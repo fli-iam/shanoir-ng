@@ -145,7 +145,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 					this.datasetAcquisitionService.deleteByIdCascade(dsAcq.getId(), event);
 				}
 				if (event != null) {
-					event.setObjectId(String.valueOf(event.getId()));
 					event.setProgress(1f);
 					event.setMessage("Examination with id " + id + " successfully deleted.");
 					event.setStatus(ShanoirEvent.SUCCESS);
@@ -153,7 +152,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
-			dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
+			if (examination.getSource() == null)
+				dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
 			examinationRepository.deleteById(id);
 		}
