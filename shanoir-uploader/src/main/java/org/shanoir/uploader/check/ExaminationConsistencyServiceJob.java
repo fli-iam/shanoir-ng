@@ -169,7 +169,7 @@ public class ExaminationConsistencyServiceJob {
                         throw new Exception("DICOM instance comparison issue: tags("
                             + attributesEqual + "), pixel(" + pixelsEqual + ")");
                     } else {
-                        deleteInstanceFile(importJobFolder, instanceFile);
+                        deleteInstanceFileAndSerieFolder(importJobFolder, instanceFile);
                         numberOfInstances++;
                     }   
                 } else {
@@ -210,13 +210,18 @@ public class ExaminationConsistencyServiceJob {
         return true;
     }
 
-    private void deleteInstanceFile(File importJobFolder, File instanceFile) {
+    private void deleteInstanceFileAndSerieFolder(File importJobFolder, File instanceFile) {
         // from-disk: delete files directly
         if (instanceFile.getParentFile().equals(importJobFolder)) {
             FileUtils.deleteQuietly(instanceFile);
         // from-pacs: delete serieUID folder as well
         } else {
-            FileUtils.deleteQuietly(instanceFile.getParentFile());
+            FileUtils.deleteQuietly(instanceFile); // delete instance DICOM
+            File serieFolder = instanceFile.getParentFile();
+            File[] remainingFiles = serieFolder.listFiles();
+            if (remainingFiles == null || remainingFiles.length == 0) {
+                FileUtils.deleteQuietly(serieFolder);
+            }
         }
     }
 
