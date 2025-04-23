@@ -942,7 +942,7 @@ public class ShanoirUploaderServiceClient {
 		try (CloseableHttpResponse response = httpService.getDicom(url.toString())) {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
-			logger.info("getDicomInstance: " + elapsedTime + "ms");
+			logger.debug("getDicomInstance: " + elapsedTime + "ms");
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();

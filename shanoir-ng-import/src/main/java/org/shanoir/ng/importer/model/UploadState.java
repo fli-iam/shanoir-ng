@@ -18,8 +18,8 @@ public enum UploadState {
 	UPLOADING_JOB_FILE, // Is it used ?
 	FINISHED, //
 	ERROR,
-	CHECKED,
-	CHECK_FAIL; //
+	CHECK_OK,
+	CHECK_KO; //
 
 	public static UploadState fromString(String value) {
 		// Handle modification of FINISHED_UPLOAD state to FINISHED

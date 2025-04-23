@@ -37,8 +37,8 @@ public class CurrentUploadsWindowTable implements Observer {
 	public String startUploadState = UploadState.START.toString();
 	public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
 	public String finishedUploadState = UploadState.FINISHED.toString();
-	public String checkedUploadState = UploadState.CHECKED.toString();
-	public String checkFailUploadState = UploadState.CHECK_FAIL.toString();
+	public String checkedUploadState = UploadState.CHECK_OK.toString();
+	public String checkFailUploadState = UploadState.CHECK_KO.toString();
 	public String errorUploadState = UploadState.ERROR.toString();
 	public int selectedRow;
 	public int rowsNb;
@@ -157,7 +157,7 @@ public class CurrentUploadsWindowTable implements Observer {
 				"",
 				""
 			};
-			case CHECKED, CHECK_FAIL -> new Object[] {
+			case CHECK_OK, CHECK_KO -> new Object[] {
 				key,
 				nominativeDataImportJob.getSubject().getIdentifier(),
 				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),

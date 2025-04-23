@@ -2,6 +2,7 @@ package org.shanoir.uploader.check;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,19 +38,27 @@ import org.springframework.stereotype.Service;
  * 
  * For performance reasons, especially on the limit network bandwith
  * in the hospital, this job only runs, when no UploadServiceJob is
- * running.
+ * running, see LOCK.
  * 
  * When the timestamp is older than 2 hours the DICOMWeb API of
  * the server is used to verify, that all local images have well
  * arrived on the server and that the examination is complete.
  * If all is perfect, that state moves to CHECK_OK or CHECK_KO.
+ * 
+ * DICOM tags and the binary pixel data are compared instance/image
+ * by instance/image.
+ * 
+ * When the check runs on instance-by-instance after each
+ * 
  */
 @Service
 public class ExaminationConsistencyServiceJob {
 
     private static final Logger logger = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
 
-    private static final long RATE = 1800000; // 30 min
+    private static final long THIRTY_MIN_IN_MILLIS = 5000;//30 * 60 * 1000;
+    
+    private static final long ONE_HOUR_IN_MILLIS = 2 * 60 * 1000;//60 * 60 * 1000;
 
    	@Autowired
 	private CurrentNominativeDataController currentNominativeDataController;
@@ -57,7 +66,7 @@ public class ExaminationConsistencyServiceJob {
     @Autowired
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = THIRTY_MIN_IN_MILLIS)
     public void execute() throws Exception {
         if (!UploadServiceJob.LOCK.isLocked()) {
             logger.info("ExaminationConsistencyServiceJob started...");
@@ -73,105 +82,123 @@ public class ExaminationConsistencyServiceJob {
         final List<File> folders = Util.listFolders(workFolder);
 		logger.debug("Found " + folders.size() + " folders in work folder.");
 		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			final File folder = (File) foldersIt.next();
-			final File importJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+			final File importJobFolder = (File) foldersIt.next();
+			final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 			// file could be missing in case of downloadOrCopy ongoing
 			if (importJobFile.exists()) {
 				NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
 				final ImportJob importJob = importJobManager.readImportJob();
                 // In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
 				if (importJob.getUploadState() == null) {
-					String uploadState = ImportUtils.getUploadStateFromUploadJob(folder);
+					String uploadState = ImportUtils.getUploadStateFromUploadJob(importJobFolder);
 					importJob.setUploadState(UploadState.fromString(uploadState));
 				}
 				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
-				if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
-                    String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
-                    try {
-                        boolean check = checkImportJob(folder, examinationUID);
-                        if (check) {
-                            importJob.setUploadState(UploadState.CHECKED);
+                if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
+                    long timestamp = importJob.getTimestamp();
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - timestamp >= ONE_HOUR_IN_MILLIS) {
+                        String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
+                        try {
+                            boolean check = checkImportJob(importJob, importJobFolder, examinationUID);
+                            if (check) {
+                                importJob.setUploadState(UploadState.CHECK_OK);
+                                importJobManager.writeImportJob(importJob);
+                            }
+                        } catch (Exception e) {
+                            importJob.setUploadState(UploadState.CHECK_KO);
                             importJobManager.writeImportJob(importJob);
+                            logger.error(e.getMessage(), e);
                         }
-                    } catch(Exception e) {
-                        importJob.setUploadState(UploadState.CHECK_FAIL);
-                        importJobManager.writeImportJob(importJob);
-                        logger.error(e.getMessage(), e);
                     }
-				}
+                }
 			} else {
 				logger.error("Folder found in workFolder without import-job.json.");
 			}
         }
     }
 
-    private boolean checkImportJob(File importJobFolder, String examinationUID) throws Exception {
-        List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);	
-		if (patients != null) {
-			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-				Patient patient = (Patient) patientsIt.next();
-				List<Study> studies = patient.getStudies();
-				for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-					Study study = (Study) studiesIt.next();
-					List<Serie> series = study.getSeries();
-					for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-						Serie serie = (Serie) seriesIt.next();
+    private boolean checkImportJob(ImportJob importJob, File importJobFolder, String examinationUID) throws Exception {
+        List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);
+        if (patients != null) {
+            for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
+                Patient patient = (Patient) patientsIt.next();
+                List<Study> studies = patient.getStudies();
+                int numberOfInstances = 0;
+                for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+                    Study study = (Study) studiesIt.next();
+                    List<Serie> series = study.getSeries();
+                    for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+                        Serie serie = (Serie) seriesIt.next();
                         List<Instance> instances = serie.getInstances();
                         for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
-                            Instance instance = (Instance) instancesIt.next();
-                            String instanceFilePath = DicomUtils.referencedFileIDToPath(importJobFolder.getAbsolutePath(), instance.getReferencedFileID());
-                            File instanceFile = new File(instanceFilePath);
-                            if (instanceFile.exists()) {
-                                try (DicomInputStream dIn = new DicomInputStream(instanceFile)) {
-                                    Attributes localInstance = dIn.readDataset();
-                                    Attributes remoteInstance = shanoirUploaderServiceClient.getDicomInstance(
-                                            examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
-                                    if (remoteInstance != null) {
-                                        Boolean attributesEqual = compareAttributes(localInstance, remoteInstance);
-                                        byte[] pixelDataLocal = localInstance.getBytes(Tag.PixelData);
-                                        byte[] pixelDataRemote = remoteInstance.getBytes(Tag.PixelData);
-                                        Boolean pixelsEqual = java.util.Arrays.equals(pixelDataLocal, pixelDataRemote);
-                                        if (!attributesEqual || !pixelsEqual) {
-                                            throw new Exception("DICOM instance comparison issue: tags("
-                                                + attributesEqual + "), pixel(" + pixelsEqual + ")");
-                                        } else {
-                                            deleteInstanceFile(importJobFolder, instanceFile);
-                                            return true;
-                                        }   
-                                    } else {
-                                        throw new Exception("DICOM instance not found on server.");
-                                    }
-                                }
-                            } else {
-                                throw new FileNotFoundException();
-                            }
+                            numberOfInstances = checkInstance(importJobFolder, examinationUID, numberOfInstances,
+                                    serie, instancesIt);
                         }
                     }
-				}
-			}
-		}
-        return false;
+                }
+                logger.info(studies.size() + " DICOM study (examination), studyDate: "
+                        + importJob.getStudy().getStudyDate()
+                        + ", checked for consistency of "
+                        + numberOfInstances + " DICOM instances (images)");
+            }
+        }
+        return true;
     }
 
-    private boolean compareAttributes(Attributes a1, Attributes a2) {
-        if (a1.size() != a2.size()) {
+    private int checkInstance(File importJobFolder, String examinationUID, int numberOfInstances, Serie serie,
+            Iterator<Instance> instancesIt) throws FileNotFoundException, IOException, Exception {
+        Instance instance = (Instance) instancesIt.next();
+        String instanceFilePath = DicomUtils.referencedFileIDToPath(importJobFolder.getAbsolutePath(), instance.getReferencedFileID());
+        File instanceFile = new File(instanceFilePath);
+        if (instanceFile.exists()) {
+            try (DicomInputStream dIn = new DicomInputStream(instanceFile)) {
+                Attributes localInstance = dIn.readDataset();
+                Attributes remoteInstance = shanoirUploaderServiceClient.getDicomInstance(
+                        examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
+                if (remoteInstance != null) {
+                    Boolean attributesEqual = compareAttributes(localInstance, remoteInstance);
+                    byte[] pixelDataLocal = localInstance.getBytes(Tag.PixelData);
+                    byte[] pixelDataRemote = remoteInstance.getBytes(Tag.PixelData);
+                    Boolean pixelsEqual = java.util.Arrays.equals(pixelDataLocal, pixelDataRemote);
+                    if (!attributesEqual || !pixelsEqual) {
+                        logger.error("Error in DICOM instance: " + instanceFilePath);
+                        throw new Exception("DICOM instance comparison issue: tags("
+                            + attributesEqual + "), pixel(" + pixelsEqual + ")");
+                    } else {
+                        deleteInstanceFile(importJobFolder, instanceFile);
+                        numberOfInstances++;
+                    }   
+                } else {
+                    throw new Exception("DICOM instance not found on server.");
+                }
+            }
+        } else {
+            logger.error("DICOM instance not found: " + instanceFilePath);
+            throw new FileNotFoundException();
+        }
+        return numberOfInstances;
+    }
+
+    private boolean compareAttributes(Attributes localAttributes, Attributes remoteAttributes) {
+        if (localAttributes.size() != remoteAttributes.size()) {
             logger.error("Number of tags differ.");
             return false;
         }
-        int[] tags1 = a1.tags();
-        for (int tag : tags1) {
-            if (!a2.contains(tag)) {
+        int[] localTags = localAttributes.tags();
+        for (int tag : localTags) {
+            if (!remoteAttributes.contains(tag)) {
                 logger.error("Missing tag in second file: " + TagUtils.toString(tag));
                 return false;
             }
-            String value1 = a1.getString(tag, null);
-            String value2 = a2.getString(tag, null);
-            if (value1 == null && value2 == null) {
+            String localValue = localAttributes.getString(tag, null);
+            String remoteValue = remoteAttributes.getString(tag, null);
+            if (localValue == null && remoteValue == null) {
                 continue;
             }
-            if (value1 == null || value2 == null || !value1.equals(value2)) {
+            if (localValue == null || remoteValue == null || !localValue.equals(remoteValue)) {
                 logger.error("Tag differs: " + TagUtils.toString(tag) +
-                                " | " + value1 + " != " + value2);
+                                " | " + localValue + " != " + remoteValue);
                 return false;
             }
         }
