@@ -165,7 +165,7 @@ public class ExaminationConsistencyServiceJob {
                     byte[] pixelDataRemote = remoteInstance.getBytes(Tag.PixelData);
                     Boolean pixelsEqual = java.util.Arrays.equals(pixelDataLocal, pixelDataRemote);
                     if (!attributesEqual || !pixelsEqual) {
-                        logger.error("Error in DICOM instance: " + instanceFilePath);
+                        logger.error("Serie: " + serie.getSeriesDescription() + ", error in DICOM instance: " + instanceFilePath);
                         throw new Exception("DICOM instance comparison issue: tags("
                             + attributesEqual + "), pixel(" + pixelsEqual + ")");
                     } else {
@@ -173,11 +173,13 @@ public class ExaminationConsistencyServiceJob {
                         numberOfInstances++;
                     }   
                 } else {
-                    throw new Exception("DICOM instance not found on server.");
+                    throw new Exception("Serie: " + serie.getSeriesDescription()
+                        + ", DICOM instance not found on server: " + instance.getSopInstanceUID());
                 }
             }
         } else {
-            logger.error("DICOM instance not found: " + instanceFilePath);
+            logger.error("Serie: " + serie.getSeriesDescription()
+                + ", DICOM instance not found locally: " + instanceFilePath);
             throw new FileNotFoundException();
         }
         return numberOfInstances;
