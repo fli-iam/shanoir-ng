@@ -2,13 +2,14 @@ package org.shanoir.uploader.nominativeData;
 
 import java.io.File;
 
+import org.shanoir.uploader.ShUpConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class manages NominativeDataUploadJob.
@@ -19,7 +20,7 @@ public class NominativeDataUploadJobManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(NominativeDataUploadJobManager.class);
 
-	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
+	public static final String NOMINATIVE_DATA_JOB_XML = ShUpConfig.NOMINATIVE_DATA_JOB_XML;
 
 	private File nominativeDataJobFile; 
 	
