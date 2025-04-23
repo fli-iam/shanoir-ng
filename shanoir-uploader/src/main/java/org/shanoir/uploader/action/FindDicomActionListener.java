@@ -19,6 +19,7 @@ import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -42,8 +43,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private static final Logger logger = LoggerFactory.getLogger(FindDicomActionListener.class);
 
 	private static final long serialVersionUID = 7126127792556196772L;
-
-	private static final String DICOMDIR = "DICOMDIR";
 
 	private static final String WILDCARD = "*";
 
@@ -94,7 +93,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				if (selectedRootDir.isDirectory()) {
 					try {
 						boolean dicomDirGenerated = false;
-						File dicomDirFile = new File(selectedRootDir, DICOMDIR);
+						File dicomDirFile = new File(selectedRootDir, ShUpConfig.DICOMDIR);
 						if (!dicomDirFile.exists()) {
 							logger.info("No DICOMDIR found: generating one.");
 							dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JOptionPane;
 
@@ -45,6 +46,8 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 	
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
+
+	private final ReentrantLock lock = new ReentrantLock();
 
 	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient, final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
 		this.mainWindow = mainWindow;
@@ -124,8 +127,18 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
-		Thread thread = new Thread(runnable);
-		thread.start();
+		if (lock.tryLock()) {
+			try {
+				Thread thread = new Thread(runnable);
+				thread.start();
+			} catch (Exception e) {
+				logger.error("An error occured while running the thread.", e);
+			} finally {
+				lock.unlock();
+			}
+		} else {
+			logger.warn("A previous thread is still running. Please wait until it is finished.");
+		}
 		
 		// clear previous selection, but keep tree open in the tab
 		mainWindow.isDicomObjectSelected = false;
@@ -200,5 +213,9 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		}
 		return subject;
 	}
+
+	public boolean isRunning() {
+        return lock.isLocked();
+    }
 
 }

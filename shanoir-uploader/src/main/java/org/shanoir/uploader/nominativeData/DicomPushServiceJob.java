@@ -16,6 +16,8 @@ import java.util.Set;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -41,9 +43,11 @@ public class DicomPushServiceJob {
 
 	private DownloadOrCopyActionListener dOCAL;
 
+	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+
 	private final Set<Serie> incomingSeries = new HashSet<>();
 
-	private final long JOB_RATE = 3600000; // 1 hour
+	private final long JOB_RATE = 60000;//3600000; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
@@ -57,8 +61,9 @@ public class DicomPushServiceJob {
 
     @Scheduled(fixedRate = JOB_RATE)
 	public void execute() {
-		// We check if the username is set (= login was successful), if not we do nothing
-		if (ShUpConfig.username != null) {
+		// We only run the job if a username is set
+		// and if there is no download or copy already running
+		if (ShUpConfig.username != null && !dOCAL.isRunning()) {
 			logger.info("Monitoring of incoming 'DICOM PUSHED' examinations started...");
 			// new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
 			monitorPushedExaminations(workFolder);
@@ -106,7 +111,7 @@ public class DicomPushServiceJob {
                 File[] dicomFiles = subdirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".dcm"));
 
         		if (dicomFiles == null || dicomFiles.length == 0) {
-            		logger.debug("No DICOM files found in {}", folder.getName());
+            		logger.info("No DICOM files found in {}", folder.getName());
 					continue;
         		}
 
@@ -126,7 +131,7 @@ public class DicomPushServiceJob {
 							// We define the studyInstanceUID
                     		studyUID = currentStudyUID;
                 		} else if (!studyUID.equals(currentStudyUID)) {
-                    		logger.debug("Warning: DICOM files from different studies found in the same folder.");
+                    		logger.info("Warning: DICOM files from different studies found in the same folder.");
                     		return false;
                 		}
 
@@ -137,7 +142,7 @@ public class DicomPushServiceJob {
 						incomingSeries.add(serie);
 						// if we have multiple series in the same folder (is it possible ?), 
 						} else if (!seriesUID.equals(currentSeriesUID)) {
-							logger.debug("Warning: DICOM files from different series found in the same folder.");
+							logger.info("Warning: DICOM files from different series found in the same folder.");
 							return false;
 						}
 
@@ -160,17 +165,23 @@ public class DicomPushServiceJob {
 					return false;
 				}		
 			}
-			logger.debug("DICOM study {} is complete.", folder.getName());
-			// We use the last instance of the last Serie folder to create the patient and study
-			Patient patient = new Patient(dicomAttributes);
-			Study study = new Study(dicomAttributes);
+			logger.info("DICOM study {} is complete.", folder.getName());
+			// We create the DICOMDIR file in the exam folder
+			File dicomDirFile = new File(folder, ShUpConfig.DICOMDIR);
 			try {
-				prepareUploadJob(patient, study, incomingSeries);
+				dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, folder);
+				logger.info("DICOMDIR generated in directory: " + folder.getAbsolutePath());
+				final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+				List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+				for (Patient patient : patients) {
+					Study study = patient.getStudies().get(0);
+					prepareUploadJob(patient, study, incomingSeries);
+				}
 			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
+				logger.error("Error occured during DICOMDIR creation: " + e.getMessage());
 			}
 		} else {
-			logger.debug("No DICOM series folder found in study folder {}", folder.getName());
+			logger.info("No DICOM series folder found in study folder {}", folder.getName());
 			return false;
 		}
 		return true;
