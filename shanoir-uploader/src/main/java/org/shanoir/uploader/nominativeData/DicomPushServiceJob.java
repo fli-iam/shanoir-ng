@@ -47,7 +47,7 @@ public class DicomPushServiceJob {
 
 	private final Set<Serie> incomingSeries = new HashSet<>();
 
-	private final long JOB_RATE = 60000;//3600000; // 1 hour
+	private final long JOB_RATE = 3600000; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
