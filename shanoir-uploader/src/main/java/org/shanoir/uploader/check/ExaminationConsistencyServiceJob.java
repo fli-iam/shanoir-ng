@@ -104,10 +104,12 @@ public class ExaminationConsistencyServiceJob {
                             if (check) {
                                 importJob.setUploadState(UploadState.CHECK_OK);
                                 importJobManager.writeImportJob(importJob);
+                                currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_OK.toString());
                             }
                         } catch (Exception e) {
                             importJob.setUploadState(UploadState.CHECK_KO);
                             importJobManager.writeImportJob(importJob);
+                            currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_KO.toString());
                             logger.error(e.getMessage(), e);
                         }
                     }
@@ -137,10 +139,11 @@ public class ExaminationConsistencyServiceJob {
                         }
                     }
                 }
-                logger.info(studies.size() + " DICOM study (examination), studyDate: "
-                        + importJob.getStudy().getStudyDate()
-                        + ", checked for consistency of "
-                        + numberOfInstances + " DICOM instances (images)");
+                logger.info(studies.size() + " DICOM study (examination) of"
+                    + " subject: " + importJob.getSubjectName()
+                    + ", studyDate: " + importJob.getStudy().getStudyDate()
+                    + " checked for consistency of "
+                    + numberOfInstances + " DICOM instances (images)");
             }
         }
         return true;
