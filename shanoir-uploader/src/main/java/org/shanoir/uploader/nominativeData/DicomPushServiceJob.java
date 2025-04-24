@@ -1,7 +1,6 @@
 package org.shanoir.uploader.nominativeData;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -12,22 +11,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.utils.FileUtil;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
@@ -44,18 +47,21 @@ public class DicomPushServiceJob {
 	private DownloadOrCopyActionListener dOCAL;
 
 	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	private final Set<Serie> incomingSeries = new HashSet<>();
 
-	private final long JOB_RATE = 3600000; // 1 hour
+	private final long JOB_RATE = 60000; //3600000; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
 	private final File workFolder = ShUpOnloadConfig.getWorkFolder();
 
 	
-	public void setDownloadOrCopyActionListener(DownloadOrCopyActionListener dOCAL) {
-		this.dOCAL = dOCAL;
+	public void setDownloadOrCopyActionListener(MainWindow mainWindow) {
+		this.dOCAL = mainWindow.dOCAL;
+		this.dicomFileAnalyzer = mainWindow.dicomFileAnalyzer;
 	}
 
 
@@ -80,15 +86,10 @@ public class DicomPushServiceJob {
 		if (!folders.isEmpty()) {
 			// We browse the content of the workfolder
 			for (File dir : folders) {
-				// If there is a directory then its a DICOM study, shanoiruploader xml upload files will be at that level
+				// If there is a directory then its a DICOM study, shanoiruploader json import-job will be at that level
 				if (dir.isDirectory() && dir.getName().matches(regex)) {
-					File[] xmlFiles = dir.listFiles(new FilenameFilter() {
-						@Override
-						public boolean accept(File folder, String name) {
-							return name.equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML) || name.equals(UploadJobManager.UPLOAD_JOB_XML);
-						}
-					});
-					if (xmlFiles.length == 0) {
+					File jsonFile = new File(dir.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+					if (!jsonFile.exists()) {
 						incomingSeries.clear();
 						if (isExamComplete(dir)) {
 							logger.info("Complete exam found in folder {}.", dir.getName());
@@ -139,6 +140,8 @@ public class DicomPushServiceJob {
 						if (seriesUID == null) {
 						seriesUID = currentSeriesUID;
 						Serie serie = new Serie(dicomAttributes);
+						//We set the Institution attributes
+						dicomFileAnalyzer.addSeriesCenter(serie, dicomAttributes);
 						incomingSeries.add(serie);
 						// if we have multiple series in the same folder (is it possible ?), 
 						} else if (!seriesUID.equals(currentSeriesUID)) {
@@ -174,8 +177,25 @@ public class DicomPushServiceJob {
 				final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
 				List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 				for (Patient patient : patients) {
+
+					// For safety : in some cases values are not retrieved from dicomdir (could use splitPatientName also)
+					if ((patient.getPatientBirthDate() == null || patient.getPatientSex() == null)
+					 && dicomAttributes.getString(Tag.PatientID).equals(patient.getPatientID())) {
+						patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(dicomAttributes.getDate(Tag.PatientBirthDate)));
+						patient.setPatientSex(dicomAttributes.getString(Tag.PatientSex));
+					}
 					Study study = patient.getStudies().get(0);
-					prepareUploadJob(patient, study, incomingSeries);
+					// We map the acquisition equipment data from the series list generated from dicom attributes to the series list generated from dicomdir 
+					Map<String, Serie> incomingSeriesMap = incomingSeries.stream().collect(Collectors.toMap(Serie::getSeriesInstanceUID, Function.identity()));
+
+					for (Serie serie : study.getSeries()) {
+						Serie matchingSerie = incomingSeriesMap.get(serie.getSeriesInstanceUID());
+						if (matchingSerie != null) {
+							// We set the equipment for the serie
+							serie.setEquipment(matchingSerie.getEquipment());
+						}
+					}
+					prepareImportJob(patient, study, incomingSeries);
 				}
 			} catch (IOException e) {
 				logger.error("Error occured during DICOMDIR creation: " + e.getMessage());
@@ -187,13 +207,13 @@ public class DicomPushServiceJob {
 		return true;
 	}
 	/**
-	 * Prepare the upload job for the DICOM push identified complete examination
+	 * Prepare the import job for the DICOM push identified complete examination
 	 * @param patient
 	 * @param study
 	 * @param completeSeries
 	 * @param folder
 	 */
-	private void prepareUploadJob(Patient patient, Study study, Set<Serie> completeSeries) throws IOException {
+	private void prepareImportJob(Patient patient, Study study, Set<Serie> completeSeries) throws IOException {
 		ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
 		try {
 			importJob.setSubject(dOCAL.createSubjectFromPatient(patient));
@@ -221,25 +241,18 @@ public class DicomPushServiceJob {
 		// We set the selected series after the copy of the DICOM files to have the instances set to each serie
 		importJob.setSelectedSeries(completeSeries);
 
-		// Creation of the uploadJob (need selected series from importJob)
-		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(importJob, uploadJob);
-
-		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-		uploadJobManager.writeUploadJob(uploadJob);
-
-		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(importJob, uploadJob, dataJob);
+		importJob.setTimestamp(System.currentTimeMillis());
+		importJob.setUploadState(UploadState.READY);
+		importJob.setUploadPercentage("");
 		
-		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-					uploadFolder.getAbsolutePath());
-		uploadDataJobManager.writeUploadDataJob(dataJob);
-		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
+		// We write the import-job.json file
+		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+		importJobManager.writeImportJob(importJob);
+		// We add the nominative data to current uploads
+		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, importJob);
 		logger.info(uploadFolder.getName() + ": finished for DICOM Pushed study: " + importJob.getStudy().getStudyDescription()
 							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
 							+ importJob.getPatient().getPatientName());
-
-		ImportUtils.writeImportJobJson(importJob, uploadFolder);
 	}
     
 }

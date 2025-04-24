@@ -64,7 +64,7 @@ public class ReadyState implements State {
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
 		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
-		dicomPushServiceJob.setDownloadOrCopyActionListener(frame.dOCAL);
+		dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
 	}
 
 	/**

@@ -649,7 +649,7 @@ public class ImportUtils {
 
 	public static List<Patient> getPatientsFromDir(File directory, boolean deleteGeneratedDICOMDir) throws IOException {
 		boolean dicomDirGenerated = false;
-		File dicomDirFile = new File(directory, DICOMDIR);
+		File dicomDirFile = new File(directory, ShUpConfig.DICOMDIR);
 		if (!dicomDirFile.exists()) {
 			logger.info("No DICOMDIR found: generating one.");
 			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);
