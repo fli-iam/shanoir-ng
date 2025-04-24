@@ -14,7 +14,7 @@
 import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
-import Keycloak from "node_modules/keycloak-js/lib/keycloak.js";
+import Keycloak from "keycloak-js";
 
 
 // The keycloak adapter supports two authentication methods : "login-required"
