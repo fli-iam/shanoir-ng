@@ -58,6 +58,7 @@ export class TreeService {
     selectedNode: ShanoirNode;
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
     studyLoading: boolean = false;
+    reopenAfterNavigation: boolean = false;
     
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -117,6 +118,7 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
+                if (this.reopenAfterNavigation) this.treeOpened = true;
                 setTimeout(() => {
                     let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
                     if (newState && !this.treeAvailable) {
@@ -632,6 +634,11 @@ export class TreeService {
     memberStudyOpened(userId: number): boolean {
         return this.studyNode?.membersNode?.members && this.studyNode?.membersNode?.members != UNLOADED
             && (this.studyNode == null || !(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId));
+    }
+
+    closeTemporarily() {
+        this.treeOpened = false;
+        this.reopenAfterNavigation = true;
     }
 }
 
