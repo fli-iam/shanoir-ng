@@ -106,7 +106,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         
         setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
             let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
-            if (!this.showTreeByDefault && this.treeService.memberStudyOpened(userId) && this.treeService.treeOpened) {
+            if (!this.showTreeByDefault && !this.treeService.memberStudyOpened(userId) && this.treeService.treeOpened) {
                 this.treeService.closeTemporarily();
             }
             this.subscriptions.push(this.activatedRoute.params.subscribe(

@@ -632,8 +632,9 @@ export class TreeService {
     }
 
     memberStudyOpened(userId: number): boolean {
-        return this.studyNode?.membersNode?.members && this.studyNode?.membersNode?.members != UNLOADED
-            && (this.studyNode == null || !(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId));
+        return this.studyNode?.membersNode?.members 
+            && this.studyNode?.membersNode?.members != UNLOADED
+            && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
     }
 
     closeTemporarily() {
