@@ -122,6 +122,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
+			LOG.error("Can't delete examination with id " + id + " because it has been copied.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -147,7 +148,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 					this.datasetAcquisitionService.deleteByIdCascade(dsAcq.getId(), event);
 				}
 				if (event != null) {
-					event.setObjectId(String.valueOf(event.getId()));
 					event.setProgress(1f);
 					event.setMessage("Examination with id " + id + " successfully deleted.");
 					event.setStatus(ShanoirEvent.SUCCESS);
@@ -155,7 +155,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
-			dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
+			if (examination.getSource() == null)
+				dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
 			examinationRepository.deleteById(id);
 		}
@@ -181,6 +182,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during deletion of examination with id : " + examinationId);
+			LOG.error("Exception e : " , e);
 		}
 	}
 

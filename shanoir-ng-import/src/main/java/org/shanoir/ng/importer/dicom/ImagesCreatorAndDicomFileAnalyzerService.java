@@ -109,7 +109,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						if (!serie.isIgnored()) {
 							// use a second try here, in case error is on serie, to get at least the serie name for error tracing
 							try {
-								getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+								getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, patient, study, serie, isImportFromPACS);
 							} catch (Exception e) {
 								handleError(event, nbSeries, cpt, serie, e);						
 							}
@@ -144,13 +144,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
+	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
 		if (instances != null && !instances.isEmpty()) {
 			Instance firstInstance = instances.get(0);
 			File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processDicomFileForFirstInstance(firstInstanceFile, serie, patient);
+			processDicomFileForFirstInstance(firstInstanceFile, patient, study, serie);
 		}
 	}
 
@@ -260,7 +260,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				} else {
 					relativeFilePath = dicomFile.getAbsolutePath();
 				}
-				
 				image.setPath(relativeFilePath);
 				addImageSeparateDatasetsInfo(image, attributes);
 				images.add(image);
@@ -280,11 +279,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @param patient
 	 */
-	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
+	private void processDicomFileForFirstInstance(File dicomFile, Patient patient, Study study, Serie serie) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			LOG.debug("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
 			Attributes attributes = dIS.readDatasetUntilPixelData();
 			checkPatientData(patient, attributes);
+			checkStudyData(study, attributes);
 			checkSerieData(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
@@ -389,6 +389,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	}
 
 	/**
+	 * Get DICOM study information from .dcm file.
+	 * 
+	 * @param study
+	 * @param attributes
+	 */
+	private void checkStudyData(Study study, Attributes attributes) {
+		if (study != null && attributes != null) {
+			// always use StudyDescription from .dcm file, e.g. in Q/R encoding errors
+			// can happen, so we trust the local .dcm file the most to avoid further issues
+			String studyDescriptionDicomFile = attributes.getString(Tag.StudyDescription);
+			if (StringUtils.isNotEmpty(studyDescriptionDicomFile)) {
+				study.setStudyDescription(studyDescriptionDicomFile);
+			}
+		}
+	}
+
+	/**
 	 * Normally we get the seriesDescription from the DicomDir, if not: null or
 	 * empty, get the seriesDescription from the .dcm file, if existing in .dcm file.
 	 * 
@@ -410,12 +427,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesNumber(seriesNumberDicomFile);
 			}
 		}
-		if (StringUtils.isEmpty(serie.getSeriesDescription())) {
-			// has not been found in dicomdir or before in other file, so we get it from .dcm file:
-			String seriesDescriptionDicomFile = attributes.getString(Tag.SeriesDescription);
-			if (StringUtils.isNotEmpty(seriesDescriptionDicomFile)) {
-				serie.setSeriesDescription(seriesDescriptionDicomFile);
-			}
+		// always use seriesDescription from .dcm file, e.g. in Q/R encoding errors
+		// can happen, so we trust the local .dcm file the most to avoid further issues
+		String seriesDescriptionDicomFile = attributes.getString(Tag.SeriesDescription);
+		if (StringUtils.isNotEmpty(seriesDescriptionDicomFile)) {
+			serie.setSeriesDescription(seriesDescriptionDicomFile);
 		}
 		DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 		DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
