@@ -110,11 +110,18 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.reloading) {
             this.fetchStudies(false).then(() => {
                 this.reloadSavedData().finally(() => this.reloading = false);
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
             }).catch(error => {
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true);
+            this.fetchStudies(true).then( () => {
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
+            });
         }
     }
 
@@ -131,12 +138,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let promises: Promise<any>[] = [];
         let study = this.importDataService.contextBackup(this.stepTs).study;
         let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
-        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
         let center = this.importDataService.contextBackup(this.stepTs).center;
         let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
         let subject = this.importDataService.contextBackup(this.stepTs).subject;
         let examination = this.importDataService.contextBackup(this.stepTs).examination;
         this.study = study;
+        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+
         let studyOption = this.studyOptions.find(s => s.value.id == study.id);
         if (studyOption) {
             this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
@@ -146,8 +154,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.useStudyCard = useStudyCard;
                 this.onToggleUseStudyCard();
             } else if (useStudyCard && studyCard){
-                this.studycard = studyCard;
-                promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
+                promises.push(this.onSelectStudyCard());
             } else {
                 this.restoreCenter(center, acquisitionEquipment);
             }
@@ -297,6 +304,21 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
+    private getStudyCardPolicy(study: Study): Promise<string> {
+        if (study && study.id) {
+            return this.studyService.get(study.id).then(study => {
+                if (study.studyCardPolicy == 'MANDATORY') {
+                    this.useStudyCard = true;
+                } else {
+                    this.useStudyCard = false;
+                }
+                return study.studyCardPolicy;
+            })
+        } else {
+            return Promise.resolve('MANDATORY');
+        }
+    }
+
     private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
@@ -324,11 +346,16 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (studyCard && studyCenterList) {
             this.acquisitionEquipment = null;
             let eqFound: AcquisitionEquipment;
-            let scFound: StudyCenter = studyCenterList?.find(sc => {
-                eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-                return (!!eqFound);
-            })
-            this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            if (this.useStudyCard) {
+                this.center = this.studycard.acquisitionEquipment.center;
+                eqFound = this.studycard.acquisitionEquipment;
+            } else {
+                let scFound: StudyCenter = studyCenterList?.find(sc => {
+                    eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
+                    return (!!eqFound);
+                })
+                this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            }
             return this.onSelectCenter().then(() => {
                 this.acquisitionEquipment = eqFound;
             });
@@ -353,8 +380,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectStudy(): Promise<void> {
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
-        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+        
+        this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
 
+        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         let studycardsOrCentersPromise: Promise<void>;
         if (this.useStudyCard) {
             studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
@@ -366,6 +395,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.centerOptions = options;
                 return this.selectDefaultCenter(options);
             });
+            this.getEquipmentOptions(this.center);
         }
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
