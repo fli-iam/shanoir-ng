@@ -35,6 +35,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -157,9 +161,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * With DICOMWeb for viewer OHIF, no need to transfer private tags,
+	 * so we exclude it here. Fix for Github issue #2805.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @return
+	 */
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata?excludeprivate=false";
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
