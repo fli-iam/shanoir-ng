@@ -33,5 +33,5 @@ jobs:
         working-directory: ./shanoir-ng-back/
 
       - name: Run Checkstyle
-        run: mvn checkstyle:check --batch-mode
+        run: mvn checkstyle:check --batch-mode -Dcheckstyle.config.location=${PWD}/checkstyle.xml
         working-directory: ./shanoir-ng-back/
