@@ -4,7 +4,7 @@
         <div *ngIf="loading">
             <i *ngIf="loading" class="fas fa-cog fa-spin"></i> Retrieving download informations...
         </div>
-        <fieldset class="body" disabled="loading">
+        <fieldset class="body" [disabled]="loading">
             <ol>
                 <li *ngIf="hasDicom">
                     <label>Dataset files format</label>
@@ -73,7 +73,16 @@
                         <ng-container *ngIf="!form.get('datasetFolders')?.value">
                             <ng-template [ngTemplateOutlet]="datasetFileNode"></ng-template>
                         </ng-container>
-                        
+                    </ng-template>
+                    <ng-template #acquisitionNode>
+                        <node *ngIf="form.get('acquisitionFolders')?.value" 
+                                label="acquisition" 
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
+                            <ng-template [ngTemplateOutlet]="datasetNode"></ng-template>
+                        </node>
+                        <ng-template *ngIf="!form.get('acquisitionFolders')?.value" [ngTemplateOutlet]="datasetNode"></ng-template>
                     </ng-template>
                     <ng-template #examinationNode>
                         <node *ngIf="form.get('examinationFolders')?.value" 
@@ -81,9 +90,9 @@
                                 awesome="fas fa-folder"
                                 [deploy]="true"
                                 [clickable]="false">
-                            <ng-template [ngTemplateOutlet]="datasetNode"></ng-template>
+                            <ng-template [ngTemplateOutlet]="acquisitionNode"></ng-template>
                         </node>
-                        <ng-template *ngIf="!form.get('examinationFolders')?.value" [ngTemplateOutlet]="datasetNode"></ng-template>
+                        <ng-template *ngIf="!form.get('examinationFolders')?.value" [ngTemplateOutlet]="acquisitionNode"></ng-template>
                     </ng-template>
                     <ng-template #subjectNode>
                         <node *ngIf="form.get('subjectFolders')?.value" 
@@ -112,6 +121,12 @@
                     <label>Examination folders</label>
                     <span class="right-col">
                         <checkbox formControlName="examinationFolders"></checkbox>
+                    </span>
+                </li>
+                <li>
+                    <label>Acquisition folders</label>
+                    <span class="right-col">
+                        <checkbox formControlName="acquisitionFolders"></checkbox>
                     </span>
                 </li>
                 <li *ngIf="form.get('unzip')?.value">
