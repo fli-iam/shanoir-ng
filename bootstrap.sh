@@ -110,7 +110,7 @@ if [ -n "$deploy" ] ; then
 		# full clean (--clean)
 		# -> destroy all external volumes
 		step "clean"
-		docker compose down -v
+		docker compose -f docker-compose-dev.yml down -v
 	else
 		# overwrite (--force)
 		# -> just remove all existing containers
@@ -121,7 +121,7 @@ if [ -n "$deploy" ] ; then
 		# - 'docker compose logs' may display old logs if the container
 		#   is not destroyed
 		step "stop shanoir"
-		docker compose down
+		docker compose -f docker-compose-dev.yml down
 	fi
 
 	#
@@ -130,7 +130,7 @@ if [ -n "$deploy" ] ; then
 
 	# 1. database
 	step "init: database"
-	docker compose up -d database
+	docker compose -f docker-compose-dev.yml up -d database
 	wait_tcp_ready database 3306
 
 	# 2. keycloak-database + keycloak
