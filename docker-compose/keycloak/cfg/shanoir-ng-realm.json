@@ -39,6 +39,7 @@
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
   "permanentLockout": true,
+  "maxTemporaryLockouts": 0,
   "maxFailureWaitSeconds": 900,
   "minimumQuickLoginWaitSeconds": 60,
   "waitIncrementSeconds": 60,
@@ -51,6 +52,30 @@
         "id": "86668424-2765-4d46-b076-f296a4219695",
         "name": "ROLE_EXPERT",
         "composite": false,
+        "clientRole": false,
+        "containerId": "shanoir-ng",
+        "attributes": {}
+      },
+      {
+        "id": "b500c7aa-e6f1-4e0c-b143-d14cf00eebf4",
+        "name": "default-roles-shanoir-ng",
+        "description": "${role_default-roles}",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ],
+          "client": {
+            "service-account": [
+              "ROLE_SERVICE"
+            ],
+            "account": [
+              "view-profile",
+              "manage-account"
+            ]
+          }
+        },
         "clientRole": false,
         "containerId": "shanoir-ng",
         "attributes": {}
@@ -312,6 +337,7 @@
         }
       ],
       "shanoir-ng-front": [],
+      "shanoir-swagger": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -326,8 +352,28 @@
           "attributes": {}
         }
       ],
+      "ohif-viewer": [],
+      "service-account": [
+        {
+          "id": "169ac6b5-4a77-44b8-b26a-f81efea4dc10",
+          "name": "ROLE_SERVICE",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "b2fe624e-3d5d-4b5a-b5db-a4b125908d1d",
+          "attributes": {}
+        }
+      ],
       "shanoir-uploader": [],
       "account": [
+        {
+          "id": "8b560c9d-b602-4f90-a556-f5beba1edfac",
+          "name": "view-groups",
+          "description": "${role_view-groups}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "715adaad-03cc-42fa-8244-da48d087465e",
+          "attributes": {}
+        },
         {
           "id": "62ec5017-c212-4b2e-82e5-db274b9a468b",
           "name": "manage-consent",
