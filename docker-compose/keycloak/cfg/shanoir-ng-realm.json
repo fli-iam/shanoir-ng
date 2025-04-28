@@ -4,6 +4,7 @@
   "displayName": "Shanoir-NG",
   "displayNameHtml": "Shanoir-NG",
   "notBefore": 0,
+  "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
   "accessTokenLifespan": 900,
@@ -24,6 +25,8 @@
   "accessCodeLifespanLogin": 1800,
   "actionTokenGeneratedByAdminLifespan": 43200,
   "actionTokenGeneratedByUserLifespan": 300,
+  "oauth2DeviceCodeLifespan": 600,
+  "oauth2DevicePollingInterval": 5,
   "enabled": true,
   "sslRequired": "all",
   "registrationAllowed": false,
@@ -37,11 +40,11 @@
   "bruteForceProtected": true,
   "permanentLockout": true,
   "maxFailureWaitSeconds": 900,
-  "minimumQuickLoginWaitSeconds": 60,
+  "minimumQuickLoginWaitSeconds": 300,
   "waitIncrementSeconds": 60,
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
-  "failureFactor": 30,
+  "failureFactor": 5,
   "roles": {
     "realm": [
       {
@@ -413,7 +416,7 @@
   "requiredCredentials": [
     "password"
   ],
-  "passwordPolicy": "hashIterations(27500) and length(8) and specialChars(1) and digits(1) and upperCase(1) and lowerCase(1) and passwordHistory(1)",
+  "passwordPolicy": "hashIterations(27500) and length(12) and specialChars(1) and digits(1) and upperCase(1) and lowerCase(1) and passwordHistory(5) and forceExpiredPasswordChange(365)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
@@ -2590,9 +2593,9 @@
       "config": {}
     },
     {
-      "alias": "terms_and_conditions",
+      "alias": "TERMS_AND_CONDITIONS",
       "name": "Terms and Conditions",
-      "providerId": "terms_and_conditions",
+      "providerId": "TERMS_AND_CONDITIONS",
       "enabled": false,
       "defaultAction": false,
       "priority": 30,
@@ -2626,6 +2629,15 @@
       "config": {}
     },
     {
+      "alias": "delete_credential",
+      "name": "Delete Credential",
+      "providerId": "delete_credential",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 100,
+      "config": {}
+    },
+    {
       "alias": "delete_account",
       "name": "Delete Account",
       "providerId": "delete_account",
@@ -2650,12 +2662,29 @@
   "resetCredentialsFlow": "shanoir-ng reset credentials",
   "clientAuthenticationFlow": "clients",
   "dockerAuthenticationFlow": "docker auth",
+  "firstBrokerLoginFlow": "first broker login",
   "attributes": {
+    "cibaBackchannelTokenDeliveryMode": "poll",
+    "cibaAuthRequestedUserHint": "login_hint",
     "clientOfflineSessionMaxLifespan": "0",
+    "oauth2DevicePollingInterval": "5",
     "clientSessionIdleTimeout": "0",
+    "clientOfflineSessionIdleTimeout": "0",
+    "cibaInterval": "5",
+    "realmReusableOtpCode": "false",
+    "cibaExpiresIn": "120",
+    "oauth2DeviceCodeLifespan": "600",
+    "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0",
-    "clientOfflineSessionIdleTimeout": "0"
+    "organizationsEnabled": "false"
   },
-  "keycloakVersion": "12.0.1",
-  "userManagedAccessAllowed": false
+  "keycloakVersion": "25.0.4",
+  "userManagedAccessAllowed": false,
+  "organizationsEnabled": false,
+  "clientProfiles": {
+    "profiles": []
+  },
+  "clientPolicies": {
+    "policies": []
+  }
 }
