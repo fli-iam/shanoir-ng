@@ -1,8 +1,12 @@
 package org.shanoir.uploader.service.rest;
 
 import org.shanoir.uploader.ShUpConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceConfiguration {
+
+	private static final Logger logger = LoggerFactory.getLogger(ServiceConfiguration.class);
 
 	/** Constructeur privé */
 	private ServiceConfiguration() {
@@ -89,12 +93,24 @@ public class ServiceConfiguration {
 	}
 
 	public String getTestURL() {
-		if (ShUpConfig.proxyProperties.getProperty("proxy.test.url") != null
-				&& !ShUpConfig.proxyProperties.getProperty("proxy.test.url").equals("")) {
-			return (ShUpConfig.proxyProperties.getProperty("proxy.test.url"));
-		} else {
-			return "https://shanoir.irisa.fr";
-		}
-	}
-
+		String profile = ShUpConfig.basicProperties.getProperty("profile");
+		if (profile != null && !profile.equals("")) {
+					if (profile.contains("OFSEP")) {
+						if (profile.contains("Qualif")) {
+							return (ShUpConfig.OFSEP_QUALIF_SERVER);
+						}
+						return (ShUpConfig.OFSEP_SERVER);
+					} else if (profile.contains("Neurinfo")){
+						if (profile.contains("Qualif")) {
+							return (ShUpConfig.NEURINFO_QUALIF_SERVER);
+						}
+						return (ShUpConfig.NEURINFO_SERVER);
+					} else {
+						return ShUpConfig.LOCAL_DEV_SERVER;
+					}
+				} else {
+					logger.warn("Profile property is empty, using default server: {}", ShUpConfig.NEURINFO_SERVER);
+					return ShUpConfig.NEURINFO_SERVER;
+				}
+			}
 }

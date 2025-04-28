@@ -84,6 +84,16 @@ public class ShUpConfig {
 
 	public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
 
+	public static final String NEURINFO_SERVER = "https://shanoir.irisa.fr";
+
+	public static final String NEURINFO_QUALIF_SERVER = "https://shanoir-qualif.irisa.fr";
+
+	public static final String OFSEP_SERVER = "https://shanoir-ofsep.irisa.fr";
+
+	public static final String OFSEP_QUALIF_SERVER = "https://shanoir-ofsep-qualif.irisa.fr";
+
+	public static final String LOCAL_DEV_SERVER = "https://shanoir-ng-nginx/shanoir-ng/home";
+
 	/**
 	 * Static variables
 	 */
