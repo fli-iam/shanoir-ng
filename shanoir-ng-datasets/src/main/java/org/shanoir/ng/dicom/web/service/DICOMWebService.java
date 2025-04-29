@@ -236,9 +236,9 @@ public class DICOMWebService {
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-                        try(
-				FileInputStream fileIS = new FileInputStream(dicomFile);
-				ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());
+			try(
+					FileInputStream fileIS = new FileInputStream(dicomFile);
+					ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());
 			) {
 				ContentBody contentBody = new InputStreamBody(byteArrIS, ContentType.create(CONTENT_TYPE_DICOM));
 				// build MultipartPart
