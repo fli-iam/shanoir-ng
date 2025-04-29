@@ -41,7 +41,7 @@ public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Compara
 				}
 			}
 		} catch(NumberFormatException e) {
-			return orderBySeriesDescription(s1, s2);
+			return orderByAcquisitionTime(s1, s2);
 		}
 	}
 
@@ -49,7 +49,7 @@ public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Compara
 		String s1AcquisitionTime = s1.getAcquisitionTime();
 		String s2AcquisitionTime = s2.getAcquisitionTime();
 		if (s1AcquisitionTime == null || s2AcquisitionTime == null) {
-			return 0;
+			return orderBySeriesDescription(s1, s2);
 		}
 		LocalTime t1 = parseDicomTime(s1AcquisitionTime);
 		LocalTime t2 = parseDicomTime(s2AcquisitionTime);
