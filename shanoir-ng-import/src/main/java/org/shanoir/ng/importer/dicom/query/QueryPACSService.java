@@ -523,14 +523,8 @@ public class QueryPACSService {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
 			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
-			// if (serie.getNumberOfSeriesRelatedInstances() > 0) {
 				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-			// } else {
-			// 	LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-			// 	serie.setIgnored(true);
-			// 	serie.setSelected(false);
-			// }
 		} else {
 			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 			serie.setIgnored(true);
