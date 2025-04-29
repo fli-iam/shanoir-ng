@@ -114,6 +114,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		LOG.error("exam deleteById : " + id);
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -122,7 +123,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
-			LOG.error("Can't delete examination with id " + id + " because it has been copied.");
+			LOG.error("This examination has been copied. Delete the copy first.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -158,7 +159,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 			if (examination.getSource() == null)
 				dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
-			examinationRepository.deleteById(id);
+			try {
+				examinationRepository.deleteById(id);
+			} catch (Exception e) {
+				LOG.error("Error during deletion of Examination : ", e);
+			}
 		}
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 	}
