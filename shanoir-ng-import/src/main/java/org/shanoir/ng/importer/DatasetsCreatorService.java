@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 @Service
 public class DatasetsCreatorService {
 
-	private static final String DATASET_STR = "dataset";
-
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorService.class);
+
+	private static final String DATASET_STR = "dataset";
 
 	private static final String DOUBLE_EQUAL = "==";
 
@@ -39,8 +39,8 @@ public class DatasetsCreatorService {
 	private String seriesProperties;
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	public void createDatasets(Patient patient, File workFolder, ImportJob importJob) throws ShanoirException {
-		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
+	public void createDatasets(Patient patient, File importJobDir, ImportJob importJob) throws ShanoirException {
+		File seriesFolderFile = new File(importJobDir.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
 		} else {
@@ -50,10 +50,9 @@ public class DatasetsCreatorService {
 		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSelectedSeries();
-
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
+				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie);
 				boolean serieIdentifiedForNotSeparating;
 				try {
 					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
@@ -69,7 +68,6 @@ public class DatasetsCreatorService {
 			}
 		}
 	}
-
 
 	/**
 	 * This method receives a serie object and a String from the properties
@@ -100,7 +98,8 @@ public class DatasetsCreatorService {
 
 	/**
 	 * This method extract the dicom files in proper dataset(s) (in a serie).
-	 * It also constructs the associated ExpressionFormat and DatasetFiles within the Dataset object.
+	 * It also constructs the associated ExpressionFormat and DatasetFiles
+	 * within the Dataset object.
 	 * 
 	 * @param serieIDFolderFile
 	 * @param serie
@@ -131,7 +130,7 @@ public class DatasetsCreatorService {
 					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
 					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(image.getInversionTime());
 					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
-					// new dataset has to be created, new expression format and add image/datasetfile
+				// new dataset has to be created, new expression format and add image/datasetfile
 				} else {
 					Dataset dataset = new Dataset();
 					ExpressionFormat expressionFormat = new ExpressionFormat();
@@ -196,7 +195,6 @@ public class DatasetsCreatorService {
 		}
 	}
 
-
 	/**
 	 * @param image
 	 * @return
@@ -217,16 +215,19 @@ public class DatasetsCreatorService {
 	 * @param serie
 	 * @throws ShanoirException
 	 */
-	private File createSerieIDFolderAndMoveFiles(File workFolder, File seriesFolderFile, Serie serie) throws ShanoirException {
+	private File createSerieIDFolderAndMoveFiles(File importJobDir, File seriesFolderFile, Serie serie) throws ShanoirException {
 		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
-			throw new ShanoirException("Error while creating serie id folder: folder already exists. serieId: " + serieID);
+			throw new ShanoirException("Error creating serie: "
+				+ serie.getSeriesDescription()
+				+ " (serieID:" + serieID + ")"
+				+ ": folder already exists.");
 		}
 		List<Image> images = serie.getImages();
-		moveFiles(workFolder, serieIDFolderFile, images);
+		moveFiles(importJobDir, serieIDFolderFile, images);
 		return serieIDFolderFile;
 	}
 
@@ -236,12 +237,12 @@ public class DatasetsCreatorService {
 	 * @param images
 	 * @throws RestServiceException
 	 */
-	private void moveFiles(File workFolder, File serieIDFolder, List<Image> images) throws ShanoirException {
+	private void moveFiles(File importJobDir, File serieIDFolder, List<Image> images) throws ShanoirException {
 		for (Iterator<Image> iterator = images.iterator(); iterator.hasNext();) {
 			Image image = iterator.next();
 			// the path has been set in processDicomFile in DicomFileAnalyzer before
 			String filePath = image.getPath();
-			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
+			File oldFile = new File(importJobDir.getAbsolutePath() + File.separator + filePath);
 			if (oldFile.exists()) {
 				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + filePath);
 				newFile.getParentFile().mkdirs();
