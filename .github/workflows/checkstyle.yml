@@ -48,7 +48,7 @@ jobs:
             "org.shanoir-ng:shanoir-ng-exchange"
             "org.shanoir-ng:shanoir-ng-import"
             "org.shanoir-ng:shanoir-ng-preclinical"
-            "org.shanoir-ng:shanoir-ng-nifti-conversion"
+            "org.shanoir-ng:nifti-conversion"
           )
 
           for coord in "${modules[@]}"; do

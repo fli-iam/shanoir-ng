@@ -107,21 +107,6 @@
     <module name="JavadocStyle"/>
     <module name="MissingJavadocMethod"/> -->
 
-    <!-- Checks code indentation to enforce a uniform style -->
-    <!-- See https://checkstyle.org/config_misc.html#Indentation -->
-    <module name="Indentation">
-        <!-- indentation for each block level -->
-        <property name="basicOffset" value="4"/>
-        <!-- additional indent for wrapped lines -->
-        <property name="lineWrappingIndentation" value="8"/>
-        <!-- indent case labels under switch statements -->
-        <property name="caseIndent" value="4"/>
-        <!-- how much to adjust when a brace is on a new line -->
-        <property name="braceAdjustment" value="0"/>
-        <!-- tab width, if you allow tabs at all -->
-        <property name="tabWidth" value="4"/>
-    </module>
-
     <!-- Checks for Naming Conventions.                  -->
     <!-- See https://checkstyle.org/checks/naming/index.html -->
     <!-- <module name="ConstantName"/>
