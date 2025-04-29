@@ -111,7 +111,9 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
-
+		LOG.error("create subject dto : ", dto);
+		LOG.error("create subject dto.id : ", dto.getId());
+		LOG.error("create subject dto.name : ", dto.getName());
 		if(subjectService.isSubjectNameAlreadyUsed(dto.getName())){
 			FieldErrorMap errorMap = new FieldErrorMap();
 			List<FieldError> errors = new ArrayList();
@@ -125,6 +127,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 		Long subjectId;
 		try {
+			LOG.error("call subjectService.createSubject");
 			subjectId = subjectService.createSubject(dto);
 		} catch (Exception ex){
 			String msg = "Failed to create subject. Animal subject can't be created.";

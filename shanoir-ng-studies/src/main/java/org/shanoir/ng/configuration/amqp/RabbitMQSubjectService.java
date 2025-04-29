@@ -150,6 +150,7 @@ public class RabbitMQSubjectService {
 	public Long createOrUpdateSubject(String subjectAsString) {
 		// create a subject
 		try {
+			LOG.error("call createOrUpdateSubject subjectAsString: ", subjectAsString);
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 			Subject subject = mapper.readValue(subjectAsString, Subject.class);

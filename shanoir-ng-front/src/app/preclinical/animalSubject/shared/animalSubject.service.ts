@@ -54,6 +54,8 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
     }
 
     createPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Promise<PreclinicalSubject> {
+        console.log("preclinicalSubject : ", preclinicalSubject);
+        console.log("this.stringify(preclinicalSubject) : ", this.stringify(preclinicalSubject));
         return this.http.post<PreclinicalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, this.stringify(preclinicalSubject))
             .toPromise();
     }
