@@ -33,5 +33,17 @@ jobs:
         working-directory: ./shanoir-ng-back/
 
       - name: Run Checkstyle
-        run: mvn checkstyle:check --batch-mode -Dcheckstyle.config.location=${PWD}/checkstyle.xml
+        run: |
+          set +e
+          EXIT=0
+          ROOT_DIR=$(pwd)
+          for module in shanoir-ng-*/ ; do
+            echo "=== Checkstyle on ${module%%/} ==="
+            mvn -B -pl "$module" checkstyle:check \
+                -Dcheckstyle.config.location="$ROOT_DIR/checkstyle.xml"
+            if [ $? -ne 0 ]; then
+              EXIT=1
+            fi
+          done
+          exit $EXIT
         working-directory: ./shanoir-ng-back/
