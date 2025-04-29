@@ -200,26 +200,35 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
+			// Tag (0008,0008) ImageType is of Type Required (1) in Enhanced MR Image IOD
 			String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
-			String imageFlavor = imageTypeArray[2];
-			if (imageFlavor.equals(ImageFlavor.ANGIO_TIME.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.DIFFUSION.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.PERFUSION.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T1.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T1_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T2.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T2_STAR.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.TOF.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.VELOCITY.name())) {
-				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
+			if (imageTypeArray != null) {
+				// Check if image flavor is present, Value Multiplicity 2-n
+				// Example was: ["DERIVED", "PRIMARY"]: no image flavor present
+				if (imageTypeArray.length > 2) {
+					String imageFlavor = imageTypeArray[2];
+					if (imageFlavor != null && !imageFlavor.isEmpty()) {
+						if (imageFlavor.equals(ImageFlavor.ANGIO_TIME.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.DIFFUSION.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.PERFUSION.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.T1.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T1_WEIGHTED_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.T2.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_WEIGHTED_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.T2_STAR.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.TOF.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET);
+						} else if (imageFlavor.equals(ImageFlavor.VELOCITY.name())) {
+							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
+						}
+					}	
+				}
 			}
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
 		}

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -65,7 +66,7 @@ public class StudyServiceImpl implements StudyService {
 		if (current.getStudyTags() != null) {
 			current.getStudyTags().clear();
 		} else {
-			current.setTags(new ArrayList<>());
+			current.setStudyTags(new HashSet<>());
 		}
 		if (updated.getStudyTags() != null) {
 			current.getStudyTags().addAll(updated.getStudyTags());

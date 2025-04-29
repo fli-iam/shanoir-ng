@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
+import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,6 @@ public class ImportFinishRunnable implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 	
-	public static final String IMPORT_JOB_JSON = "import-job.json";
-
-	private static final String ANONYMIZATION_PROFILE = "anonymization.profile";
-
-	private UploadJob uploadJob;
-	
 	private File uploadFolder;
 	
 	private ImportJob importJob;
@@ -38,8 +31,7 @@ public class ImportFinishRunnable implements Runnable {
 
 	private Anonymizer anonymizer = new Anonymizer();
 	
-	public ImportFinishRunnable(final UploadJob uploadJob, final File uploadFolder, final ImportJob importJob, final String subjectName) {
-		this.uploadJob = uploadJob;
+	public ImportFinishRunnable(final File uploadFolder, final ImportJob importJob, final String subjectName) {
 		this.uploadFolder = uploadFolder;
 		this.importJob = importJob;
 		this.subjectName = subjectName;
@@ -51,7 +43,7 @@ public class ImportFinishRunnable implements Runnable {
 		 */
 		boolean anonymizationSuccess = false;
 		try {
-			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ANONYMIZATION_PROFILE);
+			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
 			anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName);
 		} catch (IOException e) {
 			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
@@ -62,7 +54,7 @@ public class ImportFinishRunnable implements Runnable {
 			 * Write import-job.json to disk
 			 */
 			try {
-				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
+				File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
 				importJobJson.createNewFile();
 				Util.objectMapper.writeValue(importJobJson, importJob);
 			} catch (IOException e) {
@@ -70,13 +62,13 @@ public class ImportFinishRunnable implements Runnable {
 			}
 			
 			/**
-			 * Write the UploadJob and schedule upload
-			 * We keep UploadJob here to start the upload and handle errors without
+			 * Write the ImportJob and schedule upload
+			 * We keep ImportJob here to start the upload and handle errors without
 			 * developing something new with shanoir-exchange.json
 			 */
-			uploadJob.setUploadState(UploadState.START_AUTOIMPORT);
-			UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-			uploadJobManager.writeUploadJob(uploadJob);
+			importJob.setUploadState(UploadState.START_AUTOIMPORT);
+			NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+			importJobManager.writeImportJob(importJob);
 			logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
 		} else {
 			// NOTIFY THAT ANONYMIZATION HAS FAILED.

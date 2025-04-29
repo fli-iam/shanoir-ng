@@ -17,6 +17,8 @@ package org.shanoir.ng.dataset.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.ListUtils;
+import jakarta.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -62,6 +64,8 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.dto.DatasetLight;
 
 /**
  * Dataset service implementation.
@@ -180,7 +184,8 @@ public class DatasetServiceImpl implements DatasetService {
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
-			datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
+			if (dataset.getSource() == null)
+				datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
 		}
 	}
 
@@ -210,6 +215,11 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
 		return Utils.toList(repository.findAllById(ids));
+	}
+
+	@Override
+	public List<DatasetLight> findLightByIdIn(List<Long> ids) {
+		return Utils.toList(repository.findAllLightById(ids));
 	}
 
 	@Override

@@ -325,9 +325,13 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<List<Tag>> tags(@PathVariable("studyId") final Long studyId)
 			throws RestServiceException {
-		List<Tag> tags = this.studyService.getTagsFromStudy(studyId);
-		if (!tags.isEmpty()) {
-			return new ResponseEntity<>(tags, HttpStatus.OK);
+		if (studyId != null) {
+			List<Tag> tags = this.studyService.getTagsFromStudy(studyId);
+			if (!tags.isEmpty()) {
+				return new ResponseEntity<>(tags, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

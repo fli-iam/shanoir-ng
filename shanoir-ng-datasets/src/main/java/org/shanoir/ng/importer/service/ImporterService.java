@@ -356,7 +356,6 @@ public class ImporterService {
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
             }
-
             return datasetAcquisition;
         } else {
             LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");

@@ -1,5 +1,6 @@
 package org.shanoir.uploader.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,8 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.ShanoirUploader;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.IdName;
@@ -43,14 +48,30 @@ public abstract class AbstractTest {
 	private static final String USER_PASSWORD = "user.password";
 
 	protected static ShanoirUploaderServiceClient shUpClient;
+
+	protected static Pseudonymizer pseudonymizer;
+
+	protected static IdentifierCalculator identifierCalculator;
 	
 	@BeforeAll
 	public static void setup() {
+		ShanoirUploader.initShanoirUploaderFolders();
 		initProperties(TEST_PROPERTIES, testProperties);
 		initProperties(ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
 		initProperties(ShUpConfig.ENDPOINT_PROPERTIES, ShUpConfig.endpointProperties);
+		if (ShUpConfig.isModePseudonymus()) {
+			File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+			try {
+				pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
+			} catch (PseudonymusException e) {
+				logger.error(e.getMessage(), e);
+			}	
+		}
+		identifierCalculator = new IdentifierCalculator();
 		shUpClient = new ShanoirUploaderServiceClient();
+		shUpClient.configure();
+		ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
 		String user = testProperties.getProperty(USER_NAME);
 		String password = testProperties.getProperty(USER_PASSWORD);
 		String token;

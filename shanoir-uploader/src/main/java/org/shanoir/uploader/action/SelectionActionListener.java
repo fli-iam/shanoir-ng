@@ -89,7 +89,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 					// implies: select all studies + series below
 					if (o instanceof PatientTreeNode) {
 						PatientTreeNode patientTreeNode = (PatientTreeNode) o;
-						Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes().values();
+						Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes();
 						for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 							StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
 							handleStudyTreeNode(patientTreeNode, studyTreeNode, true);

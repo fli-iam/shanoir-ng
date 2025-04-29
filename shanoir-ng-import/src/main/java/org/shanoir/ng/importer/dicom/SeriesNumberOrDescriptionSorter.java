@@ -26,6 +26,9 @@ public class SeriesNumberOrDescriptionSorter implements Comparator<Serie> {
 		try {
 			int s1SeriesNumberInt = Integer.parseInt(s1SeriesNumber);
 			int s2SeriesNumberInt = Integer.parseInt(s2SeriesNumber);
+			if (s1SeriesNumberInt == 0 && s2SeriesNumberInt == 0) {
+				return orderBySeriesDescription(s1, s2);
+			}
 			if (s1SeriesNumberInt == s2SeriesNumberInt) {
 				return 0;
 			} else {
@@ -36,13 +39,17 @@ public class SeriesNumberOrDescriptionSorter implements Comparator<Serie> {
 				}
 			}
 		} catch(NumberFormatException e) {
-			String s1SeriesDescription = s1.getSeriesDescription();
-			String s2SeriesDescription = s2.getSeriesDescription();
-			if (s1SeriesDescription == null || s2SeriesDescription == null) {
-				return 0;
-			}
-			return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
+			return orderBySeriesDescription(s1, s2);
 		}
+	}
+
+	private int orderBySeriesDescription(Serie s1, Serie s2) {
+		String s1SeriesDescription = s1.getSeriesDescription();
+		String s2SeriesDescription = s2.getSeriesDescription();
+		if (s1SeriesDescription == null || s2SeriesDescription == null) {
+			return 0;
+		}
+		return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
 	}
 
 }

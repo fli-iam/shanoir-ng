@@ -35,7 +35,7 @@ public class ShanoirUploader {
 	/**
 	 * Initialize personal properties folder + workFolder of ShanoirUploader.
 	 */
-	private static void initShanoirUploaderFolders() {
+	public static void initShanoirUploaderFolders() {
 		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
 		final String shanoirUploaderFolderPath = userHomeFolderPath
 				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;

@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -15,14 +13,12 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +82,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			if (firstPatient == null) {
 				firstPatient = patient;
 				try {
-					firstSubject = createSubjectFromPatient(patient);
+					firstSubject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
 					importJob.setSubject(firstSubject);
 				} catch (PseudonymusException e) {
 					logger.error(e.getMessage(), e);
@@ -120,7 +116,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		}
 		
 		/**
-		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
+		 * 3. Download from PACS or copy from CD/DVD and write import-job.json
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
@@ -172,33 +168,6 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		String birthName = mainWindow.birthNameTF.getText();
 		String birthDate = mainWindow.birthDateTF.getText();
 		return org.shanoir.uploader.utils.ImportUtils.adjustPatientWithPatientVerification(patient, firstName, lastName, birthName, birthDate);
-	}
-
-	public Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
-		Subject subject = new Subject();
-		String identifier;
-		// OFSEP mode
-		if (ShUpConfig.isModePseudonymus()) {
-			// create PseudonymusHashValues here, based on Patient info, verified by users in GUI
-			PseudonymusHashValues pseudonymusHashValues = pseudonymizer.createHashValuesWithPseudonymus(patient);
-			subject.setPseudonymusHashValues(pseudonymusHashValues);
-			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
-		// Neurinfo mode
-		} else {
-			String birthDateString = Util.convertLocalDateToString(patient.getPatientBirthDate());
-			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDateString);
-		}
-		subject.setIdentifier(identifier);
-		/**
-		 * Keep sex and set birth date in subject to 01.01.year
-		 */
-		subject.setSex(patient.getPatientSex());
-		LocalDate birthDate = patient.getPatientBirthDate();
-		if (birthDate != null) {
-			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
-			subject.setBirthDate(birthDate);
-		}
-		return subject;
 	}
 
 }

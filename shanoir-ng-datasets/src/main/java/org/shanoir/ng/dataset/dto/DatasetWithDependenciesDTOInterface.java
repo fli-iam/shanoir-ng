@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import java.util.List;
-
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 

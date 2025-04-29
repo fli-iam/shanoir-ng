@@ -17,6 +17,8 @@ package org.shanoir.ng.acquisitionequipment.repository;
 import java.util.List;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -34,4 +36,7 @@ public interface AcquisitionEquipmentRepository extends CrudRepository<Acquisiti
 
 	List<AcquisitionEquipment> findByManufacturerModelId(Long manufacturerModelId);
 
+	@Modifying
+	@Query("DELETE FROM AcquisitionEquipment ae WHERE ae.id = :id")
+	public void deleteById(Long id);
 }

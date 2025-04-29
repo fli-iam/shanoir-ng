@@ -36,7 +36,7 @@ public class DicomTreeModel implements TreeModel {
      */
     public Object getChild(Object parent, int index) {
     	DicomTreeNode p = (DicomTreeNode) parent;
-    	return p.getTreeNodes().values().toArray()[index];
+    	return p.getTreeNodes().toArray()[index];
     }
  
     /**
@@ -53,7 +53,7 @@ public class DicomTreeModel implements TreeModel {
     public int getIndexOfChild(Object parent, Object child) {
         DicomTreeNode p = (DicomTreeNode) parent;
         DicomTreeNode[] children = (DicomTreeNode[])
-        		p.getTreeNodes().values().toArray();
+        		p.getTreeNodes().toArray();
         for (int i = 0; i < children.length; i++) {
 			if (children[i].equals(child)) {
 				return i;

@@ -110,7 +110,6 @@ public class ExaminationApiController implements ExaminationApi {
 				studyId);
 
 		eventService.publishEvent(event);
-
 		examinationService.deleteExaminationAsync(examinationId, studyId, event);
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -1,5 +1,6 @@
 package org.shanoir.uploader.dicom.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -258,7 +259,7 @@ public class SerieTreeNode implements DicomTreeNode {
 		return this.serie.toString();
 	}
 
-	public void addTreeNode(String arg0, DicomTreeNode arg1) {
+	public void addTreeNode(DicomTreeNode arg1) {
 	}
 
 	public void addTreeNodes(DicomTreeNode arg0, DicomTreeNode arg1,
@@ -269,8 +270,8 @@ public class SerieTreeNode implements DicomTreeNode {
 		return null;
 	}
 
-	public HashMap<String, DicomTreeNode> getTreeNodes() {
-		return new HashMap<String, DicomTreeNode>();
+	public List<DicomTreeNode> getTreeNodes() {
+		return new ArrayList<DicomTreeNode>();
 	}
 
 	public DicomTreeNode initChildTreeNode(Object arg0) {

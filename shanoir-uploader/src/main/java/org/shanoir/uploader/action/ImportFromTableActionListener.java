@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
@@ -21,20 +22,20 @@ public class ImportFromTableActionListener implements ActionListener {
 
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private ResourceBundle resourceBundle;
-	private DownloadOrCopyActionListener dOCAL;
+	private Pseudonymizer pseudonymizer;
 
-	public ImportFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
+	public ImportFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, Pseudonymizer pseudonymizer) {
 		this.importFromTableWindow = importFromTableWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 		this.resourceBundle = resourceBundle;
-		this.dOCAL = dOCAL;
+		this.pseudonymizer = pseudonymizer;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		ImportFromTableRunner importer = new ImportFromTableRunner(importJobs, resourceBundle, importFromTableWindow, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, dOCAL);
+		ImportFromTableRunner importer = new ImportFromTableRunner(importJobs, resourceBundle, importFromTableWindow, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, pseudonymizer);
 		importer.execute();
 	}
 
