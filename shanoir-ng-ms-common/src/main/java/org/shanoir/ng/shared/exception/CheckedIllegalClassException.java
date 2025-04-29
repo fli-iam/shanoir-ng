@@ -18,7 +18,7 @@ public class CheckedIllegalClassException extends Exception {
      */
     public CheckedIllegalClassException(Class expected, Object actual) {
         super(
-            "Expected: "
+                "Expected: "
                 + safeGetClassName(expected)
                 + ", actual: "
                 + (actual == null ? "null" : actual.getClass().getName()));
@@ -32,7 +32,7 @@ public class CheckedIllegalClassException extends Exception {
      */
     public CheckedIllegalClassException(Class expected, Class actual) {
         super(
-            "Expected: "
+                "Expected: "
                 + safeGetClassName(expected)
                 + ", actual: "
                 + safeGetClassName(actual));

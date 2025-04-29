@@ -188,8 +188,8 @@ public class DatasetFileUtils {
 
 	public static void compressGzipFile(String source, String gzipDestination) throws IOException {
 		try (FileInputStream fis = new FileInputStream(source);
-		FileOutputStream fos = new FileOutputStream(gzipDestination);
-		GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+				FileOutputStream fos = new FileOutputStream(gzipDestination);
+				GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
 			byte[] buffer = new byte[1024];
 			int len;
 			while ((len = fis.read(buffer)) > 0) {
