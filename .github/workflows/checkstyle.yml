@@ -37,11 +37,14 @@ jobs:
           set +e
           EXIT=0
           ROOT_DIR=$(pwd)
-          for module in shanoir-ng-*/ ; do
-            echo "=== Checkstyle on ${module%%/} ==="
+          # Liste tous les dossiers commençant par `shanoir-ng-`
+          for module_path in shanoir-ng-*/; do
+            # Retire le slash final pour obtenir l'artifactId
+            module=${module_path%/}
+            echo "=== Checkstyle sur $module ==="
             mvn -B -pl "$module" checkstyle:check \
                 -Dcheckstyle.config.location="$ROOT_DIR/checkstyle.xml"
-            if [ $? -ne 0 ]; then
+            if [[ $? -ne 0 ]]; then
               EXIT=1
             fi
           done
