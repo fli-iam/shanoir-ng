@@ -42,7 +42,7 @@ jobs:
             "org.shanoir-ng:shanoir-ng-ms-common"
             "org.shanoir-ng:shanoir-ng-study-rights"
             "org.shanoir-ng:shanoir-ng-users"
-            "org.shanoir-ng:anonymization"
+            "org.shanoir.anonymization:anonymization"
             "org.shanoir-ng:shanoir-ng-studies"
             "org.shanoir-ng:shanoir-ng-datasets"
             "org.shanoir-ng:shanoir-ng-exchange"
