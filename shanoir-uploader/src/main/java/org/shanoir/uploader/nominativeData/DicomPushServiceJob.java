@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +49,9 @@ public class DicomPushServiceJob {
 	
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
-	private final Set<Serie> incomingSeries = new HashSet<>();
+	// We keep it as a List because we can have PACS answers with 2 series, 
+	// but the same serie, same SeriesInstanceUID but both with different images to manage.
+	private final List<Serie> incomingSeries = new ArrayList<>();
 
 	private final long JOB_RATE = 60000; //3600000; // 1 hour
 
@@ -213,10 +214,10 @@ public class DicomPushServiceJob {
 	 * @param completeSeries
 	 * @param folder
 	 */
-	private void prepareImportJob(Patient patient, Study study, Set<Serie> completeSeries) throws IOException {
+	private void prepareImportJob(Patient patient, Study study, List<Serie> completeSeries) throws IOException {
 		ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
 		try {
-			importJob.setSubject(dOCAL.createSubjectFromPatient(patient));
+			importJob.setSubject(ImportUtils.createSubjectFromPatient(patient, dOCAL.pseudonymizer, dOCAL.identifierCalculator));
 			} catch (PseudonymusException e) {
 				logger.error(e.getMessage(), e);
 				return;
@@ -239,7 +240,7 @@ public class DicomPushServiceJob {
 		FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
 
 		// We set the selected series after the copy of the DICOM files to have the instances set to each serie
-		importJob.setSelectedSeries(completeSeries);
+		importJob.setSelectedSeries((Set<Serie>) completeSeries);
 
 		importJob.setTimestamp(System.currentTimeMillis());
 		importJob.setUploadState(UploadState.READY);

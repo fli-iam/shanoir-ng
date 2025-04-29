@@ -2,7 +2,6 @@ package org.shanoir.uploader.dicom;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JProgressBar;
 
@@ -39,7 +38,7 @@ public interface IDicomServerClient {
 	 * begin to send all files to a local server implemented in DcmRcvHelper.
 	 * @param selectedSeries
 	 */
-	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, Set<Serie> selectedSeries, final File tempFolderForUpload);
+	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File tempFolderForUpload);
 	
 	/**
 	 * This method returns the work folder.

@@ -119,7 +119,7 @@ public class FileUtil {
 		}
 	}
 
-	public static void readAndCopyDicomFilesToUploadFolder(File workFolder, String studyInstanceUID, Set<Serie> selectedSeries, final File uploadFolder,
+	public static void readAndCopyDicomFilesToUploadFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
 			final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
 		for (Serie serie : selectedSeries) {
 			List<String> fileNamesForSerie = new ArrayList<String>();
@@ -193,7 +193,7 @@ public class FileUtil {
 		}
 	}
 
-	public static void deleteFolderDownloadFromDicomServer(File workFolder, String studyInstanceUID, Set<Serie> selectedSeries) throws IOException {
+	public static void deleteFolderDownloadFromDicomServer(File workFolder, String studyInstanceUID, List<Serie> selectedSeries) throws IOException {
 		if (selectedSeries != null && !selectedSeries.isEmpty()) {
 			File studyFolder = new File(workFolder + File.separator + studyInstanceUID);
 			try (Stream<Path> walk = Files.walk(studyFolder.toPath())) {

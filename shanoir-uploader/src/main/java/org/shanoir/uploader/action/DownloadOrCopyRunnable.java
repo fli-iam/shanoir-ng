@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -85,7 +84,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-			Set<Serie> selectedSeries = importJob.getSelectedSeries();
+			List<Serie> selectedSeries = (List<Serie>) importJob.getSelectedSeries();
 			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
 			downloadProgressBar.setValue(0);

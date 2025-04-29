@@ -130,7 +130,7 @@ public class DicomServerClient implements IDicomServerClient {
 	 * Collection)
 	 */
 	@Override
-	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, Set<Serie> selectedSeries, final File uploadFolder) {
+	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder) {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		if (selectedSeries != null && !selectedSeries.isEmpty()) {
 			try {
@@ -148,7 +148,7 @@ public class DicomServerClient implements IDicomServerClient {
 		return retrievedDicomFiles;
 	}
 
-	private void downloadFromDicomServer(String studyInstanceUID, Set<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
+	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
 		// c-move: download images from DICOM server for all series
 		// we have to call here for all series as the connection set up
 		// and release is very time consuming and error prone, so we do

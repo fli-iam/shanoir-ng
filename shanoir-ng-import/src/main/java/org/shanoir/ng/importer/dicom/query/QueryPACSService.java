@@ -248,7 +248,7 @@ public class QueryPACSService {
 		LOG.debug("------------------------------");
 	}
 
-	public void queryCMOVEs(String studyInstanceUID, Set<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
+	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVES --");
 		LOG.info("--------------------");
