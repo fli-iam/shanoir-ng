@@ -3,7 +3,6 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +84,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
+			List<Serie> selectedSeries = (List<Serie>) importJob.getSelectedSeries();
 			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
 			downloadProgressBar.setValue(0);
@@ -161,5 +160,4 @@ public class DownloadOrCopyRunnable implements Runnable {
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
 }

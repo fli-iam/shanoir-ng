@@ -20,7 +20,7 @@ import org.weasis.dicom.tool.DicomListener;
 /**
  * The DcmRcvManager handles the download of DICOM files and starts one DICOM
  * SCP server at run up of ShanoirUploader. We start only one and keep him up
- * and running, first to be more efficient and second to preare for DICOM push
+ * and running, first to be more efficient and second to prepare for DICOM push
  * from outside, what requires one DICOM SCP server up and running all time as
  * long as ShUp has been started.
  * 
