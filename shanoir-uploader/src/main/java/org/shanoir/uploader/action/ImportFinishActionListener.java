@@ -23,7 +23,6 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
@@ -42,7 +41,7 @@ public class ImportFinishActionListener implements ActionListener {
 
 	private MainWindow mainWindow;
 	
-	private UploadJob uploadJob;
+	private ImportJob importJob;
 	
 	private File uploadFolder;
 	
@@ -50,10 +49,10 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
+	public ImportFinishActionListener(final MainWindow mainWindow, ImportJob importJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
-		this.uploadJob = uploadJob;
+		this.importJob = importJob;
 		this.uploadFolder = uploadFolder;
 		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
@@ -79,7 +78,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
 		 */
 		boolean useExistingSubjectInStudy = false;
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+		if (ShUpConfig.isModeSubjectNameManual()) {
 			// minimal length for subject common name is 1, same for subject study identifier
 			// if nothing is entered, use existing subject selected
 			if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
@@ -113,7 +112,7 @@ public class ImportFinishActionListener implements ActionListener {
 
 		// In case user selects existing subject from study, just use it
 		if (!useExistingSubjectInStudy) {
-			// common name: entered by the user in the GUI
+			// subject name: entered by the user in the GUI
 			String subjectName = mainWindow.importDialog.subjectTextField.getText();
 			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
 			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
@@ -199,7 +198,7 @@ public class ImportFinishActionListener implements ActionListener {
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
+		Runnable runnable = new ImportFinishRunnable(uploadFolder, importJob, subjectREST.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 

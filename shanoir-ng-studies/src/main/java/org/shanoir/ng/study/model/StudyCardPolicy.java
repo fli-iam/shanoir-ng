@@ -8,14 +8,9 @@ public enum StudyCardPolicy {
     MANDATORY(1),
 
     /**
-     * Study card is optional during import
-     */
-    OPTIONAL(2),
-
-    /**
      * Study card is disabled during import
      */
-    DISABLED(3);
+    DISABLED(2);
 
     private int id;
 

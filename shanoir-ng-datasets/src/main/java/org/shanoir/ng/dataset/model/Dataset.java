@@ -111,7 +111,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Dataset Processing. */
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
 
@@ -123,7 +123,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Processings for which this dataset is an input. */
 	@JsonIgnore
-	@ManyToMany(mappedBy="inputDatasets")
+	@ManyToMany(mappedBy = "inputDatasets", fetch = FetchType.LAZY)
 	private List<DatasetProcessing> processings;
 
 	/** Origin metadata. */
