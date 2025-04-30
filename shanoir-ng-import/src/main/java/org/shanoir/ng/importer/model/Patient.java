@@ -21,6 +21,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.utils.Utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -169,8 +170,8 @@ public class Patient {
 
 	@Override
 	public String toString() {
-		return "Patient [patientID=" + patientID + ", patientName=" + patientName + ", patientBirthName="
-				+ patientBirthName + ", patientBirthDate=" + patientBirthDate + "]";
+		return "Patient [patientID=" + Utils.sha256(patientID) + ", patientName=" + Utils.sha256(patientName) + ", patientBirthName="
+				+ Utils.sha256(patientBirthName) + ", patientBirthDate=" + patientBirthDate + "]";
 	}
 
 	public String toTreeString() {
