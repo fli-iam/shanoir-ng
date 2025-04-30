@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
@@ -545,6 +544,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
+				// if study dos not contain series, skip it
+				if (study.getSeries() == null || study.getSeries().isEmpty()) {
+					continue;
+				}
 				importJob.setStudy(study);
 				selectedSeriesByStudy.put(study.getStudyInstanceUID(), new ArrayList<>());
 				for (Serie serie : study.getSeries()) {
@@ -561,6 +564,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy().getStudyInstanceUID());
+		// If the dicom study does not contain any series matching the filters
 		if (selectedSeries == null || selectedSeries.isEmpty()) {
 			logger.error("No series found for DICOM study: " + importJob.getStudy().toString());
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
