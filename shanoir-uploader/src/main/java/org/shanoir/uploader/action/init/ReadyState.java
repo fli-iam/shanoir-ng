@@ -38,9 +38,6 @@ public class ReadyState implements State {
 
 	@Autowired
 	private CurrentNominativeDataController currentNominativeDataController;
-
-	@Autowired
-	private UploadServiceJob uploadServiceJob;
 	
 	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -75,7 +72,7 @@ public class ReadyState implements State {
 			public void windowOpened(WindowEvent e) {
 			}
 			public void windowClosing(WindowEvent e) {
-				if (uploadServiceJob.isUploading()) {
+				if (UploadServiceJob.LOCK.isLocked()) {
 					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
 					UIManager.put("OptionPane.cancelButtonText", "Cancel");
 					UIManager.put("OptionPane.noButtonText", "No");
@@ -111,15 +108,14 @@ public class ReadyState implements State {
 			final Collection<File> files = Util.listFiles(folder, null, false);
 			for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 				final File file = (File) filesIt.next();
-				if (file.getName().equals(
-						ShUpConfig.IMPORT_JOB_JSON)) {
+				if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
 					logger.debug(" Initializing data job manager before launching Jobs");
 					dataJobManager = new NominativeDataImportJobManager(file);
+					break;
 				}
 			}
 			if (dataJobManager != null) {
-				final ImportJob importJob = dataJobManager
-						.readImportJob();
+				final ImportJob importJob = dataJobManager.readImportJob();
 				// in case of previous importJobs (without uploadPercentage)
 				// we look for uploadPercentage value from nominative-data-job.xml file
 				if (importJob.getUploadPercentage() == null) {

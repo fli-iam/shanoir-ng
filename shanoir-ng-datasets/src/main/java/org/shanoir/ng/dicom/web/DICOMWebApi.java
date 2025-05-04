@@ -89,7 +89,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
-	@Operation(summary = "", description = "Returns all DICOM instances/datasets of a study and serie")
+	@Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
 			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
@@ -118,7 +118,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
 		) throws RestServiceException;
 	
-	@Operation(summary = "", description = "Returns a frame of a DICOM instance/dataset, of a study and serie")
+	@Operation(summary = "", description = "Returns a frame of a DICOM instance, of a study and a serie")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
 			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
@@ -141,7 +141,7 @@ public interface DICOMWebApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/instances")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstances() throws RestServiceException;
 
@@ -152,7 +152,7 @@ public interface DICOMWebApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/studies/{studyInstanceUID}/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{studyInstanceUID}/instances")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstancesOfStudy(
 			@Parameter(description = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
