@@ -18,7 +18,15 @@ public abstract class OutputHandler {
      * @param monitoring ExecutionMonitoring
      * @return true if execution monitoring can be process by this handler instance
      */
-    public abstract boolean canProcess(ExecutionMonitoring monitoring) throws ResultHandlerException;
+    public abstract boolean canProcess(ExecutionMonitoring monitoring, boolean postProcessing) throws ResultHandlerException;
+
+    /**
+     * Return true if the implementation can process the result of the processing relative to the given string
+     *
+     * @param pipelineIdentifier string
+     * @return true if execution monitoring can be process by this handler instance
+     */
+    public abstract boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException;
 
     /**
      * This methods manages the single result of an execution

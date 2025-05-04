@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ExecutionMonitoringRepository extends CrudRepository<ExecutionMonitoring, Long> {
