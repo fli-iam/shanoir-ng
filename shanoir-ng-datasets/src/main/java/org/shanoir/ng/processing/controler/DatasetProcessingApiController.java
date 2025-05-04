@@ -17,19 +17,16 @@ package org.shanoir.ng.processing.controler;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.apache.poi.ss.extractor.ExcelExtractor;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderServiceImpl;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -41,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,12 +49,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetProcessingApiController.class);
-
 
 	@Autowired
 	private DatasetMapper datasetMapper;
@@ -70,16 +66,14 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	private DatasetProcessingService datasetProcessingService;
 
 	@Autowired
+	private DatasetProcessingRepository processingRepository;
+
+	@Autowired
 	private ProcessingDownloaderServiceImpl processingDownloaderService;
 
 	@Autowired
 	private ExaminationService examinationService;
 
-	public DatasetProcessingApiController(){
-
-	}
-
-	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
 			throws RestServiceException {
@@ -94,43 +88,38 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		}
 	}
 
-	@Override
 	public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		
-		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		final Optional<DatasetProcessing> datasetProcessing = processingRepository.findById(datasetProcessingId);
 		if (!datasetProcessing.isPresent()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing.get()), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings() {
-		final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
+		final List<DatasetProcessing> datasetProcessings = StreamSupport.stream(processingRepository.findAll().spliterator(), false).collect(Collectors.toList());
 		if (datasetProcessings.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		final Optional<DatasetProcessing> datasetProcessing = processingRepository.findById(datasetProcessingId);
 		List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		final Optional<DatasetProcessing> datasetProcessing = processingRepository.findById(datasetProcessingId);
 		List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
 			@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
@@ -139,7 +128,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 		
 		/* Validation */
-		validate(result);
+		datasetProcessingService.validate(result);
 		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
 
 		/* Save dataset processing in db. */
@@ -147,13 +136,12 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(createdDatasetProcessing), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<Void> updateDatasetProcessing(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
 			@Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
 
-		validate(result);
+		datasetProcessingService.validate(result);
 		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
 
 		try {
@@ -165,20 +153,11 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		}
 	}
 
-	private void validate(BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
-
-	@Override
 	public void massiveDownloadByProcessingIds(
 			@Parameter(description = "ids of processing", required=true) @Valid
 			@RequestBody List<Long> processingIds,
 			@Parameter(description = "outputs to extract") @Valid
-			@RequestParam(value = "resultOnly") boolean resultOnly,
+			@RequestParam(value = "resultOnly") String resultOnly,
 			HttpServletResponse response) throws RestServiceException {
 
 		List<DatasetProcessing> processingList = new ArrayList<>();
@@ -188,7 +167,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 				if(processingId == null){
 					throw new Exception();
 				}
-				processing = datasetProcessingService.findById(processingId).get();
+				processing = processingRepository.findById(processingId).get();
 				processingList.add(processing);
 			}catch (Exception e) {
 				throw new RestServiceException(
@@ -198,15 +177,19 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
 	}
 
-	@Override
 	public void massiveDownloadProcessingByExaminationIds(
 			@Parameter(description = "ids of examination", required=true) @Valid
 			@RequestBody List<Long> examinationIds,
 			@Parameter(description = "comment of the desired processings") @Valid
 			@RequestParam(value = "processingComment", required = false) String processingComment,
 			@Parameter(description = "outputs to extract") @Valid
-			@RequestParam(value = "resultOnly") boolean resultOnly,
+			@RequestParam(value = "resultOnly") String resultOnly,
 			HttpServletResponse response) throws RestServiceException {
+
+		if(Objects.equals("", processingComment) && (examinationIds.isEmpty())){
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Filter at least on examinationsIds or on a processingComment."));
+		}
 
 		List<Examination> examinationList = new ArrayList<>();
 		for (Long examinationId : examinationIds) {

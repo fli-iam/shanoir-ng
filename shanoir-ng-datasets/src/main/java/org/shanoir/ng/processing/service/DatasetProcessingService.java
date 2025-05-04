@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,15 +34,6 @@ import java.util.Optional;
  *
  */
 public interface DatasetProcessingService {
-
-	/**
-	 * Find dataset processing by name.
-	 *
-	 * @param name name.
-	 * @return a dataset processing.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<DatasetProcessing> findByComment(String comment);
 	
     /**
      * Save an entity.
@@ -62,27 +54,10 @@ public interface DatasetProcessingService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     DatasetProcessing update(DatasetProcessing entity) throws EntityNotFoundException;
-    
-    /**
-     * Find entity by its id. 
-     *
-     * @param id id
-     * @return an entity or null.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<DatasetProcessing> findById(Long id);
-    
-    /**
-     * Get all entities.
-     * 
-     * @return a list of manufacturers.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<DatasetProcessing> findAll();
 
     /**
      * Delete an entity.
-     * 
+     *
      * @param id the entity id to be deleted.
      * @throws EntityNotFoundException if the entity cannot be found.
      */
@@ -99,15 +74,18 @@ public interface DatasetProcessingService {
     void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
     /**
-     * Delete child processing of given processing
+     * Check that the processing object is processable
      *
-     * @param id
+     * @param processing
      * @throws RestServiceException
-     * @throws ShanoirException
-     * @throws SolrServerException
-     * @throws IOException
      */
-    void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
-
     void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
+
+    /**
+     * Validate that the DatasetProcessing transformation from DTO to Java Object relative toe the BindingResult is correct
+     *
+     * @param result
+     * @throws RestServiceException
+     */
+    void validate(BindingResult result) throws RestServiceException;
 }

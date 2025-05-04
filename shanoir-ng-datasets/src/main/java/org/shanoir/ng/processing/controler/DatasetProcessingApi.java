@@ -135,7 +135,7 @@ public interface DatasetProcessingApi {
             @Parameter(description = "id of the processing", required = true) @Valid
             @RequestBody List<Long> processingIds,
             @Parameter(description = "outputs to extract") @Valid
-            @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
+            @RequestParam(value = "resultOnly", defaultValue = "") String resultOnly, HttpServletResponse response) throws RestServiceException;
 
     @Operation(summary = "massiveDownloadProcessingByExaminationIds", description = "If exists, returns a zip file of the inputs/outputs per processing corresponding to the given examination IDs. Datas are in the http response body, it must be written in a zip file. Datas are sorted with folders according to their respective examination and processing.")
     @ApiResponses(value = {
@@ -152,6 +152,6 @@ public interface DatasetProcessingApi {
             @Parameter(description = "comment of the desired processings") @Valid
             @RequestParam(value = "processingComment", required = false) String processingComment,
             @Parameter(description = "outputs to extract") @Valid
-            @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
+            @RequestParam(value = "resultOnly", defaultValue = "") String resultOnly, HttpServletResponse response) throws RestServiceException;
 
 }
