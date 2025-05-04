@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,9 +67,15 @@ spring:
     store-type: none
   mail:
     host: ${SHANOIR_SMTP_HOST}
-    port: 25
+    port: ${SHANOIR_SMTP_PORT}
+    username: ${SHANOIR_SMTP_USERNAME}
+    password: ${SHANOIR_SMTP_PASSWORD}
     properties:
-      mail.smtp.from: do-not-reply@inria.fr
+      mail.smtp.from: ${SHANOIR_SMTP_FROM}
+      mail.smtp.auth: ${SHANOIR_SMTP_AUTH}
+      mail.smtp.port: ${SHANOIR_SMTP_PORT}
+      mail.smtp.starttls.enable: ${SHANOIR_SMTP_STARTTLS_ENABLE}
+      mail.smtp.starttls.required: ${SHANOIR_SMTP_STARTTLS_REQUIRED}
   security:
     oauth2:
       resourceserver:
@@ -77,7 +83,7 @@ spring:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
 springdoc:
   api-docs:
-    path: '/api-docs'
+    path: "/api-docs"
     enabled: true
   swagger-ui:
     url: /shanoir-ng/users/api-docs
@@ -110,7 +116,6 @@ service-account:
   user:
     name: service-account-service-account
     email: ${VIP_SERVICE_EMAIL}
-
 
 ---
 ######################################
@@ -146,14 +151,13 @@ spring:
 # logging configuration
 logging:
   pattern:
-    file: '%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n'
+    file: "%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n"
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-    
-    
+
 ---
 spring:
   config.activate.on-profile: test
