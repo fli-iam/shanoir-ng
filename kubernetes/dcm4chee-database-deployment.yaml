@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: dcm4chee-database
+  name: dcm4chee-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: dcm4chee-database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: dcm4chee-database
+    spec:
+      containers:
+        - env:
+            - name: HTTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: HTTP_PORT
+                  name: variables-env
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_DB
+                  name: variables-env
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_PASSWORD
+                  name: variables-env
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_USER
+                  name: variables-env
+            - name: STORAGE_DIR
+              valueFrom:
+                configMapKeyRef:
+                  key: STORAGE_DIR
+                  name: variables-env
+          image: dcm4che/postgres-dcm4chee:14.4-27
+          name: dcm4chee-database
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: dcm4chee-database-data
+      restartPolicy: Always
+      volumes:
+        - name: dcm4chee-database-data
+          persistentVolumeClaim:
+            claimName: dcm4chee-database-data
