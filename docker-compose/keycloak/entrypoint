@@ -112,9 +112,11 @@ import)
 export)
 	# Export the shanoir-ng realm
 	#
-	# The realm is exported as:
+	# The realm is exported using the 'different_files' strategy. The resulting files are:
 	#	/export/shanoir-ng-realm.json
 	#	/export/shanoir-ng-users-0.json
+	#	  :        :
+	#	/export/shanoir-ng-users-N.json
 	#
 	# Fails if the /export dir is not present or not empty
 
@@ -124,7 +126,7 @@ export)
 	elif [ -n "`ls -A "$EXPORT_DIR"`" ] ; then
 		error "export dir '$EXPORT_DIR' is not empty"
 	else
-		extra+=(export --realm shanoir-ng --dir "$EXPORT_DIR" --users same_file)
+		extra+=(export --realm shanoir-ng --dir "$EXPORT_DIR" --users different_files)
 	fi
 	;;
 esac
