@@ -14,11 +14,13 @@
 
 package org.shanoir.ng.datasetacquisition.model.xa;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * XA protocol.
@@ -37,6 +39,16 @@ public class XaProtocol extends AbstractEntity {
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "xaProtocol")
 	private XaDatasetAcquisition xaDatasetAcquisition;
+
+
+	/** (0054, 0081) Number of Slices */
+	private Integer numberOfSlices;
+
+	/**
+	 * (0018,0050) Slice thickness Nominal reconstructed slice thickness, in mm.
+	 * The unit of measure of the slice thickness must be in mm.
+	 */
+	private Double sliceThickness;
 
 	public XaProtocol() {
 
@@ -61,4 +73,19 @@ public class XaProtocol extends AbstractEntity {
 		this.xaDatasetAcquisition = xaDatasetAcquisition;
 	}
 
+    public Integer getNumberOfSlices() {
+        return numberOfSlices;
+    }
+
+    public void setNumberOfSlices(Integer numberOfSlices) {
+        this.numberOfSlices = numberOfSlices;
+    }
+
+    public Double getSliceThickness() {
+        return sliceThickness;
+    }
+
+    public void setSliceThickness(Double sliceThickness) {
+        this.sliceThickness = sliceThickness;
+    }
 }

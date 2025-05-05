@@ -20,7 +20,7 @@ import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
 import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
@@ -396,6 +396,14 @@ export class MassDownloadService {
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
+        if (setup.acquisitionFolders && !dataset.datasetProcessing) { // for processed datasets, skip the acq folder
+            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+                || dataset.datasetAcquisition.type + '_acquisition';
+            str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
+            + '_' + dataset.datasetAcquisition.id
+            + '/';
+        }
         return str;
     }
 
@@ -410,6 +418,9 @@ export class MassDownloadService {
         }
         if (setup.examinationFolders && !dataset.datasetProcessing) {
             str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
+        }
+        if (setup.acquisitionFolders && !dataset.datasetProcessing) {
+            str += 'acq' + dataset.datasetAcquisition.sortingIndex + '_' + dataset.datasetAcquisition?.id + '/';
         }
         return str;
     }
@@ -631,7 +642,8 @@ export class DownloadSetup {
     shortPath?: boolean = false;
     subjectFolders: boolean = true;
     examinationFolders: boolean = true;
+    acquisitionFolders: boolean = false;
     datasetFolders: boolean = true;
     converter: number;
-    datasets: Dataset[] = [];
+    datasets: Dataset[] | DatasetLight[] = [];
 }

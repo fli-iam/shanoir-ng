@@ -179,5 +179,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 		</li>
+		<li *ngIf="dataset.datasetAcquisition?.acquisitionStartTime">
+			<label>Acquisition start time</label>
+			<span class="right-col">
+				{{dataset.datasetAcquisition.acquisitionStartTime | date: 'dd/MM/yyyy HH:mm:ss'}}
+			</span>
+		</li>
+		<li *ngIf="dataset.datasetAcquisition?.protocol?.sliceThickness">
+			<label>Slice thickness (mm)</label>
+			<span class="right-col">{{dataset.datasetAcquisition.protocol.sliceThickness}}</span>
+		</li>
+		<li *ngIf="dataset.datasetAcquisition?.protocol?.numberOfSlices">
+			<label>Number of slices</label>
+			<span class="right-col">{{dataset.datasetAcquisition.protocol.numberOfSlices}}</span>
+		</li>
 	</ol>
 </fieldset>
