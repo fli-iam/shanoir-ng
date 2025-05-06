@@ -1,31 +1,29 @@
-window.config = { 
-	routerBasename: '/', 
-	extensions: [], 
-	modes: [],
-	experimentalStudyBrowserSort: true,
-	showStudyList: true,
-	dataSources: [ 
-		{ 
-			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
-			sourceName: 'dicomweb', 
-			configuration: { 
-				friendlyName: 'SHANOIR-NG',
-				name: 'SHANOIR-NG', 
-				wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
-				qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
-				wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
-				qidoSupportsIncludeField: true, 
-				supportsReject: true, 
-				imageRendering: 'wadors', 
-				thumbnailRendering: 'wadors', 
-				enableStudyLazyLoad: true, 
-				supportsFuzzyMatching: true, 
-				supportsWildcard: true, 
-				omitQuotationForMultipartRequest: false, 
-			}, 
-		}, 
-	], 
-	defaultDataSourceName: 'dicomweb', 
+window.config = {
+  routerBasename: null,
+  extensions: [],
+  modes: [],
+  showStudyList: true,
+  dataSources: [
+    {
+	namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
+	sourceName: 'dicomweb', 
+	configuration: {
+        friendlyName: 'SHANOIR-NG',
+		name: 'SHANOIR-NG', 
+		wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
+		qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+		wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+		qidoSupportsIncludeField: true,
+        supportsReject: true,
+        imageRendering: 'wadors',
+        thumbnailRendering: 'wadors',
+        enableStudyLazyLoad: true,
+        supportsFuzzyMatching: true,
+        supportsWildcard: true,
+      },
+    },
+  ],
+  defaultDataSourceName: 'dicomweb',
 	oidc: [
   	  {
     	// ~ REQUIRED
