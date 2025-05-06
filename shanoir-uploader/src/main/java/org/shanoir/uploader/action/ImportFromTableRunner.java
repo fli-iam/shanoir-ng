@@ -162,7 +162,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		return null;
 	}
 
-	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, InterruptedException {
 		PatientVerification patientVerification = importJob.getPatientVerification();
 		String[] line = {
 			patientVerification.getFirstName(),
@@ -210,10 +210,16 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadOrCopyRunnable);
 		downloadThread.start();
-		while (downloadThread.isAlive()) {
-			// wait for download thread to finish 
-		}
+		// Wait for thread to finish
+		downloadThread.join();
+
 		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+
+		// Avoid latency of creation of import-job.json file and No such File exception
+		int retries = 5;
+		while (!importJobFile.exists() && retries-- > 0) {
+    		Thread.sleep(100);
+		}
 		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
 		ImportJob importJobData = importJobManager.readImportJob();
 
