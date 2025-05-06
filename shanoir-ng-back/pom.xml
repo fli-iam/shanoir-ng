@@ -49,19 +49,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
-		<keycloak.version>25.0.4</keycloak.version>
+		<keycloak.version>26.2.1</keycloak.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
 	</properties>
 
 	<dependencyManagement>
 	    <dependencies>
-	        <dependency>
-	            <groupId>org.keycloak.bom</groupId>
-	            <artifactId>keycloak-adapter-bom</artifactId>
-	            <version>${keycloak.version}</version>
-	            <type>pom</type>
-	            <scope>import</scope>
-	        </dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-bom</artifactId>
@@ -145,7 +138,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>${keycloak.version}</version>
+			<version>26.0.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sun.activation</groupId>
