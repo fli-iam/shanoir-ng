@@ -214,12 +214,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		downloadThread.join();
 
 		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-
-		// Avoid latency of creation of import-job.json file and No such File exception
-		int retries = 5;
-		while (!importJobFile.exists() && retries-- > 0) {
-    		Thread.sleep(100);
-		}
 		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
 		ImportJob importJobData = importJobManager.readImportJob();
 
