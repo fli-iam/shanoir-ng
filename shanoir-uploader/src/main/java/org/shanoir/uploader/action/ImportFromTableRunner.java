@@ -54,6 +54,7 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				String patientID = importJob.getDicomQuery().getPatientID();
 				String studyDate = importJob.getDicomQuery().getStudyDate();
 				String modality = importJob.getDicomQuery().getModality();
-				String importJobIdentifier = "[Line: " + i + ", patientName: " + patientName + ", patientID: " + patientID + ", studyDate: " + studyDate +  ", modality: " + modality + "]";
+				String importJobIdentifier = "[Line: " + i + ", patientName: " + Utils.sha256(patientName) + ", patientID: " + Utils.sha256(patientID) + ", studyDate: " + studyDate +  ", modality: " + modality + "]";
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
