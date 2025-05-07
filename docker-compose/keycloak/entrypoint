@@ -125,6 +125,8 @@ unset SHANOIR_KEYCLOAK_USER SHANOIR_KEYCLOAK_PASSWORD
 
 abort_if_error
 
+echo "Rebuild Keycloak to pick up any new providers/themes…"
+/opt/keycloak/bin/kc.sh build
 
 # run keycloak
 exec env "$@" "${extra[@]}"
