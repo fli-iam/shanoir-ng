@@ -19,7 +19,7 @@
 		<logback.version>1.5.3</logback.version>
 		<lombok.version>1.18.26</lombok.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
-		<keycloak.version>25.0.4</keycloak.version>
+		<keycloak.version>26.2.1</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
 		<json.version>20231013</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>

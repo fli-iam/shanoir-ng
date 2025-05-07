@@ -141,12 +141,11 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
 				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
 
-			initKeycloakAdminClient();
-
 			int tries = 0;
 			boolean success = false;
 			while (!success && tries < 50) {
 				try {
+					initKeycloakAdminClient();
 					createUsersIfNotExisting();
 					success = true;
 				} catch (Exception e) {
