@@ -40,6 +40,10 @@ export abstract class Dataset extends Entity {
     tags: Tag[];
     copies: number[];
     source: number;
+
+    get hasProcessings(): boolean {
+        return this.processings?.length > 0;
+    }
 }
 
 export class DatasetMetadata {

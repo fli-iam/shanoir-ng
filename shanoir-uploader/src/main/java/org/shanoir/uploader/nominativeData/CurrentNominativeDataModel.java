@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Observable;
 
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.UploadState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,28 +23,28 @@ public class CurrentNominativeDataModel extends Observable {
 
 	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
 	// Hash key = folder name;
-	Map<String, NominativeDataUploadJob> currentUploads = null;
+	Map<String, ImportJob> currentUploads = null;
 
 	String hashKey = null;
 
-	public HashMap<String, NominativeDataUploadJob> getCurrentUploads() {
+	public HashMap<String, ImportJob> getCurrentUploads() {
 		if (currentUploads == null) {
-			return new LinkedHashMap<String, NominativeDataUploadJob>();
+			return new LinkedHashMap<String, ImportJob>();
 		}
-		return (LinkedHashMap<String, NominativeDataUploadJob>) currentUploads;
+		return (LinkedHashMap<String, ImportJob>) currentUploads;
 	}
 
-	public void setCurrentUploads(Map<String, NominativeDataUploadJob> currentUploads) {
+	public void setCurrentUploads(Map<String, ImportJob> currentUploads) {
 		this.currentUploads = currentUploads;
 		String[] msg = { "fill" };
 		setChanged();
 		notifyObservers(msg);
 	}
 
-	public void addUpload(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
-		getCurrentUploads().put(absolutePath, nominativeDataUploadJob);
-		if (nominativeDataUploadJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
-			nominativeDataUploadJob.setUploadPercentage("FINISHED");
+	public void addUpload(String absolutePath, ImportJob nominativeDataImportJob) {
+		getCurrentUploads().put(absolutePath, nominativeDataImportJob);
+		if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
+			nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
 		}
 		String[] msg = { "add", absolutePath };
 		setChanged();
