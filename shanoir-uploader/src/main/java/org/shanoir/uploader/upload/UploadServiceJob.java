@@ -88,7 +88,7 @@ public class UploadServiceJob {
 					processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
 				}
 			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
+				logger.warn("Folder found in workFolder without import-job.json.");
 			}
 		}
 	}
