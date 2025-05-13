@@ -93,24 +93,6 @@ public class ServiceConfiguration {
 	}
 
 	public String getTestURL() {
-		String profile = ShUpConfig.basicProperties.getProperty("profile");
-		if (profile != null && !profile.equals("")) {
-					if (profile.contains("OFSEP")) {
-						if (profile.contains("Qualif")) {
-							return (ShUpConfig.OFSEP_QUALIF_SERVER);
-						}
-						return (ShUpConfig.OFSEP_SERVER);
-					} else if (profile.contains("Neurinfo")){
-						if (profile.contains("Qualif")) {
-							return (ShUpConfig.NEURINFO_QUALIF_SERVER);
-						}
-						return (ShUpConfig.NEURINFO_SERVER);
-					} else {
-						return ShUpConfig.LOCAL_DEV_SERVER;
-					}
-				} else {
-					logger.warn("Profile property is empty, using default server: {}", ShUpConfig.NEURINFO_SERVER);
-					return ShUpConfig.NEURINFO_SERVER;
-				}
-			}
+		return ShUpConfig.profileProperties.getProperty("shanoir.server.url");
+	}
 }
