@@ -522,6 +522,7 @@ public class QueryPACSService {
 	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
+			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
 				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 		} else {
