@@ -13,7 +13,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import * as AppUtils from "../../../utils/app.utils";
 import {Pipeline} from "../../models/pipeline";
@@ -47,6 +47,10 @@ export class PipelineService {
      * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
      */
     public listPipelines(): Observable<Array<Pipeline>> {
-        return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
+        const httpHeaders: HttpHeaders = new HttpHeaders({
+            apikey: 'imo804d70m73d4n54f18uhr5j0',
+            rejectUnauthorized: 'false'
+        });
+        return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`, { headers: httpHeaders });
     }
 }

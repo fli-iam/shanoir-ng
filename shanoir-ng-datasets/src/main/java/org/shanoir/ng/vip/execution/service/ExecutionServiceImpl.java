@@ -16,6 +16,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
@@ -54,6 +55,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Value("${vip.uri}")
     private String vipUrl;
+
+    @Value("${vip.sleep-time}")
+    private long sleepTime;
 
     @Autowired
     private ExecutionMonitoringServiceImpl executionMonitoringService;
@@ -154,7 +158,10 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         String url = vipExecutionUri + "/" + identifier + "/summary";
-        HttpHeaders headers = getServiceAccountHttpHeaders();
+        //HttpHeaders headers = getServiceAccountHttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("apikey", "imo804d70m73d4n54f18uhr5j0");
+        headers.remove("Authorization");
 
         return webClient.get()
                 .uri(url)
@@ -172,6 +179,27 @@ public class ExecutionServiceImpl implements ExecutionService {
                     ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
+    }
+
+    public ExecutionStatus getExecutionStatusFromVipIdentifier(String identifier){
+
+        try {
+            int attempts = 1;
+
+            while(attempts < 3){
+                VipExecutionDTO dto = getExecutionAsServiceAccount(attempts, identifier).block();
+
+                if(dto == null){
+                    attempts++;
+                    Thread.sleep(sleepTime);
+                } else {
+                    return dto.getStatus();
+                }
+            }
+        } catch (ResultHandlerException | SecurityException | InterruptedException | NullPointerException e) {
+            LOG.error("Failed to get VIP execution status for execution : " + identifier);
+        }
+        return null;
     }
 
     /**

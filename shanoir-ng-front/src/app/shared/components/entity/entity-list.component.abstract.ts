@@ -88,6 +88,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (options.delete != undefined) this.delete = options.delete;
         if (options.new != undefined) this.new = options.new;
         if (options.id != undefined) this.showId = options.id;
+
     }
 
     protected completeColDefs(): void {

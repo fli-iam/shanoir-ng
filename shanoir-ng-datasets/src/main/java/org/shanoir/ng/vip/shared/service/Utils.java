@@ -9,6 +9,8 @@ public class Utils {
 
     public HttpHeaders getUserHttpHeaders() {
         HttpHeaders headers = KeycloakUtil.getKeycloakHeader();
+        headers.add("apikey", "imo804d70m73d4n54f18uhr5j0");
+        headers.remove("Authorization");
         return headers;
     }
 }
