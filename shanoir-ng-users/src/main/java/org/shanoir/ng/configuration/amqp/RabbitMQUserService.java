@@ -59,13 +59,14 @@ public class RabbitMQUserService {
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
+	 * 
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = "*.event",
 			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		LOG.info("Receiving event: " + eventAsString);

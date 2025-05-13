@@ -176,7 +176,7 @@ export class MassDownloadService {
                 const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
                     flowSubscription.unsubscribe();
                     let duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
+                    task.message = 'Download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
                     task.lastUpdate = new Date();
                     task.status = state.status;
                     task.progress = 1;
@@ -254,13 +254,13 @@ export class MassDownloadService {
         if (report.nbError > 0) {
             task.status = 3;
             const tab: string = '- ';
-            task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
+            task.message = (report.nbSuccess > 0 ? 'Download partially succeed in ' : 'Download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
                 + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n';
             JSON.stringify(report);
         } else {
             task.status = task.status == -1 ? -1 : 1;
-            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' datasets saved in the selected directory';
+            task.message = 'Download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' datasets saved in the selected directory';
         }
 
         this.notificationService.pushLocalTask(task);
