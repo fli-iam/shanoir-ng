@@ -2,7 +2,6 @@ package org.shanoir.ng.vip.executionTemplate.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateParameter;
 
 import java.util.List;
 
@@ -13,28 +12,38 @@ import java.util.List;
 public class ExecutionTemplateDTO extends HalEntity {
 
     private String name;
-    private long studyId;
-    private String vipPipeline;
-    private List<ExecutionTemplateParameter> parameters;
+    private Long studyId;
+    private String pipelineName;
+    private List<ExecutionTemplateParameterDTO> parameters;
+    private List<ExecutionTemplateFilterDTO> filters;
     private int priority;
+    private String filterCombination;
+
+    public String getFilterCombination() {return filterCombination;}
+
+    public void setFilterCombination(String filterCombination) {this.filterCombination = filterCombination;}
 
     public int getPriority() {return priority;}
 
     public void setPriority(int priority) {this.priority = priority;}
 
-    public long getStudyId() { return studyId; }
+    public Long getStudyId() { return studyId; }
 
-    public void setStudyId(long studyId) { this.studyId = studyId; }
+    public void setStudyId(Long studyId) { this.studyId = studyId; }
 
     public String getName() {return name;}
 
     public void setName(String name) {this.name = name;}
 
-    public String getVipPipeline() {return vipPipeline;}
+    public String getPipelineName() {return pipelineName;}
 
-    public void setVipPipeline(String vipPipeline) {this.vipPipeline = vipPipeline;}
+    public void setPipelineName(String pipelineName) {this.pipelineName = pipelineName;}
 
-    public List<ExecutionTemplateParameter> getParameters() {return parameters;}
+    public List<ExecutionTemplateFilterDTO> getFilters() {return filters;}
 
-    public void setParameters(List<ExecutionTemplateParameter> parameters) {this.parameters = parameters;}
+    public void setFilters(List<ExecutionTemplateFilterDTO> filtersDTO) {this.filters = filtersDTO;}
+
+    public List<ExecutionTemplateParameterDTO> getParameters() {return parameters;}
+
+    public void setParameters(List<ExecutionTemplateParameterDTO> parametersDTO) {this.parameters = parametersDTO;}
 }

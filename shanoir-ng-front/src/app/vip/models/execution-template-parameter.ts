@@ -16,9 +16,6 @@ import {Entity} from "../../shared/components/entity/entity.abstract";
 export class ExecutionTemplateParameter extends Entity {
 
     id: number
-    executionTemplateId: number
-    groupBy: string
-    filter: string
-    templateId: number
-    templateName: string
+    name: string
+    value: string
 }

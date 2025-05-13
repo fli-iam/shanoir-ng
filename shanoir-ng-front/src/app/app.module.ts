@@ -281,9 +281,9 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
 import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
-import { ExecutionTemplateParameterListComponent } from "./vip/execution-template/execution-template-parameter-list.component";
-import { ExecutionTemplateParameterComponent } from "./vip/execution-template/execution-template-parameter.component";
-import { ExecutionTemplateParameterService } from "./vip/execution-template/execution-template-parameter.service";
+import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
+import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
+import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/execution-template-filter.service";
 
 @NgModule({
     declarations: [
@@ -467,8 +467,8 @@ import { ExecutionTemplateParameterService } from "./vip/execution-template/exec
         MetadataNodeComponent,
         ExecutionTemplateListComponent,
         ExecutionTemplateComponent,
-        ExecutionTemplateParameterListComponent,
-        ExecutionTemplateParameterComponent
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -575,7 +575,7 @@ import { ExecutionTemplateParameterService } from "./vip/execution-template/exec
         ShanoirEventService,
         TreeService,
         ExecutionTemplateService,
-        ExecutionTemplateParameterService,
+        ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ]

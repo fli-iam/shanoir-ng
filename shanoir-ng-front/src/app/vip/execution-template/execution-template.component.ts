@@ -1,100 +1,148 @@
-import {Component} from '@angular/core';
-import {ExecutionTemplate} from "../models/execution-template";
-import {ModesAware} from "../../preclinical/shared/mode/mode.decorator";
-import {EntityComponent} from "../../shared/components/entity/entity.component.abstract";
-import {ActivatedRoute} from "@angular/router";
-import {ExecutionTemplateService} from "./execution-template.service";
-import {FormGroup, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {EntityService} from "../../shared/components/entity/entity.abstract.service";
-import {PipelineService} from "../pipelines/pipeline/pipeline.service";
-import {Pipeline} from "../models/pipeline";
-import {ParameterType} from "../models/parameterType";
-import {Option} from "../../shared/select/select.component";
+import {ChangeDetectorRef, Component} from '@angular/core'
+import {ExecutionTemplate} from "../models/execution-template"
+import {EntityComponent} from "../../shared/components/entity/entity.component.abstract"
+import {ActivatedRoute} from "@angular/router"
+import {ExecutionTemplateService} from "./execution-template.service"
+import {
+    FormGroup,
+    UntypedFormGroup,
+    Validators
+} from "@angular/forms"
+import {EntityService} from "../../shared/components/entity/entity.abstract.service"
+import {Pipeline} from "../models/pipeline"
+import {ParameterType} from "../models/parameterType"
+import {PipelineParameter} from "../models/pipelineParameter"
+import {Option} from "../../shared/select/select.component"
+import {DatasetProcessingType} from "../../enum/dataset-processing-type.enum"
 
 @Component({
     selector: 'execution-template',
     templateUrl: './execution-template.component.html',
     standalone: false
 })
-@ModesAware
+
 export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplate> {
 
-
-    id: number;
-    studyId: number;
-    studyName: string;
+    studyName: string
+    studyId: number
+    pipeline: Pipeline
     pipelines: Pipeline[]
     pipelineNames: string[]
-    priority: number;
+    priority: number
     executionForm: UntypedFormGroup
+    existingPriorities: number[]
+    pipelineParameters: { [key: string]: string }
+    processingType = Object.values(DatasetProcessingType)
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31'),
+        new Option<number>(2, 'MCVERTER_2_0_7'),
+        new Option<number>(4, 'DCM2NII_2014_08_04'),
+        new Option<number>(5, 'MCVERTER_2_1_0'),
+        new Option<number>(6, 'DCM2NIIX'),
+        new Option<number>(7, 'DICOMIFIER'),
+        new Option<number>(8, 'MRICONVERTER'),
+    ]
 
     constructor(
         private route: ActivatedRoute,
-        private pipelineService: PipelineService,
-        protected templateService: ExecutionTemplateService) {
-        super(route, 'execution-template');
+        protected templateService: ExecutionTemplateService,
+        public cdr: ChangeDetectorRef) {
+        super(route, 'execution-template')
         if ( this.breadcrumbsService.currentStep ) {
-            this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
+            localStorage.setItem('studyId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("studyId")))
             this.studyName = this.breadcrumbsService.currentStep.getPrefilledValue("studyName")
+            localStorage.setItem('studyName', this.studyName)
         }
     }
 
-    get executionTemplate(): ExecutionTemplate { return this.entity; }
-    set executionTemplate(et: ExecutionTemplate) { this.entity= et; }
+    get executionTemplate(): ExecutionTemplate { return this.entity }
+    set executionTemplate(et: ExecutionTemplate) { this.entity= et }
 
     buildForm(): FormGroup {
+        if(this.pipelineParameters === undefined) {this.pipelineParameters = {}}
         this.executionForm = this.formBuilder.group({
-            'name': [this.executionTemplate.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
-            'studyId': [this.executionTemplate.studyId, [Validators.required]],
-            'vipPipeline': [this.executionTemplate.vipPipeline, [Validators.required]],
-            'priority': [this.executionTemplate.priority, [Validators.required, this.registerOnSubmitValidator('unique', 'priority')]]
-        });
-        return this.executionForm;
+            'name': [this.entity.name, [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.registerOnSubmitValidator('unique', 'name')]],
+            'pipelineName': [this.entity.pipelineName, [Validators.required]],
+            'filterCombination': [this.entity.filterCombination, [this.templateService.filterCombinationControl(this)]],
+            'priority': [this.entity.priority, [Validators.required, this.templateService.uniqueInStudyControl(this)]],
+            'group_by': [this.pipelineParameters['group_by'], [Validators.required]],
+            'processing_type': [this.pipelineParameters['processing_type'], [Validators.required]],
+            'export_format': [this.pipelineParameters['export_format'], [Validators.required]],
+            'execution_name': [this.pipelineParameters['execution_name'], [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+            'converter': [this.pipelineParameters['converter'], [this.templateService.requiredIfTypeIsNii()]]
+        })
+
+        this.executionForm.get('export_format')?.valueChanges.subscribe(() => {
+            this.executionForm.get('converter')?.updateValueAndValidity()
+        })
+        return this.executionForm
     }
 
     getService(): EntityService<ExecutionTemplate> {
-        return this.templateService;
+        return this.templateService
     }
 
     initCreate(): Promise<void> {
-        this.entity = new ExecutionTemplate();
-        this.entity.studyId = this.studyId;
-        this.entity.studyName = this.studyName;
-        this.pipelineService.listPipelines().subscribe(
-            (pipelines :Pipeline[])=>{
-                this.pipelines = pipelines;
-                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
-            }
-        )
+        this.entity = new ExecutionTemplate()
+        this.entity.studyId = Number(localStorage.getItem('studyId'))
+
+        this.studyName = localStorage.getItem('studyName')
+        this.templateService.getPipelinesFromVIP(this)
+        this.templateService.initParameters(this)
+        this.templateService.getExistingPriorities(this)
         return Promise.resolve()
     }
 
     initEdit(): Promise<void> {
-        this.templateService.setStudy(this)
-        this.pipelineService.listPipelines().subscribe(
-            (pipelines :Pipeline[])=>{
-                this.pipelines = pipelines;
-                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
-            }
-        )
-        return Promise.resolve();
+        this.templateService.onPipelineLoading(this)
+        this.templateService.getPipelinesFromVIP(this)
+        this.templateService.getStudyName(this)
+        this.templateService.getParameters(this)
+        this.templateService.getExistingPriorities(this)
+        return Promise.resolve()
     }
 
     initView(): Promise<void> {
-        if(this.studyName){
-            this.entity.studyName = this.studyName;
-        } else {
-            this.templateService.setStudy(this);
-        }
-        return Promise.resolve();
+        this.templateService.onPipelineLoading(this)
+        this.templateService.getStudyName(this)
+        this.templateService.getParameters(this)
+        this.cdr.detectChanges()
+        return Promise.resolve()
     }
 
     save(): Promise<ExecutionTemplate> {
-        super.save().then(() => this.router.navigate(['study/details/' + this.studyId], {fragment: 'executions'}));
-        return Promise.resolve(this.entity);
+        this.templateService.cleanParameters(this)
+        this.templateService.shapeParameterEntities(this)
+        super.save()
+        return Promise.resolve(this.entity)
     }
 
+
     goBack(): void{
-        this.router.navigate(['study/details/' + this.studyId], {fragment: 'executions'})
+        this.router.navigate(['study/details/' + this.entity.studyId], {fragment: 'executions'})
+    }
+
+    isAFile(parameter: PipelineParameter): boolean {
+        return parameter.type == ParameterType.File
+    }
+
+    onSpecificParameterUpdate(parameterName: string, value: string): void {
+        this.pipelineParameters[parameterName] = value
+    }
+
+    onExportFormatUpdate(): void{
+        if (this.pipelineParameters['export_format'] !== 'nii') {
+            this.pipelineParameters['converter'] = null
+        }
+    }
+
+    onPipelineUpdate(): void {
+        this.templateService.onPipelineUpdate(this)
+    }
+
+    getConverterLabel(converterNumber: string): string {
+        const match = this.niftiConverters.find(opt => opt.value === Number(converterNumber))
+        return match ? match.label : converterNumber
     }
 }

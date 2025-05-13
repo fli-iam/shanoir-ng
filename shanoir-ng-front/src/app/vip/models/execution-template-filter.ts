@@ -12,16 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Entity} from "../../shared/components/entity/entity.abstract";
-import {Pipeline} from "./pipeline";
-import {ExecutionTemplateParameter} from "./execution-template-parameter";
-import {Study} from "../../studies/shared/study.model";
+import {ExecutionTemplate} from "./execution-template";
 
-export class ExecutionTemplate extends Entity {
+export class ExecutionTemplateFilter extends Entity {
+
     id: number
-    studyId: number
-    name: string
-    pipelineName: string
-    priority: number
-    filterCombination: string
-    parameters: ExecutionTemplateParameter[]
+    executionTemplateId: number
+    fieldName: string
+    excluded: boolean
+    comparedRegex: string
+    identifier: number
 }

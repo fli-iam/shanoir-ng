@@ -37,13 +37,16 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
     }
 
     getEntities(): Promise<ExecutionTemplate[]> {
-        return this.executionTemplateService.getExecutionTemplatesByStudy(this.studyId)
+        if (this.studyId != undefined) {
+            return this.executionTemplateService.getExecutionTemplatesByStudy(this.studyId)
+        }
+        return Promise.resolve([]);
     }
 
     getColumnDefs(): ColumnDefinition[] {
         return [
             {headerName: "Template name", field: "name", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
-            {headerName: "Pipeline name", field: "vipPipeline", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
+            {headerName: "Pipeline name", field: "pipelineName", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
             {headerName: "Priority", field: "priority", type: "number", width: "10px", defaultSortCol: true, defaultAsc: true},
         ];
     }

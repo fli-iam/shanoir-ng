@@ -15,11 +15,13 @@ package org.shanoir.ng.shared.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.junit.jupiter.api.parallel.Execution;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -58,7 +60,9 @@ public class Study extends IdName {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyTag> studyTags;
-	
+
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ExecutionTemplate> executionTemplates;
 
 	/**
 	 * @return the tags
