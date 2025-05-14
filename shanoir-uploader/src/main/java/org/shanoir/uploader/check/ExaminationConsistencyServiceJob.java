@@ -125,7 +125,7 @@ public class ExaminationConsistencyServiceJob {
     }
 
     private boolean checkImportJob(ImportJob importJob, File importJobFolder, String examinationUID) throws Exception {
-        List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);
+        List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, true);
         if (patients != null) {
             for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
                 Patient patient = (Patient) patientsIt.next();
