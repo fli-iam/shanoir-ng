@@ -88,20 +88,23 @@ public class ImportDialogOpener {
 	 */
 	private void updateImportDialogForMRICenter(final ImportJob importJob) {
 		Serie firstSerie = importJob.getFirstSelectedSerie();
- 		String institutionName = firstSerie.getInstitution().getInstitutionName();
-		String institutionAddress = firstSerie.getInstitution().getInstitutionAddress();
-		String stationName = firstSerie.getEquipment().getStationName();
-		String manufacturer = firstSerie.getEquipment().getManufacturer();
-		String manufacturersModelName = firstSerie.getEquipment().getManufacturerModelName();
-		String magneticFieldStrength = firstSerie.getEquipment().getMagneticFieldStrength();
-		String deviceSerialNumber = firstSerie.getEquipment().getDeviceSerialNumber();
-		importDialog.mriCenterText.setText(institutionName);
-		importDialog.mriCenterAddressText.setText(institutionAddress);
-		importDialog.mriStationNameText.setText(stationName);
-		importDialog.mriManufacturerText.setText(manufacturer);
-		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
-		importDialog.mriMagneticFieldStrengthText.setText(magneticFieldStrength);
-		importDialog.mriDeviceSerialNumberText.setText(deviceSerialNumber);
+		if (firstSerie != null) {
+			if (firstSerie.getInstitution() == null) {
+				logger.error("updateImportDialogForMRICenter: no institution found for serie: " + firstSerie.getSeriesInstanceUID());
+			} else {
+				importDialog.mriCenterText.setText(firstSerie.getInstitution().getInstitutionName());
+				importDialog.mriCenterAddressText.setText(firstSerie.getInstitution().getInstitutionAddress());
+			}
+			if (firstSerie.getEquipment() == null) {
+				logger.error("updateImportDialogForMRICenter: no equipment found for serie: " + firstSerie.getSeriesInstanceUID());
+			} else {
+				importDialog.mriStationNameText.setText(firstSerie.getEquipment().getStationName());
+				importDialog.mriManufacturerText.setText(firstSerie.getEquipment().getManufacturer());
+				importDialog.mriManufacturersModelNameText.setText(firstSerie.getEquipment().getManufacturerModelName());
+				importDialog.mriMagneticFieldStrengthText.setText(firstSerie.getEquipment().getMagneticFieldStrength());
+				importDialog.mriDeviceSerialNumberText.setText(firstSerie.getEquipment().getDeviceSerialNumber());
+			}
+		}
 	}
 
 	/**
@@ -136,9 +139,12 @@ public class ImportDialogOpener {
 									studyCard.setAcquisitionEquipment(acquisitionEquipment);
 								}
 							}
-							compatibleStudyCard = ImportUtils.flagStudyCardCompatible(
+							// If at least one study card is compatible, then study is compatible
+							if (ImportUtils.flagStudyCardCompatible(
 								studyCard, importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName(),
-								importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber());
+								importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber())) {
+									compatibleStudyCard = true;
+							}
 						}
 					}
 					if (compatibleStudyCard) {
