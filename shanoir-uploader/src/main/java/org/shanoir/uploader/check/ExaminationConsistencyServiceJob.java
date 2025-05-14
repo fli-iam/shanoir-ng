@@ -56,9 +56,9 @@ public class ExaminationConsistencyServiceJob {
 
     private static final Logger logger = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
 
-    private static final long THIRTY_MIN_IN_MILLIS = 5000;//30 * 60 * 1000;
+    private static final long THIRTY_MIN_IN_MILLIS = 30 * 60 * 1000;
     
-    private static final long ONE_HOUR_IN_MILLIS = 2 * 60 * 1000;//60 * 60 * 1000;
+    private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 
    	@Autowired
 	private CurrentNominativeDataController currentNominativeDataController;
