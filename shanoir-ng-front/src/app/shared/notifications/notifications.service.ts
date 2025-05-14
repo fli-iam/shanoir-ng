@@ -290,4 +290,8 @@ export class NotificationsService {
             return ['downloadDataset.event', 'downloadFile.event'].includes(task.eventType);  
         });
     }
+
+    clearTaskList() {
+        this.freshCompletedTasks = [];
+    }
 }

@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
     </div>
-    <li>
+    <li class="jobs-menu">
         <a routerLink="/task" routerLinkActive="active" class="menu-link">
             <i class="fas fa-tasks"></i>Jobs
             <span *ngIf="!state.jobsOpened && notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
@@ -63,6 +63,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{notificationsService.nbNewError}}
             </span>
         </a>
+        <span *ngIf="state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0" 
+                class="notif button" (click)="notificationsService.clearTaskList()" title="remove completed and error tasks">
+            <i class="fa-solid fa-broom"></i>
+            clean
+        </span>
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
