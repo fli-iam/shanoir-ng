@@ -25,6 +25,7 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.PropertiesUtil;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,16 @@ public class ReadyState implements State {
 			logger.error(e.getMessage(), e);
 		}
 		MainWindow frame = initJFrame();
+		// Init check on server
+		String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+		if (value == null) { // migration case: start with true, add to basic.properties, display in GUI
+			String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
+			PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.TRUE.toString());
+			frame.checkOnServerMenuItem.setSelected(Boolean.TRUE);
+		} else { // display accordingly to basic.properties
+			boolean checkOnServer = Boolean.parseBoolean(value);
+			frame.checkOnServerMenuItem.setSelected(checkOnServer);
+		}
 		CurrentUploadsWindowTable cuw = CurrentUploadsWindowTable.getInstance(frame);
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
 		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);

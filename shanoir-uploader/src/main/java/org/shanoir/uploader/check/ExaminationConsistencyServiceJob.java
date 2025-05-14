@@ -68,13 +68,17 @@ public class ExaminationConsistencyServiceJob {
 
     @Scheduled(fixedRate = THIRTY_MIN_IN_MILLIS)
     public void execute() throws Exception {
-        if (!UploadServiceJob.LOCK.isLocked()) {
-            logger.info("ExaminationConsistencyServiceJob started...");
-			UploadServiceJob.LOCK.lock();
-            File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-            processWorkFolder(workFolder, currentNominativeDataController);    
-            UploadServiceJob.LOCK.unlock();
-            logger.info("ExaminationConsistencyServiceJob ended...");
+        String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+        boolean checkOnServer = Boolean.parseBoolean(value);
+        if (checkOnServer) {
+            if (!UploadServiceJob.LOCK.isLocked()) {
+                logger.info("ExaminationConsistencyServiceJob started...");
+                UploadServiceJob.LOCK.lock();
+                File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
+                processWorkFolder(workFolder, currentNominativeDataController);    
+                UploadServiceJob.LOCK.unlock();
+                logger.info("ExaminationConsistencyServiceJob ended...");
+            }
         }
 	}
 

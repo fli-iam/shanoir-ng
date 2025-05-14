@@ -62,6 +62,7 @@ import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
+import org.shanoir.uploader.utils.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,6 +122,7 @@ public class MainWindow extends JFrame {
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
+	public JCheckBoxMenuItem checkOnServerMenuItem;
 	public boolean isFromPACS;
 	public boolean isDicomObjectSelected = false;
 
@@ -241,13 +243,18 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		JCheckBoxMenuItem checkOnServerMenuItem = new JCheckBoxMenuItem(
+		checkOnServerMenuItem = new JCheckBoxMenuItem(
     		resourceBundle.getString("shanoir.uploader.configurationMenu.checkOnServer"));
 		mnConfiguration.add(checkOnServerMenuItem);
+		String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
 		checkOnServerMenuItem.addItemListener(e -> {
 			boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
 			if (selected) {
+				logger.info("Saving check.on.server true in basic.properties file.");
+				PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.TRUE.toString());
 			} else {
+				logger.info("Saving check.on.server false in basic.properties file.");
+				PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
 			}
 		});
 
