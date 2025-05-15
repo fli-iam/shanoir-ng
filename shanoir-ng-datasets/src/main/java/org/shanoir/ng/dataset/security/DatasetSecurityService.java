@@ -45,6 +45,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.dto.DatasetForRights;
 
 @Service
 public class DatasetSecurityService {
@@ -865,16 +868,19 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) throws EntityNotFoundException {
-    	if (list == null) {
+		if (list == null || list.isEmpty()) {
 			return true;
 		}
-    	Set<DatasetDTO> dsRemove = new HashSet<>();
-    	for(DatasetDTO dto : list) {
-    		if (!this.hasRightOnDataset(dto.getId(), rightStr)) {
-    			dsRemove.add(dto);
-        	}
+		List<Long> dsIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(dsIds).stream().map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds())).collect(Collectors.toList());
+		Set<Long> dsRemove = new HashSet<>();
+		for (DatasetForRights dto : dtos) {
+			if (!hasRightOnStudiesCenter(dto.getCenterId(), dto.getAllStudiesIds(), rightStr)) {
+				dsRemove.add(dto.getId());
+			} else {
+			}
     	}
-    	list.removeAll(dsRemove);
+    	list.removeIf(a -> dsRemove.contains(a.getId()));
     	return true;
     }
     
