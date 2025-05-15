@@ -38,6 +38,8 @@ public class CurrentUploadsWindowTable implements Observer {
 	public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
 	public String finishedUploadState = UploadState.FINISHED.toString();
 	public String errorUploadState = UploadState.ERROR.toString();
+	public String checkOKUploadState = UploadState.CHECK_OK.toString();
+	public String checkKOUploadState = UploadState.CHECK_KO.toString();
 	public int selectedRow;
 	public int rowsNb;
 
@@ -60,13 +62,11 @@ public class CurrentUploadsWindowTable implements Observer {
 		this.columnNames = columnNames;
 		// Create the non editable table to display the current uploads
 		this.table = new JTable(new DefaultTableModel(columnNames, 0) {
-
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		});
-		
 		initTable();
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
@@ -151,7 +151,18 @@ public class CurrentUploadsWindowTable implements Observer {
 				nominativeDataImportJob.getPatient().getPatientID(),
 				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
 				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
-				nominativeDataImportJob.getUploadPercentage(),
+				nominativeDataImportJob.getUploadPercentage().toString(),
+				"",
+				""
+			};
+			case CHECK_OK, CHECK_KO -> new Object[] {
+				key,
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+				nominativeDataImportJob.getUploadPercentage().toString(),
 				"",
 				actionDelete
 			};
@@ -162,7 +173,7 @@ public class CurrentUploadsWindowTable implements Observer {
 				nominativeDataImportJob.getPatient().getPatientID(),
 				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
 				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
-				nominativeDataImportJob.getUploadPercentage(),
+				nominativeDataImportJob.getUploadPercentage().toString(),
 				"",
 				""
 			};
@@ -239,7 +250,9 @@ public class CurrentUploadsWindowTable implements Observer {
 					|| UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
-					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)) {
+					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkOKUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
 					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {

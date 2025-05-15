@@ -3,23 +3,27 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Properties;
 
+import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A utility class introduced to perform
  * read/write operations over properties files.
+ * 
  * @author lvallet
  *
  */
 public class PropertiesUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
-    
-    public static void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
+	private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
+
+	public static void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
 		try {
 			final FileInputStream fIS = new FileInputStream(propertiesFile);
 			properties.load(fIS);
@@ -30,4 +34,18 @@ public class PropertiesUtil {
 			logger.error(e.getMessage(), e);
 		}
 	}
+
+	public static void storePropertyToFile(String filePath, Properties properties, String key, String value) {
+		final File propertiesFile = new File(filePath);
+		boolean propertiesExists = propertiesFile.exists();
+		if (propertiesExists) {
+			try (OutputStream out = new FileOutputStream(propertiesFile);) {
+				properties.setProperty(key, value);
+				properties.store(out, "");
+			} catch (Exception e) {
+				logger.error("Failed to store property: " + e.getMessage(), e);
+			}
+		}
+	}
+
 }
