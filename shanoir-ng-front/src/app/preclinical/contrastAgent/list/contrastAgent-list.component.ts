@@ -27,7 +27,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'contrast-agent-list',
     templateUrl: 'contrastAgent-list.component.html',
     styleUrls: ['contrastAgent-list.component.css'],
-    providers: [ContrastAgentService],
     standalone: false
 })
 export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent<ContrastAgent>{
