@@ -85,7 +85,6 @@ public class DicomProcessing {
 				return null;
 			}
 		} else {
-			LOG.warn("could not find the acquisition date and time in the DICOM attributes");
 			return null;
 		}
 	}
