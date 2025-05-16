@@ -45,6 +45,7 @@ public class CurrentNominativeDataController {
 
 	private CurrentUploadsWindowTable cuw;
 
+
 	@SuppressWarnings("deprecation")
 	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) throws IOException {
 		this.cuw = cuw;
