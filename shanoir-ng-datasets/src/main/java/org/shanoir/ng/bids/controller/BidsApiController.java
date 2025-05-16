@@ -171,8 +171,7 @@ public class BidsApiController implements BidsApi {
 			try(Stream<Path> walker = Files.walk(pp)) {
 				
 				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
-				walker.filter(path -> !path.toFile().isDirectory())
-				.forEach(path -> {
+				walker.filter(path -> !path.toFile().isDirectory()).forEach(path -> {
 					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 					try {
 						zos.putNextEntry(zipEntry);

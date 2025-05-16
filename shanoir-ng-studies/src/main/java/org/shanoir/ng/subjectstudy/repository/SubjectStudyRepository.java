@@ -33,9 +33,9 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
 
 	@EntityGraph(attributePaths = { "subjectStudyTags.tag.name", "subjectStudyTags.tag.study.name", "subject", "study" })
     @Query("SELECT ss FROM SubjectStudy ss " +
-           "LEFT JOIN FETCH ss.subjectStudyTags sst " +
-           "LEFT JOIN FETCH sst.tag t " +
-           "WHERE ss.study.id = :studyId")
+            "LEFT JOIN FETCH ss.subjectStudyTags sst " +
+            "LEFT JOIN FETCH sst.tag t " +
+            "WHERE ss.study.id = :studyId")
     List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
 
     List<SubjectStudy> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);
