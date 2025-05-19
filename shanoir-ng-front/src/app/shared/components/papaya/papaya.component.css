@@ -2,3 +2,4 @@
 :host.expanded { width: 525px; height: 470px; }
 img { height: 12px; margin-left: 10px; vertical-align: middle; }
 button { width: 120px; margin: 0; background-color: var(--color-b); height: 27px; }
+.error { padding-left: 20px; color: var(--color-error); }
