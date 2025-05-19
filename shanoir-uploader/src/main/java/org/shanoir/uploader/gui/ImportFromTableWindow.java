@@ -27,11 +27,11 @@ import javax.swing.table.DefaultTableModel;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.ImportFromTableActionListener;
 import org.shanoir.uploader.action.UpdateTableImportStudyListener;
 import org.shanoir.uploader.action.UploadFromTableActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.slf4j.Logger;
@@ -66,16 +66,14 @@ public class ImportFromTableWindow extends JFrame {
 	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 	UpdateTableImportStudyListener updateTableImportStudyListener;
-	private DownloadOrCopyActionListener dOCAL;
 
-	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
+	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, Pseudonymizer pseudonymizer) {
 		this.updateTableImportStudyListener = new UpdateTableImportStudyListener(shanoirUploaderServiceClientNG, this);
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClient = shanoirUploaderServiceClientNG;
-		this.dOCAL = dOCAL;
 		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.
@@ -241,7 +239,7 @@ public class ImportFromTableWindow extends JFrame {
 		progressBar.setVisible(false);
 		masterPanel.add(downloadProgressBar, gBCDownloadProgressBar);
 	
-		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, dOCAL);
+		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, pseudonymizer);
 		uploadButton.addActionListener(importListener);
 
 		// center the frame

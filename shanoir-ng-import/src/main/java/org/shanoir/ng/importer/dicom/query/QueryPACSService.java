@@ -514,6 +514,7 @@ public class QueryPACSService {
 			List<Serie> series = new ArrayList<Serie>();
 			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
 			series.sort(new SeriesNumberOrDescriptionSorter());
+			LOG.info("{} series returned by DICOM server", series.size());
 			study.setSeries(series);
 		}
 	}
@@ -521,14 +522,9 @@ public class QueryPACSService {
 	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
-			if (serie.getNumberOfSeriesRelatedInstances() > 0) {
+			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
 				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-				serie.setIgnored(true);
-				serie.setSelected(false);
-			}
 		} else {
 			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 			serie.setIgnored(true);
