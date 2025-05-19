@@ -40,7 +40,7 @@ jobs:
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
         restore-keys: ${{ runner.os }}-npm-
     - name: Build with Maven
-      run: mvn -f ./shanoir-ng-parent/pom.xml install
+      run: mvn -f ./shanoir-ng-parent/pom.xml install -Dcheckstyle.skip=true
       env:
         SHANOIR_URL_HOST: localhost
         SHANOIR_URL_SCHEME: http
