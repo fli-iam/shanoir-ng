@@ -171,7 +171,7 @@ public class Patient {
 	@Override
 	public String toString() {
 		return "Patient [patientID=" + Utils.sha256(patientID) + ", patientName=" + Utils.sha256(patientName) + ", patientBirthName="
-				+ Utils.sha256(patientBirthName) + ", patientBirthDate=" + patientBirthDate + "]";
+				+ Utils.sha256(patientBirthName) + ", patientBirthDate=" + Utils.sha256(patientBirthDate.toString()) + "]";
 	}
 
 	public String toTreeString() {

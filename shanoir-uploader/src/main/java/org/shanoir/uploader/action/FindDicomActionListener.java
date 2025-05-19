@@ -103,7 +103,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 			logger.info("Querying DICOM server with query parameters: "
 					+ Utils.sha256(mainWindow.patientNameTF.getText()) + " "
 					+ Utils.sha256(mainWindow.patientIDTF.getText()) + " "
-					+ mainWindow.birthDate.toString() + " "
+					+ Utils.sha256(mainWindow.birthDate.toString()) + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString() + " "
 					+ mainWindow.modality);
