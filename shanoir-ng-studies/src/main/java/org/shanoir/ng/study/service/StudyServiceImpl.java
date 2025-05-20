@@ -393,16 +393,16 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		if (study.getSubjectStudyList() != null) {
-			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setStudy(studyDb);
-			}
-			studyDb = studyRepository.save(studyDb);
-		}
+//		if (study.getSubjectStudyList() != null) {
+//			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
+//			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
+//			subjectStudyListDb.clear();
+//			subjectStudyListDb.addAll(subjectStudyListNew);
+//			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
+//				dbSubjectStudy.setStudy(studyDb);
+//			}
+//			studyDb = studyRepository.save(studyDb);
+//		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
