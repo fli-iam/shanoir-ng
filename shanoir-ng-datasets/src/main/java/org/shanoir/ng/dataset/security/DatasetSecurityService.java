@@ -804,20 +804,21 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationPage(Page<Examination> page, String rightStr) {
-    	if (page == null) return true;
-    	Set<Long> studyIds = new HashSet<>();
-    	page.forEach((Examination exam) -> studyIds.add(exam.getStudyId()));
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-    	for (Examination exam : page) {
-    		if (!checkedIds.contains(exam.getStudyId())) {
-				return false;
+		UserRights userRights = commService.getUserRights();
+		for (Examination exam : page) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			if (userRights.hasStudyRights(studyId, rightStr)) {
+				if (userRights.hasCenterRestrictionsFor(studyId)) {
+					return userRights.hasStudyCenterRights(studyId, centerId);
+				} else {
+					return true;
+				}
 			} else {
-    			if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-    				return false;
-    			}
-    		}
-    	}
-    	return true;
+				return false;
+			}
+		}
+		return true; //empty page
     }
     
     /**
