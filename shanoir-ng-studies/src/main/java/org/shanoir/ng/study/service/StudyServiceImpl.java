@@ -416,9 +416,9 @@ public class StudyServiceImpl implements StudyService {
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
+//		for (Subject subjectToDelete : toBeDeleted) {
+//			subjectService.deleteById(subjectToDelete.getId());
+//		}
 
 		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
