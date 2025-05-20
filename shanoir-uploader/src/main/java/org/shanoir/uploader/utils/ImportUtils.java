@@ -511,10 +511,10 @@ public class ImportUtils {
 
 	public static List<StudyCard> getAllStudyCards(List<Study> studies) throws Exception {
 		IdList idList = new IdList();
-		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
-			Study study = (Study) iterator.next();
-			idList.getIdList().add(study.getId());
-		}
+		studies.stream()
+			.filter(Study::isWithStudyCards)
+			.map(Study::getId)
+       		.forEach(idList.getIdList()::add);
 		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
 		return studyCards;
 	}

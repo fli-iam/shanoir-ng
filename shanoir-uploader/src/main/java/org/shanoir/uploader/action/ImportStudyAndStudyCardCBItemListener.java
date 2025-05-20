@@ -56,7 +56,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		if (state == ItemEvent.SELECTED) {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
-				updateStudyCards(study);
+				if (study.isWithStudyCards()) {
+					updateStudyCards(study);
+				} else {
+					mainWindow.importDialog.studyCardLabel.setVisible(false);
+					mainWindow.importDialog.studyCardCB.setVisible(false);
+					mainWindow.importDialog.studyCardFilterLabel.setVisible(false);
+					mainWindow.importDialog.studyCardFilterTextField.setVisible(false);
+				}
 				// Profile Neurinfo
 				if (ShUpConfig.isModeSubjectNameManual()) {
 					updateExistingSubjects(study);
