@@ -795,34 +795,6 @@ public class DatasetSecurityService {
     	list.removeAll(toRemove);
     	return true;
     }
-    
-    /**
-     * For every study of the list, check that the connected user has the given right.
-	 *
-     * @param dtos
-     * @param rightStr
-     * @return true or false
-     */
-    public boolean filterStudyCardHasRight(List<StudyCard> studyCards, String rightStr) {
-    	if (studyCards == null) {
-			return true;
-		}
-    	List<StudyCard> newList = new ArrayList<>();
-    	Map<Long, List<StudyCard>> map = new HashMap<>();
-    	Set<Long> studyIds = new HashSet<Long>();
-    	for (StudyCard sc : studyCards) {
-    		if (!map.containsKey(sc.getId())) {
-				map.put(sc.getId(), new ArrayList<StudyCard>());
-			}
-    		map.get(sc.getId()).add(sc);
-    		studyIds.add(sc.getStudyId());
-    	}
-    	for (Long id : this.commService.hasRightOnStudies(studyIds, rightStr)) {
-    		newList.addAll(map.get(id));
-    	}
-    	studyCards = newList;
-    	return true;
-    }
         
     /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
