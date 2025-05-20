@@ -130,7 +130,7 @@ if [ -n "$deploy" ] ; then
 
 	# 1. database
 	step "init: database"
-	docker compose up -d database
+	docker compose -f docker-compose-dev.yml up -d database
 	wait_tcp_ready database 3306
 
 	# 2. keycloak-database + keycloak
