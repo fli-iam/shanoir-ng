@@ -140,7 +140,7 @@ if [ -n "$deploy" ] ; then
 		wait_tcp_ready keycloak-database 3306
 		
 		step "init: keycloak"
-		docker compose run --rm -e SHANOIR_MIGRATION=init keycloak
+		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init keycloak
 
 		step "start: keycloak"
 		docker compose -f docker-compose-dev.yml up -d keycloak
@@ -173,7 +173,7 @@ if [ -n "$deploy" ] ; then
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"
-		docker compose run --rm -e SHANOIR_MIGRATION=init "$ms"
+		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
 		step "start: $ms microservice"
 		docker compose -f docker-compose-dev.yml up -d "$ms"
 	done
