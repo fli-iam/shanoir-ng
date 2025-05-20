@@ -71,9 +71,9 @@ public interface CenterApi {
 	@RequestMapping(value = "/byDicom/{studyId}", produces = { "application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
-		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-		@Parameter(description = "institution dicom to find or create a center", required = true)
-		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException;
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(description = "institution dicom to find or create a center", required = true)
+			@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns all the centers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found centers"),

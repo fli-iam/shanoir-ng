@@ -167,8 +167,8 @@ public interface ExaminationApi {
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "extra-data-upload/{examinationId}",
-	produces = { "application/json" },
-    consumes = { "multipart/form-data" })
+			produces = { "application/json" },
+			consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> addExtraData(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
@@ -181,8 +181,8 @@ public interface ExaminationApi {
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "extra-data-upload/new-exam/subject/{subjectName}/center/{centerId}",
-	produces = { "application/json" },
-    consumes = { "multipart/form-data" })
+			produces = { "application/json" },
+			consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectName(#subjectName, 'CAN_IMPORT'))")
 	ResponseEntity<Void> createExaminationAndAddExtraData(
 			@Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,

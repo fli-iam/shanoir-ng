@@ -153,8 +153,8 @@ public class ImporterService {
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
                 // Quality check
                 SubjectStudy subjectStudy = examination.getSubject().getSubjectStudyList().stream()
-                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
-                    .findFirst().orElse(null);
+                        .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
+                        .findFirst().orElse(null);
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));

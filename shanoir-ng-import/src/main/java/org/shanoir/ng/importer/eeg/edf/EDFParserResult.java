@@ -25,24 +25,21 @@ import java.util.List;
 /**
  * This class represents the complete content of an EDF-File.
  */
-public class EDFParserResult
-{
-        EDFHeader header;
-        EDFSignal signal;
-        List<EDFAnnotation> annotations;
+public class EDFParserResult {
 
-        public EDFHeader getHeader()
-        {
-                return header;
-        }
+    EDFHeader header;
+    EDFSignal signal;
+    List<EDFAnnotation> annotations;
 
-        public EDFSignal getSignal()
-        {
-                return signal;
-        }
+    public EDFHeader getHeader() {
+        return header;
+    }
 
-        public List<EDFAnnotation> getAnnotations()
-        {
-                return annotations;
-        }
+    public EDFSignal getSignal() {
+        return signal;
+    }
+
+    public List<EDFAnnotation> getAnnotations() {
+        return annotations;
+    }
 }
