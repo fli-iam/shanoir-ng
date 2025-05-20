@@ -18,6 +18,8 @@ public class Study implements Comparable<Study> {
 
 	private Boolean compatible;
 
+	private Integer studyCardPolicy;
+
 	public Long getId() {
 		return id;
 	}
@@ -64,6 +66,14 @@ public class Study implements Comparable<Study> {
 
 	public void setCompatible(Boolean compatible) {
 		this.compatible = compatible;
+	}
+
+	public Integer getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(Integer studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
 	}
 
 	public String toString() {
