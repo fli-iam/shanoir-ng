@@ -28,6 +28,7 @@ spring:
     hikari.maximum-pool-size: 70
     hikari.minimum-idle:  70
   jpa:
+    show-sql: false
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -37,6 +38,8 @@ spring:
         db_structure_naming_strategy: legacy
     properties:
       hibernate:
+        format_sql: false
+        use_sql_comments: true
         connection:
           charset: UTF-8
         hbm2ddl:

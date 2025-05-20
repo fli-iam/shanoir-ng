@@ -851,13 +851,23 @@ public class DatasetSecurityService {
 			return true;
 		}
 		List<Long> dsIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
-		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(dsIds).stream().map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds())).collect(Collectors.toList());
+		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(dsIds)
+			.stream()
+			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+			.collect(Collectors.toList());
 		Set<Long> dsRemove = new HashSet<>();
-		for (DatasetForRights dto : dtos) {
-			if (!hasRightOnStudiesCenter(dto.getCenterId(), dto.getAllStudiesIds(), rightStr)) {
-				dsRemove.add(dto.getId());
+		UserRights userRights = commService.getUserRights();
+		for (DatasetForRights ds : dtos) {
+			Long studyId = ds.getStudyId();
+			Long centerId = ds.getCenterId();
+			if (userRights.hasStudyRights(studyId, rightStr)) {
+				if (userRights.hasCenterRestrictionsFor(studyId) && !userRights.hasStudyCenterRights(studyId, centerId)) {
+					dsRemove.add(ds.getId());
+				}
+			} else {
+				dsRemove.add(ds.getId());
 			}
-    	}
+		}
     	list.removeIf(a -> dsRemove.contains(a.getId()));
     	return true;
     }
