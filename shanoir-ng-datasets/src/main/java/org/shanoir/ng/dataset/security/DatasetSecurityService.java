@@ -886,17 +886,18 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetAcquisitionDTOList(List<DatasetAcquisitionDTO> list, String rightStr) {
-    	if (list == null) {
-			return true;
+		if (list == null || list.isEmpty()) return true;
+		Set<DatasetAcquisitionDTO> toRemove = new HashSet<>();
+		UserRights userRights = commService.getUserRights();
+		for (DatasetAcquisitionDTO da : list) {
+			Long studyId = da.getExamination().getStudyId();
+			Long centerId = da.getExamination().getCenterId();
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				toRemove.add(da);
+			}
 		}
-    	Set<DatasetAcquisitionDTO> acqsToRemove = new HashSet<>();
-    	list.forEach((DatasetAcquisitionDTO dsa) -> {
-        	if (!this.hasRightOnStudyCenter(dsa.getExamination().getCenterId(), dsa.getExamination().getStudyId(), rightStr)) {
-        		acqsToRemove.add(dsa);
-        	}
-    	});
-    	list.removeAll(acqsToRemove);
-    	return true;
+		list.removeAll(toRemove);
+		return true;
     }
     
 
