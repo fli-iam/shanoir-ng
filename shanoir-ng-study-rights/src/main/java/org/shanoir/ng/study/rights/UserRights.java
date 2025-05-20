@@ -33,6 +33,9 @@ public class UserRights {
 		}
     }
 
+	/**
+	 * Has the user the specified right for the study
+	 */
     public boolean hasStudyRights(Long studyId, String rightStr) {
         if (studyRights.containsKey(studyId)) {
 			StudyUser su = studyRights.get(studyId);
@@ -42,6 +45,9 @@ public class UserRights {
 		}
     }
 	
+	/**
+	 * Has the user specific center restrictions for this study
+	 */
 	public boolean hasCenterRestrictionsFor(Long studyId) {
 		if (studyRights.containsKey(studyId)) {
 			StudyUser su = studyRights.get(studyId);
@@ -51,11 +57,29 @@ public class UserRights {
 		}
 	}
 
+	/**
+	 * Has the user right to access this study-center (including no center restriction)
+	 */
     public boolean hasStudyCenterRights(Long studyId, Long centerId) {
         if (studyRights.containsKey(studyId)) {
 			StudyUser su = studyRights.get(studyId);
 			if (!CollectionUtils.isEmpty(su.getCenterIds())) {
 				return su.getCenterIds().contains(centerId);
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+    }
+
+	/**
+	 * Has the user the specified right string for the study and also rights for this center (or no center restriction)
+	 */
+	public boolean hasStudyCenterRights(Long studyId, Long centerId, String rightStr) {
+        if (hasStudyRights(studyId, rightStr)) {
+			if (hasCenterRestrictionsFor(studyId)) {
+				return hasStudyCenterRights(studyId, centerId);
 			} else {
 				return true;
 			}

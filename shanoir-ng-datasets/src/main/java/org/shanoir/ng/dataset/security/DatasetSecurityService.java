@@ -722,15 +722,9 @@ public class DatasetSecurityService {
     public boolean checkDatasetPage(Iterable<Dataset> page, String rightStr) {
 		UserRights userRights = commService.getUserRights();
 		for (Dataset dataset : page) {
-    		if (userRights.hasStudyRights(dataset.getStudyId(), rightStr)) {
-				if (userRights.hasCenterRestrictionsFor(dataset.getDatasetAcquisition().getExamination().getStudyId())) {
-					return userRights.hasStudyCenterRights(dataset.getDatasetAcquisition().getExamination().getStudyId(), dataset.getDatasetAcquisition().getExamination().getCenterId());
-				} else {
-					return true;
-				}
-    		} else {
-				return false;
-    		}
+			Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+			Long centerId = dataset.getDatasetAcquisition().getExamination().getCenterId();
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
     	}
     	return true; // if empty page
     }
@@ -745,15 +739,9 @@ public class DatasetSecurityService {
     public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
     	UserRights userRights = commService.getUserRights();
 		for (DatasetDTO dataset : page) {
-    		if (userRights.hasStudyRights(dataset.getStudyId(), rightStr)) {
-				if (userRights.hasCenterRestrictionsFor(dataset.getStudyId())) {
-					return userRights.hasStudyCenterRights(dataset.getStudyId(), dataset.getCenterId());
-				} else {
-					return true;
-				}
-    		} else {
-				return false;
-    		}
+			Long studyId = dataset.getStudyId();
+			Long centerId = dataset.getCenterId();
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
     	}
     	return true; // if empty page
     }
@@ -808,15 +796,7 @@ public class DatasetSecurityService {
 		for (Examination exam : page) {
 			Long studyId = exam.getStudyId();
 			Long centerId = exam.getCenterId();
-			if (userRights.hasStudyRights(studyId, rightStr)) {
-				if (userRights.hasCenterRestrictionsFor(studyId)) {
-					return userRights.hasStudyCenterRights(studyId, centerId);
-				} else {
-					return true;
-				}
-			} else {
-				return false;
-			}
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
 		}
 		return true; //empty page
     }
@@ -944,15 +924,13 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean checkDatasetAcquisitionDTOPage(Page<DatasetAcquisitionDTO> page, String rightStr) {
-    	if (page == null) {
-			return true;
+		UserRights userRights = commService.getUserRights();
+		for (DatasetAcquisitionDTO acquisition : page) {
+			Long studyId = acquisition.getExamination().getStudyId();
+			Long centerId = acquisition.getExamination().getCenterId();
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
 		}
-    	for (DatasetAcquisitionDTO acquisition : page) {
-    		if (!hasRightOnStudyCenter(acquisition.getExamination().getCenterId(), acquisition.getExamination().getStudyId(), rightStr)) {
-				return false;
-			}
-    	}
-    	return true;
+		return true; //empty page
     }
     
     /**
