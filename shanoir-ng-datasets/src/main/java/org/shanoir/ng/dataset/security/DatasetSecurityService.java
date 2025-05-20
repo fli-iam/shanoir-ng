@@ -810,13 +810,16 @@ public class DatasetSecurityService {
      */
     public boolean filterExaminationList(List<Examination> list, String rightStr) {
     	Set<Examination> toRemove = new HashSet<>();
-    	list.forEach((Examination exam) -> {
-        	if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-        		toRemove.add(exam);
-        	}
-    	});
-    	list.removeAll(toRemove);
-    	return true;
+		UserRights userRights = commService.getUserRights();
+		for (Examination exam : list) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				toRemove.add(exam);
+			}
+		}
+		list.removeAll(toRemove);
+		return true;
     }
     
     /**
@@ -861,15 +864,18 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetAcquisitionList(List<DatasetAcquisition> list, String rightStr) {
-        if (list == null) return true;
-    	Set<DatasetAcquisition> toRemove = new HashSet<>();
-    	list.forEach((DatasetAcquisition ds) -> {
-        	if (!this.hasRightOnStudyCenter(ds.getExamination().getCenterId(), ds.getExamination().getStudyId(), rightStr)) {
-        		toRemove.add(ds);
-        	}
-    	});
-    	list.removeAll(toRemove);
-    	return true;
+		if (list == null || list.isEmpty()) return true;
+		Set<DatasetAcquisition> toRemove = new HashSet<>();
+		UserRights userRights = commService.getUserRights();
+		for (DatasetAcquisition da : list) {
+			Long studyId = da.getExamination().getStudyId();
+			Long centerId = da.getExamination().getCenterId();
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				toRemove.add(da);
+			}
+		}
+		list.removeAll(toRemove);
+		return true;
     }
 
     /**
@@ -924,6 +930,9 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean checkDatasetAcquisitionDTOPage(Page<DatasetAcquisitionDTO> page, String rightStr) {
+		if (page == null || page.isEmpty()) {
+			return true;
+		}
 		UserRights userRights = commService.getUserRights();
 		for (DatasetAcquisitionDTO acquisition : page) {
 			Long studyId = acquisition.getExamination().getStudyId();
@@ -941,15 +950,16 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean checkDatasetAcquisitionPage(Page<DatasetAcquisition> page, String rightStr) {
-    	if (page == null) {
+		if (page == null || page.isEmpty()) {
 			return true;
 		}
-    	for (DatasetAcquisition acquisition : page) {
-    		if (!hasRightOnStudyCenter(acquisition.getExamination().getCenterId(), acquisition.getExamination().getStudyId(), rightStr)) {
-				return false;
-			}
-    	}
-    	return true;
+		UserRights userRights = commService.getUserRights();
+		for (DatasetAcquisition acquisition : page) {
+			Long studyId = acquisition.getExamination().getStudyId();
+			Long centerId = acquisition.getExamination().getCenterId();
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+		}
+		return true; //empty page
     }
     
     /**
@@ -981,15 +991,16 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOPage(Page<ExaminationDTO> page, String rightStr) {
-    	if (page == null) {
+    	if (page == null || page.isEmpty()) {
 			return true;
 		}
-    	for (ExaminationDTO exam : page) {
-    		if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-				return false;
-			}
-    	}
-    	return true;
+		UserRights userRights = commService.getUserRights();
+		for (ExaminationDTO exam : page) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+		}
+		return true; // empty page
     }
 
     /**
@@ -1000,32 +1011,18 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
-	if (list == null) return true;
-    	Set<ExaminationDTO> examsToRemove = new HashSet<>();
-    	for (ExaminationDTO exam : list) {
-    		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-    			examsToRemove.add(exam);
+		if (list == null || list.isEmpty()) {
+			return true;
+		}
+		UserRights userRights = commService.getUserRights();
+		Set<ExaminationDTO> examsToRemove = new HashSet<>();
+		for (ExaminationDTO exam : list) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				examsToRemove.add(exam);
 			}
-    	}
-    	list.removeAll(examsToRemove);
-    	return true;
-    }
-    
-    /**
-     * Filter examinations in that list checking the connected user has the right on those examinations.
-     * 
-     * @param page the page
-     * @param rightStr the right
-     * @return true
-     */
-    public boolean filterSubjectExaminationDTOList(List<SubjectExaminationDTO> list, String rightStr) {
-	if (list == null) return true;
-    	Set<SubjectExaminationDTO> examsToRemove = new HashSet<>();
-    	for (SubjectExaminationDTO exam : list) {
-    		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-    			examsToRemove.add(exam);
-			}
-    	}
+		}
     	list.removeAll(examsToRemove);
     	return true;
     }
