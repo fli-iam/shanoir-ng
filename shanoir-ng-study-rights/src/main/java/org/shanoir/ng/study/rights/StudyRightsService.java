@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.rights;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -152,6 +153,12 @@ public class StudyRightsService {
 		}
 		return false;
 	}
-    
 
+	public UserRights getUserRights() {
+		Long userId = KeycloakUtil.getTokenUserId();
+		List<StudyUser> studyUsers = repo
+			.findAllByUserId(userId)
+			.orElseGet(Collections::emptyList);
+		return new UserRights(studyUsers);
+	}
 }

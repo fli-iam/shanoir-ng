@@ -47,7 +47,11 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
+import org.shanoir.ng.study.rights.UserRights;
 
 @Service
 public class DatasetSecurityService {
@@ -443,11 +447,11 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasAtLeastRightOnOneDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
-    	boolean hasRight = false;
-    	for(Long datasetId : datasetIds) {
-    		hasRight = hasRight || hasRightOnDataset(datasetId, rightStr);
+    	if (CollectionUtils.isEmpty(datasetIds)) return true;
+		for (Long datasetId : datasetIds) {
+			if (hasRightOnDataset(datasetId, rightStr)) return true;
     	}
-    	return hasRight;
+    	return false;
     }
     
     /**
@@ -716,21 +720,19 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean checkDatasetPage(Iterable<Dataset> page, String rightStr) {
-    	Set<Long> studyIds = new HashSet<>();
-    	page.forEach((Dataset dataset) -> studyIds.add(dataset.getStudyId()));
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
-    	
-    	// Also check for centers    	
-    	for (Dataset dataset : page) {
-    		if (!checkedIds.contains(dataset.getStudyId())) {
-    			return false;
+		UserRights userRights = commService.getUserRights();
+		for (Dataset dataset : page) {
+    		if (userRights.hasStudyRights(dataset.getStudyId(), rightStr)) {
+				if (userRights.hasCenterRestrictionsFor(dataset.getDatasetAcquisition().getExamination().getStudyId())) {
+					return userRights.hasStudyCenterRights(dataset.getDatasetAcquisition().getExamination().getStudyId(), dataset.getDatasetAcquisition().getExamination().getCenterId());
+				} else {
+					return true;
+				}
     		} else {
-    			if (!this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr)) {
-    				return false;
-    			}
+				return false;
     		}
     	}
-    	return true;
+    	return true; // if empty page
     }
     
     /**
@@ -741,21 +743,19 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
-    	Set<Long> studyIds = new HashSet<>();
-    	page.forEach((DatasetDTO dataset) -> studyIds.add(dataset.getStudyId()));
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
-    	
-    	// Also check for centers    	
-    	for (DatasetDTO dataset : page) {
-    		if (!checkedIds.contains(dataset.getStudyId())) {
-    			return false;
+    	UserRights userRights = commService.getUserRights();
+		for (DatasetDTO dataset : page) {
+    		if (userRights.hasStudyRights(dataset.getStudyId(), rightStr)) {
+				if (userRights.hasCenterRestrictionsFor(dataset.getStudyId())) {
+					return userRights.hasStudyCenterRights(dataset.getStudyId(), dataset.getCenterId());
+				} else {
+					return true;
+				}
     		} else {
-    			if (!this.hasRightOnStudyCenter(dataset.getCenterId(), dataset.getStudyId(), rightStr)) {
-    				return false;
-    			}
+				return false;
     		}
     	}
-    	return true;
+    	return true; // if empty page
     }
     
     /**
@@ -766,25 +766,31 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetList(List<Dataset> list, String rightStr) {
+		UserRights userRights = commService.getUserRights();
     	Set<Dataset> toRemove = new HashSet<>();
     	list.forEach((Dataset ds) -> {
             if (ds.getDatasetAcquisition() == null 
                     || ds.getDatasetAcquisition().getExamination() == null
                     || ds.getDatasetAcquisition().getExamination().getStudyId() == null) {
-                
+				// if processed dataset (no center)
                 if (ds.getDatasetProcessing() != null && ds.getDatasetProcessing().getInputDatasets() != null) {
-                    for (Dataset inputDs : ds.getDatasetProcessing().getInputDatasets()) {
-                        if (!hasRightOnTrustedDataset(inputDs, rightStr)) {
-                        	toRemove.add(ds);
-                        }
-                    }
+					if (userRights.hasStudyRights(ds.getStudyId(), rightStr)) {
+						// filter the input datasets as well
+						filterDatasetList(ds.getDatasetProcessing().getInputDatasets(), rightStr);
+					} else {
+						toRemove.add(ds);
+					}
                 } else {
                     throw new IllegalStateException("Cannot check dataset n°" + ds.getId() + " rights, this dataset has neither examination nor processing parent !");                
                 }
-            }
-            else if (!this.hasRightOnStudyCenter(ds.getDatasetAcquisition().getExamination().getCenterId(), ds.getDatasetAcquisition().getExamination().getStudyId(), rightStr)) {
-        		toRemove.add(ds);
-        	}
+            } else { // general case
+				Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+				Long centerId = ds.getDatasetAcquisition().getExamination().getCenterId();
+				// check rightStr on study, then check center rights
+				if (!userRights.hasStudyRights(studyId, rightStr) || !userRights.hasStudyCenterRights(studyId, centerId)) {
+					toRemove.add(ds);
+				}
+			}
     	});
     	list.removeAll(toRemove);
     	return true;
@@ -877,7 +883,6 @@ public class DatasetSecurityService {
 		for (DatasetForRights dto : dtos) {
 			if (!hasRightOnStudiesCenter(dto.getCenterId(), dto.getAllStudiesIds(), rightStr)) {
 				dsRemove.add(dto.getId());
-			} else {
 			}
     	}
     	list.removeIf(a -> dsRemove.contains(a.getId()));
@@ -1036,7 +1041,7 @@ public class DatasetSecurityService {
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
 	if (list == null) return true;
     	Set<ExaminationDTO> examsToRemove = new HashSet<>();
-    	for(ExaminationDTO exam : list) {
+    	for (ExaminationDTO exam : list) {
     		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
     			examsToRemove.add(exam);
 			}
@@ -1055,7 +1060,7 @@ public class DatasetSecurityService {
     public boolean filterSubjectExaminationDTOList(List<SubjectExaminationDTO> list, String rightStr) {
 	if (list == null) return true;
     	Set<SubjectExaminationDTO> examsToRemove = new HashSet<>();
-    	for(SubjectExaminationDTO exam : list) {
+    	for (SubjectExaminationDTO exam : list) {
     		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
     			examsToRemove.add(exam);
 			}

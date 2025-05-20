@@ -58,6 +58,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import org.shanoir.ng.study.rights.UserRights;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -109,9 +110,15 @@ public class DatasetApiSecurityTest {
 
 	@MockBean
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+	
 	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockDataset(1L), "dataset");
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 	}
 	
 	@Test
