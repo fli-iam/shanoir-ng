@@ -2,10 +2,21 @@ package org.shanoir.uploader.service.rest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -34,9 +45,9 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpOnloadConfig;
 
 /**
  * This class wraps the usage of Apache HttpClient, currently 5.1.
@@ -62,6 +73,10 @@ public class HttpService {
 	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
 	private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+
+	private static final String NEURINFO_URL = "https://shanoir.irisa.fr";
+
+	private static final String OFSEP_URL = "https://shanoir-ofsep.irisa.fr";
 	
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
@@ -195,6 +210,12 @@ public class HttpService {
 						}
 			}).build();
 			logger.info("buildHttpClient: sslContextDev build.");
+		} else {
+			List<String> certUrls = List.of(
+        	NEURINFO_URL,
+        	OFSEP_URL);
+    		sslContextDev = buildSSLContextFromRemoteCerts(certUrls);
+    		logger.info("buildHttpClient: sslContextDev built from remote certs.");
 		}
 		// In case of proxy: generate credentials provider with correct host
 		HttpHost proxyHost = null;
@@ -317,6 +338,46 @@ public class HttpService {
 				return httpClient;			
 			}		
 		}
+	}
+
+	private SSLContext buildSSLContextFromRemoteCerts(List<String> pemUrls) throws Exception {
+    	// TrustManager permissif pour télécharger les .pem
+    	TrustManager[] permissiveTrustManagers = new TrustManager[]{
+        	new X509TrustManager() {
+            	public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+            	public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+            	public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+        	}
+    	};
+
+    	// SSLContext temporaire pour le téléchargement
+    	SSLContext tempContext = SSLContext.getInstance("TLS");
+    	tempContext.init(null, permissiveTrustManagers, new SecureRandom());
+
+    	// Téléchargement des certificats
+    	KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+    	keyStore.load(null);
+
+    	int i = 0;
+    	for (String pemUrl : pemUrls) {
+       		URL url = new URL(pemUrl);
+        	HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        	conn.setSSLSocketFactory(tempContext.getSocketFactory());
+
+        	try (InputStream in = conn.getInputStream()) {
+            	CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            	Certificate cert = factory.generateCertificate(in);
+            	keyStore.setCertificateEntry("cert" + i, cert);
+            	i++;
+        	}
+    	}
+
+    	TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    	tmf.init(keyStore);
+
+    	SSLContext finalContext = SSLContext.getInstance("TLS");
+    	finalContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+    	return finalContext;
 	}
 
 }
