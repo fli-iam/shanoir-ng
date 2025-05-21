@@ -24,6 +24,7 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -722,9 +723,15 @@ public class ImportUtils {
 				}
 
 				// Modality is mandatory to create a new Manufacturer model, but not mandatory in the dicom query
-				String modality = importJob.getDicomQuery().getModality();
-				if (modality == null || modality.isBlank()) {
-					modality = importJob.getSelectedSeries().iterator().next().getModality();
+				
+				String modality = null;
+				DicomQuery dicomQuery = importJob.getDicomQuery();
+				if (dicomQuery != null) {
+					modality = dicomQuery.getModality();
+				} else {
+					if (modality == null || modality.isBlank()) {
+						modality = importJob.getSelectedSeries().iterator().next().getModality();
+					}
 				}
 				Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
 				String magneticFieldStrength = importJob.getFirstSelectedSerie().getEquipment().getMagneticFieldStrength();
