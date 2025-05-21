@@ -58,6 +58,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				Study study = (Study) e.getItem();
 				if (study.isWithStudyCards()) {
 					updateStudyCards(study);
+					mainWindow.importDialog.studyCardLabel.setVisible(true);
+					mainWindow.importDialog.studyCardCB.setVisible(true);
+					mainWindow.importDialog.studyCardFilterLabel.setVisible(true);
+					mainWindow.importDialog.studyCardFilterTextField.setVisible(true);
 				} else {
 					mainWindow.importDialog.studyCardLabel.setVisible(false);
 					mainWindow.importDialog.studyCardCB.setVisible(false);
