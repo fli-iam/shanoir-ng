@@ -60,11 +60,13 @@ public class ImportDialogOpener {
 			// Profile OFSEP: search with identifier
 			if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
 				subject = getSubject(importJob);
-			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
-			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob);
+			} // else Profile Neurinfo: no search with identifier, user selects existing subject
+			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
+			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
+			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, importJob, acquisitionEquipments, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importJob, importFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -114,12 +116,10 @@ public class ImportDialogOpener {
 	 * @param equipmentDicom
 	 * @throws Exception 
 	 */
-	private List<Study> getStudiesWithStudyCards(final ImportJob importJob) throws Exception {
+	private List<Study> getStudiesWithStudyCards(final ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {
 			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
-			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
-			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
 			if (studyCards != null) {
 				logger.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");

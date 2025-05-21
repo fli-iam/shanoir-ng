@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -22,6 +23,7 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +32,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
 	private MainWindow mainWindow;
+
+	private ImportJob importJob;
 	
 	private Subject subject;
 	
 	private SubjectStudy subjectStudy;
+
+	private List<AcquisitionEquipment> acquisitionEquipments;
 	
 	private List<Examination> examinationsOfSubject;
 	
@@ -43,8 +49,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
+		this.importJob = importJob;
+		this.acquisitionEquipments = acquisitionEquipments;
 		this.subject = subject;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
@@ -58,15 +66,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				Study study = (Study) e.getItem();
 				if (study.isWithStudyCards()) {
 					updateStudyCards(study);
-					mainWindow.importDialog.studyCardLabel.setVisible(true);
-					mainWindow.importDialog.studyCardCB.setVisible(true);
-					mainWindow.importDialog.studyCardFilterLabel.setVisible(true);
-					mainWindow.importDialog.studyCardFilterTextField.setVisible(true);
+					showOrHideStudyCardComponents(true);
 				} else {
-					mainWindow.importDialog.studyCardLabel.setVisible(false);
-					mainWindow.importDialog.studyCardCB.setVisible(false);
-					mainWindow.importDialog.studyCardFilterLabel.setVisible(false);
-					mainWindow.importDialog.studyCardFilterTextField.setVisible(false);
+					AcquisitionEquipment equipment = ImportUtils.createEquipmentAndIfStudyCard(importJob, study, null, null, acquisitionEquipments);
+	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
+					if (equipment != null) {
+						IdName center = equipment.getCenter();
+						mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+					}
+					showOrHideStudyCardComponents(false);
 				}
 				// Profile Neurinfo
 				if (ShUpConfig.isModeSubjectNameManual()) {
@@ -86,9 +94,9 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
  				// put center into exam using study card and acquisition equipment
  				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
- 				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
- 				if (acqEquipment != null) {
- 					IdName center = acqEquipment.getCenter();
+ 				AcquisitionEquipment equipment = studyCard.getAcquisitionEquipment();
+ 				if (equipment != null) {
+ 					IdName center = equipment.getCenter();
  					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				}
 			}
@@ -102,6 +110,13 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				filterExistingExamsForSelectedStudy(study);			
 			}		
 		} // ignore otherwise
+	}
+
+	private void showOrHideStudyCardComponents(boolean show) {
+		mainWindow.importDialog.studyCardLabel.setVisible(show);
+		mainWindow.importDialog.studyCardCB.setVisible(show);
+		mainWindow.importDialog.studyCardFilterLabel.setVisible(show);
+		mainWindow.importDialog.studyCardFilterTextField.setVisible(show);
 	}
 
 	public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {

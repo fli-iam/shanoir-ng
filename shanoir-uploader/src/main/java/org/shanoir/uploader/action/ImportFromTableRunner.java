@@ -213,10 +213,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		// Wait for thread to finish
 		downloadThread.join();
 
-		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
-		ImportJob importJobData = importJobManager.readImportJob();
-
 		logger.info("4. Find matching study card in selected study or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
@@ -229,7 +225,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					studyCard = scOpt.get();
 					logger.info("Matching study card found in study by name from table: " + studyCard.getName());
 				} else {
-					importJobData.setUploadState(UploadState.ERROR);
+					importJob.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: study card configured in table, but not found in study: " + importJob.getStudyCardName());
 					logger.error(importJob.getErrorMessage());
 					return false;
@@ -237,13 +233,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 		// 4.2 Find matching study card on study using info from DICOM
-		String manufacturerName = importJobData.getFirstSelectedSerie().getEquipment().getManufacturer();
-		String manufacturerModelName = importJobData.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
-		String deviceSerialNumber = importJobData.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
+		String manufacturerName = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
+		String manufacturerModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
+		String deviceSerialNumber = importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
 		if (manufacturerName == null || manufacturerName.isBlank()
 			|| manufacturerModelName == null || manufacturerModelName.isBlank()
 			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
-				importJobData.setUploadState(UploadState.ERROR);
+			importJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
 			return false;
 		}
@@ -266,94 +262,17 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				return false;
 			}
 		}
-		// 4.3 No study card found: create one
+
 		AcquisitionEquipment equipment = null;
 		if (studyCard == null) {
-			// 4.3.1 try to find equipment via model name and serial number and use it for study card creation
-			equipment = ImportUtils.findEquipmentInAllEquipments(acquisitionEquipments, manufacturerModelName, deviceSerialNumber);
-			if (equipment != null) {
-				// No need to create center, as already existing behind equipment
-				studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
-				studyCards.add(studyCard); // add in memory to avoid loading from server
-			// No equipment found: create one
-			} else {				
-				String institutionName = importJobData.getFirstSelectedSerie().getInstitution().getInstitutionName();
-				if (institutionName == null || institutionName.isBlank()) {
-					importJobData.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: no institution name in DICOM.");
-					logger.error(importJob.getErrorMessage());
-					return false;
-				}
-				// 4.3.2 find center or create one, and add it into study for import (study-center)
-				InstitutionDicom institutionDicom = new InstitutionDicom();
-				institutionDicom.setInstitutionName(institutionName);
-				institutionDicom.setInstitutionAddress(importJobData.getFirstSelectedSerie().getInstitution().getInstitutionAddress());
-				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
-				if (center == null) {
-					importJobData.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: could not find or create center.");
-					logger.error(importJob.getErrorMessage());
-					return false;
-				}
-				// 4.3.3 find or create manufacturer model and manufacturer
-				ManufacturerModel manufacturerModel = ImportUtils.findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
-				if (manufacturerModel == null) { // create one
-					Manufacturer manufacturer = ImportUtils.findManufacturerInAllEquipments(acquisitionEquipments, manufacturerName);
-					if (manufacturer == null) { // find matching manufacturer or create new manufacturer
-						List<Manufacturer> manufacturers = shanoirUploaderServiceClientNG.findManufacturers();
-						Optional<Manufacturer> matchingManufacturer = manufacturers.stream()
-        					.filter(m -> m.getName().equals(manufacturerName)).findFirst();
-						if (matchingManufacturer.isPresent()) {
-							manufacturer = matchingManufacturer.get();
-						} else {
-							manufacturer = ImportUtils.createManufacturer(manufacturerName);
-						}
-					}
-					if (manufacturer == null) {
-						importJobData.setUploadState(UploadState.ERROR);
-						importJob.setErrorMessage("Error: could not create manufacturer.");
-						logger.error(importJob.getErrorMessage());
-						return false;
-					}
-
-					// Modality is mandatory to create a new Manufacturer model, but not mandatory in the dicom query
-					String modality = importJob.getDicomQuery().getModality();
-					if (modality == null || modality.isBlank()) {
-						modality = importJob.getSelectedSeries().iterator().next().getModality();
-					}
-					Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
-					String magneticFieldStrength = importJobData.getFirstSelectedSerie().getEquipment().getMagneticFieldStrength();
-					if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
-						magneticFieldStrength = "0.0";
-					}
-					manufacturerModel = ImportUtils.createManufacturerModel(
-						manufacturerModelName, manufacturer, DatasetModalityType.getType(datasetModalityType).toString(), Double.valueOf(magneticFieldStrength));
-				}
-				if (manufacturerModel == null) {
-					importJobData.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: could not create manufacturerModel.");
-					logger.error(importJob.getErrorMessage());
-					return false;
-				}
-				equipment = ImportUtils.createEquipment(center, manufacturerModel, deviceSerialNumber);
-				if (equipment == null) {
-					importJobData.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: could not create equipment.");
-					logger.error(importJob.getErrorMessage());
-					return false;
-				} else {
-					acquisitionEquipments.add(equipment); // add in memory to avoid loading from server
-				}
-				studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
-				studyCards.add(studyCard); // add in memory to avoid loading from server
-			}
+			equipment = ImportUtils.createEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
 		}
 
 		if (studyCard == null) {
 			line[6] = "Error with study card";
 			csvWriter.addExaminationLine(false, line);
 			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			importJobData.setUploadState(UploadState.ERROR);
+			importJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 			logger.error(importJob.getErrorMessage());
 			return false;
@@ -385,7 +304,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.error(e.getMessage(), e);
 			}
 			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
-				importJobData.setUploadState(UploadState.ERROR);
+				importJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
 				return false;
@@ -410,7 +329,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (subjectREST == null) {
 				line[6] = "Error with subject";
 				csvWriter.addExaminationLine(false, line);
-				importJobData.setUploadState(UploadState.ERROR);
+				importJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
 				return false;
@@ -456,7 +375,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
 		if (examinationId == null) {
-			importJobData.setUploadState(UploadState.ERROR);
+			importJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
 			csvWriter.addExaminationLine(false, line);
@@ -469,6 +388,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
+		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 		Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
