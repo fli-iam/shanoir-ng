@@ -291,14 +291,6 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		if (study.getSubjectStudyList() != null) {
-			updateTags(study.getSubjectStudyList(), studyDb.getTags());
-			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy dbSubjectStudy : studyDb.getSubjectStudyList()) {
-				dbSubjectStudy.setStudy(studyDb);
-			}
-			studyDb = studyRepository.save(studyDb);
-		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
@@ -310,6 +302,12 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+
+
+		if (error != null && !error.isEmpty()) {
+			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
+			throw new ShanoirException(error);
+		}
 
 		return studyDb;
 	}

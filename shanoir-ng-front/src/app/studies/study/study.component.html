@@ -199,59 +199,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden]="activeTab != 'general'">
-				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Access level</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data accessibility</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.downloadableByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.downloadableByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.downloadableByDefault" formControlName="downloadableByDefault"></checkbox>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden]="activeTab != 'subjects'">
-        <legend>Subject tags</legend>
-        <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-			</fieldset>
-			<fieldset [class.hidden]="activeTab != 'centers'">
-				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.monoCenter">Single center</span>
-								<span *ngIf="!study.monoCenter">Multicenter</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
-								<span>Multicenter</span>
-							</ng-template>
-						</span>
+                    </li>
+                </ol>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
+                <legend>Subject tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
+                <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
+                <ol>
+                    <li>
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
 						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
