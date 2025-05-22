@@ -22,6 +22,7 @@ import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
+import org.shanoir.uploader.nominativeData.DicomPushServiceJob;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -41,6 +42,9 @@ public class ReadyState implements State {
 
 	@Autowired
 	private UploadServiceJob uploadServiceJob;
+
+	@Autowired
+	private DicomPushServiceJob dicomPushServiceJob;
 	
 	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -60,6 +64,7 @@ public class ReadyState implements State {
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
 		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
+		dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
 	}
 
 	/**
