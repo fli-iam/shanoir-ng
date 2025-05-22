@@ -150,7 +150,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [this.subject.subjectStudyList, [Validators.required]],
+            'subjectStudyList': [this.subject.subjectStudyList, this.mode == 'create' ? [Validators.required] : [] ],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': []
@@ -274,10 +274,14 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
-        const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
-        studyListStr += studiesNames;
-        studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
+        let studyListStr : string = "";
+        if (entity.subjectStudyList.length > 0) {
+            studyListStr = "\n\nThis subject belongs to the studies: \n- ";
+            const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
+            studyListStr += studiesNames;
+        }
+        studyListStr += '\n\nWarning: this action deletes ALL datasets ';
+        (entity.subjectStudyList.length > 0) ? studyListStr += 'from ALL studies listed above.' : studyListStr += 'from this subject.';
         return Promise.resolve(studyListStr);
     }
 }
