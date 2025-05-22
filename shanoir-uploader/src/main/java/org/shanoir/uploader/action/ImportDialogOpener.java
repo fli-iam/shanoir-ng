@@ -67,7 +67,7 @@ public class ImportDialogOpener {
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, importJob, acquisitionEquipments, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importJob, importFolder, subject, importStudyAndStudyCardCBIL);
+			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);

@@ -49,6 +49,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
+	private AcquisitionEquipment equipment;
+
 	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.importJob = importJob;
@@ -60,7 +62,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		int state = e.getStateChange();
+new Thread(() -> {		int state = e.getStateChange();
 		if (state == ItemEvent.SELECTED) {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
@@ -68,9 +70,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					updateStudyCards(study);
 					showOrHideStudyCardComponents(true);
 				} else {
-					AcquisitionEquipment equipment = ImportUtils.createEquipmentAndIfStudyCard(importJob, study, null, null, acquisitionEquipments);
+					AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, acquisitionEquipments);
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
 					if (equipment != null) {
+						this.equipment = equipment;
 						IdName center = equipment.getCenter();
 						mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 					}
@@ -110,6 +113,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				filterExistingExamsForSelectedStudy(study);			
 			}		
 		} // ignore otherwise
+	}).start();
 	}
 
 	private void showOrHideStudyCardComponents(boolean show) {
@@ -286,5 +290,13 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	public void setSubjectStudy(SubjectStudy subjectStudy) {
 		this.subjectStudy = subjectStudy;
 	}
-	
+
+	public AcquisitionEquipment getEquipment() {
+		return equipment;
+	}
+
+	public void setEquipment(AcquisitionEquipment equipment) {
+		this.equipment = equipment;
+	}
+
 }

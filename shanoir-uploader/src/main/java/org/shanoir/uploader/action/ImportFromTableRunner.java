@@ -265,7 +265,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		AcquisitionEquipment equipment = null;
 		if (studyCard == null) {
-			equipment = ImportUtils.createEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
+			equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
 		}
 
 		if (studyCard == null) {
@@ -325,7 +325,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		subjectREST = ImportUtils.manageSubject(subjectREST,
 			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
-			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard);
+			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, equipment);
 		if (subjectREST == null) {
 				line[6] = "Error with subject";
 				csvWriter.addExaminationLine(false, line);
@@ -387,7 +387,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard, equipment);
 		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 		Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);

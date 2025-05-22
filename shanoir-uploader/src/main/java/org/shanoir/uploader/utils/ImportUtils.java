@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -242,15 +241,17 @@ public class ImportUtils {
 	 * @throws DatabindException 
 	 * @throws StreamReadException 
 	 */
-	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
+	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
 		// Handle study and study card
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
 		// MS Datasets does only return StudyCard DTOs without IDs, as name is unique
 		// see: /shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
-		importJob.setStudyCardName(studyCard.getName());
-		importJob.setStudyCardId(studyCard.getId());
-		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		if (study.isWithStudyCards()) {
+			importJob.setStudyCardName(studyCard.getName());
+			importJob.setStudyCardId(studyCard.getId());
+		}
+		importJob.setAcquisitionEquipmentId(equipment.getId());
 		importJob.setExaminationId(examinationId);
 
 		/**
@@ -405,7 +406,7 @@ public class ImportUtils {
 	 * @param studyCard
 	 * @return
 	 */
-	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
+	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, AcquisitionEquipment equipment) {
 		if (subjectREST == null) {
 			try {
 				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
@@ -415,7 +416,7 @@ public class ImportUtils {
 			}
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
-				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+				Long centerId = equipment.getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
 					return null;
@@ -670,19 +671,21 @@ public class ImportUtils {
 		return patients;
 	}
 
-	public static AcquisitionEquipment createEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, List<AcquisitionEquipment> acquisitionEquipments) {
+	public static AcquisitionEquipment findOrCreateEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, List<AcquisitionEquipment> acquisitionEquipments) {
 		AcquisitionEquipment equipment = null;
 		String manufacturerName = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
 		String manufacturerModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
 		String deviceSerialNumber = importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
-		// Try to find equipment via model name and serial number and use it for study card creation
+		// Try to find equipment via model name and serial number
 		equipment = findEquipmentInAllEquipments(acquisitionEquipments, manufacturerModelName, deviceSerialNumber);
-		if (equipment != null && studyCards != null && study.isWithStudyCards()) {
-			// No need to create center, as already existing behind equipment
-			studyCard = createStudyCard(study, equipment);
-			studyCards.add(studyCard); // add in memory to avoid loading from server
-		// No equipment found: create one
-		} else {				
+		if (study.isWithStudyCards()) {
+			if (equipment != null && studyCards != null) {
+				// No need to create center, as already existing behind equipment
+				studyCard = createStudyCard(study, equipment);
+				studyCards.add(studyCard); // add in memory to avoid loading from server
+			}
+		}
+		if (equipment == null ) {
 			String institutionName = importJob.getFirstSelectedSerie().getInstitution().getInstitutionName();
 			if (institutionName == null || institutionName.isBlank()) {
 				importJob.setUploadState(UploadState.ERROR);
@@ -723,7 +726,6 @@ public class ImportUtils {
 				}
 
 				// Modality is mandatory to create a new Manufacturer model, but not mandatory in the dicom query
-				
 				String modality = null;
 				DicomQuery dicomQuery = importJob.getDicomQuery();
 				if (dicomQuery != null) {

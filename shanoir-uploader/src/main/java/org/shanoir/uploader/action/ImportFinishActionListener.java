@@ -41,18 +41,15 @@ public class ImportFinishActionListener implements ActionListener {
 
 	private MainWindow mainWindow;
 	
-	private ImportJob importJob;
-	
 	private File uploadFolder;
 	
 	private Subject subjectREST;
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, ImportJob importJob, File uploadFolder, Subject subjectREST,
+	public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
-		this.importJob = importJob;
 		this.uploadFolder = uploadFolder;
 		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
@@ -65,12 +62,20 @@ public class ImportFinishActionListener implements ActionListener {
 	@Override
 	public void actionPerformed(final ActionEvent event) {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
-		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
+		if (study == null || study.getId() == null) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
+		}
+		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
+		if (study.isWithStudyCards()) {
+			if (studyCard == null || studyCard.getName() == null) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 		}
 
 		/**
@@ -124,7 +129,7 @@ public class ImportFinishActionListener implements ActionListener {
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
 				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-				study, studyCard);
+				study, importStudyAndStudyCardCBILNG.getEquipment());
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -163,7 +168,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
-			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), importStudyAndStudyCardCBILNG.getEquipment());
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
