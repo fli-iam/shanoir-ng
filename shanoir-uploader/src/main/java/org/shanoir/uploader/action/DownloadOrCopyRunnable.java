@@ -17,6 +17,7 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -137,7 +138,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			logger.info(
 					uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
 							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
-							+ importJob.getPatient().getPatientName());
+							+ Utils.sha256(importJob.getPatient().getPatientName()));
 
 			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
