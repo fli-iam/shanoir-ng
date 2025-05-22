@@ -14,44 +14,42 @@
 
 package org.shanoir.ng.dataset.security;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
+import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.studycard.model.Card;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.shanoir.ng.dataset.dto.DatasetForRights;
-import org.shanoir.ng.study.rights.UserRights;
 
 @Service
 public class DatasetSecurityService {
@@ -78,9 +76,6 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	StudyRightsService commService;
-
-	@Autowired
-	StudyRepository studyRepository;
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
@@ -371,7 +366,10 @@ public class DatasetSecurityService {
     			return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);    			
     		}
     	} else {
-    		return hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);    		
+    		return hasRightOnStudyCenter(
+				dataset.getDatasetAcquisition().getExamination().getCenterId(), 
+				dataset.getDatasetAcquisition().getExamination().getStudyId(), 
+				rightStr);    		
     	}
     }
 
@@ -399,33 +397,6 @@ public class DatasetSecurityService {
     
     /**
      * Check that the connected user has the given right for the given dataset acquisitions.
-     * !!! The acquisitions must be trusted, meaning they must come from the database, not from the user !!!
-     * 
-     * @param datasetId the dataset acquisition id
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasRightOnEveryTrustedDatasetAcquisition(List<DatasetAcquisition> datasetAcquisitions, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return true;
-		}
-    	// If the entry is empty, return an empty list
-    	if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
-			return true;
-		}
-    	
-    	// Also check for centers    	
-    	for (DatasetAcquisition acq : datasetAcquisitions) {
-			if (!this.hasRightOnStudyCenter(acq.getExamination().getCenterId(), acq.getExamination().getStudyId(), rightStr)) {
-				return false;
-			}
-    	}
-    	return true;
-    }
-    
-    /**
-     * Check that the connected user has the given right for the given dataset acquisitions.
      * 
      * @param datasetAcquisitionIds the dataset acquisition ids
      * @param rightStr the right
@@ -433,25 +404,19 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
-    	List<DatasetAcquisition> trustedDatasetAcquisitions = Utils.toList(datasetAcquisitionRepository.findAllById(datasetAcquisitionIds));
-    	return hasRightOnEveryTrustedDatasetAcquisition(trustedDatasetAcquisitions, rightStr);
-    }
-    
-
-    /**
-     * Check that the connected user has the given right for at least one of the given datasets.
-     * 
-     * @param datasetId the datasets ids
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasAtLeastRightOnOneDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
-    	if (CollectionUtils.isEmpty(datasetIds)) return true;
-		for (Long datasetId : datasetIds) {
-			if (hasRightOnDataset(datasetId, rightStr)) return true;
+    	List<DatasetAcquisitionForRights> acqs = datasetAcquisitionRepository.findAllForRightsById(datasetAcquisitionIds)
+			.stream()
+			.map(a -> new DatasetAcquisitionForRights(a.getId(), a.getCenterId(), a.getStudyId()))
+			.collect(Collectors.toList());
+    	UserRights userRights = commService.getUserRights();
+		for (DatasetAcquisitionForRights acq : acqs) {
+			Long studyId = acq.getStudyId();
+			Long centerId = acq.getCenterId();
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
     	}
-    	return false;
+		return true;
     }
     
     /**
@@ -470,32 +435,20 @@ public class DatasetSecurityService {
     	// If the entry is empty, return an empty list
     	if (datasetIds == null || datasetIds.isEmpty()) {
 			return true;
-		}
-    	
-    	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
-
-		return hasRigthOnDatasets(datasets, rightStr);
-	}
-
-	private boolean hasRigthOnDatasets(Iterable<Dataset> datasets, String rightStr) {
-		boolean hasRight = true;
-		for (Dataset dataset : datasets) {
-			if (dataset.getDatasetAcquisition() == null
-					|| dataset.getDatasetAcquisition().getExamination() == null
-					|| dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-
-				if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
-					for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
-						hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
-					}
-				} else {
-					throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
-				}
-			} else {
-				hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+		}    	
+		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
+			.stream()
+			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+			.collect(Collectors.toList());
+		UserRights userRights = commService.getUserRights();
+		for (DatasetForRights dataset : dtos) {
+			Set<Long> studyIds = dataset.getAllStudiesIds();
+			Long centerId = dataset.getCenterId();
+			if (!userRights.hasStudiesCenterRights(studyIds, centerId, rightStr)) {
+				return false;
 			}
 		}
-		return hasRight;
+		return true;
 	}
 
 	/**
@@ -517,22 +470,19 @@ public class DatasetSecurityService {
 
 		Set<Long> studies = new HashSet<>();
 		studies.add(studyId);
-		List<Long> studiesRelated = studyRepository.findByDatasetId(studyId).stream().map(BigInteger::longValue).toList();
-		if (!studiesRelated.isEmpty()) {
-			studies.addAll(studiesRelated);
-		}
+		CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
 		return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
 	private static Long getStudyIdFromDataset(Dataset dataset) {
 		Long studyId;
-		if(dataset.getDatasetProcessing() != null){
+		if (dataset.getDatasetProcessing() != null) {
 			studyId = dataset.getDatasetProcessing().getStudyId();
-		}else if (dataset.getDatasetAcquisition() != null
+		} else if (dataset.getDatasetAcquisition() != null
 				&& dataset.getDatasetAcquisition().getExamination() != null
 				&& dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
 			studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
-		}else{
+		} else {
 			throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
 		}
 		return studyId;
@@ -603,7 +553,7 @@ public class DatasetSecurityService {
 		if (dbDatasetAcq == null) {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
 		}
-		if (datasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
+		if (datasetAcq.getExamination().getStudyId().equals(dbDatasetAcq.getExamination().getStudyId())) { // study hasn't changed
 			return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
 		} else { // study has changed : check user has right on both studies
 			return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr) &&
@@ -637,7 +587,7 @@ public class DatasetSecurityService {
     	if (dbDatasetAcq == null) {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcqDto.getId());
 		}
-    	if (datasetAcqDto.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
+    	if (datasetAcqDto.getExamination().getStudyId().equals(dbDatasetAcq.getExamination().getStudyId())) { // study hasn't changed
 			return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr);
 		} else { // study has changed : check user has right on both studies
 			return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr) &&
@@ -705,7 +655,7 @@ public class DatasetSecurityService {
                throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
            }           
        } else throw new IllegalStateException("Cannot find the type of card");
-       if (card.getStudyId() == dbCard.getStudyId()) { // study hasn't changed
+       if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
            return commService.hasRightOnStudy(card.getStudyId(), rightStr);
        } else { // study has changed : check user has right on both studies
            return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
@@ -724,9 +674,11 @@ public class DatasetSecurityService {
 		for (Dataset dataset : page) {
 			Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
 			Long centerId = dataset.getDatasetAcquisition().getExamination().getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
     	}
-    	return true; // if empty page
+    	return true; 
     }
     
     /**
@@ -741,9 +693,11 @@ public class DatasetSecurityService {
 		for (DatasetDTO dataset : page) {
 			Long studyId = dataset.getStudyId();
 			Long centerId = dataset.getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
     	}
-    	return true; // if empty page
+    	return true;
     }
     
     /**
@@ -796,9 +750,11 @@ public class DatasetSecurityService {
 		for (Examination exam : page) {
 			Long studyId = exam.getStudyId();
 			Long centerId = exam.getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
 		}
-		return true; //empty page
+		return true;
     }
     
     /**
@@ -841,14 +797,18 @@ public class DatasetSecurityService {
 		Set<Long> dsRemove = new HashSet<>();
 		UserRights userRights = commService.getUserRights();
 		for (DatasetForRights ds : dtos) {
-			Long studyId = ds.getStudyId();
+			Set<Long> studyIds = ds.getAllStudiesIds();
 			Long centerId = ds.getCenterId();
-			if (userRights.hasStudyRights(studyId, rightStr)) {
-				if (userRights.hasCenterRestrictionsFor(studyId) && !userRights.hasStudyCenterRights(studyId, centerId)) {
+			for (Long studyId : studyIds) {
+				if (userRights.hasStudyRights(studyId, rightStr)) {
+					if (userRights.hasCenterRestrictionsFor(studyId) && !userRights.hasStudyCenterRights(studyId, centerId)) {
+						dsRemove.add(ds.getId());
+						break;
+					}
+				} else {
 					dsRemove.add(ds.getId());
+					break;
 				}
-			} else {
-				dsRemove.add(ds.getId());
 			}
 		}
     	list.removeIf(a -> dsRemove.contains(a.getId()));
@@ -912,7 +872,7 @@ public class DatasetSecurityService {
 	   if (list == null) {
 	                   return true;
 	           }
-	   Set<Long> checkedIds = new HashSet<Long>();
+	   Set<Long> checkedIds = new HashSet<>();
 	   for (ExaminationDatasetAcquisitionDTO edsa : list) {
 		   if (hasRightOnExamination(edsa.getExaminationId(), rightStr)) {
 			   checkedIds.add(edsa.getExaminationId());
@@ -938,9 +898,11 @@ public class DatasetSecurityService {
 		for (DatasetAcquisitionDTO acquisition : page) {
 			Long studyId = acquisition.getExamination().getStudyId();
 			Long centerId = acquisition.getExamination().getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
 		}
-		return true; //empty page
+		return true;
     }
     
     /**
@@ -958,9 +920,11 @@ public class DatasetSecurityService {
 		for (DatasetAcquisition acquisition : page) {
 			Long studyId = acquisition.getExamination().getStudyId();
 			Long centerId = acquisition.getExamination().getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
 		}
-		return true; //empty page
+		return true;
     }
     
     /**
@@ -974,7 +938,7 @@ public class DatasetSecurityService {
         if (list == null) {
             return true;
         }
-        Set<Long> studyIds = new HashSet<Long>();
+        Set<Long> studyIds = new HashSet<>();
         list.forEach((Card sc) -> {
             studyIds.add(sc.getStudyId());
         });
@@ -999,9 +963,11 @@ public class DatasetSecurityService {
 		for (ExaminationDTO exam : page) {
 			Long studyId = exam.getStudyId();
 			Long centerId = exam.getCenterId();
-			return userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+			if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
 		}
-		return true; // empty page
+		return true;
     }
 
     /**
@@ -1078,18 +1044,23 @@ public class DatasetSecurityService {
 		return hasRightOnExamination(id, rightStr);
     }
 
-	public boolean HasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
-		boolean hasRight = true;
-
-		for (Long processingId : processingIds) {
-			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || processingId == null) {
-				continue;
-			}
-			Iterable<Dataset> datasets = datasetRepository.findDatasetsByProcessingId(processingId);
-
-			hasRight &= hasRigthOnDatasets(datasets, rightStr);
+	public boolean hasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN) || processingIds == null || processingIds.isEmpty()) {
+			return true;
 		}
-		return hasRight;
+		List<DatasetForRights> datasets = datasetRepository.findAllInputsByProcessingId(processingIds)
+			.stream()
+			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+			.collect(Collectors.toList());
+		UserRights userRights = commService.getUserRights();
+		for (DatasetForRights dataset : datasets) {
+			Set<Long> studyIds = dataset.getAllStudiesIds();
+			Long centerId = dataset.getCenterId();
+			if (!userRights.hasStudiesCenterRights(studyIds, centerId, rightStr)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -1104,15 +1075,12 @@ public class DatasetSecurityService {
 		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
-		for (Long examinationId : examinationIds) {
-			Examination exam = examinationRepository.findById(examinationId).orElse(null);
-			if (exam == null) {
-				throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
-			}
-			if (exam.getStudyId() == null) {
-				return false;
-			}
-			if(!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)){
+		List<ExaminationForRightsDTO> exams = examinationRepository.findDatasetsForRights(examinationIds);
+		UserRights userRights = commService.getUserRights();
+		for (ExaminationForRightsDTO exam : exams) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
 				return false;
 			}
 		}

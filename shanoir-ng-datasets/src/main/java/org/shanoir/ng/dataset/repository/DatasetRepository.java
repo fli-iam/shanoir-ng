@@ -84,8 +84,23 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	@Query(value="SELECT ds.id FROM dataset as ds " +
 			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
-			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
-	List<Dataset> findDatasetsByProcessingId(Long processingId);
+			"WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
+	List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
+
+	@Query("""
+		SELECT DISTINCT
+			ds.id                      AS id,
+			ex.study.id                AS studyId,
+			ex.centerId                AS centerId,
+			relSt.id                   AS relatedStudiesIds
+		FROM DatasetProcessing dp
+			JOIN dp.inputDatasets ds
+			LEFT JOIN ds.datasetAcquisition da
+			LEFT JOIN da.examination ex
+			LEFT JOIN ds.relatedStudies relSt
+		WHERE dp.id IN :processingIds
+	""")
+	List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
 			+ "ds.id, dm.name, TYPE(ds), " 

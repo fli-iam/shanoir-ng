@@ -15,10 +15,19 @@
 
 package org.shanoir.ng.dataset;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApi;
+import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -40,8 +49,11 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,14 +65,6 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import org.shanoir.ng.study.rights.UserRights;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * DatasetAPI security test.
@@ -169,15 +173,21 @@ public class DatasetApiSecurityTest {
 		
 		//deleteDatasets(List<Long>)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 		if ("ROLE_USER".equals(role)) {
 			assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 3L));
 		} else if ("ROLE_EXPERT".equals(role)) {
-			assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L));	
+			assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L));
 		}
 		
 		//findDatasetById(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
 		assertAccessAuthorized(api::findDatasetById, 1L);
 		assertAccessDenied(api::findDatasetById, 2L);
 		assertAccessDenied(api::findDatasetById, 3L);
@@ -185,6 +195,7 @@ public class DatasetApiSecurityTest {
 		
 		//updateDataset(Long, Dataset, BindingResult)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL));
 		if ("ROLE_USER".equals(role)) {
 			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
 		} else if ("ROLE_EXPERT".equals(role)) {
@@ -236,19 +247,26 @@ public class DatasetApiSecurityTest {
 		job.setStudyId(1L);
 		job.setSubjectId(1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
 		assertAccessDenied(api::createProcessedDataset, job);
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
 		assertAccessAuthorized(api::createProcessedDataset, job);
 		job.setSubjectId(3L);
 		assertAccessAuthorized(api::createProcessedDataset, job);
 		
 		job.setStudyId(2L);
 		job.setSubjectId(2L);
+		StudyUser su2 = new StudyUser();
+		su2.setStudyId(2L);
+		su2.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su2)));
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(true);
 		assertAccessAuthorized(api::createProcessedDataset, job);
 		
 		job.setStudyId(4L);
 		job.setSubjectId(4L);
+		su2.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(api::createProcessedDataset, job);
 		
@@ -257,6 +275,8 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::createProcessedDataset, job);
 		
 		//massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
 		assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L,null);
 		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
 		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
@@ -466,7 +486,14 @@ public class DatasetApiSecurityTest {
 		given(datasetRepository.findAllById(Utils.toList(2L))).willReturn(Utils.toList(dataset2));
 		given(datasetRepository.findAllById(Utils.toList(3L))).willReturn(Utils.toList(dataset3));
 		given(datasetRepository.findAllById(Utils.toList(4L))).willReturn(Utils.toList(dataset4));
-		
+
+		// rights
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(2L))).willReturn(Utils.toList(new DatasetForRights(2L, 2L, 3L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(3L))).willReturn(Utils.toList(new DatasetForRights(3L, 3L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(4L))).willReturn(Utils.toList(new DatasetForRights(4L, 4L, 4L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 3L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(3L, 3L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 2L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(2L, 2L, 3L, new HashSet())));
 	}
 
 }

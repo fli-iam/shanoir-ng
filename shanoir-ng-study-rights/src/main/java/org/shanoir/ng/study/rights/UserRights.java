@@ -28,7 +28,9 @@ public class UserRights {
     public UserRights(List<StudyUser> studyUsers) {
 		if (studyUsers != null) {
 			for (StudyUser su : studyUsers) {
-				studyRights.put(su.getStudyId(), su);
+				if (su.isConfirmed()) {
+					studyRights.put(su.getStudyId(), su);
+				}
 			}
 		}
     }
@@ -86,5 +88,17 @@ public class UserRights {
 		} else {
 			return false;
 		}
+    }
+
+	/**
+	 * Has the user the specified right string for each study and also rights for each study-center (or no center restriction)
+	 */
+	public boolean hasStudiesCenterRights(Iterable<Long> studyIds, Long centerId, String rightStr) {
+		for (Long studyId : studyIds) {
+			if (!hasStudyCenterRights(studyId, centerId, rightStr)) {
+				return false;
+			}
+		}
+		return true;
     }
 }
