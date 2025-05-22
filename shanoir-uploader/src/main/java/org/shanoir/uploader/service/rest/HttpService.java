@@ -1,15 +1,20 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -83,6 +88,8 @@ public class HttpService {
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
 	private static final String BOUNDARY = "--import_dicom_shanoir--";
+
+	private static final String CERTS_DIR = "";
 
 	private CloseableHttpClient httpClient;
 	
@@ -210,12 +217,6 @@ public class HttpService {
 						}
 			}).build();
 			logger.info("buildHttpClient: sslContextDev build.");
-		} else {
-			List<String> certUrls = List.of(
-        	NEURINFO_URL,
-        	OFSEP_URL);
-    		sslContextDev = buildSSLContextFromRemoteCerts(certUrls);
-    		logger.info("buildHttpClient: sslContextDev built from remote certs.");
 		}
 		// In case of proxy: generate credentials provider with correct host
 		HttpHost proxyHost = null;
@@ -280,9 +281,9 @@ public class HttpService {
 	 * @param sslContextDev
 	 * @param credentialsProvider
 	 * @return
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws IOException {
+	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) {
 		final SSLConnectionSocketFactory sslSocketFactory;
 		if (sslContextDev != null) {
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
@@ -340,44 +341,76 @@ public class HttpService {
 		}
 	}
 
-	private SSLContext buildSSLContextFromRemoteCerts(List<String> pemUrls) throws Exception {
-    	// TrustManager permissif pour télécharger les .pem
-    	TrustManager[] permissiveTrustManagers = new TrustManager[]{
-        	new X509TrustManager() {
-            	public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
-            	public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
-            	public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
-        	}
-    	};
+	// TODO : check if certificates already downloaded and if still valid to avoid downloading them everytime
+	private static void checkCertificates(List<String> urls, String certsDirPath) throws Exception {
+	File certsDir = new File(certsDirPath);
+        if (!certsDir.exists()) {
+            certsDir.mkdirs();
+        }
 
-    	// SSLContext temporaire pour le téléchargement
-    	SSLContext tempContext = SSLContext.getInstance("TLS");
-    	tempContext.init(null, permissiveTrustManagers, new SecureRandom());
+        for (String httpsUrl : urls) {
+            try {
+                logger.info("Getting java certificate from " + httpsUrl); // to delete afterwards
+				URL url = new URL(httpsUrl);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                conn.connect();
 
-    	// Téléchargement des certificats
-    	KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-    	keyStore.load(null);
+                Certificate[] certs = conn.getServerCertificates();
 
-    	int i = 0;
-    	for (String pemUrl : pemUrls) {
-       		URL url = new URL(pemUrl);
-        	HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        	conn.setSSLSocketFactory(tempContext.getSocketFactory());
+                int certIndex = 0;
+                for (Certificate cert : certs) {
+                    if (cert instanceof X509Certificate) {
+                        X509Certificate x509 = (X509Certificate) cert;
 
-        	try (InputStream in = conn.getInputStream()) {
-            	CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            	Certificate cert = factory.generateCertificate(in);
-            	keyStore.setCertificateEntry("cert" + i, cert);
-            	i++;
-        	}
-    	}
+                        // Renaming the file based on the host and certificate index
+                        String host = url.getHost().replaceAll("[^a-zA-Z0-9.-]", "_");
+                        String filename = String.format("%s/cert_%s_%d.pem", certsDirPath, host, certIndex++);
 
-    	TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    	tmf.init(keyStore);
+                        // Writing the file
+                        try (FileWriter writer = new FileWriter(filename)) {
+                            writer.write("-----BEGIN CERTIFICATE-----\n");
+                            writer.write(Base64.getMimeEncoder(64, new byte[]{'\n'}).encodeToString(x509.getEncoded()));
+                            writer.write("\n-----END CERTIFICATE-----\n");
+                        }
 
-    	SSLContext finalContext = SSLContext.getInstance("TLS");
-    	finalContext.init(null, tmf.getTrustManagers(), new SecureRandom());
-    	return finalContext;
+                        // Affichage expiration
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        System.out.println("Certificate saved : " + filename);
+                        System.out.println("   ↳ Expires : " + sdf.format(x509.getNotAfter()));
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error on " + httpsUrl + " : " + e.getMessage());
+            }
+        }
 	}
+
+	private static SSLContext buildSSLContextFromCertificates(List<String> pemFilePaths) throws Exception {
+        // Crée un keystore vide
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(null); // initialise à vide
+
+        // Instancie un CertificateFactory pour X.509
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+
+        int i = 0;
+        for (String pemPath : pemFilePaths) {
+            try (InputStream in = new FileInputStream(pemPath)) {
+                Certificate cert = certFactory.generateCertificate(in);
+                keyStore.setCertificateEntry("cert" + i, cert);
+                i++;
+            }
+        }
+
+        // Crée le TrustManager à partir du keystore
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(keyStore);
+
+        // Crée le SSLContext
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+        return sslContext;
+    }
 
 }
