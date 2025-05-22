@@ -314,6 +314,7 @@ public class ImportDialog extends JDialog {
 
 		studyCB = new JComboBoxMandatory();
 		studyCB.setBackground(Color.WHITE);
+		studyCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
@@ -323,6 +324,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyCB, importDialogGBC);
 		studyCB.addItemListener(importStudyAndStudyCardCBIL);
+		AutoCompleteDecorator.decorate(studyCB);
 
 		studyCardLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardLabel") + " *");
 		studyCardLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -433,7 +435,7 @@ public class ImportDialog extends JDialog {
 
 		existingSubjectsCB = new JComboBox();
 		existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.existingSubjectsTooltip"));
+		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
