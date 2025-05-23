@@ -558,7 +558,9 @@ public class ImportUtils {
 		studyCard.setAcquisitionEquipmentId(equipment.getId());
 		studyCard.setAcquisitionEquipment(equipment);
 		studyCard.setCenterId(equipment.getCenter().getId());
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
+		studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
+		logger.info("New study card created: {} {}", studyCard.getId(), studyCard.getName());
+		return studyCard;
 	}
 
 	private static AcquisitionEquipment createEquipment(Center center, ManufacturerModel manufacturerModel, String deviceSerialNumber) {
@@ -569,7 +571,9 @@ public class ImportUtils {
 		equipment.setCenter(centerIdName);
 		equipment.setSerialNumber(deviceSerialNumber);
 		equipment.setManufacturerModel(manufacturerModel);
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+		equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+		logger.info("New equipment created: {} {}", equipment.getId(), equipment.getSerialNumber());
+		return equipment;
 	}
 
 	private static ManufacturerModel createManufacturerModel(String manufacturerModelName, Manufacturer manufacturer, String modality, Double magneticFieldStrength) {
@@ -578,7 +582,9 @@ public class ImportUtils {
 		manufacturerModel.setManufacturer(manufacturer);
 		manufacturerModel.setDatasetModalityType(modality);
 		manufacturerModel.setMagneticField(magneticFieldStrength);
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
+		manufacturerModel = ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
+		logger.info("New manufacturer model created: {} {}", manufacturerModel.getId(), manufacturerModel.getName());
+		return manufacturerModel;
 	}
 
 	private static Manufacturer createManufacturer(String manufacturerName) {
@@ -703,6 +709,7 @@ public class ImportUtils {
 				logger.error(importJob.getErrorMessage());
 				return null;
 			}
+			logger.info("Center found or created: {} {}", center.getId(), center.getName());
 			// Find or create manufacturer model and manufacturer
 			ManufacturerModel manufacturerModel = findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
 			if (manufacturerModel == null) { // create one
