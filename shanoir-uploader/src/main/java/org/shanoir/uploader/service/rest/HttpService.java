@@ -342,12 +342,34 @@ public class HttpService {
 	}
 
 	// TODO : check if certificates already downloaded and if still valid to avoid downloading them everytime
-	private static void checkCertificates(List<String> urls, String certsDirPath) throws Exception {
+	private static void checkCertificates(String certsDirPath) throws Exception {
 	File certsDir = new File(certsDirPath);
         if (!certsDir.exists()) {
             certsDir.mkdirs();
-        }
+        } else {
+			for (File file : certsDir.listFiles()) {
+				if (file.isFile() && file.getName().endsWith(".pem")) {
+					try (FileInputStream fis = new FileInputStream(file.getAbsolutePath())) {
+            			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            			X509Certificate cert = (X509Certificate) cf.generateCertificate(fis);
 
+            			cert.checkValidity();
+
+        			} catch (Exception e) {
+            			logger.error("Error during HTTPS certificate validity check : " + e.getMessage());
+						// if certificate is not valid, we delete it
+						file.delete();
+						// we download new certificates
+						List<String> urls = List.of(NEURINFO_URL, OFSEP_URL);
+						downloadCerts(urls);
+					}
+				}
+			}
+		}
+	}
+
+	private static void downloadCerts(List<String> urls) throws Exception {
+		String certsDirPath = CERTS_DIR;	
         for (String httpsUrl : urls) {
             try {
                 logger.info("Getting java certificate from " + httpsUrl); // to delete afterwards
