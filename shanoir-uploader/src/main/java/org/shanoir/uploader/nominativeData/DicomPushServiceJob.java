@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -240,7 +239,7 @@ public class DicomPushServiceJob {
 		FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
 
 		// We set the selected series after the copy of the DICOM files to have the instances set to each serie
-		importJob.setSelectedSeries(new HashSet<>(completeSeries));
+		importJob.setSelectedSeries(completeSeries);
 
 		importJob.setTimestamp(System.currentTimeMillis());
 		importJob.setUploadState(UploadState.READY);
