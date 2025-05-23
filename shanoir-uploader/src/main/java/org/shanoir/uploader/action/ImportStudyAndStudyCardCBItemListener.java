@@ -62,7 +62,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-new Thread(() -> {		int state = e.getStateChange();
+		int state = e.getStateChange();
 		if (state == ItemEvent.SELECTED) {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
@@ -112,7 +112,6 @@ new Thread(() -> {		int state = e.getStateChange();
 				filterExistingExamsForSelectedStudy(study);			
 			}		
 		} // ignore otherwise
-	}).start();
 	}
 
 	private void showOrHideStudyCardComponents(boolean show) {
