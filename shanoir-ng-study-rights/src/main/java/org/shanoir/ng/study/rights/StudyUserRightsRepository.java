@@ -15,14 +15,15 @@
 package org.shanoir.ng.study.rights;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
-import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.transaction.Transactional;
 
 /**
  * Repository for relations between a study and an user.
@@ -34,6 +35,9 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
 
 	@EntityGraph(attributePaths = "studyUserRights")
 	StudyUser findByUserIdAndStudyId(Long userId, Long studyId);
+
+	@EntityGraph(attributePaths = "studyUserRights")
+	Optional<List<StudyUser>> findAllByUserId(Long userId);
 
 	@Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :id")
     List<Long> findCenterIdsByStudyUserId(@Param("id") Long studyUserId);
