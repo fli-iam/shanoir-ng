@@ -170,7 +170,7 @@ public class ImportUtils {
 		newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
 		newStudyForJob.setStudyDescription(study.getStudyDescription());
 		importJob.setStudy(newStudyForJob);
-		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
+		importJob.setSelectedSeries(new ArrayList<Serie>());
 		return importJob;
 	}
 

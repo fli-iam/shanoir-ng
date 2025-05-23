@@ -17,8 +17,7 @@
  import java.io.Serializable;
  import java.util.Iterator;
  import java.util.List;
- import java.util.Set;
- 
+
  import org.apache.commons.collections4.CollectionUtils;
  import org.shanoir.ng.importer.dicom.query.DicomQuery;
  import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -76,7 +75,7 @@
 	 private Study study;
  
 	 // series to import with this import job
-	 private Set<Serie> selectedSeries;
+	 private List<Serie> selectedSeries;
  
 	 // Shanoir study
 	 private Long studyId;
@@ -298,11 +297,11 @@
 		 this.patient = patient;
 	 }
  
-	 public Set<Serie> getSelectedSeries() {
+	 public List<Serie> getSelectedSeries() {
 		 return selectedSeries;
 	 }
  
-	 public void setSelectedSeries(Set<Serie> selectedSeries) {
+	 public void setSelectedSeries(List<Serie> selectedSeries) {
 		 this.selectedSeries = selectedSeries;
 	 }
  

@@ -569,7 +569,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
-		importJob.setSelectedSeries(new LinkedHashSet<>(selectedSeries));
+		importJob.setSelectedSeries(selectedSeries);
 		return true;
 	}
 
