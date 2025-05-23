@@ -54,6 +54,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     public selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
+    @Input() allowRemove: boolean;
     hasTags: boolean;
     hasQualityTags: boolean;
     columnDefs: ColumnDefinition[];
@@ -154,7 +155,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         this.columnDefs.push(
             { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item) }
         );
-        if (this.mode != 'view') {
+        if (this.allowRemove) {
             this.columnDefs.push(
                 { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
             );
