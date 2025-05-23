@@ -15,6 +15,9 @@
 
 package org.shanoir.ng.dataset;
 
+import java.lang.reflect.InvocationTargetException;
+
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -58,6 +61,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -441,6 +445,14 @@ public class DatasetApiSecurityTest {
 
 		given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
 		given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
+
+		try {
+			DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, false);
+			DatasetLight datasetLight3 = new DatasetLight(3L, "ds3", MrDataset.class, 1L, false);
+			given(datasetRepository.findAllLightByStudyId(1L)).willReturn(Arrays.asList(new DatasetLight[]{datasetLight1, datasetLight3}));
+		} catch (NoSuchMethodException | InstantiationException | IllegalArgumentException | IllegalAccessException | InvocationTargetException ex) {
+			fail("exception raised : ", ex);
+		} 
 
 		exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
 		dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
