@@ -869,17 +869,25 @@ public class DatasetSecurityService {
 	* @return true
 	*/
 	public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-	   if (list == null) {
-	                   return true;
-	           }
-	   Set<Long> checkedIds = new HashSet<>();
-	   for (ExaminationDatasetAcquisitionDTO edsa : list) {
-		   if (hasRightOnExamination(edsa.getExaminationId(), rightStr)) {
-			   checkedIds.add(edsa.getExaminationId());
-		   }
-	   }
-	   list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getExaminationId()));
-	   return true;
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+	   	if (list == null || list.isEmpty()) {
+			return true;
+		}
+		List<Long> examinationIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+		Set<Long> examsToRemove = new HashSet<>();
+		UserRights userRights = commService.getUserRights();
+		List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
+		for (ExaminationForRightsDTO exam : exams) {
+			Long studyId = exam.getStudyId();
+			Long centerId = exam.getCenterId();
+			if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+				examsToRemove.add(exam.getId());
+			}
+		}
+    	list.removeIf(e -> examsToRemove.contains(e.getId()));
+    	return true;
 	}
 
     
@@ -1075,7 +1083,7 @@ public class DatasetSecurityService {
 		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
-		List<ExaminationForRightsDTO> exams = examinationRepository.findDatasetsForRights(examinationIds);
+		List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
 		UserRights userRights = commService.getUserRights();
 		for (ExaminationForRightsDTO exam : exams) {
 			Long studyId = exam.getStudyId();

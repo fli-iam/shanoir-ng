@@ -126,7 +126,6 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
 		assertAccessDenied(service::create, mockDataset(null));
 		assertAccessDenied(service::update, mockDataset(1L));
@@ -161,7 +160,6 @@ public class DatasetServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::create, mockDataset(null));
 		assertAccessAuthorized(service::update, mockDataset(1L));
@@ -190,10 +188,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessDenied(service::findByAcquisition, 2L);
 		assertAccessDenied(service::findByAcquisition, 3L);
 		assertAccessDenied(service::findByAcquisition, 4L);
-
-		//findAll()
-		assertThat(service.findAll()).hasSize(1);
-		assertThat(service.findAll().get(0).getId()).isEqualTo(1L);
 		
 		//findByStudyId(Long)
 		assertAccessAuthorized(service::findByStudyId, 1L);

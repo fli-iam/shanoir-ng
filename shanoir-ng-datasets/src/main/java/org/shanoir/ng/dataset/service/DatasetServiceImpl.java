@@ -290,11 +290,6 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<Dataset> findAll() {
-		return Utils.toList(repository.findAll());
-	}
-
-	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
 
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
