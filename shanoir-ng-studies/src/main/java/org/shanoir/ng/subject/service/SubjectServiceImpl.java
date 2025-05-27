@@ -226,6 +226,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
 		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
 		if (subjectDb == null) {
@@ -235,9 +236,9 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
 		}
 		updateSubjectValues(subjectDb, subject);
-		subjectRepository.save(subjectDb);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
-		return subjectDb;
+		Subject newSubject = subjectRepository.save(subjectDb);
+		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
+		return newSubject;
 	}
 
 	/*
