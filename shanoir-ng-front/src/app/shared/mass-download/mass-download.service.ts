@@ -18,7 +18,7 @@ import { ComponentRef, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
-import { Task, TaskState } from 'src/app/async-tasks/task.model';
+import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
@@ -145,8 +145,7 @@ export class MassDownloadService {
 
     // This method is used to download in
     private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
-        let task: Task = this.createTask(datasetIds.length);
-
+        let task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
@@ -220,7 +219,7 @@ export class MassDownloadService {
                 .then(handle => this.makeRootSubdirectory(handle, datasetIds.length));
         }
         return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
-            if (!task) task = this.createTask(datasetIds.length);
+            if (!task) task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
             if (downloadState) downloadState.status = task.status;
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
@@ -530,18 +529,18 @@ export class MassDownloadService {
         return report;
     }
 
-    private createTask(nbDatasets: number): Task {
-        return this._createTask('Download launched for ' + nbDatasets + ' datasets');
+    private createTask(nbDatasets: number, status: TaskStatus = 2): Task {
+        return this._createTask('Download launched for ' + nbDatasets + ' datasets', status);
     }
 
-    private _createTask(message: string): Task {
+    private _createTask(message: string, status: TaskStatus = 2): Task {
         let task: Task = new Task();
         task.id = Date.now();
         task.creationDate = new Date();
         task.lastUpdate = task.creationDate;
         task.message = message;
         task.progress = 0;
-        task.status = 2;
+        task.status = status;
         task.eventType = 'downloadDataset.event';
         task.sessionId = this.sessionService.sessionId;
         this.notificationService.pushLocalTask(task);
