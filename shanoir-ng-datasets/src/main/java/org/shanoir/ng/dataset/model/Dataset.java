@@ -60,6 +60,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import org.shanoir.ng.vip.processingResource.model.ProcessingResource;
 
 /**
  * Dataset.
@@ -144,6 +145,13 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "referencedDatasetForSuperimposition", cascade = CascadeType.ALL)
 	private List<Dataset> referencedDatasetForSuperimpositionChildrenList;
+
+	/**
+	 * List of processing resources relative to that dataset.
+	 */
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "processing_resource_to_datasets", joinColumns = @JoinColumn(name = "dataset_id"), inverseJoinColumns = @JoinColumn(name = "resource_id"))
+	private List<ProcessingResource> resource;
 
 	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
 	private Long importedStudyId;
@@ -519,4 +527,11 @@ public abstract class Dataset extends AbstractEntity {
 		this.copies = copies;
 	}
 
+    public List<ProcessingResource> getResource() {
+        return resource;
+    }
+
+    public void setResource(List<ProcessingResource> resource) {
+        this.resource = resource;
+    }
 }
