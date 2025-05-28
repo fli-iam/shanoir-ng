@@ -32,7 +32,7 @@ public class DeleteDirectory {
 			}
 		}
 
-		logger.info(" End delete process .");
+		logger.info(" End delete process.");
 	}
 
 	public static void delete(File file) throws IOException {
