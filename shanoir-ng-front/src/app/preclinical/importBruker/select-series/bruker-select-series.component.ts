@@ -36,8 +36,7 @@ export class BrukerSelectSeriesComponent {
     private workFolder: string;
     public detailedPatient: any;
     public detailedSerie: any;
-    public papayaParams: object[];
-    public papayaError: boolean = false;
+    public papayaLoadingCallback: () => Promise<any[]>;
 
     constructor(
             private importService: ImportService,
@@ -61,9 +60,7 @@ export class BrukerSelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = serie;
-            setTimeout(() => { // so the details display has no delay
-                if (serie && serie.images) this.initPapaya(serie); 
-            });
+            if (serie && serie.images) this.papayaLoadingCallback = () => this.initPapaya(serie);
         }
     }
 
@@ -76,19 +73,15 @@ export class BrukerSelectSeriesComponent {
         }
     }
     
-    private initPapaya(serie: SerieDicom): void {
-        this.papayaError = false;
+    private initPapaya(serie: SerieDicom): Promise<any[]> {
         let listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
         let promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then((values) => {
+        return promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
-            this.papayaParams = params;
-        }).catch(reason => {
-            this.papayaError = true;
-            console.error(reason);
+            return params;
         });
     }
 
