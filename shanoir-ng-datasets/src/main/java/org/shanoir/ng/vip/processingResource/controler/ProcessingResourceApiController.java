@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.processingResource.controler;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -21,8 +22,6 @@ import java.util.List;
 public class ProcessingResourceApiController implements ProcessingResourceApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProcessingResourceApiController.class);
-
-    private static final String DCM = "dcm";
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
