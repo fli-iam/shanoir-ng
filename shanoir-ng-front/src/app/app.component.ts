@@ -29,7 +29,6 @@ import { ServiceLocator } from './utils/locator.service';
 import { Observable } from 'rxjs';
 import { NotificationsService } from './shared/notifications/notifications.service';
 
-
 @Component({
     selector: 'app-root',
     templateUrl: 'app.component.html',

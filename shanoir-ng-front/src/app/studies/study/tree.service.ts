@@ -45,7 +45,7 @@ import { StudyService } from '../shared/study.service';
 
 @Injectable()
 export class TreeService {
-
+    
     private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
@@ -58,21 +58,26 @@ export class TreeService {
     selectedNode: ShanoirNode;
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
     studyLoading: boolean = false;
-
+    reopenAfterNavigation: boolean = false;
+    
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
-    }   
-
+    }
+    
     get treeOpened(): boolean {
         return this._treeOpened;
     }
 
     set treeOpened(opened: boolean) {
         if (!this._treeOpened && opened) {
-            this._treeOpened = opened;
-            this.studyNodeInit.then(() => {
-                this.changeSelection();
-            });
+            this.changeSelection();
+            if (this.selection?.studyId && this.selection?.studyId?.includes(this.studyNode?.id)) {
+                this.studyNodeInit.then(() => {
+                    this._treeOpened = opened;
+                });
+            } else {
+                this._treeOpened = opened;
+            }
         }
         this._treeOpened = opened;
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
@@ -113,6 +118,7 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
+                if (this.reopenAfterNavigation) this.treeOpened = true;
                 setTimeout(() => {
                     let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
                     if (newState && !this.treeAvailable) {
@@ -623,6 +629,17 @@ export class TreeService {
                 attr[1].forEach(sn => this.unSelectNode(sn));
             }
         });
+    }
+
+    memberStudyOpened(userId: number): boolean {
+        return this.studyNode?.membersNode?.members 
+            && this.studyNode?.membersNode?.members != UNLOADED
+            && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
+    }
+
+    closeTemporarily() {
+        this.treeOpened = false;
+        this.reopenAfterNavigation = true;
     }
 }
 
