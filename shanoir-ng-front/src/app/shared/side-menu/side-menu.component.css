@@ -81,6 +81,7 @@ progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 .notif.button { color: var(--color-b-light2); display: none; }
 .jobs-menu:hover .notif.button { display: inline-block; }
 .jobs-menu { max-width: 100%; }
+.jobs-menu progress-bar { margin-left: 10px; }
 
-.menu-link { display: inline-block; }
+.menu-link { display: inline-block; width: 100%; }
 .remove-task { position: absolute; left: 7px; padding-top: 1px; }
