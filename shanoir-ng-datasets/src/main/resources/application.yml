@@ -18,6 +18,9 @@ server:
   error:
     whitelabel:
       enabled: false
+  shanoir-hours:
+    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
+    continuance: ${SHANOIR_CONTINUANCE_HOUR}
 ##### Database #####
 spring:
   datasource:
@@ -151,7 +154,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
-  shanoir-vip-host: ${HOSTNAME:local}
+  shanoir-vip-host: ofsepqualif
 
 # Service account
 service-account:
@@ -167,6 +170,9 @@ service-account:
 ######################################
 server:
   port: 9914
+  shanoir-hours:
+    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
+    continuance: ${SHANOIR_CONTINUANCE_HOUR}
 spring:
   config.activate.on-profile: dev
   datasource:

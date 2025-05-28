@@ -132,7 +132,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 		WHERE ds.id IN :ids
 			""")
   List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
-	
+
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
 			+ "ds.id, dm.name, TYPE(ds), " 
 			+ "ds.datasetAcquisition.examination.study.id, "  
@@ -144,5 +144,18 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			+ "LEFT JOIN e.study s " 
 			+ "WHERE s.id = :studyId")
 	List<DatasetLight> findAllLightByStudyId(Long studyId);
-	
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id " +
+			"WHERE ds.dataset_acquisition_id IN (?1) " +
+			"AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+	List<Long> findFilteredIdsByDatasetAcquisitionIdIn(List<Long> acquisitionIds, String filter);
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id " +
+			"WHERE ds.dataset_acquisition_id = ?1 " +
+			"AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+	List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
+
+	List<Dataset> findByIdIn(List<Long> ids);
 }

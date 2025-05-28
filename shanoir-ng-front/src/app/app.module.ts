@@ -275,6 +275,9 @@ import { ExecutionTemplateListComponent } from "./vip/execution-template/executi
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
 import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
 import { SizePipe } from './shared/utils/size.pipe';
+import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
+import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
+import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/execution-template-filter.service";
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { DuaService } from './dua/shared/dua.service';
 import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe";
@@ -464,7 +467,10 @@ import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe
         ExecutionTemplateListComponent,
         ExecutionTemplateComponent,
         SizePipe,
-        DUAAssistantComponent
+        DUAAssistantComponent,
+        ExecutionTemplateComponent,
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -572,6 +578,7 @@ import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe
         ShanoirEventService,
         TreeService,
         ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         DuaService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())

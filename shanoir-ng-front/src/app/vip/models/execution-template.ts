@@ -12,16 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Entity} from "../../shared/components/entity/entity.abstract";
-import {PipelineParameter} from "./pipelineParameter";
+import {Pipeline} from "./pipeline";
+import {ExecutionTemplateParameter} from "./execution-template-parameter";
+import {Study} from "../../studies/shared/study.model";
 
 export class ExecutionTemplate extends Entity {
     id: number
     studyId: number
     name: string
-    vipPipeline: string
-    examinationNameFilter: string
-    parameters: PipelineParameter[]
-    exportFormat: string
-    groupBy: string
-    niftiConverter: number
+    pipelineName: string
+    priority: number
+    filterCombination: string
+    parameters: ExecutionTemplateParameter[]
 }

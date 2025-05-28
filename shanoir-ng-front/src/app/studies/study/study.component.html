@@ -413,8 +413,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </study-history>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
-                <legend>Execution template</legend>
-                <execution-template-list [studyId]="study.id" />
+                <legend>Execution templates</legend>
+                <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
             </fieldset>
 		</form>
 	</div>

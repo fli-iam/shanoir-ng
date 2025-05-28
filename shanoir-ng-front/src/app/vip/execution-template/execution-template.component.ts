@@ -1,19 +1,17 @@
-import {Component, Input} from '@angular/core';
-import {ExecutionTemplate} from "../models/execution-template";
-import {ModesAware} from "../../preclinical/shared/mode/mode.decorator";
-import {EntityComponent, Mode} from "../../shared/components/entity/entity.component.abstract";
-import {ActivatedRoute} from "@angular/router";
-import {StudyRightsService} from "../../studies/shared/study-rights.service";
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
-import {ExecutionTemplateService} from "./execution-template.service";
-import {FormGroup, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {EntityService} from "../../shared/components/entity/entity.abstract.service";
-import {PipelineService} from "../pipelines/pipeline/pipeline.service";
-import {Pipeline} from "../models/pipeline";
-import {PipelineParameter} from "../models/pipelineParameter";
-import {ParameterType} from "../models/parameterType";
-import {Option} from "../../shared/select/select.component";
-
+import {ChangeDetectorRef, Component} from '@angular/core'
+import {ExecutionTemplate} from "../models/execution-template"
+import {EntityComponent} from "../../shared/components/entity/entity.component.abstract"
+import {ActivatedRoute} from "@angular/router"
+import {ExecutionTemplateService} from "./execution-template.service"
+import {
+    FormGroup,
+    UntypedFormGroup,
+    Validators
+} from "@angular/forms"
+import {EntityService} from "../../shared/components/entity/entity.abstract.service"
+import {Pipeline} from "../models/pipeline"
+import {Option} from "../../shared/select/select.component"
+import {DatasetProcessingType} from "../../enum/dataset-processing-type.enum"
 
 @Component({
     selector: 'execution-template',
@@ -21,114 +19,131 @@ import {Option} from "../../shared/select/select.component";
     styleUrls: ['./execution-template.component.css'],
     standalone: false
 })
-@ModesAware
+
 export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplate> {
 
-    niftiConverters: Option<number>[] = [
-        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
-        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
-        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
-        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
-        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
-        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
-        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
-    ];
-
-    studyId: number;
+    studyName: string
+    studyId: number
+    pipeline: Pipeline
     pipelines: Pipeline[]
     pipelineNames: string[]
-    selectedPipeline: Pipeline
+    priority: number
     executionForm: UntypedFormGroup
+    existingPriorities: number[]
+    pipelineParameters: { [key: string]: string }
+    processingType = Object.values(DatasetProcessingType)
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31'),
+        new Option<number>(2, 'MCVERTER_2_0_7'),
+        new Option<number>(4, 'DCM2NII_2014_08_04'),
+        new Option<number>(5, 'MCVERTER_2_1_0'),
+        new Option<number>(6, 'DCM2NIIX'),
+        new Option<number>(7, 'DICOMIFIER'),
+        new Option<number>(8, 'MRICONVERTER'),
+    ]
 
     constructor(
         private route: ActivatedRoute,
-        private studyRightsService: StudyRightsService,
-        keycloakService: KeycloakService,
-        private pipelineService: PipelineService,
-        protected executionTemplateService: ExecutionTemplateService) {
-        super(route, 'execution-template');
+        protected templateService: ExecutionTemplateService,
+        public cdr: ChangeDetectorRef) {
+        super(route, 'execution-template')
         if ( this.breadcrumbsService.currentStep ) {
-            this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
+            localStorage.setItem('studyId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("studyId")))
+            this.studyName = this.breadcrumbsService.currentStep.getPrefilledValue("studyName")
+            localStorage.setItem('studyName', this.studyName)
         }
     }
 
-    get executionTemplate(): ExecutionTemplate { return this.entity; }
-    set executionTemplate(et: ExecutionTemplate) { this.entity= et; }
+    get executionTemplate(): ExecutionTemplate { return this.entity }
+    set executionTemplate(et: ExecutionTemplate) { this.entity= et }
 
     buildForm(): FormGroup {
+        if(this.pipelineParameters === undefined) {this.pipelineParameters = {}}
         this.executionForm = this.formBuilder.group({
-            'name': [this.executionTemplate.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
-            'examinationNameFilter': [this.executionTemplate.examinationNameFilter],
-            'studyId': [this.executionTemplate.studyId, [Validators.required]],
-            'vipPipeline': [this.executionTemplate.vipPipeline, [Validators.required]]
-        });
-        return this.executionForm;
+            'name': [this.entity.name, [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.registerOnSubmitValidator('unique', 'name')]],
+            'pipelineName': [this.entity.pipelineName, [Validators.required]],
+            'filterCombination': [this.entity.filterCombination, [this.templateService.filterCombinationControl()]],
+            'priority': [this.entity.priority, [Validators.required, this.templateService.uniqueInStudyControl(this.existingPriorities)]],
+            'group': ["examination", [Validators.required]],
+            'processing_type': [this.pipelineParameters['processing_type'], [Validators.required]],
+            'export_format': [this.pipelineParameters['export_format'], [Validators.required]],
+            'execution_name': [this.pipelineParameters['execution_name'], [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+            'converter': [this.pipelineParameters['converter'], [this.templateService.requiredIfTypeIsNii()]]
+        })
+
+        this.executionForm.get('export_format')?.valueChanges.subscribe(() => {
+            this.executionForm.get('converter')?.updateValueAndValidity()
+        })
+        this.executionForm.get('export_format')?.valueChanges.subscribe(() => {
+            this.executionForm.get('converter')?.updateValueAndValidity()
+        })
+        return this.executionForm
     }
 
     getService(): EntityService<ExecutionTemplate> {
-        return this.executionTemplateService;
+        return this.templateService
     }
 
     initCreate(): Promise<void> {
-        this.entity = new ExecutionTemplate();
-        this.entity.studyId = this.studyId;
-        this.pipelineService.listPipelines().subscribe(
-            (pipelines :Pipeline[])=>{
-                this.pipelines = pipelines;
-                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
-            }
-        )
+        this.entity = new ExecutionTemplate()
+        this.entity.studyId = Number(localStorage.getItem('studyId'))
+
+        this.studyName = localStorage.getItem('studyName')
+        this.templateService.getPipelinesFromVIP(this)
+        this.templateService.initParameters(this)
+        this.templateService.getExistingPriorities(this)
         return Promise.resolve()
     }
 
     initEdit(): Promise<void> {
-        this.pipelineService.listPipelines().subscribe(
-            (pipelines :Pipeline[])=>{
-                this.pipelines = pipelines;
-                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
-            }
-        )
-        return Promise.resolve();
+        this.templateService.onPipelineLoading(this, this.formBuilder)
+        this.templateService.getStudyName(this)
+        this.templateService.getParameters(this)
+
+        this.templateService.getPipelinesFromVIP(this)
+        this.templateService.getExistingPriorities(this)
+        this.cdr.detectChanges()
+
+        return Promise.resolve()
     }
 
     initView(): Promise<void> {
-        return Promise.resolve();
+        this.templateService.onPipelineLoading(this, this.formBuilder)
+        this.templateService.getStudyName(this)
+        this.templateService.getParameters(this)
+        this.cdr.detectChanges()
+        return Promise.resolve()
     }
 
-    isAFile(parameter: PipelineParameter): boolean {
-        return parameter.type == ParameterType.File;
+    save(): Promise<ExecutionTemplate> {
+        this.templateService.checkOneDatasetGroup(this)
+        this.templateService.cleanParameters(this)
+        this.templateService.shapeParameterEntities(this)
+        this.templateService.updateEntityOnSave(this)
+        super.save()
+        return Promise.resolve(this.entity)
     }
 
-    updatePipeline(selectedPipelineIdentifier): void {
-        if (selectedPipelineIdentifier) {
-            this.pipelineService.getPipeline(selectedPipelineIdentifier).subscribe(pipeline => {
-                this.selectedPipeline = pipeline;
-                this.selectedPipeline.parameters.forEach(
-                    parameter => {
-                        let validators: ValidatorFn[] = [];
-                        if (!parameter.isOptional && parameter.type != ParameterType.Boolean && parameter.type != ParameterType.File) {
-                            validators.push(Validators.required);
-                        }
-                        let control = new UntypedFormControl(parameter.defaultValue, validators);
-                        if (parameter.name != "executable") {
-                            this.executionForm.addControl(parameter.name, control);
-                        }
-                    }
-                )
-                let groupByControl = new UntypedFormControl("dataset", [Validators.required]);
-                this.executionForm.addControl("groupBy", groupByControl);
 
-                let exportControl = new UntypedFormControl("dcm", [Validators.required]);
-                this.executionForm.addControl("exportFormat", exportControl);
+    goBack(){
+        this.router.navigate(['study/details/' + this.entity.studyId], {fragment: 'executions'})
+    }
 
-                let niiConverterControl = new UntypedFormControl(6, []);
-                this.executionForm.addControl("niftiConverter", niiConverterControl);
-            });
-
-        } else {
-            this.selectedPipeline = null;
-            this.executionForm = this.buildForm();
+    onParameterUpdate(parameterName: string) {
+        this.pipelineParameters[parameterName.replace(/_value$/, '')] = this.form.get(parameterName)?.value
+        if(parameterName === 'export_format' && this.form.get('export_format')?.value !== 'nii') {
+            this.form.get('converter')?.setValue(null)
+            this.pipelineParameters['converter'] = null
         }
     }
 
+    onPipelineUpdate() {
+        this.templateService.onPipelineUpdate(this, this.formBuilder)
+    }
+
+    getConverterLabel(converterNumber: string): string {
+        const match = this.niftiConverters.find(opt => opt.value === Number(converterNumber))
+        return match ? match.label : converterNumber
+    }
 }

@@ -1,7 +1,5 @@
 package org.shanoir.ng.vip.execution.service;
 
-import java.util.List;
-
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -9,10 +7,12 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
-
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public interface ExecutionService {
 
@@ -75,4 +75,12 @@ public interface ExecutionService {
      * @throws ResultHandlerException
      */
     Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException;
+
+    /**
+     * Try to get execution status from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
+     * Authenticate as service account
+     * @param identifier
+     * @return ExecutionStatus
+     */
+    ExecutionStatus getExecutionStatusFromVipIdentifier(String identifier);
 }

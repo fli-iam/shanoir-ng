@@ -18,5 +18,4 @@ export class PipelineComponent implements OnInit {
   ngOnInit(): void {
     console.log(this.pipeline);
   }
-
 }

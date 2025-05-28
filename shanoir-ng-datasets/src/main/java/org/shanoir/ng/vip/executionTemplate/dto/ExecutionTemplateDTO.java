@@ -2,7 +2,6 @@ package org.shanoir.ng.vip.executionTemplate.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateParameter;
 
 import java.util.List;
 
@@ -13,43 +12,38 @@ import java.util.List;
 public class ExecutionTemplateDTO extends HalEntity {
 
     private String name;
-    private long studyId;
-    private String vipPipeline;
-    private String examinationNameFilter;
-    private List<ExecutionTemplateParameter> parameters;
-    private String exportFormat;
-    private String groupBy;
-    private long niftiConverter;
+    private Long studyId;
+    private String pipelineName;
+    private List<ExecutionTemplateParameterDTO> parameters;
+    private List<ExecutionTemplateFilterDTO> filters;
+    private int priority;
+    private String filterCombination;
 
-    public long getStudyId() { return studyId; }
+    public String getFilterCombination() {return filterCombination;}
 
-    public void setStudyId(long studyId) { this.studyId = studyId; }
+    public void setFilterCombination(String filterCombination) {this.filterCombination = filterCombination;}
+
+    public int getPriority() {return priority;}
+
+    public void setPriority(int priority) {this.priority = priority;}
+
+    public Long getStudyId() { return studyId; }
+
+    public void setStudyId(Long studyId) { this.studyId = studyId; }
 
     public String getName() {return name;}
 
     public void setName(String name) {this.name = name;}
 
-    public String getVipPipeline() {return vipPipeline;}
+    public String getPipelineName() {return pipelineName;}
 
-    public void setVipPipeline(String vipPipeline) {this.vipPipeline = vipPipeline;}
+    public void setPipelineName(String pipelineName) {this.pipelineName = pipelineName;}
 
-    public String getExaminationNameFilter() {return examinationNameFilter;}
+    public List<ExecutionTemplateFilterDTO> getFilters() {return filters;}
 
-    public void setExaminationNameFilter(String examinationNameFilter) {this.examinationNameFilter = examinationNameFilter;}
+    public void setFilters(List<ExecutionTemplateFilterDTO> filtersDTO) {this.filters = filtersDTO;}
 
-    public List<ExecutionTemplateParameter> getParameters() {return parameters;}
+    public List<ExecutionTemplateParameterDTO> getParameters() {return parameters;}
 
-    public void setParameters(List<ExecutionTemplateParameter> parameters) {this.parameters = parameters;}
-
-    public String getExportFormat() {return exportFormat;}
-
-    public void setExportFormat(String exportFormat) {this.exportFormat = exportFormat;}
-
-    public String getGroupBy() {return groupBy;}
-
-    public void setGroupBy(String groupBy) {this.groupBy = groupBy;}
-
-    public long getNiftiConverter() {return niftiConverter;}
-
-    public void setNiftiConverter(long niftiConverter) {this.niftiConverter = niftiConverter;}
+    public void setParameters(List<ExecutionTemplateParameterDTO> parametersDTO) {this.parameters = parametersDTO;}
 }

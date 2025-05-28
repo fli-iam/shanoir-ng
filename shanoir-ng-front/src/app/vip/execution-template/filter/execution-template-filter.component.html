@@ -1,0 +1,57 @@
+<div #formContainer class="content-component detail">
+    <form *ngIf="form" [formGroup]="executionFilterForm" class="max-content" novalidate [class.disabled]="footerState.loading">
+        <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (cancel)="goToView()" (back)="goBack()"></form-footer>
+
+        <h2 class="header command-zone" *ngIf="mode === 'view'" i18n="View execution template filter|Title@@executiontemplatefilterDetailViewTitle">Execution template parameter</h2>
+        <h2 class="header command-zone" *ngIf="mode === 'edit'" i18n="Edit execution template|Title@@executiontemplatefilterDetailEditTitle">Edit execution template parameter</h2>
+        <h2 class="header command-zone" *ngIf="mode === 'create'" i18n="Create execution template|Title@@executiontemplatefilterDetailCreateTitle">Create execution template parameter</h2>
+
+        <fieldset>
+            <ol>
+                <li>
+                    <label i18n="Execution template detail|TemplateId label@@centerDetailName">Template</label>
+                    <span class="right-col">{{templateName}}</span>
+                </li>
+                <li>
+                    <label>Field name<tool-tip>Name of the field to compare. The format is [subject, examination, acquisition].[fieldName]. Example : acquisition.name. Only strings, numbers and boolean can be filtered</tool-tip></label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else fieldNameEdit">{{ executionTemplateFilter.fieldName }}</ng-container>
+						<ng-template #fieldNameEdit>
+                            <input type="text" id="fieldName" formControlName="fieldName"/>
+                            <label *ngIf="hasError('fieldName', ['required'])" class="form-validation-alert" i18n>Field name is required.</label>
+                            <label *ngIf="hasError('fieldName', ['fieldNameFormatControl'])" class="form-validation-alert" i18n>Field name format has to be "object.fieldName".</label>
+                        </ng-template>
+					</span>
+                </li>
+                <li>
+                    <label>Regex to compare<tool-tip>Regex for comparing the value of the field above. Format example : 'T2%SAG%' allows the selection of every field starting with T2 and containing SAG.</tool-tip></label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else comparedRegexEdit">{{ executionTemplateFilter.comparedRegex }}</ng-container>
+						<ng-template #comparedRegexEdit>
+                            <input type="text" id="comparedRegex" formControlName="comparedRegex"/>
+                            <label *ngIf="hasError('comparedRegex', ['required'])" class="form-validation-alert" i18n>Compared regex is required.</label>
+                            <label *ngIf="hasError('comparedRegex', ['comparedRegexFormatControl'])" class="form-validation-alert" i18n>Compared regex has to be composed only with strings and '%'.</label>
+                        </ng-template>
+					</span>
+                </li>
+                <li>
+                    <label>Excluded<tool-tip>Negate the comparison</tool-tip></label>
+                    <span class="right-col">
+                        <input type="checkbox" id="excluded" formControlName="excluded" [ngClass]="{'disabled-radio': mode === 'view'}"/>
+					</span>
+                </li>
+                <li>
+                    <label>Identifier<tool-tip>Used for shaping complex filter logic.</tool-tip></label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else identifierEdit">{{ executionTemplateFilter.identifier }}</ng-container>
+						<ng-template #identifierEdit>
+                            <input type="number" id="identifier" min="1"  formControlName="identifier"/>
+                            <label *ngIf="hasError('identifier', ['required'])" class="form-validation-alert" i18n>Identifier is required.</label>
+                            <label *ngIf="form.get('identifier')?.hasError('uniqueInTemplateControl')" class="form-validation-alert" i18n>Priority must be unique</label>
+                        </ng-template>
+					</span>
+                </li>
+            </ol>
+        </fieldset>
+    </form>
+</div>

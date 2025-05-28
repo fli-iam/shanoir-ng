@@ -1,6 +1,9 @@
 package org.shanoir.ng.vip.executionMonitoring.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -12,6 +15,9 @@ import org.shanoir.ng.vip.execution.service.ExecutionService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
+import org.shanoir.ng.vip.executionTemplate.model.PlannedExecution;
+import org.shanoir.ng.vip.executionTemplate.repository.PlannedExecutionRepository;
+import org.shanoir.ng.vip.executionTemplate.service.PlannedExecutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -46,6 +52,12 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
     @Autowired
     private ExecutionMonitoringRepository executionMonitoringRepository;
 
+    @Autowired
+    private PlannedExecutionRepository plannedExecutionRepository;
+
+    @Autowired
+    private PlannedExecutionService plannedExecutionService;
+
     /**
      * At the end of the Spring context loading (on application startup),
      * restart status monitoring of VIP execution monitoring with a status "Running" in database
@@ -57,7 +69,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
-        try {
+        try { // Execution resumption
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
             for (ExecutionMonitoring monitoring : runningMonitorings) {
@@ -76,11 +88,22 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                         LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
                     } catch (Exception e) {
                         LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
+                        executionMonitoringRepository.delete(monitoring);
                     }
                 }
             }
         } catch (Exception ignored) {
             //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
+        }
+
+        // Planned executions resumption
+        Map<Long, List<Long>> createdAcquisitionsPerTemplateId = StreamSupport.stream(plannedExecutionRepository.findAll().spliterator(), false)
+                .collect(Collectors.groupingBy(
+                        PlannedExecution::getTemplateId,
+                        Collectors.mapping(PlannedExecution::getAcquisitionId, Collectors.toList())
+                ));
+        if(!createdAcquisitionsPerTemplateId.isEmpty()){
+            plannedExecutionService.applyExecution(createdAcquisitionsPerTemplateId);
         }
     }
 }

@@ -100,6 +100,8 @@ import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { TestComponent } from './utils/dev/test.component';
 import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
+import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
+import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
 
 let routes: Routes = [
     {
@@ -134,6 +136,9 @@ let routes: Routes = [
     }, {
         path: 'execution-template-list',
         component: ExecutionTemplateListComponent
+    }, {
+        path: 'execution-template-filter-list',
+        component: ExecutionTemplateFilterListComponent
     }, {
         path: 'pipelines',
         component: PipelinesComponent
@@ -866,6 +871,21 @@ let routes: Routes = [
     {
         path: 'execution-template/details/:id',
         component: ExecutionTemplateComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'execution-template-filter/create',
+        component: ExecutionTemplateFilterComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'execution-template-filter/edit/:id',
+        component: ExecutionTemplateFilterComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'execution-template-filter/details/:id',
+        component: ExecutionTemplateFilterComponent,
         data: { mode: 'view' },
     }
 ];

@@ -198,6 +198,8 @@ services:
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
+      - SHANOIR_CONTINUANCE_HOUR
+      - SHANOIR_SHUTDOWN_HOUR
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro

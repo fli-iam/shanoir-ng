@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </encoder>
     </appender>
 
-    <logger name="org.shanoir.ng.vip.resulthandler" level="INFO" additivity="false">
+    <logger name="org.shanoir.ng.vip.result" level="INFO" additivity="false">
         <appender-ref ref="RESULTHANDLER_FILE"/>
     </logger>
 
