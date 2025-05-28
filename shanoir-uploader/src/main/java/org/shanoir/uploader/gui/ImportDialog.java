@@ -32,7 +32,6 @@ import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import org.jdesktop.swingx.JXTextField;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
@@ -105,9 +104,9 @@ public class ImportDialog extends JDialog {
 	public JTextFieldMandatory mrExaminationCommentTF;
 
 	public JLabel mriCenterLabel;
-	public JTextField mriCenterTF;
+	public JLabel mriCenterText;
 	public JLabel mriCenterAddressLabel;
-	public JTextField mriCenterAddressTF;
+	public JLabel mriCenterAddressText;
 	public JLabel mriStationNameLabel;
 	public JLabel mriStationNameText;
 	public JLabel mriManufacturerLabel;
@@ -176,15 +175,12 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 0;
 		dicomPanel.add(mriCenterLabel, dicomPanelGBC);
 
-		mriCenterTF = new JTextField();
-		mriCenterTF.setBackground(Color.LIGHT_GRAY);
-		mriCenterTF.setEnabled(false);
-		mriCenterTF.setEditable(false);
-		mriCenterTF.setFont(font);
-		mriCenterTF.setHorizontalAlignment(SwingConstants.LEFT);
+		mriCenterText = new JLabel("");
+		mriCenterText.setFont(font);
+		mriCenterText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.gridx = 1;
 		dicomPanelGBC.gridy = 0;
-		dicomPanel.add(mriCenterTF, dicomPanelGBC);
+		dicomPanel.add(mriCenterText, dicomPanelGBC);
 
 		mriCenterAddressLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.address"));
 		mriCenterAddressLabel.setFont(font);
@@ -192,15 +188,12 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 1;
 		dicomPanel.add(mriCenterAddressLabel, dicomPanelGBC);
 
-		mriCenterAddressTF = new JTextField();
-		mriCenterAddressTF.setBackground(Color.LIGHT_GRAY);
-		mriCenterAddressTF.setEnabled(false);
-		mriCenterAddressTF.setEditable(false);
-		mriCenterAddressTF.setFont(font);
-		mriCenterAddressTF.setHorizontalAlignment(SwingConstants.LEFT);
+		mriCenterAddressText = new JLabel("");
+		mriCenterAddressText.setFont(font);
+		mriCenterAddressText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.gridx = 1;
 		dicomPanelGBC.gridy = 1;
-		dicomPanel.add(mriCenterAddressTF, dicomPanelGBC);
+		dicomPanel.add(mriCenterAddressText, dicomPanelGBC);
 
 		mriStationNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.station.name"));
 		mriStationNameLabel.setFont(font);

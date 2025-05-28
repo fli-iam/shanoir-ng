@@ -10,10 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -87,10 +85,18 @@ public class ImportDialogOpener {
 		importDialog.setVisible(true);
 	}
 	
+	/**
+	 * @param uploadJob
+	 */
 	private void updateImportDialogForMRICenter(final ImportJob importJob) {
 		Serie firstSerie = importJob.getFirstSelectedSerie();
 		if (firstSerie != null) {
-			manageInstitution(firstSerie);
+			if (firstSerie.getInstitution() == null) {
+				logger.error("updateImportDialogForMRICenter: no institution found for serie: " + firstSerie.getSeriesInstanceUID());
+			} else {
+				importDialog.mriCenterText.setText(firstSerie.getInstitution().getInstitutionName());
+				importDialog.mriCenterAddressText.setText(firstSerie.getInstitution().getInstitutionAddress());
+			}
 			if (firstSerie.getEquipment() == null) {
 				logger.error("updateImportDialogForMRICenter: no equipment found for serie: " + firstSerie.getSeriesInstanceUID());
 			} else {
@@ -100,28 +106,6 @@ public class ImportDialogOpener {
 				importDialog.mriMagneticFieldStrengthText.setText(firstSerie.getEquipment().getMagneticFieldStrength());
 				importDialog.mriDeviceSerialNumberText.setText(firstSerie.getEquipment().getDeviceSerialNumber());
 			}
-		}
-	}
-
-	private void manageInstitution(Serie firstSerie) {
-		InstitutionDicom institution = firstSerie.getInstitution();
-		if (institution == null) {
-			logger.warn("updateImportDialogForMRICenter: no institution found for serie: " + firstSerie.getSeriesInstanceUID());
-			importDialog.mriCenterTF.setText(ImagesCreatorAndDicomFileAnalyzerService.UNKNOWN);
-			importDialog.mriCenterAddressTF.setText(ImagesCreatorAndDicomFileAnalyzerService.UNKNOWN);
-		} else {
-			importDialog.mriCenterTF.setText(firstSerie.getInstitution().getInstitutionName());
-			importDialog.mriCenterAddressTF.setText(firstSerie.getInstitution().getInstitutionAddress());
-		}
-		if (ImagesCreatorAndDicomFileAnalyzerService.UNKNOWN.equals(importDialog.mriCenterTF.getText())) {
-			importDialog.mriCenterTF.setEnabled(true);
-			importDialog.mriCenterTF.setEditable(true);
-			importDialog.mriCenterTF.setBackground(Color.WHITE);
-		}
-		if (ImagesCreatorAndDicomFileAnalyzerService.UNKNOWN.equals(importDialog.mriCenterAddressTF.getText())) {
-			importDialog.mriCenterAddressTF.setEnabled(true);
-			importDialog.mriCenterAddressTF.setEditable(true);
-			importDialog.mriCenterAddressTF.setBackground(Color.WHITE);
 		}
 	}
 
