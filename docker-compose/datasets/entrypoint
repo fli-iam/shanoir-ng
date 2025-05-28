@@ -11,6 +11,8 @@ require  SHANOIR_URL_SCHEME
 require  VIP_URL_HOST
 require  VIP_URL_SCHEME
 require  VIP_CLIENT_SECRET
+require  SHANOIR_CONTINUANCE_HOUR
+require  SHANOIR_SHUTDOWN_HOUR
 
 # Rabbit MQ default environnement variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
