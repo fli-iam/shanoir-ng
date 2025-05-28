@@ -63,7 +63,6 @@ public class DefaultHandler extends OutputHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
-
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {
         return true;

@@ -23,11 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -65,6 +61,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.executionTemplate.service.ExecutionTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +69,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -120,6 +119,9 @@ public class ImporterService {
 
     @Autowired
     private QualityService qualityService;
+
+    @Autowired
+    private ExecutionTemplateService templateService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -214,6 +216,16 @@ public class ImporterService {
                     +" Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
+
+            if(Objects.nonNull(templateService)){ //For maven test
+                final List<DatasetAcquisition> acquisitionsSnapshot = new ArrayList<>(generatedAcquisitions);
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        templateService.createExecutionsFromExecutionTemplates(acquisitionsSnapshot.stream().toList()); //performed after the new acquisitions are commited to DB
+                    }
+                });
+            }
 
             // Manage archive
             if (importJob.getArchive() != null) {
