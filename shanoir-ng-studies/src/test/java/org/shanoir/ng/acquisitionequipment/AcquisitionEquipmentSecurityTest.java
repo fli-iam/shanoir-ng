@@ -72,8 +72,8 @@ public class AcquisitionEquipmentSecurityTest {
 	public void testAsUser() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
+		assertAccessAuthorized(service::create, mockNew);
+		assertAccessAuthorized(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
 
