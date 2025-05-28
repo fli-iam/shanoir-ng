@@ -29,7 +29,6 @@ import { TherapyService } from '../shared/therapy.service';
 @Component({
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
-    providers: [TherapyService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })

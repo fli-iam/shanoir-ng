@@ -25,7 +25,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'reference-list',
     templateUrl: 'reference-list.component.html',
     styleUrls: ['reference-list.component.css'],
-    providers: [ReferenceService],
     standalone: false
 })
     

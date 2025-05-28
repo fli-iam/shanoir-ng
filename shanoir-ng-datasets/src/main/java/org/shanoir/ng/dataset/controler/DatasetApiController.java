@@ -294,23 +294,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-		
-		final List<Examination> examinations = examinationService.findByStudyId(studyId);
-		if (examinations.isEmpty()) {
+	
+		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
+		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		List<Dataset> datasets = new ArrayList<Dataset>();
-		for(Examination examination : examinations) {
-			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasets.add(dataset);
-				}
-			}
-		}
-		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
 	@Override
