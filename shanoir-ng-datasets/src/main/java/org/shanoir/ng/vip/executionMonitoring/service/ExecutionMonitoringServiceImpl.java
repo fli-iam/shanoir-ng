@@ -118,23 +118,25 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
                 if(dto == null){
                     attempts++;
-                    continue;
+                    Thread.sleep(sleepTime);
                 }else{
                     attempts = 1;
-                }
-                switch (dto.getStatus()) {
-                    case FINISHED -> processFinishedJob(processing, event, dto.getEndDate());
-                    case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(processing, event, dto);
-                    case RUNNING -> {
-                        try {
-                            Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
-                        } catch (InterruptedException e) {
-                            event.setMessage(execLabel + " : Monitoring interrupted, current state unknown...");
-                            eventService.publishEvent(event);
-                            LOG.warn("Execution monitoring thread interrupted", e);
+
+                    switch (dto.getStatus()) {
+                        case FINISHED -> processFinishedJob(processing, event, dto.getEndDate());
+                        case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(processing, event, dto);
+                        case RUNNING -> {
+                            try {
+                                Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
+                                LOG.info("Status for vip execution {}, monitoring {} is RUNNING", dto.getIdentifier(),identifier);
+                            } catch (InterruptedException e) {
+                                event.setMessage(execLabel + " : Monitoring interrupted, current state unknown...");
+                                eventService.publishEvent(event);
+                                LOG.warn("Execution monitoring thread interrupted", e);
+                            }
                         }
+                        default -> stop.set(true);
                     }
-                    default -> stop.set(true);
                 }
             } catch (Exception e){
                 // Unwrap ReactiveException thrown from async method
@@ -145,6 +147,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 stop.set(true);
             }
         }
+    }
+
+    public String getVipIdentifierFromMonitoringId(Long id) {
+        return repository.findById(id).get().getIdentifier();
     }
 
     /**
