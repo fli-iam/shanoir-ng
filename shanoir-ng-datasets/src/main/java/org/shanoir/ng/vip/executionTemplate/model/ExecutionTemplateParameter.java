@@ -1,63 +1,29 @@
 package org.shanoir.ng.vip.executionTemplate.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 @Entity
 public class ExecutionTemplateParameter extends AbstractEntity {
 
+    @ManyToOne(fetch =  FetchType.EAGER)
+    @JoinColumn(name = "execution_template_id")
+    private ExecutionTemplate executionTemplate;
     private String name;
-    private String type;
     private String value;
-    private boolean isOptional;
-    private boolean isReturnedValue;
-    private String description;
 
-    public String getName() {
-        return name;
-    }
+    public ExecutionTemplate getExecutionTemplate() {return executionTemplate;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setExecutionTemplate(ExecutionTemplate executionTemplate) {this.executionTemplate = executionTemplate;}
 
-    public String getType() {
-        return type;
-    }
+    public String getName() {return name;}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public void setName(String name) {this.name = name;}
 
-    public String getValue() {
-        return value;
-    }
+    public String getValue() {return value;}
 
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public boolean isOptional() {
-        return isOptional;
-    }
-
-    public void setOptional(boolean optional) {
-        isOptional = optional;
-    }
-
-    public boolean isReturnedValue() {
-        return isReturnedValue;
-    }
-
-    public void setReturnedValue(boolean returnedValue) {
-        isReturnedValue = returnedValue;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setValue(String value) {this.value = value;}
 }
