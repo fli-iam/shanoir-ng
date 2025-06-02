@@ -537,17 +537,19 @@ export class StudyComponent extends EntityComponent<Study> {
                 }
                 return;
             }
-            this.studyCardService.getAllForStudy(study.id).then(studyCards => {
-                if (!studyCards || studyCards.length == 0) {
-                    this.confirmDialogService.confirm('Create a Study Card',
-                        'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
-                        .then(userChoice => {
-                            if (userChoice) {
-                                this.router.navigate(['/study-card/create', {studyId: study.id}]);
-                            }
-                        });
-                }
-            })
+            if (study.studyCardPolicy == 'MANDATORY') {
+                this.studyCardService.getAllForStudy(study.id).then(studyCards => {
+                    if (!studyCards || studyCards.length == 0) {
+                        this.confirmDialogService.confirm('Create a Study Card',
+                            'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
+                            .then(userChoice => {
+                                if (userChoice) {
+                                    this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                                }
+                            });
+                    }
+                })
+            }
             return study;
         });
     }
