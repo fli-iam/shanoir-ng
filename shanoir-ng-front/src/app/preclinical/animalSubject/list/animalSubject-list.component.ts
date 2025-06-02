@@ -30,7 +30,6 @@ import {PreclinicalSubject} from '../shared/preclinicalSubject.model';
     selector: 'animalSubject-list',
     templateUrl: 'animalSubject-list.component.html',
     styleUrls: ['animalSubject-list.component.css'],
-    providers: [AnimalSubjectService],
     standalone: false
 })
 export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
