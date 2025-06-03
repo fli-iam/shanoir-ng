@@ -25,13 +25,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -49,10 +49,8 @@ import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +162,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		return null;
 	}
 
-	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, InterruptedException {
 		PatientVerification patientVerification = importJob.getPatientVerification();
 		String[] line = {
 			patientVerification.getFirstName(),
@@ -212,12 +210,12 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadOrCopyRunnable);
 		downloadThread.start();
-		while (downloadThread.isAlive()) {
-			// wait for download thread to finish 
-		}
-		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
-		UploadJob uploadJob = uploadJobManager.readUploadJob();
+		// Wait for thread to finish
+		downloadThread.join();
+
+		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
+		ImportJob importJobData = importJobManager.readImportJob();
 
 		logger.info("4. Find matching study card in selected study or create a new study card");
 		StudyCard studyCard = null;
@@ -231,7 +229,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					studyCard = scOpt.get();
 					logger.info("Matching study card found in study by name from table: " + studyCard.getName());
 				} else {
-					uploadJob.setUploadState(UploadState.ERROR);
+					importJobData.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: study card configured in table, but not found in study: " + importJob.getStudyCardName());
 					logger.error(importJob.getErrorMessage());
 					return false;
@@ -239,13 +237,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 		// 4.2 Find matching study card on study using info from DICOM
-		String manufacturerName = uploadJob.getMriInformation().getManufacturer();
-		String manufacturerModelName = uploadJob.getMriInformation().getManufacturersModelName();
-		String deviceSerialNumber = uploadJob.getMriInformation().getDeviceSerialNumber();
+		String manufacturerName = importJobData.getFirstSelectedSerie().getEquipment().getManufacturer();
+		String manufacturerModelName = importJobData.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
+		String deviceSerialNumber = importJobData.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
 		if (manufacturerName == null || manufacturerName.isBlank()
 			|| manufacturerModelName == null || manufacturerModelName.isBlank()
 			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
-			uploadJob.setUploadState(UploadState.ERROR);
+				importJobData.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
 			return false;
 		}
@@ -279,9 +277,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				studyCards.add(studyCard); // add in memory to avoid loading from server
 			// No equipment found: create one
 			} else {				
-				String institutionName = uploadJob.getMriInformation().getInstitutionName();
+				String institutionName = importJobData.getFirstSelectedSerie().getInstitution().getInstitutionName();
 				if (institutionName == null || institutionName.isBlank()) {
-					uploadJob.setUploadState(UploadState.ERROR);
+					importJobData.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: no institution name in DICOM.");
 					logger.error(importJob.getErrorMessage());
 					return false;
@@ -289,10 +287,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				// 4.3.2 find center or create one, and add it into study for import (study-center)
 				InstitutionDicom institutionDicom = new InstitutionDicom();
 				institutionDicom.setInstitutionName(institutionName);
-				institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
+				institutionDicom.setInstitutionAddress(importJobData.getFirstSelectedSerie().getInstitution().getInstitutionAddress());
 				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
 				if (center == null) {
-					uploadJob.setUploadState(UploadState.ERROR);
+					importJobData.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: could not find or create center.");
 					logger.error(importJob.getErrorMessage());
 					return false;
@@ -312,7 +310,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						}
 					}
 					if (manufacturer == null) {
-						uploadJob.setUploadState(UploadState.ERROR);
+						importJobData.setUploadState(UploadState.ERROR);
 						importJob.setErrorMessage("Error: could not create manufacturer.");
 						logger.error(importJob.getErrorMessage());
 						return false;
@@ -324,7 +322,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						modality = importJob.getSelectedSeries().iterator().next().getModality();
 					}
 					Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
-					String magneticFieldStrength = uploadJob.getMriInformation().getMagneticFieldStrength();
+					String magneticFieldStrength = importJobData.getFirstSelectedSerie().getEquipment().getMagneticFieldStrength();
 					if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
 						magneticFieldStrength = "0.0";
 					}
@@ -332,14 +330,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						manufacturerModelName, manufacturer, DatasetModalityType.getType(datasetModalityType).toString(), Double.valueOf(magneticFieldStrength));
 				}
 				if (manufacturerModel == null) {
-					uploadJob.setUploadState(UploadState.ERROR);
+					importJobData.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: could not create manufacturerModel.");
 					logger.error(importJob.getErrorMessage());
 					return false;
 				}
 				equipment = ImportUtils.createEquipment(center, manufacturerModel, deviceSerialNumber);
 				if (equipment == null) {
-					uploadJob.setUploadState(UploadState.ERROR);
+					importJobData.setUploadState(UploadState.ERROR);
 					importJob.setErrorMessage("Error: could not create equipment.");
 					logger.error(importJob.getErrorMessage());
 					return false;
@@ -355,7 +353,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			line[6] = "Error with study card";
 			csvWriter.addExaminationLine(false, line);
 			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			uploadJob.setUploadState(UploadState.ERROR);
+			importJobData.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 			logger.error(importJob.getErrorMessage());
 			return false;
@@ -387,7 +385,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.error(e.getMessage(), e);
 			}
 			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
-				uploadJob.setUploadState(UploadState.ERROR);
+				importJobData.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
 				return false;
@@ -412,7 +410,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (subjectREST == null) {
 				line[6] = "Error with subject";
 				csvWriter.addExaminationLine(false, line);
-				uploadJob.setUploadState(UploadState.ERROR);
+				importJobData.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
 				return false;
@@ -458,7 +456,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
 		if (examinationId == null) {
-			uploadJob.setUploadState(UploadState.ERROR);
+			importJobData.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
 			csvWriter.addExaminationLine(false, line);
@@ -467,11 +465,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setExaminationId(examinationId);
 
-		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json and upload-job.xml.");
+		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
-		Runnable importRunnable = new ImportFinishRunnable(uploadJobFile.getParentFile(), importJob, subjectREST.getName());
+		Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
 		while (importThread.isAlive()) {
@@ -545,6 +543,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
+				// if study dos not contain series, skip it
+				if (study.getSeries() == null || study.getSeries().isEmpty()) {
+					continue;
+				}
 				importJob.setStudy(study);
 				selectedSeriesByStudy.put(study.getStudyInstanceUID(), new ArrayList<>());
 				for (Serie serie : study.getSeries()) {
@@ -561,12 +563,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy().getStudyInstanceUID());
+		// If the dicom study does not contain any series matching the filters
 		if (selectedSeries == null || selectedSeries.isEmpty()) {
 			logger.error("No series found for DICOM study: " + importJob.getStudy().toString());
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
-		importJob.setSelectedSeries(new LinkedHashSet<>(selectedSeries));
+		importJob.setSelectedSeries(selectedSeries);
 		return true;
 	}
 

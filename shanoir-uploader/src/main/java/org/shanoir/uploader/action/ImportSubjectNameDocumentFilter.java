@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.awt.Color;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.SubjectStudy;
 
 public class ImportSubjectNameDocumentFilter implements DocumentListener {
 

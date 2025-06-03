@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JProgressBar;
 
@@ -73,9 +74,8 @@ public class ImportUtils {
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	private static final String DICOMDIR = "DICOMDIR";
-
 	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+
 
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
@@ -170,7 +170,7 @@ public class ImportUtils {
 		newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
 		newStudyForJob.setStudyDescription(study.getStudyDescription());
 		importJob.setStudy(newStudyForJob);
-		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
+		importJob.setSelectedSeries(new ArrayList<Serie>());
 		return importJob;
 	}
 
@@ -329,7 +329,7 @@ public class ImportUtils {
 			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
-				logger.info(uploadFolder.getName() + ": error with download from PACS.");
+				logger.info(uploadFolder.getName() + ": error with download from PACS.");    
 				return null;
 			}
 		} else {
@@ -649,7 +649,7 @@ public class ImportUtils {
 
 	public static List<Patient> getPatientsFromDir(File directory, boolean deleteGeneratedDICOMDir) throws IOException {
 		boolean dicomDirGenerated = false;
-		File dicomDirFile = new File(directory, DICOMDIR);
+		File dicomDirFile = new File(directory, ShUpConfig.DICOMDIR);
 		if (!dicomDirFile.exists()) {
 			logger.info("No DICOMDIR found: generating one.");
 			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);

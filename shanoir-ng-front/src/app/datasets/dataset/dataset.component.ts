@@ -41,8 +41,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
-    public papayaLoaded: boolean = false;
     isMRS: boolean = false; // MR Spectroscopy
+    papayaLoadCallback: () => Promise<any[]>;
 
     constructor(
             private datasetService: DatasetService,
@@ -65,8 +65,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     initView(): Promise<void> {
-        this.papayaLoaded = false;
         this.dicomArchiveService.clearFileInMemory();
+        this.papayaLoadCallback = () => this.loadDicomInMemory();
         if (!this.dataset.updatedMetadata) this.dataset.updatedMetadata = new DatasetMetadata();
         this.isMRS = this.isSpectro(this.dataset);
         if (this.keycloakService.isUserAdmin()) {
@@ -113,30 +113,29 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.downloadService.downloadByIds([this.dataset?.id], this.downloadState);
     }
 
-    public loadDicomInMemory() {
-        this.papayaLoaded = true;
-        this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
+    public loadDicomInMemory(): Promise<any[]> {
+        return this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
-            this.dicomArchiveService.importFromZip(blobReponse.body)
+            return this.dicomArchiveService.importFromZip(blobReponse.body)
                 .then(response => {
-                    this.dicomArchiveService.extractFileDirectoryStructure()
+                    return this.dicomArchiveService.extractFileDirectoryStructure()
                         .then(response => {
-                            this.initPapaya(response);
+                            return this.initPapaya(response);
                         });
                 });
         });
     }
 
-    private initPapaya(dataFiles: any): void {
+    private initPapaya(dataFiles: any): Promise<any[]> {
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
             buffs.push(dataFiles.files[key].async("arraybuffer"));
         });
         let promiseOfList = Promise.all(buffs);
-        promiseOfList.then((values) => {
+        return promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
-            this.papayaParams = params;
+            return params;
         });
     }
 

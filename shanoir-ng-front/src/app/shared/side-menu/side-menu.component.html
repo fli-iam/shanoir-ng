@@ -48,10 +48,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
     </div>
-    <li>
+    <li class="jobs-menu">
         <a routerLink="/task" routerLinkActive="active" class="menu-link">
             <i class="fas fa-tasks"></i>Jobs
-            <span *ngIf="!state.jobsOpened && notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
+            <span *ngIf="notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
                 <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
             </span>
             <span *ngIf="notificationsService.nbNew" class="notif">
@@ -62,12 +62,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 {{notificationsService.nbNewError}}
             </span>
+            <span *ngIf="state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0" 
+                    class="notif button" (click)="$event.stopPropagation(); $event.preventDefault(); notificationsService.clearTaskList()" title="remove completed and error tasks">
+                <i class="fa-solid fa-broom"></i>
+                clean
+            </span>
         </a>
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
     <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
         <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@.disabled]="task.status == 2 || task.status == 5">
+            <span *ngIf="[1, -1].includes(task.status)" class="remove-task" (click)="notificationsService.removeTaskFromFresh(task)">
+                <i class="fa-regular fa-circle-xmark"></i>
+            </span>
             <a routerLink="/task"  routerLinkActive="active">
                 <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5 || task.status == 3"></progress-bar>
                 <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>
