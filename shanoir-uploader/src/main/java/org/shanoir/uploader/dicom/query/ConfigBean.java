@@ -15,6 +15,18 @@ public class ConfigBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigBean.class);
 
+	public static final String DICOM_SERVER_HOST = "dicom.server.host";
+
+	public static final String DICOM_SERVER_PORT = "dicom.server.port";
+
+	public static final String DICOM_SERVER_AET_CALLED = "dicom.server.aet.called";
+
+	public static final String LOCAL_DICOM_SERVER_HOST = "local.dicom.server.host";
+
+	public static final String LOCAL_DICOM_SERVER_PORT = "local.dicom.server.port";
+
+	public static final String LOCAL_DICOM_SERVER_AET_CALLING = "local.dicom.server.aet.calling";
+
 	/** The AET of the Q/R SCP. */
 	private String dicomServerAETCalled;
 
@@ -140,11 +152,9 @@ public class ConfigBean {
 	}
 
 	public void initWithPropertiesFile(final Properties properties) {
-
-		// Init called PACS server (ex: NeurInfo-recherche)
-		final String host = properties.getProperty("dicom.server.host");
-		final int port = toInt(properties.getProperty("dicom.server.port"));
-		final String aetCalled = properties.getProperty("dicom.server.aet.called");
+		final String host = properties.getProperty(DICOM_SERVER_HOST);
+		final int port = toInt(properties.getProperty(DICOM_SERVER_PORT));
+		final String aetCalled = properties.getProperty(DICOM_SERVER_AET_CALLED);
 		final String protocol = properties.getProperty("dicom.server.protocol");
 		final int webPort = toInt(properties.getProperty("dicom.server.web.port"));
 
@@ -180,9 +190,9 @@ public class ConfigBean {
 
 
 		// Init calling PACS (Shanoir)
-		final String localHost = properties.getProperty("local.dicom.server.host");
-		final int localPort = toInt(properties.getProperty("local.dicom.server.port"));
-		final String localAETCalling = properties.getProperty("local.dicom.server.aet.calling");
+		final String localHost = properties.getProperty(LOCAL_DICOM_SERVER_HOST);
+		final int localPort = toInt(properties.getProperty(LOCAL_DICOM_SERVER_PORT));
+		final String localAETCalling = properties.getProperty(LOCAL_DICOM_SERVER_AET_CALLING);
 
 		setLocalDicomServerHost(localHost);
 		setLocalDicomServerPort(localPort);

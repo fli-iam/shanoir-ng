@@ -86,7 +86,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
+			List<Serie> selectedSeries = importJob.getSelectedSeries();
 			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
 			downloadProgressBar.setValue(0);
@@ -162,5 +162,4 @@ public class DownloadOrCopyRunnable implements Runnable {
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
 }

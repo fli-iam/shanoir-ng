@@ -54,7 +54,6 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
     selector: 'animalSubject-form',
     templateUrl: 'animalSubject-form.component.html',
     styleUrls: ['../../../subjects/subject/subject.component.css', 'animalSubject-form.component.css'],
-    providers: [AnimalSubjectService, ReferenceService, PathologyService, SubjectPathologyService, SubjectTherapyService],
     animations: [slideDown, preventInitialChildAnimations],
     standalone: false
 })

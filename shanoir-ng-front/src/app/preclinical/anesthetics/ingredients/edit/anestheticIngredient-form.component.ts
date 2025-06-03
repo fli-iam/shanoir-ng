@@ -35,7 +35,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'anesthetic-ingredient-form',
     templateUrl: 'anestheticIngredient-form.component.html',
-    providers: [AnestheticIngredientService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })

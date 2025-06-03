@@ -18,6 +18,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -25,7 +26,6 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +52,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 
 	private String filePathDicomDir;
+
+	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
@@ -88,7 +90,16 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				File selectedRootDir = fileChooser.getSelectedFile();
 				if (selectedRootDir.isDirectory()) {
 					try {
-						List<Patient> patients = ImportUtils.getPatientsFromDir(selectedRootDir, true);
+						boolean dicomDirGenerated = false;
+						File dicomDirFile = new File(selectedRootDir, ShUpConfig.DICOMDIR);
+						if (!dicomDirFile.exists()) {
+							logger.info("No DICOMDIR found: generating one.");
+							dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
+							dicomDirGenerated = true;
+							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+						}
+						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 						fillMediaWithPatients(media, patients);
 						filePathDicomDir = selectedRootDir.toString();
 					} catch (Exception e) {
