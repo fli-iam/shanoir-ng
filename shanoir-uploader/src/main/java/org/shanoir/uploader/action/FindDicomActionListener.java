@@ -14,6 +14,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
