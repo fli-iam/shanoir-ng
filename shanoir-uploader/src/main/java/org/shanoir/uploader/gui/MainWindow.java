@@ -118,7 +118,7 @@ public class MainWindow extends JFrame {
 	public JLabel connexionStatus;
 
 	private FindDicomActionListener fAL;
-	private DownloadOrCopyActionListener dOCAL;
+	public DownloadOrCopyActionListener dOCAL;
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
@@ -149,10 +149,10 @@ public class MainWindow extends JFrame {
 
 	public ResourceBundle resourceBundle;
 	public ShUpConfig shanoirUploaderConfiguration;
+
+	public ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	
 	private ImportDialogOpener importDialogOpener;
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	/**
 	 * Create the frame.

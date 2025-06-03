@@ -22,6 +22,7 @@ import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
+import org.shanoir.uploader.nominativeData.DicomPushServiceJob;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -39,6 +40,9 @@ public class ReadyState implements State {
 
 	@Autowired
 	private CurrentNominativeDataController currentNominativeDataController;
+
+	@Autowired
+	private DicomPushServiceJob dicomPushServiceJob;
 	
 	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -68,6 +72,7 @@ public class ReadyState implements State {
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
 		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
+		dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
 	}
 
 	/**
@@ -112,12 +117,12 @@ public class ReadyState implements State {
 	private void initNominativeDataFilesBeforeLaunchingJobs() {
 		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
 		logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
-		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
+		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			NominativeDataImportJobManager dataJobManager = null;
 			final File folder = (File) foldersIt.next();
 			// initDataJobManager
 			final Collection<File> files = Util.listFiles(folder, null, false);
-			for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
+			for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 				final File file = (File) filesIt.next();
 				if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
 					logger.debug(" Initializing data job manager before launching Jobs");
@@ -143,7 +148,7 @@ public class ReadyState implements State {
 						importJob.setUploadPercentage(uploadPercentage);
 				dataJobManager.writeImportJob(importJob);
 			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
+				logger.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
 			}
 		}
 	}

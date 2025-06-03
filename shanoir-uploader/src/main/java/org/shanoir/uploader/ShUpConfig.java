@@ -78,6 +78,8 @@ public class ShUpConfig {
 
 	public static final String CHECK_ON_SERVER = "check.on.server";
 
+	public static final String DICOMDIR = "DICOMDIR";
+
 	public static final String IMPORT_JOB_JSON = "import-job.json";
 
 	public static final String UPLOAD_JOB_XML = "upload-job.xml";
