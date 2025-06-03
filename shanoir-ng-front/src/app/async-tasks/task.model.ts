@@ -53,6 +53,7 @@ export class Task extends Entity {
     hasReport: boolean;
     sessionId: string;
     _idAsString: string;
+    hideFromMenu: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId', '_idAsString'];
 
     set eventType(eventType: string) {
@@ -138,7 +139,7 @@ export class Task extends Entity {
         return true;
     }
 
-    updateWith(task: Task) {
+    updateWith(task: Task): Task {
         if (task.status != undefined) this.status = task.status;
         if (task.progress != undefined) this.progress = task.progress;
         if (task.lastUpdate) this.lastUpdate = task.lastUpdate;
@@ -146,6 +147,14 @@ export class Task extends Entity {
         if (task.report) this.report = task.report;
         if (task.message) this.message = task.message;
         if (task.idAsString) this.idAsString = task.idAsString;
+        if (task.hideFromMenu != undefined) this.hideFromMenu = task.hideFromMenu;
+        if (task.sessionId) this.sessionId = task.sessionId;
+        if (task.eventLabel) this.eventLabel = task.eventLabel;
+        if (task.debugTs) this.debugTs = task.debugTs;
+        if (task.objectId) this.objectId = task.objectId;
+        if (task.route) this.route = task.route;
+        if (task.hasReport != undefined) this.hasReport = task.hasReport;
+        return this;
     }
 }
 

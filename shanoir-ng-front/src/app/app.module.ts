@@ -284,6 +284,7 @@ import { ExecutionTemplateService } from "./vip/execution-template/execution-tem
 import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
 import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
 import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/execution-template-filter.service";
+import { SizePipe } from './shared/utils/size.pipe';
 
 @NgModule({
     declarations: [
@@ -469,6 +470,7 @@ import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/
         ExecutionTemplateComponent,
         ExecutionTemplateFilterListComponent,
         ExecutionTemplateFilterComponent
+        SizePipe
     ],
     bootstrap: [AppComponent],
     imports: [

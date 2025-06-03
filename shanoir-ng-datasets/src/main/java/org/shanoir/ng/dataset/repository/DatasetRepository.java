@@ -110,4 +110,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
 
 	List<Dataset> findByIdIn(List<Long> ids);
+	
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
+			+ "ds.id, dm.name, TYPE(ds), " 
+			+ "ds.datasetAcquisition.examination.study.id, "  
+			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) " 
+			+ "FROM Dataset ds " 
+			+ "JOIN ds.originMetadata dm " 
+			+ "LEFT JOIN ds.datasetAcquisition da "  
+			+ "LEFT JOIN da.examination e "  
+			+ "LEFT JOIN e.study s " 
+			+ "WHERE s.id = :studyId")
+	List<DatasetLight> findAllLightByStudyId(Long studyId);
+
 }
