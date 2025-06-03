@@ -52,7 +52,7 @@ public class DicomPushServiceJob {
 	// but the same serie, same SeriesInstanceUID but both with different images to manage.
 	private final List<Serie> incomingSeries = new ArrayList<>();
 
-	private final long JOB_RATE = 60000; //3600000; // 1 hour
+	private static final long JOB_RATE = 3600000L; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
