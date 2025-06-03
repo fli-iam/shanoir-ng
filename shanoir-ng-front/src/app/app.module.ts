@@ -278,9 +278,15 @@ import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
+import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
+import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
+import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
+import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
+import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
+import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/execution-template-filter.service";
 import { SizePipe } from './shared/utils/size.pipe';
 
-@NgModule({ 
+@NgModule({
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -460,9 +466,13 @@ import { SizePipe } from './shared/utils/size.pipe';
         CoilNodeComponent,
         DoubleAwesomeComponent,
         MetadataNodeComponent,
+        ExecutionTemplateListComponent,
+        ExecutionTemplateComponent,
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent,
         SizePipe
     ],
-    bootstrap: [AppComponent], 
+    bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
@@ -474,7 +484,11 @@ import { SizePipe } from './shared/utils/size.pipe';
         PreclinicalRoutingModule,
         RouterModule,
         ClipboardModule
-    ], 
+    ],
+    exports: [
+        TableComponent,
+        FormFooterComponent
+    ],
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -562,9 +576,11 @@ import { SizePipe } from './shared/utils/size.pipe';
         SessionService,
         ShanoirEventService,
         TreeService,
+        ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
-    ] 
+    ]
 })
 export class AppModule {
 
