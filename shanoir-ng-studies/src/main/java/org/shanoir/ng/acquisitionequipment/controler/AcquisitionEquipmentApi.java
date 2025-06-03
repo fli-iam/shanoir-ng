@@ -130,7 +130,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@Parameter(description = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			BindingResult result) throws RestServiceException;
@@ -144,7 +144,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
 	ResponseEntity<Void> updateAcquisitionEquipment(
 			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
 			@Parameter(description = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,

@@ -76,8 +76,8 @@ public class ManufacturerModelSecurityTest {
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findIdsAndNames);
 		assertAccessAuthorized(service::findIdsAndNamesForCenter, 12L);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
+		assertAccessAuthorized(service::create, mockNew);
+		assertAccessAuthorized(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
 

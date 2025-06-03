@@ -53,7 +53,7 @@ public interface ManufacturerService {
 	 * @param entity the entity to create.
 	 * @return created entity.
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and #entity.getId() == null")
 	Manufacturer create(Manufacturer entity);
 
 	/**
@@ -64,7 +64,7 @@ public interface ManufacturerService {
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Manufacturer update(Manufacturer entity) throws EntityNotFoundException;
 	
 	/**
