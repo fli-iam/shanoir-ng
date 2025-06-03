@@ -469,7 +469,7 @@ import { SizePipe } from './shared/utils/size.pipe';
         ExecutionTemplateListComponent,
         ExecutionTemplateComponent,
         ExecutionTemplateFilterListComponent,
-        ExecutionTemplateFilterComponent
+        ExecutionTemplateFilterComponent,
         SizePipe
     ],
     bootstrap: [AppComponent],
