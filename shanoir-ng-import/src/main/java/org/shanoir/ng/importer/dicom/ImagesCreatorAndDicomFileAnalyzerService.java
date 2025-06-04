@@ -123,7 +123,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				 * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
 				 * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
 				 */
-				series.sort(new SeriesNumberOrDescriptionSorter());
+				series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 			}
 		}
 	}
