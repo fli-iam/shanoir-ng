@@ -31,7 +31,6 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
 @Component({
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
-    providers: [ExtraDataService],
     animations: [slideDown],
     standalone: false
 })

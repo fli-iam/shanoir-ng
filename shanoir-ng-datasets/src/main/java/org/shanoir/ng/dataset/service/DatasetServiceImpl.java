@@ -190,7 +190,8 @@ public class DatasetServiceImpl implements DatasetService {
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
-			datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
+			if (dataset.getSource() == null)
+				datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
 		}
 	}
 
@@ -225,6 +226,11 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<DatasetLight> findLightByIdIn(List<Long> ids) {
 		return Utils.toList(repository.findAllLightById(ids));
+	}
+
+	@Override
+	public List<DatasetLight> findLightByStudyId(Long studyId) {
+		return Utils.toList(repository.findAllLightByStudyId(studyId));
 	}
 
 	@Override

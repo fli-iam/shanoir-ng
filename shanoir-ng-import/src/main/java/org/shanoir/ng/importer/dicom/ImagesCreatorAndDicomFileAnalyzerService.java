@@ -373,11 +373,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	/**
 	 * Adds the equipment information.
+	 * Used by ShanoirUploader in case of a DICOM Pushed study
 	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
-	private void addSeriesCenter(Serie serie, Attributes attributes) {
+	public void addSeriesCenter(Serie serie, Attributes attributes) {
 		if (serie.getInstitution() == null) {
 			InstitutionDicom institution = new InstitutionDicom();
 			String institutionName = getOrSetToUnknown(attributes, Tag.InstitutionName, UNKNOWN);
