@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
@@ -100,7 +101,6 @@ public class UploadServiceJob {
 	 */
 	private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
 			final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
-		// NominativeDataImportJobManager nominativeDataImportJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
 		/**
 		 * Get all files from uploadFolder (importJob) and send them.
@@ -125,7 +125,7 @@ public class UploadServiceJob {
 				logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
 			}
 		} else {
-			
+			logger.error("importJobManager is null.");
 		}
 	}
 
@@ -170,6 +170,14 @@ public class UploadServiceJob {
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
 			importJob.setTimestamp(System.currentTimeMillis());
 			nominativeDataImportJobManager.writeImportJob(importJob);
+
+			// Delete DICOM files, if check.on.server is false
+	        String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+			boolean checkOnServer = Boolean.parseBoolean(value);
+			if (!checkOnServer) {
+				// Clean all DICOM files after successful import to server
+				deleteAllDicomFiles(folder, allFiles);
+			}
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, org.shanoir.ng.importer.model.UploadState.ERROR.toString());
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
@@ -185,5 +193,19 @@ public class UploadServiceJob {
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shanoirUploaderServiceClient.startImportJob(importJobJson);
 	}
+
+	private void deleteAllDicomFiles(File importJobFolder, List<File> files) {
+        for (Iterator<File> iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            // from-disk: delete files directly
+            if (file.getParentFile().equals(importJobFolder)) {
+                FileUtils.deleteQuietly(file);
+            // from-pacs: delete serieUID folder as well
+            } else {
+                FileUtils.deleteQuietly(file.getParentFile());
+            }
+        }
+        logger.info("All DICOM files deleted after successful upload to server.");
+    }
 
 }
