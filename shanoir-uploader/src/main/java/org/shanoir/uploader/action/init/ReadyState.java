@@ -60,10 +60,10 @@ public class ReadyState implements State {
 		MainWindow frame = initJFrame();
 		// Init check on server
 		String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
-		if (value == null) { // migration case: start with true, add to basic.properties, display in GUI
+		if (value == null) { // migration case: start with false, add to basic.properties, display in GUI
 			String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
-			PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.TRUE.toString());
-			frame.checkOnServerMenuItem.setSelected(Boolean.TRUE);
+			PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
+			frame.checkOnServerMenuItem.setSelected(Boolean.FALSE);
 		} else { // display accordingly to basic.properties
 			boolean checkOnServer = Boolean.parseBoolean(value);
 			frame.checkOnServerMenuItem.setSelected(checkOnServer);
