@@ -54,6 +54,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -133,6 +134,9 @@ public class DatasetApiController implements DatasetApi {
 	private ImporterService importerService;
 
 	@Autowired
+	private ProcessedDatasetImporterService processedDatasetImporterService;
+
+	@Autowired
 	private WADODownloaderService downloader;
 
 	@Autowired
@@ -150,10 +154,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private DatasetRepository datasetRepository;
-
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -371,7 +371,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
-		importerService.createProcessedDataset(importJob);
+		processedDatasetImporterService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
 		return new ResponseEntity<Void>(HttpStatus.OK);
