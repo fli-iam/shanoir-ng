@@ -178,6 +178,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
+            this.breadcrumbsService.currentStep.data = {{ this.breadcrumbsService.currentStep.data.forceStudy.id }}
+            lastname = {{ this.breadcrumbsService.currentStep.data.lastName }}
+
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
 				<subject-study-list
                     [allowRemove]="true" [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>

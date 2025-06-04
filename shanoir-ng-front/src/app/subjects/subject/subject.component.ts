@@ -95,11 +95,13 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     init() {
+        console.log("init");
         super.init();
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
             this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
+            console.log("forceStudy : ", this.forceStudy);
 	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
             if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
                 if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';

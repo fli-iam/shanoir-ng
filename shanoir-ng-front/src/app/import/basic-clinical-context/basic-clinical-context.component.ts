@@ -101,12 +101,15 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateSubjectStep(step: Step) {
+        console.log("this.study : ", this.study);
+        console.log("step reception : ", step);
         step.entity = this.getPrefilledSubject();
         step.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
         step.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
         step.data.patientName = this.patient.patientName;
         step.data.forceStudy = this.study;
         step.data.subjectNamePrefix = this.subjectNamePrefix;
+        console.log("step reception : ", step);
     }
 
     private getPrefilledSubject(): Subject {
