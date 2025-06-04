@@ -10,6 +10,6 @@ IF EXIST "%JAVA_HOME%\bin\javaw.exe" (
 		pause
 	) ELSE (
 		ECHO Starting ShanoirUploader without JAVA_HOME...
-		javaw -Dhttps.protocols=TLSv1.2 -Xms128m -Xmx512m -Xnoclassgc -jar shanoir-uploader-9.0.0-jar-with-dependencies.jar org.shanoir.uploader.ShanoirUploader
+		javaw -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -jar shanoir-uploader-9.0.0-jar-with-dependencies.jar org.shanoir.uploader.ShanoirUploader
 	)
 )
