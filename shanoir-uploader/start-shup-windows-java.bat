@@ -2,7 +2,7 @@
 
 IF EXIST "%JAVA_HOME%\bin\javaw.exe" (
 	ECHO Starting ShanoirUploader using JAVA_HOME...
-	"%JAVA_HOME%\bin\javaw.exe" -Dhttps.protocols=TLSv1.2 -Xms128m -Xmx512m -Xnoclassgc -jar shanoir-uploader-9.0.0-jar-with-dependencies.jar org.shanoir.uploader.ShanoirUploader  
+	"%JAVA_HOME%\bin\javaw.exe" -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -jar shanoir-uploader-9.0.0-jar-with-dependencies.jar org.shanoir.uploader.ShanoirUploader  
 ) ELSE (
 	java.exe -version >nul 2>&1
 	IF %ERRORLEVEL% NEQ 0 (
