@@ -90,34 +90,38 @@ public class ExaminationConsistencyServiceJob {
 			final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 			// file could be missing in case of downloadOrCopy ongoing
 			if (importJobFile.exists()) {
-				NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
-				final ImportJob importJob = importJobManager.readImportJob();
-                // In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
-				if (importJob.getUploadState() == null) {
-					String uploadState = ImportUtils.getUploadStateFromUploadJob(importJobFolder);
-					importJob.setUploadState(UploadState.fromString(uploadState));
-				}
-				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
-                if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
-                    long timestamp = importJob.getTimestamp();
-                    long currentTime = System.currentTimeMillis();
-                    if (currentTime - timestamp >= ONE_HOUR_IN_MILLIS) {
-                        String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
-                        try {
-                            boolean check = checkImportJob(importJob, importJobFolder, examinationUID);
-                            if (check) {
-                                importJob.setUploadState(UploadState.CHECK_OK);
+                // if the check.on.server flag has been activated after, do not check on previous
+                // already imported folders, as they do not contain any DICOM anymore
+                if (importJobFolder.listFiles().length > 1) {
+                    NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
+                    final ImportJob importJob = importJobManager.readImportJob();
+                    // In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
+                    if (importJob.getUploadState() == null) {
+                        String uploadState = ImportUtils.getUploadStateFromUploadJob(importJobFolder);
+                        importJob.setUploadState(UploadState.fromString(uploadState));
+                    }
+                    final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
+                    if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
+                        long timestamp = importJob.getTimestamp();
+                        long currentTime = System.currentTimeMillis();
+                        if (currentTime - timestamp >= ONE_HOUR_IN_MILLIS) {
+                            String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
+                            try {
+                                boolean check = checkImportJob(importJob, importJobFolder, examinationUID);
+                                if (check) {
+                                    importJob.setUploadState(UploadState.CHECK_OK);
+                                    importJobManager.writeImportJob(importJob);
+                                    currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_OK.toString());
+                                }
+                            } catch (Exception e) {
+                                importJob.setUploadState(UploadState.CHECK_KO);
                                 importJobManager.writeImportJob(importJob);
-                                currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_OK.toString());
+                                currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_KO.toString());
+                                logger.error(e.getMessage(), e);
                             }
-                        } catch (Exception e) {
-                            importJob.setUploadState(UploadState.CHECK_KO);
-                            importJobManager.writeImportJob(importJob);
-                            currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_KO.toString());
-                            logger.error(e.getMessage(), e);
                         }
                     }
-                }
+                } // do nothing, keep already imported untouched
 			} else {
 				logger.error("Folder found in workFolder without import-job.json.");
 			}
