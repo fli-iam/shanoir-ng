@@ -17,9 +17,10 @@ import { Router } from '@angular/router';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { DatasetProcessingService } from '../shared/dataset-processing.service';
 
 
 @Component({
@@ -40,6 +41,7 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
             private datasetService: DatasetService,
             private downloadService: MassDownloadService,
             protected treeService: TreeService,
+            private processingService: DatasetProcessingService,
             elementRef: ElementRef) {
         super(elementRef);
     }
@@ -89,5 +91,16 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
 
     onProcessingDelete(index: number) {
         (this.node.processings as ProcessingNode[]).splice(index, 1) ;
+    }
+
+    loadProcessings() {
+        if (this.node.processings == UNLOADED) {
+            this.loading = true;
+            this.datasetService.get(this.node.id).then(dataset => {
+                this.node.processings = dataset.processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+            });
+        }
     }
 }

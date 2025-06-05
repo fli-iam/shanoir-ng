@@ -28,10 +28,10 @@ import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import { DatasetProcessingDTO, DatasetProcessingDTOService } from './dataset-processing.dto';
 
 @Injectable()
 export class DatasetDTOService {
-    private datasetProcessingService: DatasetProcessingService;
     constructor(
         private studyService: StudyService,
         private subjectService: SubjectService,
@@ -44,33 +44,10 @@ export class DatasetDTOService {
      * @param result can be used to get an immediate temporary result without waiting async data
      */
     public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {
-        if(!this.datasetProcessingService) {
-            this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
-        }
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
         if (mode == 'eager') {
-            if (dto.processings) {
-                for(let p of dto.processings) {
-                    promises.push(this.datasetProcessingService.get(p.id).then(
-                        processing => {
-                            if (!processing.inputDatasets) processing.inputDatasets = [];
-                            if (!processing.inputDatasets.find(inds => inds.id == result.id)) {
-                                processing.inputDatasets.push(result);
-                            }
-                            result.processings.push(processing);
-                        }
-                    ));
-                }
-            }
-            if (dto.datasetProcessing) {
-                promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
-                    processing => {
-                        result.datasetProcessing = processing;
-                    }
-                ));
-            }
             if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
             if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
             return Promise.all(promises).then(([]) => {
@@ -152,8 +129,7 @@ export class DatasetDTOService {
         }
         if(dto.processings) {
             for(let p of dto.processings) {
-                let processing = new DatasetProcessing();
-                processing.id = p.id;
+                let processing = DatasetProcessingDTOService.mapSyncFields(p, new DatasetProcessing());
                 entity.processings.push(processing);
             }
         }
@@ -203,7 +179,7 @@ export class DatasetDTO {
     updatedMetadata: DatasetMetadata;
 	name: string;
     type: DatasetType;
-    processings: {id: number}[];
+    processings: DatasetProcessingDTO[];
 	datasetProcessing: {id: number};
     datasetAcquisition: DatasetAcquisitionDTO;
     inPacs: boolean;
@@ -224,7 +200,7 @@ export class DatasetDTO {
             this.name = dataset.name;
             this.datasetProcessing = dataset.datasetProcessing;
             this.type = dataset.type;
-            this.processings = dataset.processings.map( (p: DatasetProcessing) => { return { id: p.id } } );
+            this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingDTO(p)} );
             if(dataset.datasetAcquisition) {
                 this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
             }
