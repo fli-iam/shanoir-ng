@@ -20,7 +20,7 @@ public class ShUpConfig {
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
 	
-	public static final String RELEASE_DATE = "2025-04-29";
+	public static final String RELEASE_DATE = "2025-06-05";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
