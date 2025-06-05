@@ -54,6 +54,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -133,6 +134,9 @@ public class DatasetApiController implements DatasetApi {
 	private ImporterService importerService;
 
 	@Autowired
+	private ProcessedDatasetImporterService processedDatasetImporterService;
+
+	@Autowired
 	private WADODownloaderService downloader;
 
 	@Autowired
@@ -150,10 +154,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private DatasetRepository datasetRepository;
-
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -294,23 +294,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-		
-		final List<Examination> examinations = examinationService.findByStudyId(studyId);
-		if (examinations.isEmpty()) {
+	
+		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
+		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		List<Dataset> datasets = new ArrayList<Dataset>();
-		for(Examination examination : examinations) {
-			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasets.add(dataset);
-				}
-			}
-		}
-		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
 	@Override
@@ -380,7 +371,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
-		importerService.createProcessedDataset(importJob);
+		processedDatasetImporterService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
 		return new ResponseEntity<Void>(HttpStatus.OK);

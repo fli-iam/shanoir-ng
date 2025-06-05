@@ -31,7 +31,6 @@ import { AnestheticService } from '../shared/anesthetic.service';
     selector: 'anesthetic-list',
     templateUrl: 'anesthetic-list.component.html',
     styleUrls: ['anesthetic-list.component.css'],
-    providers: [AnestheticService],
     standalone: false
 })
 export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<Anesthetic>{

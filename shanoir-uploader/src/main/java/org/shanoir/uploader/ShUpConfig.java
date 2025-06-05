@@ -20,7 +20,7 @@ public class ShUpConfig {
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
 	
-	public static final String RELEASE_DATE = "2025-04-02";
+	public static final String RELEASE_DATE = "2025-04-29";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -75,6 +75,8 @@ public class ShUpConfig {
 	public static final String USERNAME = "username";
 
 	public static final String PASSWORD = "password";
+
+	public static final String DICOMDIR = "DICOMDIR";
 
 	public static final String IMPORT_JOB_JSON = "import-job.json";
 

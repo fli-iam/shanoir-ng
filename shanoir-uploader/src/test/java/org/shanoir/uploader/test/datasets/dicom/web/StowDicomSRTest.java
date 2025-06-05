@@ -14,13 +14,13 @@ public class StowDicomSRTest extends AbstractTest {
 	
 	public void postDICOMSRToDicomWeb() throws Exception {
 		try {
-		    URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
-		    if (resource != null) {
-		        File file = new File(resource.toURI());
-		       shUpClient.postDicomSR(file);
-		    }
+			URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
+			if (resource != null) {
+				File file = new File(resource.toURI());
+				shUpClient.postDicomSR(file);
+			}
 		} catch (URISyntaxException e) {
-		    logger.error("Error while reading file", e);
+			logger.error("Error while reading file", e);
 		}
 	}
 
