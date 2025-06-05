@@ -102,7 +102,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
         this.addBCStep();
         this.mode = this.activatedRoute.snapshot.data['mode'];
-        
+
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
             this.subscriptions.push(this.activatedRoute.params.subscribe(
@@ -181,9 +181,9 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.hasEditRight().then(right => this.footerState.canEdit = right);
             this.hasDeleteRight().then(right => this.footerState.canDelete = right);
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.entity = this.breadcrumbsService.currentStep.entity as T;
+                this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res as T);
             }
-            this.breadcrumbsService.currentStep.entity = this.entity;
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res);
             this.manageFormSubscriptions();
         });
 

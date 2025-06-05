@@ -536,6 +536,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     public openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
+        console.log("step envoi : ", importStep);
         let createSubjectRoute: string = this.getCreateSubjectRoute();
         this.router.navigate([createSubjectRoute]).then(success => {
             this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
