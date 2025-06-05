@@ -93,7 +93,7 @@ public class ShanoirEventsService {
 				&& now - event.getLastUpdate().getTime() > INACTIVE_TIMEOUT;
 		}).map(event -> {
 			event.setStatus(-1);
-			event.setMessage("inactivity timeout, there must has been");
+			event.setMessage("Inactivity timeout, task was set to error status because inactive for more than 5 minutes.");
 			return event;
 		}).collect(Collectors.toList());
 		if (!updatedEvents.isEmpty()) repository.saveAll(updatedEvents);
