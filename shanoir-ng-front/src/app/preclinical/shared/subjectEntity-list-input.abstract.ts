@@ -51,12 +51,12 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     protected abstract addEntity(subjectEntity: T);
 
 
-    protected addToCache(key: string, toBeCached: any) {
-        if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
-            this.breadcrumbsService.currentStep.addPrefilled(key, []);
-        }
-        this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
-    }
+    // protected addToCache(key: string, toBeCached: any) {
+    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
+    //         this.breadcrumbsService.currentStep.addPrefilled(key, []);
+    //     }
+    //     this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
+    // }
 
     protected getCache(key: string) {
         if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
@@ -98,10 +98,10 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         this.createMode = false;
         if (subjectEntity && subjectEntity != null) {
             if (!subjectEntity.id && create) {
-                this.addToCache(this.getEntityName() + "ToCreate", subjectEntity);
+                this.breadcrumbsService.currentStep.addPrefilled(this.getEntityName() + "ToCreate", subjectEntity);
                 this.onAdd.next(subjectEntity);
             } else  if (subjectEntity.id && !create) {
-                this.addToCache(this.getEntityName() + "ToUpdate", subjectEntity);
+                this.breadcrumbsService.currentStep.addPrefilled(this.getEntityName() + "ToUpdate", subjectEntity);
             }
         }
         if (subjectEntity && create) {
@@ -117,13 +117,16 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
             this.getEntityList().splice(index, 1);
         }
         if (item.id != null) {
-            this.addToCache(this.getEntityName() + "ToDelete", item);
+            this.breadcrumbsService.currentStep.addPrefilled(this.getEntityName() + "ToDelete", item);
         } else {
-            if (this.getCache(this.getEntityName() + "ToCreate").indexOf(item) != -1) {
-                this.getCache(this.getEntityName() + "ToCreate").splice(this.getCache(this.getEntityName() + "ToCreate").indexOf(item), 1);
+            let entity;
+            this.breadcrumbsService.currentStep.getPrefilledValue(this.getEntityName() + "ToCreate").then(res => entity = res);
+            if (entity.indexOf(item) != -1) {
+                entity.splice(entity.indexOf(item), 1);
             }
-            if (this.getCache(this.getEntityName() + "ToCreate").indexOf(item) != -1) {
-                 this.getCache(this.getEntityName() + "ToUpdate").splice(this.getCache(this.getEntityName() + "ToUpdate").indexOf(item), 1);
+            this.breadcrumbsService.currentStep.getPrefilledValue(this.getEntityName() + "ToUpdate").then(res => entity = res);
+            if (entity.indexOf(item) != -1) {
+                 entity.splice(entity.indexOf(item), 1);
             }
         }
         this.onEvent.emit("delete");

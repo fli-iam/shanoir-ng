@@ -97,10 +97,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private prefill() {
-        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
+        this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then( res => this.centersFromStudyCard = res);
         this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.nonEditableCenter) {
-            this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+            this.breadcrumbsService.currentStep.getPrefilledValue('center').then( res => this.acqEquip.center = res);
         } else if (this.acqEquip.center) {
             // Clean center
             let centerSelected: Center = new Center();

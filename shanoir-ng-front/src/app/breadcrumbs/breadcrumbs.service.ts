@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,12 +18,13 @@ import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { ImportMode } from '../import/import.component';
+import {SuperPromise} from "../utils/super-promise";
 
 @Injectable()
 export class BreadcrumbsService implements OnDestroy {
 
     steps: Step[] = [];
-    
+
     private popFoundedStepIndex: number;
     public currentStepIndex: number;
     private nextLabel: string;
@@ -33,10 +34,10 @@ export class BreadcrumbsService implements OnDestroy {
     onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
 
     constructor(
-            private router: Router, 
-            private locationStrategy: LocationStrategy,
-            private titleService: Title) {
-        
+        private router: Router,
+        private locationStrategy: LocationStrategy,
+        private titleService: Title) {
+
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
@@ -50,8 +51,8 @@ export class BreadcrumbsService implements OnDestroy {
 
         this.subscriptions.push(router.events.subscribe(event => {
             if (event instanceof NavigationEnd
-                    // navigating inside a page is not changing page
-                    && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) { 
+                // navigating inside a page is not changing page
+                && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) {
 
                 if(this.ignoreNavigationEnd) {
                     this.ignoreNavigationEnd = false;
@@ -117,7 +118,7 @@ export class BreadcrumbsService implements OnDestroy {
     public currentStepAsMilestone(label?: string) {
         this.processMilestone(label);
     }
-    
+
     private processMilestone(label?: string) {
         this.currentStep.milestone = true;
         if (label) this.currentStep.label = label;
@@ -182,8 +183,8 @@ export class BreadcrumbsService implements OnDestroy {
     //         stepsJSON.push(step.save())
     //     }
 
-    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
-    //         steps: stepsJSON, 
+    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({
+    //         steps: stepsJSON,
     //         popFoundedStepIndex: this.popFoundedStepIndex,
     //         replace: this.replace,
     //         currentStepIndex: this.currentStepIndex,
@@ -222,15 +223,15 @@ export class BreadcrumbsService implements OnDestroy {
 export class Step {
 
     constructor(
-            public label: string,
-            public route: string,
-            public timestamp: number) {}
+        public label: string,
+        public route: string,
+        public timestamp: number) {}
 
     public id = new Date().getTime();
     public subscribers: number = 0;
     public disabled: boolean = false;
     public displayWaitStatus: boolean = true;
-    public prefilled: any[] = [];
+    public prefilled: { field: string, value: Promise<any>}[] = [];
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
     public milestone: boolean = false;
@@ -268,16 +269,32 @@ export class Step {
     }
 
     public addPrefilled(field: string, value: any) {
-        this.prefilled.push({field: field, value: value});
+        let found: any[] = this.prefilled.filter(obj => obj.field == field);
+        if (found.length > 0) {
+            return found[0].value.resolve(value);
+        } else {
+            let superPro = new SuperPromise();
+            this.prefilled.push({field: field, value: value});
+            //this.addPrefilled(field, superPro);
+            superPro.resolve(value);
+        }
     }
 
     public isPrefilled(field: string): boolean {
         return this.prefilled.filter(obj => obj.field == field).length > 0;
     }
 
-    public getPrefilledValue(field: string): any {
-        let found: any[] = this.prefilled.filter(obj => obj.field == field);
-        return found && found.length > 0 ? found[0].value : undefined;
+    public async getPrefilledValue(field: string): Promise<any> {
+        if (this.isPrefilled(field)) {
+            return SuperPromise.timeoutPromise().then( () => {
+                let found: any[] = this.prefilled.filter(obj => obj.field == field);
+                return found && found.length > 0 ? found[0].value : undefined;
+            })
+        } else {
+            let superPro = new SuperPromise();
+            this.addPrefilled(field, superPro);
+            return superPro;
+        }
     }
 
     public resetWait() {

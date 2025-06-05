@@ -62,7 +62,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromCoil(this.coil);
     }
-    
+
     initView(): Promise<void> {
         return this.centerService.getAll().then(centers => {
             this.coil.center = centers.find(center => center.id == this.coil.center.id);
@@ -85,7 +85,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        this.prefilledCenter = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+        this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => this.prefilledCenter = res);
         let centerPromise: Promise<void>;
         if (this.prefilledCenter) {
             this.coil.center = this.prefilledCenter;
@@ -96,7 +96,7 @@ export class CoilComponent extends EntityComponent<Coil> {
                 this.centers = centers;
             });
         }
-        this.prefilledManuf = this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel');
+        this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel').then(res => this.prefilledManuf = res);
         if (this.prefilledManuf) {
             this.coil.manufacturerModel = this.prefilledManuf;
             this.manufModels = [this.prefilledManuf];

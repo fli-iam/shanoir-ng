@@ -73,10 +73,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
     ];
 
     constructor(private route: ActivatedRoute,
-            private subjectService: SubjectService,
-            private studyService: StudyService,
-            private downloadService: MassDownloadService,
-            private studyRightsService: StudyRightsService) {
+                private subjectService: SubjectService,
+                private studyService: StudyService,
+                private downloadService: MassDownloadService,
+                private studyRightsService: StudyRightsService) {
 
         super(route, 'subject');
     }
@@ -95,21 +95,21 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     init() {
-        console.log("init");
         super.init();
         if (this.mode == 'create') {
-            this.firstName = this.breadcrumbsService.currentStep.data.firstName;
-            this.lastName = this.breadcrumbsService.currentStep.data.lastName;
-            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
-            console.log("forceStudy : ", this.forceStudy);
-	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res);
+
+            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
+            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
                 if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
                 this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
             }
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
-	        }
+            }
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
@@ -176,12 +176,12 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
-      return (c: AbstractControl): { [key: string]: boolean } | null => {
-        if (forbiddenValues.indexOf(c.value) !== -1) {
-          return { 'subjectNamePrefix': true };
-        }
-        return null;
-      };
+        return (c: AbstractControl): { [key: string]: boolean } | null => {
+            if (forbiddenValues.indexOf(c.value) !== -1) {
+                return { 'subjectNamePrefix': true };
+            }
+            return null;
+        };
     }
 
     private notEmptyValidator(): ValidatorFn {
