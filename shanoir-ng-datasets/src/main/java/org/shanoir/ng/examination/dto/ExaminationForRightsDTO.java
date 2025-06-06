@@ -14,42 +14,13 @@
 
 package org.shanoir.ng.examination.dto;
 
-/**
- * Examination DTO with necessary information for front
- * 
- * @author ifakhfak
- *
- */
-public class ExaminationForRightsDTO {
 
-	private Long id;
+public interface ExaminationForRightsDTO {
 
-	private Long centerId;
+	public Long getId();
 
-	private Long studyId;
+    public Long getCenterId();
 
+    public Long getStudyId();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getCenterId() {
-        return centerId;
-    }
-
-    public void setCenterId(Long centerId) {
-        this.centerId = centerId;
-    }
-
-    public Long getStudyId() {
-        return studyId;
-    }
-
-    public void setStudyId(Long studyId) {
-        this.studyId = studyId;
-    }
 }
