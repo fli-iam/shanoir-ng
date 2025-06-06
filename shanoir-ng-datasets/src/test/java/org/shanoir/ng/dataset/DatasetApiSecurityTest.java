@@ -75,6 +75,7 @@ import org.shanoir.ng.dataset.dto.DatasetLight;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
+/**
  * DatasetAPI security test.
  * 
  * @author jlouis
