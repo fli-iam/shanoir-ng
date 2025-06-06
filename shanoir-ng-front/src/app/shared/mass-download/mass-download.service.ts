@@ -402,7 +402,7 @@ export class MassDownloadService {
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.datasetProcessing) { // for processed datasets, skip the acq folder
+        if (setup.acquisitionFolders && !dataset.datasetProcessing) { 
             let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
                 || dataset.datasetAcquisition.protocol?.originMetadata?.name 
                 || dataset.datasetAcquisition.type + '_acquisition';

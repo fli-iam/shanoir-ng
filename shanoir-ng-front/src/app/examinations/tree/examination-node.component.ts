@@ -76,7 +76,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
                     this.input.hasDownloadRights,
                     this.input.examination.preclinical);
             }
-            //this.node.registerOpenPromise(this.contentLoaded);
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
