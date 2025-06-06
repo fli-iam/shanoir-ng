@@ -63,7 +63,6 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
             if (this.input instanceof ExaminationNode) {
                 this.node = this.input;
                 if (this.input.datasetAcquisitions != 'UNLOADED') {
-                    console.log(1)
                     this.fetchDatasetIds(this.input.datasetAcquisitions);
                 }
             } else {
