@@ -283,10 +283,12 @@ export class TreeService {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
                                                 if (acqNode) {
+                                                    this.scrollTo(acqNode);
                                                     return acqNode.open()?.then(() => {
                                                         if (acqNode.datasets != UNLOADED) {
                                                             let dsNode: DatasetNode = acqNode.datasets?.find(acqDs => acqDs.id == ret.topParent.id);
                                                             if (dsNode) {
+                                                                this.scrollTo(dsNode);
                                                                 return dsNode.open().then(() => {
                                                                     if (ret.topParent.id != (typeof dataset == 'number' ? dataset : dataset.id)) { // if sub processing/datasets 
                                                                         if (dsNode.processings != UNLOADED) {
