@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -75,7 +76,6 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 		}
 
 		long filesSize = 0L;
-
 		for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 			LocalDateTime contentTime;
 			LocalDateTime acquisitionTime;
@@ -87,61 +87,55 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				LOG.error("Error while reading DICOM attributes from file.", e);
 				throw e;
 			}
-
 			DatasetFile pacsDatasetFile = new DatasetFile();
 			pacsDatasetFile.setPacs(true);
-
 			filesSize += Files.size(Paths.get(datasetFile.getPath()));
-
-			final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
-			final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-			final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
-			final StringBuilder wadoStrBuf = new StringBuilder();
-
-			wadoStrBuf.append(dcm4cheeProtocol).append(dcm4cheeHost).append(":").append(dcm4cheePortWeb);
-			// Use WADO-RS if true, WADO-URI if otherwise
-			if (dicomWeb) {
-				wadoStrBuf.append(dicomWebRS)
-						.append("/")
-						.append(studyInstanceUID)
-						.append("/series/")
-						.append(seriesInstanceUID)
-						.append("/instances/")
-						.append(sOPInstanceUID);
-			} else {
-				wadoStrBuf.append(dicomWADOURI)
-						.append("?requestType=WADO&studyUID=")
-						.append(studyInstanceUID).append("&seriesUID=")
-						.append(seriesInstanceUID).append("&objectUID=")
-						.append(sOPInstanceUID)
-						.append("&contentType=application/dicom");
-			}
-
-			URL wadoURL = new URL(wadoStrBuf.toString());
-			pacsDatasetFile.setPath(wadoURL.toString());
-
+			pacsDatasetFile = setPath(dicomAttributes, pacsDatasetFile);
 			pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 			pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 
 			// calculate the acquisition duration for this acquisition
 			acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
 			contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
-
 			this.setAcquistionDuration(pacsDatasetExpression, acquisitionTime);
-
 			this.setAcquistionDuration(pacsDatasetExpression, contentTime);
 		}
-
 		pacsDatasetExpression.setSize(filesSize);
 		return pacsDatasetExpression;
 	}
 
-	private void setAcquistionDuration(DatasetExpression pacsDatasetExpression, LocalDateTime time) {
+	public DatasetFile setPath(Attributes attributes, DatasetFile datasetFile) throws MalformedURLException {
+		final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+		final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+		final StringBuilder wadoStrBuf = new StringBuilder();
+		wadoStrBuf.append(dcm4cheeProtocol).append(dcm4cheeHost).append(":").append(dcm4cheePortWeb);
+		// Use WADO-RS if true, WADO-URI if otherwise
+		if (dicomWeb) {
+			wadoStrBuf.append(dicomWebRS)
+					.append("/")
+					.append(studyInstanceUID)
+					.append("/series/")
+					.append(seriesInstanceUID)
+					.append("/instances/")
+					.append(sOPInstanceUID);
+		} else {
+			wadoStrBuf.append(dicomWADOURI)
+					.append("?requestType=WADO&studyUID=")
+					.append(studyInstanceUID).append("&seriesUID=")
+					.append(seriesInstanceUID).append("&objectUID=")
+					.append(sOPInstanceUID)
+					.append("&contentType=application/dicom");
+		}
+		URL wadoURL = new URL(wadoStrBuf.toString());
+		datasetFile.setPath(wadoURL.toString());
+		return datasetFile;
+	}
 
+	private void setAcquistionDuration(DatasetExpression pacsDatasetExpression, LocalDateTime time) {
 		if (time == null) {
 			return;
 		}
-
 		if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
 			pacsDatasetExpression.setLastImageAcquisitionTime(time);
 		}

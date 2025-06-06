@@ -41,7 +41,6 @@ import { Option } from '../../../../shared/select/select.component';
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
-    providers: [AnestheticService, AnestheticIngredientService],
     animations: [slideDown],
     standalone: false
 })

@@ -95,7 +95,7 @@ export class DatasetService extends EntityService<Dataset> {
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
-                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+                .then(dtos => this.datasetDTOService.toEntityList(dtos, [], 'lazy'));
     }
 
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {

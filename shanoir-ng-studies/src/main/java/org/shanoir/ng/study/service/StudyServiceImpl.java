@@ -393,16 +393,6 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		if (study.getSubjectStudyList() != null) {
-			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setStudy(studyDb);
-			}
-			studyDb = studyRepository.save(studyDb);
-		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
@@ -415,10 +405,6 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
 
 		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
