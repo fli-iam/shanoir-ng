@@ -278,6 +278,7 @@ import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
+import { SizePipe } from './shared/utils/size.pipe';
 
 @NgModule({ 
     declarations: [
@@ -458,7 +459,8 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         StudyTreeComponent,
         CoilNodeComponent,
         DoubleAwesomeComponent,
-        MetadataNodeComponent
+        MetadataNodeComponent,
+        SizePipe
     ],
     bootstrap: [AppComponent], 
     imports: [

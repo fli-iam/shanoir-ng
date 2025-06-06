@@ -52,8 +52,8 @@ export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
 # creation of the admin account
-export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
-export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+export KC_BOOTSTRAP_ADMIN_USERNAME="$SHANOIR_KEYCLOAK_USER"
+export KC_BOOTSTRAP_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'

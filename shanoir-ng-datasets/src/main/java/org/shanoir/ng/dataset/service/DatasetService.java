@@ -94,6 +94,9 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_SEE_ALL')")
 	List<DatasetLight> findLightByIdIn(List<Long> ids);
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL')")
+	List<DatasetLight> findLightByStudyId(Long studyId);
+
 	/**
 	 * Save a dataset.
 	 *
