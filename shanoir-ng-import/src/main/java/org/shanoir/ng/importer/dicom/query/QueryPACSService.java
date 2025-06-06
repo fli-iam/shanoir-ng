@@ -187,10 +187,10 @@ public class QueryPACSService {
 		Association association = connectAssociation(calling, called, true);
 		ImportJob importJob = new ImportJob();
 		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
-			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
-			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())
-			|| StringUtils.isNotBlank(dicomQuery.getStudyDescription())
-			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
+				|| StringUtils.isNotBlank(dicomQuery.getPatientID())
+				|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())
+				|| StringUtils.isNotBlank(dicomQuery.getStudyDescription())
+				|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
 			// patient root query level
 			if (!dicomQuery.isStudyRootQuery()) {
 				queryPatientLevel(association, dicomQuery, importJob);
@@ -524,8 +524,8 @@ public class QueryPACSService {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
 			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
-				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
-				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
+			DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
+			DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 		} else {
 			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 			serie.setIgnored(true);

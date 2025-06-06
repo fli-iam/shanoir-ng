@@ -14,16 +14,16 @@
 
 package org.shanoir.ng.shared.model;
 
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.examination.model.UnitOfMeasure;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * This class represents an echo time. It is used in the MR protocol to list and
@@ -110,25 +110,25 @@ public class EchoTime extends AbstractEntity {
 	}
 
 	@Override
-	  public boolean equals(Object v) {
-	        boolean retVal = false;
-	        boolean retVal1 = false;
+	public boolean equals(Object v) {
+		boolean retVal = false;
+		boolean retVal1 = false;
+
+		if (v instanceof EchoTime){
+			EchoTime echoTime = (EchoTime) v;
+			retVal = echoTime.getEchoNumber() == this.echoNumber;
+			retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
+		}
+
+		return retVal && retVal1;
+	}
 	
-	        if (v instanceof EchoTime){
-	        	EchoTime echoTime = (EchoTime) v;
-	            retVal = echoTime.getEchoNumber() == this.echoNumber;
-	            retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
-	        }
-	
-	     return retVal && retVal1;
-	  }
-	
-	    @Override
-	    public int hashCode() {
-	        int hash = 7;
-	        hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
-	        hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
-	        return hash;
-	    }
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
+		hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
+		return hash;
+	}
 
 }

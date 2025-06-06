@@ -176,9 +176,9 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-         Long qualityCardId,
-		 int start,
-		 int stop) throws RestServiceException, MicroServiceCommunicationException {
+			Long qualityCardId,
+			int start,
+			int stop) throws RestServiceException, MicroServiceCommunicationException {
 
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
