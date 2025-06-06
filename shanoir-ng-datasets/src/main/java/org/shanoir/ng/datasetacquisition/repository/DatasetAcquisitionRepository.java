@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.datasetacquisition.repository;
 
-import org.shanoir.ng.dataset.model.Dataset;
+import java.util.List;
+
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
-import java.util.List;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for dataset acquisition.
@@ -43,6 +45,17 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
 	List<DatasetAcquisition> findBySourceId(Long sourceId);
 	DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
+
+	@Query("""
+		SELECT DISTINCT
+			da.id              AS id,
+			ex.study.id        AS studyId,
+			ex.centerId        AS centerId
+		FROM DatasetAcquisition da
+			LEFT JOIN da.examination ex
+		WHERE da.id IN :acquisitionIds
+    """)
+    List<DatasetAcquisitionForRightsProjection> findAllForRightsById(@Param("acquisitionIds") List<Long> acquisitionIds);
 }
 
 
