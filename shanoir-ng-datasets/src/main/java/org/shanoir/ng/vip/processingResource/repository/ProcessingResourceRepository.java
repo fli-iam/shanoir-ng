@@ -11,10 +11,10 @@ import java.util.List;
 @Repository
 public interface ProcessingResourceRepository  extends CrudRepository<ProcessingResource, Long> {
 
-    @Query(value = "SELECT d FROM Dataset AS d JOIN ProcessingResource AS p ON d.id = p.dataset.id WHERE p.resourceId = :resourceId")
+    @Query(value = "SELECT d FROM Dataset AS d JOIN ProcessingResource AS p JOIN p.datasets pd WHERE p.resourceId = :resourceId")
     List<Dataset> findDatasetsByResourceId(String resourceId);
 
     void deleteByProcessingId(Long processingId);
 
-    void deleteByDatasetId(Long datasetId);
+    void deleteAllByResourceIdIn(List<String> list);
 }
