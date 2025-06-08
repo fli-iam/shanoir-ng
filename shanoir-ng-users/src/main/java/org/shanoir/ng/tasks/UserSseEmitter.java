@@ -28,4 +28,10 @@ public class UserSseEmitter extends SseEmitter {
 	public long getUserId() {
 		return userId;
 	}
+
+	@Override
+	public String toString() {
+		return "[userId=" + userId + "]";
+	}
+
 }

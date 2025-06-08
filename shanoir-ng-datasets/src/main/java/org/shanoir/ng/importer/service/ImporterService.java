@@ -113,6 +113,7 @@ public class ImporterService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
         try {
+            QualityCardResult qualityResult;
             Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
             if (examination != null) {
                 // generate acquisitions
@@ -125,7 +126,6 @@ public class ImporterService {
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
-                QualityCardResult qualityResult;
                 
                 // If import comes from ShanoirUploader, the check quality at import has already been done
                 if (!importJob.isFromShanoirUploader()) {
@@ -147,13 +147,6 @@ public class ImporterService {
                 if (qualityResult != null && !qualityResult.isEmpty() && qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
-                    if (qualityResult != null && !qualityResult.isEmpty()) {
-                        if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
-                            event.setReport(qualityResult.toString());
-                        }
-                        // add tag to subject-study
-                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-                    }
                 	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
@@ -165,7 +158,6 @@ public class ImporterService {
                         // revert quality tag
                         if(subjectStudy != null) {
                             subjectStudy.setQualityTag(tagSave);
-                            subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
                         }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
@@ -174,9 +166,16 @@ public class ImporterService {
                 throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
             }
 
+            // Event: only publish quality result/report once, last event
+            if (qualityResult != null && !qualityResult.isEmpty()) {
+                if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+                    event.setReport(qualityResult.toString());
+                }
+                // add tag to subject-study
+                subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+            }
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
-
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
                     +" Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
