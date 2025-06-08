@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -30,6 +31,7 @@ import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -116,6 +118,9 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private ProcessingResourceRepository processingResourceRepository;
 
+	@Autowired
+	DatasetFileRepository datasetFileRepository;
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 	private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -126,7 +131,16 @@ public class DatasetServiceImpl implements DatasetService {
 		processingService.removeDatasetFromAllProcessingInput(id);
 		processingResourceRepository.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
-		repository.deleteById(id);
+
+		List<Long> expressionIds = entity.getDatasetExpressions().stream()
+				.map(DatasetExpression::getId)
+				.filter(Objects::nonNull)
+				.toList();
+
+		if (!expressionIds.isEmpty()) {
+			datasetFileRepository.deleteByDatasetExpressionIds(expressionIds);
+		}
+		repository.delete(entity);
 	}
 
 	/**
@@ -188,6 +202,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		Long id = dataset.getId();
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			Hibernate.initialize(expression.getDatasetFiles());
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
 			if (dataset.getSource() == null)
