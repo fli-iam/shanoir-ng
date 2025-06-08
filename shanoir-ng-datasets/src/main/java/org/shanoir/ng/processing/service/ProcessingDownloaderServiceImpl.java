@@ -1,21 +1,19 @@
 package org.shanoir.ng.processing.service;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.solr.common.util.Pair;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.DatasetFileUtils;
@@ -23,9 +21,9 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -35,19 +33,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Service
-public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl{
+public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService{
 
-    /** Number of downloadable datasets. */
-    private static final int DATASET_LIMIT = 500;
-
-    @Autowired
-    private WADODownloaderService downloader;
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
+
     @Autowired
     private DatasetProcessingServiceImpl datasetProcessingService;
 
-    public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+    public void massiveDownload(List<DatasetProcessing> processingList, String resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         manageResultOnly(processingList, resultOnly);
 
         response.setContentType("application/zip");
@@ -72,9 +66,35 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
+    public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, String resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+        List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
+        List<DatasetProcessing> processingList = datasetProcessingRepository.findAllByIdIn(processingIdsList);
+        if(!Objects.isNull(processingComment)){
+            processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
+        };
+        massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
+    }
+
+    /**
+     * Manage the resultOnly variable. It can clear the input, and filter the outputs
+     */
+    private void manageResultOnly(List<DatasetProcessing> processingList, String resultOnly) {
+        if(StringUtils.isNotEmpty(resultOnly)){
+            if(!Objects.equals(resultOnly, "all")){
+                List<String> desiredOutput = List.of(resultOnly.split(","));
+                processingList.forEach(it -> {it.setInputDatasets(new ArrayList<>()); it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> desiredOutput.contains(file.getName())).toList());});
+            } else {
+                processingList.forEach(it ->  it.setInputDatasets(new ArrayList<>()));
+            }
+        }
+    }
+
+    /**
+     * Manage the writing of the datasets to download relative to the processings in the zip archive
+     */
     private void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws RestServiceException, IOException {
         for (DatasetProcessing processing : processingList) {
-            String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
+            String processingFilePath = getExecFilepath(processing, getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
             for (Dataset dataset : processing.getInputDatasets()) {
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
@@ -97,21 +117,10 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
-        if(!Objects.isNull(processingComment)){
-            processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
-        };
-        massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
-    }
 
-    private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if(resultOnly){
-            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
-        }
-    }
-
+    /**
+     * Get the subject relative to a processing
+     */
     private String getProcessingSubject(DatasetProcessing processing) {
         Examination exam = null;
         for (Dataset dataset : processing.getInputDatasets()){
@@ -126,6 +135,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return "noSubject";
     }
 
+    /**
+     * Get examination id and comment from a list of datasets
+     */
     private Pair<Long, String> getExaminationDatas(List<Dataset> inputs) {
         Examination exam = null;
         for (Dataset dataset : inputs){
@@ -141,17 +153,23 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return new Pair<>(0L, "");
     }
 
-    private String getExecFilepath(Long processingId, Pair<Long, String> examDatas) {
-
-        String execFilePath = "processing_" + processingId +  "_exam_" + examDatas.first();
-        if (!Objects.equals(examDatas.second(), "")) {
+    /**
+     * Create a path for a processing download according to the processing
+     */
+    private String getExecFilepath(DatasetProcessing processing, Pair<Long, String> examDatas) {
+        String execFilePath = "processing_" + processing.getId() +  "_exam_" + examDatas.first();
+        if (Objects.nonNull(examDatas.second()) && !Objects.equals(examDatas.second(), "")) {
             execFilePath += "_" + examDatas.second();
         }
         return shapeForPath(execFilePath);
     }
 
+
+    /**
+     * Shape a string to a standard path format
+     */
     private String shapeForPath(String path){
-        path = path.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+        path = path.replaceAll("[^a-zA-Z0-9_]", "_").replaceAll("_+$", "").replaceAll("_+", "_");
         if (path.length() > 255) {
             path = path.substring(0, 254);
         }

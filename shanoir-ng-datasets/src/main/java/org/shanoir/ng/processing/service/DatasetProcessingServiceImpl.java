@@ -20,10 +20,8 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.ProcessedDatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
@@ -32,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,49 +53,15 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-    ProcessingResourceService processingResourceService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
     private SolrService solrService;
-
-    protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
-		to.setDatasetProcessingType(from.getDatasetProcessingType());
-		to.setComment(from.getComment());
-		to.setInputDatasets(from.getInputDatasets());
-		to.setOutputDatasets(from.getOutputDatasets());
-		to.setProcessingDate(from.getProcessingDate());
-		to.setStudyId(from.getStudyId());
-		return to;
-	}
-
-	public Optional<DatasetProcessing> findByComment(String comment) {
-		return repository.findByComment(comment);
-	}
-	
-    @Override
-    public Optional<DatasetProcessing> findById(final Long id) {
-        return repository.findById(id);
-    }
     
-    @Override
-    public List<DatasetProcessing> findAll() {
-        return Utils.toList(repository.findAll());
-    }
-
-    public List<DatasetProcessing> findAllById(List<Long> idList) {
-        return idList.stream().flatMap(it -> findById(it).stream()).toList();
-    }
-    
-    @Override
     public DatasetProcessing create(final DatasetProcessing entity) {
-        DatasetProcessing savedEntity = repository.save(entity);
-        return savedEntity;
+        return repository.save(entity);
     }
     
-    @Override
     public DatasetProcessing update(final DatasetProcessing entity) throws EntityNotFoundException {
         final Optional<DatasetProcessing> entityDbOpt = repository.findById(entity.getId());
         final DatasetProcessing entityDb = entityDbOpt.orElseThrow(
@@ -105,7 +70,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         return repository.save(entityDb);
     }
 
-    @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         final Optional<DatasetProcessing> entity = repository.findById(id);
@@ -123,12 +87,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         repository.deleteById(id);
     }
 
-    /**
-     * Unlink given dataset to all dataset processing
-     *
-     * @param datasetId
-     */
-    @Override
     public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
@@ -149,15 +107,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         repository.saveAll(toUpdate);
     }
 
-    @Override
-    public void deleteByParentId(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        List<DatasetProcessing> processings = repository.findAllByParentId(id);
-        for(DatasetProcessing child : processings){
-            this.deleteById(child.getId());
-        }
-    }
-
-    @Override
     public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
         if(processing.getStudyId() == null){
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
@@ -172,6 +121,38 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
                 throw new RestServiceException(error);
             }
+        }
+    }
+
+    public void validate(BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
+
+    /**
+     * Update a processing with datas of an other processing (this last one can be fake)
+     */
+    private DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
+        to.setDatasetProcessingType(from.getDatasetProcessingType());
+        to.setComment(from.getComment());
+        to.setInputDatasets(from.getInputDatasets());
+        to.setOutputDatasets(from.getOutputDatasets());
+        to.setProcessingDate(from.getProcessingDate());
+        to.setStudyId(from.getStudyId());
+        return to;
+    }
+
+
+    /**
+     * Delete all processings having as parent the processing relative to the id parameter
+     */
+    private void deleteByParentId(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+        List<DatasetProcessing> processings = repository.findAllByParentId(id);
+        for(DatasetProcessing child : processings){
+            this.deleteById(child.getId());
         }
     }
 }
