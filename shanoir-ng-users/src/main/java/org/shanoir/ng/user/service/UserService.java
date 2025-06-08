@@ -73,7 +73,6 @@ public interface UserService {
 	 * 
 	 * @return a list of users
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
 	List<User> findAll();
 	

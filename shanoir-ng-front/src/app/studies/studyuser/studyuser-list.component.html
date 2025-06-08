@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<span class="right-col" *ngIf="pannelStudyUser">
 			<div class="pannel">
 				<div class="close" (click)="closePannel()"><i class="fas fa-times"></i></div>
-				<fieldset *ngIf="isAdmin">
+				<fieldset *ngIf="isAdmin || (isExpert && isStudyAdmin)">
 					<legend>General</legend>
 					<ul>
 						<li>
