@@ -1,11 +1,28 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -34,9 +51,10 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
+import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpOnloadConfig;
 
 /**
  * This class wraps the usage of Apache HttpClient, currently 5.1.
@@ -62,6 +80,10 @@ public class HttpService {
 	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
 	private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+
+	private static final String NEURINFO_URL = "https://shanoir.irisa.fr";
+
+	private static final String OFSEP_URL = "https://shanoir-ofsep.irisa.fr";
 	
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
@@ -72,6 +94,9 @@ public class HttpService {
 	private CloseableHttpClient httpClient;
 	
 	private HttpClientContext context;
+
+	private static final String certsDirPath = System.getProperty(ShUpConfig.USER_HOME) + File.separator + ShUpConfig.SU + "_" 
+												+ ShUpConfig.SHANOIR_UPLOADER_VERSION + File.separator + ShUpConfig.CERTS_FOLDER;
 
 	public HttpService(String serverURL) {
 		try {
@@ -259,9 +284,9 @@ public class HttpService {
 	 * @param sslContextDev
 	 * @param credentialsProvider
 	 * @return
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws IOException {
+	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws Exception {
 		final SSLConnectionSocketFactory sslSocketFactory;
 		if (sslContextDev != null) {
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
@@ -270,10 +295,20 @@ public class HttpService {
 					.build();
 			logger.info("DEV SSLSocketFactory used.");
 		} else {
+			// We check the validity of the certificates in the certsDirPath
+			// If the certificates are not valid, we download them
+			try {
+				checkCertificates(certsDirPath);
+			} catch (Exception e) {
+				logger.error("Error during certificate check: " + e.getMessage());
+			}
+			// Build SSLContext from certificates in certsDirPath
+			SSLContext sslContextProd = buildSSLContextFromCertificates();
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-					.setHostnameVerifier(new CustomHostnameVerifier())
-					.setTlsVersions(TLS.V_1_2)
-					.build();
+				.setSslContext(sslContextProd)
+				.setHostnameVerifier(new CustomHostnameVerifier())
+				.setTlsVersions(TLS.V_1_2)
+				.build();
 			logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
 		}
 		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
@@ -318,5 +353,112 @@ public class HttpService {
 			}		
 		}
 	}
+
+	// TODO : check if certificates already downloaded and if still valid to avoid downloading them everytime
+	private static void checkCertificates(String certsDirPath) throws Exception {
+	List<String> urls = List.of(NEURINFO_URL, OFSEP_URL);
+	File certsDir = new File(certsDirPath);
+        if (!certsDir.exists()) {
+            certsDir.mkdirs();
+			downloadCerts(urls);
+        } else if (certsDir.listFiles() !=null && certsDir.listFiles().length > 0) {
+			for (File file : certsDir.listFiles()) {
+				if (file.isFile() && file.getName().endsWith(".pem")) {
+					try (FileInputStream fis = new FileInputStream(file.getAbsolutePath())) {
+            			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            			X509Certificate cert = (X509Certificate) cf.generateCertificate(fis);
+
+            			cert.checkValidity();
+
+        			} catch (Exception e) {
+            			logger.error("Error during HTTPS certificate validity check : " + e.getMessage());
+						// if certificate is not valid, we delete it and download new certificates
+						file.delete();
+						downloadCerts(urls);
+					}
+				}
+			}
+		} else {
+			// if certsDirPath is empty, we download new certificates
+			downloadCerts(urls);
+		}
+	}
+
+	private static void downloadCerts(List<String> urls) throws Exception {
+
+        for (String httpsUrl : urls) {
+            try {
+                logger.info("Getting java certificate from " + httpsUrl); // to delete afterwards
+				URL url = new URL(httpsUrl);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                conn.connect();
+
+                Certificate[] certs = conn.getServerCertificates();
+
+                int certIndex = 0;
+                for (Certificate cert : certs) {
+                    if (cert instanceof X509Certificate) {
+                        X509Certificate x509 = (X509Certificate) cert;
+
+                        // Renaming the file based on the host and certificate index
+                        String host = url.getHost().replaceAll("[^a-zA-Z0-9.-]", "_");
+                        String filename = String.format("%s/cert_%s_%d.pem", certsDirPath, host, certIndex++);
+
+                        // Writing the file
+                        try (FileWriter writer = new FileWriter(filename)) {
+                            writer.write("-----BEGIN CERTIFICATE-----\n");
+                            writer.write(Base64.getMimeEncoder(64, new byte[]{'\n'}).encodeToString(x509.getEncoded()));
+                            writer.write("\n-----END CERTIFICATE-----\n");
+                        }
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        System.out.println("Certificate saved : " + filename);
+                        System.out.println("   ↳ Expires : " + sdf.format(x509.getNotAfter()));
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error on " + httpsUrl + " : " + e.getMessage());
+            }
+        }
+	}
+
+	private static SSLContext buildSSLContextFromCertificates() throws Exception {
+		List<String> pemFilePaths = new ArrayList<>();
+		// We get all the .pem  files located in certsDirPath
+		for (File file : new File(certsDirPath).listFiles()) {
+			if (file.isFile() && file.getName().endsWith(".pem")) {
+				pemFilePaths.add(file.getAbsolutePath());
+			}
+		}
+		if (pemFilePaths.isEmpty()) {
+    		throw new RuntimeException("No certificates found in " + certsDirPath + " — cannot build truststore.");
+		}
+        // We create an empty keystore
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(null); // initialise à vide
+
+        // Instanciate a CertificateFactory for X.509
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+
+        int i = 0;
+        for (String pemPath : pemFilePaths) {
+            try (InputStream in = new FileInputStream(pemPath)) {
+                Certificate cert = certFactory.generateCertificate(in);
+                keyStore.setCertificateEntry("cert" + i, cert);
+                i++;
+            }
+        }
+		logger.info("Loaded " + pemFilePaths.size() + " PEM certificate(s) from " + certsDirPath);
+
+        // Creating TrustManager from keystore
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(keyStore);
+
+        // Creating SSLContext
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+        return sslContext;
+    }
 
 }
