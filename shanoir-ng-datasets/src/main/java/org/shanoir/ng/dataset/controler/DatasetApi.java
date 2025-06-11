@@ -100,7 +100,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-	ResponseEntity<DatasetDTO> findDatasetById(
+	ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
 	@Operation(summary = "", description = "Updates a dataset")
