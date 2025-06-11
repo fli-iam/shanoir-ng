@@ -20,6 +20,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
+import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 
 @SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {

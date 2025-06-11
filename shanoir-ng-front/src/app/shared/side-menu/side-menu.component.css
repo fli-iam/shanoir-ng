@@ -78,5 +78,10 @@ progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 .notif { font-size: 10px; color: #00ff44; vertical-align: 1px; margin-left: 8px; font-weight: bold; }
 .notif i { margin-right: 5px; width: auto !important; }
 .notif.error { color: #ff1900; }
+.notif.button { color: var(--color-b-light2); display: none; }
+.jobs-menu:hover .notif.button { display: inline-block; }
+.jobs-menu { max-width: 100%; }
+.jobs-menu progress-bar { margin-left: 10px; }
 
-.menu-link {width: 100%; display: inline-block; }
+.menu-link { display: inline-block; width: 100%; }
+.remove-task { position: absolute; left: 7px; padding-top: 1px; }

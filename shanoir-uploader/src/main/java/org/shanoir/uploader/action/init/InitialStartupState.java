@@ -57,7 +57,7 @@ public class InitialStartupState implements State {
 	private static final String SU_V8_0_0 = ".su_v8.0.0";
 
 	@Autowired
-	private ProxyConfigurationState proxyConfigurationState;
+	private SelectProfileConfigurationState selectProfileConfigurationState;
 
 	@Autowired
 	private ShUpStartupDialog shUpStartupDialog;
@@ -84,7 +84,7 @@ public class InitialStartupState implements State {
 		initProfile();
 		initCredentials();
 		initStartupDialog(context);
-		context.setState(proxyConfigurationState);
+		context.setState(selectProfileConfigurationState);
 		context.nextState();
 	}
 
