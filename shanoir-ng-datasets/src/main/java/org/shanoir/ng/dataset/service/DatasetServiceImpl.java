@@ -229,6 +229,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<DatasetLight> findLightByStudyId(Long studyId) {
+		return Utils.toList(repository.findAllLightByStudyId(studyId));
+	}
+
+	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
 		Long studyId;

@@ -29,8 +29,6 @@ import { ColumnDefinition } from '..//table/column.definition.type';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import {SubjectComponent} from "../../../subjects/subject/subject.component";
-import {SubjectService} from "../../../subjects/shared/subject.service";
 
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {

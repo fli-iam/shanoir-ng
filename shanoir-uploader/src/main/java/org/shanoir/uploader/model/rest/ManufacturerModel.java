@@ -29,7 +29,7 @@ public class ManufacturerModel {
 
 	@Override
 	public String toString() {
-		return manufacturer.toString() + " " + name + "(" + magneticField + ")";
+		return manufacturer.toString() + " " + name + " (" + magneticField + ")";
 	}
 
 	/**

@@ -275,14 +275,14 @@ public class StudyServiceImpl implements StudyService {
         @Override
         public boolean check(StudyCenter a, StudyCenter b) {
             boolean result =  a != null && b != null && (
-				a.getId() != null && a.getId().equals(b.getId()) || (
-					   a.getCenter() != null && a.getCenter().getId() != null 
-					&& b.getCenter() != null && b.getCenter().getId() != null 
-					&& a.getCenter().getId().equals(b.getCenter().getId())
-					&& a.getStudy() != null && a.getStudy().getId() != null
-					&& b.getStudy() != null && b.getStudy().getId() != null
-					&& a.getStudy().getId().equals(b.getStudy().getId())
-				) 
+					a.getId() != null && a.getId().equals(b.getId()) || (
+						a.getCenter() != null && a.getCenter().getId() != null 
+						&& b.getCenter() != null && b.getCenter().getId() != null 
+						&& a.getCenter().getId().equals(b.getCenter().getId())
+						&& a.getStudy() != null && a.getStudy().getId() != null
+						&& b.getStudy() != null && b.getStudy().getId() != null
+						&& a.getStudy().getId().equals(b.getStudy().getId())
+					) 
 			);
 			return result;
         }
@@ -393,16 +393,6 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		if (study.getSubjectStudyList() != null) {
-			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setStudy(studyDb);
-			}
-			studyDb = studyRepository.save(studyDb);
-		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
@@ -415,10 +405,6 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
 
 		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
@@ -856,14 +842,14 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
-					if(!detailedStorageVolumes.containsKey(study.getId())){
-						return;
-					}
-					Long filesSize = this.getStudyFilesSize(study);
-					StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
-					dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-					dto.setTotal(filesSize + dto.getTotal());
-				}
+			if(!detailedStorageVolumes.containsKey(study.getId())) {
+				return;
+			}
+			Long filesSize = this.getStudyFilesSize(study);
+			StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+			dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+			dto.setTotal(filesSize + dto.getTotal());
+		}
 		);
 
 		return detailedStorageVolumes;
