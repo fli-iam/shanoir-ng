@@ -134,7 +134,7 @@ public class CurrentNominativeDataController {
 					final CurrentUploadsWindowTable cuw, int row) throws IOException {
 				String message = cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.message")
-						+ (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + "?";
+						+ " " + (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + " ?";
 				UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.cancel"));
 				UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
