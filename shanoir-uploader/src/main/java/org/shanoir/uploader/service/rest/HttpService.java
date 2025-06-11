@@ -14,6 +14,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -50,6 +51,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,11 +91,12 @@ public class HttpService {
 
 	private static final String BOUNDARY = "--import_dicom_shanoir--";
 
-	private static final String CERTS_DIR = "";
-
 	private CloseableHttpClient httpClient;
 	
 	private HttpClientContext context;
+
+	private static final String certsDirPath = System.getProperty(ShUpConfig.USER_HOME) + File.separator + ShUpConfig.SU + "_" 
+												+ ShUpConfig.SHANOIR_UPLOADER_VERSION + File.separator + ShUpConfig.CERTS_FOLDER;
 
 	public HttpService(String serverURL) {
 		try {
@@ -283,7 +286,7 @@ public class HttpService {
 	 * @return
 	 * @throws Exception 
 	 */
-	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) {
+	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws Exception {
 		final SSLConnectionSocketFactory sslSocketFactory;
 		if (sslContextDev != null) {
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
@@ -292,10 +295,20 @@ public class HttpService {
 					.build();
 			logger.info("DEV SSLSocketFactory used.");
 		} else {
+			// We check the validity of the certificates in the certsDirPath
+			// If the certificates are not valid, we download them
+			try {
+				checkCertificates(certsDirPath);
+			} catch (Exception e) {
+				logger.error("Error during certificate check: " + e.getMessage());
+			}
+			// Build SSLContext from certificates in certsDirPath
+			SSLContext sslContextProd = buildSSLContextFromCertificates();
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-					.setHostnameVerifier(new CustomHostnameVerifier())
-					.setTlsVersions(TLS.V_1_2)
-					.build();
+				.setSslContext(sslContextProd)
+				.setHostnameVerifier(new CustomHostnameVerifier())
+				.setTlsVersions(TLS.V_1_2)
+				.build();
 			logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
 		}
 		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
@@ -369,7 +382,7 @@ public class HttpService {
 	}
 
 	private static void downloadCerts(List<String> urls) throws Exception {
-		String certsDirPath = CERTS_DIR;	
+
         for (String httpsUrl : urls) {
             try {
                 logger.info("Getting java certificate from " + httpsUrl); // to delete afterwards
@@ -395,7 +408,6 @@ public class HttpService {
                             writer.write("\n-----END CERTIFICATE-----\n");
                         }
 
-                        // Affichage expiration
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                         System.out.println("Certificate saved : " + filename);
                         System.out.println("   ↳ Expires : " + sdf.format(x509.getNotAfter()));
@@ -408,12 +420,19 @@ public class HttpService {
         }
 	}
 
-	private static SSLContext buildSSLContextFromCertificates(List<String> pemFilePaths) throws Exception {
-        // Crée un keystore vide
+	private static SSLContext buildSSLContextFromCertificates() throws Exception {
+		List<String> pemFilePaths = new ArrayList<>();
+		// We get all the .pem  files located in certsDirPath
+		for (File file : new File(certsDirPath).listFiles()) {
+			if (file.isFile() && file.getName().endsWith(".pem")) {
+				pemFilePaths.add(file.getAbsolutePath());
+			}
+		}
+        // We create an empty keystore
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null); // initialise à vide
 
-        // Instancie un CertificateFactory pour X.509
+        // Instanciate a CertificateFactory for X.509
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 
         int i = 0;
@@ -425,11 +444,11 @@ public class HttpService {
             }
         }
 
-        // Crée le TrustManager à partir du keystore
+        // Creating TrustManager from keystore
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(keyStore);
 
-        // Crée le SSLContext
+        // Creating SSLContext
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
         return sslContext;

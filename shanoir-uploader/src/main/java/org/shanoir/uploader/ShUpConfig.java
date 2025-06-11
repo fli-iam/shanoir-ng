@@ -63,6 +63,8 @@ public class ShUpConfig {
 	public static final String FRENCH_LANGUAGE = "FRENCH";
 	
 	public static final String WORK_FOLDER = "workFolder";
+
+	public static final String CERTS_FOLDER = "certs";
 	
 	public static final String UPLOAD_SERVICE_JOB = "uploadServiceJob";
 	
