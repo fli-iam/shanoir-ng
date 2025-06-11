@@ -3,6 +3,7 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -84,7 +86,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-			List<Serie> selectedSeries = (List<Serie>) importJob.getSelectedSeries();
+			List<Serie> selectedSeries = importJob.getSelectedSeries();
 			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
 			downloadProgressBar.setValue(0);
@@ -136,7 +138,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			logger.info(
 					uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
 							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
-							+ importJob.getPatient().getPatientName());
+							+ Utils.sha256(importJob.getPatient().getPatientName()));
 
 			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}

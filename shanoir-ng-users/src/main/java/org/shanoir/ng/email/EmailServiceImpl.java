@@ -529,7 +529,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
-         User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
+		User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
 
         // get study admin
         List<User> studyAdmins = this.findStudyAdmin(createdRequest.getStudyId());

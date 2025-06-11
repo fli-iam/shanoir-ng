@@ -134,7 +134,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		}
 		
 		if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
-		&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
+				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
 			
 			initKeycloakAdminClient();
 			if(!StringUtils.isBlank(vipSrvEmail)){

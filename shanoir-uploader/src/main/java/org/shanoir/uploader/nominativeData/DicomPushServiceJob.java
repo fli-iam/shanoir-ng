@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DicomPushServiceJob {
 
-	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataController.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomPushServiceJob.class);
 
 	private DownloadOrCopyActionListener dOCAL;
 
@@ -53,7 +52,7 @@ public class DicomPushServiceJob {
 	// but the same serie, same SeriesInstanceUID but both with different images to manage.
 	private final List<Serie> incomingSeries = new ArrayList<>();
 
-	private final long JOB_RATE = 60000; //3600000; // 1 hour
+	private static final long JOB_RATE = 3600000L; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
@@ -240,7 +239,7 @@ public class DicomPushServiceJob {
 		FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
 
 		// We set the selected series after the copy of the DICOM files to have the instances set to each serie
-		importJob.setSelectedSeries((Set<Serie>) completeSeries);
+		importJob.setSelectedSeries(completeSeries);
 
 		importJob.setTimestamp(System.currentTimeMillis());
 		importJob.setUploadState(UploadState.READY);

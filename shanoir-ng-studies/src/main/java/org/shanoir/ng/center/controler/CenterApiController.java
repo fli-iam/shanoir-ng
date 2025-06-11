@@ -106,9 +106,9 @@ public class CenterApiController implements CenterApi {
 	@Override
 	@Transactional
 	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
-		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-		@Parameter(description = "institution dicom to find or create a center", required = true)
-		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(description = "institution dicom to find or create a center", required = true)
+			@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
 		if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
 			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		}
