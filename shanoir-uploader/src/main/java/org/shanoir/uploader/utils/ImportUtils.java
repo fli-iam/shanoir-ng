@@ -111,7 +111,6 @@ public class ImportUtils {
 				// do nothing: call of findSubjectsByStudyId
 				return false;
 			}
-			subject.getSubjectStudyList().add(subjectStudy);
 		} else {
 			// Check that this SubjectStudy does not exist yet
 			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
@@ -120,9 +119,9 @@ public class ImportUtils {
 					return false;
 				}
 			}
-			// Not yet existing: add it
-			subject.getSubjectStudyList().add(subjectStudy);
 		}
+		// In case of a newly created subjectStudyList or a not yet existing subjectStudy for the study id in the list : add it
+		subject.getSubjectStudyList().add(subjectStudy);
 		return true;
 	}
 
