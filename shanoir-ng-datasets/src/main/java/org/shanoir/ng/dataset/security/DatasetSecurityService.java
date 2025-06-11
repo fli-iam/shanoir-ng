@@ -673,37 +673,37 @@ public class DatasetSecurityService {
     * @return true or false
     * @throws EntityNotFoundException
     */
-   public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
-       if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-           return true;
-       }
-       if (card == null) {
-           throw new IllegalArgumentException("Study card cannot be null here.");
-       }
-       if (card.getId() == null) {
-           throw new IllegalArgumentException("Study card id cannot be null here.");
-       }
-       if (card.getStudyId() == null) {
-           return false;
-       }
-       Card dbCard;
-       if (card instanceof StudyCard) {
-           dbCard = studyCardRepository.findById(card.getId()).orElse(null);
-           if (dbCard == null) {
-               throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
-           }           
-       } else if (card instanceof QualityCard) {
-           dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
-           if (dbCard == null) {
-               throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
-           }           
-       } else throw new IllegalStateException("Cannot find the type of card");
-       if (card.getStudyId() == dbCard.getStudyId()) { // study hasn't changed
-           return commService.hasRightOnStudy(card.getStudyId(), rightStr);
-       } else { // study has changed : check user has right on both studies
-           return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
-       }
-   }
+    public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+		if (card == null) {
+			throw new IllegalArgumentException("Study card cannot be null here.");
+		}
+		if (card.getId() == null) {
+			throw new IllegalArgumentException("Study card id cannot be null here.");
+		}
+		if (card.getStudyId() == null) {
+			return false;
+		}
+		Card dbCard;
+		if (card instanceof StudyCard) {
+			dbCard = studyCardRepository.findById(card.getId()).orElse(null);
+			if (dbCard == null) {
+				throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
+			}           
+		} else if (card instanceof QualityCard) {
+			dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
+			if (dbCard == null) {
+				throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
+			}           
+		} else throw new IllegalStateException("Cannot find the type of card");
+		if (card.getStudyId() == dbCard.getStudyId()) { // study hasn't changed
+			return commService.hasRightOnStudy(card.getStudyId(), rightStr);
+		} else { // study has changed : check user has right on both studies
+			return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+		}
+   	}
     
     /**
      * Check that page checking the connected user has the right on those datasets.
@@ -928,17 +928,17 @@ public class DatasetSecurityService {
 	* @return true
 	*/
 	public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-	   if (list == null) {
-	                   return true;
-	           }
-	   Set<Long> checkedIds = new HashSet<Long>();
-	   for (ExaminationDatasetAcquisitionDTO edsa : list) {
-		   if (hasRightOnExamination(edsa.getExaminationId(), rightStr)) {
-			   checkedIds.add(edsa.getExaminationId());
-		   }
-	   }
-	   list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getExaminationId()));
-	   return true;
+		if (list == null) {
+			return true;
+		}
+		Set<Long> checkedIds = new HashSet<Long>();
+		for (ExaminationDatasetAcquisitionDTO edsa : list) {
+			if (hasRightOnExamination(edsa.getExaminationId(), rightStr)) {
+				checkedIds.add(edsa.getExaminationId());
+			}
+		}
+		list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getExaminationId()));
+		return true;
 	}
 
     
@@ -1028,15 +1028,15 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
-	if (list == null) return true;
-    	Set<ExaminationDTO> examsToRemove = new HashSet<>();
-    	for(ExaminationDTO exam : list) {
-    		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
-    			examsToRemove.add(exam);
+		if (list == null) return true;
+		Set<ExaminationDTO> examsToRemove = new HashSet<>();
+		for(ExaminationDTO exam : list) {
+			if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
+				examsToRemove.add(exam);
 			}
-    	}
-    	list.removeAll(examsToRemove);
-    	return true;
+		}
+		list.removeAll(examsToRemove);
+		return true;
     }
     
     /**
@@ -1047,7 +1047,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterSubjectExaminationDTOList(List<SubjectExaminationDTO> list, String rightStr) {
-	if (list == null) return true;
+		if (list == null) return true;
     	Set<SubjectExaminationDTO> examsToRemove = new HashSet<>();
     	for(SubjectExaminationDTO exam : list) {
     		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {

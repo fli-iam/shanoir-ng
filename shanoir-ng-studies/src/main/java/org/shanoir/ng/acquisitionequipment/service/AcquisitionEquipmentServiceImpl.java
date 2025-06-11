@@ -138,8 +138,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
 	@Override
 	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-		Long centerId,
-		EquipmentDicom equipmentDicom) {
+			Long centerId,
+			EquipmentDicom equipmentDicom) {
 		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
 		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
 		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
