@@ -356,10 +356,12 @@ public class HttpService {
 
 	// TODO : check if certificates already downloaded and if still valid to avoid downloading them everytime
 	private static void checkCertificates(String certsDirPath) throws Exception {
+	List<String> urls = List.of(NEURINFO_URL, OFSEP_URL);
 	File certsDir = new File(certsDirPath);
         if (!certsDir.exists()) {
             certsDir.mkdirs();
-        } else {
+			downloadCerts(urls);
+        } else if (certsDir.listFiles() !=null && certsDir.listFiles().length > 0) {
 			for (File file : certsDir.listFiles()) {
 				if (file.isFile() && file.getName().endsWith(".pem")) {
 					try (FileInputStream fis = new FileInputStream(file.getAbsolutePath())) {
@@ -370,14 +372,15 @@ public class HttpService {
 
         			} catch (Exception e) {
             			logger.error("Error during HTTPS certificate validity check : " + e.getMessage());
-						// if certificate is not valid, we delete it
+						// if certificate is not valid, we delete it and download new certificates
 						file.delete();
-						// we download new certificates
-						List<String> urls = List.of(NEURINFO_URL, OFSEP_URL);
 						downloadCerts(urls);
 					}
 				}
 			}
+		} else {
+			// if certsDirPath is empty, we download new certificates
+			downloadCerts(urls);
 		}
 	}
 
@@ -428,6 +431,9 @@ public class HttpService {
 				pemFilePaths.add(file.getAbsolutePath());
 			}
 		}
+		if (pemFilePaths.isEmpty()) {
+    		throw new RuntimeException("No certificates found in " + certsDirPath + " — cannot build truststore.");
+		}
         // We create an empty keystore
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null); // initialise à vide
@@ -443,6 +449,7 @@ public class HttpService {
                 i++;
             }
         }
+		logger.info("Loaded " + pemFilePaths.size() + " PEM certificate(s) from " + certsDirPath);
 
         // Creating TrustManager from keystore
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
