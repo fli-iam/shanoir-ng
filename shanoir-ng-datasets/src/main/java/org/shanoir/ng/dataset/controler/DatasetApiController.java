@@ -208,7 +208,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
+	public ResponseEntity<DatasetDTO> findDatasetById(
 			final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -218,12 +218,12 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		if (dataset instanceof MrDataset) {
-			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset), HttpStatus.OK);
+			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetDTO((MrDataset) dataset), HttpStatus.OK);
 		}
 		else if (dataset instanceof EegDataset) {
-			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
+			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO((EegDataset) dataset), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset), HttpStatus.OK);
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 		}
 	}
 
