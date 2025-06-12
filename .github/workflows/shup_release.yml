@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - Laurent_SHUP_jpackage
-    tags:
-      - SHUP_v*
+    # tags:
+    #   - SHUP_v*
     paths: 
       - 'shanoir-uploader/**'
  
