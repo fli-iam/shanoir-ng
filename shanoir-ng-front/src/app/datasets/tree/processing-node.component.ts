@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
 
@@ -76,5 +76,16 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
                 }
             });
         })
+    }
+
+    loadOutputDatasets() {
+        if (this.node.datasets == UNLOADED) {
+            this.loading = true;
+            this.processingService.getOutputDatasets(this.node.id).then(datasets => {
+                this.node.datasets = datasets.map(d => DatasetNode.fromDataset(d, true, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+            });
+        }
     }
 }

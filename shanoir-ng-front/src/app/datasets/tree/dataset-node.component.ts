@@ -96,8 +96,8 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
     loadProcessings() {
         if (this.node.processings == UNLOADED) {
             this.loading = true;
-            this.datasetService.get(this.node.id).then(dataset => {
-                this.node.processings = dataset.processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
+            this.processingService.findByInputDatasetId(this.node.id).then(processings => {
+                this.node.processings = processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
             }).finally(() => {
                 this.loading = false;
             });

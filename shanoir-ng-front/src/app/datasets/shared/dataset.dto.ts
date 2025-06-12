@@ -112,9 +112,17 @@ export class DatasetDTOService {
             entity.study = new Study();
             entity.study.id = dto.studyId;
         }
+        if (dto.studyName) {
+            if (!entity.study) entity.study = new Study();
+            entity.study.name = dto.studyName;
+        }
         if (dto.subjectId) {
             entity.subject = new Subject();
             entity.subject.id = dto.subjectId;
+        }
+        if (dto.subjectName) {
+            if (!entity.subject) entity.subject = new Subject();
+            entity.subject.name = dto.subjectName;
         }
         if (dto.datasetAcquisition) {
             let dsAcq = DatasetAcquisitionUtils.getNewDAInstance(dto.datasetAcquisition.type);
@@ -137,7 +145,10 @@ export class DatasetDTOService {
 			let process = new DatasetProcessing();
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
-		}
+            entity.hasProcessing = !!entity.datasetProcessing;
+		} else {
+            entity.hasProcessing = dto.hasProcessing;
+        }
         entity.tags = dto.tags ? dto.tags : [];
         return entity;
     }
@@ -175,12 +186,16 @@ export class DatasetDTO {
     //groupOfSubjectsId: number;
     originMetadata: DatasetMetadata;
     studyId: number;
+    studyName: string;
     subjectId: number;
+    subjectName: string;
     updatedMetadata: DatasetMetadata;
 	name: string;
     type: DatasetType;
     processings: DatasetProcessingDTO[];
 	datasetProcessing: {id: number};
+    hasProcessing: boolean;
+    datasetParent: number;
     datasetAcquisition: DatasetAcquisitionDTO;
     inPacs: boolean;
     tags: Tag[];

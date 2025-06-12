@@ -395,7 +395,8 @@ export class ProcessingNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public canDownload: boolean
     ) {
         super(parent, id, label);
     }
@@ -408,10 +409,10 @@ export class ProcessingNode extends ShanoirNode {
             parent,
             processing.id,
             processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            null,
-            canDelete
+            UNLOADED,
+            canDelete,
+            canDownload
         );
-        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete, canDownload)) : [];
         return node;
     }
 }

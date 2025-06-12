@@ -38,6 +38,11 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
             .toPromise().then(dtos => this.mapEntityList(dtos));
 	}
 
+    findByInputDatasetId(datasetId: number): Promise<DatasetProcessing[]> {
+        return this.http.get<DatasetProcessingDTO[]>(this.API_URL + '/inputDataset/' + datasetId)
+            .toPromise().then(dtos => this.mapEntityList(dtos));
+    }
+
     getInputDatasets(datasetProcessingId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(this.API_URL + '/' + datasetProcessingId + '/inputDatasets/')
             .toPromise().then(dtos => this.datasetDTOService.toEntityList(dtos, [], 'lazy'));

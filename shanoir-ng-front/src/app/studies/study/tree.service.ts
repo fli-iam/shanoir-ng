@@ -344,7 +344,7 @@ export class TreeService {
             if (!botomChild) botomChild = ds;
             if (ds.datasetProcessing) {
                 if (!(ds.datasetProcessing.inputDatasets?.length > 0)) throw Error('no input ds on this processing');
-                return this.findDatasetParent(ds.datasetProcessing.inputDatasets[0].id, botomChild);
+                return this.findDatasetParent(ds.datasetProcessing.inputDatasets[0], botomChild);
             } else {
                 return {topParent: ds, bottomChild: botomChild};
             }
