@@ -57,8 +57,10 @@ jobs:
         id: set_timestamp
         run: echo "timestamp=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
+      - run: echo "${{ steps.set_timestamp.outputs.timestamp }}"
+
       - name: Build
-        run: cd shanoir-ng-parent && mvn clean package -Dmaven.build.timestamp=${{ steps.set_timestamp.outputs.timestamp }} -DskipTests
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests -Dmaven.build.timestamp=${{ steps.set_timestamp.outputs.timestamp }}
 
       - name: Package .exe
         run: |
