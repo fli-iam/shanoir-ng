@@ -6,7 +6,9 @@ on:
       - Laurent_SHUP_jpackage
     tags:
       - SHUP_v*
-    paths: 'shanoir-uploader/**'
+    paths: 
+      - 'shanoir-uploader/**'
+ 
 
 jobs:
   build-linux:
