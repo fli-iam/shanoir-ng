@@ -2,11 +2,11 @@ name: Release ShanoirUploader App
 
 on:
   push:
-    paths: 'shanoir-uploader/**'
     branches:
       - Laurent_SHUP_jpackage
     tags:
       - SHUP_v*
+    paths: 'shanoir-uploader/**'
 
 jobs:
   build-linux:
