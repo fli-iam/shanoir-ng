@@ -3,7 +3,7 @@ name: Release ShanoirUploader App
 on:
   push:
     branches:
-      - Laurent_SHUP_jpackage
+      - main
     # tags:
     #   - SHUP_v*
     # paths: 
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: swing-deb
+          name: shup-deb
           path: shanoir-uploader/dist/*.deb
 
   build-windows:
@@ -70,7 +70,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: swing-exe
+          name: shup-exe
           path: shanoir-uploader/dist/*.exe
 
   build-macos:
@@ -101,7 +101,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: swing-dmg
+          name: shup-dmg
           path: shanoir-uploader/dist/*.dmg
 
   release:
@@ -115,8 +115,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Java Swing ${{ github.ref_name }}
+          tag_name: SHUP_v${{ github.ref_name }} # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v${{ github.ref_name }}
           files: |
             artifacts/**/*
         env:

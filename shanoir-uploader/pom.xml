@@ -29,7 +29,7 @@
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swingx-all.version>1.6.4</swingx-all.version>
 		<timestamp>${maven.build.timestamp}</timestamp>
-  		<maven.build.timestamp.format>yyyy-mm-dd_HH-MM-SS</maven.build.timestamp.format>
+  		<maven.build.timestamp.format>yyyy-MM-dd'T'HH-mm-ss'Z'</maven.build.timestamp.format>
 	</properties>
 
 	<dependencies>
