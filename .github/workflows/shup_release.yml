@@ -55,9 +55,10 @@ jobs:
       
       - name: Set timestamp for Windows packaging
         id: set_timestamp
-        run: echo "timestamp=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
+        run: echo "timestamp=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> "$GITHUB_OUTPUT"
 
-      - run: echo "${{ steps.set_timestamp.outputs.timestamp }}"
+      - name: Debug timestamp
+        run: echo "Timestamp is ${{ steps.set_timestamp.outputs.timestamp }}"
 
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests -Dmaven.build.timestamp=${{ steps.set_timestamp.outputs.timestamp }}
