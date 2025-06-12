@@ -1,0 +1,121 @@
+name: Release ShanoirUploader App
+
+on:
+  push:
+    paths: 'shanoir-uploader/**'
+    branches:
+      - Laurent_SHUP_jpackage
+    tags:
+      - SHUP_v*
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build
+        run: cd shanoir-uploader && mvn clean package -DskipTests
+
+      - name: Package .deb
+        run: |
+          cd shanoir-uploader
+          mkdir dist
+          jpackage \
+            --type deb \
+            --input target \
+            --dest dist \
+            --name ShanoirUploader \
+            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
+            --main-class org.shanoir.uploader.ShanoirUploader
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swing-deb
+          path: shanoir-uploader/dist/*.deb
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build
+        run: cd shanoir-uploader && mvn clean package -DskipTests
+
+      - name: Package .exe
+        run: |
+          cd shanoir-uploader
+          mkdir dist
+          jpackage `
+            --type exe `
+            --input target `
+            --dest dist `
+            --name ShanoirUploader `
+            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar `
+            --main-class org.shanoir.uploader.ShanoirUploader
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swing-exe
+          path: shanoir-uploader/dist/*.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build
+        run: cd shanoir-uploader && mvn clean package -DskipTests
+
+      - name: Package .dmg
+        run: |
+          cd shanoir-uploader
+          mkdir dist
+          jpackage \
+            --type dmg \
+            --input target \
+            --dest dist \
+            --name ShanoirUploader \
+            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
+            --main-class org.shanoir.uploader.ShanoirUploader
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swing-dmg
+          path: shanoir-uploader/dist/*.dmg
+
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Java Swing ${{ github.ref_name }}
+          files: |
+            artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
