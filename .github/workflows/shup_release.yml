@@ -23,7 +23,7 @@ jobs:
           java-version: 21
 
       - name: Build
-        run: cd shanoir-uploader && mvn clean package -DskipTests
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
       - name: Package .deb
         run: |
@@ -54,7 +54,7 @@ jobs:
           java-version: 21
 
       - name: Build
-        run: cd shanoir-uploader && mvn clean package -DskipTests
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
       - name: Package .exe
         run: |
@@ -85,7 +85,7 @@ jobs:
           java-version: 21
 
       - name: Build
-        run: cd shanoir-uploader && mvn clean package -DskipTests
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
       - name: Package .dmg
         run: |
