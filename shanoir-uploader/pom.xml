@@ -28,6 +28,8 @@
 		<opencsv.version>5.7.1</opencsv.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swingx-all.version>1.6.4</swingx-all.version>
+		<timestamp>${maven.build.timestamp}</timestamp>
+  		<maven.build.timestamp.format>yyyy-mm-dd_HH-MM-SS</maven.build.timestamp.format>
 	</properties>
 
 	<dependencies>
@@ -414,7 +416,7 @@
 						</goals>
 						<configuration>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
+							<finalName>${project.artifactId}-${project.version}-${timestamp}</finalName>
 							<descriptors>
 								<descriptor>src/main/assembly/zip.xml</descriptor>
 							</descriptors>
