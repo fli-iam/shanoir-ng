@@ -53,6 +53,8 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -100,7 +102,10 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
                 this.node.processings = processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
             }).finally(() => {
                 this.loading = false;
+                this.contentLoaded.resolve();
             });
+        } else {
+            this.contentLoaded.resolve();
         }
     }
 }

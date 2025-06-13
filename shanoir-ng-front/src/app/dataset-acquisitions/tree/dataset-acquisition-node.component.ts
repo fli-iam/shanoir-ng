@@ -91,7 +91,10 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                 this.setDatasetIds(this.node.datasets);
             }).finally(() => {
                 this.loading = false;
+                this.contentLoaded.resolve();
             });
+        } else {
+            this.contentLoaded.resolve();
         }
     }
 

@@ -142,7 +142,7 @@ export class DatasetDTOService {
             }
         }
 		if (dto.datasetProcessing) {
-			let process = new DatasetProcessing();
+			let process = DatasetProcessingDTOService.mapSyncFields(dto.datasetProcessing, new DatasetProcessing());
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
             entity.hasProcessing = !!entity.datasetProcessing;
@@ -193,7 +193,7 @@ export class DatasetDTO {
 	name: string;
     type: DatasetType;
     processings: DatasetProcessingDTO[];
-	datasetProcessing: {id: number};
+	datasetProcessing: DatasetProcessingDTO;
     hasProcessing: boolean;
     datasetParent: number;
     datasetAcquisition: DatasetAcquisitionDTO;
@@ -213,7 +213,7 @@ export class DatasetDTO {
             this.source = dataset.source;
             this.copies = dataset.copies;
             this.name = dataset.name;
-            this.datasetProcessing = dataset.datasetProcessing;
+            this.datasetProcessing = new DatasetProcessingDTO(dataset.datasetProcessing);
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingDTO(p)} );
             if(dataset.datasetAcquisition) {

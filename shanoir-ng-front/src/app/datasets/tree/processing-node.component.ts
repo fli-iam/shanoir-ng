@@ -47,6 +47,8 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -85,7 +87,10 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
                 this.node.datasets = datasets.map(d => DatasetNode.fromDataset(d, true, this.node, this.node.canDelete, this.node.canDownload));
             }).finally(() => {
                 this.loading = false;
+                this.contentLoaded.resolve();
             });
+        } else {
+            this.contentLoaded.resolve();
         }
     }
 }

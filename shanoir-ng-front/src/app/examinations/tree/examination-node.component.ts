@@ -129,7 +129,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
                 return;
             } else {
                 dsAcq.datasets.forEach(ds => {
-                    datasetIds.push(ds.id);
+                    datasetIds?.push(ds.id);
                     if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }

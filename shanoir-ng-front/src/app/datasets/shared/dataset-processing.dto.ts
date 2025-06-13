@@ -39,12 +39,6 @@ export class DatasetProcessingDTOService {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.inputDatasets && dto.inputDatasets.length > 0) {
-            promises.push(this.datasetProcessingService.getInputDatasets(dto.id).then(inputDatasets => result.inputDatasets = inputDatasets));
-        }
-        if (dto.outputDatasets && dto.outputDatasets.length > 0) {
-            promises.push(this.datasetProcessingService.getOutputDatasets(dto.id).then(outputDatasets => result.outputDatasets = outputDatasets));
-        }
         return Promise.all(promises).then(([]) => {
             return result;
         });
@@ -74,18 +68,16 @@ export class DatasetProcessingDTOService {
         entity.comment = dto.comment;
         entity.datasetProcessingType = dto.datasetProcessingType;
         if(dto.inputDatasets) {
-            entity.inputDatasets = dto.inputDatasets.map((datasetIdName)=> {
+            entity.inputDatasets = dto.inputDatasets.map(id => {
                 let dataset = new MrDataset();
-                dataset.id = datasetIdName.id;
-                dataset.name = datasetIdName.name;
+                dataset.id = id;
                 return dataset;
             })
         }
         if(dto.outputDatasets) {
-            entity.outputDatasets = dto.outputDatasets.map((datasetIdName)=> {
+            entity.outputDatasets = dto.outputDatasets.map(id => {
                 let dataset = new MrDataset();
-                dataset.id = datasetIdName.id;
-                dataset.name = datasetIdName.name;
+                dataset.id = id;
                 return dataset;
             })
         }
@@ -102,8 +94,8 @@ export class DatasetProcessingDTO {
     id: number;
     comment: string;
     datasetProcessingType: DatasetProcessingType;
-    inputDatasets: DatasetDTO[];
-    outputDatasets: DatasetDTO[];
+    inputDatasets: number[];
+    outputDatasets: number[];
 	processingDate: Date;
     studyId: number;
     parentId: number;
@@ -112,16 +104,8 @@ export class DatasetProcessingDTO {
         this.id = datasetProcessing.id;
         this.comment = datasetProcessing.comment;
         this.datasetProcessingType = datasetProcessing.datasetProcessingType;
-        this.inputDatasets = datasetProcessing.inputDatasets.map((dataset)=> {
-            let datasetDTO = new DatasetDTO(dataset);
-            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
-            return datasetDTO;
-        });
-        this.outputDatasets = datasetProcessing.outputDatasets.map((dataset)=> {
-            let datasetDTO = new DatasetDTO(dataset);
-            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
-            return datasetDTO;
-        });
+        this.inputDatasets = datasetProcessing.inputDatasets.map(ds => ds.id);
+        this.outputDatasets = datasetProcessing.outputDatasets.map(ds => ds.id);
         this.processingDate = datasetProcessing.processingDate;
         this.studyId = datasetProcessing.studyId;
         this.parentId = datasetProcessing.parentId;

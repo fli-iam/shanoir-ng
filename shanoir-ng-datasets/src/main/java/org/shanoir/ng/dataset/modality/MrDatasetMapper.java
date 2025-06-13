@@ -65,8 +65,8 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
-	// @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
-	// @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
+	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
 	MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
 	
 	/**
