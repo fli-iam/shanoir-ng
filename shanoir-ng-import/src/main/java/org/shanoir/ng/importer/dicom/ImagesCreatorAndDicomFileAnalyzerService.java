@@ -199,6 +199,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			throws FileNotFoundException {
 		String instanceFilePath;
 		if (isImportFromPACS) {
+<<<<<<< shup-examination-consistency-checker
 			StringBuilder instanceFilePathBuilder = new StringBuilder();
 			instanceFilePathBuilder.append(folderFileAbsolutePath)
 				.append(File.separator)
@@ -207,6 +208,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				.append(instance.getSopInstanceUID())
 				.append(SUFFIX_DCM);
 			instanceFilePath = instanceFilePathBuilder.toString();
+=======
+			instanceFilePath.append(folderFileAbsolutePath)
+					.append(File.separator)
+					.append(serie.getSeriesInstanceUID())
+					.append(File.separator)
+					.append(instance.getSopInstanceUID())
+					.append(SUFFIX_DCM);
+>>>>>>> develop
 		} else {
 			instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
 		}
@@ -293,9 +302,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+				|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}

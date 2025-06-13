@@ -23,127 +23,107 @@ package org.shanoir.ng.importer.eeg.edf;
 /**
  * This class represents the complete header of an EDF-File.
  */
-public class EDFHeader
-{
-        String idCode = null;
-        String subjectID = null;
-        String recordingID = null;
-        String startDate = null;
-        String startTime = null;
-        int bytesInHeader = 0;
-        String formatVersion = null;
-        int numberOfRecords = 0;
-        double durationOfRecords = 0;
-        int numberOfChannels = 0;
-        String[] channelLabels = null;
-        String[] transducerTypes = null;
-        String[] dimensions = null;
-        Double[] minInUnits = null;
-        Double[] maxInUnits = null;
-        Integer[] digitalMin = null;
-        Integer[] digitalMax = null;
-        String[] prefilterings = null;
-        Integer[] numberOfSamples = null;
-        byte[][] reserveds = null;
+public class EDFHeader {
 
-        public String getIdCode()
-        {
-                return idCode;
-        }
+    String idCode = null;
+    String subjectID = null;
+    String recordingID = null;
+    String startDate = null;
+    String startTime = null;
+    int bytesInHeader = 0;
+    String formatVersion = null;
+    int numberOfRecords = 0;
+    double durationOfRecords = 0;
+    int numberOfChannels = 0;
+    String[] channelLabels = null;
+    String[] transducerTypes = null;
+    String[] dimensions = null;
+    Double[] minInUnits = null;
+    Double[] maxInUnits = null;
+    Integer[] digitalMin = null;
+    Integer[] digitalMax = null;
+    String[] prefilterings = null;
+    Integer[] numberOfSamples = null;
+    byte[][] reserveds = null;
 
-        public String getSubjectID()
-        {
-                return subjectID;
-        }
+    public String getIdCode() {
+        return idCode;
+    }
 
-        public String getRecordingID()
-        {
-                return recordingID;
-        }
+    public String getSubjectID() {
+        return subjectID;
+    }
 
-        public String getStartDate()
-        {
-                return startDate;
-        }
+    public String getRecordingID() {
+        return recordingID;
+    }
 
-        public String getStartTime()
-        {
-                return startTime;
-        }
+    public String getStartDate() {
+        return startDate;
+    }
 
-        public int getBytesInHeader()
-        {
-                return bytesInHeader;
-        }
+    public String getStartTime() {
+        return startTime;
+    }
 
-        public String getFormatVersion()
-        {
-                return formatVersion;
-        }
+    public int getBytesInHeader() {
+        return bytesInHeader;
+    }
 
-        public int getNumberOfRecords()
-        {
-                return numberOfRecords;
-        }
+    public String getFormatVersion() {
+        return formatVersion;
+    }
 
-        public double getDurationOfRecords()
-        {
-                return durationOfRecords;
-        }
+    public int getNumberOfRecords() {
+        return numberOfRecords;
+    }
 
-        public int getNumberOfChannels()
-        {
-                return numberOfChannels;
-        }
+    public double getDurationOfRecords() {
+        return durationOfRecords;
+    }
 
-        public String[] getChannelLabels()
-        {
-                return channelLabels;
-        }
+    public int getNumberOfChannels() {
+        return numberOfChannels;
+    }
 
-        public String[] getTransducerTypes()
-        {
-                return transducerTypes;
-        }
+    public String[] getChannelLabels() {
+        return channelLabels;
+    }
 
-        public String[] getDimensions()
-        {
-                return dimensions;
-        }
+    public String[] getTransducerTypes() {
+        return transducerTypes;
+    }
 
-        public Double[] getMinInUnits()
-        {
-                return minInUnits;
-        }
+    public String[] getDimensions() {
+        return dimensions;
+    }
 
-        public Double[] getMaxInUnits()
-        {
-                return maxInUnits;
-        }
+    public Double[] getMinInUnits() {
+        return minInUnits;
+    }
 
-        public Integer[] getDigitalMin()
-        {
-                return digitalMin;
-        }
+    public Double[] getMaxInUnits() {
+        return maxInUnits;
+    }
 
-        public Integer[] getDigitalMax()
-        {
-                return digitalMax;
-        }
+    public Integer[] getDigitalMin() {
+        return digitalMin;
+    }
 
-        public String[] getPrefilterings()
-        {
-                return prefilterings;
-        }
+    public Integer[] getDigitalMax() {
+        return digitalMax;
+    }
 
-        public Integer[] getNumberOfSamples()
-        {
-                return numberOfSamples;
-        }
+    public String[] getPrefilterings() {
+        return prefilterings;
+    }
 
-        public byte[][] getReserveds()
-        {
-                return reserveds;
-        }
+    public Integer[] getNumberOfSamples() {
+        return numberOfSamples;
+    }
+
+    public byte[][] getReserveds() {
+        return reserveds;
+    }
 
 }

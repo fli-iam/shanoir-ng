@@ -49,7 +49,7 @@ import jakarta.persistence.Table;
 @Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
-"userPersonalCommentList" })
+	"userPersonalCommentList" })
 @SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
 		@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
