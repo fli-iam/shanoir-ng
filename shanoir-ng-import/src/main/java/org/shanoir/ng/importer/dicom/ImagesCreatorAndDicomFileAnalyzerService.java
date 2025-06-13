@@ -199,23 +199,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			throws FileNotFoundException {
 		String instanceFilePath;
 		if (isImportFromPACS) {
-<<<<<<< shup-examination-consistency-checker
 			StringBuilder instanceFilePathBuilder = new StringBuilder();
 			instanceFilePathBuilder.append(folderFileAbsolutePath)
 				.append(File.separator)
 				.append(serie.getSeriesInstanceUID())
 				.append(File.separator)
 				.append(instance.getSopInstanceUID())
-				.append(SUFFIX_DCM);
-			instanceFilePath = instanceFilePathBuilder.toString();
-=======
-			instanceFilePath.append(folderFileAbsolutePath)
-					.append(File.separator)
-					.append(serie.getSeriesInstanceUID())
-					.append(File.separator)
-					.append(instance.getSopInstanceUID())
 					.append(SUFFIX_DCM);
->>>>>>> develop
+			instanceFilePath = instanceFilePathBuilder.toString();
 		} else {
 			instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
 		}
