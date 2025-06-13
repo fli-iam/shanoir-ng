@@ -101,12 +101,17 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        console.log("fillCreateSubjectStep");
+        let s: Subject = this.getPrefilledSubject();
+        console.log("s : ", s);
+        this.breadcrumbsService.currentStep.addPrefilled("entity", s);
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+        this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
     }
 
     private getPrefilledSubject(): Subject {
@@ -122,6 +127,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         }
         newSubject.subjectStudyList = [subjectStudy];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        console.log("newSubject :" , newSubject);
         return newSubject;
     }
 

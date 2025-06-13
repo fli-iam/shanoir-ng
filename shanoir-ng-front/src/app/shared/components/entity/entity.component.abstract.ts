@@ -159,6 +159,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     init(): void {
+        console.log("entity abstract init");
         const choose = (): Promise<void> => {
             switch (this.mode) {
                 case 'create' :
@@ -180,11 +181,25 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.footerState.backButton = this.isMainComponent;
             this.hasEditRight().then(right => this.footerState.canEdit = right);
             this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res as T);
-            }
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res);
+
             this.manageFormSubscriptions();
+            if ((this.mode == 'create' || this.mode == 'edit')) {
+                this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => {
+                    this.entity = res as T;
+                    console.log("entity :", this.entity);
+                    this.form.updateValueAndValidity();
+                    this.manageFormSubscriptions();
+                });
+            }
+
+            this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
+
+            // if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+            //     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res as T);
+            // }
+            // this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
+            //     this.entity = res;
+            // });
         });
 
         // load called tab
@@ -214,6 +229,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     private manageFormSubscriptions() {
+        console.log("manage form subscription");
         this.form = this.buildForm();
         if (this.form) {
             this.subscriptions.push(
@@ -505,6 +521,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         if (event.key == '²') {
             console.log('form', this.form);
             console.log('entity', this.entity);
+            console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})));
         }
     }
 

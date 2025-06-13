@@ -95,12 +95,16 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     init() {
+        console.log("init");
         super.init();
         if (this.mode == 'create') {
+            console.log("init mode == create");
             this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res as Subject);
+            this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
             if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
@@ -117,6 +121,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     initView(): Promise<void> {
+        console.log("initView");
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
@@ -137,6 +142,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     initCreate(): Promise<void> {
+        console.log("initCreate");
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
@@ -144,6 +150,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     buildForm(): UntypedFormGroup {
+        console.log("buildForm");
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
@@ -172,6 +179,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         if (!this.subject.name && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
         }
+
         return subjectForm;
     }
 
@@ -194,6 +202,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
+        console.log("update form control");
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);

@@ -275,7 +275,6 @@ export class Step {
         } else {
             let superPro = new SuperPromise();
             this.prefilled.push({field: field, value: value});
-            //this.addPrefilled(field, superPro);
             superPro.resolve(value);
         }
     }
