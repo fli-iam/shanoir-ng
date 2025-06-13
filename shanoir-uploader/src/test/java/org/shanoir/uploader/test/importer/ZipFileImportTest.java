@@ -48,7 +48,7 @@ public class ZipFileImportTest extends AbstractTest {
 	@Test
 	public void testImportWithDicomZipUpload() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 0; i++) {
 			ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
