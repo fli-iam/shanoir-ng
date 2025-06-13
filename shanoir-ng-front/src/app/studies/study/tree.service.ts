@@ -225,6 +225,7 @@ export class TreeService {
     }
 
     select(selection: Selection): Promise<void> {
+        if (selection.equals(this.selection)) return Promise.resolve();
         this.selection = selection;
         if (this.treeOpened) {
             return this.changeSelection().then(() => {
@@ -663,6 +664,10 @@ export class Selection {
         public studyId: number[],
         public entity?: Entity
     ) {}
+
+    equals(otherSelection: Selection): boolean {
+        return otherSelection && this.id == otherSelection.id && this.type == otherSelection.type;
+    }
 
     isSelected(id: number, type: NodeType): boolean {
         return id == this.id && type == this.type;
