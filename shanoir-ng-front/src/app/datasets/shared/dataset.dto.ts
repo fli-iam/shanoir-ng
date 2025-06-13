@@ -28,7 +28,7 @@ import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { DatasetProcessingDTO, DatasetProcessingDTOService } from './dataset-processing.dto';
+import { DatasetProcessingInDTO, DatasetProcessingDTOService, DatasetProcessingOutDTO } from './dataset-processing.dto';
 
 @Injectable()
 export class DatasetDTOService {
@@ -137,12 +137,12 @@ export class DatasetDTOService {
         }
         if(dto.processings) {
             for(let p of dto.processings) {
-                let processing = DatasetProcessingDTOService.mapSyncFields(p, new DatasetProcessing());
+                let processing = DatasetProcessingDTOService.mapSyncFields((p as DatasetProcessingInDTO), new DatasetProcessing());
                 entity.processings.push(processing);
             }
         }
 		if (dto.datasetProcessing) {
-			let process = DatasetProcessingDTOService.mapSyncFields(dto.datasetProcessing, new DatasetProcessing());
+			let process = DatasetProcessingDTOService.mapSyncFields((dto.datasetProcessing as DatasetProcessingInDTO), new DatasetProcessing());
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
             entity.hasProcessing = !!entity.datasetProcessing;
@@ -192,8 +192,8 @@ export class DatasetDTO {
     updatedMetadata: DatasetMetadata;
 	name: string;
     type: DatasetType;
-    processings: DatasetProcessingDTO[];
-	datasetProcessing: DatasetProcessingDTO;
+    processings: DatasetProcessingInDTO[] | DatasetProcessingOutDTO[];
+	datasetProcessing: DatasetProcessingInDTO | DatasetProcessingOutDTO;
     hasProcessing: boolean;
     datasetParent: number;
     datasetAcquisition: DatasetAcquisitionDTO;
@@ -213,9 +213,9 @@ export class DatasetDTO {
             this.source = dataset.source;
             this.copies = dataset.copies;
             this.name = dataset.name;
-            this.datasetProcessing = new DatasetProcessingDTO(dataset.datasetProcessing);
+            this.datasetProcessing = (new DatasetProcessingOutDTO(dataset.datasetProcessing));
             this.type = dataset.type;
-            this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingDTO(p)} );
+            this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingOutDTO(p)} );
             if(dataset.datasetAcquisition) {
                 this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
             }
