@@ -73,10 +73,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
     ];
 
     constructor(private route: ActivatedRoute,
-            private subjectService: SubjectService,
-            private studyService: StudyService,
-            private downloadService: MassDownloadService,
-            private studyRightsService: StudyRightsService) {
+                private subjectService: SubjectService,
+                private studyService: StudyService,
+                private downloadService: MassDownloadService,
+                private studyRightsService: StudyRightsService) {
 
         super(route, 'subject');
     }
@@ -95,19 +95,25 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     init() {
+        console.log("init");
         super.init();
         if (this.mode == 'create') {
-            this.firstName = this.breadcrumbsService.currentStep.data.firstName;
-            this.lastName = this.breadcrumbsService.currentStep.data.lastName;
-            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
-	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
+            console.log("init mode == create");
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res as Subject);
+            this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
+
+            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
+            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
                 if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
                 this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
             }
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
-	        }
+            }
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
@@ -115,6 +121,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     initView(): Promise<void> {
+        console.log("initView");
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
@@ -135,6 +142,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     initCreate(): Promise<void> {
+        console.log("initCreate");
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
@@ -142,6 +150,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     buildForm(): UntypedFormGroup {
+        console.log("buildForm");
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
@@ -170,16 +179,17 @@ export class SubjectComponent extends EntityComponent<Subject> {
         if (!this.subject.name && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
         }
+
         return subjectForm;
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
-      return (c: AbstractControl): { [key: string]: boolean } | null => {
-        if (forbiddenValues.indexOf(c.value) !== -1) {
-          return { 'subjectNamePrefix': true };
-        }
-        return null;
-      };
+        return (c: AbstractControl): { [key: string]: boolean } | null => {
+            if (forbiddenValues.indexOf(c.value) !== -1) {
+                return { 'subjectNamePrefix': true };
+            }
+            return null;
+        };
     }
 
     private notEmptyValidator(): ValidatorFn {
@@ -192,6 +202,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
+        console.log("update form control");
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
