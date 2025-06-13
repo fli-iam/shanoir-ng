@@ -203,9 +203,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<version>3.6.0</version>
 				<configuration>
 					<configLocation>checkstyle.xml</configLocation>
+					<excludes>**/target/**/*</excludes>
 				</configuration>
 				<executions>
 					<execution>
+						<id>checkstyle-verify</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>check</goal>
 						</goals>

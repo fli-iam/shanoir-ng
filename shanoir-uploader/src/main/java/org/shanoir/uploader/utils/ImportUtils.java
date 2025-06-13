@@ -23,7 +23,7 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -295,7 +295,7 @@ public class ImportUtils {
 		// We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
 		// The user select after both components in the tree GUI of ShanoirUploader, where a linked list
 		// is used, therefore as the user can click and series on his behalf, we sort again here.
-		series.sort(new SeriesNumberOrDescriptionSorter());
+		series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
 		patient.setStudies(studiesImportJob);
