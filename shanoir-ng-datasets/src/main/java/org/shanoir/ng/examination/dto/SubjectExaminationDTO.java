@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
@@ -29,8 +28,6 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 public class SubjectExaminationDTO {
 
 	private String comment;
-
-	private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
 
 	@LocalDateAnnotations
 	private LocalDate examinationDate;
@@ -58,21 +55,6 @@ public class SubjectExaminationDTO {
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	/**
-	 * @return the datasetAcquisitions
-	 */
-	public List<ExaminationDatasetAcquisitionDTO> getDatasetAcquisitions() {
-		return datasetAcquisitions;
-	}
-
-	/**
-	 * @param datasetAcquisitions
-	 *            the datasetAcquisitions to set
-	 */
-	public void setDatasetAcquisitions(List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions) {
-		this.datasetAcquisitions = datasetAcquisitions;
 	}
 
 	/**
