@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import {AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -121,7 +121,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): UntypedFormGroup {
         let form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
+            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
         });
@@ -173,6 +173,22 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             return { spaces: true }
         }
         return null;
+    }
+
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
+        if (!control.parent) return null;
+
+        const serialNumber = control.value;
+        const manufacturerModel = control.parent.get('manufacturerModel')?.value;
+
+        if (!serialNumber || !manufacturerModel) return null;
+
+        try {
+            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+            return exists ? { unique: true } : null;
+        } catch (error) {
+            return null;
+        }
     }
 
     save(): Promise<AcquisitionEquipment> {
