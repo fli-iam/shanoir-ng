@@ -61,12 +61,18 @@ jobs:
           cd shanoir-uploader
           mkdir dist
           jpackage `
+            --app-version 1.0.0 `
+            --vendor "Inria" `
+            --copyright "© 2025 Inria" `
             --type exe `
             --input target `
             --dest dist `
             --name ShanoirUploader `
             --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar `
-            --main-class org.shanoir.uploader.ShanoirUploader
+            --main-class org.shanoir.uploader.ShanoirUploader `
+            --win-menu `
+            --win-shortcut `
+            --icon blabla.ico
 
       - uses: actions/upload-artifact@v4
         with:
