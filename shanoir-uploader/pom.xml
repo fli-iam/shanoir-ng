@@ -24,7 +24,7 @@
 		<json.version>20231013</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
-		<poi.version>4.1.2</poi.version>
+		<poi.version>5.4.0</poi.version>
 		<opencsv.version>5.7.1</opencsv.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swingx-all.version>1.6.4</swingx-all.version>
