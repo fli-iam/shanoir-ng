@@ -16,13 +16,11 @@ import javax.swing.JTextArea;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.utils.Utils;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
 public class DownloadOrCopyRunnable implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
-
-	public static final String IMPORT_JOB_JSON = "import-job.json";
 
 	private boolean isFromPACS;
 
@@ -90,7 +86,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
+			List<Serie> selectedSeries = importJob.getSelectedSeries();
 			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
 			downloadProgressBar.setValue(0);
@@ -105,8 +101,8 @@ public class DownloadOrCopyRunnable implements Runnable {
 				 * 2. Fill MRI information into all series from first DICOM file of each serie
 				 */
 				for (Serie serie : selectedSeries) {
-					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(),
-							serie, null, isFromPACS);
+					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), null,
+						importJob.getStudy(), serie, isFromPACS);
 				}
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
@@ -115,45 +111,35 @@ public class DownloadOrCopyRunnable implements Runnable {
 			}
 
 			/**
-			 * Write the UploadJob
+			 * Set the upload parameters of the importJob object
 			 */
-			UploadJob uploadJob = new UploadJob();
-			ImportUtils.initUploadJob(importJob, uploadJob);
+			importJob.setTimestamp(System.currentTimeMillis());
+
 			if (allFileNames == null) {
-				uploadJob.setUploadState(UploadState.ERROR);
+				importJob.setUploadState(UploadState.ERROR);
+			} else {
+				importJob.setUploadState(UploadState.READY);
 			}
-			UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-			uploadJobManager.writeUploadJob(uploadJob);
+
+			importJob.setUploadPercentage("");
 
 			/**
-			 * Write the NominativeDataUploadJobManager for displaying the download state
+			 * Write import-job.json to disk
 			 */
-			NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-			ImportUtils.initDataUploadJob(importJob, uploadJob, dataJob);
-			if (allFileNames == null) {
-				dataJob.setUploadState(UploadState.ERROR);
-			}
-			NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-					uploadFolder.getAbsolutePath());
-			uploadDataJobManager.writeUploadDataJob(dataJob);
-			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-			logger.info(
-					uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
-							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
-							+ importJob.getPatient().getPatientName());
-
-			/**
-			 * Write import-job.json to disk and remove unnecessary DICOM information before
-			 */
-			importJob.setPatient(null);
-			importJob.setStudy(null);
 			try {
-				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
+				File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
 				importJobJson.createNewFile();
 				Util.objectMapper.writeValue(importJobJson, importJob);
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}
+
+			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, importJob);
+			logger.info(
+					uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
+							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
+							+ Utils.sha256(importJob.getPatient().getPatientName()));
+
 			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
 		if (isTableImport) {
@@ -176,5 +162,4 @@ public class DownloadOrCopyRunnable implements Runnable {
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
 }

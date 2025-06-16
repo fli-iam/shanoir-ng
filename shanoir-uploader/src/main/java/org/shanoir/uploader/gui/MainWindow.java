@@ -115,7 +115,7 @@ public class MainWindow extends JFrame {
 	public JLabel connexionStatus;
 
 	private FindDicomActionListener fAL;
-	private DownloadOrCopyActionListener dOCAL;
+	public DownloadOrCopyActionListener dOCAL;
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
@@ -145,10 +145,10 @@ public class MainWindow extends JFrame {
 
 	public ResourceBundle resourceBundle;
 	public ShUpConfig shanoirUploaderConfiguration;
+
+	public ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	
 	private ImportDialogOpener importDialogOpener;
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	/**
 	 * Create the frame.
@@ -213,7 +213,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), dOCAL);
+				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), ShUpOnloadConfig.getPseudonymizer());
 			}
 		});
 
@@ -817,18 +817,7 @@ public class MainWindow extends JFrame {
 		
 		menuBar.add(Box.createHorizontalGlue());
 		
-		/**
-		 * Init pseudonymizer and subjectIdentifierGenerator and create
-		 * DownloadOrCopyActionListener, and add AL to button.
-		 */
-		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-		Pseudonymizer pseudonymizer = null;
-		try {
-			pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
-		} catch (PseudonymusException e) {
-			logger.error(e.getMessage(), e);
-		}
-		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient, dicomFileAnalyzer);
+		dOCAL = new DownloadOrCopyActionListener(this, ShUpOnloadConfig.getPseudonymizer(), dicomServerClient, dicomFileAnalyzer);
 		downloadOrCopyButton.addActionListener(dOCAL);
 		downloadOrCopyButton.setEnabled(false);
 		

@@ -4,18 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
+import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
@@ -51,7 +49,7 @@ public class UploadServiceJob {
 	private boolean uploading;
 
 	@Scheduled(fixedRate = 5000)
-	public void execute() {
+	public void execute() throws IOException {
 		logger.debug("UploadServiceJob started...");
 		uploading = false;
 		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
@@ -63,22 +61,30 @@ public class UploadServiceJob {
 	 * Walk trough all folders within the work folder.
 	 * 
 	 * @param workFolder
+	 * @throws IOException 
 	 */
-	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) {
+	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws IOException {
 		final List<File> folders = Util.listFolders(workFolder);
 		logger.debug("Found " + folders.size() + " folders in work folder.");
 		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			final File folder = (File) foldersIt.next();
-			final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
+			final File importJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 			// file could be missing in case of downloadOrCopy ongoing
-			if (uploadJobFile.exists()) {
-				UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
-				final UploadJob uploadJob = uploadJobManager.readUploadJob();
-				final UploadState uploadState = uploadJob.getUploadState();
-				// Avoid reading all files (a lot) in case of finished upload
-				if (!uploadState.equals(UploadState.FINISHED_UPLOAD)) {
-					processFolderForServer(folder, uploadJobManager, uploadJobFile, currentNominativeDataController);
+			if (importJobFile.exists()) {
+				NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
+				final ImportJob importJob = importJobManager.readImportJob();
+				// In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
+				if (importJob.getUploadState() == null) {
+					String uploadState = ImportUtils.getUploadStateFromUploadJob(folder);
+					importJob.setUploadState(UploadState.fromString(uploadState));
 				}
+				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
+				// Avoid reading all files (a lot) in case of finished upload
+				if (!uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
+					processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
+				}
+			} else {
+				logger.warn("Folder found in workFolder without import-job.json.");
 			}
 		}
 	}
@@ -88,9 +94,9 @@ public class UploadServiceJob {
 	 * 
 	 * @param folder
 	 */
-	private void processFolderForServer(final File folder, final UploadJobManager uploadJobManager,
-			final File uploadJobFile, CurrentNominativeDataController currentNominativeDataController) {
-		NominativeDataUploadJobManager nominativeDataUploadJobManager = null;
+	private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
+			final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
+		// NominativeDataImportJobManager nominativeDataImportJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
 		/**
 		 * Get all files from uploadFolder (importJob) and send them.
@@ -101,35 +107,32 @@ public class UploadServiceJob {
 		final Collection<File> files = Util.listFiles(folder, null, true);
 		for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
-			// do not transfer nominativeDataUploadJob as only for display in ShUp
-			if (file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
-				nominativeDataUploadJobManager = new NominativeDataUploadJobManager(file);
+			// do not transfer nominativeDataImportJob as only for display in ShUp
+			// if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
+			// 	nominativeDataImportJobManager = new NominativeDataImportJobManager(file);
 		    // remove upload-job.xml from the list of files to transfer, to guarantee later
 			// that this file is for sure transferred as the last file to avoid sync problems
 			// on the server, when auto-import starts with still missing files
-			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-					|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
-				// do not add to list
-		    } else {
-		    	if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX))
-		    		filesToTransfer.add(file);
+			// } else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
+			// 		|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
+			// 	// do not add to list
+		    // } else {
+		    if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+				filesToTransfer.add(file);
 			}
+			// }
 		}
-		if (uploadJobManager != null && nominativeDataUploadJobManager != null) {
-			final UploadJob uploadJob = uploadJobManager.readUploadJob();
-			final UploadState uploadState = uploadJob.getUploadState();
-			final NominativeDataUploadJob nominativeDataUploadJob = nominativeDataUploadJobManager.readUploadDataJob();
-			nominativeDataUploadJob.setUploadState(uploadState);
-			if (uploadState.equals(UploadState.START) || uploadState.equals(UploadState.START_AUTOIMPORT)) {
+		if (importJobManager != null) {
+			final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
+			if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.START) || uploadState.equals(org.shanoir.ng.importer.model.UploadState.START_AUTOIMPORT)) {
 				long startTime = System.currentTimeMillis();
-				processStartForServer(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
-						uploadJobManager, nominativeDataUploadJobManager, currentNominativeDataController);
+				processStartForServer(folder, filesToTransfer, importJob, importJobManager, currentNominativeDataController);
 				long stopTime = System.currentTimeMillis();
 			    long elapsedTime = stopTime - startTime;
 				logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
 			}
 		} else {
-			logger.error("Folder found in workFolder without upload-job.xml.");
+			
 		}
 	}
 
@@ -141,8 +144,7 @@ public class UploadServiceJob {
 	 * @param uploadJob
 	 */
 	private void processStartForServer(final File folder, final List<File> allFiles,
-			final UploadJob uploadJob, final NominativeDataUploadJob nominativeDataUploadJob,
-			UploadJobManager uploadJobManager, NominativeDataUploadJobManager nominativeDataUploadJobManager,
+			final ImportJob importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
 			uploading = true;
@@ -159,23 +161,25 @@ public class UploadServiceJob {
 				shanoirUploaderServiceClient.uploadFile(tempDirId, file);
 				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
 				uploadPercentage = i * 100 / allFiles.size() + " %";
-				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
+				// following 2 lines are doing same thing ?
+				importJob.setUploadPercentage(uploadPercentage);
 				currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
-				nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
+				nominativeDataImportJobManager.writeImportJob(importJob);
 				logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
 			}
 			logger.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
 
 			/**
-			 * Read import-job.json and start job on server
+			 * Start job on server
 			 */
-			ImportJob importJob = ImportUtils.readImportJob(folder);
 			setTempDirIdAndStartImport(tempDirId, importJob);	
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
-					UploadState.FINISHED_UPLOAD.toString());
-			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
-			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
-			uploadJobManager.writeUploadJob(uploadJob);
+				org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
+			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
+			importJob.setTimestamp(System.currentTimeMillis());
+			nominativeDataImportJobManager.writeImportJob(importJob);
+
+			//List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);
 			
 			// Clean all DICOM files after successful import to server
 			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
@@ -192,10 +196,10 @@ public class UploadServiceJob {
 
 			uploading = false;
 		} catch (Exception e) {
-			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
-			uploadJob.setUploadState(UploadState.ERROR);
-			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
-			uploadJobManager.writeUploadJob(uploadJob);
+			currentNominativeDataController.updateNominativeDataPercentage(folder, org.shanoir.ng.importer.model.UploadState.ERROR.toString());
+			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
+			importJob.setTimestamp(System.currentTimeMillis());
+			nominativeDataImportJobManager.writeImportJob(importJob);
 			logger.error("An error occurred during upload to server: " + e.getMessage());
 		}
 	}

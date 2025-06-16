@@ -58,14 +58,13 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
 				// Profile Neurinfo
-				if (ShUpConfig.isModeSubjectCommonNameManual()) {
+				if (ShUpConfig.isModeSubjectNameManual()) {
 					updateExistingSubjects(study);
 					this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();	
 					// for OFSEP this is done in ImportDialogOpener as subject found before, if
 					updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
 				}
 				updateSubjectStudy(study, subject);
-				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
@@ -196,7 +195,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		// Check if RelSubjectStudy exists for selected study
 		if (subject != null) {
 			// Profile Neurinfo: findSubjectsByStudyId returns single subject-study
-			if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			if (ShUpConfig.isModeSubjectNameManual()) {
 				SubjectStudy subjectStudy = subject.getSubjectStudy();
 				if (subjectStudy != null) {
 					logger.info("Existing subjectStudy found with ID: " + subjectStudy.getId());

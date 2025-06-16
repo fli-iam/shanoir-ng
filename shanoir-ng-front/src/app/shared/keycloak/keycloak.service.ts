@@ -14,6 +14,7 @@
 import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
+import Keycloak from "keycloak-js";
 
 
 // The keycloak adapter supports two authentication methods : "login-required"
@@ -31,8 +32,6 @@ import * as AppUtils from '../../utils/app.utils';
 //   It is reliable but slower (because of the two redirections the
 //   authentication is performed twice and the SPA is loaded twice).
 const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
-
-declare var Keycloak: any;
 
 @Injectable()
 export class KeycloakService {
@@ -63,7 +62,7 @@ export class KeycloakService {
                         // login form.
                         // But 'check-sso' only sets/clears the token, we have
                         // to do the redirection explicitely
-                        window.location.replace(keycloakAuth.createLoginUrl());
+                        keycloakAuth.createLoginUrl().then(url => window.location.replace(url));
                 }
         }
 
