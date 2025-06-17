@@ -37,6 +37,7 @@ import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import { Selection } from 'src/app/studies/study/tree.service';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-card',
@@ -75,6 +76,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
+        this.subscriptions.push(this.onSave.subscribe(() => {
+            let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+            if (studyIdforDUA) {
+                this.breadcrumbsService.currentStep.data.goDUA = undefined;
+                DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
+            }
+        }));
      }
 
     getService(): EntityService<StudyCard> {

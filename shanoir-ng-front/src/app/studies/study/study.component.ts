@@ -49,6 +49,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
 import { Tag } from 'src/app/tags/tag.model';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-detail',
@@ -549,11 +550,17 @@ export class StudyComponent extends EntityComponent<Study> {
                             'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                             .then(userChoice => {
                                 if (userChoice) {
-                                    this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                                    this.router.navigate(['/study-card/create', {studyId: study.id}]).then(() => {
+                                        this.breadcrumbsService.currentStep.data.goDUA = study.id;
+                                    });
+                                } else { // cancel
+                                    DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
                                 }
                             });
                     }
                 })
+            } else {
+                DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
             return study;
         });

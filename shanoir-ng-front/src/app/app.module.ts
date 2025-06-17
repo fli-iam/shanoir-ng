@@ -279,6 +279,7 @@ import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-proto
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
 
 @NgModule({ 
     declarations: [
@@ -460,7 +461,8 @@ import { SizePipe } from './shared/utils/size.pipe';
         CoilNodeComponent,
         DoubleAwesomeComponent,
         MetadataNodeComponent,
-        SizePipe
+        SizePipe,
+        DUAAssistantComponent
     ],
     bootstrap: [AppComponent], 
     imports: [
