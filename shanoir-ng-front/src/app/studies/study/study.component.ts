@@ -521,7 +521,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        let newStudy: boolean = !!this.study?.id; 
+        let newStudy: boolean = !this.study?.id; 
         return super.save(() => {
             let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
@@ -552,7 +552,9 @@ export class StudyComponent extends EntityComponent<Study> {
                             .then(userChoice => {
                                 if (userChoice) {
                                     this.router.navigate(['/study-card/create', {studyId: study.id}]).then(() => {
-                                        if (newStudy) this.breadcrumbsService.currentStep.data.goDUA = study.id;
+                                        setTimeout(() => {
+                                            if (newStudy) this.breadcrumbsService.currentStep.data.goDUA = study.id;
+                                        });
                                     });
                                 } else if (newStudy) { // cancel
                                     DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);

@@ -120,6 +120,15 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return Promise.resolve();
     }
 
+    ngOnDestroy(): void {
+        let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+        if (studyIdforDUA) {
+            this.breadcrumbsService.currentStep.data.goDUA = undefined;
+            DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
+        }
+        super.ngOnDestroy();
+    }
+
     buildForm(): UntypedFormGroup {
         let form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
