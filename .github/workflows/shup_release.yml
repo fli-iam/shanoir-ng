@@ -30,7 +30,7 @@ jobs:
           jlink \
             --module-path $JAVA_HOME/jmods \
             --add-modules java.base,java.desktop \
-            --output target/custom-runtime \
+            --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
             --no-header-files \
@@ -73,7 +73,7 @@ jobs:
           jlink \
             --module-path $Env:JAVA_HOME\jmods \
             --add-modules java.base,java.desktop \
-            --output target/custom-runtime \
+            --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
             --no-header-files \
@@ -121,7 +121,7 @@ jobs:
           jlink \
             --module-path $JAVA_HOME/jmods \
             --add-modules java.base,java.desktop \
-            --output target/custom-runtime \
+            --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
             --no-header-files \
