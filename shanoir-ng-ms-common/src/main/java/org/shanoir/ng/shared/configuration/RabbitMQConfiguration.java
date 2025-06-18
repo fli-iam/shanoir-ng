@@ -228,7 +228,7 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
-    		return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
+		return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
     }
 
     @Bean

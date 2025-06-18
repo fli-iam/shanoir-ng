@@ -389,6 +389,6 @@ public interface StudyApi {
 	@GetMapping(value = "/statistics/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
 	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
-		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 	
 }

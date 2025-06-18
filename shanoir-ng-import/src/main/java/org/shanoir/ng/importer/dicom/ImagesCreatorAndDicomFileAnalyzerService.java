@@ -200,11 +200,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {
 			instanceFilePath.append(folderFileAbsolutePath)
-				.append(File.separator)
-				.append(serie.getSeriesInstanceUID())
-				.append(File.separator)
-				.append(instance.getSopInstanceUID())
-				.append(SUFFIX_DCM);
+					.append(File.separator)
+					.append(serie.getSeriesInstanceUID())
+					.append(File.separator)
+					.append(instance.getSopInstanceUID())
+					.append(SUFFIX_DCM);
 		} else {
 			String[] instancePathArray = instance.getReferencedFileID();
 			if (instancePathArray != null || instancePathArray.length != 0) {
@@ -303,9 +303,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+				|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
