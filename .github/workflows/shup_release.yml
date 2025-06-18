@@ -40,6 +40,7 @@ jobs:
         run: |
           cd shanoir-uploader
           mkdir target/packages
+          mkdir -p target/lib
           cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage \
             --type deb \
@@ -85,6 +86,7 @@ jobs:
         run: |
           cd shanoir-uploader
           mkdir target/packages
+          mkdir -p target/lib
           cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage `
             --app-version 1.0.1 `
@@ -135,6 +137,7 @@ jobs:
         run: |
           cd shanoir-uploader
           mkdir target/packages
+          mkdir -p target/lib
           cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage \
             --type dmg \
