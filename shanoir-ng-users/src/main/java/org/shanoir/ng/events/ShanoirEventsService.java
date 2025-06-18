@@ -50,7 +50,7 @@ public class ShanoirEventsService {
 		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
-			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
+			  	|| ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.SOLR_INDEX_ALL_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
