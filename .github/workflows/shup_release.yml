@@ -39,14 +39,14 @@ jobs:
       - name: Package .deb
         run: |
           cd shanoir-uploader
-          mkdir dist
+          mkdir target/packages
+          cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage \
             --type deb \
-            --input target \
-            --dest dist \
+            --input target/lib \
+            --dest target/packages \
             --name ShanoirUploader \
             --main-jar shanoir-uploader-9.0.0.jar \
-            --classpath "target/lib/*" \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" 
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: shup-deb
-          path: shanoir-uploader/dist/*.deb
+          path: shanoir-uploader/target/packages/*.deb
 
   build-windows:
     runs-on: windows-latest
@@ -84,18 +84,18 @@ jobs:
       - name: Package .exe
         run: |
           cd shanoir-uploader
-          mkdir dist
+          mkdir target/packages
+          cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage `
             --app-version 1.0.1 `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
             --type exe `
-            --input target `
-            --dest dist `
+            --input target/lib `
+            --dest target/packages `
             --name ShanoirUploader `
             --main-jar shanoir-uploader-9.0.0.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
-            --classpath "target/lib/*" `
             --runtime-image target/custom-runtime `
             --java-options "-Xmx2g" `
             --win-menu `
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: shup-exe
-          path: shanoir-uploader/dist/*.exe
+          path: shanoir-uploader/target/packages/*.exe
 
   build-macos:
     runs-on: macos-latest
@@ -134,22 +134,22 @@ jobs:
       - name: Package .dmg
         run: |
           cd shanoir-uploader
-          mkdir dist
+          mkdir target/packages
+          cp target/shanoir-uploader-9.0.0.jar target/lib/
           jpackage \
             --type dmg \
-            --input target \
-            --dest dist \
+            --input target/lib \
+            --dest target/packages \
             --name ShanoirUploader \
             --main-jar shanoir-uploader-9.0.0.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
-            --classpath "target/lib/*" \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g"
 
       - uses: actions/upload-artifact@v4
         with:
           name: shup-dmg
-          path: shanoir-uploader/dist/*.dmg
+          path: shanoir-uploader/target/packages/*.dmg
 
   release:
     needs: [build-linux, build-windows, build-macos]
@@ -162,8 +162,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v1.0.1 # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v1.0.1
+          tag_name: SHUP_v1.0.3 # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v1.0.3
           files: |
             artifacts/**/*
         env:
