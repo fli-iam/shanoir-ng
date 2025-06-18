@@ -275,14 +275,14 @@ public class StudyServiceImpl implements StudyService {
         @Override
         public boolean check(StudyCenter a, StudyCenter b) {
             boolean result =  a != null && b != null && (
-				a.getId() != null && a.getId().equals(b.getId()) || (
-					   a.getCenter() != null && a.getCenter().getId() != null 
-					&& b.getCenter() != null && b.getCenter().getId() != null 
-					&& a.getCenter().getId().equals(b.getCenter().getId())
-					&& a.getStudy() != null && a.getStudy().getId() != null
-					&& b.getStudy() != null && b.getStudy().getId() != null
-					&& a.getStudy().getId().equals(b.getStudy().getId())
-				) 
+					a.getId() != null && a.getId().equals(b.getId()) || (
+						a.getCenter() != null && a.getCenter().getId() != null 
+						&& b.getCenter() != null && b.getCenter().getId() != null 
+						&& a.getCenter().getId().equals(b.getCenter().getId())
+						&& a.getStudy() != null && a.getStudy().getId() != null
+						&& b.getStudy() != null && b.getStudy().getId() != null
+						&& a.getStudy().getId().equals(b.getStudy().getId())
+					) 
 			);
 			return result;
         }
@@ -842,14 +842,14 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
-					if(!detailedStorageVolumes.containsKey(study.getId())){
-						return;
-					}
-					Long filesSize = this.getStudyFilesSize(study);
-					StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
-					dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-					dto.setTotal(filesSize + dto.getTotal());
-				}
+			if(!detailedStorageVolumes.containsKey(study.getId())) {
+				return;
+			}
+			Long filesSize = this.getStudyFilesSize(study);
+			StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+			dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+			dto.setTotal(filesSize + dto.getTotal());
+		}
 		);
 
 		return detailedStorageVolumes;
