@@ -45,9 +45,10 @@ jobs:
             --input target \
             --dest dist \
             --name ShanoirUploader \
-            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
+            --main-jar shanoir-uploader-9.0.0.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
-            --runtime-image target/custom-runtime
+            --runtime-image target/custom-runtime \
+            --java-options "-Xmx2g" 
 
       - uses: actions/upload-artifact@v4
         with:
@@ -91,9 +92,10 @@ jobs:
             --input target `
             --dest dist `
             --name ShanoirUploader `
-            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar `
+            --main-jar shanoir-uploader-9.0.0.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
+            --java-options "-Xmx2g" `
             --win-menu `
             --win-shortcut 
 
@@ -136,9 +138,10 @@ jobs:
             --input target \
             --dest dist \
             --name ShanoirUploader \
-            --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
+            --main-jar shanoir-uploader-9.0.0.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
-            --runtime-image target/custom-runtime
+            --runtime-image target/custom-runtime \
+            --java-options "-Xmx2g"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -156,8 +159,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v1.0.1 # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v1.0.1
+          tag_name: SHUP_v1.0.2 # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v1.0.2
           files: |
             artifacts/**/*
         env:
