@@ -3,7 +3,7 @@ name: Release ShanoirUploader App
 on:
   push:
     branches:
-      - main
+      - Laurent_SHUP_jpackage
     # tags:
     #   - SHUP_v*
     # paths: 
@@ -25,6 +25,17 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Create custom runtime with jlink
+        run: |
+          jlink \
+            --module-path $JAVA_HOME/jmods \
+            --add-modules java.base,java.desktop \
+            --output target/custom-runtime \
+            --compress 2 \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
       - name: Package .deb
         run: |
           cd shanoir-uploader
@@ -35,7 +46,8 @@ jobs:
             --dest dist \
             --name ShanoirUploader \
             --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
-            --main-class org.shanoir.uploader.ShanoirUploader
+            --main-class org.shanoir.uploader.ShanoirUploader \
+            --runtime-image custom-runtime
 
       - uses: actions/upload-artifact@v4
         with:
@@ -56,12 +68,23 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Create custom runtime with jlink
+        run: |
+          jlink \
+            --module-path $Env:JAVA_HOME\jmods \
+            --add-modules java.base,java.desktop \
+            --output target/custom-runtime \
+            --compress 2 \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
       - name: Package .exe
         run: |
           cd shanoir-uploader
           mkdir dist
           jpackage `
-            --app-version 1.0.0 `
+            --app-version 1.0.1 `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
             --type exe `
@@ -70,9 +93,9 @@ jobs:
             --name ShanoirUploader `
             --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
+            --runtime-image custom-runtime `
             --win-menu `
-            --win-shortcut `
-            --icon blabla.ico
+            --win-shortcut 
 
       - uses: actions/upload-artifact@v4
         with:
@@ -93,6 +116,17 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Create custom runtime with jlink
+        run: |
+          jlink \
+            --module-path $JAVA_HOME/jmods \
+            --add-modules java.base,java.desktop \
+            --output target/custom-runtime \
+            --compress 2 \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
       - name: Package .dmg
         run: |
           cd shanoir-uploader
@@ -103,7 +137,8 @@ jobs:
             --dest dist \
             --name ShanoirUploader \
             --main-jar shanoir-uploader-9.0.0-jar-with-dependencies.jar \
-            --main-class org.shanoir.uploader.ShanoirUploader
+            --main-class org.shanoir.uploader.ShanoirUploader \
+            --runtime-image custom-runtime
 
       - uses: actions/upload-artifact@v4
         with:
@@ -121,8 +156,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v${{ github.ref_name }} # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v${{ github.ref_name }}
+          tag_name: SHUP_v1.0.1 # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v1.0.1
           files: |
             artifacts/**/*
         env:
