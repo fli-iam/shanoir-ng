@@ -125,7 +125,7 @@ public class ImportFinishActionListener implements ActionListener {
 			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
-				subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
 				study, studyCard);
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
