@@ -70,13 +70,13 @@ jobs:
 
       - name: Create custom runtime with jlink
         run: |
-          jlink \
-            --module-path $Env:JAVA_HOME\jmods \
-            --add-modules java.base,java.desktop \
-            --output shanoir-uploader/target/custom-runtime \
-            --compress 2 \
-            --strip-debug \
-            --no-header-files \
+          jlink `
+            --module-path $Env:JAVA_HOME\jmods `
+            --add-modules java.base,java.desktop `
+            --output shanoir-uploader/target/custom-runtime `
+            --compress 2 `
+            --strip-debug `
+            --no-header-files `
             --no-man-pages
 
       - name: Package .exe
