@@ -365,50 +365,50 @@
 				<version>1.7</version>
 				<executions>
 					<execution>
+						<id>copy-scripts</id>
 						<phase>package</phase>
-						<configuration>
-							<tasks>
-								<copy file="start-shup-windows-java.bat"
-									tofile="target/start-shup-windows-java.bat" />
-								<copy file="start-shup-linux-mac-java.sh"
-									tofile="target/start-shup-linux-mac-java.sh" />
-								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
-								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
-							</tasks>
-						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<tasks>
+						<copy file="start-shup-windows-java.bat"
+							tofile="target/start-shup-windows-java.bat" />
+						<copy file="start-shup-linux-mac-java.sh"
+							tofile="target/start-shup-linux-mac-java.sh" />
+						<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
+						<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
+					</tasks>
+				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
 				<executions>
-					<execution>
-						<id>jar-with-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<addMavenDescriptor>false</addMavenDescriptor>
-								<manifestEntries>
-									<Permissions>all-permissions</Permissions>
-									<Codebase>*</Codebase>
-									<Application-Name>ShanoirUploader</Application-Name>
-								</manifestEntries>
-								<manifest>
-									<mainClass>org.shanoir.uploader.ShanoirUploader</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
-					</execution>
-					<execution>
+    				<execution>
+      					<id>default-jar</id>
+      					<phase>package</phase>
+      					<goals>
+        					<goal>jar</goal>
+      					</goals>
+    				</execution>
+  				</executions>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifestEntries>
+							<Permissions>all-permissions</Permissions>
+							<Codebase>*</Codebase>
+							<Application-Name>ShanoirUploader</Application-Name>
+						</manifestEntries>
+						<manifest>
+							<mainClass>org.shanoir.uploader.ShanoirUploader</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+					<!-- <execution>
 						<id>distribution</id>
 						<phase>package</phase>
 						<goals>
@@ -421,9 +421,25 @@
 								<descriptor>src/main/assembly/zip.xml</descriptor>
 							</descriptors>
 						</configuration>
-					</execution>
-				</executions>
+					</execution> -->
 			</plugin>
+			<plugin>
+      			<artifactId>maven-dependency-plugin</artifactId>
+      			<version>3.6.0</version>
+				<executions>
+        			<execution>
+          				<id>copy-dependencies</id>
+          				<phase>install</phase>
+          				<goals>
+            				<goal>copy-dependencies</goal>
+          				</goals>
+          				<configuration>
+            				<outputDirectory>${project.build.directory}/lib</outputDirectory>
+            				<includeScope>runtime</includeScope>
+          				</configuration>
+        			</execution>
+      			</executions>
+    		</plugin>
 		</plugins>
 	</build>
 
