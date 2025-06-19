@@ -280,6 +280,7 @@ import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-proto
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { DuaService } from './dua/shared/dua.service';
 
 @NgModule({ 
     declarations: [
@@ -564,6 +565,7 @@ import { DUAAssistantComponent } from './dua/dua-assistant.component';
         SessionService,
         ShanoirEventService,
         TreeService,
+        DuaService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ] 

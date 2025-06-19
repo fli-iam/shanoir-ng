@@ -130,6 +130,7 @@ form { color: var(--dark-grey); position: relative; }
   form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; width: 220px; }
   form .right-col { display: inline-block; min-width: 250px; line-height: 20px; vertical-align: top; }
   form .right-col label { text-align: left; display: block; }
+  form label tool-tip { vertical-align: bottom; }
   form .right-col button:not(.normal) { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:not(.normal):active { background-color: var(--color-b-light); }
     form .right-col button:not(.normal):hover { background-color: inherit; color: inherit; }

@@ -14,3 +14,67 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <h2 class="header command-zone">DUA assistant</h2>
 
+@if (link) {
+    <div>
+        You can now access the draft with this link : <a [href]="link">dua draft</a>
+        This link has been sent to {{form.get('email')?.value ? form.get('email')?.value + ' and ' : '' }} you by email. 
+        Anyone having the link is free to edit the document. When someone sets the dua to "ready", you will be alerted by mail.
+        At any time you can generate a pdf document from this dua draft and upload it into you study.
+    </div>
+} @else {
+    <form [formGroup]="form">
+        <ul>
+            <li>
+                <label>
+                    Send to
+                </label>
+                <input form="form" type="email" class="right-col" formControlName="email"/>
+            </li>
+        </ul>
+    </form>
+    <button form="form" [disabled]="!form.valid">Submit</button>
+    
+    <div class="page">
+        <h1>Mandatory</h1>
+        <ol>
+            <li>1. Je me conformerai à toutes les règles et réglementations en vigueur en matière de protection de données à caractère personnel imposées par l‘institution dont je relève.</li>
+            <li>2. Je ne poursuivrai jamais, par quelque moyen que ce soit, la finalité visant à établir ou à retrouver l'identité des personnes concernées par le traitement des données à caractère personnel.</li>
+            <li>3. Je ne diffuserai pas ces données.</li>
+            <li>4. Je ferai référence à la source originelle spécifique des données auxquelles j'ai eu accès lorsque je présenterai les résultats ou des algorithmes ayant bénéficié de leur utilisation.</li>
+        </ol>
+        
+        <h1>To answer/complete</h1>
+        <form [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
+            <ul>
+                <li>
+                    <label>
+                        Lien Clinical Trials de l'étude *
+                        <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
+                    </label>
+                    <span class="right-col">
+                        https://clinicaltrials.gov/<input type="text" formControlName="url"/>
+                    </span>
+                </li>
+                <li>
+                    <label>
+                        Financement *
+                    </label>
+                    <textarea class="right-col" formControlName="funding"></textarea>
+                </li>
+                <li>
+                    <label>
+                        Remerciements *
+                    </label>
+                    <textarea class="right-col" formControlName="thanks"></textarea>
+                </li>
+                <li>
+                    <label>
+                        Articles à citer *
+                    </label>
+                    <textarea class="right-col" formControlName="papers"></textarea>
+                </li>
+            </ul>
+        </form>
+    </div>
+}
+

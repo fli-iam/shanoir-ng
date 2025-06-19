@@ -14,7 +14,10 @@
 
 import { Component } from '@angular/core';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DuaDocument } from './shared/dua-document.model';
+import { DuaService } from './shared/dua.service';
 
 
 @Component({
@@ -26,6 +29,42 @@ import { Router } from '@angular/router';
 
 export class DUAAssistantComponent {
 
+    protected form: FormGroup;
+    private studyId: number;
+    protected link: string;
+
+    constructor(
+            private formBuilder: FormBuilder, 
+            private route: ActivatedRoute,
+            private duaService: DuaService) {
+        let studyIdStr: string = this.route.snapshot.paramMap.get('id');
+        this.studyId = studyIdStr ? parseInt(this.route.snapshot.paramMap.get(studyIdStr)) : null;
+        this.buildForm();
+    }
+
+    protected buildForm() {
+        this.form = this.formBuilder.group({
+            'url': ['', [Validators.required]],
+            'funding': ['', [Validators.required]],
+            'thanks': ['', [Validators.required]],
+            'papers': ['', [Validators.required]],
+            'email': ['', [Validators.email]],
+        });
+    }
+
+    protected onSubmit() {
+        let dua: DuaDocument = DuaDocument.buildInstance(
+            this.studyId,
+            this.form.get('url')?.value,
+            this.form.get('funding')?.value,
+            this.form.get('thanks')?.value,
+            this.form.get('papers')?.value
+        );
+        this.duaService.create(dua, this.form.get('email')?.value)
+            .then(dua => {
+                this.link = '/dua/view/' + dua.id;
+            });
+    }
 
     public static openCreateDialog(studyId: number, confirmDialogService: ConfirmDialogService, router: Router) {
         confirmDialogService.confirm('Data User Agreement',

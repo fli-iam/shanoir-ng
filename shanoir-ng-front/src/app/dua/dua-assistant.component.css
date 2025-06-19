@@ -1,2 +1,8 @@
-dua-signing { display: block; }
-.empty { margin-top: 20px; }
+.page {
+    margin: 50px 0;
+    width: 800px;
+    height: 1131px;
+    border: 1px solid var(--grey);
+    box-shadow: 10px 5px 20px;
+    padding: 40px 60px;
+}
