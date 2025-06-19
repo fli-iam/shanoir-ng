@@ -130,7 +130,6 @@ jobs:
             --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
-            --no-header-files \
             --no-man-pages
 
       - name: Package .dmg
@@ -165,8 +164,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v1.0.5 # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v1.0.5
+          tag_name: SHUP_v1.0.6 # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v1.0.6
           files: |
             artifacts/**/*
         env:
