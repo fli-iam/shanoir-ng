@@ -138,7 +138,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#centerId, #center)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#centerId, #center)")
 	ResponseEntity<Void> updateCenter(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "center to update", required = true) @RequestBody Center center, BindingResult result)

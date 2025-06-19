@@ -116,7 +116,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PutMapping(value = "/{datasetProcessingId}", produces = {"application/json"}, consumes = {
             "application/json"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controllerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
     ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
