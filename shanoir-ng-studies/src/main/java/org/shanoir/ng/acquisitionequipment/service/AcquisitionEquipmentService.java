@@ -65,7 +65,7 @@ public interface AcquisitionEquipmentService {
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	AcquisitionEquipment update(AcquisitionEquipment entity) throws EntityNotFoundException;
 	
 	/**
