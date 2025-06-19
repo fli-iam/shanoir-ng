@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -18,9 +19,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -53,16 +56,38 @@ public class CurrentNominativeDataController {
 		currentNominativeDataModel.addObserver(cuw);
 		processWorkFolder(workFolderFilePath);
 
-		cuw.table.addMouseListener(new MouseAdapter() {
-			public DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
+		DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
 
-            @Override
+		JTableHeader header = cuw.table.getTableHeader();
+		//We set a tooltip to the delete column header to inform the user that clicking on it will delete all finished imports
+		ToolTipManager.sharedInstance().registerComponent(header);
+		header.addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				// No action needed on drag
+			}
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				int column = header.columnAtPoint(e.getPoint());
+				String columnName = cuw.table.getColumnName(column);
+				if (column == cuw.deleteColumn && columnName.equals(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete"))) {
+					header.setToolTipText(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
+				} else {
+					header.setToolTipText(null);
+				}
+			}
+		});
+
+		// Add mouse listener to the table header Delete column to allow deleting finished imports
+		header.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
-				int row = cuw.table.getSelectedRow();
-				int col = cuw.table.getSelectedColumn();
+				int column = header.columnAtPoint(e.getPoint());
 				int rows = cuw.table.getRowCount();
-				// Last row and last column: delete all imports whatever their status
-				if (col == cuw.deleteColumn && row == rows - 1) {
+				String columnName = cuw.table.getColumnName(column);
+		
+				// Check if the clicked column is the delete column
+				if (column == cuw.deleteColumn && columnName.equals(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete"))) {
 					String message = cuw.frame.resourceBundle
 							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
 					UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
@@ -80,7 +105,7 @@ public class CurrentNominativeDataController {
 						for (int i = 0; i < rows; i++) {
 							String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
 							if (uploadState.equals(cuw.finishedUploadState)
-									|| uploadState.equals(cuw.errorUploadState)) {
+									|| uploadState.equals(cuw.errorUploadState)) { // Delete Error uploads as well ?
 								DeleteDirectory dt = new DeleteDirectory();
 								dt.delete((String) model.getValueAt(i, 0));
 								uploadsToDelete = true;
@@ -100,8 +125,17 @@ public class CurrentNominativeDataController {
 							e1.printStackTrace();
 						}
 					}
+				}
+			}
+		});
+		
+		cuw.table.addMouseListener(new MouseAdapter() {
+            @Override
+			public void mouseClicked(MouseEvent e) {
+				int row = cuw.table.getSelectedRow();
+				int col = header.columnAtPoint(e.getPoint());
 				// delete one import: ready (to gain disk space) or finished
-				} else if (col == cuw.deleteColumn && row != -1) {
+				if (col == cuw.deleteColumn) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.readyUploadState)) {
@@ -112,12 +146,12 @@ public class CurrentNominativeDataController {
 						}					
 					}
 				// start the import or try reimporting an exam with status "ERROR"
-				} else if (col == cuw.importColumn && row != -1) {
+				} else if (col == cuw.importColumn) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
 						String importJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
 						File importJobFile = new File(importJobFilePath);
-						importJobManager = new NominativeDataImportJobManager(importJobFile); // Or uploadJobManager ? or dedicated importJobManager
+						importJobManager = new NominativeDataImportJobManager(importJobFile);
 						ImportJob importJob = importJobManager.readImportJob();
 						cuw.frame.getImportDialogOpener().openImportDialog(importJob, importJobFile.getParentFile());
 					}
@@ -246,9 +280,7 @@ public class CurrentNominativeDataController {
 					importJob.setUploadPercentage((String) uploadState.toString());
 				}
 				return importJob;
-			} //else {
-			// 	logger.error("Folder found in workFolder without upload-job.xml.");
-			// }
+			}
 		} else {
 			logger.error("Folder " + folder.getName() + " found in workFolder without import-job.json.");
 		}
@@ -301,15 +333,9 @@ public class CurrentNominativeDataController {
 
 			if (value instanceof String) {
  				String string = (String) value;
- 				if (row != cuw.rowsNb - 1) {
- 					setText(getDeleteHTML(string));
- 					setToolTipText(cuw.frame.resourceBundle
- 							.getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
- 				} else {
- 					setText(getDeleteAllHTML(string));
-					setToolTipText(cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
-				}
+ 				setText(getDeleteHTML(string));
+ 				setToolTipText(cuw.frame.resourceBundle
+ 						.getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
 			}
 			return tableCellRendererComponent;
 		}
@@ -318,16 +344,6 @@ public class CurrentNominativeDataController {
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html>");
 			sb.append("<span style=\"color: blue;\"><b>");
-			sb.append(string);
-			sb.append("</b></span>");
-			sb.append("</html>");
-			return sb.toString();
-		}
-
-		private String getDeleteAllHTML(String string) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html>");
-			sb.append("<span style=\"color: purple;\"><b>");
 			sb.append(string);
 			sb.append("</b></span>");
 			sb.append("</html>");
