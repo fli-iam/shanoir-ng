@@ -73,7 +73,7 @@ public class AcquisitionEquipmentSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::create, mockNew);
-		assertAccessAuthorized(service::update, mockExisting);
+		assertAccessDenied(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
 
