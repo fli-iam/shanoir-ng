@@ -144,7 +144,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controllerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
 	ResponseEntity<Void> updateAcquisitionEquipment(
 			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
 			@Parameter(description = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,

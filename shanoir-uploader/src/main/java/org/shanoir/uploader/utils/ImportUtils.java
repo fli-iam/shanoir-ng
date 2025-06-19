@@ -387,23 +387,6 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	/**
-	 * 
-	 * @param subjectREST
-	 * @param subject
-	 * @param subjectName
-	 * @param category
-	 * @param languageHemDom
-	 * @param manualHemDom
-	 * @param subjectStudy
-	 * @param subjectType
-	 * @param existingSubjectInStudy
-	 * @param isPhysicallyInvolved
-	 * @param subjectStudyIdentifier
-	 * @param study
-	 * @param studyCard
-	 * @return
-	 */
 	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, AcquisitionEquipment equipment) {
 		if (subjectREST == null) {
 			try {
