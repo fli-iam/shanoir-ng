@@ -105,24 +105,26 @@ export class NotificationsService {
                     task.message = 'interrupted';
                 }
             }
-            if (task.status == -1 && task.lastUpdate) {
-                let freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
-                if (freshError) {
+            if (!task.hideFromMenu) {
+                if (task.status == -1 && task.lastUpdate) {
+                    let freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
+                    if (freshError) {
+                        this.freshTimeouts[task.id]?.triggerNow();
+                        this.pushToFreshError(task);
+                    }
+                } else if (task.status == 1 || task.status == 3) {
+                    let freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
+                    if (freshDone) {
+                        this.freshTimeouts[task.id]?.triggerNow();
+                        this.pushToFreshCompleted(task);
+                    }
+                } else if (task.status == 2 || task.status == 5) {
                     this.freshTimeouts[task.id]?.triggerNow();
-                    this.pushToFreshError(task);
-                }
-            } else if (task.status == 1 || task.status == 3) {
-                let freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
-                if (freshDone) {
+                    tmpTasksInProgress.push(task);
+                } else if (task.status == 4) {
                     this.freshTimeouts[task.id]?.triggerNow();
-                    this.pushToFreshCompleted(task);
+                    tmpTasksInWait.push(task);
                 }
-            } else if (task.status == 2 || task.status == 5) {
-                this.freshTimeouts[task.id]?.triggerNow();
-                tmpTasksInProgress.push(task);
-            } else if (task.status == 4) {
-                this.freshTimeouts[task.id]?.triggerNow();
-                tmpTasksInWait.push(task);
             }
         }
         this.tasksInProgress = tmpTasksInProgress;
@@ -136,7 +138,7 @@ export class NotificationsService {
         this.nbNew++;
         // remove after 30min
         this.freshTimeouts[task.id] = new SuperTimeout(() => {
-            this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+            this.removeTaskFromFreshCompleted(task);
         }, this.persistenceTime);
     }
 
@@ -147,8 +149,24 @@ export class NotificationsService {
         this.nbNewError++;
         // remove after 30min
         this.freshTimeouts[task.id] = new SuperTimeout(() => {
-            this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+            this.removeTaskFromFreshCompleted(task);
         }, this.persistenceTime);
+    }
+
+    isFreshCompleted(task: Task): boolean {
+        return !!this.freshCompletedTasks.find(tip => tip.id == task.id);
+    }
+
+    removeTaskFromFreshCompleted(task: Task) {
+        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+    }
+
+    removeTaskFromFresh(task: Task) {
+        this.removeTaskFromFreshCompleted(task);
+        this.tasksInProgress = this.tasksInProgress.filter(tip => tip.id != task.id);
+        this.tasksInWait = this.tasksInWait.filter(tip => tip.id != task.id);
+        task.hideFromMenu = true;
+
     }
 
     private connectToServer() {
@@ -187,8 +205,12 @@ export class NotificationsService {
     }
 
     private createOrUpdateTask(task: Task) {
-        this.newLocalTasksQueue = this.newLocalTasksQueue.filter(t => t.id != task.id);
-        this.newLocalTasksQueue.push(task);
+        let existingTask: Task = this.newLocalTasksQueue.find(t => t.id == task.id);
+        if (existingTask) {
+            existingTask.updateWith(task);
+        } else {
+            this.newLocalTasksQueue.push(task);
+        }
         if (!this.writeLocalStorageConnection) {
             this.connectWriteSessionToLocalStorage();
         }
@@ -217,13 +239,26 @@ export class NotificationsService {
                 return task.eventType != 'downloadFile.event' || task.sessionId == this.sessionService.sessionId;
             });
         }
+        storageTasks.forEach(stTask => {
+            let existingTask: Task = this.localTasks.find(t => t.id == stTask.id);
+            if (existingTask) {
+                stTask.updateWith(existingTask);
+            }
+        });
         this.localTasks = storageTasks;
     }
 
     private updateLocalStorage() {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
-        tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
+        tmpTasks = tmpTasks.concat(this.newLocalTasksQueue.map(nlt => {
+            let existing: Task = this.localTasks.find(lt => lt.id == nlt.id);
+            if (existing) {
+                return existing.updateWith(nlt);
+            } else {
+                return nlt;
+            }
+        }));
         tmpTasks.sort((a, b) => (a.lastUpdate?.getTime() || a.creationDate?.getDate()) - (b.lastUpdate?.getTime() || b.creationDate?.getDate()));
         let tmpTasksStr: string = this.serializeTasks(tmpTasks);
         // check the size limit
@@ -254,5 +289,9 @@ export class NotificationsService {
         return !!this.tasksInProgress.find(task => {
             return ['downloadDataset.event', 'downloadFile.event'].includes(task.eventType);  
         });
+    }
+
+    clearTaskList() {
+        this.freshCompletedTasks = [];
     }
 }

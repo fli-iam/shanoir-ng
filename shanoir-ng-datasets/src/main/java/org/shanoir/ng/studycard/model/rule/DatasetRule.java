@@ -56,10 +56,10 @@ public class DatasetRule extends StudyCardRule<Dataset> {
     }
    
     private void applyAssignments(Dataset dataset) {
-       for (StudyCardAssignment<?> assignment : getAssignments()) {
-           if (assignment instanceof DatasetAssignment) {
-               ((DatasetAssignment)assignment).apply(dataset);                              
-           } else throw new IllegalArgumentException("Unimplemented assignment type");
-       }
+        for (StudyCardAssignment<?> assignment : getAssignments()) {
+            if (assignment instanceof DatasetAssignment) {
+                ((DatasetAssignment)assignment).apply(dataset);                              
+            } else throw new IllegalArgumentException("Unimplemented assignment type");
+        }
     }
 }

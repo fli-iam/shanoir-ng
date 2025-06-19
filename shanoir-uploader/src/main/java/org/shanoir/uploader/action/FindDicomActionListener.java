@@ -19,6 +19,7 @@ import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
@@ -113,9 +114,9 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		// when the query button is clicked
 		} else if (event.getSource().getClass() == JButton.class) {
 			logger.info("Querying DICOM server with query parameters: "
-					+ mainWindow.patientNameTF.getText() + " "
-					+ mainWindow.patientIDTF.getText() + " "
-					+ mainWindow.birthDate.toString() + " "
+					+ Utils.sha256(mainWindow.patientNameTF.getText()) + " "
+					+ Utils.sha256(mainWindow.patientIDTF.getText()) + " "
+					+ Utils.sha256(mainWindow.birthDate.toString()) + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString() + " "
 					+ mainWindow.modality);

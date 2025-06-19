@@ -51,7 +51,7 @@ import jakarta.validation.constraints.Pattern;
 @SqlResultSetMapping(name="centerNameResult", classes = {
 	    @ConstructorResult(targetClass = IdName.class, 
 	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
-	})
+})
 public class Center extends HalEntity {
 
 	/**

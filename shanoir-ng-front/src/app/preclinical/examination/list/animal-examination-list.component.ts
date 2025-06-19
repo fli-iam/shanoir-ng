@@ -32,7 +32,6 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
 @Component({
     selector: 'animal-examination-list',
     templateUrl: 'animal-examination-list.component.html',
-    providers: [ExaminationService],
     standalone: false
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
