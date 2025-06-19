@@ -279,6 +279,8 @@ import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-proto
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { DuaService } from './dua/shared/dua.service';
 
 @NgModule({ 
     declarations: [
@@ -460,7 +462,8 @@ import { SizePipe } from './shared/utils/size.pipe';
         CoilNodeComponent,
         DoubleAwesomeComponent,
         MetadataNodeComponent,
-        SizePipe
+        SizePipe,
+        DUAAssistantComponent
     ],
     bootstrap: [AppComponent], 
     imports: [
@@ -562,6 +565,7 @@ import { SizePipe } from './shared/utils/size.pipe';
         SessionService,
         ShanoirEventService,
         TreeService,
+        DuaService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ] 
