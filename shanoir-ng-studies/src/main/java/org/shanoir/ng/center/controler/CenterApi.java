@@ -62,14 +62,14 @@ public interface CenterApi {
 	ResponseEntity<CenterDTO> findCenterById(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
-	@Operation(summary = "", description = "If exists, returns the center corresponding to the given InstitutionDicom or create a new center")
+	@Operation(summary = "", description = "If exists, returns the center corresponding to the given InstitutionDicom or creates a new center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found center"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "404", description = "no center found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byDicom/{studyId}", produces = { "application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_IMPORT')")
 	ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description = "institution dicom to find or create a center", required = true)

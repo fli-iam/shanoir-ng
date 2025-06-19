@@ -103,7 +103,6 @@ public interface CenterService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and #center.getId() == null")
 	Center create(Center center);
 	
-	
 	/**
 	 * Update an entity.
 	 *
