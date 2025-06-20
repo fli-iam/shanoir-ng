@@ -14,8 +14,13 @@
 
 package org.shanoir.ng.dua.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class DuaDraft {
 
+    @Id
     private String id;
 
     private Long studyId;

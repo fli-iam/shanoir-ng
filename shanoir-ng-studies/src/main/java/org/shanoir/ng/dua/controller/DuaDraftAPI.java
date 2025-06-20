@@ -32,8 +32,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 
-@Tag(name = "studies", description = "the studies API")
-@RequestMapping("/studies")
+@Tag(name = "duaDraft", description = "the dua draft API")
+@RequestMapping("/dua")
 public interface DuaDraftAPI {
 
 	@Operation(summary = "", description = "Saves a new dua draft")

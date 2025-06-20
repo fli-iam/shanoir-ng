@@ -14,10 +14,8 @@
 
 package org.shanoir.ng.dua.dto.mapper;
 
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.shanoir.ng.dua.dto.DuaDraftCreationDTO;
 import org.shanoir.ng.dua.dto.DuaDraftDTO;
 import org.shanoir.ng.dua.model.DuaDraft;
@@ -31,18 +29,12 @@ import org.shanoir.ng.dua.model.DuaDraft;
 @Mapper(componentModel = "spring", uses = { })
 public interface DuaDraftMapper {
 
-	@Named("DuaDraftCreationDTOToDuaDraft")
-	@IterableMapping(qualifiedByName = "DuaDraftCreationDTOToDuaDraft")
 	@Mapping(target = "id", ignore = true)
 	DuaDraft DuaDraftCreationDTOToDuaDraft(DuaDraftCreationDTO dto);
 
-	@Named("DuaDraftDTOToDuaDraft")
-	@IterableMapping(qualifiedByName = "DuaDraftDTOToDuaDraft")
 	@Mapping(target = "studyId", ignore = true)
 	DuaDraft DuaDraftDTOToDuaDraft(DuaDraftDTO dto);
 
-	@Named("duaDraftToDuaDraftDTO")
-	@IterableMapping(qualifiedByName = "duaDraftToDuaDraftDTO")
 	DuaDraftDTO duaDraftToDuaDraftDTO(DuaDraft entity);
 
 }
