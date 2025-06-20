@@ -3,7 +3,7 @@ name: Release ShanoirUploader App
 on:
   push:
     branches:
-      - Laurent_SHUP_jpackage
+      - main
     # tags:
     #   - SHUP_v*
     # paths: 
@@ -29,7 +29,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging \
             --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
@@ -75,7 +75,7 @@ jobs:
         run: |
           jlink `
             --module-path $Env:JAVA_HOME\jmods `
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported `
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging `
             --output shanoir-uploader/target/custom-runtime `
             --compress 2 `
             --strip-debug `
@@ -126,10 +126,11 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules ALL-MODULE-PATH \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging \
             --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
+            --no-header-files \
             --no-man-pages
 
       - name: Package .dmg
@@ -164,8 +165,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v1.0.6 # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v1.0.6
+          tag_name: SHUP_v1.0.7 # TODO : remplacer github.ref_name par le nom de la version
+          name: SHUP_v1.0.7
           files: |
             artifacts/**/*
         env:
