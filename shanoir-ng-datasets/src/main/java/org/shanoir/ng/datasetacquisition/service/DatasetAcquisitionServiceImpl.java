@@ -49,12 +49,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
 
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    private ExaminationRepository examRepository;
 
     @Autowired
     private SecurityService securityService;
@@ -97,7 +103,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        return repository.findByExaminationId(examinationId);
+        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
+        if (exam.isPresent()) {
+            return exam.get().getDatasetAcquisitions();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
