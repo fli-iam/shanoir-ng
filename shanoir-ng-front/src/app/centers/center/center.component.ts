@@ -22,6 +22,7 @@ import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
 
 @Component({
     selector: 'center-detail',
@@ -33,7 +34,6 @@ import { Selection } from 'src/app/studies/study/tree.service';
 export class CenterComponent extends EntityComponent<Center> {
 
     isNameUniqueError: boolean = false;
-    phoneNumberPatternError: boolean = false;
     openAcqEq: boolean = true;
 
     get center(): Center { return this.entity; }
@@ -69,12 +69,12 @@ export class CenterComponent extends EntityComponent<Center> {
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.center.name, [ShanoirValidators.required, ShanoirValidators.minLength(2), ShanoirValidators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],
             'postalCode': [this.center.postalCode],
             'city': [this.center.city],
             'country': [this.center.country],
-            'phoneNumber': [this.center.phoneNumber],
+            'phoneNumber': [this.center.phoneNumber, ShanoirValidators.isPhoneNumber()],
             'website': [this.center.website]
         });
     }
