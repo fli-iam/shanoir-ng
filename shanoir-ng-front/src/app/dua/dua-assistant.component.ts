@@ -61,8 +61,8 @@ export class DUAAssistantComponent {
             this.form.get('papers')?.value
         );
         this.duaService.create(dua, this.form.get('email')?.value)
-            .then(dua => {
-                this.link = '/dua/view/' + dua.id;
+            .then(id => {
+                this.link = '/dua/view/' + id;
             });
     }
 

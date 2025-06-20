@@ -27,7 +27,7 @@ export class DuaService {
         protected http: HttpClient) {
     }
 
-    create(entity: DuaDocument, email: string): Promise<DuaDocument> {
+    create(entity: DuaDocument, email: string): Promise<string> {
         let arg: any = {dua: entity, email: email};
         return this.http.post<any>(this.API_URL, this.stringify(arg))
             .toPromise();
