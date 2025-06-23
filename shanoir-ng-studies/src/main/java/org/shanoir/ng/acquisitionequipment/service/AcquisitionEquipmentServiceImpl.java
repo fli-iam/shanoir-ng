@@ -27,6 +27,7 @@ import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -177,6 +178,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		ManufacturerModel manufacturerModel = new ManufacturerModel();
 		manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
 		manufacturerModel.setManufacturer(manufacturer);
+		Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(equipmentDicom.getModality());
+		manufacturerModel.setDatasetModalityType(DatasetModalityType.getType(datasetModalityType));
 		equipment.setManufacturerModel(manufacturerModel);
 		Optional<Center> center = centerRepository.findById(centerId);
 		equipment.setCenter(center.orElseThrow());
