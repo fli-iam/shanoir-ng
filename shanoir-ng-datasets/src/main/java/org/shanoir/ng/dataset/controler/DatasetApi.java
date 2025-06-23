@@ -137,7 +137,7 @@ public interface DatasetApi {
 	@GetMapping(value = "/examination/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-																 @Parameter(description = "return output datasets too") @RequestParam(value = "output", required = false) Boolean output);
+																 @Parameter(description = "return output datasets too") @RequestParam(value = "output", required = false, defaultValue = "false") Boolean output);
 
 	
 	@Operation(summary = "", description = "Returns a dataset list")
