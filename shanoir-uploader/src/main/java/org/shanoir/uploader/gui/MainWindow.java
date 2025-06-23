@@ -59,8 +59,6 @@ import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +126,7 @@ public class MainWindow extends JFrame {
 	public String studyDate = "";
 	public String modality;
 	JScrollPane scrollPaneUpload;
+	public JButton btndeleteFinishedUploads;
 
 	public JLabel startedDownloadsLB;
 	public JProgressBar downloadProgressBar;
@@ -954,14 +953,29 @@ public class MainWindow extends JFrame {
 		// add main split pane here
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"), null, mainSplitPane,
 				resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
-		JPanel currentUploadsPanel = new JPanel(false);
+		JPanel currentUploadsPanel = new JPanel(new BorderLayout());
 		// and below the current uploads panel
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.currentUploadsTab"), null, currentUploadsPanel,
 				resourceBundle.getString("shanoir.uploader.currentUploadsTab.tooltip"));
 		scrollPaneUpload = new JScrollPane();
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
-		currentUploadsPanel.add(scrollPaneUpload);
+		currentUploadsPanel.add(scrollPaneUpload, BorderLayout.CENTER);
+
+		// Add delete all finished uploads button
+		btndeleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll"));
+		btndeleteFinishedUploads.setFont(new Font("SansSerif", Font.BOLD, 14));
+		btndeleteFinishedUploads.setBackground(new Color(220, 53, 69));
+		btndeleteFinishedUploads.setForeground(Color.WHITE);
+		btndeleteFinishedUploads.setFocusPainted(false);
+		btndeleteFinishedUploads.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+		btndeleteFinishedUploads.setToolTipText(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.add(btndeleteFinishedUploads);
+
+		currentUploadsPanel.add(buttonPanel, BorderLayout.SOUTH);
+
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
