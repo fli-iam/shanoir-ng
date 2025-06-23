@@ -68,7 +68,7 @@ public interface ManufacturerApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Manufacturer> saveNewManufacturer(
 			@Parameter(description = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException;
@@ -82,7 +82,7 @@ public interface ManufacturerApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{manufacturerId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controllerSecurityService.idMatches(#manufacturerId, #manufacturer)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#manufacturerId, #manufacturer)")
 	ResponseEntity<Void> updateManufacturer(
 			@Parameter(description = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
 			@Parameter(description = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,

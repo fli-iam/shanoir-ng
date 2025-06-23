@@ -130,7 +130,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@Parameter(description = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			BindingResult result) throws RestServiceException;
