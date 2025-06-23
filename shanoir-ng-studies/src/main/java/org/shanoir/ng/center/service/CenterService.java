@@ -100,7 +100,7 @@ public interface CenterService {
 	 * @param entity the entity to create.
 	 * @return created entity.
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and #center.getId() == null")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #center.getId() == null")
 	Center create(Center center);
 	
 	/**
@@ -111,7 +111,7 @@ public interface CenterService {
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	Center update(Center center) throws EntityNotFoundException;
 
 	/**
