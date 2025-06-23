@@ -362,7 +362,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
 			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
 			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 	
