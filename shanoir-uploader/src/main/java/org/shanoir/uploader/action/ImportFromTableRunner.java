@@ -271,7 +271,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 
-		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
+		logger.info("Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
 		// Profile Neurinfo/dev: in Excel table: SHANOIR_SUBJECT_NAME column is mandatory
@@ -323,7 +323,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setSubjectName(subjectREST.getName());
 
-		logger.info("6.1 Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
+		logger.info("Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
 		line[4] = importJob.getSubjectName();
 		line[5] = studyDate.format(DateTimeUtils.FORMATTER);
 		try {
@@ -352,7 +352,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			logger.error(e.getMessage(), e);
 			return false;
 		}
-		logger.info("6.2 Create examination.");
+		logger.info("Create examination.");
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
 		Long centerId = equipment.getCenter().getId();
@@ -371,7 +371,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setExaminationId(examinationId);
 
-		logger.info("7. Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
+		logger.info("Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard, equipment);
