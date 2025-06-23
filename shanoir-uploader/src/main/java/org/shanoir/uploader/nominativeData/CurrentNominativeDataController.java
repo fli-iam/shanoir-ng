@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -15,11 +14,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -58,76 +57,53 @@ public class CurrentNominativeDataController {
 
 		DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
 
-		JTableHeader header = cuw.table.getTableHeader();
-		//We set a tooltip to the delete column header to inform the user that clicking on it will delete all finished imports
-		ToolTipManager.sharedInstance().registerComponent(header);
-		header.addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				// No action needed on drag
-			}
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				int column = header.columnAtPoint(e.getPoint());
-				String columnName = cuw.table.getColumnName(column);
-				if (column == cuw.deleteColumn && columnName.equals(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete"))) {
-					header.setToolTipText(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
-				} else {
-					header.setToolTipText(null);
-				}
-			}
-		});
-
-		// Add mouse listener to the table header Delete column to allow deleting finished imports
-		header.addMouseListener(new MouseAdapter() {
+		// Set the action when delete completred uploads button is clicked
+		JButton deleteAllButton = cuw.frame.btndeleteFinishedUploads;
+		deleteAllButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int column = header.columnAtPoint(e.getPoint());
 				int rows = cuw.table.getRowCount();
-				String columnName = cuw.table.getColumnName(column);
-		
-				// Check if the clicked column is the delete column
-				if (column == cuw.deleteColumn && columnName.equals(cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete"))) {
-					String message = cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
-					UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.cancel"));
-					UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.no"));
-					UIManager.put("OptionPane.okButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.ok"));
-					UIManager.put("OptionPane.yesButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.yes"));
-					if (JOptionPane.showConfirmDialog(null, message,
-							cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.title"), 1)
-							== JOptionPane.YES_OPTION) {
-						boolean uploadsToDelete = false;
-						for (int i = 0; i < rows; i++) {
-							String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
-							if (uploadState.equals(cuw.finishedUploadState)
-									|| uploadState.equals(cuw.errorUploadState)) { // Delete Error uploads as well ?
-								DeleteDirectory dt = new DeleteDirectory();
-								dt.delete((String) model.getValueAt(i, 0));
-								uploadsToDelete = true;
-							}
+				String message = cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
+				UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.cancel"));
+				UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.no"));
+				UIManager.put("OptionPane.okButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.ok"));
+				UIManager.put("OptionPane.yesButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.yes"));
+				if (JOptionPane.showConfirmDialog(null, message,
+						cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.title"), 1)
+						== JOptionPane.YES_OPTION) {
+					boolean uploadsToDelete = false;
+					for (int i = 0; i < rows; i++) {
+						String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
+						if (uploadState.equals(cuw.finishedUploadState)
+								|| uploadState.equals(cuw.errorUploadState)) { // Delete Error uploads as well ?
+							DeleteDirectory dt = new DeleteDirectory();
+							dt.delete((String) model.getValueAt(i, 0));
+							uploadsToDelete = true;
 						}
-						if (uploadsToDelete) {
-							String mess = cuw.frame.resourceBundle
-									.getString("shanoir.uploader.currentUploads.Action.deleteAll.succeeded.message");
-							JOptionPane.showMessageDialog(new JFrame(), mess,
-									cuw.frame.resourceBundle.getString(
-											"shanoir.uploader.currentUploads.Action.deleteAll.succeeded.title"),
-									JOptionPane.INFORMATION_MESSAGE);
-						}
-						try {
-							processWorkFolder(workFolderFilePath);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
+					}
+					if (uploadsToDelete) {
+						String mess = cuw.frame.resourceBundle
+								.getString("shanoir.uploader.currentUploads.Action.deleteAll.succeeded.message");
+						JOptionPane.showMessageDialog(new JFrame(), mess,
+								cuw.frame.resourceBundle.getString(
+										"shanoir.uploader.currentUploads.Action.deleteAll.succeeded.title"),
+								JOptionPane.INFORMATION_MESSAGE);
+					}
+					try {
+						processWorkFolder(workFolderFilePath);
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
 				}
 			}
 		});
+
+		JTableHeader header = cuw.table.getTableHeader();
 		
 		cuw.table.addMouseListener(new MouseAdapter() {
             @Override
