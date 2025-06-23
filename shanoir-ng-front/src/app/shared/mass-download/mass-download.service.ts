@@ -392,17 +392,17 @@ export class MassDownloadService {
         let str: string = '/';
         if (setup.subjectFolders) {
             str += 'Subject-' + (
-                dataset.datasetProcessing
+                dataset.hasProcessing
                     ? dataset.subject?.name + '_' + dataset.subject?.id
                     : dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
-        if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder
+        if (setup.examinationFolders && !dataset.hasProcessing) { // for processed datasets, skip the exam folder
             str += dataset.datasetAcquisition?.examination?.comment
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.datasetProcessing) { // for processed datasets, skip the acq folder
+        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
             let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
                 || dataset.datasetAcquisition.protocol?.originMetadata?.name 
                 || dataset.datasetAcquisition.type + '_acquisition';
@@ -417,15 +417,15 @@ export class MassDownloadService {
         let str: string = '/';
         if (setup.subjectFolders) {
             str += 'subj'+ (
-                dataset.datasetProcessing
+                dataset.hasProcessing
                     ? dataset.subject?.id
                     : dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
-        if (setup.examinationFolders && !dataset.datasetProcessing) {
+        if (setup.examinationFolders && !dataset.hasProcessing) {
             str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
         }
-        if (setup.acquisitionFolders && !dataset.datasetProcessing) {
+        if (setup.acquisitionFolders && !dataset.hasProcessing) {
             str += 'acq' + dataset.datasetAcquisition.sortingIndex + '_' + dataset.datasetAcquisition?.id + '/';
         }
         return str;

@@ -14,6 +14,27 @@
 
 package org.shanoir.ng.processing.controler;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,20 +42,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.List;
 
 @Tag(name = "datasetProcessing")
 @RequestMapping("/datasetProcessing")
@@ -73,6 +80,17 @@ public interface DatasetProcessingApi {
     @GetMapping(value = "", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings();
+
+    @Operation(summary = "", description = "Returns the processings of an input dataset")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found dataset processings"),
+            @ApiResponse(responseCode = "204", description = "no dataset processing found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/inputDataset/{datasetId}", produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
     @Operation(summary = "", description = "Returns the input datasets of a processing")
     @ApiResponses(value = {
