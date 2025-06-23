@@ -72,8 +72,8 @@ public class ManufacturerSecurityTest {
 	public void testAsUser() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::create, mockNew);
-		assertAccessAuthorized(service::update, mockExisting);
+		assertAccessDenied(service::create, mockNew);
+		assertAccessDenied(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
 
