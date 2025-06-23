@@ -15,6 +15,7 @@ import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
@@ -70,12 +71,13 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					updateStudyCards(study);
 					showOrHideStudyCardComponents(true);
 				} else {
-					AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, acquisitionEquipments);
+					Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), study.getId());
+					AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, center, acquisitionEquipments);
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
 					if (equipment != null) {
 						this.equipment = equipment;
-						IdName center = equipment.getCenter();
-						mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+						IdName centerIdName = equipment.getCenter();
+						mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
 					}
 					showOrHideStudyCardComponents(false);
 				}

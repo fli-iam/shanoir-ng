@@ -659,7 +659,7 @@ public class ImportUtils {
 		return patients;
 	}
 
-	public static AcquisitionEquipment findOrCreateEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, List<AcquisitionEquipment> acquisitionEquipments) {
+	public static AcquisitionEquipment findOrCreateEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, Center center, List<AcquisitionEquipment> acquisitionEquipments) {
 		AcquisitionEquipment equipment = null;
 		String manufacturerName = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
 		String manufacturerModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
@@ -674,25 +674,6 @@ public class ImportUtils {
 			}
 		}
 		if (equipment == null ) {
-			String institutionName = importJob.getFirstSelectedSerie().getInstitution().getInstitutionName();
-			if (institutionName == null || institutionName.isBlank()) {
-				importJob.setUploadState(UploadState.ERROR);
-				importJob.setErrorMessage("Error: no institution name in DICOM.");
-				logger.error(importJob.getErrorMessage());
-				return null;
-			}
-			// Find center or create one, and add it into study for import (study-center)
-			InstitutionDicom institutionDicom = new InstitutionDicom();
-			institutionDicom.setInstitutionName(institutionName);
-			institutionDicom.setInstitutionAddress(importJob.getFirstSelectedSerie().getInstitution().getInstitutionAddress());
-			Center center = ShUpOnloadConfig.getShanoirUploaderServiceClient().findCenterOrCreateByInstitutionDicom(institutionDicom, study.getId());
-			if (center == null) {
-				importJob.setUploadState(UploadState.ERROR);
-				importJob.setErrorMessage("Error: could not find or create center.");
-				logger.error(importJob.getErrorMessage());
-				return null;
-			}
-			logger.info("Center found or created: {} {}", center.getId(), center.getName());
 			// Find or create manufacturer model and manufacturer
 			ManufacturerModel manufacturerModel = findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
 			if (manufacturerModel == null) { // create one
@@ -753,6 +734,21 @@ public class ImportUtils {
 			}
 		}
 		return equipment;
+	}
+
+	public static Center findOrCreateCenterWithInstitutionDicom(InstitutionDicom institutionDicom, Long studyId) {
+		String institutionName = institutionDicom.getInstitutionName();
+		if (institutionName == null || institutionName.isBlank()) {
+			logger.error("Error: no institution name.");
+			return null;
+		}
+		Center center = ShUpOnloadConfig.getShanoirUploaderServiceClient().findCenterOrCreateByInstitutionDicom(institutionDicom, studyId);
+		if (center == null) {
+			logger.error("Error: could not find or create center.");
+		} else {
+			logger.info("Center found or created: {} {}", center.getId(), center.getName());
+		}
+		return center;
 	}
 
 }

@@ -40,6 +40,7 @@ import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -251,7 +252,16 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 
-		AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
+		Long centerId = null;
+		AcquisitionEquipment equipment = null;
+		if (studyCard == null) {
+			Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
+			centerId = center.getId();
+			equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, center, acquisitionEquipments);
+		} else {
+			centerId = studyCard.getCenterId();
+			equipment = studyCard.getAcquisitionEquipment();
+		}
 
 		if (studyREST.isWithStudyCards()) {
 			if (studyCard == null) {
@@ -355,7 +365,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("Create examination.");
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
-		Long centerId = equipment.getCenter().getId();
 		// If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
 		if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
 			studyDescription = importJob.getExaminationComment();
