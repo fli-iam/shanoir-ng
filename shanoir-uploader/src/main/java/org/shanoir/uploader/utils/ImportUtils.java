@@ -31,6 +31,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.ng.shared.dataset.DatasetModalityType;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -506,8 +507,8 @@ public class ImportUtils {
 		return studyCards;
 	}
 
-	public static boolean flagStudyCardCompatible(StudyCard studyCard, String manufacturerModelName, String deviceSerialNumber) {
-		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(), manufacturerModelName, deviceSerialNumber);
+	public static boolean flagStudyCardCompatible(StudyCard studyCard, EquipmentDicom equipmentDicom) {
+		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(), equipmentDicom.getManufacturerModelName(), equipmentDicom.getDeviceSerialNumber());
 		studyCard.setCompatible(isCompatible);
 		if (isCompatible) {
 			return true; // correct equipment found, break for-loop acqEquip

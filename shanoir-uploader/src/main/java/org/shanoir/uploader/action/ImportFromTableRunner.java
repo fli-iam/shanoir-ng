@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,27 +31,22 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.importer.model.UploadState;
-import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.Manufacturer;
-import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,23 +90,25 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importFromTableWindow.progressBar.setVisible(true);
 
 		logger.info("Preparing import: loading acquisition equipments and add them to study cards");
-		org.shanoir.uploader.model.rest.Study study = (org.shanoir.uploader.model.rest.Study) importFromTableWindow.studyCB.getSelectedItem();
-		List<StudyCard> studyCards = study.getStudyCards();
-		// as we auto-create new study cards in the process, we can start with an empty list in the study
-		if (studyCards == null) {
-			studyCards = new ArrayList<StudyCard>();
-		}
-		// Important use all equipments from database here, as they can be used in N studies
+		org.shanoir.uploader.model.rest.Study studyREST = (org.shanoir.uploader.model.rest.Study) importFromTableWindow.studyCB.getSelectedItem();
+		// Important: use all equipments from database here, as they can be used in N studies
 		List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
 		if (acquisitionEquipments == null) {
 			// as we create equipments, we can start with an empty list as well
 			acquisitionEquipments = new ArrayList<AcquisitionEquipment>();
 		}
-		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-			for (StudyCard studyCard : studyCards) {
-				// find the correct equipment for each study card and add it
-				if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
-					studyCard.setAcquisitionEquipment(acquisitionEquipment);
+		if (studyREST.isWithStudyCards()) {
+			List<StudyCard> studyCards = studyREST.getStudyCards();
+			// as we auto-create new study cards in the process, we can start with an empty list in the study
+			if (studyCards == null) {
+				studyCards = new ArrayList<StudyCard>();
+			}
+			for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+				for (StudyCard studyCard : studyCards) {
+					// find the correct equipment for each study card and add it
+					if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
+						studyCard.setAcquisitionEquipment(acquisitionEquipment);
+					}
 				}
 			}
 		}
@@ -135,7 +131,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
-				boolean resultOneJob = importData(importJob, study, acquisitionEquipments, csvWriter);
+				boolean resultOneJob = importData(importJob, studyREST, acquisitionEquipments, csvWriter);
 				resultAllJobs = resultOneJob && resultAllJobs;
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
@@ -197,9 +193,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Subject subject = ImportUtils.createSubjectFromPatient(newPatient, pseudonymizer, identifierCalculator);
 		importJob.setSubject(subject);
 
-		logger.info("3. Download from PACS");
+		logger.info("Download from PACS");
 		/**
-		 * For the moment the ImportFromTableRunner processes line-by-line, study-by-study,
+		 * For the moment the ImportFromTableRunner processes line-by-line, DICOM study-by-study,
 		 * so we only send one import job to the DownloadOrCopyRunnable, to download only
 		 * one DICOM study, as the code after directly finishes the import of this study.
 		 */
@@ -214,75 +210,65 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		// Wait for thread to finish
 		downloadThread.join();
 
-		logger.info("4. Find matching study card in selected study or create a new study card");
+		EquipmentDicom equipmentDicom = getAndCheckEquipmentDicom(importJob);
+		if (equipmentDicom == null) {
+			return false;
+		}
+
+		logger.info("Find matching study card in selected study or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
-		if (!studyCards.isEmpty()) {
-			// 4.1 Check if study card configured in Excel: use it (user knows best), no DICOM info necessary
-			if (importJob.getStudyCardName() != null && !importJob.getStudyCardName().isEmpty()) {
-				Optional<StudyCard> scOpt = studyCards.stream().filter(
-					element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
-				if (scOpt.isPresent()) {
-					studyCard = scOpt.get();
-					logger.info("Matching study card found in study by name from table: " + studyCard.getName());
-				} else {
-					importJob.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: study card configured in table, but not found in study: " + importJob.getStudyCardName());
-					logger.error(importJob.getErrorMessage());
+		if (studyREST.isWithStudyCards()) {
+			if (!studyCards.isEmpty()) {
+				// Check if study card configured in Excel: use it (user knows best), no DICOM info necessary
+				if (importJob.getStudyCardName() != null && !importJob.getStudyCardName().isEmpty()) {
+					Optional<StudyCard> scOpt = studyCards.stream().filter(
+						element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
+					if (scOpt.isPresent()) {
+						studyCard = scOpt.get();
+						logger.info("Matching study card found in study by name from table: " + studyCard.getName());
+					} else {
+						importJob.setUploadState(UploadState.ERROR);
+						importJob.setErrorMessage("Error: study card configured in table, but not found in study: " + importJob.getStudyCardName());
+						logger.error(importJob.getErrorMessage());
+						return false;
+					}
+				}
+				try {
+					for (StudyCard studyCardIt : studyCards) {
+						if (ImportUtils.flagStudyCardCompatible(studyCardIt, equipmentDicom)) {
+							studyCard = studyCardIt;
+							logger.info("Matching study card found in study: " + studyCard.getName()
+								+ " via manufacturer model name: " + equipmentDicom.getManufacturerModelName()
+								+ " and device serial number: " + equipmentDicom.getDeviceSerialNumber());
+							break;
+						}
+					}
+				} catch (Exception e) {
+					this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 					return false;
 				}
 			}
 		}
-		// 4.2 Find matching study card on study using info from DICOM
-		String manufacturerName = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
-		String manufacturerModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
-		String deviceSerialNumber = importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
-		if (manufacturerName == null || manufacturerName.isBlank()
-			|| manufacturerModelName == null || manufacturerModelName.isBlank()
-			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
-			importJob.setUploadState(UploadState.ERROR);
-			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
-			return false;
-		}
-		logger.info("Manufacturer name used from DICOM: " + manufacturerName);
-		logger.info("Manufacturer model name used from DICOM: " + manufacturerModelName);
-		logger.info("Device serial number used from DICOM: " + deviceSerialNumber);
-		if (!studyCards.isEmpty()) {
-			try {
-				for (StudyCard studyCardIt : studyCards) {
-					if (ImportUtils.flagStudyCardCompatible(studyCardIt, manufacturerModelName, deviceSerialNumber)) {
-						studyCard = studyCardIt;
-						logger.info("Matching study card found in study: " + studyCard.getName()
-							+ " via manufacturer model name: " + manufacturerModelName
-							+ " and device serial number: " + deviceSerialNumber);
-						break;
-					}
-				}
-			} catch (Exception e) {
+
+		AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
+
+		if (studyREST.isWithStudyCards()) {
+			if (studyCard == null) {
+				line[6] = "Error with study card";
+				csvWriter.addExaminationLine(false, line);
 				this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+				importJob.setUploadState(UploadState.ERROR);
+				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+				logger.error(importJob.getErrorMessage());
 				return false;
+			} else {
+				if (equipment != null) {
+					studyCard.setAcquisitionEquipment(equipment);
+				}
+				importJob.setStudyCardId(studyCard.getId());
+				importJob.setStudyCardName(studyCard.getName());
 			}
-		}
-
-		AcquisitionEquipment equipment = null;
-		if (studyCard == null) {
-			equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, acquisitionEquipments);
-		}
-
-		if (studyCard == null) {
-			line[6] = "Error with study card";
-			csvWriter.addExaminationLine(false, line);
-			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			importJob.setUploadState(UploadState.ERROR);
-			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			logger.error(importJob.getErrorMessage());
-			return false;
-		} else {
-			if (equipment != null) {
-				studyCard.setAcquisitionEquipment(equipment);
-			}
-			importJob.setStudyCardId(studyCard.getId());
-			importJob.setStudyCardName(studyCard.getName());
 		}
 
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
@@ -346,7 +332,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				List<Examination> examinationsFilteredByStudy = examinations.parallelStream()
 					.filter(e -> e.getStudyId().equals(studyREST.getId()))
 					.collect(Collectors.toList());
-				for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
+				for (Iterator<Examination> iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 					Examination examination = (Examination) iterator.next();
 					// Existing exam found with the same study date: stop importJob and take next one
 					Date examinationDate = examination.getExaminationDate();
@@ -369,7 +355,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("6.2 Create examination.");
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
-		Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+		Long centerId = equipment.getCenter().getId();
 		// If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
 		if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
 			studyDescription = importJob.getExaminationComment();
@@ -385,7 +371,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setExaminationId(examinationId);
 
-		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json");
+		logger.info("7. Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard, equipment);
@@ -398,6 +384,24 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		csvWriter.addExaminationLine(true, line);
 		return true;
+	}
+
+	private EquipmentDicom getAndCheckEquipmentDicom(ImportJob importJob) {
+		EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+		String manufacturerName = equipmentDicom.getManufacturer();
+		String manufacturerModelName = equipmentDicom.getManufacturerModelName();
+		String deviceSerialNumber = equipmentDicom.getDeviceSerialNumber();
+		if (manufacturerName == null || manufacturerName.isBlank()
+			|| manufacturerModelName == null || manufacturerModelName.isBlank()
+			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
+			importJob.setUploadState(UploadState.ERROR);
+			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
+			return null;
+		}
+		logger.info("Manufacturer name used from DICOM: " + manufacturerName);
+		logger.info("Manufacturer model name used from DICOM: " + manufacturerModelName);
+		logger.info("Device serial number used from DICOM: " + deviceSerialNumber);
+		return equipmentDicom;
 	}
 	
 	private boolean queryPacs(ImportJob importJob) {

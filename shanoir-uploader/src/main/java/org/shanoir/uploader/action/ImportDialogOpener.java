@@ -142,8 +142,7 @@ public class ImportDialogOpener {
 								}
 								// If at least one study card is compatible, then study is compatible
 								if (ImportUtils.flagStudyCardCompatible(
-									studyCard, importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName(),
-									importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber())) {
+									studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
 									compatibleStudyCard = true;
 								}
 							}
