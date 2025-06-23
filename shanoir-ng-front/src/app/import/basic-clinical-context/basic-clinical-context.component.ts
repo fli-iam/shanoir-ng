@@ -112,6 +112,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
         this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
         this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
+        this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
     }
 
     private getPrefilledSubject(): Subject {

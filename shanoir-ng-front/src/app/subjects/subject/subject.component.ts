@@ -46,7 +46,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    isAlreadyAnonymized: boolean = false;
+    //isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
@@ -95,16 +95,18 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     init() {
-        console.log("init");
         super.init();
         if (this.mode == 'create') {
-            console.log("init mode == create");
             this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res as Subject);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => {
+                this.subject.isAlreadyAnonymized = res;
+                console.log("isAlreadyAnonymized res : ", res);
+            });
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
             if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
@@ -153,7 +155,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         console.log("buildForm");
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
-            'isAlreadyAnonymized': [],
+            'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
             'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix])).concat([this.notEmptyValidator()])],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
@@ -167,7 +169,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         this.updateFormControl(subjectForm);
         this.subscriptions.push(
             subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
-                this.isAlreadyAnonymized = false;
+                this.subject.isAlreadyAnonymized = false;
                 this.updateFormControl(subjectForm);
             })
         );
@@ -202,8 +204,8 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        console.log("update form control");
-        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
+        console.log("update form control this.isAlreadyAnonymized: ",  this.subject.isAlreadyAnonymized);
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
                 formGroup.get('lastName').setValidators(this.nameValidators);
@@ -241,7 +243,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     private generateSubjectIdentifier(): string {
         let hash;
-        if (this.humanSelected() && !this.isAlreadyAnonymized) {
+        if (this.humanSelected() && !this.subject.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
         }
         else {
@@ -272,9 +274,9 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     public toggleAnonymised() {
-        if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
+        if (this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
-        } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
+        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
             this.subject.name = this.subjectNamePrefix;
         }
     }
