@@ -22,6 +22,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.uploader.ShUpConfig;
@@ -77,6 +78,8 @@ public class ShanoirUploaderServiceClient {
 	
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER = "service.acquisition.equipments.by.serial.number";
 
+	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_EQUIPMENT_DICOM = "service.acquisition.equipments.find.or.create.by.equipment.dicom";
+
 	private static final String SERVICE_MANUFACTURER_MODELS = "service.manufacturer.models";
 	
 	private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
@@ -126,6 +129,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLAcquisitionEquipments;
 	
 	private String serviceURLAcquisitionEquipmentsBySerialNumber;
+
+	private String serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom;
 	
 	private String serviceURLManufacturerModels;
 	
@@ -186,6 +191,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLAcquisitionEquipmentsBySerialNumber = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER);
+		this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS_BY_EQUIPMENT_DICOM);
 		this.serviceURLManufacturerModels = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURER_MODELS);
 		this.serviceURLManufacturers = this.serverURL
@@ -515,6 +522,26 @@ public class ShanoirUploaderServiceClient {
 				return acquisitionEquipments;
 			} else {
 				logger.error("Could not find acquisition equipments by serial number (status code: " + code + ", message: "
+						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		}
+		return null;
+	}
+
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(final EquipmentDicom equipmentDicom, Long centerId) throws Exception {
+		long startTime = System.currentTimeMillis();
+		String json = Util.objectWriter.writeValueAsString(equipmentDicom);
+		try (CloseableHttpResponse response = httpService.post(this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom + centerId, json, false)) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
+						AcquisitionEquipment.class);
+				return acquisitionEquipments;
+			} else {
+				logger.error("Could not find acquisition equipment(s) or create by equipment dicom (status code: " + code + ", message: "
 						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
