@@ -59,6 +59,7 @@ public class CurrentNominativeDataController {
 
 		// Set the action when delete completred uploads button is clicked
 		JButton deleteAllButton = cuw.frame.btndeleteFinishedUploads;
+		
 		deleteAllButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
