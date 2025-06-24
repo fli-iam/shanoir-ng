@@ -208,6 +208,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		AcquisitionEquipment equipment = new AcquisitionEquipment();
 		equipment.setManufacturerModel(manufacturerModel);
 		equipment.setCenter(centerRepository.findById(centerId).orElseThrow());
+		equipment.setSerialNumber(equipmentDicom.getDeviceSerialNumber());
 		return repository.save(equipment);
 	}
 
