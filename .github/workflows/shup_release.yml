@@ -3,14 +3,34 @@ name: Release ShanoirUploader App
 on:
   push:
     branches:
-      - main
-    # tags:
-    #   - SHUP_v*
-    # paths: 
-    #   - 'shanoir-uploader/**'
+      - Laurent_SHUP_jpackage
+    paths: 
+      - 'shanoir-uploader/**'
  
 
 jobs:
+  setup-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_part: ${{ steps.get_tag.outputs.version_part }}
+      release_tag: ${{ steps.get_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest NG tag and generate SHUP release tag
+        id: get_tag
+        run: |
+          latest_tag=$(git tag --list "SHUP_v*" --sort=-creatordate | head -n 1)
+          if [[ "$latest_tag" =~ _v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            version_part="${BASH_REMATCH[1]}"
+            new_tag="SHUP_v$version_part"
+            echo "version_part=$version_part" >> "$GITHUB_OUTPUT"
+            echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "No NG tag found"
+            exit 1
+          fi
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +49,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging \
+            --add-modules java.base,java.desktop \
             --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
@@ -41,13 +61,14 @@ jobs:
           cd shanoir-uploader
           mkdir target/packages
           mkdir -p target/lib
-          cp target/shanoir-uploader-9.0.0.jar target/lib/
+          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage \
             --type deb \
             --input target/lib \
             --dest target/packages \
             --name ShanoirUploader \
-            --main-jar shanoir-uploader-9.0.0.jar \
+            --app-version ${{ needs.setup-version.outputs.version_part }} \
+            --main-jar shanoir-uploader-2.6.5.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" 
@@ -75,7 +96,7 @@ jobs:
         run: |
           jlink `
             --module-path $Env:JAVA_HOME\jmods `
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging `
+            --add-modules java.base,java.desktop `
             --output shanoir-uploader/target/custom-runtime `
             --compress 2 `
             --strip-debug `
@@ -87,17 +108,16 @@ jobs:
           cd shanoir-uploader
           mkdir target/packages
           mkdir -p target/lib
-          cp target/shanoir-uploader-9.0.0.jar target/lib/
+          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage `
-            --app-version 1.0.1 `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
+            --app-version ${{ needs.setup-version.outputs.version_part }} `
             --type exe `
-            --icon src/main/resources/icon.ico `
             --input target/lib `
             --dest target/packages `
-            --main-jar shanoir-uploader-9.0.0.jar `
+            --main-jar shanoir-uploader-2.6.5.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
             --java-options "-Xmx2g" `
@@ -129,7 +149,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging \
+            --add-modules java.base,java.desktop \
             --output shanoir-uploader/target/custom-runtime \
             --compress 2 \
             --strip-debug \
@@ -141,13 +161,14 @@ jobs:
           cd shanoir-uploader
           mkdir target/packages
           mkdir -p target/lib
-          cp target/shanoir-uploader-9.0.0.jar target/lib/
+          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage \
             --type dmg \
             --input target/lib \
             --dest target/packages \
             --name ShanoirUploader \
-            --main-jar shanoir-uploader-9.0.0.jar \
+            --app-version ${{ needs.setup-version.outputs.version_part }} \
+            --main-jar shanoir-uploader-2.6.5.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g"
@@ -168,8 +189,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: SHUP_v1.0.7 # TODO : remplacer github.ref_name par le nom de la version
-          name: SHUP_v1.0.7
+          tag_name: ${{ needs.setup-version.outputs.release_tag }}
+          name: ${{ needs.setup-version.outputs.release_tag }}
           files: |
             artifacts/**/*
         env:
