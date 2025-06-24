@@ -448,6 +448,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
 		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		if (StringUtils.isEmpty(serie.getModality())) {
+			serie.setModality(attributes.getString(Tag.Modality));
+		}
 	}
 
 	/**
