@@ -79,7 +79,6 @@ public class ImportUtils {
 
 	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
-
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
 			.registerModule(new Jdk8Module())
@@ -661,11 +660,9 @@ public class ImportUtils {
 
 	public static AcquisitionEquipment findOrCreateEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, Center center, List<AcquisitionEquipment> acquisitionEquipments) {
 		AcquisitionEquipment equipment = null;
-		String manufacturerName = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
-		String manufacturerModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
-		String deviceSerialNumber = importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
+		EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
 		// Try to find equipment via model name and serial number
-		equipment = findEquipmentInAllEquipments(acquisitionEquipments, manufacturerModelName, deviceSerialNumber);
+		equipment = findEquipmentInAllEquipments(acquisitionEquipments, equipmentDicom.getManufacturerModelName(), equipmentDicom.getDeviceSerialNumber());
 		if (study.isWithStudyCards()) {
 			if (equipment != null && studyCards != null) {
 				// No need to create center, as already existing behind equipment
@@ -674,52 +671,7 @@ public class ImportUtils {
 			}
 		}
 		if (equipment == null ) {
-			// Find or create manufacturer model and manufacturer
-			ManufacturerModel manufacturerModel = findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
-			if (manufacturerModel == null) { // create one
-				Manufacturer manufacturer = findManufacturerInAllEquipments(acquisitionEquipments, manufacturerName);
-				if (manufacturer == null) { // find matching manufacturer or create new manufacturer
-					List<Manufacturer> manufacturers = ShUpOnloadConfig.getShanoirUploaderServiceClient().findManufacturers();
-					Optional<Manufacturer> matchingManufacturer = manufacturers.stream()
-						.filter(m -> m.getName().equals(manufacturerName)).findFirst();
-					if (matchingManufacturer.isPresent()) {
-						manufacturer = matchingManufacturer.get();
-					} else {
-						manufacturer = createManufacturer(manufacturerName);
-					}
-				}
-				if (manufacturer == null) {
-					importJob.setUploadState(UploadState.ERROR);
-					importJob.setErrorMessage("Error: could not create manufacturer.");
-					logger.error(importJob.getErrorMessage());
-					return null;
-				}
-
-				// Modality is mandatory to create a new Manufacturer model, but not mandatory in the dicom query
-				String modality = null;
-				DicomQuery dicomQuery = importJob.getDicomQuery();
-				if (dicomQuery != null) {
-					modality = dicomQuery.getModality();
-				} else {
-					if (modality == null || modality.isBlank()) {
-						modality = importJob.getSelectedSeries().iterator().next().getModality();
-					}
-				}
-				Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
-				String magneticFieldStrength = importJob.getFirstSelectedSerie().getEquipment().getMagneticFieldStrength();
-				if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
-					magneticFieldStrength = "0.0";
-				}
-				manufacturerModel = createManufacturerModel(
-					manufacturerModelName, manufacturer, DatasetModalityType.getType(datasetModalityType).toString(), Double.valueOf(magneticFieldStrength));
-			}
-			if (manufacturerModel == null) {
-				importJob.setUploadState(UploadState.ERROR);
-				importJob.setErrorMessage("Error: could not create manufacturerModel.");
-				logger.error(importJob.getErrorMessage());
-				return null;
-			}
-			equipment = createEquipment(center, manufacturerModel, deviceSerialNumber);
+			equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
 			if (equipment == null) {
 				importJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage("Error: could not create equipment.");

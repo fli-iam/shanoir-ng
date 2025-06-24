@@ -198,6 +198,11 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 			newManufacturerModel.setManufacturer(manufacturer);
 			Integer modalityTypeId = DatasetModalityType.getIdFromModalityName(equipmentDicom.getModality());
 			newManufacturerModel.setDatasetModalityType(DatasetModalityType.getType(modalityTypeId));
+			String magneticFieldStrength = equipmentDicom.getMagneticFieldStrength();
+			if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
+					magneticFieldStrength = "0.0";
+			}
+			newManufacturerModel.setMagneticField(Double.valueOf(magneticFieldStrength));
 			return manufacturerModelRepository.save(newManufacturerModel);
 		});
 		AcquisitionEquipment equipment = new AcquisitionEquipment();

@@ -528,22 +528,28 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(final EquipmentDicom equipmentDicom, Long centerId) throws Exception {
-		long startTime = System.currentTimeMillis();
-		String json = Util.objectWriter.writeValueAsString(equipmentDicom);
-		try (CloseableHttpResponse response = httpService.post(this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom + centerId, json, false)) {
-			long stopTime = System.currentTimeMillis();
-			long elapsedTime = stopTime - startTime;
-			logger.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom: " + elapsedTime + "ms");
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
-						AcquisitionEquipment.class);
-				return acquisitionEquipments;
-			} else {
-				logger.error("Could not find acquisition equipment(s) or create by equipment dicom (status code: " + code + ", message: "
-						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(final EquipmentDicom equipmentDicom, Long centerId) {
+		try {
+			long startTime = System.currentTimeMillis();
+			String json = Util.objectWriter.writeValueAsString(equipmentDicom);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom + centerId, json, false)) {
+				long stopTime = System.currentTimeMillis();
+				long elapsedTime = stopTime - startTime;
+				logger.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom: " + elapsedTime + "ms");
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
+							AcquisitionEquipment.class);
+					return acquisitionEquipments;
+				} else {
+					logger.error("Could not find acquisition equipment(s) or create by equipment dicom (status code: " + code + ", message: "
+							+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
+		} catch(JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
