@@ -92,16 +92,19 @@ jobs:
             --app-version 1.0.1 `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
+            --name ShanoirUploader `
             --type exe `
+            --icon src/main/resources/icon.ico `
             --input target/lib `
             --dest target/packages `
-            --name ShanoirUploader `
             --main-jar shanoir-uploader-9.0.0.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
             --java-options "-Xmx2g" `
             --win-menu `
-            --win-shortcut 
+            --win-shortcut `
+            --win-dir-chooser `
+            --win-per-user-install
 
       - uses: actions/upload-artifact@v4
         with:
