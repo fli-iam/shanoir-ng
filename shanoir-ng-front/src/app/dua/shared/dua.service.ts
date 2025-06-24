@@ -16,21 +16,21 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { DuaDocument } from './dua-document.model';
 import { HttpClient } from '@angular/common/http';
+import * as AppUtils from '../../utils/app.utils';
 
 
 @Injectable()
 export class DuaService {
 
-    API_URL = '/dua';
+    API_URL = AppUtils.BACKEND_API_STUDIES_MS_URL + '/dua';
 
     constructor(
         protected http: HttpClient) {
     }
 
     create(entity: DuaDocument, email: string): Promise<string> {
-        let arg: any = {dua: entity, email: email};
-        return this.http.post<any>(this.API_URL, this.stringify(arg))
-            .toPromise();
+        let arg: any = {duaDraft: entity, email: email};
+        return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
     }
 
     update(entity: DuaDocument): Promise<void> {

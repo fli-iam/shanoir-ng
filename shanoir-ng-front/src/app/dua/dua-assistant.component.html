@@ -13,17 +13,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2 class="header command-zone">DUA assistant</h2>
+@if (mode == 'view') {
+    <button class="left-icon alt" (click)="generatePDF()"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
+    <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
+} @else if (mode == 'edit') {
+    <button class="right-icon" *ngIf="form" [formGroup]="form" [disabled]="!form?.valid">Save<i class="fa-regular fa-floppy-disk"></i></button>
+    <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
+} @else if (mode == 'create') {
+    <button class="right-icon" *ngIf="form" [formGroup]="form" [disabled]="!form?.valid">Save<i class="fa-regular fa-floppy-disk"></i></button>
+}
 
-@if (link) {
+
+@if (mode == 'create' && link) {
+    <h3 class="created-title right-icon">
+        The draft is created<i class="fa-regular fa-thumbs-up"></i>
+    </h3>
     <div>
         You can now access the draft with this link : <a [href]="link">dua draft</a>
-        This link has been sent to {{form.get('email')?.value ? form.get('email')?.value + ' and ' : '' }} you by email. 
+        This link has been sent to {{form?.get('email')?.value ? form?.get('email')?.value + ' and ' : '' }} you by email. 
         Anyone having the link is free to edit the document. When someone sets the dua to "ready", you will be alerted by mail.
         At any time you can generate a pdf document from this dua draft and upload it into you study.
     </div>
 } @else {
-    <form [formGroup]="form">
-        <ul>
+    <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <ul *ngIf="mode == 'create'">
             <li>
                 <label>
                     Send to
@@ -32,9 +45,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
         </ul>
     </form>
-    <button form="form" [disabled]="!form.valid">Submit</button>
     
-    <div class="page">
+    <div class="page" #pdfContent>
         <h1>Mandatory</h1>
         <ol>
             <li>1. Je me conformerai à toutes les règles et réglementations en vigueur en matière de protection de données à caractère personnel imposées par l‘institution dont je relève.</li>
@@ -43,38 +55,54 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>4. Je ferai référence à la source originelle spécifique des données auxquelles j'ai eu accès lorsque je présenterai les résultats ou des algorithmes ayant bénéficié de leur utilisation.</li>
         </ol>
         
-        <h1>To answer/complete</h1>
-        <form [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
-            <ul>
-                <li>
-                    <label>
-                        Lien Clinical Trials de l'étude *
-                        <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
-                    </label>
-                    <span class="right-col">
-                        https://clinicaltrials.gov/<input type="text" formControlName="url"/>
-                    </span>
-                </li>
-                <li>
-                    <label>
-                        Financement *
-                    </label>
-                    <textarea class="right-col" formControlName="funding"></textarea>
-                </li>
-                <li>
-                    <label>
-                        Remerciements *
-                    </label>
-                    <textarea class="right-col" formControlName="thanks"></textarea>
-                </li>
-                <li>
-                    <label>
-                        Articles à citer *
-                    </label>
-                    <textarea class="right-col" formControlName="papers"></textarea>
-                </li>
-            </ul>
-        </form>
+        @if(mode == "view" && dua) {
+            <div>
+                <label>Lien Clinical Trials de l'étude : </label>
+                <a [href]="'https://clinicaltrials.gov/' + dua.url">{{'https://clinicaltrials.gov/' + dua.url}}</a>
+            </div>
+            <p>
+                {{dua.funding}}
+            </p>
+            <p>
+                {{dua.thanks}}
+            </p>
+            <p>
+                {{dua.papers}}
+            </p>
+        } @else if (mode == 'edit' || mode == 'create') {
+            <h1>To answer/complete</h1>
+            <form *ngIf="form" [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
+                <ul>
+                    <li>
+                        <label>
+                            Lien Clinical Trials de l'étude *
+                            <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
+                        </label>
+                        <span class="right-col">
+                            https://clinicaltrials.gov/<input type="text" formControlName="url"/>
+                        </span>
+                    </li>
+                    <li>
+                        <label>
+                            Financement *
+                        </label>
+                        <textarea class="right-col" formControlName="funding"></textarea>
+                    </li>
+                    <li>
+                        <label>
+                            Remerciements *
+                        </label>
+                        <textarea class="right-col" formControlName="thanks"></textarea>
+                    </li>
+                    <li>
+                        <label>
+                            Articles à citer *
+                        </label>
+                        <textarea class="right-col" formControlName="papers"></textarea>
+                    </li>
+                </ul>
+            </form>
+        }
     </div>
 }
 

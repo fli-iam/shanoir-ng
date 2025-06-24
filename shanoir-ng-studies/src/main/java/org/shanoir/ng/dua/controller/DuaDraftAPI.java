@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.dua.controller;
 
-import org.shanoir.ng.dua.dto.DuaDraftCreationDTO;
+import org.shanoir.ng.dua.dto.DuaDraftCreationWrapperDTO;
 import org.shanoir.ng.dua.dto.DuaDraftDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +46,7 @@ public interface DuaDraftAPI {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationDTO dua, BindingResult result)
+			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a dua draft")

@@ -12,10 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import * as html2pdf from 'html2pdf.js';
+import { Subscription } from 'rxjs';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
 
@@ -27,29 +30,63 @@ import { DuaService } from './shared/dua.service';
     standalone: false
 })
 
-export class DUAAssistantComponent {
+export class DUAAssistantComponent implements OnDestroy {
 
     protected form: FormGroup;
     private studyId: number;
     protected link: string;
+    protected mode: Mode;
+    protected dua: DuaDocument;
+    protected id: string;
+    protected subscriptions: Subscription[] = [];
+    @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
 
     constructor(
             private formBuilder: FormBuilder, 
             private route: ActivatedRoute,
             private duaService: DuaService) {
-        let studyIdStr: string = this.route.snapshot.paramMap.get('id');
-        this.studyId = studyIdStr ? parseInt(this.route.snapshot.paramMap.get(studyIdStr)) : null;
-        this.buildForm();
+        this.subscriptions.push(this.route.params.subscribe(
+            params => {
+                let studyIdStr: string = params['studyId'];
+                let studyId: number = studyIdStr ? parseInt(studyIdStr) : null;
+                let duaId: string = params['id'];
+                let mode: Mode = this.route.snapshot.data['mode'];
+                this.init(mode, duaId, studyId);
+            })
+        );
     }
 
-    protected buildForm() {
-        this.form = this.formBuilder.group({
-            'url': ['', [Validators.required]],
-            'funding': ['', [Validators.required]],
-            'thanks': ['', [Validators.required]],
-            'papers': ['', [Validators.required]],
-            'email': ['', [Validators.email]],
-        });
+    private init(mode: Mode, id: string, studyId: number) {
+        this.link = null;
+        this.form = null;
+        this.dua = null;
+        this.mode = mode;
+        this.studyId = studyId;
+        this.id = id;
+        if (this.mode == 'create') {
+            this.buildForm();
+        } else if (this.mode == 'edit') {
+            this.duaService.get(id).then(dua => {
+                this.buildForm(dua);
+            });
+        } else if (this.mode == 'view') {
+            this.duaService.get(id).then(dua => {
+                this.dua = dua;
+            });
+        }
+    }
+
+    protected buildForm(dua?: DuaDocument) {
+        let controls: any = {
+            'url': [dua?.url, [Validators.required]],
+            'funding': [dua?.funding, [Validators.required]],
+            'thanks': [dua?.thanks, [Validators.required]],
+            'papers': [dua?.papers, [Validators.required]],
+        };
+        if (this.mode == 'create') {
+            controls['email'] = ['', [Validators.email]];
+        }
+        this.form = this.formBuilder.group(controls);
     }
 
     protected onSubmit() {
@@ -62,8 +99,26 @@ export class DUAAssistantComponent {
         );
         this.duaService.create(dua, this.form.get('email')?.value)
             .then(id => {
-                this.link = '/dua/view/' + id;
+                this.link = '/shanoir-ng/dua/view/' + id;
             });
+    }
+
+    protected generatePDF(): void {
+        const element = this.pdfContent.nativeElement;
+        const options = {
+            margin: 10,
+            filename: 'mon-document.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        };
+        html2pdf().from(element).set(options).save();
+    }
+
+    ngOnDestroy() {
+        for (let subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
     }
 
     public static openCreateDialog(studyId: number, confirmDialogService: ConfirmDialogService, router: Router) {

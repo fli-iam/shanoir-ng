@@ -828,9 +828,21 @@ let routes: Routes = [
     {
         path: 'access-request/list',
         component: AccessRequestListComponent
-    },{
+    },
+    {
         path: 'dua/create/:studyId',
-        component: DUAAssistantComponent
+        component: DUAAssistantComponent,
+        data: { mode: 'create' }
+    },
+    {
+        path: 'dua/edit/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'edit' }
+    },
+    {
+        path: 'dua/view/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'view' }
     },
 ];
 

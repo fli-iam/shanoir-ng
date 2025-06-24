@@ -17,21 +17,30 @@ package org.shanoir.ng.dua.controller;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.shanoir.ng.dua.dto.DuaDraftCreationDTO;
+import org.shanoir.ng.dua.dto.DuaDraftCreationWrapperDTO;
 import org.shanoir.ng.dua.dto.DuaDraftDTO;
 import org.shanoir.ng.dua.dto.mapper.DuaDraftMapper;
 import org.shanoir.ng.dua.model.DuaDraft;
 import org.shanoir.ng.dua.service.DuaDraftService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.exception.EntityFoundException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -42,22 +51,39 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 	DuaDraftService duaDraftService;
 
 	@Autowired
-	DuaDraftMapper mapper;
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private DuaDraftMapper mapper;
+
+	@Autowired
+	private StudyService studyService;
+
+	@Value("${front.server.url}")
+	private String frontServerUrl;
 
 
 	@Override
 	public ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationDTO dua, BindingResult result)
+			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException {
 
 		String generatedId = UUID.randomUUID().toString();
-	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua);
+	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
 		duaEntity.setId(generatedId);
 		try {
 			duaDraftService.create(duaEntity);
+			if (dua.getEmail() != null) {
+				sendDuaDraftCreationMail(duaEntity, dua.getEmail());
+			}
 			return new ResponseEntity<>(generatedId, HttpStatus.OK);
 		} catch (EntityFoundException ex) {
 			return new ResponseEntity<>("This id is already taken", HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (JsonProcessingException ex) {
+            return new ResponseEntity<>("The mail could not be sent, json serializing error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -90,5 +116,15 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+
+    private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) throws JsonProcessingException {
+		DuaDraftWrapper data = new DuaDraftWrapper();
+		String link = frontServerUrl + "/dua/" + duaEntity.getId();
+		data.setDuaLink(link);
+		data.setRecipienEmailAddress(email);
+		data.setSenderUserId(KeycloakUtil.getTokenUserId());
+		data.setStudyName(studyService.findNameById(duaEntity.getStudyId()));
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, objectMapper.writeValueAsString(data));
+    }
 
 }

@@ -18,13 +18,13 @@ public class DuaDraftCreationDTO {
 
     private Long studyId;
 
-    String url;
+    private String url;
     
-    String funding;
+    private String funding;
 
-    String thanks;
+    private String thanks;
     
-    String papers;
+    private String papers;
 
 
     public Long getStudyId() {
