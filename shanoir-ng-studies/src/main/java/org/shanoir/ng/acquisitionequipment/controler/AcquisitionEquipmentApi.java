@@ -83,7 +83,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byDicom/{centerId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateByEquipmentDicom(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody EquipmentDicom equipmentDicom,
 			BindingResult result);
