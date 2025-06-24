@@ -176,6 +176,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         Promise.all([this.entityPromise, choosePromise]).then(() => {
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
         });
+
         choosePromise.then(() => {
             this.footerState = new FooterState(this.mode);
             this.footerState.backButton = this.isMainComponent;
@@ -184,22 +185,14 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
             this.manageFormSubscriptions();
             if ((this.mode == 'create' || this.mode == 'edit')) {
+                console.log("before entity getPrefilled");
                 this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => {
                     this.entity = res as T;
-                    console.log("entity :", this.entity);
+                    console.log("after entity getPrefilled :", this.entity);
                     this.form.updateValueAndValidity();
                     this.manageFormSubscriptions();
                 });
             }
-
-            this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
-
-            // if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-            //     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => this.entity = res as T);
-            // }
-            // this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
-            //     this.entity = res;
-            // });
         });
 
         // load called tab
@@ -494,6 +487,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     ngOnDestroy() {
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
+
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }

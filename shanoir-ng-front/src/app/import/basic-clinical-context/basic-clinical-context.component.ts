@@ -133,7 +133,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
+        console.log("fillCreateExaminationStep step : ", step);
+        let exam: Examination = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
     }
 
     private getPrefilledExam(): Examination {
@@ -151,6 +153,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
+        console.log("getPrefilledExam newExam : ", newExam);
         return newExam;
     }
 

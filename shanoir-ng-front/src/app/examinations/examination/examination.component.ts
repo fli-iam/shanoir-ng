@@ -34,6 +34,8 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import {ExaminationNode} from "../../tree/tree.model";
+import {Subject} from "../../subjects/shared/subject.model";
+import {SubjectStudy} from "../../subjects/shared/subject-study.model";
 
 @Component({
     selector: 'examination-detail',
@@ -107,6 +109,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
+        console.log("init view");
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -125,6 +128,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initEdit(): Promise<void> {
+        console.log("initEdit");
         this.getCenters();
         this.getStudies();
 
@@ -136,10 +140,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initCreate(): Promise<void> {
+        console.log("initCreate");
         this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
+
         return Promise.resolve();
     }
 

@@ -103,10 +103,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
             this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res as Subject);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => {
-                this.subject.isAlreadyAnonymized = res;
-                console.log("isAlreadyAnonymized res : ", res);
-            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
             if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {

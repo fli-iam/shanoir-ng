@@ -536,27 +536,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    public openCreateSubject = () => {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        console.log("step envoi : ", importStep);
-        let createSubjectRoute: string = this.getCreateSubjectRoute();
-            this.router.navigate([createSubjectRoute]).then(success => {
-                this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
-                this.subscribtions.push(
-                    importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    let sub: Subject;
-                    if (entity instanceof Subject) {
-                        sub = entity;
-                    } else if (entity instanceof PreclinicalSubject) {
-                        sub = entity.subject;
-                    }
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
-                })
-            );
-        })
-    }
-
     protected fillCreateSubjectStep(step: Step) {}
 
     protected fillCreateExaminationStep(step: Step) {}
@@ -571,7 +550,45 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return '/examination/create';
     }
 
+    public openCreateSubject = () => {
+        let importStep: Step = this.breadcrumbsService.currentStep;
+        console.log("step envoi subject : ", importStep);
+        let createSubjectRoute: string = this.getCreateSubjectRoute();
+        this.router.navigate([createSubjectRoute]).then(success => {
+            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
+            this.subscribtions.push(
+                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+
+                    console.log("importStep.waitFor");
+                    let sub: Subject;
+                    if (entity instanceof Subject) {
+                        sub = entity;
+                    } else if (entity instanceof PreclinicalSubject) {
+                        sub = entity.subject;
+                    }
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
+                })
+            );
+        })
+    }
+
+    public openCreateExam = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        console.log("openCreateExam step envoi : ", currentStep);
+        let createExamRoute: string = this.getCreateExamRoute();
+        this.router.navigate([createExamRoute]).then(success => {
+            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    console.log("wait for entity : ", entity);
+                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
+                })
+            );
+        });
+    }
+
     public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
+        console.log("subjectToSubjectWithSubjectStudy");
         if (!subject) return;
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
         subjectWithSubjectStudy.id = subject.id;
@@ -584,21 +601,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return subjectWithSubjectStudy;
     }
 
-    public openCreateExam = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        let createExamRoute: string = this.getCreateExamRoute();
-        this.router.navigate([createExamRoute]).then(success => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
-                })
-            );
-        });
-    }
-
     private examToSubjectExam(examination: Examination): SubjectExamination {
+        console.log("exam to subjectExam");
         if (!examination) return;
         // Add the new created exam to the select box and select it
         let subjectExam = new SubjectExamination();
