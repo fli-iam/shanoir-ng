@@ -21,11 +21,15 @@ jobs:
         id: get_tag
         run: |
           latest_tag=$(git tag --list "SHUP_v*" --sort=-creatordate | head -n 1)
-          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
-          if [[ "$latest_tag" =~ _v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          echo "latest_tag=$latest_tag"
+          if [[ "$latest_tag" =~ SHUP_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             version_part="${BASH_REMATCH[1]}"
-            new_tag="SHUP_v$version_part"
-            echo "version_part=$version_part" >> "$GITHUB_OUTPUT"
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+            patch=$((patch + 1))
+            new_tag="SHUP_v${major}.${minor}.${patch}"
+            echo "version_part="${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
             echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
           else
             echo "No NG tag found"
