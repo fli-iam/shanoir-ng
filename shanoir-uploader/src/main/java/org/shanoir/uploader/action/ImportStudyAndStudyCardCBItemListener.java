@@ -43,8 +43,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	private AcquisitionEquipment equipment;
-
 	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
@@ -293,14 +291,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	public void setSubjectStudy(SubjectStudy subjectStudy) {
 		this.subjectStudy = subjectStudy;
-	}
-
-	public AcquisitionEquipment getEquipment() {
-		return equipment;
-	}
-
-	public void setEquipment(AcquisitionEquipment equipment) {
-		this.equipment = equipment;
 	}
 
 }

@@ -84,6 +84,7 @@ public class ImportFinishActionListener implements ActionListener {
 			return;
 		}
 
+		AcquisitionEquipment equipment = null;
 		if (study.isWithStudyCards()) {
 			final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 			if (studyCard == null || studyCard.getName() == null) {
@@ -92,6 +93,7 @@ public class ImportFinishActionListener implements ActionListener {
 						"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+			equipment = studyCard.getAcquisitionEquipment();
 		} else {
 			InstitutionDicom institutionDicom = new InstitutionDicom();
 			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
@@ -102,7 +104,7 @@ public class ImportFinishActionListener implements ActionListener {
 				equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
 				equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
 				equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
-				AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+				equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
 				if (equipment == null) {
 					logger.error("No study card: equipment not found or created.");
 					JOptionPane.showMessageDialog(mainWindow.frame,
@@ -159,7 +161,7 @@ public class ImportFinishActionListener implements ActionListener {
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
 				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-				study, importStudyAndStudyCardCBILNG.getEquipment());
+				study, equipment);
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -198,7 +200,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
-			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), importStudyAndStudyCardCBILNG.getEquipment());
+			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
