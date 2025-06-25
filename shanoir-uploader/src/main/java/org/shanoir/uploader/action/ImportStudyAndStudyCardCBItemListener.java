@@ -63,7 +63,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					showOrHideStudyCardComponents(true);
 				} else { // if no study card, we generate the center from the info DICOM
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-					IdName centerIdName = new IdName(1L, "Automatic, as above");
+					IdName centerIdName = new IdName(0L, "Automatic, as above");
 					mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
 					showOrHideStudyCardComponents(false);
 				}
@@ -107,6 +107,11 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.studyCardCB.setVisible(show);
 		mainWindow.importDialog.studyCardFilterLabel.setVisible(show);
 		mainWindow.importDialog.studyCardFilterTextField.setVisible(show);
+		mainWindow.importDialog.mriCenterText.setEnabled(show);
+		mainWindow.importDialog.mriCenterAddressText.setEnabled(show);
+		mainWindow.importDialog.mriManufacturerText.setEnabled(show);
+		mainWindow.importDialog.mriManufacturersModelNameText.setEnabled(show);
+		mainWindow.importDialog.mriDeviceSerialNumberText.setEnabled(show);
 	}
 
 	public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
