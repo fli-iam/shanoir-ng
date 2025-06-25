@@ -21,12 +21,12 @@ jobs:
           fetch-tags: true
 
       - name: Debug tags
-        run: git tag -l
+        run: git tag -l "SHUP_v*" | sort -V | tail -n 1
 
       - name: Get latest NG tag and generate SHUP release tag
         id: get_tag
         run: |
-          latest_tag=$(git tag --list "SHUP_v*" --sort=-creatordate | head -n 1)
+          latest_tag=$(git tag -l "SHUP_v*" | sort -V | tail -n 1)
           echo "Latest_tag: $latest_tag"
           if [[ "$latest_tag" =~ SHUP_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             version_part="${BASH_REMATCH[1]}"
