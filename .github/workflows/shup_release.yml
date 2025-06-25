@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - Laurent_SHUP_jpackage
-    paths: 
-      - 'shanoir-uploader/**'
+    # paths: 
+    #   - 'shanoir-uploader/**'
  
 
 jobs:
