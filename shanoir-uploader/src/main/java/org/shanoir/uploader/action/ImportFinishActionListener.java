@@ -84,6 +84,7 @@ public class ImportFinishActionListener implements ActionListener {
 			return;
 		}
 
+		Long centerId = null;
 		AcquisitionEquipment equipment = null;
 		if (study.isWithStudyCards()) {
 			final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
@@ -93,6 +94,7 @@ public class ImportFinishActionListener implements ActionListener {
 						"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+			centerId = studyCard.getCenterId();
 			equipment = studyCard.getAcquisitionEquipment();
 		} else {
 			InstitutionDicom institutionDicom = new InstitutionDicom();
@@ -100,6 +102,7 @@ public class ImportFinishActionListener implements ActionListener {
 			institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
 			Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(institutionDicom, study.getId());
 			if (center != null) {
+				centerId = center.getId();
 				EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
 				equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
 				equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
@@ -175,10 +178,9 @@ public class ImportFinishActionListener implements ActionListener {
 		Long examinationId = null;
 		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
-			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, center.getId());
+			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, centerId);
 			if (examinationId == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),

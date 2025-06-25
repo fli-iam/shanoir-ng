@@ -248,8 +248,10 @@ public class ImportUtils {
 		if (study.isWithStudyCards()) {
 			importJob.setStudyCardName(studyCard.getName());
 			importJob.setStudyCardId(studyCard.getId());
+		} else {
+			importJob.setCenterId(equipment.getCenter().getId());
+			importJob.setAcquisitionEquipmentId(equipment.getId());
 		}
-		importJob.setAcquisitionEquipmentId(equipment.getId());
 		importJob.setExaminationId(examinationId);
 
 		/**
