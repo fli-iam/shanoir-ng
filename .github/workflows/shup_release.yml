@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0     # Très important : récupère tout l'historique
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Debug tags
@@ -29,18 +29,19 @@ jobs:
           latest_tag=$(git tag -l "SHUP_v*" | sort -V | tail -n 1)
           echo "Latest_tag: $latest_tag"
           if [[ "$latest_tag" =~ SHUP_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            version_part="${BASH_REMATCH[1]}"
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             patch="${BASH_REMATCH[3]}"
             patch=$((patch + 1))
-            new_tag="SHUP_v${major}.${minor}.${patch}"
-            echo "version_part=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+            version_part="${major}.${minor}.${patch}"
+            new_tag="SHUP_v${version_part}"
+            echo "version_part=$version_part" >> "$GITHUB_OUTPUT"
             echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
           else
-            echo "No NG tag found"
+            echo "No SHUP_v tag found"
             exit 1
           fi
+
 
   build-linux:
     runs-on: ubuntu-latest
@@ -82,7 +83,8 @@ jobs:
             --main-jar shanoir-uploader-2.6.5.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
-            --java-options "-Xmx2g" 
+            --java-options "-Xmx2g" \
+            --icon src/main/resources/images/icon.png
 
       - uses: actions/upload-artifact@v4
         with:
@@ -183,7 +185,8 @@ jobs:
             --main-jar shanoir-uploader-2.6.5.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
-            --java-options "-Xmx2g"
+            --java-options "-Xmx2g" \
+            --icon src/main/resources/images/icon.icns \
 
       - uses: actions/upload-artifact@v4
         with:
