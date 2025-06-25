@@ -42,6 +42,8 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
+import {SubjectStudy} from "../../subjects/shared/subject-study.model";
+import {ImagedObjectCategory} from "../../subjects/shared/imaged-object-category.enum";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -380,7 +382,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectStudy(): Promise<void> {
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
-        
+
         this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
 
         this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
@@ -509,6 +511,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             newCenter.name = this.importedCenterDataStr.split(' - ')[0] != "null" ? this.importedCenterDataStr.split(' - ')[0] : "";
             newCenter.street = this.importedCenterDataStr.split(' - ')[1] != "null" ? this.importedCenterDataStr.split(' - ')[1] : "";
         }
+        this.breadcrumbsService.currentStep.addPrefilled("entity", newCenter);
         return newCenter;
     }
 
@@ -534,26 +537,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    public openCreateSubject = () => {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        let createSubjectRoute: string = this.getCreateSubjectRoute();
-        this.router.navigate([createSubjectRoute]).then(success => {
-            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
-            this.subscribtions.push(
-                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    let sub: Subject;
-                    if(entity instanceof Subject){
-                        sub = entity;
-                    }else if(entity instanceof PreclinicalSubject){
-                        sub = entity.subject;
-                    }
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
-                })
-            );
-        });
-    }
-
     protected fillCreateSubjectStep(step: Step) {}
 
     protected fillCreateExaminationStep(step: Step) {}
@@ -568,6 +551,39 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return '/examination/create';
     }
 
+    public openCreateSubject = () => {
+        let importStep: Step = this.breadcrumbsService.currentStep;
+        let createSubjectRoute: string = this.getCreateSubjectRoute();
+        this.router.navigate([createSubjectRoute]).then(success => {
+            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
+            this.subscribtions.push(
+                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+
+                    let sub: Subject;
+                    if (entity instanceof Subject) {
+                        sub = entity;
+                    } else if (entity instanceof PreclinicalSubject) {
+                        sub = entity.subject;
+                    }
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
+                })
+            );
+        })
+    }
+
+    public openCreateExam = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        let createExamRoute: string = this.getCreateExamRoute();
+        this.router.navigate([createExamRoute]).then(success => {
+            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
+                })
+            );
+        });
+    }
+
     public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
         if (!subject) return;
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
@@ -579,20 +595,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
 
         return subjectWithSubjectStudy;
-    }
-
-    public openCreateExam = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        let createExamRoute: string = this.getCreateExamRoute();
-        this.router.navigate([createExamRoute]).then(success => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
-                })
-            );
-        });
     }
 
     private examToSubjectExam(examination: Examination): SubjectExamination {
