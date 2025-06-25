@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
@@ -41,7 +41,7 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
     standalone: false
 })
 
-export class SubjectComponent extends EntityComponent<Subject> {
+export class SubjectComponent extends EntityComponent<Subject> implements OnDestroy {
 
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -293,5 +293,16 @@ export class SubjectComponent extends EntityComponent<Subject> {
         studyListStr += '\n\nWarning: this action deletes ALL datasets ';
         (entity.subjectStudyList.length > 0) ? studyListStr += 'from ALL studies listed above.' : studyListStr += 'from this subject.';
         return Promise.resolve(studyListStr);
+    }
+
+    ngOnDestroy() {
+        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
+        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
+
+        for (let subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
     }
 }
