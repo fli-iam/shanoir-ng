@@ -20,9 +20,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Debug tags
-        run: git tag -l "SHUP_v*" | sort -V | tail -n 1
-
       - name: Get latest NG tag and generate SHUP release tag
         id: get_tag
         run: |
@@ -44,6 +41,7 @@ jobs:
 
 
   build-linux:
+    needs: setup-version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +61,7 @@ jobs:
             --module-path $JAVA_HOME/jmods \
             --add-modules java.base,java.desktop \
             --output shanoir-uploader/target/custom-runtime \
-            --compress 2 \
+            --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
@@ -92,6 +90,7 @@ jobs:
           path: shanoir-uploader/target/packages/*.deb
 
   build-windows:
+    needs: setup-version
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +110,7 @@ jobs:
             --module-path $Env:JAVA_HOME\jmods `
             --add-modules java.base,java.desktop `
             --output shanoir-uploader/target/custom-runtime `
-            --compress 2 `
+            --compress zip-6 `
             --strip-debug `
             --no-header-files `
             --no-man-pages
@@ -146,6 +145,7 @@ jobs:
           path: shanoir-uploader/target/packages/*.exe
 
   build-macos:
+    needs: setup-version
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -165,7 +165,7 @@ jobs:
             --module-path $JAVA_HOME/jmods \
             --add-modules java.base,java.desktop \
             --output shanoir-uploader/target/custom-runtime \
-            --compress 2 \
+            --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
