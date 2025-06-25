@@ -66,21 +66,24 @@ jobs:
             --no-header-files \
             --no-man-pages
 
+      - name: Get ShUp version from pom.xml
+        id: get_version
+        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
       - name: Package .deb
         run: |
+          VERSION=${{ steps.get_version.outputs.version }}
           cd shanoir-uploader
           mkdir target/packages
-          mkdir -p target/lib
-          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage \
             --type deb \
-            --input target/lib \
+            --input target \
             --dest target/packages \
             --vendor "Inria" \
             --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
-            --main-jar shanoir-uploader-2.6.5.jar \
+            --main-jar shanoir-uploader-${VERSION}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" \
@@ -117,24 +120,24 @@ jobs:
             --no-header-files `
             --no-man-pages
 
-      - name: Create lib directory
-        run: mkdir -p target/lib
+      - name: Get ShUp version from pom.xml
+        id: get_version
         shell: bash
+        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
 
       - name: Package .exe
         run: |
           cd shanoir-uploader
           mkdir target/packages
-          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage `
             --type exe `
-            --input target/lib `
+            --input target `
             --dest target/packages `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
-            --main-jar shanoir-uploader-2.6.5.jar `
+            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
             --java-options "-Xmx2g" `
@@ -175,21 +178,23 @@ jobs:
             --no-header-files \
             --no-man-pages
 
+      - name: Get ShUp version from pom.xml
+        id: get_version
+        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
       - name: Package .dmg
         run: |
           cd shanoir-uploader
           mkdir target/packages
-          mkdir -p target/lib
-          cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage \
             --type dmg \
-            --input target/lib \
+            --input target \
             --dest target/packages \
             --vendor "Inria" \
             --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
-            --main-jar shanoir-uploader-2.6.5.jar \
+            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" \
