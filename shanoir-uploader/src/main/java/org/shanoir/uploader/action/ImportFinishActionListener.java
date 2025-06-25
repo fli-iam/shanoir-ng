@@ -73,6 +73,8 @@ public class ImportFinishActionListener implements ActionListener {
 			return;
 		}
 
+		SubjectStudy subjectStudy = null;
+
 		/**
 		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
 		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
@@ -85,6 +87,7 @@ public class ImportFinishActionListener implements ActionListener {
 				subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
 				if (subjectREST != null) {
 					logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+					subjectStudy = subjectREST.getSubjectStudy();
 					useExistingSubjectInStudy = true;
 				} else {
 					JOptionPane.showMessageDialog(mainWindow.frame,
@@ -117,7 +120,6 @@ public class ImportFinishActionListener implements ActionListener {
 			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
 			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
 			String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
-			SubjectStudy subjectStudy = importStudyAndStudyCardCBILNG.getSubjectStudy();
 			String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
 			SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
 			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
@@ -133,6 +135,7 @@ public class ImportFinishActionListener implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
+			subjectStudy = subjectREST.getSubjectStudyList().get(0);
 		}
 		
 		Long examinationId = null;
@@ -167,7 +170,7 @@ public class ImportFinishActionListener implements ActionListener {
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
-			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
+			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, subjectStudy, mainWindow.isFromPACS);
 			// If quality check resulted in errors, show a message and do not start the import
 			if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
 				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
@@ -177,7 +180,7 @@ public class ImportFinishActionListener implements ActionListener {
 				logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
 			} else {
 				// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
-				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
+				if (!qualityControlResult.isEmpty()) {
 					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
 						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
@@ -185,7 +188,7 @@ public class ImportFinishActionListener implements ActionListener {
 					}
 					// If Failed Valid No updated subject studies exist in the qualityControlResult
 					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
-					if (!qualityControlResult.hasFailedValid()) {
+					if (!qualityControlResult.hasFailedValid() && !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
 						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
 						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
 					}
