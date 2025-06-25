@@ -107,11 +107,24 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.studyCardCB.setVisible(show);
 		mainWindow.importDialog.studyCardFilterLabel.setVisible(show);
 		mainWindow.importDialog.studyCardFilterTextField.setVisible(show);
-		mainWindow.importDialog.mriCenterText.setEnabled(show);
-		mainWindow.importDialog.mriCenterAddressText.setEnabled(show);
-		mainWindow.importDialog.mriManufacturerText.setEnabled(show);
-		mainWindow.importDialog.mriManufacturersModelNameText.setEnabled(show);
-		mainWindow.importDialog.mriDeviceSerialNumberText.setEnabled(show);
+		mainWindow.importDialog.mriCenterText.setEditable(!show);
+		mainWindow.importDialog.mriCenterAddressText.setEditable(!show);
+		mainWindow.importDialog.mriManufacturerText.setEditable(!show);
+		mainWindow.importDialog.mriManufacturersModelNameText.setEditable(!show);
+		mainWindow.importDialog.mriDeviceSerialNumberText.setEditable(!show);
+		if (show) {
+			mainWindow.importDialog.mriCenterText.setBackground(Color.LIGHT_GRAY);
+			mainWindow.importDialog.mriCenterAddressText.setBackground(Color.LIGHT_GRAY);
+			mainWindow.importDialog.mriManufacturerText.setBackground(Color.LIGHT_GRAY);
+			mainWindow.importDialog.mriManufacturersModelNameText.setBackground(Color.LIGHT_GRAY);
+			mainWindow.importDialog.mriDeviceSerialNumberText.setBackground(Color.LIGHT_GRAY);
+		} else {
+			mainWindow.importDialog.mriCenterText.setBackground(Color.WHITE);
+			mainWindow.importDialog.mriCenterAddressText.setBackground(Color.WHITE);
+			mainWindow.importDialog.mriManufacturerText.setBackground(Color.WHITE);
+			mainWindow.importDialog.mriManufacturersModelNameText.setBackground(Color.WHITE);
+			mainWindow.importDialog.mriDeviceSerialNumberText.setBackground(Color.WHITE);
+		}
 	}
 
 	public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
