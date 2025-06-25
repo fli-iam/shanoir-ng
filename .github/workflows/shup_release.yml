@@ -76,6 +76,8 @@ jobs:
             --type deb \
             --input target/lib \
             --dest target/packages \
+            --vendor "Inria" \
+            --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
             --main-jar shanoir-uploader-2.6.5.jar \
@@ -115,20 +117,23 @@ jobs:
             --no-header-files `
             --no-man-pages
 
+      - name: Create lib directory
+        run: mkdir -p target/lib
+        shell: bash
+
       - name: Package .exe
         run: |
           cd shanoir-uploader
           mkdir target/packages
-          mkdir -p target/lib
           cp target/shanoir-uploader-2.6.5.jar target/lib/
           jpackage `
+            --type exe `
+            --input target/lib `
+            --dest target/packages `
             --vendor "Inria" `
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
-            --type exe `
-            --input target/lib `
-            --dest target/packages `
             --main-jar shanoir-uploader-2.6.5.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
@@ -180,6 +185,8 @@ jobs:
             --type dmg \
             --input target/lib \
             --dest target/packages \
+            --vendor "Inria" \
+            --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
             --main-jar shanoir-uploader-2.6.5.jar \
