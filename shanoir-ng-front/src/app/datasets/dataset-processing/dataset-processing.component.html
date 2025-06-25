@@ -170,19 +170,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[columnDefs]="inputDatasetsColumnDefs"
 						[readOnly]="mode == 'view'">
 				</multi-select-table>
-                <li *ngIf="!isExecutionMonitoring">
-                    <legend>
-                        Output datasets
-                        <tool-tip>Datasets resulting from this dataset processing.</tool-tip>
-                    </legend>
-                    <multi-select-table
-                            formControlName="outputDatasetList"
-                            [(ngModel)]="datasetProcessing.outputDatasets"
-                            [options]="outputDatasetOptions"
-                            [columnDefs]="outputDatasetsColumnDefs"
-                            [readOnly]="mode == 'view'">
-                    </multi-select-table>
-                </li>
 			</ol>
 		</fieldset>
 	</form>

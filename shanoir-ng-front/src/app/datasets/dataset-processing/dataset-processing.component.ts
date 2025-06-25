@@ -46,7 +46,6 @@ import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
 
     @ViewChild('inputDatasetsTable', {static: false}) inputDatasetsTable: TableComponent;
-    @ViewChild('outputDatasetsTable', {static: false}) outputDatasetsTable: TableComponent;
 
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
     public study: Study;
@@ -54,9 +53,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public studyOptions: Option<Study>[] = [];
     public subjectOptions: Option<Subject>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
-    public outputDatasetOptions: Option<Dataset>[] = [];
     public inputDatasetsColumnDefs: ColumnDefinition[];
-    public outputDatasetsColumnDefs: ColumnDefinition[];
     public isExecutionMonitoring: boolean = false;
     public executionMonitoring: ExecutionMonitoring;
     prefilledStudy: Study;
@@ -151,13 +148,11 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     onSubjectChange() {
         this.inputDatasetOptions = [];
-        this.outputDatasetOptions = [];
-        if (this.datasetProcessing.inputDatasets?.length > 0 || this.datasetProcessing.outputDatasets?.length > 0) {
-            this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input and output will be removed from the current lists.')
+        if (this.datasetProcessing.inputDatasets?.length > 0) {
+            this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input will be removed from the current lists.')
             .then(response => {
                 if (response) {
                     this.datasetProcessing.inputDatasets = [];
-                    this.datasetProcessing.outputDatasets = [];
                     this.fetchDatasets();
                 }
             });
@@ -205,7 +200,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
             for (let dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
         });
     }
@@ -217,7 +211,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
             'inputDatasetList': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
-            'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
         this.subscriptions.push(
@@ -227,10 +220,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             }), formGroup.get('subject').valueChanges.subscribe(subjectVal => {
                 if (!subjectVal) {
                     formGroup.get('inputDatasetList').disable();
-                    formGroup.get('outputDatasetList').disable();
                 } else {
                     formGroup.get('inputDatasetList').enable();
-                    formGroup.get('outputDatasetList').enable();
                 }
             })
         );
@@ -252,7 +243,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-        this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];
     }
 
     public downloadStdout() {
