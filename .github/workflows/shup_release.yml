@@ -21,7 +21,7 @@ jobs:
         id: get_tag
         run: |
           latest_tag=$(git tag --list "SHUP_v*" --sort=-creatordate | head -n 1)
-          echo "latest_tag=$latest_tag"
+          echo "Latest_tag: $latest_tag"
           if [[ "$latest_tag" =~ SHUP_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             version_part="${BASH_REMATCH[1]}"
             major="${BASH_REMATCH[1]}"
