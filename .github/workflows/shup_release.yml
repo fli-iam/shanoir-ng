@@ -16,6 +16,12 @@ jobs:
       release_tag: ${{ steps.get_tag.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # Très important : récupère tout l'historique
+          fetch-tags: true
+
+      - name: Debug tags
+        run: git tag -l
 
       - name: Get latest NG tag and generate SHUP release tag
         id: get_tag
