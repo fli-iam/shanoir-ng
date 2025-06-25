@@ -94,8 +94,8 @@ public class ImportFinishActionListener implements ActionListener {
 						"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			centerId = studyCard.getCenterId();
 			equipment = studyCard.getAcquisitionEquipment();
+			centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
 		} else {
 			InstitutionDicom institutionDicom = new InstitutionDicom();
 			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
