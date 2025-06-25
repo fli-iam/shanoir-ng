@@ -55,6 +55,12 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Get ShUp version from pom.xml
+        id: get_version
+        run: |
+          cd shanoir-uploader
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
       - name: Create custom runtime with jlink
         run: |
           jlink \
@@ -65,10 +71,6 @@ jobs:
             --strip-debug \
             --no-header-files \
             --no-man-pages
-
-      - name: Get ShUp version from pom.xml
-        id: get_version
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Package .deb
         run: |
@@ -109,6 +111,13 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Get ShUp version from pom.xml
+        id: get_version
+        shell: bash
+        run: |
+          cd shanoir-uploader
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
       - name: Create custom runtime with jlink
         run: |
           jlink `
@@ -119,11 +128,6 @@ jobs:
             --strip-debug `
             --no-header-files `
             --no-man-pages
-
-      - name: Get ShUp version from pom.xml
-        id: get_version
-        shell: bash
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
 
       - name: Package .exe
         run: |
@@ -167,6 +171,12 @@ jobs:
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
+      - name: Get ShUp version from pom.xml
+        id: get_version
+        run: |
+          cd shanoir-uploader
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
       - name: Create custom runtime with jlink
         run: |
           jlink \
@@ -177,10 +187,6 @@ jobs:
             --strip-debug \
             --no-header-files \
             --no-man-pages
-
-      - name: Get ShUp version from pom.xml
-        id: get_version
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Package .dmg
         run: |
