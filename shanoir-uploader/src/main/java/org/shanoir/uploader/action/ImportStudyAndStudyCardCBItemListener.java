@@ -9,13 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
@@ -24,7 +22,6 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +31,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private MainWindow mainWindow;
 
-	private ImportJob importJob;
-	
 	private Subject subject;
 	
 	private SubjectStudy subjectStudy;
 
-	private List<AcquisitionEquipment> acquisitionEquipments;
-	
 	private List<Examination> examinationsOfSubject;
 	
 	private Date studyDate;
@@ -52,10 +45,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private AcquisitionEquipment equipment;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
-		this.importJob = importJob;
-		this.acquisitionEquipments = acquisitionEquipments;
 		this.subject = subject;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
@@ -70,7 +61,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				if (study.isWithStudyCards()) {
 					updateStudyCards(study);
 					showOrHideStudyCardComponents(true);
-				} else {
+				} else { // if no study card, we generate the center from the info DICOM
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
 					IdName centerIdName = new IdName(1L, "Automatic, as above");
 					mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
