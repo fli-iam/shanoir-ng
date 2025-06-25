@@ -29,7 +29,7 @@ jobs:
             patch="${BASH_REMATCH[3]}"
             patch=$((patch + 1))
             new_tag="SHUP_v${major}.${minor}.${patch}"
-            echo "version_part="${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+            echo "version_part=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
             echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
           else
             echo "No NG tag found"
