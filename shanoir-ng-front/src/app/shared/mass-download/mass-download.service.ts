@@ -18,23 +18,21 @@ import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
-
 import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
-
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
 import { ShanoirError } from '../models/error.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';
-
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import {AbstractControl, ValidatorFn} from "@angular/forms";
 
 declare let JSZip: any;
 
@@ -402,9 +400,9 @@ export class MassDownloadService {
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
-            const acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
-                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+        if (setup.acquisitionFolders && !dataset.hasProcessing) {
+            const acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name
                 || dataset.datasetAcquisition.type + '_acquisition';
             str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
             + '_' + dataset.datasetAcquisition.id
@@ -634,7 +632,20 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
-    }  
+    }
+
+    requiredIfTypeIsNii(): ValidatorFn {
+        return (control: AbstractControl) => {
+            const format = control?.parent?.get('format')?.value
+            const isRequired = format === 'nii'
+            const value = control?.value
+
+            if (isRequired && !value) {
+                return {requiredIfTypeIsNii: true}
+            }
+            return null
+        }
+    }
 }
 
 export class DownloadSetup {
