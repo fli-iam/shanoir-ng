@@ -101,9 +101,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        console.log("fillCreateSubjectStep");
         let s: Subject = this.getPrefilledSubject();
-        console.log("s : ", s);
         this.breadcrumbsService.currentStep.addPrefilled("entity", s);
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
@@ -128,12 +126,10 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         }
         newSubject.subjectStudyList = [subjectStudy];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        console.log("newSubject :" , newSubject);
         return newSubject;
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        console.log("fillCreateExaminationStep step : ", step);
         let exam: Examination = this.getPrefilledExam();
         this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
     }
@@ -153,12 +149,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
-        console.log("getPrefilledExam newExam : ", newExam);
         return newExam;
     }
 
     protected fillCreateAcqEqStep(step: Step) {
-        step.entity = this.getPrefilledAcqEqt();
+        let acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {
