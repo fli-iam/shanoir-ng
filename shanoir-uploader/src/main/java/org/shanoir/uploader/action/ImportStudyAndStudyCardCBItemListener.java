@@ -71,13 +71,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					updateStudyCards(study);
 					showOrHideStudyCardComponents(true);
 				} else {
-					Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), study.getId());
-					AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, center, acquisitionEquipments);
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-					if (equipment != null) {
-						this.equipment = equipment;
-						IdName centerIdName = equipment.getCenter();
-						mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
+					Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), study.getId());
+					if (center != null) {
+						AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, center, acquisitionEquipments);
+						if (equipment != null) {
+							this.equipment = equipment;
+							IdName centerIdName = equipment.getCenter();
+							mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
+						}
 					}
 					showOrHideStudyCardComponents(false);
 				}
