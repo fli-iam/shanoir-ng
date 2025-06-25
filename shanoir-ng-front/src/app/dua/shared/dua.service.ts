@@ -13,10 +13,9 @@
  */
 import { Injectable } from '@angular/core';
 
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { DuaDocument } from './dua-document.model';
 import { HttpClient } from '@angular/common/http';
 import * as AppUtils from '../../utils/app.utils';
+import { DuaDocument } from './dua-document.model';
 
 
 @Injectable()
