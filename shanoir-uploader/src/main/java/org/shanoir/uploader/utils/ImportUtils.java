@@ -532,7 +532,7 @@ public class ImportUtils {
 		return false;
 	}
 
-	private static StudyCard createStudyCard(Study study, AcquisitionEquipment equipment) {
+	public static StudyCard createStudyCard(Study study, AcquisitionEquipment equipment) {
 		StudyCard studyCard = new StudyCard();
 		studyCard.setStudyId(study.getId());
 		String studyCardName = study.getName() + " - " + equipment.getCenter().getName() + " - " + equipment.getSerialNumber();
@@ -658,32 +658,12 @@ public class ImportUtils {
 		return patients;
 	}
 
-	public static AcquisitionEquipment findOrCreateEquipmentAndIfStudyCard(ImportJob importJob, Study study, List<StudyCard> studyCards, StudyCard studyCard, Center center, List<AcquisitionEquipment> acquisitionEquipments) {
-		AcquisitionEquipment equipment = null;
-		EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
-		// Try to find equipment via model name and serial number
-		equipment = findEquipmentInAllEquipments(acquisitionEquipments, equipmentDicom.getManufacturerModelName(), equipmentDicom.getDeviceSerialNumber());
-		if (study.isWithStudyCards()) {
-			if (equipment != null && studyCards != null) {
-				// No need to create center, as already existing behind equipment
-				studyCard = createStudyCard(study, equipment);
-				studyCards.add(studyCard); // add in memory to avoid loading from server
-			}
-		}
-		if (equipment == null ) {
-			equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
-			if (equipment == null) {
-				importJob.setUploadState(UploadState.ERROR);
-				importJob.setErrorMessage("Error: could not create equipment.");
-				logger.error(importJob.getErrorMessage());
-				return null;
-			} else {
-				acquisitionEquipments.add(equipment); // add in memory to avoid loading from server
-			}
-			if (studyCards != null && study.isWithStudyCards()) {
-				studyCard = createStudyCard(study, equipment);
-				studyCards.add(studyCard); // add in memory to avoid loading from server
-			}
+	public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Center center) {
+		AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
+		if (equipment == null) {
+			logger.error("Error: could not find or create equipment.");
+		} else {
+			logger.info("Equipment found or created: {} {}", equipment.getId(), equipment.getManufacturerModel().getName());
 		}
 		return equipment;
 	}

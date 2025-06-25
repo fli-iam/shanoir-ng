@@ -11,10 +11,14 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -68,15 +72,56 @@ public class ImportFinishActionListener implements ActionListener {
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
+
+		ImportJob importJob = null;
+		try {
+			importJob = ImportUtils.readImportJob(uploadFolder);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
 		if (study.isWithStudyCards()) {
+			final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 			if (studyCard == null || studyCard.getName() == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
 						"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+		} else {
+			InstitutionDicom institutionDicom = new InstitutionDicom();
+			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
+			institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
+			Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(institutionDicom, study.getId());
+			if (center != null) {
+				EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+				equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
+				equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
+				equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
+				AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+				if (equipment == null) {
+					logger.error("No study card: equipment not found or created.");
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							"Equipment not found or created.",
+							"Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+			} else {
+				logger.error("No study card: center not found or created.");
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						"Center not found or created.",
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 		}
+
+		// block further action
+		((JButton) event.getSource()).setEnabled(false);
+		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		/**
 		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
@@ -100,21 +145,6 @@ public class ImportFinishActionListener implements ActionListener {
 			}
 		}
 		
-		// block further action
-		((JButton) event.getSource()).setEnabled(false);
-		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		ImportJob importJob = null;
-		try {
-			importJob = ImportUtils.readImportJob(uploadFolder);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
-					"Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
 		// In case user selects existing subject from study, just use it
 		if (!useExistingSubjectInStudy) {
 			// subject name: entered by the user in the GUI

@@ -72,15 +72,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					showOrHideStudyCardComponents(true);
 				} else {
 	 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-					Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), study.getId());
-					if (center != null) {
-						AcquisitionEquipment equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, study, null, null, center, acquisitionEquipments);
-						if (equipment != null) {
-							this.equipment = equipment;
-							IdName centerIdName = equipment.getCenter();
-							mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
-						}
-					}
+					IdName centerIdName = new IdName(1L, "Automatic, as above");
+					mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
 					showOrHideStudyCardComponents(false);
 				}
 				// Profile Neurinfo

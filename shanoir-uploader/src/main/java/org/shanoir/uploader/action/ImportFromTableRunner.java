@@ -219,6 +219,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("Find matching study card in selected study or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
+		// Try, if we can find a matching study card already:
 		if (studyREST.isWithStudyCards()) {
 			if (!studyCards.isEmpty()) {
 				// Check if study card configured in Excel: use it (user knows best), no DICOM info necessary
@@ -252,13 +253,24 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 
+		// With or without study card: we might require the creation of
+		// a center and/or an acquisition equipment
 		Long centerId = null;
 		AcquisitionEquipment equipment = null;
 		if (studyCard == null) {
 			Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
 			centerId = center.getId();
-			equipment = ImportUtils.findOrCreateEquipmentAndIfStudyCard(importJob, studyREST, studyCards, studyCard, center, acquisitionEquipments);
-		} else {
+			equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+			if (equipment != null) {
+				acquisitionEquipments.add(equipment);
+			} else {
+				return false;
+			}
+			if (studyREST.isWithStudyCards()) {
+				studyCard = ImportUtils.createStudyCard(studyREST, equipment);
+				studyCards.add(studyCard); // add in memory to avoid loading from server
+			}
+		} else { // study card used and found
 			centerId = studyCard.getCenterId();
 			equipment = studyCard.getAcquisitionEquipment();
 		}
