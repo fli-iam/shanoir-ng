@@ -18,7 +18,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
+	public static final String SHANOIR_UPLOADER_VERSION = "v2.6.5";
 	
 	public static final String RELEASE_DATE = "2025-04-29";
 	

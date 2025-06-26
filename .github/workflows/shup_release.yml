@@ -52,14 +52,20 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Set ShUp version from incremented tag
+        run: mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Clean maven versions backup
+        run: rm -f pom.xml.versionsBackup
+
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
-      - name: Get ShUp version from pom.xml
-        id: get_version
+      - name: Get mvn timestamp from pom.xml
+        id: get_timestamp
         run: |
           cd shanoir-uploader
-          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(mvn help:evaluate -Dexpression=project.properties.timestamp -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Create custom runtime with jlink
         run: |
@@ -84,7 +90,7 @@ jobs:
             --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
-            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar \
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" \
@@ -94,6 +100,12 @@ jobs:
         with:
           name: shup-deb
           path: shanoir-uploader/target/packages/*.deb
+
+      - name: Upload ZIP Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: shup-zip
+          path: shanoir-uploader/target/shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-${{ steps.get_timestamp.outputs.timestamp }}.zip
 
   build-windows:
     needs: setup-version
