@@ -14,10 +14,14 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.dataset.service.ProcessedDatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -32,11 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * center service implementation.
@@ -88,6 +87,11 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
     public List<DatasetProcessing> findAllById(List<Long> idList) {
         return idList.stream().flatMap(it -> findById(it).stream()).toList();
+    }
+
+    @Override
+    public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
+        return repository.findAllByInputDatasets_Id(datasetId);
     }
     
     @Override
@@ -167,7 +171,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
             throw new RestServiceException(error);
         }
-        for(Dataset dataset : processing.getInputDatasets()){
+        for(Dataset dataset : processing.getInputDatasets()) {
             if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))){
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
                 throw new RestServiceException(error);
