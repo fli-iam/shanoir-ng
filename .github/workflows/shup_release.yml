@@ -53,10 +53,10 @@ jobs:
           java-version: 21
 
       - name: Set ShUp version from incremented tag
-        run: mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
 
       - name: Clean maven versions backup
-        run: rm -f pom.xml.versionsBackup
+        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
 
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
