@@ -5,7 +5,7 @@ on:
     branches:
       - Laurent_SHUP_jpackage
     # paths: 
-    #   - 'shanoir-uploader/**'
+    #   - 'shanoir-uploader/**' # uncomment when final push is ready
  
 
 jobs:
@@ -74,7 +74,6 @@ jobs:
 
       - name: Package .deb
         run: |
-          VERSION=${{ steps.get_version.outputs.version }}
           cd shanoir-uploader
           mkdir target/packages
           jpackage \
@@ -85,7 +84,7 @@ jobs:
             --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
-            --main-jar shanoir-uploader-${VERSION}-jar-with-dependencies.jar \
+            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar \ 
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g" \
@@ -181,7 +180,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.desktop \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,org.slf4j,ch.qos.logback.classic,java.logging \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
