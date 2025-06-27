@@ -29,7 +29,7 @@ import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,7 +48,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 
-@WebMvcTest(controllers = {ManufacturerApiController.class, ControlerSecurityService.class})
+@WebMvcTest(controllers = {ManufacturerApiController.class, ControllerSecurityService.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ManufacturerApiControllerTest {

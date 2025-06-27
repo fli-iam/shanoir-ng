@@ -11,10 +11,14 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -41,18 +45,15 @@ public class ImportFinishActionListener implements ActionListener {
 
 	private MainWindow mainWindow;
 	
-	private ImportJob importJob;
-	
 	private File uploadFolder;
 	
 	private Subject subjectREST;
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, ImportJob importJob, File uploadFolder, Subject subjectREST,
+	public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
-		this.importJob = importJob;
 		this.uploadFolder = uploadFolder;
 		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
@@ -65,13 +66,67 @@ public class ImportFinishActionListener implements ActionListener {
 	@Override
 	public void actionPerformed(final ActionEvent event) {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
-		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
+		if (study == null || study.getId() == null) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
+		ImportJob importJob = null;
+		try {
+			importJob = ImportUtils.readImportJob(uploadFolder);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		Long centerId = null;
+		AcquisitionEquipment equipment = null;
+		if (study.isWithStudyCards()) {
+			final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
+			if (studyCard == null || studyCard.getName() == null) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			equipment = studyCard.getAcquisitionEquipment();
+			centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+		} else {
+			InstitutionDicom institutionDicom = new InstitutionDicom();
+			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
+			institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
+			Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(institutionDicom, study.getId());
+			if (center != null) {
+				centerId = center.getId();
+				EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+				equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
+				equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
+				equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
+				equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+				if (equipment == null) {
+					logger.error("No study card: equipment not found or created.");
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							"Equipment not found or created.",
+							"Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+			} else {
+				logger.error("No study card: center not found or created.");
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						"Center not found or created.",
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		}
+
+		// block further action
+		((JButton) event.getSource()).setEnabled(false);
+		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		/**
 		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
@@ -95,21 +150,6 @@ public class ImportFinishActionListener implements ActionListener {
 			}
 		}
 		
-		// block further action
-		((JButton) event.getSource()).setEnabled(false);
-		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		ImportJob importJob = null;
-		try {
-			importJob = ImportUtils.readImportJob(uploadFolder);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
-					"Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
 		// In case user selects existing subject from study, just use it
 		if (!useExistingSubjectInStudy) {
 			// subject name: entered by the user in the GUI
@@ -124,7 +164,7 @@ public class ImportFinishActionListener implements ActionListener {
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
 				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-				study, studyCard);
+				study, equipment);
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -138,10 +178,9 @@ public class ImportFinishActionListener implements ActionListener {
 		Long examinationId = null;
 		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
-			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, center.getId());
+			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, centerId);
 			if (examinationId == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
@@ -163,7 +202,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
-			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
