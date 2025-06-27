@@ -5,7 +5,7 @@ on:
     branches:
       - Laurent_SHUP_jpackage
     # paths: 
-    #   - 'shanoir-uploader/**' # uncomment when final push is ready
+    #   - 'shanoir-uploader/**'
  
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
@@ -127,7 +127,7 @@ jobs:
         run: |
           jlink `
             --module-path $Env:JAVA_HOME\jmods `
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging `
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
             --output shanoir-uploader/target/custom-runtime `
             --compress zip-6 `
             --strip-debug `
@@ -186,7 +186,7 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \

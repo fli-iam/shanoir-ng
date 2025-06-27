@@ -383,32 +383,6 @@
 					</tasks>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.3.0</version>
-				<executions>
-    				<execution>
-      					<id>default-jar</id>
-      					<phase>package</phase>
-      					<goals>
-        					<goal>jar</goal>
-      					</goals>
-    				</execution>
-  				</executions>
-				<configuration>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-						<manifestEntries>
-							<Permissions>all-permissions</Permissions>
-							<Codebase>*</Codebase>
-							<Application-Name>ShanoirUploader</Application-Name>
-						</manifestEntries>
-						<manifest>
-							<mainClass>org.shanoir.uploader.ShanoirUploader</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin> -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -451,23 +425,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin>
-      			<artifactId>maven-dependency-plugin</artifactId>
-      			<version>3.6.0</version>
-				<executions>
-        			<execution>
-          				<id>copy-dependencies</id>
-          				<phase>package</phase>
-          				<goals>
-            				<goal>copy-dependencies</goal>
-          				</goals>
-          				<configuration>
-            				<outputDirectory>${project.build.directory}/lib</outputDirectory>
-            				<includeScope>runtime</includeScope>
-          				</configuration>
-        			</execution>
-      			</executions>
-    		</plugin> -->
 		</plugins>
 	</build>
 
