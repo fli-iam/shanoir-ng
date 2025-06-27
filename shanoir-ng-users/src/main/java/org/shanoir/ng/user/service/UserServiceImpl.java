@@ -298,9 +298,9 @@ public class UserServiceImpl implements UserService {
 		}
 		accessRequest.setUser(savedUser);
 		accessRequest.setMotivation("User " + user.getFirstName() + " " +user.getLastName() 
-			+ " created an account to join your study"
-			+ (accessRequest.getMotivation() != null ? " with motivation text: " + accessRequest.getMotivation() : "")
-			+ ". Associated email: " + user.getEmail());
+				+ " created an account to join your study"
+				+ (accessRequest.getMotivation() != null ? " with motivation text: " + accessRequest.getMotivation() : "")
+				+ ". Associated email: " + user.getEmail());
 		
 		accessRequestRepository.save(accessRequest);
 		

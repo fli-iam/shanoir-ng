@@ -28,192 +28,181 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 /**
- * This class is capable of writing EDF+ data structures.
- * Changed for fixing issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
+ * This class is capable of writing EDF+ data structures. Changed for fixing
+ * issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
  */
-public class EDFWriter
-{
-        public static final String SHORT_DECIMAL_FORMAT = "#0.0";
-        public static final String LONG_DECIMAL_FORMAT = "#0.0####";
+public class EDFWriter {
 
-        /**
-         * Writes the EDFHeader into the OutputStream.
-         *
-         * @param header The header to write
-         * @param outputStream The OutputStream to write into
-         * @throws IOException Will be thrown if it is not possible to write into the outputStream
-         */
-        public static void writeIntoOutputStream(EDFHeader header, OutputStream outputStream) throws IOException
-        {
-                DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-                dfs.setDecimalSeparator('.');
-                DecimalFormat shortFormatter = new DecimalFormat(SHORT_DECIMAL_FORMAT, dfs);
-                DecimalFormat longFormatter = new DecimalFormat(LONG_DECIMAL_FORMAT, dfs);
+    public static final String SHORT_DECIMAL_FORMAT = "#0.0";
+    public static final String LONG_DECIMAL_FORMAT = "#0.0####";
 
-                ByteBuffer bb = ByteBuffer.allocate(header.bytesInHeader);
-                putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.idCode);
-                putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.subjectID);
-                putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.recordingID);
-                putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.startDate);
-                putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.startTime);
-                putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.bytesInHeader);
-                putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.formatVersion);
-                putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.numberOfRecords);
-                putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.durationOfRecords, longFormatter);
-                putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.numberOfChannels);
+    /**
+     * Writes the EDFHeader into the OutputStream.
+     *
+     * @param header The header to write
+     * @param outputStream The OutputStream to write into
+     * @throws IOException Will be thrown if it is not possible to write into
+     * the outputStream
+     */
+    public static void writeIntoOutputStream(EDFHeader header, OutputStream outputStream) throws IOException {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat shortFormatter = new DecimalFormat(SHORT_DECIMAL_FORMAT, dfs);
+        DecimalFormat longFormatter = new DecimalFormat(LONG_DECIMAL_FORMAT, dfs);
 
-                putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.channelLabels);
-                putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.transducerTypes);
-                putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.dimensions);
-                putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.minInUnits, shortFormatter);
-                putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.maxInUnits, shortFormatter);
-                putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.digitalMin);
-                putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.digitalMax);
-                putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.prefilterings);
-                putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.numberOfSamples);
-                putIntoBuffer(bb, header.reserveds);
+        ByteBuffer bb = ByteBuffer.allocate(header.bytesInHeader);
+        putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.idCode);
+        putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.subjectID);
+        putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.recordingID);
+        putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.startDate);
+        putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.startTime);
+        putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.bytesInHeader);
+        putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.formatVersion);
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.numberOfRecords);
+        putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.durationOfRecords, longFormatter);
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.numberOfChannels);
 
-                outputStream.write(bb.array());
+        putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.channelLabels);
+        putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.transducerTypes);
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.dimensions);
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.minInUnits, shortFormatter);
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.maxInUnits, shortFormatter);
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.digitalMin);
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.digitalMax);
+        putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.prefilterings);
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.numberOfSamples);
+        putIntoBuffer(bb, header.reserveds);
+
+        outputStream.write(bb.array());
+    }
+
+    /**
+     * Write the signals in output stream
+     *
+     * @param edfSignal The signals to write
+     * @param header The header of EDF file
+     * @param outputStream The OutputStream to write into
+     * @throws IOException Will be thrown if it is not possible to write into
+     * the outputStream
+     */
+    public static void writeIntoOutputStream(EDFSignal edfSignal, EDFHeader header, OutputStream outputStream)
+            throws IOException {
+
+        short[] data = buildDataArray(edfSignal.getDigitalValues(), header);
+        writeIntoOutputStream(data, outputStream);
+    }
+
+    /**
+     * Write signals data in output stream
+     *
+     * @param data The signals in edf short array format
+     * @param outputStream The OutputStream to write into
+     * @throws IOException Will be thrown if it is not possible to write into
+     * the outputStream
+     */
+    public static void writeIntoOutputStream(short[] data, OutputStream outputStream)
+            throws IOException {
+
+        ByteBuffer bb = ByteBuffer.allocate(data.length * 2);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        putIntoBuffer(bb, data);
+        outputStream.write(bb.array());
+    }
+
+    /**
+     * Convert data signals from two dimensions format ( {channels} {time,
+     * samples} ) to one dimension format ( channels {samples for each channel}
+     * grouped by time )
+     *
+     * @param digitalValues The signals data in two dimensions format
+     * @param header The header of edf format
+     * @return The signals data in one dimensions format
+     */
+    public static short[] buildDataArray(short[][] digitalValues, EDFHeader header) {
+        int index;
+        int totalDataLength = 0;
+        int previousSamples = 0;
+        int timeChunkLength = 0;
+
+        // compute the total length of the new short array
+        for (short[] digitalValue : digitalValues) {
+            totalDataLength += digitalValue.length;
+        }
+        short[] signalsData = new short[totalDataLength];
+
+        for (Integer sample : header.getNumberOfSamples()) {
+            timeChunkLength += sample;
         }
 
-        /**
-         * Write the signals in output stream
-         *
-         * @param edfSignal     The signals to write
-         * @param header        The header of EDF file
-         * @param outputStream  The OutputStream to write into
-         * @throws IOException  Will be thrown if it is not possible to write into the outputStream
-         */
-        public static void writeIntoOutputStream(EDFSignal edfSignal, EDFHeader header, OutputStream outputStream)
-                throws IOException {
+        // build the signals array, which is a short one
+        for (int channel = 0; channel < digitalValues.length; channel++) {
+            short[] channelValues = digitalValues[channel];
+            int noOfSamples = header.getNumberOfSamples()[channel];
 
-                short[] data = buildDataArray(edfSignal.getDigitalValues(), header);
-                writeIntoOutputStream(data, outputStream);
-        }
+            for (int t = 0; t < header.getNumberOfRecords(); t++) {
 
-        /**
-         * Write signals data in output stream
-         *
-         * @param data          The signals in edf short array format
-         * @param outputStream  The OutputStream to write into
-         * @throws IOException  Will be thrown if it is not possible to write into the outputStream
-         */
-        public static void writeIntoOutputStream(short[] data, OutputStream outputStream)
-                throws IOException {
-
-                ByteBuffer bb = ByteBuffer.allocate(data.length * 2);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                putIntoBuffer(bb, data);
-                outputStream.write(bb.array());
-        }
-
-        /**
-         * Convert data signals from two dimensions format ( {channels} {time, samples} ) to one
-         * dimension format ( channels {samples for each channel} grouped by time )
-         *
-         * @param digitalValues         The signals data in two dimensions format
-         * @param header                The header of edf format
-         * @return                      The signals data in one dimensions format
-         */
-        public static short[] buildDataArray(short[][] digitalValues, EDFHeader header) {
-                int index;
-                int totalDataLength = 0;
-                int previousSamples = 0;
-                int timeChunkLength = 0;
-
-                // compute the total length of the new short array
-                for (short[] digitalValue : digitalValues) {
-                        totalDataLength += digitalValue.length;
-                }
-                short[] signalsData = new short[totalDataLength];
-
-
-                for (Integer sample : header.getNumberOfSamples()) {
-                        timeChunkLength += sample;
-                }
-
-                // build the signals array, which is a short one
-                for (int channel = 0; channel < digitalValues.length; channel++) {
-                        short[] channelValues = digitalValues[channel];
-                        int noOfSamples = header.getNumberOfSamples()[channel];
-
-                        for (int t = 0; t < header.getNumberOfRecords(); t++) {
-
-                                for (int sample = 0; sample < noOfSamples; sample++) {
-                                        short shortValue = channelValues[t * noOfSamples + sample];
-                                        index = t * timeChunkLength + previousSamples + sample;
-                                        signalsData[index] = shortValue;
-                                }
-
-                        }
-                        previousSamples += noOfSamples;
-                }
-                return signalsData;
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, Double[] values, DecimalFormat df)
-        {
-                for (Double value : values)
-                {
-                        putIntoBuffer(bb, lengthPerValue, value, df);
-                }
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int length, Double value, DecimalFormat df)
-        {
-                if (Math.floor(value) == value) {
-                        putIntoBuffer(bb, length, value.intValue());
-                } else {
-                        putIntoBuffer(bb, length, df.format(value));
-                }
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, Integer[] values)
-        {
-                for (Integer value : values)
-                {
-                        putIntoBuffer(bb, lengthPerValue, value);
-                }
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int length, int value)
-        {
-                putIntoBuffer(bb, length, String.valueOf(value));
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, String[] values)
-        {
-                for (String value : values)
-                {
-                        putIntoBuffer(bb, lengthPerValue, value);
-                }
-        }
-
-        private static void putIntoBuffer(ByteBuffer bb, int length, String value)
-        {
-                ByteBuffer valueBuffer = ByteBuffer.allocate(length);
-                valueBuffer.put(value.getBytes(EDFConstants.CHARSET));
-                while (valueBuffer.remaining() > 0) {
-                        valueBuffer.put(" ".getBytes());
+                for (int sample = 0; sample < noOfSamples; sample++) {
+                    short shortValue = channelValues[t * noOfSamples + sample];
+                    index = t * timeChunkLength + previousSamples + sample;
+                    signalsData[index] = shortValue;
                 }
 
-                valueBuffer.rewind();
-                bb.put(valueBuffer);
+            }
+            previousSamples += noOfSamples;
+        }
+        return signalsData;
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, Double[] values, DecimalFormat df) {
+        for (Double value : values) {
+            putIntoBuffer(bb, lengthPerValue, value, df);
+        }
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int length, Double value, DecimalFormat df) {
+        if (Math.floor(value) == value) {
+            putIntoBuffer(bb, length, value.intValue());
+        } else {
+            putIntoBuffer(bb, length, df.format(value));
+        }
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, Integer[] values) {
+        for (Integer value : values) {
+            putIntoBuffer(bb, lengthPerValue, value);
+        }
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int length, int value) {
+        putIntoBuffer(bb, length, String.valueOf(value));
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int lengthPerValue, String[] values) {
+        for (String value : values) {
+            putIntoBuffer(bb, lengthPerValue, value);
+        }
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, int length, String value) {
+        ByteBuffer valueBuffer = ByteBuffer.allocate(length);
+        valueBuffer.put(value.getBytes(EDFConstants.CHARSET));
+        while (valueBuffer.remaining() > 0) {
+            valueBuffer.put(" ".getBytes());
         }
 
-        private static void putIntoBuffer(ByteBuffer bb, byte[][] values)
-        {
-                for (byte[] val : values)
-                {
-                        bb.put(val);
-                }
-        }
+        valueBuffer.rewind();
+        bb.put(valueBuffer);
+    }
 
-        private static void putIntoBuffer(ByteBuffer bb, short[] values)
-        {
-                for (short val : values)
-                {
-                        bb.putShort(val);
-                }
+    private static void putIntoBuffer(ByteBuffer bb, byte[][] values) {
+        for (byte[] val : values) {
+            bb.put(val);
         }
+    }
+
+    private static void putIntoBuffer(ByteBuffer bb, short[] values) {
+        for (short val : values) {
+            bb.putShort(val);
+        }
+    }
 }

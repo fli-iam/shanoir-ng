@@ -1,5 +1,9 @@
 package org.shanoir.ng.solr.runner;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.util.Objects;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -13,10 +17,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.Objects;
 
 
 @Component
@@ -37,14 +37,10 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-
         SolrClient solrClient = new HttpSolrClient.Builder(solrUrl).build();
-
         SolrQuery q = new SolrQuery("*:*");
         q.setRows(0);  // don't actually request any data
-	
-	long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
-
+	    long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
         try {
             while (true) {
                 try {

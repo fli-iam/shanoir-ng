@@ -74,7 +74,7 @@ public class DicomDirToModelService {
 						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
-					series.sort(new SeriesNumberOrDescriptionSorter());
+					series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 					study.setSeries(series);
 					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
 				}

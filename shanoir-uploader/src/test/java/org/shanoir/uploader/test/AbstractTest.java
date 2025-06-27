@@ -1,13 +1,9 @@
 package org.shanoir.uploader.test;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,7 +19,9 @@ import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the base class for all ShUp test classes, that do
@@ -56,10 +54,9 @@ public abstract class AbstractTest {
 	@BeforeAll
 	public static void setup() {
 		ShanoirUploader.initShanoirUploaderFolders();
-		initProperties(TEST_PROPERTIES, testProperties);
-		initProperties(ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES,
-				ShUpConfig.profileProperties);
-		initProperties(ShUpConfig.ENDPOINT_PROPERTIES, ShUpConfig.endpointProperties);
+		PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
+		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
+		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
 		if (ShUpConfig.isModePseudonymus()) {
 			File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 			try {
@@ -86,18 +83,6 @@ public abstract class AbstractTest {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
             Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
-		}
-	}
-
-	private static void initProperties(final String fileName, final Properties properties) {
-		try {
-			InputStream iS = Util.class.getResourceAsStream("/" + fileName);
-			if (iS != null) {
-				properties.load(iS);
-				iS.close();
-			}
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
 		}
 	}
 	

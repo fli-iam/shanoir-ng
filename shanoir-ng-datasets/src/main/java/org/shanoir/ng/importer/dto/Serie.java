@@ -224,11 +224,11 @@ public class Serie {
 
 	public DatasetFile getFirstDatasetFileForCurrentSerie() {
 		if (getDatasets() == null
-			|| getDatasets().get(0) == null
-			|| getDatasets().get(0).getExpressionFormats() == null
-			|| getDatasets().get(0).getExpressionFormats().get(0) == null
-			|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
-			|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
+				|| getDatasets().get(0) == null
+				|| getDatasets().get(0).getExpressionFormats() == null
+				|| getDatasets().get(0).getExpressionFormats().get(0) == null
+				|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
+				|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
 			return null;
 		}
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);

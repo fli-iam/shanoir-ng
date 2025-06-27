@@ -20,24 +20,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.importer.model.SubjectStudy;
@@ -265,12 +259,12 @@ public class ImportUtils {
 		
 		try (InputStream in = zipFile.getInputStream(zipIn);
 				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-					byte[] bytesIn = new byte[BUFFER_SIZE];
-					int read = 0;
-					while ((read = in.read(bytesIn)) != -1) {
-						bos.write(bytesIn, 0, read);
-					}
-	        }
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = in.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
+		}
 	}
 
 	/**
@@ -286,30 +280,30 @@ public class ImportUtils {
 		for (int i = 0, is = wildcard.length(); i < is; i++) {
 			char c = wildcard.charAt(i);
 			switch (c) {
-			case '*':
-				s.append(".*");
-				break;
-			case '?':
-				s.append(".");
-				break;
-				// escape special regexp-characters
-			case '(':
-			case ')':
-			case '[':
-			case ']':
-			case '$':
-			case '^':
-			case '.':
-			case '{':
-			case '}':
-			case '|':
-			case '\\':
-				s.append("\\");
-				s.append(c);
-				break;
-			default:
-				s.append(c);
-				break;
+				case '*':
+					s.append(".*");
+					break;
+				case '?':
+					s.append(".");
+					break;
+					// escape special regexp-characters
+				case '(':
+				case ')':
+				case '[':
+				case ']':
+				case '$':
+				case '^':
+				case '.':
+				case '{':
+				case '}':
+				case '|':
+				case '\\':
+					s.append("\\");
+					s.append(c);
+					break;
+				default:
+					s.append(c);
+					break;
 			}
 		}
 		s.append('$');
