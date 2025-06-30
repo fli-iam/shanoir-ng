@@ -149,7 +149,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(
 			Long centerId, EquipmentDicom equipmentDicom) {
 		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
-		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
+		LOG.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom called with: " + equipmentDicom.toString());
 		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all values
 			AcquisitionEquipment acquisitionEquipment;
 			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
