@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -31,6 +33,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private MainWindow mainWindow;
 
+	private InstitutionDicom institutionDicom;
+
+	private EquipmentDicom equipmentDicom;
+
 	private Subject subject;
 	
 	private SubjectStudy subjectStudy;
@@ -43,8 +49,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
+		this.institutionDicom = institutionDicom;
+		this.equipmentDicom = equipmentDicom;
 		this.subject = subject;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
@@ -109,19 +117,41 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.mriCenterAddressText.setEditable(!show);
 		mainWindow.importDialog.mriManufacturerText.setEditable(!show);
 		mainWindow.importDialog.mriManufacturersModelNameText.setEditable(!show);
+		mainWindow.importDialog.mriMagneticFieldStrengthText.setEditable(!show);
 		mainWindow.importDialog.mriDeviceSerialNumberText.setEditable(!show);
 		if (show) {
 			mainWindow.importDialog.mriCenterText.setBackground(Color.LIGHT_GRAY);
 			mainWindow.importDialog.mriCenterAddressText.setBackground(Color.LIGHT_GRAY);
 			mainWindow.importDialog.mriManufacturerText.setBackground(Color.LIGHT_GRAY);
 			mainWindow.importDialog.mriManufacturersModelNameText.setBackground(Color.LIGHT_GRAY);
+			mainWindow.importDialog.mriMagneticFieldStrengthText.setBackground(Color.LIGHT_GRAY);
 			mainWindow.importDialog.mriDeviceSerialNumberText.setBackground(Color.LIGHT_GRAY);
 		} else {
 			mainWindow.importDialog.mriCenterText.setBackground(Color.WHITE);
 			mainWindow.importDialog.mriCenterAddressText.setBackground(Color.WHITE);
 			mainWindow.importDialog.mriManufacturerText.setBackground(Color.WHITE);
 			mainWindow.importDialog.mriManufacturersModelNameText.setBackground(Color.WHITE);
+			mainWindow.importDialog.mriMagneticFieldStrengthText.setBackground(Color.WHITE);
 			mainWindow.importDialog.mriDeviceSerialNumberText.setBackground(Color.WHITE);
+		}
+		updateImportDialogForMRICenter(this.institutionDicom, this.equipmentDicom);
+	}
+
+	private void updateImportDialogForMRICenter(InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom) {
+		if (institutionDicom == null) {
+			logger.error("updateImportDialogForMRICenter: no institution found.");
+		} else {
+			mainWindow.importDialog.mriCenterText.setText(institutionDicom.getInstitutionName());
+			mainWindow.importDialog.mriCenterAddressText.setText(institutionDicom.getInstitutionAddress());
+		}
+		if (equipmentDicom == null) {
+			logger.error("updateImportDialogForMRICenter: no equipment found.");
+		} else {
+			mainWindow.importDialog.mriStationNameText.setText(equipmentDicom.getStationName());
+			mainWindow.importDialog.mriManufacturerText.setText(equipmentDicom.getManufacturer());
+			mainWindow.importDialog.mriManufacturersModelNameText.setText(equipmentDicom.getManufacturerModelName());
+			mainWindow.importDialog.mriMagneticFieldStrengthText.setText(equipmentDicom.getMagneticFieldStrength());
+			mainWindow.importDialog.mriDeviceSerialNumberText.setText(equipmentDicom.getDeviceSerialNumber());
 		}
 	}
 

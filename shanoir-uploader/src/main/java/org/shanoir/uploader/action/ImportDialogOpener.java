@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -64,18 +65,19 @@ public class ImportDialogOpener {
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
 			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
-			// init components of GUI and listeners
+			// Init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+			InstitutionDicom institutionDicom = importJob.getFirstSelectedSerie().getInstitution();
+			EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
-			// update import dialog with items from server
+			// Update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of the dialog
 			updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-			updateImportDialogForMRICenter(importJob);
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
 			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
 		} catch (Exception e) {
@@ -83,30 +85,6 @@ public class ImportDialogOpener {
 			return;
 		}
 		importDialog.setVisible(true);
-	}
-	
-	/**
-	 * @param uploadJob
-	 */
-	private void updateImportDialogForMRICenter(final ImportJob importJob) {
-		Serie firstSerie = importJob.getFirstSelectedSerie();
-		if (firstSerie != null) {
-			if (firstSerie.getInstitution() == null) {
-				logger.error("updateImportDialogForMRICenter: no institution found for serie: " + firstSerie.getSeriesInstanceUID());
-			} else {
-				importDialog.mriCenterText.setText(firstSerie.getInstitution().getInstitutionName());
-				importDialog.mriCenterAddressText.setText(firstSerie.getInstitution().getInstitutionAddress());
-			}
-			if (firstSerie.getEquipment() == null) {
-				logger.error("updateImportDialogForMRICenter: no equipment found for serie: " + firstSerie.getSeriesInstanceUID());
-			} else {
-				importDialog.mriStationNameText.setText(firstSerie.getEquipment().getStationName());
-				importDialog.mriManufacturerText.setText(firstSerie.getEquipment().getManufacturer());
-				importDialog.mriManufacturersModelNameText.setText(firstSerie.getEquipment().getManufacturerModelName());
-				importDialog.mriMagneticFieldStrengthText.setText(firstSerie.getEquipment().getMagneticFieldStrength());
-				importDialog.mriDeviceSerialNumberText.setText(firstSerie.getEquipment().getDeviceSerialNumber());
-			}
-		}
 	}
 
 	/**

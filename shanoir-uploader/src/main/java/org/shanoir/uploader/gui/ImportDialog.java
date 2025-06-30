@@ -114,7 +114,7 @@ public class ImportDialog extends JDialog {
 	public JLabel mriManufacturersModelNameLabel;
 	public JTextField mriManufacturersModelNameText;
 	public JLabel mriMagneticFieldStrengthLabel;
-	public JLabel mriMagneticFieldStrengthText;
+	public JTextField mriMagneticFieldStrengthText;
 	public JLabel mriDeviceSerialNumberLabel;
 	public JTextField mriDeviceSerialNumberText;
 
@@ -246,7 +246,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 2;
 		dicomPanel.add(mriMagneticFieldStrengthLabel, dicomPanelGBC);
 
-		mriMagneticFieldStrengthText = new JLabel("");
+		mriMagneticFieldStrengthText = new JTextField(4);
 		mriMagneticFieldStrengthText.setFont(font);
 		mriMagneticFieldStrengthText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
