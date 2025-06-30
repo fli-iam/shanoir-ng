@@ -47,7 +47,10 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 
 	@Override
 	public DuaDraft update(final DuaDraft dua) throws EntityNotFoundException {
-		if (duaDraftRepository.existsById(dua.getId())) {
+		Optional<DuaDraft> existing = duaDraftRepository.findById(dua.getId());
+		if (existing.isPresent()) {
+			dua.setStudyId(existing.get().getStudyId());
+			due.setStudyName(existing.get().getStudyName());
 			return duaDraftRepository.save(dua);
 		} else {
 			throw new EntityNotFoundException("dua draft with this id doesn't exist");

@@ -17,17 +17,20 @@ export class DuaDocument {
     
     id: string;
     studyId: number;
+    studyName: string;
     url: string;
     funding: string;
     thanks: string;
     papers: string;
+    logoUrl: string;
 
     static buildInstance(
             studyId: number,
             url: string,
             funding: string,
             thanks: string,
-            papers: string) {
+            papers: string,
+            logoUrl: string) {
 
         let instance: DuaDocument = new DuaDocument();
         instance.studyId = studyId;
@@ -35,6 +38,7 @@ export class DuaDocument {
         instance.funding = funding;
         instance.thanks = thanks;
         instance.papers = papers;
+        instance.logoUrl = logoUrl;
         return instance;
     }
 

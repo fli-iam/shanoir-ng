@@ -12,15 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as html2pdf from 'html2pdf.js';
-import { Subscription } from 'rxjs';
+import { from, Observable, of, Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
+import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { HttpClient } from '@angular/common/http';
+import { catchError, map } from 'rxjs/operators';
 
 
 @Component({
@@ -39,12 +43,18 @@ export class DUAAssistantComponent implements OnDestroy {
     protected dua: DuaDocument;
     protected id: string;
     protected subscriptions: Subscription[] = [];
+    protected base64Img: string;
+
     @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
+    readonly shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
+    @HostBinding('class.not-authenticated') notAuthenticated: boolean = !KeycloakService.auth.loggedIn;
 
     constructor(
             private formBuilder: FormBuilder, 
             private route: ActivatedRoute,
-            private duaService: DuaService) {
+            private router: Router,
+            private duaService: DuaService,
+            private http: HttpClient) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
                 let studyIdStr: string = params['studyId'];
@@ -82,6 +92,10 @@ export class DUAAssistantComponent implements OnDestroy {
             'funding': [dua?.funding, [Validators.required]],
             'thanks': [dua?.thanks, [Validators.required]],
             'papers': [dua?.papers, [Validators.required]],
+            'logoUrl': [dua?.logoUrl, {
+                asyncValidators: this.corsAllowedValidator(),
+                updateOn: 'blur'
+            }],
         };
         if (this.mode == 'create') {
             controls['email'] = ['', [Validators.email]];
@@ -95,24 +109,86 @@ export class DUAAssistantComponent implements OnDestroy {
             this.form.get('url')?.value,
             this.form.get('funding')?.value,
             this.form.get('thanks')?.value,
-            this.form.get('papers')?.value
+            this.form.get('papers')?.value,
+            this.form.get('logoUrl')?.value
         );
-        this.duaService.create(dua, this.form.get('email')?.value)
-            .then(id => {
-                this.link = '/shanoir-ng/dua/view/' + id;
-            });
+        if (this.mode == 'create') {
+            this.duaService.create(dua, this.form.get('email')?.value)
+                .then(id => {
+                    this.link = '/shanoir-ng/dua/view/' + id;
+                });
+        } else if (this.mode == 'edit') {
+            dua.id = this.id;
+            this.duaService.update(dua)
+                .then(() => {
+                    this.router.navigate(['/dua/view/' + dua.id]);
+                });
+        }
+    }
+
+    corsAllowedValidator(): AsyncValidatorFn {
+        return (control: AbstractControl): Observable<ValidationErrors | null> => {
+            const url = control.value;
+            if (!url) return of(null); // Skip if empty
+            try {
+                new URL(url); // Validate URL format
+            } catch {
+                return of({ invalidUrlFormat: true }); // Malformed URL
+            }
+
+            return from(
+                fetch(url, { method: 'GET', mode: 'cors' })
+                    .then(res => {
+                        if (res.status === 404) return { notFound: true }; // 404 not found
+                        if (!res.ok) return { httpError: true }; // Other HTTP error (e.g. 403, 500)
+                        const contentType = res.headers.get('content-type') || '';
+                        if (!contentType.startsWith('image/')) return { notAnImage: true }; // Not an image
+                        return null; // All good
+                    })
+                    .catch(() => {
+                        return { corsError: true }; // Likely a CORS or network error
+                    })
+            );
+        };
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && control.touched && !control.valid) {
+            return control.errors;
+        }
+    }
+
+    hasError(fieldName: string, errors?: string[]) {
+        let formError = this.formErrors(fieldName);
+        if (formError) {
+            if (errors) {
+                for (let errorName of errors) {
+                    if (formError[errorName]) return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected generatePDF(): void {
         const element = this.pdfContent.nativeElement;
         const options = {
-            margin: 10,
-            filename: 'mon-document.pdf',
+            margin: 0,
+            padding: 0,
+            filename: 'dua.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+            jsPDF: { format: [1000, 1360], unit: 'px', orientation: 'portrait' },
         };
         html2pdf().from(element).set(options).save();
+    }
+
+    isAuthenticated(): boolean {
+        return KeycloakService.auth.loggedIn;
     }
 
     ngOnDestroy() {

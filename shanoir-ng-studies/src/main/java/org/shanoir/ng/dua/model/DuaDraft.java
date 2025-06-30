@@ -25,6 +25,8 @@ public class DuaDraft {
 
     private Long studyId;
 
+    private String studyName;
+
     String url;
     
     String funding;
@@ -32,6 +34,8 @@ public class DuaDraft {
     String thanks;
     
     String papers;
+
+    String logoUrl;
 
 
     public String getId() {
@@ -48,6 +52,14 @@ public class DuaDraft {
 
     public void setStudyId(Long studyId) {
         this.studyId = studyId;
+    }
+
+    public String getStudyName() {
+        return studyName;
+    }
+
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
     }
 
     public String getUrl() {
@@ -80,6 +92,13 @@ public class DuaDraft {
 
     public void setPapers(String papers) {
         this.papers = papers;
-    }   
-    
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
 }

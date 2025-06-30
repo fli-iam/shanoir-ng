@@ -44,7 +44,7 @@ public interface DuaDraftAPI {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<String> saveNew(
 			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException;

@@ -16,6 +16,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import * as AppUtils from '../../utils/app.utils';
 import { DuaDocument } from './dua-document.model';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 
 @Injectable()
@@ -24,12 +25,17 @@ export class DuaService {
     API_URL = AppUtils.BACKEND_API_STUDIES_MS_URL + '/dua';
 
     constructor(
-        protected http: HttpClient) {
+            protected http: HttpClient,
+            protected studyService: StudyService) {
     }
 
     create(entity: DuaDocument, email: string): Promise<string> {
-        let arg: any = {duaDraft: entity, email: email};
-        return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
+        return this.studyService.getStudiesNames().then(idNames => {
+            let studyName: string = idNames?.find(idName => idName.id == entity?.studyId)?.[0]?.name;
+            entity.studyName = studyName;
+            let arg: any = {duaDraft: entity, email: email};
+            return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
+        });
     }
 
     update(entity: DuaDocument): Promise<void> {

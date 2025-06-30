@@ -37,7 +37,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         if (!req.url.endsWith('/accountrequest') 
                 && !req.url.endsWith('/extensionrequest') 
                 && !req.url.endsWith('/data')
-                && !(req.url.includes('/studies/dua/') && ['GET', 'PUT'].includes(req.method))) {
+                && !(req.url.includes('/studies/dua') && ['GET', 'PUT'].includes(req.method))) {
             authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
