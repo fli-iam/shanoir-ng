@@ -53,7 +53,7 @@ public interface SubjectStudyApi {
 	@PreAuthorize("( hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER')"
 			+ "  and ( @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT')"
 			+ " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
-			+ "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
+			+ "  )) and @controllerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
 	ResponseEntity<Void> updateSubjectStudy(
 			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
 			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,

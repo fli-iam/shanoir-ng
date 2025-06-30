@@ -106,7 +106,7 @@ public interface CoilApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{coilId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#coilId, #coil)")
 	ResponseEntity<Void> updateCoil(
 			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
 			@Parameter(description = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
