@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -20,7 +22,6 @@ import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
-import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -102,6 +103,25 @@ public class ImportFinishActionListener implements ActionListener {
 					JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.institution"),
 						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			if (mainWindow.importDialog.mriManufacturerText.getText().isBlank()
+				|| mainWindow.importDialog.mriManufacturersModelNameText.getText().isBlank()
+				|| mainWindow.importDialog.mriMagneticFieldStrengthText.getText().isBlank()
+				|| mainWindow.importDialog.mriDeviceSerialNumberText.getText().isBlank()) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.equipment"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
+			String regex = "\\d+(\\.\\d+)?";
+			Pattern pattern = Pattern.compile(regex);
+        	Matcher matcher = pattern.matcher(magneticFieldStrength);
+			if (!matcher.find()) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.equipment.magnetic.field"),
+					"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			InstitutionDicom institutionDicom = new InstitutionDicom();
