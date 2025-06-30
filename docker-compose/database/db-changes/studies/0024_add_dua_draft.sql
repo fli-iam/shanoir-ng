@@ -5,6 +5,6 @@ create table dua_draft (
     funding text,
     thanks text,
     papers text,
-    logoUrl tinytext,
+    logo_url tinytext,
     primary key (id)
 );
