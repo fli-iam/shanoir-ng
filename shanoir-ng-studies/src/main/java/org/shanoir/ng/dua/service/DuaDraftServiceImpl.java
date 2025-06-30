@@ -50,7 +50,7 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 		Optional<DuaDraft> existing = duaDraftRepository.findById(dua.getId());
 		if (existing.isPresent()) {
 			dua.setStudyId(existing.get().getStudyId());
-			due.setStudyName(existing.get().getStudyName());
+			dua.setStudyName(existing.get().getStudyName());
 			return duaDraftRepository.save(dua);
 		} else {
 			throw new EntityNotFoundException("dua draft with this id doesn't exist");
