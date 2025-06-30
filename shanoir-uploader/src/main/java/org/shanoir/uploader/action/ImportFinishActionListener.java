@@ -90,13 +90,20 @@ public class ImportFinishActionListener implements ActionListener {
 			final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 			if (studyCard == null || studyCard.getName() == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
-						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
-						"Error", JOptionPane.ERROR_MESSAGE);
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			equipment = studyCard.getAcquisitionEquipment();
 			centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
 		} else {
+			if (mainWindow.importDialog.mriCenterText.getText().isBlank()
+				|| mainWindow.importDialog.mriCenterAddressText.getText().isBlank()) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.institution"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			InstitutionDicom institutionDicom = new InstitutionDicom();
 			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
 			institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
