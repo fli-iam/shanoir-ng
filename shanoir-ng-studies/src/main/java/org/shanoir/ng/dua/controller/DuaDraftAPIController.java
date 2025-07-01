@@ -15,7 +15,6 @@
 package org.shanoir.ng.dua.controller;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.shanoir.ng.dua.dto.DuaDraftCreationWrapperDTO;
 import org.shanoir.ng.dua.dto.DuaDraftDTO;
@@ -71,15 +70,13 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException {
 
-		String generatedId = UUID.randomUUID().toString();
 	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
-		duaEntity.setId(generatedId);
 		try {
-			duaDraftService.create(duaEntity);
+			DuaDraft created = duaDraftService.create(duaEntity);
 			if (dua.getEmail() != null) {
-				sendDuaDraftCreationMail(duaEntity, dua.getEmail());
+				sendDuaDraftCreationMail(created, dua.getEmail());
 			}
-			return new ResponseEntity<>(generatedId, HttpStatus.OK);
+			return new ResponseEntity<>(created.getId(), HttpStatus.OK);
 		} catch (EntityFoundException ex) {
 			return new ResponseEntity<>("This id is already taken", HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (JsonProcessingException ex) {

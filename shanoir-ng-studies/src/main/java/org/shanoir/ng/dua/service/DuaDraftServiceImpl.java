@@ -15,6 +15,7 @@
 package org.shanoir.ng.dua.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.shanoir.ng.dua.model.DuaDraft;
 import org.shanoir.ng.dua.repository.DuaDraftRepository;
@@ -38,9 +39,11 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 
 	@Override
 	public DuaDraft create(final DuaDraft dua) throws EntityFoundException {
-		if (duaDraftRepository.existsById(dua.getId())) {
+		if (dua.getId() != null && duaDraftRepository.existsById(dua.getId())) {
 			throw new EntityFoundException("dua draft with this id already exists");
 		} else {
+			String generatedId = UUID.randomUUID().toString();
+			dua.setId(generatedId);
 			return duaDraftRepository.save(dua);
 		}
 	}
