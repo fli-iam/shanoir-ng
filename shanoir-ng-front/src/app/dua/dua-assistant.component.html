@@ -15,20 +15,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <ng-container *ngIf="!isAuthenticated()">
     <header></header>
 </ng-container>
-
 <div class="content {{mode}}">
 
     <h2 class="header command-zone">DUA assistant</h2>
-    @if (mode == 'view') {
-        <button class="left-icon alt" (click)="generatePDF()"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
-        <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
-    } @else if (mode == 'edit') {
-        <button class="right-icon" *ngIf="form" [formGroup]="form" [disabled]="!form?.valid" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
-        <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
-    } @else if (mode == 'create') {
-        <button class="right-icon" *ngIf="form" [formGroup]="form" [disabled]="!form?.valid" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
-    }
-    
+    <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        @if (mode == 'view') {
+            <button class="left-icon alt" (click)="generatePDF()"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
+            <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
+        } @else if (mode == 'edit') {
+            <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
+            <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
+        } @else if (mode == 'create') {
+            <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
+        }
+    </form>    
     
     @if (mode == 'create' && link) {
         <h3 class="created-title right-icon">
