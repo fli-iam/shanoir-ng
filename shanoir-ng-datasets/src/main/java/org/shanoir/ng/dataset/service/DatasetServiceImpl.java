@@ -405,6 +405,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
+		return repository.findDatasetAndOutputByExaminationId(examinationId);
+	}
+
+	@Override
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
 		for (Dataset dataset : datasets) {
