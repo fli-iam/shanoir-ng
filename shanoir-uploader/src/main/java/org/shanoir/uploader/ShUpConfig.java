@@ -18,7 +18,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v2.6.5";
+	public static final String SHANOIR_UPLOADER_VERSION;
 	
 	public static final String RELEASE_DATE = "2025-06-27"; // Do we keep it ?
 	
@@ -138,5 +138,21 @@ public class ShUpConfig {
 	public static boolean isModeSubjectStudyIdentifier() {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_SUBJECT_STUDY_IDENTIFIER));
 	}
+
+	/**
+	 * Static initialization block to set the ShanoirUploader version.
+	 * Used to manage the version only in pom.xml.
+	 */
+	static {
+        String version = "dev";
+        Package pkg = ShUpConfig.class.getPackage();
+        if (pkg != null) {
+            String currentVersion = pkg.getImplementationVersion();
+            if (currentVersion != null) {
+                version = "v" + currentVersion;
+            }
+        }
+        SHANOIR_UPLOADER_VERSION = version;
+    }
 
 }

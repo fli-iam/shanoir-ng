@@ -50,17 +50,7 @@ public class InitialStartupState implements State {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
 
-	//private static final Pattern VERSION_PATTERN = Pattern.compile(".su_v(\\d+)\\.(\\d+)\\.(\\d+)");
-
 	private static final String USER_HOME_FOLDER = System.getProperty(ShUpConfig.USER_HOME);
-	
-	private static final String SU_V6_0_3 = ".su_v6.0.3";
-
-	private static final String SU_V6_0_4 = ".su_v6.0.4";
-
-	private static final String SU_V7_0_1 = ".su_v7.0.1";
-
-	private static final String SU_V8_0_0 = ".su_v8.0.0";
 
 	@Autowired
 	private SelectProfileConfigurationState selectProfileConfigurationState;
@@ -115,7 +105,7 @@ public class InitialStartupState implements State {
 		String previousVersion;
 		// If previous shup folder contains version in its name, we extract it.
 		if (shupFolder.getName().contains("_v")) {
-			previousVersion = shupFolder.getName().replaceFirst("^\\.ba_v", "");
+			previousVersion = shupFolder.getName().replaceFirst("^\\.su_v", "");
 		// otherwise it is a folder from version 5.2, which does not contain version in its name.
 		} else {
 			previousVersion = "5.2";
@@ -126,7 +116,7 @@ public class InitialStartupState implements State {
 		copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
 		logger.info("Finished migrating properties from version " + previousVersion + " of ShUp: language, proxy, dicom_server.");
 		Utils.deleteFolder(shupFolder);
-		logger.info("Folder from version " + previousVersion + " of ShanoirUploader was successfully deleted.");
+		logger.info("Folder " + shupFolder.getName() + " was successfully deleted.");
 	}
 
 	private void copyPropertiesFile(final File srcDir, final File destDir, final String fileName) throws IOException {

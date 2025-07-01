@@ -87,7 +87,7 @@ jobs:
             --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
-            --java-options "-Xmx2g" \
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" \
             --icon src/main/resources/images/icon.png
 
       - uses: actions/upload-artifact@v4
@@ -149,7 +149,7 @@ jobs:
             --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
-            --java-options "-Xmx2g" `
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" `
             --icon src/main/resources/images/icon.ico `
             --win-menu `
             --win-shortcut `
@@ -208,7 +208,7 @@ jobs:
             --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
-            --java-options "-Xmx2g" \
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" \
             --icon src/main/resources/images/icon.icns \
 
       - uses: actions/upload-artifact@v4
