@@ -297,7 +297,8 @@ export class ExaminationNode extends ShanoirNode {
             canDownload,
             exam.preclinical
         );
-        node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
+        node.datasetAcquisitions = UNLOADED;
+        //exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -329,7 +330,8 @@ export class DatasetAcquisitionNode extends ShanoirNode {
             canDelete,
             canDownload
         );
-        node.datasets = dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
+        node.datasets = UNLOADED;
+        // dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -377,7 +379,8 @@ export class DatasetNode extends ShanoirNode {
             dataset.inPacs,
             null
         );
-        node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
+        node.processings = UNLOADED;
+        //dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
         let metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
         node.metadata = metadataNode;
         return node;
@@ -392,7 +395,8 @@ export class ProcessingNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public canDownload: boolean
     ) {
         super(parent, id, label);
     }
@@ -405,10 +409,10 @@ export class ProcessingNode extends ShanoirNode {
             parent,
             processing.id,
             processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            null,
-            canDelete
+            UNLOADED,
+            canDelete,
+            canDownload
         );
-        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete, canDownload)) : [];
         return node;
     }
 }

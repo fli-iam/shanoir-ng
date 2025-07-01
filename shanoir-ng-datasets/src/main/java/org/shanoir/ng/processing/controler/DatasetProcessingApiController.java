@@ -115,6 +115,15 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	}
 
 	@Override
+	public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId) {
+		final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByInputDatasetId(datasetId);
+		if (datasetProcessings.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);

@@ -100,6 +100,7 @@ import { ExecutionTemplateListComponent } from "./vip/execution-template/executi
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
 import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
 import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
+import { TestComponent } from './utils/dev/test.component';
 
 let routes: Routes = [
     {
@@ -867,6 +868,10 @@ let routes: Routes = [
         path: 'execution-template-filter/details/:id',
         component: ExecutionTemplateFilterComponent,
         data: { mode: 'view' },
+    },
+    {
+        path: 'dev',
+        component: TestComponent
     }
 
 ];
