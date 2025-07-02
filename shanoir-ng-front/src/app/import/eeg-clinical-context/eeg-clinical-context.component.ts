@@ -177,9 +177,10 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
     }
 
     protected getPrefilledSubject(): Subject {
@@ -193,7 +194,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        step.entity = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {

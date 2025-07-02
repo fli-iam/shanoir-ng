@@ -231,7 +231,10 @@ export class Step {
     public subscribers: number = 0;
     public disabled: boolean = false;
     public displayWaitStatus: boolean = true;
-    public prefilled: { field: string, value: Promise<any>}[] = [];
+    public prefilled: { field: string, value: SuperPromise<any>}[] = [];
+
+    private resolvedPrefilledValues: { [field: string]: any } = {};
+
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
     public milestone: boolean = false;
@@ -268,33 +271,39 @@ export class Step {
         return this.waitStep != null && this.waitStep != undefined;
     }
 
-    public addPrefilled(field: string, value: any) {
-        let found: any[] = this.prefilled.filter(obj => obj.field == field);
-        if (found.length > 0) {
-            return found[0].value.resolve(value);
-        } else {
-            let superPro = new SuperPromise();
-            this.prefilled.push({field: field, value: value});
-            superPro.resolve(value);
-        }
-    }
-
     public isPrefilled(field: string): boolean {
         return this.prefilled.filter(obj => obj.field == field).length > 0;
     }
 
-    public async getPrefilledValue(field: string): Promise<any> {
-        if (this.isPrefilled(field)) {
-            return SuperPromise.timeoutPromise().then( () => {
-                let found: any[] = this.prefilled.filter(obj => obj.field == field);
-                return found && found.length > 0 ? found[0].value : undefined;
-            })
+    public addPrefilled(field: string, value: any) {
+        const found = this.prefilled.find(obj => obj.field === field);
+
+        if (found) {
+            this.resolvedPrefilledValues[field] = value;
+            return found.value.resolve(value);
         } else {
-            let superPro = new SuperPromise();
-            this.addPrefilled(field, superPro);
+            const superPro = new SuperPromise();
+            this.prefilled.push({ field, value: superPro });
+            this.resolvedPrefilledValues[field] = value;
+            superPro.resolve(value);
             return superPro;
         }
     }
+
+    public async getPrefilledValue(field: string): Promise<any> {
+        const found = this.prefilled.find(obj => obj.field === field);
+
+        if (found) {
+            return SuperPromise.timeoutPromise().then(() => {
+                return this.resolvedPrefilledValues[field];
+            });
+        } else {
+            const superPro = new SuperPromise();
+            this.prefilled.push({ field, value: superPro });
+            return superPro;
+        }
+    }
+
 
     public resetWait() {
         this.waitStep = null;

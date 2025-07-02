@@ -58,12 +58,12 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     //     this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
     // }
 
-    protected getCache(key: string) {
-        if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
-           this.breadcrumbsService.currentStep.addPrefilled(key, []);
-        }
-        return this.breadcrumbsService.currentStep.getPrefilledValue(key);
-    }
+    // protected getCache(key: string) {
+    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
+    //        this.breadcrumbsService.currentStep.addPrefilled(key, []);
+    //     }
+    //     return this.breadcrumbsService.currentStep.getPrefilledValue(key);
+    // }
 
     protected editSubjectEntity = (item: T) => {
         this.selectedEntity = item;
@@ -100,7 +100,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
             if (!subjectEntity.id && create) {
                 this.breadcrumbsService.currentStep.addPrefilled(this.getEntityName() + "ToCreate", subjectEntity);
                 this.onAdd.next(subjectEntity);
-            } else  if (subjectEntity.id && !create) {
+            } else if (subjectEntity.id && !create) {
                 this.breadcrumbsService.currentStep.addPrefilled(this.getEntityName() + "ToUpdate", subjectEntity);
             }
         }

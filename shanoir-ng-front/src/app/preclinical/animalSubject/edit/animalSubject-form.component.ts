@@ -134,12 +134,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     //     this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
     // }
 
-    private getCache(key: string) {
-        if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
-           this.breadcrumbsService.currentStep.addPrefilled(key, []);
-        }
-        return this.breadcrumbsService.currentStep.getPrefilledValue(key);
-    }
+    // private getCache(key: string) {
+    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
+    //        this.breadcrumbsService.currentStep.addPrefilled(key, []);
+    //     }
+    //     return this.breadcrumbsService.currentStep.getPrefilledValue(key);
+    // }
 
     protected fetchEntity: () => Promise<PreclinicalSubject> = () => {
         return this.idPromise.then(id => {
@@ -420,37 +420,37 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
                 }
                 // Create, Update, Delete therapies and pathologies from breadcrumb cache
-                if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToCreate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
                     for (let therapy of entity) {
                         this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
-                if (this.getCache(this.therapiesComponent.getEntityName() + "ToUpdate")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToUpdate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
                     for (let therapy of entity) {
                         this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
-                if (this.getCache(this.therapiesComponent.getEntityName() + "ToDelete")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToDelete")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
                     for (let therapy of entity) {
                         this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
-                if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToCreate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
                     for (let pathology of entity) {
                         this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
-                if (this.getCache(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
                     for (let pathology of entity) {
                         this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
-                if (this.getCache(this.pathologiesComponent.getEntityName() + "ToDelete")) {
+                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToDelete")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
                     for (let pathology of entity) {
                         this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
