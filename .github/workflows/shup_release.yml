@@ -113,15 +113,14 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Set ShUp version from incremented tag
+        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Clean maven versions backup
+        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
+
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
-
-      - name: Get ShUp version from pom.xml
-        id: get_version
-        shell: bash
-        run: |
-          cd shanoir-uploader
-          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Create custom runtime with jlink
         run: |
@@ -146,7 +145,7 @@ jobs:
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
-            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar `
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
             --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" `
@@ -173,14 +172,14 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Set ShUp version from incremented tag
+        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Clean maven versions backup
+        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
+
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
-
-      - name: Get ShUp version from pom.xml
-        id: get_version
-        run: |
-          cd shanoir-uploader
-          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Create custom runtime with jlink
         run: |
@@ -205,7 +204,7 @@ jobs:
             --copyright "© 2025 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
-            --main-jar shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar \
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
             --main-class org.shanoir.uploader.ShanoirUploader \
             --runtime-image target/custom-runtime \
             --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" \
