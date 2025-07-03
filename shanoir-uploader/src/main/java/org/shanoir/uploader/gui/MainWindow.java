@@ -59,8 +59,6 @@ import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,7 +314,11 @@ public class MainWindow extends JFrame {
 		gbc_queryPanelLabel.gridy = 0;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
 
-		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
+		ImageIcon infoIcon = new ImageIcon(getClass().getResource("/images/info.png"));
+
+		JLabel queryLevelLabel = new JLabel();
+		queryLevelLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.queryLevelLabel") + " <img src='" + infoIcon + "'> :</html>");
+		queryLevelLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.queryLevel.tooltip"));
 		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
 		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
 		gbc_queryLevelLabel.insets = new Insets(5, 5, 2, 0);
@@ -328,15 +330,13 @@ public class MainWindow extends JFrame {
 		queryLevelRG = new ButtonGroup();
 
 		// "Patient" Radio Button
-		pRB = new JRadioButton("Patient");
+		pRB = new JRadioButton(resourceBundle.getString("shanoir.uploader.queryLevelPatient"));
 		pRB.setSelected(true);
-		pRB.setToolTipText(resourceBundle.getString("shanoir.uploader.patientQueryLevel.tooltip"));
 		queryLevelRG.add(pRB);
 		queryRadioPanel.add(pRB);
 
 		// "Study" Radio Button
 		sRB = new JRadioButton(resourceBundle.getString("shanoir.uploader.queryLevelStudy"));
-		sRB.setToolTipText(resourceBundle.getString("shanoir.uploader.studyQueryLevel.tooltip"));
 		queryLevelRG.add(sRB);
 		queryRadioPanel.add(sRB);
 
@@ -349,7 +349,9 @@ public class MainWindow extends JFrame {
 		gbc_radioPanel.fill = GridBagConstraints.HORIZONTAL;
 		queryPanel.add(queryRadioPanel, gbc_radioPanel);
 
-		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
+		JLabel patientNameLabel = new JLabel();
+		patientNameLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.patientNameLabel") + " <img src='" + infoIcon + "'> :</html>");
+		patientNameLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.patientNameLabel.tooltip"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_patientNameLabel = new GridBagConstraints();
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
@@ -368,8 +370,6 @@ public class MainWindow extends JFrame {
 		queryPanel.add(patientNameTF, gbc_patientNameTF);
 		patientNameTF.setColumns(15);
 		patientNameTF.setText("");
-		patientNameTF.setToolTipText(resourceBundle.getString("shanoir.uploader.patientNameLabel.tooltip"));
-
 
 		// If fields Patient name, Patient ID and Study description are empty
 		// Query DICOM server button is grey
@@ -491,7 +491,9 @@ public class MainWindow extends JFrame {
 			}
 		});
 		
-		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
+		JLabel studyDescriptionLabel = new JLabel();
+		studyDescriptionLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.studyDescriptionLabel") + " <img src='" + infoIcon + "'> :</html>");
+		studyDescriptionLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
 		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
 		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
 		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
@@ -506,7 +508,6 @@ public class MainWindow extends JFrame {
 		gbc_studyDescriptionTF.gridwidth = 6;
 		gbc_studyDescriptionTF.gridx = 1;
 		gbc_studyDescriptionTF.gridy = 5;
-		studyDescriptionTF.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
 		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
 		studyDescriptionTF.setColumns(15);
 		studyDescriptionTF.setText("");
