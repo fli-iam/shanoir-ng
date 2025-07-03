@@ -55,9 +55,6 @@ jobs:
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
 
-      - name: Clean maven versions backup
-        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
-
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
@@ -116,9 +113,6 @@ jobs:
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set "-DnewVersion=${{ needs.setup-version.outputs.version_part }}"
 
-      - name: Clean maven versions backup
-        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
-
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
@@ -174,9 +168,6 @@ jobs:
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
-
-      - name: Clean maven versions backup
-        run: cd shanoir-uploader && rm -f pom.xml.versionsBackup
 
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
