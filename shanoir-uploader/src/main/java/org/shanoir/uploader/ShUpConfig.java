@@ -57,6 +57,8 @@ public class ShUpConfig {
 	public static final String KEYCLOAK_JSON = "keycloak.json";
 	
 	public static final String SU = ".su";
+
+	public static final String DEV = "dev";
 	
 	public static final String USER_HOME = "user.home";
 
@@ -144,7 +146,7 @@ public class ShUpConfig {
 	 * Used to manage the version only in pom.xml.
 	 */
 	static {
-        String version = "dev";
+        String version = DEV;
         Package pkg = ShUpConfig.class.getPackage();
         if (pkg != null) {
             String currentVersion = pkg.getImplementationVersion();

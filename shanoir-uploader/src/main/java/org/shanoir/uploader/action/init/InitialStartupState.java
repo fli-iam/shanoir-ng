@@ -87,9 +87,11 @@ public class InitialStartupState implements State {
 	private void doMigration() throws IOException {
 		// We run through all previous versions folders in user home folder and delete them after migrating properties.
 		File userHomeFolderPath = new File(USER_HOME_FOLDER);
+		// We list all version folders starting with ".su" and not containing the current version or "dev" in their name.
 		File[] obsoleteFolders = Arrays.stream(userHomeFolderPath.listFiles())
     		.filter(file -> file.getName().startsWith(ShUpConfig.SU))
     		.filter(file -> !file.getName().contains(ShUpConfig.SHANOIR_UPLOADER_VERSION))
+			.filter(file -> !file.getName().contains(ShUpConfig.DEV))
     		.filter(File::isDirectory)
     		.toArray(File[]::new);
 
