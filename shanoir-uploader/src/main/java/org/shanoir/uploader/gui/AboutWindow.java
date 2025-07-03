@@ -21,15 +21,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpConfig;
 
 public class AboutWindow extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
 
-	String supportMail = "imagerie@ofsep.org";
+	String supportMail = "developers_shanoir@inria.fr";
 
 	public AboutWindow(final ResourceBundle resourceBundle) {
 		// Create the frame.
@@ -65,7 +65,7 @@ public class AboutWindow extends JFrame {
 				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: 2023-03");
+		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: 2025-06");
 		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
 		JLabel copyrightLabel = new JLabel(
@@ -112,8 +112,8 @@ public class AboutWindow extends JFrame {
 		// center the frame
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		int windowWidth = 300;
-		int windowHeight = 369;
+		int windowWidth = 415;
+		int windowHeight = 300;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
 
