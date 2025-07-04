@@ -64,7 +64,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 
-	private static string DUA_VIEW_URL = "/shanoir-ng/dua/view/";
+	private static String DUA_VIEW_URL = "/shanoir-ng/dua/view/";
 
 
 	@Override
