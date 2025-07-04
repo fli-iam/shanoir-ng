@@ -90,13 +90,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy();
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -251,7 +251,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             }
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;
+                    this.entity.acquisitionEquipment = entity as AcquisitionEquipment;
                 })
             );
         });

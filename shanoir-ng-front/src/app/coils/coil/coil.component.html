@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.coilType}}
 							</ng-template>
 								<ng-template ngSwitchDefault>
-								<select-box formControlName="coilType" [(ngModel)]="coil.coilType" [optionArr]="coilTypes">
+								<select-box [formControl]="form.controls['coilType']" [(ngModel)]="coil.coilType" [optionArr]="coilTypes">
 								</select-box>
 							</ng-template>
 						</span>
@@ -93,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<select-box
 										(onNewClick)="openNewCenter()"
 										[newDisabled]="prefilledCenter"
-										formControlName="center"
+                                        [formControl]="form.controls['center']"
 										[(ngModel)]="coil.center"
 										(ngModelChange)="updateManufList($event?.id)"
 										[optionArr]="centers">

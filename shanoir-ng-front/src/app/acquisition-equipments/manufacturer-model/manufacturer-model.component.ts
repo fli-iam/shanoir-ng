@@ -27,6 +27,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { Option } from '../../shared/select/select.component';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import {Subject} from "../../subjects/shared/subject.model";
+import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -127,7 +129,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         this.router.navigate(['/manufacturer/create']).then(success => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
+                    this.entity.manufacturer = entity as Manufacturer;
                 })
             );
         });
