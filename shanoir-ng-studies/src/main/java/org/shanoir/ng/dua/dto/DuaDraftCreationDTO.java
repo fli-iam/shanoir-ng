@@ -28,8 +28,6 @@ public class DuaDraftCreationDTO {
     
     private String papers;
 
-    private String logoUrl;
-
 
     public Long getStudyId() {
         return studyId;
@@ -77,13 +75,5 @@ public class DuaDraftCreationDTO {
 
     public void setPapers(String papers) {
         this.papers = papers;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
     }
 }

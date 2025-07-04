@@ -35,8 +35,6 @@ public class DuaDraft {
     
     String papers;
 
-    String logoUrl;
-
 
     public String getId() {
         return id;
@@ -92,13 +90,5 @@ public class DuaDraft {
 
     public void setPapers(String papers) {
         this.papers = papers;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
     }
 }

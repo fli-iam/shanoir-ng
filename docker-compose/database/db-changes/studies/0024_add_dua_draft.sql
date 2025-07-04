@@ -3,9 +3,8 @@ create table dua_draft (
     study_id bigint(20) not null,
     study_name varchar(255) not null,
     url tinytext,
-    funding text,
-    thanks text,
-    papers text,
-    logo_url tinytext,
+    funding mediumtext,
+    thanks mediumtext,
+    papers mediumtext,
     primary key (id)
 );

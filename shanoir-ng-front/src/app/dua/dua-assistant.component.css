@@ -5,7 +5,28 @@
     box-shadow: 10px 5px 20px;
     margin: 30px 0;
     width: 800px;
+    min-height: 1131px;
+    position: relative;
+}
+.page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
     height: 1131px;
+    border-bottom: 1px dashed var(--grey);
+}
+.page.converting::after {
+    content: "generating...";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    border: 1px solid white;
+    background-color: white;
+    padding: 20px;
 }
 .inner-page {
     padding: 70px 70px;
@@ -13,19 +34,18 @@
     line-height: 150%;
 }
 .header { margin-bottom: 30px; }
-button.alt { }
 .created-title { color: green; }
 
 .document-header { display: flex; width: 100%; margin-bottom: 50px; }
 .shanoir-logo { height: 60px; margin-left: -10px; margin-left: auto; background-color: var(--color-a); border-radius: 2px; }
-.other-logo { max-height: 150px; }
+.other-logo { max-height: 150px; display: block; }
 form.other-logo { 
     display: flex;
     flex-flow: column;
     border: 1px solid var(--grey);
     padding: 15px;
 }
-.view form.other-logo { 
+.view form.other-logo {
     height: 90px;
 }
 .page h1 { text-align: center; margin-bottom: 60px; color: black; }
@@ -33,3 +53,11 @@ ol li { margin-bottom: 16px; }
 form.other-logo input { width: 350px; }
 form.other-logo label { display: block; margin-bottom: 20px; }
 .form-validation-alert { font-size: 12px; text-align: left; width: auto; margin-top: 10px; font-weight: bold; }
+.other-logo-container { position: relative; }
+.converting .upload-file,
+.converting .logo-placeholder { opacity: 0; }
+
+upload-file { display: block; position: absolute; top: -24px; width: 160px; }
+.logo-placeholder { width: 200px; border: 1px dashed gray; padding: 10px; font-size: 12px; height: 75px; color: var(--color-a); }
+.logo-placeholder i { font-size: 20px; }
+h3 { color: inherit; }

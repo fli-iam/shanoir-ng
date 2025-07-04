@@ -18,17 +18,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="content {{mode}}">
 
     <h2 class="header command-zone">DUA assistant</h2>
-    <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-        @if (mode == 'view') {
-            <button class="left-icon alt" (click)="generatePDF()"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
-            <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
-        } @else if (mode == 'edit') {
+    @if (mode == 'view') {
+        <button class="left-icon alt" (click)="generatePDF()" [disabled]="converting"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
+        <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
+    } @else if (mode == 'edit') {
+        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
             <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
             <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
-        } @else if (mode == 'create') {
+        </form>    
+    } @else if (mode == 'create' && !link) {
+        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
             <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
-        }
-    </form>    
+        </form>
+    }
     
     @if (mode == 'create' && link) {
         <h3 class="created-title right-icon">
@@ -52,25 +54,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ul>
         </form>
         
-        <div class="page">
+        <div class="page" [class.converting]="converting" *ngIf="showPage">
             <div #pdfContent class="inner-page">
                 <div class="document-header">
-                    @if(mode == "view" && dua?.logoUrl) {
-                        <img class="other-logo" [src]="dua.logoUrl" alt="Sorry the distant server does not authorize this image to be used here (CORS policy)"/>
-                    } @else if (mode != 'view') {
-                        <form *ngIf="form" [formGroup]="form" id="form" (ngSubmit)="onSubmit()" class="other-logo">
-                            <label>Url du logo (optionel)</label>
-                            <input type="url" formControlName="logoUrl"/>
-                            <div class="error" class="form-validation-alert left-icon">
-                                <i *ngIf="hasError('logoUrl')" class="fa-solid fa-triangle-exclamation"></i>
-                                <span *ngIf="hasError('logoUrl', ['invalidUrlFormat'])" >Format d'url invalide</span>
-                                <span *ngIf="hasError('logoUrl', ['corsError'])">L'hébergeur de l'image n'autorise pas son utilisation externe</span>
-                                <span *ngIf="hasError('logoUrl', ['notAnImage'])">Ce n'est pas une image</span>
-                                <span *ngIf="hasError('logoUrl', ['notFound'])">Url invalide</span>
-                                <span *ngIf="hasError('logoUrl', ['httpError'])">Erreur http</span>
-                            </div>
-                        </form>
-                    }
+                    <div class="other-logo-container">
+                        <img *ngIf="duaService.imagePreview" class="other-logo" [src]="duaService.imagePreview" alt="Logo"/>
+                        <div *ngIf="!duaService.imagePreview" class="logo-placeholder left-icon">
+                            <i class="fa-solid fa-circle-info"></i>
+                            The image will not be saved, please add it right before generating the pdf.
+                        </div>
+                        <upload-file *ngIf="!converting" (fileChange)="onImageLoaded($event)" accept="image/*" label="Load logo file" [noFilename]="true"></upload-file>
+                    </div>
                     <img class="shanoir-logo" [src]="shanoirLogoUrl"/>
                 </div>
                 <h1>Accord d'Utilisation des Données</h1>
@@ -96,24 +90,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label>Lien Clinical Trials de l'étude : </label>
                         <a [href]="'https://clinicaltrials.gov/' + dua.url">{{'https://clinicaltrials.gov/' + dua.url}}</a>
                     </div>
-                    <p>
-                        <label>Financement : </label>
+                    <div>
+                        <h3>Financement : </h3>
                         {{dua.funding}}
-                    </p>
-                    <p>
-                        <label>Remerciements : </label>
+                    </div>
+                    <div>
+                        <h3>Remerciements : </h3>
                         {{dua.thanks}}
-                    </p>
-                    <p>
-                        <label>Articles : </label>
+                    </div>
+                    <div>
+                        <h3>Articles : </h3>
                         {{dua.papers}}
-                    </p>
+                    </div>
                 } @else if (mode == 'edit' || mode == 'create') {
                     <h1>To answer/complete</h1>
                     <form *ngIf="form" [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
                         <ul>
                             <li>
-                                <label>
+                                <label>this.wrapTextInSpans(element);
                                     Lien Clinical Trials de l'étude *
                                     <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
                                 </label>

@@ -24,6 +24,8 @@ export class DuaService {
 
     API_URL = AppUtils.BACKEND_API_STUDIES_MS_URL + '/dua';
 
+    imagePreview: string | null = null;
+
     constructor(
             protected http: HttpClient,
             protected studyService: StudyService) {

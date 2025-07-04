@@ -12,19 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as html2pdf from 'html2pdf.js';
-import { from, Observable, of, Subscription } from 'rxjs';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import { Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../shared/components/entity/entity.component.abstract';
+import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
-import { ImagesUrlUtil } from '../shared/utils/images-url.util';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map } from 'rxjs/operators';
 
 
 @Component({
@@ -44,6 +45,9 @@ export class DUAAssistantComponent implements OnDestroy {
     protected id: string;
     protected subscriptions: Subscription[] = [];
     protected base64Img: string;
+    protected loadedImage: File | null = null;
+    protected converting: boolean = false;
+    protected showPage: boolean = true;
 
     @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
     readonly shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
@@ -53,7 +57,7 @@ export class DUAAssistantComponent implements OnDestroy {
             private formBuilder: FormBuilder, 
             private route: ActivatedRoute,
             private router: Router,
-            private duaService: DuaService,
+            protected duaService: DuaService,
             private http: HttpClient) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
@@ -92,10 +96,6 @@ export class DUAAssistantComponent implements OnDestroy {
             'funding': [dua?.funding, [Validators.required]],
             'thanks': [dua?.thanks, [Validators.required]],
             'papers': [dua?.papers, [Validators.required]],
-            'logoUrl': [dua?.logoUrl, {
-                asyncValidators: this.corsAllowedValidator(),
-                updateOn: 'blur'
-            }],
         };
         if (this.mode == 'create') {
             controls['email'] = ['', [Validators.email]];
@@ -110,7 +110,6 @@ export class DUAAssistantComponent implements OnDestroy {
             this.form.get('funding')?.value,
             this.form.get('thanks')?.value,
             this.form.get('papers')?.value,
-            this.form.get('logoUrl')?.value
         );
         if (this.mode == 'create') {
             this.duaService.create(dua, this.form.get('email')?.value)
@@ -126,31 +125,18 @@ export class DUAAssistantComponent implements OnDestroy {
         }
     }
 
-    corsAllowedValidator(): AsyncValidatorFn {
-        return (control: AbstractControl): Observable<ValidationErrors | null> => {
-            const url = control.value;
-            if (!url) return of(null); // Skip if empty
-            try {
-                new URL(url); // Validate URL format
-            } catch {
-                return of({ invalidUrlFormat: true }); // Malformed URL
-            }
-
-            return from(
-                fetch(url, { method: 'GET', mode: 'cors' })
-                    .then(res => {
-                        if (res.status === 404) return { notFound: true }; // 404 not found
-                        if (!res.ok) return { httpError: true }; // Other HTTP error (e.g. 403, 500)
-                        const contentType = res.headers.get('content-type') || '';
-                        if (!contentType.startsWith('image/')) return { notAnImage: true }; // Not an image
-                        return null; // All good
-                    })
-                    .catch(() => {
-                        return { corsError: true }; // Likely a CORS or network error
-                    })
-            );
+    onImageLoaded(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files?.length) return;
+        const file = input.files[0];
+        this.loadedImage = file;
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.duaService.imagePreview = reader.result as string;
         };
+        reader.readAsDataURL(file);
     }
+
 
     formErrors(field: string): any {
         if (!this.form) return;
@@ -174,17 +160,118 @@ export class DUAAssistantComponent implements OnDestroy {
         return false;
     }
 
+    private getRelativeY(child: HTMLElement, parent: HTMLElement): number {
+        const childRect = child.getBoundingClientRect();
+        const parentRect = parent.getBoundingClientRect();
+        return childRect.top - parentRect.top;
+    }
+
+    /**
+     * Wrap every single word inside el, including inside children, into a <span>
+     * @param el 
+     */
+    private wrapTextInSpans(el: HTMLElement): void {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+        const nodesToWrap: Text[] = [];
+        while (walker.nextNode()) {
+            const node = walker.currentNode as Text;
+            if (node.textContent?.trim()) {
+                nodesToWrap.push(node);
+            }
+        }
+        for (const textNode of nodesToWrap) {
+            const parent = textNode.parentNode;
+            if (!parent) continue;
+            const words = textNode.textContent!.split(/(\s+)/); 
+            const fragment = document.createDocumentFragment();
+            for (const word of words) {
+                if (word.trim()) {
+                    const span = document.createElement('span');
+                    span.classList.add('word');
+                    span.textContent = word;
+                    fragment.appendChild(span);
+                } else {
+                    fragment.appendChild(document.createTextNode(word));
+                }
+            }
+            parent.replaceChild(fragment, textNode);
+        }
+    }
+
+    /**
+     * Insert spacer that act like page breaks. 
+     * Works by looking at the position of every word.
+     */
+    private insertPageBreaks(element: HTMLElement) {
+        this.wrapTextInSpans(element);
+        let page: number = 1;
+        const margin: number = 70;
+        const pHeight: number = 1132;
+        Array.from(element.querySelectorAll('span.word')).forEach(wordEl => {
+            const wordBottomY: number = this.getRelativeY((wordEl as HTMLElement), element) + (wordEl as HTMLElement).offsetHeight;
+            const nextYLimit: number = (pHeight * page) - margin;
+            const overflow: number = wordBottomY - nextYLimit;
+            if (overflow > 0) {
+                this.addSpacer(wordEl as HTMLElement, margin, overflow);
+                page++;
+            }
+        })
+
+    }
+
+    private addSpacer(wordEl: HTMLElement, margin: number, overflow: number) {
+        const div = document.createElement('div');
+        div.style.width = '100%';
+        div.style.height = (margin*2) + (wordEl.offsetHeight - overflow) + 'px';
+        div.style.margin = '0';
+        div.classList.add('spacer');
+        wordEl.prepend(div);
+    }
+
     protected generatePDF(): void {
         const element = this.pdfContent.nativeElement;
-        const options = {
-            margin: 0,
-            padding: 0,
-            filename: 'dua.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, allowTaint: true },
-            jsPDF: { format: [1000, 1360], unit: 'px', orientation: 'portrait' },
-        };
-        html2pdf().from(element).set(options).save();
+
+        let originalHtml: string | null = null;
+        originalHtml = element.innerHTML;
+        this.insertPageBreaks(element);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        this.converting = true;
+        setTimeout(() => {
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pageWidth;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                let position = 0;
+                while (position < pdfHeight) {
+                    const remainingHeight = pdfHeight - position;
+                    const pageContentHeight = Math.min(pageHeight, remainingHeight);
+                    pdf.addImage(imgData, 'JPEG', 0, -position, pdfWidth, pdfHeight);
+                    position += pageHeight;
+                    if (position < pdfHeight) pdf.addPage();
+                }
+                pdf.save('dua.pdf');
+                this.converting = false;
+                this.restorePage();
+            }).catch(() => {
+                this.converting = false;
+                this.restorePage();
+            });
+        });
+    }
+
+    private restorePage() {
+        this.showPage = false;
+        setTimeout(() => {
+            this.showPage = true;
+        });
     }
 
     isAuthenticated(): boolean {
