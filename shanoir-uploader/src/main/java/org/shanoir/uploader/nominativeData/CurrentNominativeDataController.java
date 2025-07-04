@@ -57,8 +57,8 @@ public class CurrentNominativeDataController {
 
 		DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
 
-		// Set the action when delete completred uploads button is clicked
-		JButton deleteAllButton = cuw.frame.btndeleteFinishedUploads;
+		// Set the action when delete completed uploads button is clicked
+		JButton deleteAllButton = cuw.frame.deleteFinishedUploads;
 		
 		deleteAllButton.addMouseListener(new MouseAdapter() {
 			@Override

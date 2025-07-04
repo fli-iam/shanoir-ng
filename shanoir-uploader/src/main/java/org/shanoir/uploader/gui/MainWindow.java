@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
 	public String studyDate = "";
 	public String modality;
 	JScrollPane scrollPaneUpload;
-	public JButton btndeleteFinishedUploads;
+	public JButton deleteFinishedUploads;
 
 	public JLabel startedDownloadsLB;
 	public JProgressBar downloadProgressBar;
@@ -963,16 +963,16 @@ public class MainWindow extends JFrame {
 		currentUploadsPanel.add(scrollPaneUpload, BorderLayout.CENTER);
 
 		// Add delete all finished uploads button
-		btndeleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll"));
-		btndeleteFinishedUploads.setFont(new Font("SansSerif", Font.BOLD, 14));
-		btndeleteFinishedUploads.setBackground(new Color(220, 53, 69));
-		btndeleteFinishedUploads.setForeground(Color.WHITE);
-		btndeleteFinishedUploads.setFocusPainted(false);
-		btndeleteFinishedUploads.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-		btndeleteFinishedUploads.setToolTipText(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
+		deleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll"));
+		deleteFinishedUploads.setFont(new Font("SansSerif", Font.BOLD, 14));
+		deleteFinishedUploads.setBackground(new Color(220, 53, 69));
+		deleteFinishedUploads.setForeground(Color.WHITE);
+		deleteFinishedUploads.setFocusPainted(false);
+		deleteFinishedUploads.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+		deleteFinishedUploads.setToolTipText(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		buttonPanel.add(btndeleteFinishedUploads);
+		buttonPanel.add(deleteFinishedUploads);
 
 		currentUploadsPanel.add(buttonPanel, BorderLayout.SOUTH);
 
