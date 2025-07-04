@@ -60,11 +60,7 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
-
-
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	String findNameById(Long id);
-
+	
 	
 	/**
 	 * Get all the studies

@@ -32,7 +32,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	Optional<Study> findById(Long id);
 
 	@Query("SELECT s.name FROM Study s WHERE s.id = :id")
-	String findNameById(@Param("id") Long id);
+	Optional<String> findNameById(@Param("id") Long id);
 
 	@EntityGraph("Study.All")
 	void deleteById(Long id);

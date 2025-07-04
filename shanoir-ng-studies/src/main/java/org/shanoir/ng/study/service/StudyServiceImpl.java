@@ -175,11 +175,6 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public String findNameById(Long id) {
-		return studyRepository.findNameById(id);
-	}
-
-	@Override
 	public Study create(final Study study) throws MicroServiceCommunicationException {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {

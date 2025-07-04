@@ -21,6 +21,7 @@ import org.shanoir.ng.dua.model.DuaDraft;
 import org.shanoir.ng.dua.repository.DuaDraftRepository;
 import org.shanoir.ng.shared.exception.EntityFoundException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,9 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 
 	@Autowired
 	private DuaDraftRepository duaDraftRepository;
+
+	@Autowired
+	private StudyRepository studyRepository;
 
 	
 	@Override
@@ -42,9 +46,15 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 		if (dua.getId() != null && duaDraftRepository.existsById(dua.getId())) {
 			throw new EntityFoundException("dua draft with this id already exists");
 		} else {
-			String generatedId = UUID.randomUUID().toString();
-			dua.setId(generatedId);
-			return duaDraftRepository.save(dua);
+			Optional<String> studyName = studyRepository.findNameById(dua.getStudyId());
+			if (studyName.isPresent()) {
+				dua.setStudyName(studyName.get());
+				String generatedId = UUID.randomUUID().toString();
+				dua.setId(generatedId);
+				return duaDraftRepository.save(dua);
+			} else {
+				throw new IllegalArgumentException("No study found for id " + dua.getStudyId());
+			}
 		}
 	}
 

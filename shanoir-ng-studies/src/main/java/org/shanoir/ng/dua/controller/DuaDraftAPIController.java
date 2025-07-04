@@ -120,7 +120,6 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 		data.setDuaLink(link);
 		data.setRecipienEmailAddress(email);
 		data.setSenderUserId(KeycloakUtil.getTokenUserId());
-		data.setStudyName(studyService.findNameById(duaEntity.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, objectMapper.writeValueAsString(data));
     }
 
