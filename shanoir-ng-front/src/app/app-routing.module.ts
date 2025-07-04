@@ -97,6 +97,7 @@ import { QualityCardListComponent } from './study-cards/quality-card-list/qualit
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { TestComponent } from './utils/dev/test.component';
 
 let routes: Routes = [
     {
@@ -843,7 +844,10 @@ let routes: Routes = [
         path: 'dua/view/:id',
         component: DUAAssistantComponent,
         data: { mode: 'view' }
-    },
+    },{
+        path: 'dev',
+        component: TestComponent
+    }
 ];
 
 @NgModule({
