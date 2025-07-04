@@ -97,11 +97,14 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private prefill() {
-        this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then( res => this.centersFromStudyCard = res);
+        this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then( res => {
+            this.centers = res;
+        });
+        this.breadcrumbsService.currentStep.getPrefilledValue('center').then( res => {
+            this.acqEquip.center = res;
+        });
         this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
-        if (this.nonEditableCenter) {
-            this.breadcrumbsService.currentStep.getPrefilledValue('center').then( res => this.acqEquip.center = res);
-        } else if (this.acqEquip.center) {
+        if (this.acqEquip.center) {
             // Clean center
             let centerSelected: Center = new Center();
             centerSelected.id = this.acqEquip.center.id;
@@ -143,7 +146,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+                    this.entity.manufacturerModel = entity as ManufacturerModel;
                 })
             );
         });

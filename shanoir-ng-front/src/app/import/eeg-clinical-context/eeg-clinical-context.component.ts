@@ -215,7 +215,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateAcqEqStep(step: Step) {
-        step.entity = this.getPrefilledAcqEqt();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledAcqEqt());
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {
