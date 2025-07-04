@@ -64,6 +64,8 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 
+	private static string DUA_VIEW_URL = "/shanoir-ng/dua/view/";
+
 
 	@Override
 	public ResponseEntity<String> saveNew(
@@ -116,7 +118,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 
     private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) throws JsonProcessingException {
 		DuaDraftWrapper data = new DuaDraftWrapper();
-		String link = frontServerUrl + "/shanoir-ng/dua/view/" + duaEntity.getId();
+		String link = frontServerUrl + DUA_VIEW_URL + duaEntity.getId();
 		data.setDuaLink(link);
 		data.setRecipienEmailAddress(email);
 		data.setSenderUserId(KeycloakUtil.getTokenUserId());
