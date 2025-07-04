@@ -79,7 +79,7 @@ export class DownloadSetupAltComponent implements OnInit {
             } else if (this.inputIds.acquisitionId) {
                 fetchDatasets = this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
             } else if (this.inputIds.datasetIds) {
-                fetchDatasets = this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+                fetchDatasets = this.datasetService.getLigthByIds(new Set(this.inputIds.datasetIds));
             }
             if (fetchDatasets) {
                 this.loading = true;
