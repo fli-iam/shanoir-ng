@@ -116,7 +116,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 
     private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) throws JsonProcessingException {
 		DuaDraftWrapper data = new DuaDraftWrapper();
-		String link = frontServerUrl + "/dua/" + duaEntity.getId();
+		String link = frontServerUrl + "/shanoir-ng/dua/view/" + duaEntity.getId();
 		data.setDuaLink(link);
 		data.setRecipienEmailAddress(email);
 		data.setSenderUserId(KeycloakUtil.getTokenUserId());
