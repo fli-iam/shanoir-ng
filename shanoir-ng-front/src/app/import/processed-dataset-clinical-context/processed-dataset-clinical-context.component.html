@@ -28,12 +28,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading">
+                        [disabled]="datasetProcessing != null">
                 </select-box>
-
             </span>
         </li>
-
     </ol>
 
     <ol>
@@ -45,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a subject</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="loading || !study"
+                        [disabled]="datasetProcessing != null || !study"
                         [(ngModel)]="subject"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"

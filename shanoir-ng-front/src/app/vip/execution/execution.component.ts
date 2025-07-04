@@ -91,7 +91,7 @@ export class ExecutionComponent implements OnInit {
         this.pipeline = this.processingService.selectedPipeline;
         this.initExecutionForm();
 
-        this.datasetsPromise = this.datasetService.getByIds(this.processingService.selectedDatasets).then(
+        this.datasetsPromise = this.datasetService.getLigthByIds(this.processingService.selectedDatasets).then(
             result => {
                 this.selectedDatasets = new Set(result);
                 this.createColumnDefs();

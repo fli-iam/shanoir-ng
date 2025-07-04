@@ -44,10 +44,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     public processedDatasetName: string;
     public processedDatasetComment: string;
     public datasetProcessing: DatasetProcessing;
-    public datasetProcessings: DatasetProcessing[] = [];
     public useStudyCard: boolean = false;
-    private datasetProcessingService: DatasetProcessingService = ServiceLocator.injector.get(DatasetProcessingService);
-    public datasetProcessingLabelPipe: DatasetProcessingPipe = ServiceLocator.injector.get(DatasetProcessingPipe);
 
     getNextUrl(): string {
         return '/imports/processed-dataset';
@@ -84,9 +81,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     public openCreateDatasetProcessing() {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createDatasetProcessingRoute: string = '/dataset-processing/create';
-        this.router.navigate([createDatasetProcessingRoute]).then(success => {
-	        this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
-            this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
+        this.router.navigate([createDatasetProcessingRoute],   {state: {study: this.study, subject: this.subject}}).then(success => {
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
@@ -128,9 +123,11 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             return this.onSelectStudy().then(() => {
                 if (subject) {
                     this.subject = subject;
-                    if (datasetProcessing) {
-                        this.datasetProcessing = datasetProcessing;
-                    }
+                    return this.onSelectSubject().then(() => {
+                        if (datasetProcessing) {
+                            this.datasetProcessing = datasetProcessing;
+                        }
+                    });
                 }
             });
         }
