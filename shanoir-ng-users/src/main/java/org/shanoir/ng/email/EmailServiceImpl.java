@@ -665,6 +665,21 @@ public class EmailServiceImpl implements EmailService {
 			// Send the message
 			LOG.info("Sending notifyDuaDraftCreation mail from {} for study {}", user.get().getId(), mail.getStudyName());
 			mailSender.send(messagePreparator);
+
+			messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(user.get().getEmail());
+				messageHelper.setSubject("[Shanoir] DUA draft created for study " + mail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(STUDY_NAME, mail.getStudyName());
+				variables.put(LINK, mail.getDuaLink());
+				final String content = build("notifyStudyAdminDuaDraftCreation", variables);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending notifyStudyAdminDuaDraftCreation mail to {} for study {}", user.get().getId(), mail.getStudyName());
+			mailSender.send(messagePreparator);
 		}
     }
 
