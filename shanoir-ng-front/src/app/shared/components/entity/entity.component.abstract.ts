@@ -159,6 +159,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     init(): void {
+        console.log("entity abstract init");
         const choose = (): Promise<void> => {
             switch (this.mode) {
                 case 'create' :
@@ -184,11 +185,13 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
             this.manageFormSubscriptions();
             if ((this.mode == 'create' || this.mode == 'edit')) {
+                console.log("entity abstract init - check is prefilled");
                 if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
                         this.entity = res as T;
                         this.form.updateValueAndValidity();
                         this.manageFormSubscriptions();
+                        console.log("entity abstract init - entity : ", this.entity);
                     });
                 }
             }

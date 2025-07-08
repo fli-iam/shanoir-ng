@@ -108,8 +108,16 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         return super.entity;
     }
 
+    init() {
+        console.log("exam init");
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.examination = res);
+        }
+    }
+
     initView(): Promise<void> {
-        console.log("init view");
+        console.log("exam - initView");
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -128,7 +136,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     initEdit(): Promise<void> {
-        console.log("initEdit");
+        console.log("exam - initEdit");
         this.getCenters();
         this.getStudies();
 
@@ -140,11 +148,12 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     initCreate(): Promise<void> {
-        console.log("initCreate");
+        console.log("exam - initCreate");
         this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
 
         return Promise.resolve();
     }

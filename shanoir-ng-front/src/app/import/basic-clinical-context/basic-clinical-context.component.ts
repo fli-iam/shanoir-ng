@@ -102,6 +102,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected fillCreateSubjectStep(step: Step) {
         let s: Subject = this.getPrefilledSubject();
+        console.log("basic-clinical - fill create subject");
         this.breadcrumbsService.currentStep.addPrefilled("entity", s);
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
@@ -131,7 +132,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected fillCreateExaminationStep(step: Step) {
         let exam: Examination = this.getPrefilledExam();
+        console.log("basic-clinical - fill create examination");
         this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
+        this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
     }
 
     private getPrefilledExam(): Examination {

@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.sex}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box formControlName="sex" [(ngModel)]="subject.sex" [options]="genderOptions">
+									<select-box [formControl]="form.controls['sex']" [(ngModel)]="subject.sex" [options]="genderOptions">
 									</select-box>
 								</ng-template>
 							</span>

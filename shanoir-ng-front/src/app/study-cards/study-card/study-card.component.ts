@@ -171,7 +171,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
                 if (err.status != 404) throw err;
             });
             form.get('acquisitionEquipment').enable();
-            this.centerService.getCentersNamesByStudyId(study.id).then(centers => this.centers = centers);
+            this.centerService.getCentersNamesByStudyId(study.id).then(centers => {
+                this.centers = centers;
+                this.breadcrumbsService.currentStep.addPrefilled("center", this.centers);
+            });
         } else {
             form.get('acquisitionEquipment').disable();
             this.studyCard.acquisitionEquipment = null;

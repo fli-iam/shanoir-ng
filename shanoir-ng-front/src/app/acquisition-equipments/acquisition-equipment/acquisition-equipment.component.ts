@@ -71,10 +71,20 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     async initView(): Promise<void> {
+        console.log("acq-eq initView");
         this.updateAcquEq();
     }
 
+    init() {
+        console.log("acquisition init");
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("center").then( res => this.acqEquip.center = res);
+        }
+    }
+
     initEdit(): Promise<void> {
+        console.log("acq-eq initEdit");
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames()
@@ -84,26 +94,39 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    async initCreate(): Promise<void> {
+    initCreate(): Promise<void> {
+        console.log("acq-eq initCreate");
         this.entity = new AcquisitionEquipment();
         this.prefill();
         if (this.centersFromStudyCard == null) {
-            this.centerService.getCentersNames().then(centers => this.centers = centers);
+            console.log("get centers names");
+            this.centerService.getCentersNames().then(centers => {
+                console.log("centers : ", centers);
+                this.centers = centers
+            });
         }
         else {
             this.centers = this.centersFromStudyCard;
         }
         this.getManufModels();
+        return Promise.resolve();
     }
 
     private prefill() {
-        this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then( res => {
-            this.centers = res;
-        });
-        this.breadcrumbsService.currentStep.getPrefilledValue('center').then( res => {
-            this.acqEquip.center = res;
-        });
-        this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
+        if (this.breadcrumbsService.currentStep.isPrefilled('sc_center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then(res => {
+                console.log("acq eq - prefill sc_center : ", res);
+                this.centersFromStudyCard = res;
+            });
+        }
+        if (this.breadcrumbsService.currentStep.isPrefilled('center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => {
+                console.log("acq eq - prefill center : ", res);
+                this.acqEquip.center = res;
+                this.nonEditableCenter = true;
+            });
+        }
+        // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.acqEquip.center) {
             // Clean center
             let centerSelected: Center = new Center();

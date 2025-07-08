@@ -95,12 +95,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     init() {
+        console.log("subject init");
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.subject = res as Subject);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
@@ -120,7 +120,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     initView(): Promise<void> {
-        console.log("initView");
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
@@ -141,10 +140,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     initCreate(): Promise<void> {
-        console.log("initCreate");
+        console.log("subject initCreate");
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
         return Promise.resolve();
     }
 
@@ -201,7 +201,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        console.log("update form control this.isAlreadyAnonymized: ",  this.subject.isAlreadyAnonymized);
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
