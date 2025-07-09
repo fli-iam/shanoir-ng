@@ -133,6 +133,7 @@ public class ImportFinishActionListener implements ActionListener {
 				EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
 				equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
 				equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
+				equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());
 				equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
 				equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
 				if (equipment == null) {
