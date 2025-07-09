@@ -117,13 +117,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then(res => {
                 console.log("acq eq - prefill sc_center : ", res);
                 this.centersFromStudyCard = res;
+                this.nonEditableCenter = true;
             });
         }
         if (this.breadcrumbsService.currentStep.isPrefilled('center')) {
             this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => {
                 console.log("acq eq - prefill center : ", res);
                 this.acqEquip.center = res;
-                this.nonEditableCenter = true;
             });
         }
         // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
