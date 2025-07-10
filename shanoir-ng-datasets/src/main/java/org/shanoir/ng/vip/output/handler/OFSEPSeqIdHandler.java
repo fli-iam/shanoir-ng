@@ -405,14 +405,14 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         DatasetProperty institutionName = new DatasetProperty();
         institutionName.setDataset(ds);
         institutionName.setName("dicom.InstitutionName");
-        institutionName.setValue(attributes.getString(Tag.InstitutionName));
+        institutionName.setValue("\""+ attributes.getString(Tag.InstitutionName) + "\"");
         institutionName.setProcessing(monitoring);
         properties.add(institutionName);
 
         DatasetProperty institutionAddress = new DatasetProperty();
         institutionAddress.setDataset(ds);
         institutionAddress.setName("dicom.InstitutionAddress");
-        institutionAddress.setValue(attributes.getString(Tag.InstitutionAddress));
+        institutionAddress.setValue("\"" + attributes.getString(Tag.InstitutionAddress) + "\"");
         institutionAddress.setProcessing(monitoring);
         properties.add(institutionAddress);
 
