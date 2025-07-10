@@ -8,13 +8,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.service.StudyService;
@@ -41,8 +39,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,7 +127,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         if(processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()){
             throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
         }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
+        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification") || processing.getPipelineIdentifier().startsWith("SIMS");
     }
 
     @Override
@@ -172,6 +168,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      * @return true if the two arrays are equal
      */
     public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
+        LOG.info("1 " + dsOrientation + " 2" + volOrientation);
 
         if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
             return false;
@@ -205,12 +202,16 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             return null;
         }
 
+
         JSONArray volumes = serie.getJSONArray(VOLUMES);
         double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
         for (int i = 0 ; i < volumes.length(); i++) {
+            LOG.info("ca commence");
             JSONObject volume = volumes.getJSONObject(i);
             if(!checkIfSameDatasetVolume(dataset, volume)){
+
+                LOG.info("Mmmmmmmmmmmmmh");
                 continue;
             }
 
@@ -235,7 +236,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                 JSONObject result = new JSONObject();
                 result.put("serie", serie);
                 result.put("volume", volume);
-                return result;            }
+                return result;
+            }
         }
         return null;
     }
@@ -245,29 +247,18 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      */
     private boolean checkIfSameDatasetVolume(Dataset dataset, JSONObject volume) {
         try {
-            JSONArray files = volume.getJSONArray("files");
-            String regex = "(\\d+)\\.dcm";
-            Pattern pattern = java.util.regex.Pattern.compile(regex);
+            LOG.info("JSON : " + volume.getJSONObject("shanoirId").getString("value") + ", ds : " + dataset.getId());
+            String shanoirId = volume.getJSONObject("shanoirId").getString("value");
 
-            for (int i = 0; i < files.length(); i++) {
-                try{
-                    Matcher matcher = pattern.matcher(files.getString(i));
-                    String code = matcher.group(1);
-                    if(Objects.nonNull(code)){
-                        List<DatasetExpression> datasetExpressions = datasetExpressionRepository.findAllByDatasetId(dataset.getId());
-                        for(DatasetExpression datasetExpression : datasetExpressions){
-                            DatasetFile datasetFile = datasetFileRepository.findByDatasetExpressionId(datasetExpression.getId());
-                            if(datasetFile.getPath().contains(code)){
-                                return true;
-                            }
-                        }
-                    }
-                } catch (Exception ignored) {}
+            if(shanoirId.contains(",")){
+                return Arrays.stream(shanoirId.split(",")).anyMatch(split -> Objects.equals(Long.valueOf(split), dataset.getId()));
+            } else {
+                return Objects.equals(Long.valueOf(shanoirId), dataset.getId());
             }
         } catch (JSONException e) {
+            LOG.error("JSON Exception", e);
             return false;
         }
-        return false;
     }
 
     /**
@@ -405,14 +396,14 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         DatasetProperty institutionName = new DatasetProperty();
         institutionName.setDataset(ds);
         institutionName.setName("dicom.InstitutionName");
-        institutionName.setValue(attributes.getString(Tag.InstitutionName));
+        institutionName.setValue("\""+ attributes.getString(Tag.InstitutionName) + "\"");
         institutionName.setProcessing(monitoring);
         properties.add(institutionName);
 
         DatasetProperty institutionAddress = new DatasetProperty();
         institutionAddress.setDataset(ds);
         institutionAddress.setName("dicom.InstitutionAddress");
-        institutionAddress.setValue(attributes.getString(Tag.InstitutionAddress));
+        institutionAddress.setValue("\"" + attributes.getString(Tag.InstitutionAddress) + "\"");
         institutionAddress.setProcessing(monitoring);
         properties.add(institutionAddress);
 
