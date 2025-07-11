@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label [class.required-label]="!useStudyCard">Select a center</label>
             <span class="right-col">
-                <select-box *ngIf="center"
+                <select-box
                         [disabled]="(!study || !centerOptions) || loading"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
