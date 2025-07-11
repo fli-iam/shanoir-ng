@@ -87,6 +87,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected fetchEntity: () => Promise<any>; // optional
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
+
     constructor(
         protected activatedRoute: ActivatedRoute,
         private readonly ROUTING_NAME: string) {
@@ -102,7 +103,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
         this.addBCStep();
         this.mode = this.activatedRoute.snapshot.data['mode'];
-        
+
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
             this.subscriptions.push(this.activatedRoute.params.subscribe(
