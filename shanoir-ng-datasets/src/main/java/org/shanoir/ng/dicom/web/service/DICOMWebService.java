@@ -236,25 +236,42 @@ public class DICOMWebService {
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-                        try(
-				FileInputStream fileIS = new FileInputStream(dicomFile);
-				ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());
-			) {
-				ContentBody contentBody = new InputStreamBody(byteArrIS, ContentType.create(CONTENT_TYPE_DICOM));
-				// build MultipartPart
-				MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-				partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-				partBuilder.setBody(contentBody);
-				MultipartPart multipartPart = partBuilder.build();
-				multipartEntityBuilder.addPart(multipartPart);
-			} catch(Exception e) {
-				LOG.error(e.getMessage(), e);
-				throw new ShanoirException(e.getMessage());
-			}
+			addFileToMultipart(dicomFile, multipartEntityBuilder);
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+	}
+
+	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
+		if (dicomFile == null || !dicomFile.exists()) {
+			LOG.error("sendDicomFileToPacs called with null, or file: not existing.");
+			throw new ShanoirException("sendDicomFileToPacs called with null, or file: not existing.");
+		}
+		LOG.info("Start: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+		multipartEntityBuilder.setBoundary(BOUNDARY);
+		multipartEntityBuilder.setMimeSubtype(RELATED);
+		addFileToMultipart(dicomFile, multipartEntityBuilder);
+		HttpEntity entity = multipartEntityBuilder.build();
+		sendMultipartRequest(entity);
+		LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+	}
+
+	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
+		try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
+			ContentBody contentBody = new InputStreamBody(
+					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
+			// build MultipartPart
+			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+			partBuilder.setBody(contentBody);
+			MultipartPart multipartPart = partBuilder.build();
+			multipartEntityBuilder.addPart(multipartPart);
+		} catch(Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

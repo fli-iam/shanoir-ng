@@ -19,8 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -28,10 +26,13 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.Utils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.amqp.AmqpException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * SubjectStudy service implementation.
@@ -69,7 +70,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         }
 		subjectStudyRepository.saveAll(subjectStudiesDb);
         List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(Utils.toList(subjectStudiesDb));
-			    this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
+        this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
 		return Utils.toList(subjectStudiesDb);
 	}
 	

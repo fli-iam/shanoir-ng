@@ -14,9 +14,8 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -26,7 +25,10 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
@@ -104,13 +106,13 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Datas
             sb.append("none of the ");
         } else {
             sb.append("at least ")
-                .append(getCardinality())
-                .append(" of the ");
+                    .append(getCardinality())
+                    .append(" of the ");
         }
         sb.append("Dataset metadata field '").append(getShanoirField().name())
-            .append("' ").append(getOperation().name())
-            .append(" ")
-            .append(StringUtils.join(getValues(), " or "));        
+                .append("' ").append(getOperation().name())
+                .append(" ")
+                .append(StringUtils.join(getValues(), " or "));        
         return sb.toString();
     }
 

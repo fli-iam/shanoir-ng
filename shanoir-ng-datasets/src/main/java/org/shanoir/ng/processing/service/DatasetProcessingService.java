@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -21,10 +25,6 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * DatasetProcessing service.
@@ -79,6 +79,9 @@ public interface DatasetProcessingService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<DatasetProcessing> findAll();
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<DatasetProcessing> findByInputDatasetId(Long datasetId);
 
     /**
      * Delete an entity.

@@ -28,7 +28,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'reference-form',
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
-    providers: [ReferenceService],
     animations: [slideDown],
     standalone: false
 })

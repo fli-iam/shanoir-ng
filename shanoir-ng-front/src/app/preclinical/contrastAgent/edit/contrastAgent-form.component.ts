@@ -32,7 +32,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'contrast-agent-form',
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
-    providers: [ContrastAgentService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
