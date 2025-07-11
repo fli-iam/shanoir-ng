@@ -32,6 +32,7 @@ import { SessionService } from '../services/session.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import {AbstractControl, ValidatorFn} from "@angular/forms";
 
 declare var JSZip: any;
 
@@ -402,9 +403,9 @@ export class MassDownloadService {
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
-            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
-                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+        if (setup.acquisitionFolders && !dataset.hasProcessing) {
+            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name
                 || dataset.datasetAcquisition.type + '_acquisition';
             str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
             + '_' + dataset.datasetAcquisition.id
@@ -637,7 +638,20 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
-    }  
+    }
+
+    requiredIfTypeIsNii(): ValidatorFn {
+        return (control: AbstractControl) => {
+            const format = control?.parent?.get('format')?.value
+            const isRequired = format === 'nii'
+            const value = control?.value
+
+            if (isRequired && !value) {
+                return {requiredIfTypeIsNii: true}
+            }
+            return null
+        }
+    }
 }
 
 export class DownloadSetup {

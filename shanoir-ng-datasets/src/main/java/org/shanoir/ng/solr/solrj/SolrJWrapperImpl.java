@@ -303,9 +303,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
 			String rangeQueryStr = fieldName + ":[" 
-					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
+					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().atStartOfDay().format(formatter)) : "*")
 					+ " TO "
-					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*") 	
+					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().atStartOfDay().format(formatter)) : "*")
 					+ "]";	
 			query.addFilterQuery(rangeQueryStr);
 		}
