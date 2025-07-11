@@ -65,6 +65,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 this.hasPosition = true;
             }
         }
+        this.modality = 'EEG';
         this.findEegDate();
     }
 
