@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -60,20 +61,23 @@ public class ImportDialogOpener {
 			// Profile OFSEP: search with identifier
 			if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
 				subject = getSubject(importJob);
-			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
-			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob);
-			// init components of GUI and listeners
+			} // else Profile Neurinfo: no search with identifier, user selects existing subject
+			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
+			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
+			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
+			// Init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importJob, importFolder, subject, importStudyAndStudyCardCBIL);
+			InstitutionDicom institutionDicom = importJob.getFirstSelectedSerie().getInstitution();
+			EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
-			// update import dialog with items from server
+			// Update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of the dialog
 			updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-			updateImportDialogForMRICenter(importJob);
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
 			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
 		} catch (Exception e) {
@@ -81,30 +85,6 @@ public class ImportDialogOpener {
 			return;
 		}
 		importDialog.setVisible(true);
-	}
-	
-	/**
-	 * @param uploadJob
-	 */
-	private void updateImportDialogForMRICenter(final ImportJob importJob) {
-		Serie firstSerie = importJob.getFirstSelectedSerie();
-		if (firstSerie != null) {
-			if (firstSerie.getInstitution() == null) {
-				logger.error("updateImportDialogForMRICenter: no institution found for serie: " + firstSerie.getSeriesInstanceUID());
-			} else {
-				importDialog.mriCenterText.setText(firstSerie.getInstitution().getInstitutionName());
-				importDialog.mriCenterAddressText.setText(firstSerie.getInstitution().getInstitutionAddress());
-			}
-			if (firstSerie.getEquipment() == null) {
-				logger.error("updateImportDialogForMRICenter: no equipment found for serie: " + firstSerie.getSeriesInstanceUID());
-			} else {
-				importDialog.mriStationNameText.setText(firstSerie.getEquipment().getStationName());
-				importDialog.mriManufacturerText.setText(firstSerie.getEquipment().getManufacturer());
-				importDialog.mriManufacturersModelNameText.setText(firstSerie.getEquipment().getManufacturerModelName());
-				importDialog.mriMagneticFieldStrengthText.setText(firstSerie.getEquipment().getMagneticFieldStrength());
-				importDialog.mriDeviceSerialNumberText.setText(firstSerie.getEquipment().getDeviceSerialNumber());
-			}
-		}
 	}
 
 	/**
@@ -114,45 +94,44 @@ public class ImportDialogOpener {
 	 * @param equipmentDicom
 	 * @throws Exception 
 	 */
-	private List<Study> getStudiesWithStudyCards(final ImportJob importJob) throws Exception {
+	private List<Study> getStudiesWithStudyCards(final ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {
 			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
-			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
-			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
-			logger.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
-			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
-				Study study = (Study) iterator.next();
-				study.setCompatible(new Boolean(false));
-				Boolean compatibleStudyCard = false;
-				if (studyCards != null) {
-					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
-					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
-						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						// filter all study cards related to the selected study
-						if (study.getId().equals(studyCard.getStudyId())) {
-							studyCardsStudy.add(studyCard);
-							for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-								// find the correct equipment for each study card and add it
-								if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
-									studyCard.setAcquisitionEquipment(acquisitionEquipment);
+			if (studyCards != null) {
+				logger.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
+				for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
+					Study study = (Study) iterator.next();
+					study.setCompatible(new Boolean(false));
+					Boolean compatibleStudyCard = false;
+					if (studyCards != null && study.isWithStudyCards()) {
+						List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
+						for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+							StudyCard studyCard = (StudyCard) itStudyCards.next();
+							// filter all study cards related to the selected study
+							if (study.getId().equals(studyCard.getStudyId())) {
+								studyCardsStudy.add(studyCard);
+								for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+									// find the correct equipment for each study card and add it
+									if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
+										studyCard.setAcquisitionEquipment(acquisitionEquipment);
+									}
+								}
+								// If at least one study card is compatible, then study is compatible
+								if (ImportUtils.flagStudyCardCompatible(
+									studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
+									compatibleStudyCard = true;
 								}
 							}
-							// If at least one study card is compatible, then study is compatible
-							if (ImportUtils.flagStudyCardCompatible(
-								studyCard, importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName(),
-								importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber())) {
-									compatibleStudyCard = true;
-							}
 						}
+						if (compatibleStudyCard) {
+							study.setCompatible(true);
+						} else {
+							study.setCompatible(false);
+						}
+						study.setStudyCards(studyCardsStudy);
 					}
-					if (compatibleStudyCard) {
-						study.setCompatible(true);
-					} else {
-						study.setCompatible(false);
-					}
-					study.setStudyCards(studyCardsStudy);
 				}
 			}
 			return studies;

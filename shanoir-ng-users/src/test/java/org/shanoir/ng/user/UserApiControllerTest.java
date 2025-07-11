@@ -35,7 +35,7 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.user.controller.UserApiController;
 import org.shanoir.ng.user.model.User;
@@ -65,7 +65,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
+@WebMvcTest(controllers = {UserApiController.class, ControllerSecurityService.class, UserPrivacySecurityService.class,
 		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class, 
 		AccessRequestService.class})
 @AutoConfigureMockMvc(addFilters = false)

@@ -36,6 +36,8 @@ public class IdNameCenterStudyDTO extends IdName {
 
 	private Profile profile;
 
+	private Integer studyCardPolicy;
+
 	/**
 	 * Simple constructor.
 	 */
@@ -79,4 +81,13 @@ public class IdNameCenterStudyDTO extends IdName {
 	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
+
+	public Integer getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(Integer studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
+	}
+
 }
