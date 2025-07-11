@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.controler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -75,11 +76,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Autowired
 	private ExaminationService examinationService;
 
-	public DatasetProcessingApiController(){
+	public DatasetProcessingApiController(){}
 
-	}
-
-	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
 			throws RestServiceException {
@@ -94,7 +92,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		}
 	}
 
-	@Override
 	public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		
@@ -105,7 +102,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing.get()), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings() {
 		final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
 		if (datasetProcessings.isEmpty()) {
@@ -114,7 +110,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId) {
 		final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByInputDatasetId(datasetId);
 		if (datasetProcessings.isEmpty()) {
@@ -123,7 +118,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
@@ -131,7 +125,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
@@ -139,7 +132,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
 			@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
@@ -156,7 +148,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(createdDatasetProcessing), HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<Void> updateDatasetProcessing(
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
 			@Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
@@ -182,7 +173,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		}
 	}
 
-	@Override
 	public void massiveDownloadByProcessingIds(
 			@Parameter(description = "ids of processing", required=true) @Valid
 			@RequestBody List<Long> processingIds,
@@ -207,7 +197,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
 	}
 
-	@Override
 	public void massiveDownloadProcessingByExaminationIds(
 			@Parameter(description = "ids of examination", required=true) @Valid
 			@RequestBody List<Long> examinationIds,
@@ -236,5 +225,21 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			}
 		}
 		processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm" , response, false, null);
+	}
+
+	public void complexMassiveDownload(
+			@Parameter(description = "parameters for download", required = true)
+			@Valid @RequestBody JsonNode jsonRequest,
+			HttpServletResponse response) throws Exception {
+		try {
+			LOG.info("Starting complex download for process data.");
+			processingDownloaderService.complexMassiveDownload(jsonRequest, response);
+		}catch (Exception e) {
+			response.setContentType(null);
+			LOG.error("Error while downloading processing data.", e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"Error while downloading processing data."));
+		}
 	}
 }
