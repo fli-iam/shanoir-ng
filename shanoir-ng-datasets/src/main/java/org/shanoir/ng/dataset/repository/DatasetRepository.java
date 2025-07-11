@@ -34,10 +34,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
 	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
-	List<Dataset> findBySourceId(Long sourceDatasetId);
-
-	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
-
 	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
@@ -62,9 +58,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
 
-	void deleteByIdIn(List<Long> ids);
-
 	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
+
+	@Query("SELECT ds FROM Dataset ds " +
+			"LEFT JOIN ds.datasetAcquisition acq " +
+			"LEFT JOIN ds.datasetProcessing dp " +
+			"LEFT JOIN dp.inputDatasets inputDs " +
+			"LEFT JOIN inputDs.datasetAcquisition inputAcq " +
+			"WHERE acq.examination.id = :examId OR inputAcq.examination.id = :examId")
+	List<Dataset> findDatasetAndOutputByExaminationId(Long examId);
+
 
 	@Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
 			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
