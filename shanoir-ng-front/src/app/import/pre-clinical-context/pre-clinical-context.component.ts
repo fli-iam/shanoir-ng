@@ -115,12 +115,13 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
-        step.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
-        step.data.patientName = this.patient.patientName;
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
@@ -145,7 +146,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateExaminationStep(step: Step): void {
-        step.entity = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {

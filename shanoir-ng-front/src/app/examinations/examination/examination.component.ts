@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -34,6 +34,8 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import {ExaminationNode} from "../../tree/tree.model";
+import {Subject} from "../../subjects/shared/subject.model";
+import {SubjectStudy} from "../../subjects/shared/subject-study.model";
 
 @Component({
     selector: 'examination-detail',
@@ -41,7 +43,7 @@ import {ExaminationNode} from "../../tree/tree.model";
     standalone: false
 })
 
-export class ExaminationComponent extends EntityComponent<Examination> {
+export class ExaminationComponent extends EntityComponent<Examination> implements OnDestroy {
 
     @ViewChild('input') private fileInput: ElementRef;
 
@@ -106,7 +108,16 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return super.entity;
     }
 
+    init() {
+        console.log("exam init");
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.examination = res);
+        }
+    }
+
     initView(): Promise<void> {
+        console.log("exam - initView");
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -125,6 +136,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initEdit(): Promise<void> {
+        console.log("exam - initEdit");
         this.getCenters();
         this.getStudies();
 
@@ -136,10 +148,13 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initCreate(): Promise<void> {
+        console.log("exam - initCreate");
         this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
+
         return Promise.resolve();
     }
 
@@ -252,5 +267,13 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
+    }
+
+    ngOnDestroy() {
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
+
+        for (let subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
     }
 }
