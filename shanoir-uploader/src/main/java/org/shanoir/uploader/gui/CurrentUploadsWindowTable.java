@@ -14,13 +14,14 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 
 @SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
@@ -62,12 +63,20 @@ public class CurrentUploadsWindowTable implements Observer {
 		};
 		this.columnNames = columnNames;
 		// Create the non editable table to display the current uploads
-		this.table = new JTable(new DefaultTableModel(columnNames, 0) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		});
+		DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+    		@Override
+    		public boolean isCellEditable(int row, int column) {
+        		return false;
+    		}
+		};
+		this.table = new JTable(model);
+
+		// Activate sorting for comparable content
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
+		sorter.setSortable(7, false);
+		sorter.setSortable(8, false);
+		table.setRowSorter(sorter);
+
 		initTable();
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
@@ -121,12 +130,6 @@ public class CurrentUploadsWindowTable implements Observer {
 				addRow(model, key, nominativeDataImportJob);
 			}
 		}
-		addLastRow(model);
-	}
-
-	private void addLastRow(DefaultTableModel model) {
-		model.addRow(new Object[] { "", "", "", "", "", "", "", "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll") });
 	}
 
 	private void addRow(DefaultTableModel model, String key, ImportJob nominativeDataImportJob) {
@@ -184,16 +187,13 @@ public class CurrentUploadsWindowTable implements Observer {
 
 	public void addLineToTable(String absolutePath, ImportJob nominativeDataImportJob) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		int nbRow = model.getRowCount();
-		model.removeRow(nbRow - 1);
 		addRow(model, absolutePath, nominativeDataImportJob);
-		addLastRow(model);
 	}
 
 	public void updatePercent(String path, String percentage) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		int nbRow = model.getRowCount();
-		for (int i = 0; i < nbRow - 1; i++) {
+		for (int i = 0; i < nbRow; i++) {
 			if (model.getValueAt(i, 0).equals(path)) {
 				model.setValueAt(percentage, i, uploadStateColumn);
 			}
