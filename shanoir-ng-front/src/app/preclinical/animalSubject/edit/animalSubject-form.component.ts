@@ -166,7 +166,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     init() {
-        console.log("preclinical subject init");
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);

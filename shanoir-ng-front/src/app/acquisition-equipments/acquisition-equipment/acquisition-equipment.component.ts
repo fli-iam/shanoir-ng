@@ -71,12 +71,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     async initView(): Promise<void> {
-        console.log("acq-eq initView");
         this.updateAcquEq();
     }
 
     init() {
-        console.log("acquisition init");
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("center").then( res => this.acqEquip.center = res);
@@ -84,7 +82,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initEdit(): Promise<void> {
-        console.log("acq-eq initEdit");
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames()
@@ -95,13 +92,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initCreate(): Promise<void> {
-        console.log("acq-eq initCreate");
         this.entity = new AcquisitionEquipment();
         this.prefill();
         if (this.centersFromStudyCard == null) {
-            console.log("get centers names");
             this.centerService.getCentersNames().then(centers => {
-                console.log("centers : ", centers);
                 this.centers = centers
             });
         }
@@ -115,14 +109,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private prefill() {
         if (this.breadcrumbsService.currentStep.isPrefilled('sc_center')) {
             this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then(res => {
-                console.log("acq eq - prefill sc_center : ", res);
                 this.centersFromStudyCard = res;
                 this.nonEditableCenter = true;
             });
         }
         if (this.breadcrumbsService.currentStep.isPrefilled('center')) {
             this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => {
-                console.log("acq eq - prefill center : ", res);
                 this.acqEquip.center = res;
             });
         }

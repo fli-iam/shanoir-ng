@@ -107,7 +107,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     init() {
-        console.log("exam init");
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);

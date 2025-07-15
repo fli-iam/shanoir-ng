@@ -95,7 +95,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     init() {
-        console.log("subject init");
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
@@ -140,7 +139,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     initCreate(): Promise<void> {
-        console.log("subject initCreate");
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
@@ -149,7 +147,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     buildForm(): UntypedFormGroup {
-        console.log("buildForm");
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],

@@ -383,8 +383,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
 
-        if (this.modality != 'EEG')
-            this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
+        this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
 
         this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         let studycardsOrCentersPromise: Promise<void>;
