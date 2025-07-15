@@ -206,7 +206,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Override
 	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-		@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
 			final BindingResult result) {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(centerId, equipmentDicom);

@@ -38,14 +38,15 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
 		Long userId = KeycloakUtil.getTokenUserId();
 		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-			userId, 
-			ShanoirEventType.IMPORT_DATASET_EVENT, 
-			ShanoirEventType.COPY_DATASET_EVENT, 
-			ShanoirEventType.EXECUTION_MONITORING_EVENT, 
-			ShanoirEventType.CHECK_QUALITY_EVENT, 
-			ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
-			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
-			ShanoirEventType.DELETE_EXAMINATION_EVENT);
+				userId, 
+				ShanoirEventType.IMPORT_DATASET_EVENT, 
+				ShanoirEventType.COPY_DATASET_EVENT, 
+				ShanoirEventType.EXECUTION_MONITORING_EVENT, 
+				ShanoirEventType.CHECK_QUALITY_EVENT, 
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
+				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
+				ShanoirEventType.DELETE_EXAMINATION_EVENT,
+				ShanoirEventType.DELETE_DATASET_EVENT);
  		// Order by last update date
 		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
 			@Override
@@ -70,10 +71,10 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	@Override
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-	long userId = KeycloakUtil.getTokenUserId();
-        UserSseEmitter emitter = new UserSseEmitter(userId);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        return new ResponseEntity<>(emitter,HttpStatus.OK);
+		long userId = KeycloakUtil.getTokenUserId();
+		UserSseEmitter emitter = new UserSseEmitter(userId);
+		emitters.add(emitter);
+		emitter.onCompletion(() -> emitters.remove(emitter));
+		return new ResponseEntity<>(emitter,HttpStatus.OK);
     }
 }

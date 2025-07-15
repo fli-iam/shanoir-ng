@@ -71,7 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected confirmDialogService: ConfirmDialogService;
     private entityRoutes: EntityRoutes;
     protected router: Router;
-    private location: Location;
+    protected location: Location;
     protected formBuilder: UntypedFormBuilder;
     public keycloakService: KeycloakService;
     protected consoleService: ConsoleService;
@@ -100,15 +100,15 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
 
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute);
         this.addBCStep();
-
-        setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
+        this.mode = this.activatedRoute.snapshot.data['mode'];
+        
+        queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
+            if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     this.mode = this.activatedRoute.snapshot.data['mode'];
-                    if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute); // at each routing event
+                    if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute); // at each routing event
                     this.addBCStep();
                     this.isMainComponent = true;
                     const id = +params['id'];

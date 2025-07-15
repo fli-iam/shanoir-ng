@@ -127,21 +127,19 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	
 	@Override
 	public void run(final ApplicationArguments args) throws Exception {
-
-		if(!StringUtils.isBlank(vipSrvEmail)){
-			initKeycloakAdminClient();
-			this.setVIPServiceAccountEmail();
-		}
-
+		
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 			return;
 		}
-
+		
 		if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
 				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
-
+			
 			initKeycloakAdminClient();
+			if(!StringUtils.isBlank(vipSrvEmail)){
+				this.setVIPServiceAccountEmail();
+			}
 
 			int tries = 0;
 			boolean success = false;

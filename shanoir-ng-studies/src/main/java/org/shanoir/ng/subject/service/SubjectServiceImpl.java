@@ -226,6 +226,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
 		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
 		if (subjectDb == null) {
@@ -235,9 +236,9 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
 		}
 		updateSubjectValues(subjectDb, subject);
-		subjectRepository.save(subjectDb);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
-		return subjectDb;
+		Subject newSubject = subjectRepository.save(subjectDb);
+		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
+		return newSubject;
 	}
 
 	/*
@@ -377,7 +378,8 @@ public class SubjectServiceImpl implements SubjectService {
 			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
 			if (subjectStudyList != null) {
 				subjectStudyList.stream().forEach(ss -> {
-					ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+					ss.getSubjectStudyTags().clear();
+					ss.getSubjectStudyTags().addAll(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
 					Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
 					if (studyWithTags != null) {
 						ss.getStudy().setTags(studyWithTags.getTags());

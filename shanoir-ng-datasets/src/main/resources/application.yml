@@ -25,9 +25,10 @@ spring:
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari.maximum-pool-size: 60
-    hikari.minimum-idle:  60
+    hikari.maximum-pool-size: 70
+    hikari.minimum-idle:  70
   jpa:
+    show-sql: true
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -37,6 +38,8 @@ spring:
         db_structure_naming_strategy: legacy
     properties:
       hibernate:
+        format_sql: false
+        use_sql_comments: true
         connection:
           charset: UTF-8
         hbm2ddl:
@@ -100,6 +103,7 @@ ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
@@ -147,6 +151,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
+  shanoir-vip-host: ${HOSTNAME:local}
 
 # Service account
 service-account:
@@ -200,6 +205,7 @@ ms.url:
   shanoir-ng-studies: http://studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:

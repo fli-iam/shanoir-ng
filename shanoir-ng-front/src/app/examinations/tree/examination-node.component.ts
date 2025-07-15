@@ -76,7 +76,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
                     this.input.hasDownloadRights,
                     this.input.examination.preclinical);
             }
-            //this.node.registerOpenPromise(this.contentLoaded);
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -129,7 +129,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
                 return;
             } else {
                 dsAcq.datasets.forEach(ds => {
-                    datasetIds.push(ds.id);
+                    datasetIds?.push(ds.id);
                     if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }

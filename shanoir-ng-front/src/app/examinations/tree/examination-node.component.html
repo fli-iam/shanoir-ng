@@ -28,6 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (chkbxChange)="selectedChange.emit()"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
+        [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && node.id != null">

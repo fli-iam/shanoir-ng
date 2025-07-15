@@ -80,7 +80,6 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
-
 FROM base-microservice as datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -99,6 +98,8 @@ ENV LANGUAGE en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
+
+
 
 COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
@@ -265,7 +266,7 @@ CMD ["-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:25.0.4 as keycloak-base
+FROM quay.io/keycloak/keycloak:26.2.1 as keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -387,6 +388,8 @@ RUN mkdir -p /etc/shanoir-core-template \
 USER solr
 
 COPY --link solr/core /etc/shanoir-core-template/
+COPY --link solr/entrypoint /usr/bin/
 
+ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 

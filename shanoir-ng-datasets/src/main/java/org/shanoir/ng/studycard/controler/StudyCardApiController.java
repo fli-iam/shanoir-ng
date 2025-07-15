@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -74,7 +75,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
-		@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		    @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
         try {
             if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
                 throw new RestServiceException(
@@ -252,8 +253,12 @@ public class StudyCardApiController implements StudyCardApi {
         }
         
         // Update solr metadata
-        solrService.updateDatasetsAsync(datasetIds);
-        
+        try {
+            solrService.updateDatasetsAsync(datasetIds);
+        }catch (Exception e){
+            LOG.error("Solr update failed for datasets {}", datasetIds, e);
+        }
+
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 

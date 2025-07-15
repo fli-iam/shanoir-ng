@@ -25,8 +25,10 @@ import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
 import { Observable } from 'rxjs';
+import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
+export type DatasetLight = {id: number, name: string, type: DatasetType, hasProcessings: boolean, studyId: number};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -93,7 +95,7 @@ export class DatasetService extends EntityService<Dataset> {
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
-                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+                .then(dtos => this.datasetDTOService.toEntityList(dtos, [], 'lazy'));
     }
 
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
@@ -105,12 +107,11 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getByIds(ids: Set<number>): Promise<Dataset[]> {
+    getByIds(ids: Set<number>): Promise<DatasetLight[]> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
-        return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
-            .toPromise()
-            .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
+        return this.http.post<DatasetLight[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
+            .toPromise();
     }
 
     countDatasetsByStudyId(studyId: number): Promise<number> {

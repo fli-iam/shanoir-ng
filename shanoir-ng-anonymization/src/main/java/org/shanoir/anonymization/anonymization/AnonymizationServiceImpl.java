@@ -222,17 +222,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					anonymizeTag(tagInt, action, datasetAttributes);
 				// even: public tags
 				} else if (anonymizationMap.containsKey(tagString)) {
-                                    switch (tagInt) {
-                                        case Tag.SOPInstanceUID -> anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
-                                        case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
-                                        case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
-                                        case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
-                                        case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
-                                        default -> {
-                                            final String action = anonymizationMap.get(tagString);
-                                            anonymizeTag(tagInt, action, datasetAttributes);
-                                        }
-                                    }
+					switch (tagInt) {
+						case Tag.SOPInstanceUID -> anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
+						case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
+						case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
+						case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
+						case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
+						default -> {
+							final String action = anonymizationMap.get(tagString);
+							anonymizeTag(tagInt, action, datasetAttributes);
+						}
+					}
 				} else {
 					if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
 						final String action = anonymizationMap.get(CURVE_DATA_TAGS);
@@ -312,8 +312,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 		}
 		if (checkTagContainsValuePHI(tagInt, value, patientIDAttr)
-			|| checkTagContainsValuePHI(tagInt, value, patientBirthNameAttr)
-			|| checkTagContainsValuePHI(tagInt, value, patientBirthDateAttr)) {
+				|| checkTagContainsValuePHI(tagInt, value, patientBirthNameAttr)
+				|| checkTagContainsValuePHI(tagInt, value, patientBirthDateAttr)) {
 			return "X";
 		}
 		return action;

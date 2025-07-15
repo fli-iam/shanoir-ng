@@ -148,9 +148,11 @@ public class StudyInstanceUIDHandler {
 			if (examination != null) {
 				studyInstanceUID = findStudyInstanceUID(examination);
 				if (studyInstanceUID != null) {
-					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
-					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
-					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
+					String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
+					if (existing == null) {
+						LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
+						LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
+					}
 				}
 			}
 		}

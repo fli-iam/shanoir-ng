@@ -15,15 +15,27 @@
 
 package org.shanoir.ng.dataset.controler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -42,6 +54,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -52,8 +65,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.tag.model.StudyTag;
-import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -75,18 +86,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 
 @Controller
@@ -129,6 +134,9 @@ public class DatasetApiController implements DatasetApi {
 	private ImporterService importerService;
 
 	@Autowired
+	private ProcessedDatasetImporterService processedDatasetImporterService;
+
+	@Autowired
 	private WADODownloaderService downloader;
 
 	@Autowired
@@ -147,13 +155,6 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Autowired
-	private StudyTagService studyTagService;
-
-	@Autowired
-	private DatasetRepository datasetRepository;
-
-
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
 
@@ -165,13 +166,11 @@ public class DatasetApiController implements DatasetApi {
 			if (ds == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
+			LOG.info("Deletion of dataset with ID: " + ds.getId());
 			Long studyId = datasetService.getStudyId(ds);
-
-
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
-
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException | RestServiceException e) {
 			throw e;
@@ -187,6 +186,10 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody List<Long> datasetIds)
 			throws RestServiceException {
 		try {
+			if (datasetIds.size() > DATASET_LIMIT) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + datasetIds.size() + " datasets. You can't delete more than " + DATASET_LIMIT + " datasets."));
+			}
 			datasetService.deleteByIdIn(datasetIds);
 			solrService.deleteFromIndex(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -251,54 +254,23 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetLight>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
-		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		List<DatasetLight> datasets = datasetService.findLightByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
-		List<DatasetWithDependenciesDTOInterface> dtos = new ArrayList<>();
-		for(Dataset dataset : datasets){
-			if (dataset instanceof MrDataset) {
-				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
-			} else if (dataset instanceof EegDataset) {
-				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
-			} else {
-				dtos.add(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset));
-			}
-		}
-
-		return new ResponseEntity<>(dtos, HttpStatus.OK);
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
-	@Override
-	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws EntityNotFoundException, SolrServerException, IOException {
-		Dataset ds = datasetService.findById(datasetId);
-		if (ds == null) {
-			throw new EntityNotFoundException(Dataset.class, datasetId);
+  	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
+		List<Dataset> datasets;
+		if(output){
+			datasets = datasetService.findDatasetAndOutputByExaminationId(examinationId);
+		} else {
+			datasets = datasetService.findByExaminationId(examinationId);
 		}
-
-		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
-
-		ds.setTags(new ArrayList<>());
-
-		for(StudyTag tag : tags){
-			if(tag.getStudy().getId().equals(ds.getStudyId())){
-				ds.getTags().add(tag);
-			}
-		}
-
-		datasetRepository.save(ds);
-
-		solrService.indexDataset(datasetId);
-
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-  @Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
-		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -327,23 +299,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-		
-		final List<Examination> examinations = examinationService.findByStudyId(studyId);
-		if (examinations.isEmpty()) {
+	
+		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
+		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		List<Dataset> datasets = new ArrayList<Dataset>();
-		for(Examination examination : examinations) {
-			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasets.add(dataset);
-				}
-			}
-		}
-		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
 	@Override
@@ -400,7 +363,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
-		Long datasetId) throws IOException, MessagingException {
+			Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);
 		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
@@ -413,7 +376,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
-		importerService.createProcessedDataset(importJob);
+		processedDatasetImporterService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -594,8 +557,7 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(description = "Subject name including regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
-			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws IOException {
+			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws IOException {
 
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;

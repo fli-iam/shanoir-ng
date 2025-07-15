@@ -69,6 +69,9 @@ public class Serie implements Cloneable {
 	@JsonProperty("seriesNumber")
 	private String seriesNumber;
 
+	@JsonProperty("acquisitionTime")
+	private String acquisitionTime;
+
 	@JsonProperty("numberOfSeriesRelatedInstances")
 	private Integer numberOfSeriesRelatedInstances;
 
@@ -120,7 +123,8 @@ public class Serie implements Cloneable {
 		sopClassUID = attributes.getString(Tag.SOPClassUID);
 		seriesDescription = attributes.getString(Tag.SeriesDescription);
 		seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		seriesNumber = attributes.getString(Tag.SeriesNumber);
+		seriesNumber = Integer.toString(attributes.getInt(Tag.SeriesNumber, 0));
+		acquisitionTime = attributes.getString(Tag.AcquisitionTime);
 		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		modality = attributes.getString(Tag.Modality);
 		protocolName = attributes.getString(Tag.ProtocolName);
@@ -332,6 +336,14 @@ public class Serie implements Cloneable {
 		this.isEnhanced = isEnhanced;
 	}
 
+	public String getAcquisitionTime() {
+		return acquisitionTime;
+	}
+
+	public void setAcquisitionTime(String acquisitionTime) {
+		this.acquisitionTime = acquisitionTime;
+	}
+
 	public String getSequenceName() {
 		return sequenceName;
 	}
@@ -350,6 +362,8 @@ public class Serie implements Cloneable {
 		sB.append(this.protocolName);
 		sB.append(", ");
 		sB.append(this.seriesNumber);
+		sB.append(", ");
+		sB.append(this.acquisitionTime);
 		sB.append(", ");
 		sB.append(this.numberOfSeriesRelatedInstances);
 		sB.append(", ");

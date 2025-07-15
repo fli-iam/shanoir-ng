@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.tag.model.StudyTagDTO;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.tag.model.StudyTagDTOLight;
 
 
 /**
@@ -52,7 +52,7 @@ public class DatasetDTO {
 
 	private boolean inPacs;
 	
-	private List<StudyTagDTO> tags;
+	private List<StudyTagDTOLight> tags;
 
 	private Long source;
 
@@ -195,11 +195,11 @@ public class DatasetDTO {
 		this.inPacs = inPacs;
 	}
 
-	public List<StudyTagDTO> getTags() {
+	public List<StudyTagDTOLight> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<StudyTagDTO> tags) {
+	public void setTags(List<StudyTagDTOLight> tags) {
 		this.tags = tags;
 	}
 

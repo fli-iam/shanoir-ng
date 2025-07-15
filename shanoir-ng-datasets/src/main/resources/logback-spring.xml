@@ -28,6 +28,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </filter>
     </appender>
 
+    <appender name="RUNNER" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><pattern>${CONSOLE_LOG_PATTERN}</pattern></encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
     <appender name="EVENT_FILE_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/shanoir-ng-logs/shanoir-events.log</file>
         <append>true</append>
@@ -73,6 +81,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     
     <logger name="org.shanoir.ng.examination.schedule.ExaminationsConsistencyChecker" level="INFO" additivity="false">
         <appender-ref ref="ECC_FILE_LOG" />
+    </logger>
+
+    <logger name="org.shanoir.ng.solr.runner" level="INFO" additivity="false">
+        <appender-ref ref="RUNNER" />
+    </logger>
+
+    <logger name="org.shanoir.ng.vip.monitoring.schedule" level="INFO" additivity="false">
+        <appender-ref ref="RUNNER" />
     </logger>
 
     <root level="INFO">

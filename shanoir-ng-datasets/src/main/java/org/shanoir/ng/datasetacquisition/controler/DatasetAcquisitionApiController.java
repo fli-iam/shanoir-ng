@@ -166,7 +166,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(Long examinationId) {
-		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
 

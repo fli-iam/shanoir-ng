@@ -59,8 +59,6 @@ import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +113,7 @@ public class MainWindow extends JFrame {
 	public JLabel connexionStatus;
 
 	private FindDicomActionListener fAL;
-	private DownloadOrCopyActionListener dOCAL;
+	public DownloadOrCopyActionListener dOCAL;
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
@@ -128,6 +126,7 @@ public class MainWindow extends JFrame {
 	public String studyDate = "";
 	public String modality;
 	JScrollPane scrollPaneUpload;
+	public JButton deleteFinishedUploads;
 
 	public JLabel startedDownloadsLB;
 	public JProgressBar downloadProgressBar;
@@ -145,10 +144,10 @@ public class MainWindow extends JFrame {
 
 	public ResourceBundle resourceBundle;
 	public ShUpConfig shanoirUploaderConfiguration;
+
+	public ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	
 	private ImportDialogOpener importDialogOpener;
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	/**
 	 * Create the frame.
@@ -213,7 +212,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), dOCAL);
+				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), ShUpOnloadConfig.getPseudonymizer());
 			}
 		});
 
@@ -316,7 +315,11 @@ public class MainWindow extends JFrame {
 		gbc_queryPanelLabel.gridy = 0;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
 
-		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
+		ImageIcon infoIcon = new ImageIcon(getClass().getResource("/images/info.png"));
+
+		JLabel queryLevelLabel = new JLabel();
+		queryLevelLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.queryLevelLabel") + " <img src='" + infoIcon + "'> :</html>");
+		queryLevelLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.queryLevel.tooltip"));
 		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
 		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
 		gbc_queryLevelLabel.insets = new Insets(5, 5, 2, 0);
@@ -328,7 +331,7 @@ public class MainWindow extends JFrame {
 		queryLevelRG = new ButtonGroup();
 
 		// "Patient" Radio Button
-		pRB = new JRadioButton("Patient");
+		pRB = new JRadioButton(resourceBundle.getString("shanoir.uploader.queryLevelPatient"));
 		pRB.setSelected(true);
 		queryLevelRG.add(pRB);
 		queryRadioPanel.add(pRB);
@@ -347,7 +350,9 @@ public class MainWindow extends JFrame {
 		gbc_radioPanel.fill = GridBagConstraints.HORIZONTAL;
 		queryPanel.add(queryRadioPanel, gbc_radioPanel);
 
-		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
+		JLabel patientNameLabel = new JLabel();
+		patientNameLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.patientNameLabel") + " <img src='" + infoIcon + "'> :</html>");
+		patientNameLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.patientNameLabel.tooltip"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_patientNameLabel = new GridBagConstraints();
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
@@ -366,8 +371,6 @@ public class MainWindow extends JFrame {
 		queryPanel.add(patientNameTF, gbc_patientNameTF);
 		patientNameTF.setColumns(15);
 		patientNameTF.setText("");
-		patientNameTF.setToolTipText(resourceBundle.getString("shanoir.uploader.patientNameLabel.tooltip"));
-
 
 		// If fields Patient name, Patient ID and Study description are empty
 		// Query DICOM server button is grey
@@ -489,7 +492,9 @@ public class MainWindow extends JFrame {
 			}
 		});
 		
-		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
+		JLabel studyDescriptionLabel = new JLabel();
+		studyDescriptionLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.studyDescriptionLabel") + " <img src='" + infoIcon + "'> :</html>");
+		studyDescriptionLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
 		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
 		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
 		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
@@ -599,7 +604,8 @@ public class MainWindow extends JFrame {
 		
 		String[] modalityList = { "MR", "CT", "PT", "NM", "XA", "None" };
 		JComboBox<String> modalityCB = new JComboBox<String>(modalityList);
-		modalityCB.setSelectedIndex(0);
+		// We set by default the modality to None because some PACS do not support modality at Patient or even Study root query
+		modalityCB.setSelectedIndex(modalityList.length - 1);
 		GridBagConstraints gBC_modality = new GridBagConstraints();
 		gBC_modality.anchor = GridBagConstraints.WEST;
 		gBC_modality.insets = new Insets(5, 5, 0, 0);
@@ -813,18 +819,7 @@ public class MainWindow extends JFrame {
 		
 		menuBar.add(Box.createHorizontalGlue());
 		
-		/**
-		 * Init pseudonymizer and subjectIdentifierGenerator and create
-		 * DownloadOrCopyActionListener, and add AL to button.
-		 */
-		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-		Pseudonymizer pseudonymizer = null;
-		try {
-			pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
-		} catch (PseudonymusException e) {
-			logger.error(e.getMessage(), e);
-		}
-		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient, dicomFileAnalyzer);
+		dOCAL = new DownloadOrCopyActionListener(this, ShUpOnloadConfig.getPseudonymizer(), dicomServerClient, dicomFileAnalyzer);
 		downloadOrCopyButton.addActionListener(dOCAL);
 		downloadOrCopyButton.setEnabled(false);
 		
@@ -961,14 +956,29 @@ public class MainWindow extends JFrame {
 		// add main split pane here
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"), null, mainSplitPane,
 				resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
-		JPanel currentUploadsPanel = new JPanel(false);
+		JPanel currentUploadsPanel = new JPanel(new BorderLayout());
 		// and below the current uploads panel
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.currentUploadsTab"), null, currentUploadsPanel,
 				resourceBundle.getString("shanoir.uploader.currentUploadsTab.tooltip"));
 		scrollPaneUpload = new JScrollPane();
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
-		currentUploadsPanel.add(scrollPaneUpload);
+		currentUploadsPanel.add(scrollPaneUpload, BorderLayout.CENTER);
+
+		// Add delete all finished uploads button
+		deleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll"));
+		deleteFinishedUploads.setFont(new Font("SansSerif", Font.BOLD, 14));
+		deleteFinishedUploads.setBackground(new Color(220, 53, 69));
+		deleteFinishedUploads.setForeground(Color.WHITE);
+		deleteFinishedUploads.setFocusPainted(false);
+		deleteFinishedUploads.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+		deleteFinishedUploads.setToolTipText(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.add(deleteFinishedUploads);
+
+		currentUploadsPanel.add(buttonPanel, BorderLayout.SOUTH);
+
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
