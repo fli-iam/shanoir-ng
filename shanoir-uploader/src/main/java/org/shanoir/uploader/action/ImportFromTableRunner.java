@@ -427,7 +427,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				List<Examination> examinationsFilteredByStudy = examinations.parallelStream()
 					.filter(e -> e.getStudyId().equals(studyREST.getId()))
 					.collect(Collectors.toList());
-				for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
+				for (Iterator<Examination> iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 					Examination examination = (Examination) iterator.next();
 					// Existing exam found with the same study date: stop importJob and take next one
 					Date examinationDate = examination.getExaminationDate();
@@ -455,21 +455,20 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
 			studyDescription = importJob.getExaminationComment();
 		}
-		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
-		if (examinationId == null) {
-			importJobData.setUploadState(UploadState.ERROR);
+		Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
+		if (examination == null) {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
 			csvWriter.addExaminationLine(false, line);
 			logger.error(importJob.getErrorMessage());
 			return false;
 		}
-		importJob.setExaminationId(examinationId);
 
-		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json");
+		logger.info("7. Prepare importJob in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(),
+			examination.getId(), examination.getStudyInstanceUID(), studyREST, studyCard);
 		Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();

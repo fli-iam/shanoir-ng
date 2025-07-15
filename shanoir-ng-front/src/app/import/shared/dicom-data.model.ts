@@ -24,6 +24,7 @@ export class ImportJob {
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;
+    studyInstanceUID: string;
     studyId: number;
     studyCardId: number;
     acquisitionEquipmentId: number;
@@ -36,7 +37,6 @@ export class ImportJob {
 }
 
 export class PatientDicom {
-
     subject: SimpleSubject;
     patientID: string;
     patientName: string;
@@ -52,7 +52,6 @@ export class StudyDicom {
     studyDescription: string;
     studyDate: Date;
     series: SerieDicom[];
-
     selected: boolean;
 }
 

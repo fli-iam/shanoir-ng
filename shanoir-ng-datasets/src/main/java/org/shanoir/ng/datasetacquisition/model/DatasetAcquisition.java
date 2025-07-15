@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
@@ -121,12 +122,18 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	private LocalDateTime acquisitionStartTime;
 
+    /**
+     * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light, and generated during pseudonymization.
+     */
+    @Column(name = "series_instance_uid", unique = true)
+    private String seriesInstanceUID;
+
 	public DatasetAcquisition() {
 	}
 
 	public DatasetAcquisition(DatasetAcquisition other) {
 		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
-
 		this.examination = other.examination;
 		this.studyCard = null;
 		this.studyCardTimestamp = other.studyCardTimestamp;
@@ -291,7 +298,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	public void setCopies(List<DatasetAcquisition> copies) {
 		this.copies = copies;
 	}
-		
+
     public LocalDateTime getAcquisitionStartTime() {
         return acquisitionStartTime;
     }
@@ -299,4 +306,13 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
         this.acquisitionStartTime = acquisitionStartTime;
     }
+
+	public String getSeriesInstanceUID() {
+		return seriesInstanceUID;
+	}
+
+	public void setSeriesInstanceUID(String seriesInstanceUID) {
+		this.seriesInstanceUID = seriesInstanceUID;
+	}
+
 }
