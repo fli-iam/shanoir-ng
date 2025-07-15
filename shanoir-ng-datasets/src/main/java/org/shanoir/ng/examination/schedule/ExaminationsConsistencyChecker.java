@@ -12,12 +12,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.joda.time.Instant;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
@@ -215,7 +213,7 @@ public class ExaminationsConsistencyChecker {
 	}
 
 	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS, String[] line,
-		Map<Long, String> examinationIDToStudyInstanceUID, List<Long> emptyExaminations) {
+			Map<Long, String> examinationIDToStudyInstanceUID, List<Long> emptyExaminations) {
 		Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
 		filesInPACS.parallelStream().forEach(f -> {
 			String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
