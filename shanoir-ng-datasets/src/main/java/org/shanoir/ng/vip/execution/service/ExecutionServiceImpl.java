@@ -16,7 +16,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -77,7 +75,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private Utils utils;
-    
+
+
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
