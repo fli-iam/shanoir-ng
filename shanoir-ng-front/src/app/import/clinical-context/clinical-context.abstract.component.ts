@@ -373,6 +373,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private selectDefaultEquipment(options: Option<AcquisitionEquipment>[]) {
+        if (options?.length == 1) {
+            this.acquisitionEquipment = options[0].value;
+        }
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.acquisitionEquipment = founded;
@@ -493,7 +496,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
+
+            this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledCenter());
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).center = this.updateStudyCenter(entity as Center);

@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select a center</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!study || !centerOptions) || loading"
+                        [disabled]="!study || loading"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
@@ -66,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select a center equipment</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!center || !acquisitionEquipmentOptions) || loading"
+                        [disabled]="!center || loading"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
