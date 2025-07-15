@@ -43,7 +43,7 @@ public class ImportFinishRunnable implements Runnable {
 		 */
 		boolean anonymizationSuccess = false;
 		try {
-			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ANONYMIZATION_PROFILE);
+			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
 			anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName, importJob.getStudyInstanceUID());
 		} catch (IOException e) {
 			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
