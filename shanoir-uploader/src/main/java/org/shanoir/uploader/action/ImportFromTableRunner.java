@@ -457,7 +457,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
 		if (examination == null) {
-			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
 			csvWriter.addExaminationLine(false, line);
