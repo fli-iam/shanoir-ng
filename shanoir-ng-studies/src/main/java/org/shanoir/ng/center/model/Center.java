@@ -70,7 +70,7 @@ public class Center extends HalEntity {
 	@NotBlank
 	@Column(unique = true)
 	@Unique
-	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
+	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT", "ROLE_USER" })
 	private String name;
 
 	@Pattern(regexp = "[\\+]?[\\d]*")
