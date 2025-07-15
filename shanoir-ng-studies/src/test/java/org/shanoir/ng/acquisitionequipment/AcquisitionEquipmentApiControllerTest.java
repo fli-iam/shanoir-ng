@@ -33,7 +33,7 @@ import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +72,8 @@ public class AcquisitionEquipmentApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+	@MockBean(name = "controllerSecurityService")
+	private ControllerSecurityService controllerSecurityService;
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
@@ -91,7 +91,7 @@ public class AcquisitionEquipmentApiControllerTest {
 		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(equip));
 		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(equip));
 		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(equip);
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
+		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
 	}
 
 	@Test

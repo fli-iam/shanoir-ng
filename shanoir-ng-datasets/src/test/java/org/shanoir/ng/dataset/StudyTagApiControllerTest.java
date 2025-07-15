@@ -14,12 +14,22 @@
 
 package org.shanoir.ng.dataset;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
@@ -41,6 +51,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -48,7 +59,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.shanoir.ng.tag.service.StudyTagService;
@@ -65,17 +76,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for dataset controller.
@@ -124,8 +125,8 @@ public class StudyTagApiControllerTest {
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
 	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+	@MockBean(name = "controllerSecurityService")
+	private ControllerSecurityService controllerSecurityService;
 	
     @TempDir
     private File tempDir;
@@ -150,6 +151,9 @@ public class StudyTagApiControllerTest {
 	
 	@MockBean
 	private ImporterService importerService;
+
+	@MockBean
+	private ProcessedDatasetImporterService processedDatasetImporterService;
 	
 	@MockBean
 	private DicomSEGAndSRImporterService dicomSRImporterService;
@@ -182,7 +186,7 @@ public class StudyTagApiControllerTest {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
+		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);

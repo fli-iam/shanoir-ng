@@ -123,7 +123,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				 * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
 				 * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
 				 */
-				series.sort(new SeriesNumberOrDescriptionSorter());
+				series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 			}
 		}
 	}
@@ -200,11 +200,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {
 			instanceFilePath.append(folderFileAbsolutePath)
-				.append(File.separator)
-				.append(serie.getSeriesInstanceUID())
-				.append(File.separator)
-				.append(instance.getSopInstanceUID())
-				.append(SUFFIX_DCM);
+					.append(File.separator)
+					.append(serie.getSeriesInstanceUID())
+					.append(File.separator)
+					.append(instance.getSopInstanceUID())
+					.append(SUFFIX_DCM);
 		} else {
 			String[] instancePathArray = instance.getReferencedFileID();
 			if (instancePathArray != null) {
@@ -303,9 +303,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+				|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
@@ -362,7 +362,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
 			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
 			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 	
@@ -448,6 +448,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
 		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		if (StringUtils.isEmpty(serie.getModality())) {
+			serie.setModality(attributes.getString(Tag.Modality));
+		}
 	}
 
 	/**

@@ -86,7 +86,8 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             newLine += executionMonitoring.getId() + ",";
             newLine += executionMonitoring.getInputDatasets().getFirst().getDatasetAcquisition().getExamination().getId() + ",";
             newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
-            newLine += executionMonitoring.getInputDatasets().stream().filter(dataset -> Objects.nonNull(dataset.getOriginMetadata())).map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("").substring(0, 66) + ",,,";
+            String names = executionMonitoring.getInputDatasets().stream().filter(dataset -> Objects.nonNull(dataset.getOriginMetadata())).map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("");
+            newLine += (names.length() > 66 ? names.substring(0, 66) : names ) + ",,,";
 
             writer.write(newLine);
         } catch (IOException e) {

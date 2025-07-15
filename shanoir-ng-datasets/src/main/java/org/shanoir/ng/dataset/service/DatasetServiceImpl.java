@@ -229,6 +229,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<DatasetLight> findLightByStudyId(Long studyId) {
+		return Utils.toList(repository.findAllLightByStudyId(studyId));
+	}
+
+	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
 		Long studyId;
@@ -253,7 +258,12 @@ public class DatasetServiceImpl implements DatasetService {
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		try {
-			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			Long studyId;
+			if (ds.getDatasetProcessing() == null) {
+				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			} else {
+				studyId = ds.getStudyId();
+			}
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
@@ -395,6 +405,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
+		return repository.findDatasetAndOutputByExaminationId(examinationId);
+	}
+
+	@Override
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
 		for (Dataset dataset : datasets) {
@@ -448,22 +463,22 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @return
 	 */
 	@Override
-	public Long getStudyId(Dataset dataset){
+	public Long getStudyId(Dataset dataset) {
 		if (dataset.getStudyId() != null) {
 			return dataset.getStudyId();
 		}
 		if (dataset.getDatasetProcessing() != null) {
 			return dataset.getDatasetProcessing().getStudyId();
 		}
-		try {
-			LOG.error(objectMapper.writeValueAsString(dataset));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
 		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
-		return null;
+		try {
+			LOG.error(objectMapper.writeValueAsString(dataset));
+			return null;
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
