@@ -75,8 +75,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private Utils utils;
-
-
+    
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
