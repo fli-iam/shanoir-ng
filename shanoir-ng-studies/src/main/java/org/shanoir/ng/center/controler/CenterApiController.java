@@ -103,6 +103,12 @@ public class CenterApiController implements CenterApi {
 		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
 	}
 
+	/**
+	 * This method is used by ShanoirUploader, during mass imports (Excel) and imports for studies
+	 * without study cards. We could add a check here to only allow this method on studies, that have
+	 * no study cards, but this would block existing mass imports into today's studies, that is why
+	 * we do not add this restriction today.
+	 */
 	@Override
 	@Transactional
 	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
