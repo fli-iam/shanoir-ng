@@ -57,9 +57,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Value("${vip.uri}")
     private String vipUrl;
 
-//    @Autowired
-//    private ExecutionMonitoringServiceImpl executionMonitoringService;
-    private ExecutionMonitoringService executionMonitoringService;
+    @Autowired
+    private ExecutionMonitoringServiceImpl executionMonitoringService;
+
     @Autowired
     private ProcessingResourceServiceImpl processingResourceService;
 
@@ -77,12 +77,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private Utils utils;
-
-    @Autowired
-    public void setExecutionMonitoringService(@Lazy ExecutionMonitoringService executionMonitoringService) {
-        this.executionMonitoringService = executionMonitoringService;
-    }
-
+    
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
