@@ -33,6 +33,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -504,6 +505,20 @@ public class StudyServiceImpl implements StudyService {
 		}
 		setNumberOfSubjectsAndExaminations(studies);
 		setFilePaths(studies);
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studies);
+	}
+
+	@Override
+	public List<IdName> findAllNames() {
+		List<IdName> studies;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			studies = studyRepository.findAllIdAndName();
+		} else {
+			studies = studyRepository
+					.findIdAndNameByUserAndRight(
+							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+		}
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
 	}

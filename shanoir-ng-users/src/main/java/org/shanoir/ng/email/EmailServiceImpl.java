@@ -22,10 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
@@ -88,6 +90,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String MOTIVATION = "motivation";
 
 	private static final String STUDYCARD_URL = "studyCardUrl";
+
+	private static final String LINK = "link";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
@@ -638,5 +642,45 @@ public class EmailServiceImpl implements EmailService {
 		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
 		mailSender.send(messagePreparator);
 	}
+
+    @Override
+    public void notifyDuaDraftCreation(DuaDraftWrapper mail) {
+        Optional<User> user = userRepository.findById(mail.getSenderUserId());
+		if (user.isEmpty()) {
+			throw new IllegalStateException("cannot find the dua draft issuer, given id : " + mail.getSenderUserId());
+		} else {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(user.get().getEmail());
+				messageHelper.setTo(mail.getRecipienEmailAddress());
+				messageHelper.setSubject("[Shanoir] pleaser help configure DUA for study " + mail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(FIRSTNAME, user.get().getFirstName());
+				variables.put(LASTNAME, user.get().getLastName());
+				variables.put(STUDY_NAME, mail.getStudyName());
+				variables.put(LINK, mail.getDuaLink());
+				final String content = build("notifyDuaDraftCreation", variables);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending notifyDuaDraftCreation mail from {} for study {}", user.get().getId(), mail.getStudyName());
+			mailSender.send(messagePreparator);
+
+			messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(user.get().getEmail());
+				messageHelper.setSubject("[Shanoir] DUA draft created for study " + mail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(STUDY_NAME, mail.getStudyName());
+				variables.put(LINK, mail.getDuaLink());
+				final String content = build("notifyStudyAdminDuaDraftCreation", variables);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending notifyStudyAdminDuaDraftCreation mail to {} for study {}", user.get().getId(), mail.getStudyName());
+			mailSender.send(messagePreparator);
+		}
+    }
 
 }

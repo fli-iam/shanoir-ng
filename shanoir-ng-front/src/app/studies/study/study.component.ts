@@ -49,6 +49,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
 import { Tag } from 'src/app/tags/tag.model';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-detail',
@@ -520,6 +521,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
+        let newStudy: boolean = !this.study?.id; 
         return super.save(() => {
             let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
@@ -549,11 +551,21 @@ export class StudyComponent extends EntityComponent<Study> {
                             'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                             .then(userChoice => {
                                 if (userChoice) {
-                                    this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                                    this.router.navigate(['/study-card/create', {studyId: study.id}]).then(() => {
+                                        setTimeout(() => {
+                                            if (newStudy) this.breadcrumbsService.currentStep.data.goDUA = study.id;
+                                        });
+                                    });
+                                } else if (newStudy) { // cancel
+                                    DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
                                 }
                             });
+                    } else if (newStudy) {
+                        DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
                     }
                 })
+            } else if (newStudy) {
+                DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
             return study;
         });
