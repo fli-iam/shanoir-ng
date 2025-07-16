@@ -632,7 +632,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let context = this.getContext();
         return (
             !!context.study
-            && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject?.subjectStudy?.subjectType

@@ -209,7 +209,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let context = this.getContext();
         return (
             context.study
-            && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
