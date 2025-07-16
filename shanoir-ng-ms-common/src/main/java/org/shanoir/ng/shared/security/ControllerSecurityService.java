@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ControlerSecurityService {
+public class ControllerSecurityService {
 		
 	/**
 	 * Check that id and entity.getId() matches.
