@@ -1,13 +1,12 @@
-name: Release ShanoirUploader App
+name: ShanoirUploader Build & Release
+
+concurrency:
+  group: shanoir-uploader-release
+  cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - master
-    paths: 
-      - 'shanoir-uploader/**'
+  workflow_dispatch:
  
-
 jobs:
   setup-version:
     runs-on: ubuntu-latest

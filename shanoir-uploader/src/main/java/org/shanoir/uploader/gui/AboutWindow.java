@@ -29,7 +29,7 @@ public class AboutWindow extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
 
-	String supportMail = "developers_shanoir@inria.fr";
+	String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail");;
 
 	public AboutWindow(final ResourceBundle resourceBundle) {
 		// Create the frame.
@@ -65,7 +65,8 @@ public class AboutWindow extends JFrame {
 				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: 2025-06");
+		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: "
+				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 9));
 		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
 		JLabel copyrightLabel = new JLabel(

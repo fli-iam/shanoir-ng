@@ -20,8 +20,6 @@ public class ShUpConfig {
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION;
 	
-	public static final String RELEASE_DATE = "2025-06-27"; // Do we keep it ?
-	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public static final String PROFILES_PROPERTIES = "profiles.properties";
@@ -71,6 +69,8 @@ public class ShUpConfig {
 	public static final int UPLOAD_SERVICE_INTERVAL = 5;
 
 	public static final String RANDOM_SEED = "random.seed";
+
+	public static final String RELEASE_DATE = "release.date";
 	
 	public static final String PROFILE = "profile";
 	
