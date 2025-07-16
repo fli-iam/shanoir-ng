@@ -390,7 +390,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
         this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         let studycardsOrCentersPromise: Promise<void>;
-        if (this.useStudyCard && this.modality == 'MR') {
+        if (this.useStudyCard && (this.modality == 'MR' || this.modality == 'bruker')) {
             studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
                 this.studycardOptions = options;
                 return this.selectDefaultStudyCard(options);

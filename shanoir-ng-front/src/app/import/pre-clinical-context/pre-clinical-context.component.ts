@@ -47,6 +47,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     postConstructor() {
         this.patient = this.importDataService.patients[0];
         this.useStudyCard = true;
+        this.modality = 'bruker';
     }
 
     protected exitCondition(): boolean {
