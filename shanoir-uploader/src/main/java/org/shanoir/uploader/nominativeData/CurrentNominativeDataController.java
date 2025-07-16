@@ -47,7 +47,6 @@ public class CurrentNominativeDataController {
 
 	private CurrentUploadsWindowTable cuw;
 
-
 	@SuppressWarnings("deprecation")
 	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) throws IOException {
 		this.cuw = cuw;
@@ -81,6 +80,7 @@ public class CurrentNominativeDataController {
 					for (int i = 0; i < rows; i++) {
 						String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
 						if (uploadState.equals(cuw.finishedUploadState)
+								|| uploadState.equals(cuw.checkOKUploadState)
 								|| uploadState.equals(cuw.errorUploadState)) { // Delete Error uploads as well ?
 							DeleteDirectory dt = new DeleteDirectory();
 							dt.delete((String) model.getValueAt(i, 0));
@@ -114,7 +114,9 @@ public class CurrentNominativeDataController {
 				// delete one import: ready (to gain disk space) or finished
 				if (col == cuw.deleteColumn) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
-					if (uploadState.equals(cuw.checkOKUploadState)
+					if (uploadState.equals(cuw.finishedUploadState)
+							|| uploadState.equals(cuw.checkOKUploadState)
+							|| uploadState.equals(cuw.checkKOUploadState)
 							|| uploadState.equals(cuw.readyUploadState)) {
 						try {
 							showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
@@ -327,4 +329,5 @@ public class CurrentNominativeDataController {
 			return sb.toString();
 		}
 	}
+
 }
