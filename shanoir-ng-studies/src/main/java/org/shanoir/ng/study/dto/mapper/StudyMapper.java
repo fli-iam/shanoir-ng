@@ -28,6 +28,7 @@ import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyCardPolicy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
@@ -92,5 +93,10 @@ public interface StudyMapper {
 		@Mapping(target = "subjectPreclinical", source = "subject.preclinical")
 	})
 	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
+
+	default Integer map(StudyCardPolicy policy) {
+        if (policy == null) return null;
+        return policy.getId();
+    }
 
 }
