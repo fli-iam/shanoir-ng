@@ -61,7 +61,6 @@ public class InitialStartupState implements State {
 	public void load(StartupStateContext context) throws Exception {
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
-		logger.info("Release Date: " + ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 9));
 		logger.info("Java Vendor: " + System.getProperty("java.vendor"));
 		logger.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
 		logger.info("Java Version: " + System.getProperty("java.version"));

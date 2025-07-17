@@ -4,7 +4,7 @@
 
 	<groupId>org.shanoir.uploader</groupId>
 	<artifactId>shanoir-uploader</artifactId>
-	<version>2.6.5</version> <!-- Version to be modified when pushing a release, if not will be updated for the release only with last NG_ tag version-->
+	<version>2.6.5</version> <!-- Version to be modified when pushing a release, if not will be updated anyway for the release with last NG_ tag version-->
 	<packaging>jar</packaging>
 
 	<name>ShanoirUploader</name>

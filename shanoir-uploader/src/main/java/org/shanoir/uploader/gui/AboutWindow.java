@@ -66,7 +66,7 @@ public class AboutWindow extends JFrame {
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
 		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: "
-				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 9));
+				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 10));
 		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
 		JLabel copyrightLabel = new JLabel(
@@ -77,8 +77,7 @@ public class AboutWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightPseudonymus"));
 		addItem(aboutPanel, copyrightPseudonymusLabel, 0, 6, 1, GridBagConstraints.CENTER);
 
-		final JLabel SupportLabel = new JLabel(
-				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.supportMail"));
+		final JLabel SupportLabel = new JLabel(supportMail);
 		addItem(aboutPanel, SupportLabel, 0, 7, 1, GridBagConstraints.CENTER);
 
 		SupportLabel.addMouseListener(new MouseAdapter() {
@@ -86,7 +85,7 @@ public class AboutWindow extends JFrame {
 			public void mouseClicked(MouseEvent event) {
 				try {
 					Desktop.getDesktop().mail(new URI(
-							"mailto:" + resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.supportMail")));
+							"mailto:" + supportMail));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
@@ -114,7 +113,7 @@ public class AboutWindow extends JFrame {
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 		int windowWidth = 415;
-		int windowHeight = 300;
+		int windowHeight = 327;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
 
