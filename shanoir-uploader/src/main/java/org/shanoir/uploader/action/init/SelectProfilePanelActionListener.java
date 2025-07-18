@@ -41,18 +41,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 		if (selectProfilePanel.rbRememberProfile.isSelected()) {
 			logger.info("Saving Profile selected in basic.properties file.");
 			String fileName = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
-			final File propertiesFile = new File(fileName);
-			boolean propertiesExists = propertiesFile.exists();
-			if (propertiesExists) {
-				try (OutputStream out = new FileOutputStream(propertiesFile);){
-					Properties props = ShUpConfig.basicProperties;
-					props.setProperty(ShUpConfig.PROFILE, selectedProfile);
-					// Store the new Profile configuration in the basic.properties file
-					props.store(out, "Profile Configuration");
-				} catch (Exception exception) {
-					logger.error("Failed to save selected Profile : " + exception.getMessage());
-				}
-			}
+			PropertiesUtil.storePropertyToFile(fileName, ShUpConfig.basicProperties, ShUpConfig.PROFILE, selectedProfile);
 		}
 		sSC.nextState();
 	}

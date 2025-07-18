@@ -1,5 +1,6 @@
 package org.shanoir.uploader.service.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -20,6 +21,8 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
@@ -43,6 +46,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * 
@@ -956,6 +963,44 @@ public class ShanoirUploaderServiceClient {
 				throw new Exception("Error in postDicomSR");
 			}
 		}		
+	}
+
+	public Attributes getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
+		long startTime = System.currentTimeMillis();
+		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
+			+ "/" + examinationUID
+			+ "/series/" +  seriesInstanceUID
+			+ "/instances/" + sopInstanceUID);
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.getDicom(url.toString())) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.debug("getDicomInstance: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					String contentType = entity.getContentType();
+	                byte[] rawData = EntityUtils.toByteArray(entity);
+					ByteArrayDataSource ds = new ByteArrayDataSource(rawData, contentType);
+					MimeMultipart multipart = new MimeMultipart(ds);
+					if (multipart.getCount() > 0) {
+						MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
+						try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
+							return din.readDataset();
+						}
+					} else {
+						throw new RuntimeException("No parts found in multipart DICOM response.");
+					}
+				}
+			} else {
+				logger.error("Error in getDicomInstance: status code: "
+					+ code + ", message: "
+					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in getDicomFile");
+			}
+		}
+		return null;	
 	}
 
 }
