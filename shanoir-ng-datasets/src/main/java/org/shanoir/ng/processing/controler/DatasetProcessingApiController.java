@@ -18,21 +18,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.apache.poi.ss.extractor.ExcelExtractor;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
-import org.shanoir.ng.processing.service.ProcessingDownloaderServiceImpl;
+import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -42,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {
@@ -71,7 +65,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	private DatasetProcessingService datasetProcessingService;
 
 	@Autowired
-	private ProcessingDownloaderServiceImpl processingDownloaderService;
+	private ProcessingDownloaderService processingDownloaderService;
 
 	@Autowired
 	private ExaminationService examinationService;
@@ -234,12 +228,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		try {
 			LOG.info("Starting complex download for process data.");
 			processingDownloaderService.complexMassiveDownload(jsonRequest, response);
+			LOG.info("Complex download completed.");
 		}catch (Exception e) {
 			response.setContentType(null);
 			LOG.error("Error while downloading processing data.", e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"Error while downloading processing data."));
 		}
 	}
 }

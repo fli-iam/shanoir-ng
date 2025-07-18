@@ -6,6 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.solr.common.util.Pair;
+import org.assertj.core.util.Lists;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -79,8 +80,8 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     }
 
     public void complexMassiveDownload(@Valid JsonNode jsonRequest, HttpServletResponse response) throws Exception{
-        List<List<Long>> datasetIdsPerExtraction = new ArrayList<>();
-        List<Boolean> inputPerExtraction = new ArrayList<>();
+        Map<Integer, List<Long>> datasetIdsPerExtraction = new HashMap<>();
+        Map<Integer, Boolean> inputPerExtraction = new HashMap<>();
         List<Integer> extractionIdList = new ArrayList<>();
 
         if(!jsonRequest.has("data_to_extract")){
@@ -93,9 +94,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 throw new Exception("An extraction definition is missing an extraction identifier.");
             }
 
-            extractionIdList.add(extraction.get("extraction_identifier").asInt());
-            inputPerExtraction.add(extraction.get("input").asBoolean(false));
-            datasetIdsPerExtraction.add(extraction.get("extraction_identifier").asInt(), getDatasetIdsFromJsonFilters(extraction));
+            Integer extractionId = extraction.get("extraction_identifier").asInt();
+            extractionIdList.add(extractionId);
+            inputPerExtraction.put(extractionId, extraction.get("input").asBoolean(false));
+            datasetIdsPerExtraction.put(extractionId, getDatasetIdsFromJsonFilters(extraction));
+            LOG.info("Results for extraction {} query are :{}", extractionId, datasetIdsPerExtraction.get(extractionId));
         }
 
         response.setContentType("application/zip");
@@ -103,7 +106,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             downloadDatasetsWithJsonSorting(datasetIdsPerExtraction, inputPerExtraction, extractionIdList, jsonRequest, zipOutputStream);
         } catch (Exception e) {
-            throw new Exception("An error occured while generating the zip.", e);
+            LOG.error("An error occured while generating the zip.", e);
         }
     }
 
@@ -196,7 +199,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return path;
     }
 
-    protected void downloadDatasetsWithJsonSorting(List<List<Long>> datasetIdsPerExtraction, List<Boolean> inputPerExtraction, List<Integer> extractionIdList, @Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) {
+    protected void downloadDatasetsWithJsonSorting(Map<Integer, List<Long>> datasetIdsPerExtraction, Map<Integer, Boolean> inputPerExtraction, List<Integer> extractionIdList, @Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) {
         List<String> sortingType = StreamSupport.stream(jsonRequest.get("sorting").spliterator(), false).map(JsonNode::asText).toList();
         List<Long> processingWithInputsAlreadyDownloaded = new ArrayList<>();
         Map<Long, DatasetDownloadError> downloadErrors = new HashMap<Long, DatasetDownloadError>();
@@ -260,8 +263,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 downloadErrors.remove(dataset.getId());
             }
         } catch (RestServiceException | IOException e) {
-            LOG.error("An error while zipping dataset " + dataset.getId() + " for complex processing download.");
-        }
+            LOG.error("An error while zipping dataset {} for complex processing download.", dataset.getId(), e);        }
     }
 
     protected String getDatasetFilepath(Dataset dataset, List<String> sortingType, String processingName) {
@@ -293,20 +295,21 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             throw new Exception("The extraction " + extraction.get("extraction_identifier") + "has no filters array.");
         } else if(extraction.get("filter").isEmpty()) {
             throw new Exception("There is no extraction filter defined for the extraction " + extraction.get("extraction_identifier") + "." );
-        } else if (!StreamSupport.stream(extraction.get("filter").spliterator(), false).map(JsonNode::asText).anyMatch(filterType -> filterType.contains("processing"))){
+        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing"))){
             throw new Exception("There is no processing filter defined for the extraction " + extraction.get("extraction_identifier") + "." );
         }
 
         List<String> queryFilters = new ArrayList<>();
         String query = "SELECT dataset.id FROM dataset dataset " +
-                "JOIN dataset_metadata AS metadata ON metadata.id = dataset.metadata_id " +
+                "JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id " +
                 "JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id " +
+                "JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id " +
                 "JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id " +
                 "JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id " +
                 "JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id " +
                 "JOIN examination AS examination ON acquisition.examination_id = examination.id " +
                 "JOIN subject ON dataset.subject_id = subject.id " +
-                "JOIN study ON subject.study_id = study.id " +
+                "JOIN study ON examination.study_id = study.id " +
                 "WHERE ";
 
         for(JsonNode filter : extraction.get("filter")) {
@@ -317,7 +320,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 queryFilter += " IS " + value.asBoolean();
             } else {
                 String valueStr = value.asText();
-                if(valueStr.replaceAll(",","").trim().matches("\\d+")){
+                if(queryFilter.endsWith("date")) {
+                    queryFilter += "'" + valueStr + "'";
+                } else if(valueStr.replaceAll(",","").trim().matches("\\d+")){
                     queryFilter += " IN (" + valueStr + ")";
                 } else {
                     queryFilter += " REGEXP '" + valueStr.replaceAll(",", "|") + "'";
@@ -325,17 +330,24 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             }
             queryFilters.add(queryFilter);
         }
-        query += queryFilters + String.join(" AND ", queryFilters) + ";";
+        query += String.join(" AND ", queryFilters) + ";";
 
         try{
             return em.createNativeQuery(query).getResultList();
         } catch (Exception e) {
-            throw new Exception("There is an issue with the filters of the extraction " + extraction.get("extraction_identifier") + ". Please check that they are correct, otherwise take contact with the dev team." );
+            LOG.error("There is an issue with the filters of the extraction " + extraction.get("extraction_identifier") + ". Please check that they are correct, otherwise take contact with the dev team.");
+            throw e;
         }
     }
 
     //Some types need a tiny change. For example, dataset.name does not exist, metadata.name is required here.
     protected String correctFilterType(String type) {
-        return ""; //TODO
+        String table = type.split("\\.")[0];
+        String field = type.split("\\.")[1];
+        return switch (table) {
+            case "dataset" -> Lists.list("name", "pipeline_identifier").contains(field) ? "metadata." + field : type;
+            case "processing" -> Lists.list("name", "comment").contains(field) ? "monitoring." + field : type;
+            default -> type;
+        };
     }
 }
