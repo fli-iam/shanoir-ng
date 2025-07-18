@@ -65,6 +65,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 this.hasPosition = true;
             }
         }
+        this.modality = 'EEG';
         this.findEegDate();
     }
 
@@ -127,7 +128,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getContext(): EegContextData {
-        return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
+        return new EegContextData(this.study, null, this.useStudyCard, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.coordsystem, null, null, null, null, null, null);
     }
 
@@ -177,9 +178,10 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
     }
 
     protected getPrefilledSubject(): Subject {
@@ -193,7 +195,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        step.entity = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {
@@ -214,7 +216,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateAcqEqStep(step: Step) {
-        step.entity = this.getPrefilledAcqEqt();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledAcqEqt());
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {

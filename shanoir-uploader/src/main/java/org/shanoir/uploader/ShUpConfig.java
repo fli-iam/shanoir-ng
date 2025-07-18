@@ -18,9 +18,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
-	
-	public static final String RELEASE_DATE = "2025-06-05";
+	public static final String SHANOIR_UPLOADER_VERSION;
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -57,6 +55,8 @@ public class ShUpConfig {
 	public static final String KEYCLOAK_JSON = "keycloak.json";
 	
 	public static final String SU = ".su";
+
+	public static final String DEV = "dev";
 	
 	public static final String USER_HOME = "user.home";
 
@@ -69,6 +69,8 @@ public class ShUpConfig {
 	public static final int UPLOAD_SERVICE_INTERVAL = 5;
 
 	public static final String RANDOM_SEED = "random.seed";
+
+	public static final String RELEASE_DATE = "release.date";
 	
 	public static final String PROFILE = "profile";
 	
@@ -140,5 +142,21 @@ public class ShUpConfig {
 	public static boolean isModeSubjectStudyIdentifier() {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_SUBJECT_STUDY_IDENTIFIER));
 	}
+
+	/**
+	 * Static initialization block to set the ShanoirUploader version.
+	 * Used to manage the version only in pom.xml.
+	 */
+	static {
+        String version = DEV;
+        Package pkg = ShUpConfig.class.getPackage();
+        if (pkg != null) {
+            String currentVersion = pkg.getImplementationVersion();
+            if (currentVersion != null) {
+                version = "v" + currentVersion;
+            }
+        }
+        SHANOIR_UPLOADER_VERSION = version;
+    }
 
 }
