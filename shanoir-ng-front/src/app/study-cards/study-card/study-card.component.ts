@@ -90,13 +90,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy();
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -171,7 +171,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
                 if (err.status != 404) throw err;
             });
             form.get('acquisitionEquipment').enable();
-            this.centerService.getCentersNamesByStudyId(study.id).then(centers => this.centers = centers);
+            this.centerService.getCentersNamesByStudyId(study.id).then(centers => {
+                this.centers = centers;
+                this.breadcrumbsService.currentStep.addPrefilled("center", this.centers);
+            });
         } else {
             form.get('acquisitionEquipment').disable();
             this.studyCard.acquisitionEquipment = null;
@@ -251,7 +254,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             }
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;
+                    this.entity.acquisitionEquipment = entity as AcquisitionEquipment;
                 })
             );
         });

@@ -36,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li class="info" *ngIf="study && useStudyCard && studycardOptions && studycardOptions.length == 0">
+        <li class="info" *ngIf="study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == 'MR'">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>No study cards are configured on this study, please create one before trying to import MR data.</strong>
             <ng-container *ngIf="!isAdminOfStudy[study.id]">
@@ -46,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <br/><a (click)="createStudyCard()">Click here to create a study card</a>
             </ng-container>
         </li>
-        <li *ngIf="useStudyCard" @slideDown>
+        <li *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" @slideDown>
             <label class="required-label">Select a study card</label>
             <span class="right-col">
                 <select-box
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li class="info" *ngIf="study && scHasCoilToUpdate">
+        <li class="info" *ngIf="study && scHasCoilToUpdate && useStudyCard">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>That study card contains coil references that need to be precised.</strong>
             <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank.
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
             </ng-container>
         </li>
-        <li class="info" *ngIf="scHasDifferentModality && study">
+        <li class="info" *ngIf="scHasDifferentModality && study && useStudyCard">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>That study card would set a different modality than detected in your data.</strong>
             <br/>Your data says <strong>{{modality}}</strong> while the study card would set <strong>{{scHasDifferentModality}}</strong> in the imported metadata.
@@ -83,12 +83,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ng-container>
         </li>
         <li>
-            <label *ngIf="modality == 'MR'" [class.required-label]="!useStudyCard">Acquisition center</label>
-            <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an acquisition center</label>
+            <label *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" [class.required-label]="useStudyCard">Acquisition center</label>
+            <label *ngIf="!useStudyCard || (modality != 'MR' && modality != 'bruker')" [class.required-label]="!useStudyCard">Select an acquisition center</label>
             <span class="right-col">
-                <select-box *ngIf="!useStudyCard || center"
+                <select-box *ngIf="(modality == 'MR' && !useStudyCard) || modality != 'MR' || center"
                         [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
-                        [readOnly]="useStudyCard"
+                        [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
@@ -109,12 +109,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ng-container>
         </li>
         <li>
-            <label *ngIf="modality == 'MR'" [class.required-label]="!useStudyCard">Center equipment</label>
-            <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select a center equipment</label>
+            <label *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" [class.required-label]="useStudyCard">Center equipment</label>
+            <label *ngIf="!useStudyCard || (modality != 'MR' && modality != 'bruker')" [class.required-label]="!useStudyCard">Select a center equipment</label>
             <span class="right-col">
-                <select-box *ngIf="!useStudyCard || acquisitionEquipment"
+                <select-box *ngIf="(modality == 'MR' && !useStudyCard) || modality != 'MR' || acquisitionEquipment"
                         [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
-                        [readOnly]="useStudyCard"
+                        [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
@@ -213,7 +213,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label>
             <span class="right-col">
-                <select-box class="examination-select" 
+                <select-box class="examination-select"
                         [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
                         [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">

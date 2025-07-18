@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,6 +20,10 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {Step} from "../../breadcrumbs/breadcrumbs.service";
+import {Subject} from "../../subjects/shared/subject.model";
+import {SubjectStudy} from "../../subjects/shared/subject-study.model";
+import {ImagedObjectCategory} from "../../subjects/shared/imaged-object-category.enum";
 
 @Component({
     selector: 'manufacturer-detail',
@@ -28,7 +32,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 })
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {
-    
+
     isNameUniqueError = null;
 
     constructor (
@@ -63,7 +67,7 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
             .then(manuf => {
                 this.manuf = manuf;
             });
-    }   
+    }
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
@@ -75,6 +79,4 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
-
-
 }
