@@ -1,5 +1,9 @@
 # Single-study subject
 
+DROP TABLE subject_group_of_subjects;
+
+DROP TABLE group_of_subjects;
+
 # Extend subject with columns from subject_study
 ALTER TABLE subject
 	ADD COLUMN study_identifier VARCHAR(255),
