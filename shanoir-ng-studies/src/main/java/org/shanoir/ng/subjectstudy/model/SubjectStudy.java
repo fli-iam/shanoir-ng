@@ -54,7 +54,6 @@ public class SubjectStudy extends AbstractEntity {
 	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
 
-	/** Study. */
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	@NotNull
@@ -76,7 +75,7 @@ public class SubjectStudy extends AbstractEntity {
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
 	
-	/** StudyCard tags associated to the subject. */
+	/** QualityCard tags associated to the subject. */
 	private Integer qualityTag;
 
 	/**
