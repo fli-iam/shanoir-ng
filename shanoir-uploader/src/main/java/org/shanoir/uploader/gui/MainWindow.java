@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,6 +25,7 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -60,8 +62,11 @@ import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
+import org.shanoir.uploader.utils.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.formdev.flatlaf.FlatLightLaf;
 
 
 /**
@@ -117,6 +122,7 @@ public class MainWindow extends JFrame {
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
+	public JCheckBoxMenuItem checkOnServerMenuItem;
 	public boolean isFromPACS;
 	public boolean isDicomObjectSelected = false;
 
@@ -160,12 +166,7 @@ public class MainWindow extends JFrame {
 		this.resourceBundle = resourceBundle;
 		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION;
 		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
+			UIManager.setLookAndFeel(new FlatLightLaf());
 		} catch (Exception e) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -226,7 +227,6 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		// add Server Configuration and Dicom configuration Menu Items
 		JMenuItem mntmDicomServerConfiguration = new JMenuItem(
 				resourceBundle.getString("shanoir.uploader.configurationMenu.dicomServer"));
 		mnConfiguration.add(mntmDicomServerConfiguration);
@@ -244,7 +244,21 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		// Language Configuration Menu
+		checkOnServerMenuItem = new JCheckBoxMenuItem(
+    		resourceBundle.getString("shanoir.uploader.configurationMenu.checkOnServer"));
+		mnConfiguration.add(checkOnServerMenuItem);
+		String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
+		checkOnServerMenuItem.addItemListener(e -> {
+			boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
+			if (selected) {
+				logger.info("Saving check.on.server true in basic.properties file.");
+				PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.TRUE.toString());
+			} else {
+				logger.info("Saving check.on.server false in basic.properties file.");
+				PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
+			}
+		});
+
 		JMenuItem mntmLanguage = new JMenuItem(resourceBundle.getString("shanoir.uploader.configurationMenu.language"));
 		mnConfiguration.add(mntmLanguage);
 		mntmLanguage.addActionListener(new ActionListener() {
@@ -254,6 +268,10 @@ public class MainWindow extends JFrame {
 						resourceBundle);
 			}
 		});
+
+		JCheckBoxMenuItem pseudonymizeAfterCopyOrDownloadMenuItem = new JCheckBoxMenuItem(
+    		resourceBundle.getString("shanoir.uploader.configurationMenu.pseudonymizeAfterCopyOrDownload"));
+		mnConfiguration.add(pseudonymizeAfterCopyOrDownloadMenuItem);
 
 		JMenu mnHelp = new JMenu(resourceBundle.getString("shanoir.uploader.helpMenu"));
 		menuBar.add(mnHelp);
