@@ -30,7 +30,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
-    providers: [PathologyModelService, PathologyService],
     animations: [slideDown],
     standalone: false
 })
@@ -109,7 +108,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         this.router.navigate(['/preclinical-pathology/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 this.pathologies.push(entity as Pathology);
-                (currentStep.entity as PathologyModel).pathology = entity as Pathology;
+                this.entity.pathology = entity as Pathology;
             });
         });
     }

@@ -1,8 +1,12 @@
 package org.shanoir.uploader.service.rest;
 
 import org.shanoir.uploader.ShUpConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceConfiguration {
+
+	private static final Logger logger = LoggerFactory.getLogger(ServiceConfiguration.class);
 
 	/** Constructeur privé */
 	private ServiceConfiguration() {
@@ -89,12 +93,6 @@ public class ServiceConfiguration {
 	}
 
 	public String getTestURL() {
-		if (ShUpConfig.proxyProperties.getProperty("proxy.test.url") != null
-				&& !ShUpConfig.proxyProperties.getProperty("proxy.test.url").equals("")) {
-			return (ShUpConfig.proxyProperties.getProperty("proxy.test.url"));
-		} else {
-			return "https://shanoir.irisa.fr";
-		}
+		return ShUpConfig.profileProperties.getProperty("shanoir.server.url");
 	}
-
 }

@@ -72,10 +72,10 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         if (getUpdatedSubjectStudies() == null) return;
         for (SubjectStudy original : study.getSubjectStudyList()) {
             getUpdatedSubjectStudies().removeIf(updated -> 
-                updated.getId().equals(original.getId()) 
-                && updated.getQualityTag() != null
-                && updated.getQualityTag().equals(original.getQualityTag())
-             );
+                    updated.getId().equals(original.getId()) 
+                    && updated.getQualityTag() != null
+                    && updated.getQualityTag().equals(original.getQualityTag())
+            );
         }
     }
 

@@ -74,6 +74,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.updateAcquEq();
     }
 
+    init() {
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("center").then( res => this.acqEquip.center = res);
+        }
+    }
+
     initEdit(): Promise<void> {
         this.getManufModels();
         return Promise.all([
@@ -84,24 +91,35 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    async initCreate(): Promise<void> {
+    initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
         this.prefill();
         if (this.centersFromStudyCard == null) {
-            this.centerService.getCentersNames().then(centers => this.centers = centers);
+            this.centerService.getCentersNames().then(centers => {
+                this.centers = centers
+            });
         }
         else {
             this.centers = this.centersFromStudyCard;
         }
         this.getManufModels();
+        return Promise.resolve();
     }
 
     private prefill() {
-        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
-        this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
-        if (this.nonEditableCenter) {
-            this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
-        } else if (this.acqEquip.center) {
+        if (this.breadcrumbsService.currentStep.isPrefilled('sc_center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then(res => {
+                this.centersFromStudyCard = res;
+                this.nonEditableCenter = true;
+            });
+        }
+        if (this.breadcrumbsService.currentStep.isPrefilled('center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => {
+                this.acqEquip.center = res;
+            });
+        }
+        // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
+        if (this.acqEquip.center) {
             // Clean center
             let centerSelected: Center = new Center();
             centerSelected.id = this.acqEquip.center.id;
@@ -143,7 +161,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+                    this.entity.manufacturerModel = entity as ManufacturerModel;
                 })
             );
         });

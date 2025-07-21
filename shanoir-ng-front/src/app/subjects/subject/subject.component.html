@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<form-footer
 				[state]="footerState"
-				(save)="save()"
+				(save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
@@ -58,19 +58,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="mode == 'create' && humanSelected() && importMode != 'EEG'">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="isAlreadyAnonymized == true"
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="subject.isAlreadyAnonymized == true"
 								/>Yes
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'subject.isAlreadyAnonymized'?'subject.isAlreadyAnonymized == false' :'true' "
 								/>No
 							</span>
 						</li>
-						<li class="info" *ngIf="!isAlreadyAnonymized && mode == 'create'" [@slideDown]="!isAlreadyAnonymized && mode == 'create'">
+						<li class="info" *ngIf="!subject.isAlreadyAnonymized && mode == 'create'" [@slideDown]="!subject.isAlreadyAnonymized && mode == 'create'">
 							<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
 							This can help you to identify a subject that has already been inserted into the database.
 							<br/>To ensure anonymity, the first name and the last name will not be saved.
 							<br/>Note that the birth date will be set to January 1st of the birth year for the same reason.
 						</li>
-						<li *ngIf="!isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
+						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First name</label>
 							<span class="right-col">
 								<input *ngIf="importMode != 'DICOM'" type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 							</span>
 						</li>
-						<li *ngIf="!isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
+						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last name</label>
 							<span class="right-col">
                                 <input *ngIf="importMode != 'DICOM'" type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.sex}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box formControlName="sex" [(ngModel)]="subject.sex" [options]="genderOptions">
+									<select-box [formControl]="form.controls['sex']" [(ngModel)]="subject.sex" [options]="genderOptions">
 									</select-box>
 								</ng-template>
 							</span>
@@ -179,7 +179,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
-				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+				<subject-study-list
+                    [allowRemove]="true" [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
                 <label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && forceStudy">

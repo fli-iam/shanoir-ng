@@ -28,7 +28,7 @@ import org.shanoir.ng.manufacturermodel.controler.ManufacturerModelApiController
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -61,8 +61,8 @@ public class ManufacturerModelApiControllerTest {
 	@MockBean
 	private ManufacturerModelService manufacturerModelServiceMock;
 	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+	@MockBean(name = "controllerSecurityService")
+	private ControllerSecurityService controllerSecurityService;
 
 	@BeforeEach
 	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -72,7 +72,7 @@ public class ManufacturerModelApiControllerTest {
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
 		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
 				.willReturn(model);
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
+		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
 	}
 
 	@Test

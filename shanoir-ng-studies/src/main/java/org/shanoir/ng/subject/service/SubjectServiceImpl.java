@@ -237,9 +237,10 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
 		}
 		updateSubjectValues(subjectDb, subject);
-		Subject s = subjectRepository.save(subjectDb);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(s));
-		return s;
+
+		Subject newSubject = subjectRepository.save(subjectDb);
+		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
+		return newSubject;
 	}
 
 	/*

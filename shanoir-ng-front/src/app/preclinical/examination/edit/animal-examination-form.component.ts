@@ -96,7 +96,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     get examination(): Examination { return this.entity; }
-    set examination(examination: Examination) { this.entity = examination; }
+    set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
         return this.examinationService;
@@ -104,6 +104,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromExamination(this.examination);
+    }
+
+    init() {
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);
+        }
     }
 
     initView(): Promise<void> {
