@@ -114,6 +114,13 @@ export class DatasetService extends EntityService<Dataset> {
             .toPromise();
     }
 
+    getFullByIds(ids: Set<number>): Promise<Dataset[]> {
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', Array.from(ids).join(","));
+        return this.http.post<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL + '/allFullById', formData)
+            .toPromise();
+    }
+
     countDatasetsByStudyId(studyId: number): Promise<number> {
         return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
         .toPromise();

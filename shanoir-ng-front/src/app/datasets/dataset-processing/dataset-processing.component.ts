@@ -234,6 +234,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 }
             })
         );
+        this.datasetService.getFullByIds(new Set<number>(this.datasetProcessing.inputDatasets.map(it=>it.id))).then(list => formGroup.get("inputDatasetList").setValue(list));
+        this.datasetService.getFullByIds(new Set<number>(this.datasetProcessing.outputDatasets.map(it=>it.id))).then(list => formGroup.get("outputDatasetList").setValue(list));
         return formGroup;
     }
 

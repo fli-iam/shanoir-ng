@@ -350,7 +350,7 @@ public interface DatasetApi {
 			throws RestServiceException, IOException;
 
 
-	@Operation(summary = "", description = "If exists, returns the datasets corresponding to the given ids")
+	@Operation(summary = "", description = "If exists, returns the light datasets corresponding to the given ids")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -359,5 +359,16 @@ public interface DatasetApi {
 	@PostMapping(value = "/allById", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetLight>> findDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
+
+	@Operation(summary = "", description = "If exists, returns the datasets corresponding to the given ids")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PostMapping(value = "/allFullById", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<Dataset>> findFullDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 }
