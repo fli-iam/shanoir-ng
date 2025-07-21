@@ -10,9 +10,10 @@ ALTER TABLE subject
     ADD COLUMN study_identifier VARCHAR(255),
     ADD COLUMN physically_involved BIT(1),
     ADD COLUMN subject_type INT(11),
-    ADD COLUMN quality_tag INT(11);
+    ADD COLUMN quality_tag INT(11)
+    ADD CONSTRAINT unique_subject_name_study_id UNIQUE (name, study_id);;
 
-# Copy columns from subject_study into subject (single-study subject already)
+# Copy columns from subject_study into all subjects (single-study subject already)
 UPDATE subject s
 JOIN (
     SELECT subject_id,
@@ -23,7 +24,6 @@ JOIN (
            MAX(study_id) AS study_id
     FROM subject_study
     GROUP BY subject_id
-    HAVING COUNT(*) = 1
 ) ss ON s.id = ss.subject_id
 SET
     s.study_identifier = ss.subject_study_identifier,
@@ -32,7 +32,7 @@ SET
     s.quality_tag = ss.quality_tag,
     s.study_id = ss.study_id;
 
-# Add new subject, in case multi-study subject
+# Add new subject, in case multi-study subject and only for additional studies
 INSERT INTO subject (
     birth_date,
     identifier,
@@ -71,5 +71,7 @@ JOIN (
     GROUP BY subject_id
     HAVING COUNT(*) > 1
 ) multi ON ss.subject_id = multi.subject_id
-JOIN subject s ON ss.subject_id = s.id;
+JOIN subject s ON ss.subject_id = s.id
+LEFT JOIN subject existing ON existing.name = s.name AND existing.study_id = ss.study_id
+WHERE existing.id IS NULL;
 
