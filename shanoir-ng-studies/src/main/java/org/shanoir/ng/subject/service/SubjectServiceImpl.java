@@ -216,6 +216,7 @@ public class SubjectServiceImpl implements SubjectService {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}
+			// @todo: Manage create subject: multi studies here
 			SubjectStudy subjectStudy = subject.getSubjectStudyList().get(0);
 			subject.setStudy(subjectStudy.getStudy());
 			subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
