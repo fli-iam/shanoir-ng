@@ -270,6 +270,11 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		subjectDb.setStudy(subject.getStudy());
+		subjectDb.setStudyIdentifier(subject.getStudyIdentifier());
+		subjectDb.setPhysicallyInvolved(subject.isPhysicallyInvolved());
+		subjectDb.setQualityTag(subject.getQualityTag());
+		subjectDb.setSubjectType(subject.getSubjectType());
 		// @todo: create new subject in database here
 		if (subject.getSubjectStudyList() != null) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
