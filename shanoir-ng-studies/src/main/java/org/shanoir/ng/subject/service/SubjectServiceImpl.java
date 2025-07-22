@@ -280,9 +280,21 @@ public class SubjectServiceImpl implements SubjectService {
 					subjectDb.setSubjectType(subjectStudyNew.getSubjectType());
 					Long studyIdDb = subjectStudyDb.getStudy().getId();
 					if (!studyIdNew.equals(studyIdDb)) {
-						subjectDb.setId(Long.valueOf(-1));
-						// Create new subject, if new subject study
-						subjectRepository.save(subjectDb);
+						Subject newSubject = new Subject();
+						newSubject.setName(subject.getName());
+						newSubject.setIdentifier(subject.getIdentifier());
+						newSubject.setSex(subject.getSex());
+						newSubject.setManualHemisphericDominance(subject.getManualHemisphericDominance());
+						newSubject.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
+						newSubject.setImagedObjectCategory(subject.getImagedObjectCategory());
+						newSubject.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+						newSubject.setStudy(subjectStudyNew.getStudy());
+						newSubject.setStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
+						newSubject.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
+						newSubject.setQualityTag(subjectStudyNew.getQualityTag());
+						newSubject.setSubjectType(subjectStudyNew.getSubjectType());
+						// Create new subject without subject study, if new subject study
+						subjectRepository.save(newSubject);
 					}
 				}
 			}
