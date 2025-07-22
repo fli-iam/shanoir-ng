@@ -10,9 +10,13 @@ ECHO ERROR: No JAR file found with the pattern shanoir-uploader-*-jar-with-depen
 EXIT /b 1
 
 :found
+FOR /F "tokens=3 delims=-" %%v IN ("!JAR_FILE!") DO (
+    set "APP_VERSION=v%%v"
+)
+
 IF EXIST "%JAVA_HOME%\bin\javaw.exe" (
 	ECHO Starting ShanoirUploader using JAVA_HOME...
-	"%JAVA_HOME%\bin\javaw.exe" -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -jar "%JAR_FILE%" org.shanoir.uploader.ShanoirUploader  
+	"%JAVA_HOME%\bin\javaw.exe" -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -Dapp.version=!APP_VERSION! -jar "!JAR_FILE!" org.shanoir.uploader.ShanoirUploader  
 ) ELSE (
 	java.exe -version >nul 2>&1
 	IF %ERRORLEVEL% NEQ 0 (
@@ -20,6 +24,6 @@ IF EXIST "%JAVA_HOME%\bin\javaw.exe" (
 		pause
 	) ELSE (
 		ECHO Starting ShanoirUploader without JAVA_HOME...
-		javaw -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -jar "%JAR_FILE%" org.shanoir.uploader.ShanoirUploader
+		javaw -Dhttps.protocols=TLSv1.2 -Xms512m -Xmx2g -Xnoclassgc -Dapp.version=!APP_VERSION! -jar "!JAR_FILE!" org.shanoir.uploader.ShanoirUploader
 	)
 )
