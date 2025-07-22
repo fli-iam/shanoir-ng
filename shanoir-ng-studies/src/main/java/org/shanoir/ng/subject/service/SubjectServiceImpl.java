@@ -259,15 +259,33 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		// Update new columns for future clients
 		subjectDb.setStudy(subject.getStudy());
 		subjectDb.setStudyIdentifier(subject.getStudyIdentifier());
 		subjectDb.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 		subjectDb.setQualityTag(subject.getQualityTag());
 		subjectDb.setSubjectType(subject.getSubjectType());
-		// @todo: create new subject in database here
+		// Old clients: still send subject study list
 		if (subject.getSubjectStudyList() != null) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
+			for (SubjectStudy subjectStudyNew : subjectStudyListNew) {
+				Long studyIdNew = subjectStudyNew.getStudy().getId();
+				for (SubjectStudy subjectStudyDb : subjectStudyListDb) {
+					// Update values in any case
+					subjectDb.setStudy(subjectStudyNew.getStudy());
+					subjectDb.setStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
+					subjectDb.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
+					subjectDb.setQualityTag(subjectStudyNew.getQualityTag());
+					subjectDb.setSubjectType(subjectStudyNew.getSubjectType());
+					Long studyIdDb = subjectStudyDb.getStudy().getId();
+					if (!studyIdNew.equals(studyIdDb)) {
+						subjectDb.setId(Long.valueOf(-1));
+						// Create new subject, if new subject study
+						subjectRepository.save(subjectDb);
+					}
+				}
+			}
 			subjectStudyListDb.clear();
 			subjectStudyListDb.addAll(subjectStudyListNew);
 			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
