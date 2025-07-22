@@ -22,7 +22,7 @@ JOIN (
            MAX(subject_type) AS subject_type,
            MAX(quality_tag) AS quality_tag,
            MAX(study_id) AS study_id
-    FROM subject_study
+    FROM subject_study ss
     GROUP BY subject_id
 ) ss ON s.id = ss.subject_id
 SET
