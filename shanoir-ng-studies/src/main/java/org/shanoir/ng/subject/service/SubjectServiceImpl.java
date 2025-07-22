@@ -98,9 +98,6 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
 	
-	@Autowired
-	private ShanoirEventService eventService;
-	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
@@ -110,15 +107,12 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
-
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
 		if (subject.get().isPreclinical())
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
-
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
-
 	}
 
 	@Override
