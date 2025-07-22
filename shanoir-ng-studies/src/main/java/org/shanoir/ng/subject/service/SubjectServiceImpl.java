@@ -182,10 +182,11 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Override
 	public Subject create(final Subject subject) {
-		if (subject.getSubjectStudyList() != null) {
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}
+			copyFromSubjectStudyToSubject(subject);
 		}
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
@@ -195,13 +196,23 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return subjectDb;
 	}
+
+	private void copyFromSubjectStudyToSubject(final Subject subject) {
+		SubjectStudy subjectStudy = subject.getSubjectStudyList().get(0);
+		subject.setStudy(subjectStudy.getStudy());
+		subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+		subject.setQualityTag(subjectStudy.getQualityTag());
+		subject.setSubjectType(subjectStudy.getSubjectType());
+	}
 	
 	@Override
 	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
-		if (subject.getSubjectStudyList() != null) {
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}
+			copyFromSubjectStudyToSubject(subject);
 		}
 		// the first 3 numbers are the center code, search for highest existing subject with center code
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
@@ -259,6 +270,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		// @todo: create new subject in database here
 		if (subject.getSubjectStudyList() != null) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
