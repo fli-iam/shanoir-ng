@@ -182,12 +182,7 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Override
 	public Subject create(final Subject subject) {
-		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				subjectStudy.setSubject(subject);
-			}
-			copyFromSubjectStudyToSubject(subject);
-		}
+		manageSubjectStudy(subject);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
 			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
@@ -197,23 +192,9 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 
-	private void copyFromSubjectStudyToSubject(final Subject subject) {
-		SubjectStudy subjectStudy = subject.getSubjectStudyList().get(0);
-		subject.setStudy(subjectStudy.getStudy());
-		subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-		subject.setQualityTag(subjectStudy.getQualityTag());
-		subject.setSubjectType(subjectStudy.getSubjectType());
-	}
-	
 	@Override
 	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
-		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				subjectStudy.setSubject(subject);
-			}
-			copyFromSubjectStudyToSubject(subject);
-		}
+		manageSubjectStudy(subject);
 		// the first 3 numbers are the center code, search for highest existing subject with center code
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
 		String commonNameCenter = formatterCenter.format(centerId);
@@ -236,6 +217,20 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 
+	private void manageSubjectStudy(final Subject subject) {
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				subjectStudy.setSubject(subject);
+			}
+			SubjectStudy subjectStudy = subject.getSubjectStudyList().get(0);
+			subject.setStudy(subjectStudy.getStudy());
+			subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+			subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+			subject.setQualityTag(subjectStudy.getQualityTag());
+			subject.setSubjectType(subjectStudy.getSubjectType());
+		}
+	}	
+
 	@Override
 	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
@@ -256,7 +251,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 * Update some values of template to save them in database.
 	 * Intentially this update method does not modify the pseudonymus
 	 * hash values, that are only added by createSubject to avoid any
-	 * maniplation.
+	 * manipulation.
 	 *
 	 * @param templateDb template found in database.
 	 * @param template template with new values.
