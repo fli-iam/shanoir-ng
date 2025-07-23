@@ -261,6 +261,7 @@ public class SubjectServiceImpl implements SubjectService {
 		clonedSubject.setName(subject.getName());
 		clonedSubject.setIdentifier(subject.getIdentifier());
 		clonedSubject.setSex(subject.getSex());
+		clonedSubject.setBirthDate(subject.getBirthDate());
 		clonedSubject.setManualHemisphericDominance(subject.getManualHemisphericDominance());
 		clonedSubject.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		clonedSubject.setImagedObjectCategory(subject.getImagedObjectCategory());
