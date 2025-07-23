@@ -70,6 +70,14 @@ import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import jakarta.transaction.Transactional;
 
@@ -403,7 +411,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-		return repository.findDatasetAndOutputByExaminationId(examinationId);
+        return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
 	}
 
 	@Override
