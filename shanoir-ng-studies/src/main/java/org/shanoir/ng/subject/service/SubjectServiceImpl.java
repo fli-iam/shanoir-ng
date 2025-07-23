@@ -239,6 +239,8 @@ public class SubjectServiceImpl implements SubjectService {
 				subjectStudy.setSubject(subject);
 				count++;
 			}
+		} else {
+			subjects.add(subject);
 		}
 		return subjects;
 	}
