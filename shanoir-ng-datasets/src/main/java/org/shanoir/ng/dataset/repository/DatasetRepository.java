@@ -103,7 +103,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			LEFT JOIN da.examination ex
 			LEFT JOIN ds.relatedStudies relSt
 		WHERE dp.id IN :processingIds
-	""")
+			""")
 	List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
@@ -130,7 +130,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			LEFT JOIN da.examination ex
 		LEFT JOIN ds.relatedStudies relSt
 		WHERE ds.id IN :ids
-	""")
+			""")
   List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
 	
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 

@@ -630,7 +630,7 @@ public class DatasetSecurityService {
     * @return true or false
     * @throws EntityNotFoundException
     */
-   public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
+	public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
@@ -660,7 +660,7 @@ public class DatasetSecurityService {
 		} else { // study has changed : check user has right on both studies
 			return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
 		}
-   }
+	}
 
     
     /**

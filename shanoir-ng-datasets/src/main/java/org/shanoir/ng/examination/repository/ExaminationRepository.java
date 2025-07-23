@@ -130,7 +130,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 		ex.centerId                AS centerId
 		FROM Examination ex
 		WHERE ex.id IN :ids
-	""")
+			""")
   	List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
 

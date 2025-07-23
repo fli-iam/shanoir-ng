@@ -52,7 +52,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 		FROM DatasetAcquisition da
 			LEFT JOIN da.examination ex
 		WHERE da.id IN :acquisitionIds
-    """)
+    		""")
     List<DatasetAcquisitionForRightsProjection> findAllForRightsById(@Param("acquisitionIds") List<Long> acquisitionIds);
 }
 
