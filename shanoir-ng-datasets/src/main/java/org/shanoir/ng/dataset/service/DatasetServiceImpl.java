@@ -68,6 +68,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.shanoir.ng.dataset.dto.DatasetLight;
 
@@ -406,7 +408,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-		return repository.findDatasetAndOutputByExaminationId(examinationId);
+        return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
 	}
 
 	@Override
