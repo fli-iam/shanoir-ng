@@ -101,12 +101,16 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
-        step.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
-        step.data.patientName = this.patient.patientName;
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        let s: Subject = this.getPrefilledSubject();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", s);
+        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+        this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
+        this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
     }
 
     private getPrefilledSubject(): Subject {
@@ -126,7 +130,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        step.entity = this.getPrefilledExam();
+        let exam: Examination = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
+        this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
     }
 
     private getPrefilledExam(): Examination {
@@ -148,7 +154,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected fillCreateAcqEqStep(step: Step) {
-        step.entity = this.getPrefilledAcqEqt();
+        let acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {
@@ -162,7 +169,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
      * Try to compute patient first name and last name from dicom tags.
      * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
      */
-     private computeNameFromDicomTag (patientName: string): string[] {
+    private computeNameFromDicomTag (patientName: string): string[] {
         let names: string[] = [];
         if (patientName) {
             names = patientName.split("\\^");
@@ -174,42 +181,42 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return names;
     }
 
-  protected getFirstSelectedPatient(): PatientDicom {
-       for(let patient of this.importDataService.patients){
-         for(let study of patient.studies){
-           if (study.selected) return patient;
-         }
-       }
-       return null;
-  }
+    protected getFirstSelectedPatient(): PatientDicom {
+        for(let patient of this.importDataService.patients){
+            for(let study of patient.studies){
+                if (study.selected) return patient;
+            }
+        }
+        return null;
+    }
 
-  protected getFirstSelectedSerie(): SerieDicom {
-      if (!this.patient) return null;
-      for (let study of this.patient.studies) {
-          for (let serie of study.series) {
-              if (serie.selected) return serie;
-          }
-      }
-     return null;
-  }
+    protected getFirstSelectedSerie(): SerieDicom {
+        if (!this.patient) return null;
+        for (let study of this.patient.studies) {
+            for (let serie of study.series) {
+                if (serie.selected) return serie;
+            }
+        }
+        return null;
+    }
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
         for (let study of this.patient.studies) {
             if(study.selected) return study;
         }
-       return null;
+        return null;
     }
 
     get importedCenterDataStr(): string {
         return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - "
-                + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
+            + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
     }
 
     get importedEquipmentDataStr(): string {
         return this.patient?.studies[0]?.series[0]?.equipment?.manufacturer
-                + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
-                + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;
+            + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
+            + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;
     }
 
 }

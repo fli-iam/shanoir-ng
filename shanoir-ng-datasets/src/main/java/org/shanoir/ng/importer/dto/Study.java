@@ -24,18 +24,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Study {
 
-     @JsonProperty("studyInstanceUID")
-     private String studyInstanceUID;
+    @JsonProperty("studyInstanceUID")
+    private String studyInstanceUID;
 
-     @JsonProperty("studyDate")
-     @LocalDateAnnotations
-     private LocalDate studyDate;
+    @JsonProperty("studyDate")
+    @LocalDateAnnotations
+    private LocalDate studyDate;
 
-     @JsonProperty("studyDescription")
-     private String studyDescription;
+    @JsonProperty("studyDescription")
+    private String studyDescription;
 
-     @JsonProperty("series")
-     private List<Serie> series;
+    @JsonProperty("series")
+    private List<Serie> series;
 
     public String getStudyInstanceUID() {
         return studyInstanceUID;

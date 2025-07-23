@@ -50,7 +50,7 @@ public class ShanoirEventsService {
 		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
-			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
+			  	|| ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.SOLR_INDEX_ALL_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
@@ -93,7 +93,7 @@ public class ShanoirEventsService {
 				&& now - event.getLastUpdate().getTime() > INACTIVE_TIMEOUT;
 		}).map(event -> {
 			event.setStatus(-1);
-			event.setMessage("inactivity timeout, there must has been");
+			event.setMessage("Inactivity timeout, task was set to error status because inactive for more than 5 minutes.");
 			return event;
 		}).collect(Collectors.toList());
 		if (!updatedEvents.isEmpty()) repository.saveAll(updatedEvents);

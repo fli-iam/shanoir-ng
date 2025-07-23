@@ -164,7 +164,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
-		@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(

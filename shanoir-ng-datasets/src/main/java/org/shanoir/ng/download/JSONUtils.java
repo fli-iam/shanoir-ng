@@ -31,7 +31,7 @@ public class JSONUtils {
      * @param other The other JSONObject
      * @return true if they are equal
      */
-     public static boolean equals(JSONObject o1, JSONObject o2) {
+    public static boolean equals(JSONObject o1, JSONObject o2) {
         try {
             if (!(o2 instanceof JSONObject)) {
                 return false;
@@ -162,7 +162,7 @@ public class JSONUtils {
      * @return BigDecimal conversion of the original value, or the defaultValue if unable
      *          to convert.
      */
-     private static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue, boolean exact) {
+    private static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue, boolean exact) {
         if (val == null) {
             return defaultValue;
         }

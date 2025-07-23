@@ -35,6 +35,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -157,9 +161,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * With DICOMWeb for viewer OHIF, no need to transfer private tags,
+	 * so we exclude it here. Fix for Github issue #2805.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @return
+	 */
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata?excludeprivate=false";
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -176,6 +188,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * This method is used by the viewer OHIF to display the actual images.
+	 * The raw pixel data are searched in dcm4chee arc light behind Shanoir
+	 * and send as byte array to OHIF.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @param frame
+	 * @return
+	 */
 	public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
 			String sopInstanceUID, String frame) {
 		try {
@@ -201,6 +224,16 @@ public class DICOMWebService {
 		return null;
 	}
 	
+	/**
+	 * This method is used by OHIF viewer, double-click on DICOM SEG.
+	 * ShanoirUploader is calling it to get a DICOM instance,
+	 * when running its job to check examination consistency.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @return
+	 */
 	public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
@@ -236,25 +269,42 @@ public class DICOMWebService {
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-                        try(
-				FileInputStream fileIS = new FileInputStream(dicomFile);
-				ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());
-			) {
-				ContentBody contentBody = new InputStreamBody(byteArrIS, ContentType.create(CONTENT_TYPE_DICOM));
-				// build MultipartPart
-				MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-				partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-				partBuilder.setBody(contentBody);
-				MultipartPart multipartPart = partBuilder.build();
-				multipartEntityBuilder.addPart(multipartPart);
-			} catch(Exception e) {
-				LOG.error(e.getMessage(), e);
-				throw new ShanoirException(e.getMessage());
-			}
+			addFileToMultipart(dicomFile, multipartEntityBuilder);
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+	}
+
+	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
+		if (dicomFile == null || !dicomFile.exists()) {
+			LOG.error("sendDicomFileToPacs called with null, or file: not existing.");
+			throw new ShanoirException("sendDicomFileToPacs called with null, or file: not existing.");
+		}
+		LOG.info("Start: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+		multipartEntityBuilder.setBoundary(BOUNDARY);
+		multipartEntityBuilder.setMimeSubtype(RELATED);
+		addFileToMultipart(dicomFile, multipartEntityBuilder);
+		HttpEntity entity = multipartEntityBuilder.build();
+		sendMultipartRequest(entity);
+		LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+	}
+
+	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
+		try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
+			ContentBody contentBody = new InputStreamBody(
+					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
+			// build MultipartPart
+			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+			partBuilder.setBody(contentBody);
+			MultipartPart multipartPart = partBuilder.build();
+			multipartEntityBuilder.addPart(multipartPart);
+		} catch(Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

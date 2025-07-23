@@ -66,9 +66,9 @@
 
     <!-- Define file appender -->
 	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/.su_v9.0.0/su.log</file>
+        <file>${user.home}/.su_${app.version:-dev}/su.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/.su_v9.0.0/archived_logs/su.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/.su_${app.version:-dev}/archived_logs/su.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <!-- each archived file, size max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->

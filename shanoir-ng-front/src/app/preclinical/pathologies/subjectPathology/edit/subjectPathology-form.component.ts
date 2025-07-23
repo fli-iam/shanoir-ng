@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,7 +33,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'subject-pathology-form',
     templateUrl: 'subjectPathology-form.component.html',
-    providers: [SubjectPathologyService, PathologyModelService, PathologyService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
@@ -56,7 +55,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
 
     constructor(
         private route: ActivatedRoute,
-        private  subjectPathologyService: SubjectPathologyService, 
+        private  subjectPathologyService: SubjectPathologyService,
         private modelService: PathologyModelService,
         private pathologyService: PathologyService,
         private referenceService: ReferenceService,
@@ -65,9 +64,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
 
         super(route, 'preclinical-subject-pathology');
     }
-   
+
     get subjectPathology(): SubjectPathology { return this.entity; }
-    set subjectPathology(subjectPathology: SubjectPathology) { this.entity = subjectPathology; }
+    set subjectPathology(subjectPathology: SubjectPathology) { this.entity = subjectPathology; }
 
     getService(): EntityService<SubjectPathology> {
         return this.subjectPathologyService;
@@ -80,7 +79,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if (this.subjectpathoSelected) {
             this.subjectPathology = this.subjectpathoSelected;
         }
-        return Promise.resolve();   
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -111,7 +110,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             'endDate': [this.subjectPathology.endDate]
         });
     }
-    
+
     loadPathologies() {
         this.pathologyService.getAll().then(pathologies => this.pathologies = pathologies);
     }
@@ -136,13 +135,13 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         }
         this.createSPMode = creation;
     }
-    
+
     toggleFormSPAndReset(creation: boolean): void {
         this.toggleFormSP(creation);
         this.subjectPathology = new SubjectPathology();
     }
 
-    
+
     goToAddPathology(){
         this.router.navigate(['/preclinical-pathology/create']);
     }
@@ -163,7 +162,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         }
    }
 
-    //AS we need to have the same object reference in select and model, w have to set them from loaded lists 
+    //AS we need to have the same object reference in select and model, w have to set them from loaded lists
     loadSubjectPathologyAttributesForSelect(selectedPatho: SubjectPathology) {
         this.subjectPathology = selectedPatho;
         if (this.pathologies) {
@@ -187,8 +186,8 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
                 }
             }
         }
-        
-        
+
+
         if(this.subjectPathology && this.subjectPathology.pathology) this.loadModelsDisplay();
     }
 
@@ -206,14 +205,14 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
                 	if (this.subjectPathology.pathology.id == model.pathology.id) {
                     	this.modelsDisplay.push(model);
                 	}
-            	} 
-            }           
+            	}
+            }
         } else {
-            this.modelsDisplay = [];   
+            this.modelsDisplay = [];
         }
     }
-    
-    
+
+
     refreshModelsByPathology() {
         this.loadModelsDisplay();
         // Set the value to the first avaiable
@@ -235,8 +234,8 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
 
     addPathology(): Promise<void> {
-        if (!this.subjectPathology) { 
-            return; 
+        if (!this.subjectPathology) {
+            return;
         }
         if(this.preclinicalSubject.pathologies === undefined){
             this.preclinicalSubject.pathologies = [];
@@ -247,10 +246,10 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
     }
-    
+
     updatePathology(): void {
         if (!this.subjectPathology) {
-            return; 
+            return;
         }
         if (this.onEvent.observers.length > 0) {
             this.onEvent.emit([this.subjectPathology, false]);

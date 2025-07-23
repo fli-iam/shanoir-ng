@@ -22,9 +22,11 @@ import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
+import org.shanoir.uploader.nominativeData.DicomPushServiceJob;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.PropertiesUtil;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,7 @@ public class ReadyState implements State {
 	private CurrentNominativeDataController currentNominativeDataController;
 
 	@Autowired
-	private UploadServiceJob uploadServiceJob;
+	private DicomPushServiceJob dicomPushServiceJob;
 	
 	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -56,10 +58,21 @@ public class ReadyState implements State {
 			logger.error(e.getMessage(), e);
 		}
 		MainWindow frame = initJFrame();
+		// Init check on server
+		String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+		if (value == null) { // migration case: start with false, add to basic.properties, display in GUI
+			String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
+			PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
+			frame.checkOnServerMenuItem.setSelected(Boolean.FALSE);
+		} else { // display accordingly to basic.properties
+			boolean checkOnServer = Boolean.parseBoolean(value);
+			frame.checkOnServerMenuItem.setSelected(checkOnServer);
+		}
 		CurrentUploadsWindowTable cuw = CurrentUploadsWindowTable.getInstance(frame);
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
 		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
+		dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
 	}
 
 	/**
@@ -75,7 +88,7 @@ public class ReadyState implements State {
 			public void windowOpened(WindowEvent e) {
 			}
 			public void windowClosing(WindowEvent e) {
-				if (uploadServiceJob.isUploading()) {
+				if (UploadServiceJob.LOCK.isLocked()) {
 					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
 					UIManager.put("OptionPane.cancelButtonText", "Cancel");
 					UIManager.put("OptionPane.noButtonText", "No");
@@ -104,22 +117,21 @@ public class ReadyState implements State {
 	private void initNominativeDataFilesBeforeLaunchingJobs() {
 		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
 		logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
-		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
+		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			NominativeDataImportJobManager dataJobManager = null;
 			final File folder = (File) foldersIt.next();
 			// initDataJobManager
 			final Collection<File> files = Util.listFiles(folder, null, false);
-			for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
+			for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 				final File file = (File) filesIt.next();
-				if (file.getName().equals(
-						ShUpConfig.IMPORT_JOB_JSON)) {
+				if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
 					logger.debug(" Initializing data job manager before launching Jobs");
 					dataJobManager = new NominativeDataImportJobManager(file);
+					break;
 				}
 			}
 			if (dataJobManager != null) {
-				final ImportJob importJob = dataJobManager
-						.readImportJob();
+				final ImportJob importJob = dataJobManager.readImportJob();
 				// in case of previous importJobs (without uploadPercentage)
 				// we look for uploadPercentage value from nominative-data-job.xml file
 				if (importJob.getUploadPercentage() == null) {
@@ -136,7 +148,7 @@ public class ReadyState implements State {
 						importJob.setUploadPercentage(uploadPercentage);
 				dataJobManager.writeImportJob(importJob);
 			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
+				logger.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
 			}
 		}
 	}

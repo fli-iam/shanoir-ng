@@ -69,7 +69,7 @@ public class DicomStoreSCPServer {
         DicomNode scpNode = new DicomNode(calledName, calledHost, calledPort);
         File storageDir = new File(storageDirPath);
         if (!storageDir.exists()) {
-        		storageDir.mkdirs();
+			storageDir.mkdirs();
         }
 		AdvancedParams params = new AdvancedParams();
         ConnectOptions connectOptions = new ConnectOptions();
@@ -81,10 +81,10 @@ public class DicomStoreSCPServer {
         params.setConnectOptions(connectOptions);
         ListenerParams lparams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
         try {
-        		DicomListener listener = new DicomListener(storageDir);
+			DicomListener listener = new DicomListener(storageDir);
             listener.start(scpNode, lparams);
         } catch (Exception e) {
-           LOG.error(e.getMessage(), e);
+          	LOG.error(e.getMessage(), e);
         }
         LOG.info("DicomStoreSCPServer successfully initialized: {}, {}, {}, {}", calledName, calledHost, calledPort, storageDirPath);
 	}

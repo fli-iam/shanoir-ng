@@ -82,7 +82,7 @@ public interface ManufacturerApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{manufacturerId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#manufacturerId, #manufacturer)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#manufacturerId, #manufacturer)")
 	ResponseEntity<Void> updateManufacturer(
 			@Parameter(description = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
 			@Parameter(description = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
