@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.configuration.security;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +26,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,7 +33,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
@@ -39,10 +40,6 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Spring security configuration.
@@ -75,24 +72,24 @@ public class SecurityConfiguration {
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.csrf(AbstractHttpConfigurer::disable)
-			.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
-			.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
-			.authorizeHttpRequests(
-				matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
-					.permitAll()
-				.anyRequest()
-					.authenticated()
-			)
-			.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-                Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
-                Collection<String> roles = realmAccess.get("roles");
-                var grantedAuthorities = roles.stream()
-                        .map(role -> new SimpleGrantedAuthority(role))
-                        .collect(Collectors.toList());
-                return new JwtAuthenticationToken(jwt, grantedAuthorities);
-			})));
+				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.csrf(AbstractHttpConfigurer::disable)
+				.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
+				.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
+				.authorizeHttpRequests(
+					matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
+						.permitAll()
+					.anyRequest()
+						.authenticated()
+				)
+				.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+					Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
+					Collection<String> roles = realmAccess.get("roles");
+					var grantedAuthorities = roles.stream()
+							.map(role -> new SimpleGrantedAuthority(role))
+							.collect(Collectors.toList());
+					return new JwtAuthenticationToken(jwt, grantedAuthorities);
+				})));
 		return http.build();
 	}
 

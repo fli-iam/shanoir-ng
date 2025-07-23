@@ -31,15 +31,16 @@ public interface ExecutionMonitoringApi {
         ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(
                         @Parameter(description = "id of the execution monitoring", required = true) @PathVariable("executionMonitoringId") Long executionMonitoringId);
 
-        @Operation(summary = "", description = "Return all execution monitorings")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "found execution monitorings"),
-                        @ApiResponse(responseCode = "401", description = "unauthorized"),
-                        @ApiResponse(responseCode = "403", description = "forbidden"),
-                        @ApiResponse(responseCode = "404", description = "no execution monitoring found"),
-                        @ApiResponse(responseCode = "500", description = "unexpected error") })
-        @GetMapping(value = "all", produces = { "application/json" })
-        @PreAuthorize("hasAnyRole('ADMIN')")
-        ResponseEntity<List<ExecutionMonitoringDTO>> getAllExecutionMonitoring();
+
+    @Operation(summary = "", description = "Return all execution monitorings")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "found execution monitorings"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "404", description = "no execution monitoring found"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "all", produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    ResponseEntity<List<ExecutionMonitoringDTO>> getAllExecutionMonitoring();
 
 }

@@ -263,9 +263,14 @@ public class DatasetApiController implements DatasetApi {
 		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
-  @Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
-		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+  	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
+		List<Dataset> datasets;
+		if(output){
+			datasets = datasetService.findDatasetAndOutputByExaminationId(examinationId);
+		} else {
+			datasets = datasetService.findByExaminationId(examinationId);
+		}
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -358,7 +363,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
-		Long datasetId) throws IOException, MessagingException {
+			Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);
 		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
@@ -552,8 +557,7 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(description = "Subject name including regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
-			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws IOException {
+			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws IOException {
 
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;

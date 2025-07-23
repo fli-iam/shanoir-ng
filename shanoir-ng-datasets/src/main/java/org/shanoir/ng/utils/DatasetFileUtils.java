@@ -82,13 +82,14 @@ public class DatasetFileUtils {
 	 * Return the list of copied files
 	 *
 	 * @param urls
-	 * @param subjectName the subjectName
-	 * @param datasetFilePath 
+	 * @param subjectName         the subjectName
+	 * @param datasetFilePath
+	 * @param datasetDownloadName
+	 * @return
 	 * @throws IOException
 	 * @throws MessagingException
-	 * @return
 	 */
-	public static List<String> copyNiftiFilesForURLs(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath) throws IOException {
+	public static List<String> copyNiftiFilesForURLs(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName) throws IOException {
 		int index = 0;
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
@@ -96,7 +97,7 @@ public class DatasetFileUtils {
 			File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
 			String srcPath = srcFile.getAbsolutePath();
 
-			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
+			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
 
 			if (fileName.contains(File.separator)) {
 				fileName = fileName.replaceAll(File.separator, UNDERSCORE);
@@ -155,8 +156,11 @@ public class DatasetFileUtils {
 		zipOutputStream.closeEntry();
 	}
 
-	public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
-		if (keepName || dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+	public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index, String datasetDownloadName) {
+		if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+			return datasetDownloadName;
+		}
+		if (keepName ){
 			return srcFile.getName();
 		}
 
@@ -188,8 +192,8 @@ public class DatasetFileUtils {
 
 	public static void compressGzipFile(String source, String gzipDestination) throws IOException {
 		try (FileInputStream fis = new FileInputStream(source);
-		FileOutputStream fos = new FileOutputStream(gzipDestination);
-		GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+				FileOutputStream fos = new FileOutputStream(gzipDestination);
+				GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
 			byte[] buffer = new byte[1024];
 			int len;
 			while ((len = fis.read(buffer)) > 0) {

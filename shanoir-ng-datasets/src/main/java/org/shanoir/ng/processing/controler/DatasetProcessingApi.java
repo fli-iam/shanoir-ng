@@ -81,6 +81,17 @@ public interface DatasetProcessingApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings();
 
+    @Operation(summary = "", description = "Returns the processings of an input dataset")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found dataset processings"),
+            @ApiResponse(responseCode = "204", description = "no dataset processing found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/inputDataset/{datasetId}", produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId);
+
     @Operation(summary = "", description = "Returns the input datasets of a processing")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found dataset processings"),
@@ -123,7 +134,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PutMapping(value = "/{datasetProcessingId}", produces = {"application/json"}, consumes = {
             "application/json"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controllerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
     ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)

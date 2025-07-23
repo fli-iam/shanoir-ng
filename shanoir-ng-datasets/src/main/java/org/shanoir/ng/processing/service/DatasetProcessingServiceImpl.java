@@ -88,6 +88,11 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     public List<DatasetProcessing> findAllById(List<Long> idList) {
         return idList.stream().flatMap(it -> findById(it).stream()).toList();
     }
+
+    @Override
+    public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
+        return repository.findAllByInputDatasets_Id(datasetId);
+    }
     
     @Override
     public DatasetProcessing create(final DatasetProcessing entity) {
@@ -166,7 +171,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
             throw new RestServiceException(error);
         }
-        for(Dataset dataset : processing.getInputDatasets()){
+        for(Dataset dataset : processing.getInputDatasets()) {
             if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))){
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
                 throw new RestServiceException(error);

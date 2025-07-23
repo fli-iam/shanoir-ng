@@ -56,10 +56,10 @@ public class SubjectStudyUpdateBroadcastService {
 		List<SubjectStudyDTO> dtos = new ArrayList<>();
 		for (SubjectStudy subjectStudy : subjectStudies) {
 			SubjectStudyDTO dto = new SubjectStudyDTO(
-				subjectStudy.getId(),
-				subjectStudy.getStudy().getId(), 
-				subjectStudy.getSubject().getId(),
-				(subjectStudy.getSubjectType() != null ? subjectStudy.getSubjectType().getId() : null));
+					subjectStudy.getId(),
+					subjectStudy.getStudy().getId(), 
+					subjectStudy.getSubject().getId(),
+					(subjectStudy.getSubjectType() != null ? subjectStudy.getSubjectType().getId() : null));
 			dtos.add(dto);
 		}
 		return dtos;

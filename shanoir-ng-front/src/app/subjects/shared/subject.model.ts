@@ -32,6 +32,7 @@ export class Subject extends Entity {
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
+    isAlreadyAnonymized: boolean = false;
 
     public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();

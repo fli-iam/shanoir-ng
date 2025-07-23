@@ -661,6 +661,7 @@ public class DatasetSecurityService {
 			return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
 		}
    }
+
     
     /**
      * Check that page checking the connected user has the right on those datasets.
@@ -869,6 +870,7 @@ public class DatasetSecurityService {
 	* @return true
 	*/
 	public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
+
 		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
