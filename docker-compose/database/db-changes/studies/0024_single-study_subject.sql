@@ -4,6 +4,9 @@ DROP TABLE subject_group_of_subjects;
 
 DROP TABLE group_of_subjects;
 
+# Remove unique constraint on subject name
+ALTER TABLE subject DROP INDEX subject_name_idx;
+
 # Extend subject with columns from subject_study
 ALTER TABLE subject
     ADD COLUMN study_id BIGINT(20),

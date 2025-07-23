@@ -233,9 +233,11 @@ public class SubjectServiceImpl implements SubjectService {
 			int count = 0;
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				if (count > 0) {
-					subject = cloneSubject(subject);
+					Subject clonedSubject = cloneSubject(subject);
+					subjects.add(mapSubjectStudyToSubject(clonedSubject, subjectStudy));
+				} else {
+					subjects.add(mapSubjectStudyToSubject(subject, subjectStudy));
 				}
-				subjects.add(mapSubjectStudyToSubject(subject, subjectStudy));
 				subjectStudy.setSubject(subject);
 				count++;
 			}
