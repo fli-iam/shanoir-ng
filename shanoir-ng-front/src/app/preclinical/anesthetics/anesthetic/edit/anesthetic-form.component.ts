@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -47,7 +47,7 @@ import { Option } from '../../../../shared/select/select.component';
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    @ViewChild('ingredientsTable', { static: false }) table: TableComponent; 
+    @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
 
     AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
@@ -89,7 +89,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
         this.loadUnits();
-        this.loadNames();  
+        this.loadNames();
         this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
@@ -110,7 +110,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
         this.loadUnits();
-        this.loadNames();  
+        this.loadNames();
         this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
@@ -133,7 +133,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
         this.loadUnits();
-        this.loadNames();  
+        this.loadNames();
         this.createColumnDefs();
         return Promise.resolve();
     }
@@ -142,7 +142,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         return this.formBuilder.group({
             'name': [this.anesthetic.name],
             'comment': [this.anesthetic.comment],
-            'anestheticType': [this.anesthetic.anestheticType, Validators.required], 
+            'anestheticType': [this.anesthetic.anestheticType, Validators.required],
             'ingredientsList': [this.anesthetic.ingredients]
         });
     }
@@ -173,7 +173,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     loadUnits(){
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
      }
-     
+
      loadNames(){
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_ANESTHETIC,PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT).then(names => this.names = names);
      }
@@ -194,7 +194,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
                 }
             })
         );
-       
+
     }
 
 
@@ -236,7 +236,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
-    
+
     private editIngredient = (item: AnestheticIngredient) => {
         this.ingredientSelected = item;
         this.toggleFormAI = true;
@@ -260,7 +260,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.anesthetic.ingredients.splice(index, 1);
         }
         this.ingredientsToDelete.push(item);
-        
+
         const createIndex: number = this.ingredientsToCreate.indexOf(item);
         if (createIndex !== -1) {
             this.ingredientsToCreate.splice(createIndex, 1);
@@ -268,7 +268,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
         this.browserPaging.setItems(this.anesthetic.ingredients);
         this.table.refresh();
-        
+
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }

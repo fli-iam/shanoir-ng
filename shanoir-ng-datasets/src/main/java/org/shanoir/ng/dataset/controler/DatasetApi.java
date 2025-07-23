@@ -111,7 +111,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("@controllerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDataset(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@Parameter(description = "dataset to update", required = true) @Valid @RequestBody Dataset dataset,
@@ -136,7 +136,8 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/examination/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
+	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+																 @Parameter(description = "return output datasets too") @RequestParam(value = "output", required = false, defaultValue = "false") Boolean output);
 
 	
 	@Operation(summary = "", description = "Returns a dataset list")
@@ -247,9 +248,9 @@ public interface DatasetApi {
 		@ApiResponse(responseCode = "422", description = "bad parameters"),
 		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/processedDataset",
-		produces = { "application/json" },
-		consumes = { "application/json" },
-		method = RequestMethod.POST)
+			produces = { "application/json" },
+			consumes = { "application/json" },
+			method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
 	
