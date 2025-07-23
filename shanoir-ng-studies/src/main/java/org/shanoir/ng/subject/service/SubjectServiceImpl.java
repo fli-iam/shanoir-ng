@@ -176,55 +176,93 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Override
 	public Subject create(final Subject subject) {
-		manageSubjectStudy(subject);
-		Subject subjectDb = subjectRepository.save(subject);
-		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+		List<Subject> subjects = mapSubjectStudyListToSubjects(subject);
+		int count = 0;
+		Subject firstSubject = null;
+		for (Subject subjectIt : subjects) {
+			Subject subjectDb = subjectRepository.save(subjectIt);
+			if (count == 0) {
+				firstSubject = subjectDb;
+			}
+			try {
+				updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+			}
+			count++;
 		}
-		return subjectDb;
+		return firstSubject;
 	}
 
 	@Override
 	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
-		manageSubjectStudy(subject);
-		// the first 3 numbers are the center code, search for highest existing subject with center code
-		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
-		String commonNameCenter = formatterCenter.format(centerId);
-		int maxCommonNameNumber = 0;
-		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
-		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
-			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
-			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		List<Subject> subjects = mapSubjectStudyListToSubjects(subject);
+		int count = 0;
+		Subject firstSubject = null;
+		for (Subject subjectIt : subjects) {
+			// the first 3 numbers are the center code, search for highest existing subject with center code
+			DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
+			String commonNameCenter = formatterCenter.format(centerId);
+			int maxCommonNameNumber = 0;
+			Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
+			if (subjectOfsepCommonNameMaxFoundByCenter != null) {
+				String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
+				maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+			}
+			maxCommonNameNumber += 1;
+			DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
+			String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+			subject.setName(subjectName);
+			Subject subjectDb = subjectRepository.save(subjectIt);
+			if (count == 0) {
+				firstSubject = subjectDb;
+			}
+			try {
+				updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+			}
+			count++;
 		}
-		maxCommonNameNumber += 1;
-		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
-		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
-		subject.setName(subjectName);
-		Subject subjectDb = subjectRepository.save(subject);
-		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
-		}
-		return subjectDb;
+		return firstSubject;
 	}
 
-	private void manageSubjectStudy(final Subject subject) {
+	private List<Subject> mapSubjectStudyListToSubjects(Subject subject) {
+		List<Subject> subjects = new ArrayList<Subject>();
 		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
+			int count = 0;
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (count > 0) {
+					subject = cloneSubject(subject);
+				}
+				subjects.add(mapSubjectStudyToSubject(subject, subjectStudy));
 				subjectStudy.setSubject(subject);
+				count++;
 			}
-			// @todo: Manage create subject: multi studies here
-			SubjectStudy subjectStudy = subject.getSubjectStudyList().get(0);
-			subject.setStudy(subjectStudy.getStudy());
-			subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-			subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-			subject.setQualityTag(subjectStudy.getQualityTag());
-			subject.setSubjectType(subjectStudy.getSubjectType());
 		}
-	}	
+		return subjects;
+	}
+
+	private Subject mapSubjectStudyToSubject(Subject subject, SubjectStudy subjectStudy) {
+		subject.setStudy(subjectStudy.getStudy());
+		subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+		subject.setSubjectType(subjectStudy.getSubjectType());
+		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+		subject.setQualityTag(subjectStudy.getQualityTag());
+		return subject;
+	}
+
+	private Subject cloneSubject(Subject subject) {
+		Subject clonedSubject = new Subject();
+		clonedSubject.setName(subject.getName());
+		clonedSubject.setIdentifier(subject.getIdentifier());
+		clonedSubject.setSex(subject.getSex());
+		clonedSubject.setManualHemisphericDominance(subject.getManualHemisphericDominance());
+		clonedSubject.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
+		clonedSubject.setImagedObjectCategory(subject.getImagedObjectCategory());
+		clonedSubject.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		return clonedSubject;
+	}
 
 	@Override
 	@Transactional
@@ -273,29 +311,13 @@ public class SubjectServiceImpl implements SubjectService {
 			for (SubjectStudy subjectStudyNew : subjectStudyListNew) {
 				Long studyIdNew = subjectStudyNew.getStudy().getId();
 				for (SubjectStudy subjectStudyDb : subjectStudyListDb) {
-					// Update values in any case
-					subjectDb.setStudy(subjectStudyNew.getStudy());
-					subjectDb.setStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
-					subjectDb.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
-					subjectDb.setQualityTag(subjectStudyNew.getQualityTag());
-					subjectDb.setSubjectType(subjectStudyNew.getSubjectType());
+					mapSubjectStudyToSubject(subjectDb, subjectStudyNew);
 					Long studyIdDb = subjectStudyDb.getStudy().getId();
 					if (!studyIdNew.equals(studyIdDb)) {
-						Subject newSubject = new Subject();
-						newSubject.setName(subject.getName());
-						newSubject.setIdentifier(subject.getIdentifier());
-						newSubject.setSex(subject.getSex());
-						newSubject.setManualHemisphericDominance(subject.getManualHemisphericDominance());
-						newSubject.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
-						newSubject.setImagedObjectCategory(subject.getImagedObjectCategory());
-						newSubject.setUserPersonalCommentList(subject.getUserPersonalCommentList());
-						newSubject.setStudy(subjectStudyNew.getStudy());
-						newSubject.setStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
-						newSubject.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
-						newSubject.setQualityTag(subjectStudyNew.getQualityTag());
-						newSubject.setSubjectType(subjectStudyNew.getSubjectType());
+						Subject clonedSubject = cloneSubject(subject);
+						mapSubjectStudyToSubject(clonedSubject, subjectStudyNew);
 						// Create new subject without subject study, if new subject study
-						subjectRepository.save(newSubject);
+						subjectRepository.save(clonedSubject);
 					}
 				}
 			}
