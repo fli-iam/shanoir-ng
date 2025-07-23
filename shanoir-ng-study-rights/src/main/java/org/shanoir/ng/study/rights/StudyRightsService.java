@@ -157,8 +157,8 @@ public class StudyRightsService {
 	public UserRights getUserRights() {
 		Long userId = KeycloakUtil.getTokenUserId();
 		List<StudyUser> studyUsers = repo
-			.findAllByUserId(userId)
-			.orElseGet(Collections::emptyList);
+				.findAllByUserId(userId)
+				.orElseGet(Collections::emptyList);
 		return new UserRights(studyUsers);
 	}
 }
