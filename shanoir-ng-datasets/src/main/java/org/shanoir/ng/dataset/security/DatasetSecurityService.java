@@ -405,9 +405,9 @@ public class DatasetSecurityService {
      */
     public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
     	List<DatasetAcquisitionForRights> acqs = datasetAcquisitionRepository.findAllForRightsById(datasetAcquisitionIds)
-			.stream()
-			.map(a -> new DatasetAcquisitionForRights(a.getId(), a.getCenterId(), a.getStudyId()))
-			.collect(Collectors.toList());
+				.stream()
+				.map(a -> new DatasetAcquisitionForRights(a.getId(), a.getCenterId(), a.getStudyId()))
+				.collect(Collectors.toList());
     	UserRights userRights = commService.getUserRights();
 		for (DatasetAcquisitionForRights acq : acqs) {
 			Long studyId = acq.getStudyId();
@@ -437,9 +437,9 @@ public class DatasetSecurityService {
 			return true;
 		}    	
 		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
-			.stream()
-			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
-			.collect(Collectors.toList());
+				.stream()
+				.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+				.collect(Collectors.toList());
 		UserRights userRights = commService.getUserRights();
 		for (DatasetForRights dataset : dtos) {
 			Set<Long> studyIds = dataset.getAllStudiesIds();
@@ -631,35 +631,35 @@ public class DatasetSecurityService {
     * @throws EntityNotFoundException
     */
    public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
-       if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-           return true;
-       }
-       if (card == null) {
-           throw new IllegalArgumentException("Study card cannot be null here.");
-       }
-       if (card.getId() == null) {
-           throw new IllegalArgumentException("Study card id cannot be null here.");
-       }
-       if (card.getStudyId() == null) {
-           return false;
-       }
-       Card dbCard;
-       if (card instanceof StudyCard) {
-           dbCard = studyCardRepository.findById(card.getId()).orElse(null);
-           if (dbCard == null) {
-               throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
-           }           
-       } else if (card instanceof QualityCard) {
-           dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
-           if (dbCard == null) {
-               throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
-           }           
-       } else throw new IllegalStateException("Cannot find the type of card");
-       if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
-           return commService.hasRightOnStudy(card.getStudyId(), rightStr);
-       } else { // study has changed : check user has right on both studies
-           return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
-       }
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+		if (card == null) {
+			throw new IllegalArgumentException("Study card cannot be null here.");
+		}
+		if (card.getId() == null) {
+			throw new IllegalArgumentException("Study card id cannot be null here.");
+		}
+		if (card.getStudyId() == null) {
+			return false;
+		}
+		Card dbCard;
+		if (card instanceof StudyCard) {
+			dbCard = studyCardRepository.findById(card.getId()).orElse(null);
+			if (dbCard == null) {
+				throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
+			}
+		} else if (card instanceof QualityCard) {
+			dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
+			if (dbCard == null) {
+				throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
+			}
+		} else throw new IllegalStateException("Cannot find the type of card");
+		if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
+			return commService.hasRightOnStudy(card.getStudyId(), rightStr);
+		} else { // study has changed : check user has right on both studies
+			return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+		}
    }
     
     /**
@@ -791,9 +791,9 @@ public class DatasetSecurityService {
 		}
 		List<Long> dsIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
 		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(dsIds)
-			.stream()
-			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
-			.collect(Collectors.toList());
+				.stream()
+				.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+				.collect(Collectors.toList());
 		Set<Long> dsRemove = new HashSet<>();
 		UserRights userRights = commService.getUserRights();
 		for (DatasetForRights ds : dtos) {
@@ -1057,9 +1057,9 @@ public class DatasetSecurityService {
 			return true;
 		}
 		List<DatasetForRights> datasets = datasetRepository.findAllInputsByProcessingId(processingIds)
-			.stream()
-			.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
-			.collect(Collectors.toList());
+				.stream()
+				.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+				.collect(Collectors.toList());
 		UserRights userRights = commService.getUserRights();
 		for (DatasetForRights dataset : datasets) {
 			Set<Long> studyIds = dataset.getAllStudiesIds();
