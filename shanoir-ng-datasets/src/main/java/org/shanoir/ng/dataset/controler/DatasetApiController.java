@@ -263,6 +263,15 @@ public class DatasetApiController implements DatasetApi {
 		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
+	public ResponseEntity<List<Dataset>> findFullDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
+	}
+
   	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
 		List<Dataset> datasets;
