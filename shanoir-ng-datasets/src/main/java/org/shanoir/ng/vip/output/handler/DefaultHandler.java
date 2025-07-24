@@ -87,7 +87,7 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
+            List<Dataset> inputDatasets = monitoring.getInputDatasets();
 
             if(inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
