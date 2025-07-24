@@ -60,13 +60,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
-	@Query("SELECT ds FROM Dataset ds " +
-			"LEFT JOIN ds.datasetAcquisition acq " +
-			"LEFT JOIN ds.datasetProcessing dp " +
-			"LEFT JOIN dp.inputDatasets inputDs " +
-			"LEFT JOIN inputDs.datasetAcquisition inputAcq " +
-			"WHERE acq.examination.id = :examId OR inputAcq.examination.id = :examId")
-	List<Dataset> findDatasetAndOutputByExaminationId(Long examId);
+	@Query(value="SELECT ds.id FROM dataset ds " +
+			"LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+			"LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id " +
+			"LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id " +
+			"LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id " +
+			"LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id " +
+			"WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
+	List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
 
 	@Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
