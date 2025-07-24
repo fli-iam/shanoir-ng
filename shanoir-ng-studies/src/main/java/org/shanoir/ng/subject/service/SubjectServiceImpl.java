@@ -40,6 +40,7 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
@@ -316,12 +317,26 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setSubject(subjectDb);
-				if (dbSubjectStudy.getSubjectStudyTags() == null) {
-					dbSubjectStudy.setSubjectStudyTags(new ArrayList<>());
+			List<SubjectStudy> toRemove = new ArrayList<>();
+			for (SubjectStudy oldSS : subjectStudyListDb) {
+				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
+						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
+				);
+				if (!stillPresent) {
+					toRemove.add(oldSS);
+				}
+			}
+			subjectStudyListDb.removeAll(toRemove);
+			for (SubjectStudy newSS : subjectStudyListNew) {
+				boolean alreadyExists = subjectStudyListDb.stream().anyMatch(existingSS ->
+						existingSS.getStudy().getId().equals(newSS.getStudy().getId())
+				);
+				if (!alreadyExists) {
+					newSS.setSubject(subjectDb);
+					if (newSS.getSubjectStudyTags() == null) {
+						newSS.setSubjectStudyTags(new ArrayList<>());
+					}
+					subjectStudyListDb.add(newSS);
 				}
 			}
 		}
