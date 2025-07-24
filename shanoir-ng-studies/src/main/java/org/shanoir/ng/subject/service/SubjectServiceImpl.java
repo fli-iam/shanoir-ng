@@ -261,21 +261,41 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+
 		if (subject.getSubjectStudyList() != null) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setSubject(subjectDb);
-				if (dbSubjectStudy.getSubjectStudyTags() == null) {
-					dbSubjectStudy.setSubjectStudyTags(new ArrayList<>());
+
+			// Supprimer les associations obsolètes
+			List<SubjectStudy> toRemove = new ArrayList<>();
+			for (SubjectStudy oldSS : subjectStudyListDb) {
+				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
+						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
+				);
+				if (!stillPresent) {
+					toRemove.add(oldSS);
+				}
+			}
+			subjectStudyListDb.removeAll(toRemove);
+
+			// Ajouter les nouvelles associations manquantes
+			for (SubjectStudy newSS : subjectStudyListNew) {
+				boolean alreadyExists = subjectStudyListDb.stream().anyMatch(existingSS ->
+						existingSS.getStudy().getId().equals(newSS.getStudy().getId())
+				);
+				if (!alreadyExists) {
+					newSS.setSubject(subjectDb);
+					if (newSS.getSubjectStudyTags() == null) {
+						newSS.setSubjectStudyTags(new ArrayList<>());
+					}
+					subjectStudyListDb.add(newSS);
 				}
 			}
 		}
+
 		return subjectDb;
 	}
-	
+
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.
