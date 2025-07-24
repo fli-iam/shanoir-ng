@@ -81,16 +81,6 @@ public interface SubjectService {
 	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
 	
 	/**
-	 * Find subject by data.
-	 *
-	 * @param data data.
-	 * @return a subject.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findByData(String data);
-
-	/**
 	 * Find subject by its id.
 	 *
 	 * @param id template id.

@@ -89,7 +89,9 @@ public class SubjectServiceTest {
 	public void setup() {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
-		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
+		List<Subject> subjects = new ArrayList<Subject>();
+		subjects.add(createSubjectToUpdate());
+		given(subjectRepository.findByName(ModelsUtil.SUBJECT_NAME)).willReturn(subjects);
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectToSave());
 	}
 
@@ -173,4 +175,5 @@ public class SubjectServiceTest {
 		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
 	}
+
 }

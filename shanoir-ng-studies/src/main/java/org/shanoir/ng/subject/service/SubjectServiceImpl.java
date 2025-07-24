@@ -17,6 +17,7 @@ package org.shanoir.ng.subject.service;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -159,11 +160,6 @@ public class SubjectServiceImpl implements SubjectService {
 		return names;
 	}
 
-    @Override
-	public Subject findByData(final String name) {
-		return subjectRepository.findByName(name);
-	}
-
 	@Override
 	public Subject findById(final Long id) {
 		return subjectRepository.findById(id).orElse(null);
@@ -272,17 +268,24 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
-		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
-		if (subjectDb == null) {
+		final List<Subject> subjects = subjectRepository.findByName(subject.getName());
+		if (subjects == null || subjects.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
-		if (!subjectDb.getName().equals(subject.getName())) {
-			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
+		if (!subjects.getFirst().getName().equals(subject.getName())) {
+			throw new ShanoirException("You cannot update subject name.", HttpStatus.FORBIDDEN.value());
 		}
-		updateSubjectValues(subjectDb, subject);
-		Subject newSubject = subjectRepository.save(subjectDb);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
-		return newSubject;
+		manageSubjects(subjects, subject);
+		subjects.forEach(s -> {
+			updateSubjectValues(s, subject);
+			subjectRepository.save(s);
+			try {
+				updateSubjectName(subjectMapper.subjectToSubjectDTO(s));
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Unable to propagate subject update to dataset microservice: ", e);
+			}
+		});
+		return subjects.getFirst();
 	}
 
 	/*
@@ -295,37 +298,22 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @param template template with new values.
 	 * @return database template with new values.
 	 */
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
-		subjectDb.setName(subject.getName());
+	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
+		// Name and birth date should never be updated
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setSex(subject.getSex());
 		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
-		// Update new columns for future clients
 		subjectDb.setStudy(subject.getStudy());
 		subjectDb.setStudyIdentifier(subject.getStudyIdentifier());
 		subjectDb.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 		subjectDb.setQualityTag(subject.getQualityTag());
 		subjectDb.setSubjectType(subject.getSubjectType());
-		// Old clients: still send subject study list
-		if (subject.getSubjectStudyList() != null) {
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-			for (SubjectStudy subjectStudyNew : subjectStudyListNew) {
-				Long studyIdNew = subjectStudyNew.getStudy().getId();
-				for (SubjectStudy subjectStudyDb : subjectStudyListDb) {
-					mapSubjectStudyToSubject(subjectDb, subjectStudyNew);
-					Long studyIdDb = subjectStudyDb.getStudy().getId();
-					if (!studyIdNew.equals(studyIdDb)) {
-						Subject clonedSubject = cloneSubject(subject);
-						mapSubjectStudyToSubject(clonedSubject, subjectStudyNew);
-						// Create new subject without subject study, if new subject study
-						subjectRepository.save(clonedSubject);
-					}
-				}
-			}
 			subjectStudyListDb.clear();
 			subjectStudyListDb.addAll(subjectStudyListNew);
 			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
@@ -336,6 +324,28 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 		}
 		return subjectDb;
+	}
+
+	private void manageSubjects(List<Subject> subjects, Subject subject) {
+		Map<Long, Subject> studyIdSubjectMapDb = subjects.stream()
+	    		.collect(Collectors.toMap(s -> s.getStudy().getId(), s -> s));
+		Map<Long, SubjectStudy> studyIdSubjectStudyMapNew = subject.getSubjectStudyList().stream()
+		    	.collect(Collectors.toMap(s -> s.getStudy().getId(), s -> s));
+		// Delete cloned subjects, if original subject removed from studies
+		List<Subject> subjectsToDelete = studyIdSubjectMapDb.values().stream()
+				.filter(old -> !studyIdSubjectStudyMapNew.containsKey(old.getStudy().getId()))
+				.collect(Collectors.toList());
+		subjectsToDelete.forEach(subjectRepository::delete);
+		// Create new subjects in case original subject added to new study
+		List<Study> studyIdsForNewSubjectsToAdd = subject.getSubjectStudyList().stream()
+				.filter(newSub -> !studyIdSubjectMapDb.containsKey(newSub.getStudy().getId()))
+				.map(newSub -> newSub.getStudy())
+				.collect(Collectors.toList());
+		studyIdsForNewSubjectsToAdd.forEach(study -> {
+			Subject newSubject = cloneSubject(subject);
+			mapSubjectStudyToSubject(newSubject, studyIdSubjectStudyMapNew.get(study.getId()));
+			subjectRepository.save(newSubject);
+		});
 	}
 	
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
