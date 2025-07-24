@@ -171,7 +171,6 @@ public final class ModelsUtil {
 	public static Subject createSubject() {
 		final Subject subject = new Subject();
 		subject.setName(SUBJECT_NAME);
-		subject.setStudy(createStudy());
 		return subject;
 	}
 

@@ -275,7 +275,9 @@ public class SubjectServiceImpl implements SubjectService {
 		if (!subjects.getFirst().getName().equals(subject.getName())) {
 			throw new ShanoirException("You can not update the subject name.", HttpStatus.FORBIDDEN.value());
 		}
-		manageSubjects(subjects, subject);
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
+			manageSubjects(subjects, subject);
+		}
 		subjects.forEach(s -> {
 			updateSubjectValues(s, subject);
 			subjectRepository.save(s);

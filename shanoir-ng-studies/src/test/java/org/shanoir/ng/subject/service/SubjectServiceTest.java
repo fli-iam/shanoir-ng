@@ -90,7 +90,9 @@ public class SubjectServiceTest {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
 		List<Subject> subjects = new ArrayList<Subject>();
-		subjects.add(createSubjectToUpdate());
+		Subject subject = createSubjectToUpdate();
+		subject.setStudy(ModelsUtil.createStudy());
+		subjects.add(subject);
 		given(subjectRepository.findByName(ModelsUtil.SUBJECT_NAME)).willReturn(subjects);
 		given(subjectRepository.findByName("new name")).willReturn(subjects);
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectToSave());
@@ -127,7 +129,9 @@ public class SubjectServiceTest {
 
 	@Test
 	public void updateTest() throws RestServiceException, ShanoirException {
-		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
+		Subject subject = createSubjectToUpdate();
+		subject.setStudy(ModelsUtil.createStudy());
+		final Subject updatedSubject = subjectService.update(subject);
 		Assertions.assertNotNull(updatedSubject);
 		Assertions.assertTrue(Sex.F.equals(updatedSubject.getSex()));
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
