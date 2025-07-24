@@ -92,6 +92,7 @@ public class SubjectServiceTest {
 		List<Subject> subjects = new ArrayList<Subject>();
 		subjects.add(createSubjectToUpdate());
 		given(subjectRepository.findByName(ModelsUtil.SUBJECT_NAME)).willReturn(subjects);
+		given(subjectRepository.findByName("new name")).willReturn(subjects);
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectToSave());
 	}
 
@@ -140,7 +141,7 @@ public class SubjectServiceTest {
 			subjectService.update(updated);
 		} catch (ShanoirException exception) {
 			assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
-			assertEquals("You cannot update subject common name.", exception.getMessage());
+			assertEquals("You can not update the subject name.", exception.getMessage());
 			return;
 		}
 		fail();

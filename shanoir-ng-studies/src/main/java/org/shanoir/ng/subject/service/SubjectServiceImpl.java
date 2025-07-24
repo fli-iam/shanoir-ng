@@ -273,7 +273,7 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
 		if (!subjects.getFirst().getName().equals(subject.getName())) {
-			throw new ShanoirException("You cannot update subject name.", HttpStatus.FORBIDDEN.value());
+			throw new ShanoirException("You can not update the subject name.", HttpStatus.FORBIDDEN.value());
 		}
 		manageSubjects(subjects, subject);
 		subjects.forEach(s -> {
