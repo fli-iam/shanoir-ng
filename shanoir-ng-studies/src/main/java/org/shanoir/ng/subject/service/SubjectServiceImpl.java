@@ -238,7 +238,9 @@ public class SubjectServiceImpl implements SubjectService {
 				mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
 				List<SubjectStudy> clonedSubjectSubjectStudyList = new ArrayList<SubjectStudy>();
 				clonedSubjectSubjectStudyList.add(subjectStudy);
+				clonedSubject.setSubjectStudyList(clonedSubjectSubjectStudyList);
 				subjectStudy.setSubject(clonedSubject);
+				subjects.add(clonedSubject);
 			}
 		} else {
 			subjects.add(subject);
