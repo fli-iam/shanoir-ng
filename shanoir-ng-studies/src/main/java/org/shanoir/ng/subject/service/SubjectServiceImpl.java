@@ -209,7 +209,7 @@ public class SubjectServiceImpl implements SubjectService {
 			maxCommonNameNumber += 1;
 			DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
 			String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
-			subject.setName(subjectName);
+			subjectIt.setName(subjectName);
 			Subject subjectDb = subjectRepository.save(subjectIt);
 			if (count == 0) {
 				firstSubject = subjectDb;
