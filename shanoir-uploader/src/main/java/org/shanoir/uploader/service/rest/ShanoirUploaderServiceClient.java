@@ -1003,4 +1003,48 @@ public class ShanoirUploaderServiceClient {
 		return null;	
 	}
 
+	// public Boolean isStudyExisting(String studyInstanceUID) throws Exception {
+	// 	long startTime = System.currentTimeMillis();
+	// 	URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies + "?StudyInstanceUID=" + studyInstanceUID);
+	// 	URL url = b.build().toURL();
+	// 	try (CloseableHttpResponse response = httpService.get(url.toString())) {
+	// 		long stopTime = System.currentTimeMillis();
+	// 		long elapsedTime = stopTime - startTime;
+	// 		logger.debug("isStudyExisting: " + elapsedTime + "ms");
+	// 		int code = response.getCode();
+	// 		if (code == HttpStatus.SC_OK) {
+	// 			return true;
+	// 		} else if (code == HttpStatus.SC_NO_CONTENT) {
+	// 			return false;
+	// 		} else {
+	// 			logger.error("Error in isStudyExisting: status code: "
+	// 				+ code + ", message: "
+	// 				+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+	// 			throw new Exception("Error in isStudyExisting");
+	// 		}
+	// 	}
+	// }
+
+	public Boolean isStudyOnServer(String studyInstanceUID) throws Exception {
+		long startTime = System.currentTimeMillis();
+		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies + "/" + studyInstanceUID + "/instances");
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.debug("isStudyOnServer: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				return true;
+			} else if (code == HttpStatus.SC_NO_CONTENT || code == HttpStatus.SC_NOT_FOUND) {
+				return false;
+			} else {
+				logger.error("Error in isStudyOnServer: status code: "
+					+ code + ", message: "
+					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in isStudyOnServer");
+			}
+		}
+	}
+
 }

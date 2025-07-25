@@ -345,7 +345,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setSubjectName(subjectREST.getName());
 
-		logger.info("Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
+		logger.info("Search existing examinations for subject: a) same date and studyInstanceUID: user has to finish import b) new date && studyInstanceUID: create examination.");
 		line[4] = importJob.getSubjectName();
 		line[5] = studyDate.format(DateTimeUtils.FORMATTER);
 		try {
@@ -356,15 +356,19 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					.collect(Collectors.toList());
 				for (Iterator<Examination> iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 					Examination examination = (Examination) iterator.next();
-					// Existing exam found with the same study date: stop importJob and take next one
+					// Existing exam found with the same study date and studyInstanceUID: stop importJob and take next one
 					Date examinationDate = examination.getExaminationDate();
 					LocalDate examinationLocalDate = examinationDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
 					if (examinationLocalDate.equals(studyDate)) {
-						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
-						csvWriter.addExaminationLine(false, line);
-						return false;
+						Boolean isStudyOnServer = shanoirUploaderServiceClientNG.isStudyOnServer(importJob.getStudy().getStudyInstanceUID());
+						if (isStudyOnServer) {
+							logger.info("Import job only downloaded, manual user decision needed: existing non-empty examination with the same date found: " + examination.getId() + ", " + examinationDate
+								+ ", " + importJob.getExaminationComment());
+							csvWriter.addExaminationLine(false, line);
+							return false;
+						}
 					}
 				}
 			}
