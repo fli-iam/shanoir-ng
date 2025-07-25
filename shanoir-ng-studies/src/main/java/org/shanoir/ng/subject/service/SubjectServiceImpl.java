@@ -224,19 +224,21 @@ public class SubjectServiceImpl implements SubjectService {
 		return firstSubject;
 	}
 
+	/**
+	 * This method translates a subject with n SubjectStudy
+	 * into a list of subjects, each with one SubjectStudy.
+	 * @param subject
+	 * @return
+	 */
 	private List<Subject> mapSubjectStudyListToSubjects(Subject subject) {
 		List<Subject> subjects = new ArrayList<Subject>();
 		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-			int count = 0;
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				if (count > 0) {
-					Subject clonedSubject = cloneSubject(subject);
-					subjects.add(mapSubjectStudyToSubject(clonedSubject, subjectStudy));
-				} else {
-					subjects.add(mapSubjectStudyToSubject(subject, subjectStudy));
-				}
-				subjectStudy.setSubject(subject);
-				count++;
+				Subject clonedSubject = cloneSubject(subject);
+				mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
+				List<SubjectStudy> clonedSubjectSubjectStudyList = new ArrayList<SubjectStudy>();
+				clonedSubjectSubjectStudyList.add(subjectStudy);
+				subjectStudy.setSubject(clonedSubject);
 			}
 		} else {
 			subjects.add(subject);
@@ -244,7 +246,7 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjects;
 	}
 
-	private Subject mapSubjectStudyToSubject(Subject subject, SubjectStudy subjectStudy) {
+	private Subject mapSubjectStudyAttributesToSubject(Subject subject, SubjectStudy subjectStudy) {
 		subject.setStudy(subjectStudy.getStudy());
 		subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		subject.setSubjectType(subjectStudy.getSubjectType());
@@ -360,7 +362,7 @@ public class SubjectServiceImpl implements SubjectService {
 				.collect(Collectors.toList());
 		studyIdsForNewSubjectsToAdd.forEach(study -> {
 			Subject newSubject = cloneSubject(subject);
-			mapSubjectStudyToSubject(newSubject, studyIdSubjectStudyMapNew.get(study.getId()));
+			mapSubjectStudyAttributesToSubject(newSubject, studyIdSubjectStudyMapNew.get(study.getId()));
 			subjectRepository.save(newSubject);
 		});
 	}
