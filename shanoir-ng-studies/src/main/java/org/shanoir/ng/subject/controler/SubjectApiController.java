@@ -77,11 +77,10 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Void> deleteSubject(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
-			// Delete all associated bids folders
+			// Delete all associated BIDS folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
-
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -178,7 +177,6 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
-		
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);

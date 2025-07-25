@@ -17,7 +17,6 @@ package org.shanoir.ng.study.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -35,9 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public abstract class StudyDecorator implements StudyMapper {
-
-	@Autowired
-	private ExperimentalGroupOfSubjectsMapper experimentalGroupOfSubjectsMapper;
 
 	@Autowired
 	private StudyMapper delegate;
@@ -109,8 +105,6 @@ public abstract class StudyDecorator implements StudyMapper {
 				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		if (withData) {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
-			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
-					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
 			if (study.getTags() != null) {
 				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
 			}
