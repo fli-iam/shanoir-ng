@@ -307,7 +307,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @return database template with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
-		// Name and birth date should never be updated
+		// Name, birth date, pseudo hash values should never be updated
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setSex(subject.getSex());
 		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
