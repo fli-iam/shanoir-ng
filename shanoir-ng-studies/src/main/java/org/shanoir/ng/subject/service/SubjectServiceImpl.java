@@ -174,28 +174,20 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject create(final Subject subject) {
 		List<Subject> subjects = mapSubjectStudyListToSubjects(subject);
-		int count = 0;
-		Subject firstSubject = null;
 		for (Subject subjectIt : subjects) {
 			Subject subjectDb = subjectRepository.save(subjectIt);
-			if (count == 0) {
-				firstSubject = subjectDb;
-			}
 			try {
 				updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 			} catch (MicroServiceCommunicationException e) {
 				LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 			}
-			count++;
 		}
-		return firstSubject;
+		return subjects.getLast();
 	}
 
 	@Override
 	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
 		List<Subject> subjects = mapSubjectStudyListToSubjects(subject);
-		int count = 0;
-		Subject firstSubject = null;
 		for (Subject subjectIt : subjects) {
 			// the first 3 numbers are the center code, search for highest existing subject with center code
 			DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
@@ -211,17 +203,13 @@ public class SubjectServiceImpl implements SubjectService {
 			String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
 			subjectIt.setName(subjectName);
 			Subject subjectDb = subjectRepository.save(subjectIt);
-			if (count == 0) {
-				firstSubject = subjectDb;
-			}
 			try {
 				updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 			} catch (MicroServiceCommunicationException e) {
 				LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 			}
-			count++;
 		}
-		return firstSubject;
+		return subjects.getLast();
 	}
 
 	/**
@@ -253,7 +241,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 */
 	private Subject cloneSubjectFromSubjectStudy(Subject subject, final SubjectStudy subjectStudy) {
 		Subject clonedSubject = cloneSubject(subject);
-		mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
+		clonedSubject = mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
 		List<SubjectStudy> clonedSubjectSubjectStudyList = new ArrayList<SubjectStudy>();
 		clonedSubjectSubjectStudyList.add(subjectStudy);
 		clonedSubject.setSubjectStudyList(clonedSubjectSubjectStudyList);
