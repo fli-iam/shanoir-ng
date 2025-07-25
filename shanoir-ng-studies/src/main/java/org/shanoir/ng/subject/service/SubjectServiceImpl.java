@@ -299,13 +299,6 @@ public class SubjectServiceImpl implements SubjectService {
 	private void manageSubjects(List<Subject> subjects, Subject subject) {
 		Map<Long, Subject> studyIdSubjectMapDb = subjects.stream()
 	    		.collect(Collectors.toMap(s -> s.getStudy().getId(), s -> s));
-		Map<Long, SubjectStudy> studyIdSubjectStudyMapNew = subject.getSubjectStudyList().stream()
-		    	.collect(Collectors.toMap(s -> s.getStudy().getId(), s -> s));
-		// Delete cloned subjects, if original subject removed from studies
-		List<Subject> subjectsToDelete = studyIdSubjectMapDb.values().stream()
-				.filter(old -> !studyIdSubjectStudyMapNew.containsKey(old.getStudy().getId()))
-				.collect(Collectors.toList());
-		subjectsToDelete.forEach(subjectRepository::delete);
 		// Create new subjects in case original subject added to new study
 		Map<Long, SubjectStudy> studyIdsSubjectStudyForNewSubjectsToAdd = subject.getSubjectStudyList().stream()
 				.filter(newSub -> !studyIdSubjectMapDb.containsKey(newSub.getStudy().getId()))
