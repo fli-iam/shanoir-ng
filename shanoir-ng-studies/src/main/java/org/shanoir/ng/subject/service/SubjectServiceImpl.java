@@ -267,6 +267,7 @@ public class SubjectServiceImpl implements SubjectService {
 		clonedSubject.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		clonedSubject.setImagedObjectCategory(subject.getImagedObjectCategory());
 		clonedSubject.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		clonedSubject.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		return clonedSubject;
 	}
 
