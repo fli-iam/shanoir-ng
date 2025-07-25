@@ -234,18 +234,31 @@ public class SubjectServiceImpl implements SubjectService {
 		List<Subject> subjects = new ArrayList<Subject>();
 		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				Subject clonedSubject = cloneSubject(subject);
-				mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
-				List<SubjectStudy> clonedSubjectSubjectStudyList = new ArrayList<SubjectStudy>();
-				clonedSubjectSubjectStudyList.add(subjectStudy);
-				clonedSubject.setSubjectStudyList(clonedSubjectSubjectStudyList);
-				subjectStudy.setSubject(clonedSubject);
+				Subject clonedSubject = cloneSubjectFromSubjectStudy(subject, subjectStudy);
 				subjects.add(clonedSubject);
 			}
 		} else {
 			subjects.add(subject);
 		}
 		return subjects;
+	}
+
+	/**
+	 * This method receives a subject and one specific SubjectStudy
+	 * to clone a new subject with the values from SubjectStudy and
+	 * this SubjectStudy in the list.
+	 * @param subject
+	 * @param subjectStudy
+	 * @return
+	 */
+	private Subject cloneSubjectFromSubjectStudy(Subject subject, final SubjectStudy subjectStudy) {
+		Subject clonedSubject = cloneSubject(subject);
+		mapSubjectStudyAttributesToSubject(clonedSubject, subjectStudy);
+		List<SubjectStudy> clonedSubjectSubjectStudyList = new ArrayList<SubjectStudy>();
+		clonedSubjectSubjectStudyList.add(subjectStudy);
+		clonedSubject.setSubjectStudyList(clonedSubjectSubjectStudyList);
+		subjectStudy.setSubject(clonedSubject);
+		return clonedSubject;
 	}
 
 	private Subject mapSubjectStudyAttributesToSubject(Subject subject, SubjectStudy subjectStudy) {
@@ -285,7 +298,6 @@ public class SubjectServiceImpl implements SubjectService {
 			manageSubjects(subjects, subject);
 		}
 		subjects.forEach(s -> {
-			updateSubjectValues(s, subject);
 			subjectRepository.save(s);
 			try {
 				updateSubjectName(subjectMapper.subjectToSubjectDTO(s));
@@ -294,58 +306,6 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 		});
 		return subjects.getFirst();
-	}
-
-	/*
-	 * Update some values of template to save them in database.
-	 * Intentially this update method does not modify the pseudonymus
-	 * hash values, that are only added by createSubject to avoid any
-	 * manipulation.
-	 *
-	 * @param templateDb template found in database.
-	 * @param template template with new values.
-	 * @return database template with new values.
-	 */
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
-		// Name, birth date, pseudo hash values should never be updated
-		subjectDb.setIdentifier(subject.getIdentifier());
-		subjectDb.setSex(subject.getSex());
-		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
-		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
-		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
-		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
-		subjectDb.setStudy(subject.getStudy());
-		subjectDb.setStudyIdentifier(subject.getStudyIdentifier());
-		subjectDb.setPhysicallyInvolved(subject.isPhysicallyInvolved());
-		subjectDb.setQualityTag(subject.getQualityTag());
-		subjectDb.setSubjectType(subject.getSubjectType());
-		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-			List<SubjectStudy> toRemove = new ArrayList<>();
-			for (SubjectStudy oldSS : subjectStudyListDb) {
-				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
-						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
-				);
-				if (!stillPresent) {
-					toRemove.add(oldSS);
-				}
-			}
-			subjectStudyListDb.removeAll(toRemove);
-			for (SubjectStudy newSS : subjectStudyListNew) {
-				boolean alreadyExists = subjectStudyListDb.stream().anyMatch(existingSS ->
-						existingSS.getStudy().getId().equals(newSS.getStudy().getId())
-				);
-				if (!alreadyExists) {
-					newSS.setSubject(subjectDb);
-					if (newSS.getSubjectStudyTags() == null) {
-						newSS.setSubjectStudyTags(new ArrayList<>());
-					}
-					subjectStudyListDb.add(newSS);
-				}
-			}
-		}
-		return subjectDb;
 	}
 
 	private void manageSubjects(List<Subject> subjects, Subject subject) {
@@ -359,14 +319,12 @@ public class SubjectServiceImpl implements SubjectService {
 				.collect(Collectors.toList());
 		subjectsToDelete.forEach(subjectRepository::delete);
 		// Create new subjects in case original subject added to new study
-		List<Study> studyIdsForNewSubjectsToAdd = subject.getSubjectStudyList().stream()
+		Map<Long, SubjectStudy> studyIdsSubjectStudyForNewSubjectsToAdd = subject.getSubjectStudyList().stream()
 				.filter(newSub -> !studyIdSubjectMapDb.containsKey(newSub.getStudy().getId()))
-				.map(newSub -> newSub.getStudy())
-				.collect(Collectors.toList());
-		studyIdsForNewSubjectsToAdd.forEach(study -> {
-			Subject newSubject = cloneSubject(subject);
-			mapSubjectStudyAttributesToSubject(newSubject, studyIdSubjectStudyMapNew.get(study.getId()));
-			subjectRepository.save(newSubject);
+				.collect(Collectors.toMap(s -> s.getStudy().getId(), s -> s));
+		studyIdsSubjectStudyForNewSubjectsToAdd.values().forEach(ss -> {
+			Subject cloned = cloneSubjectFromSubjectStudy(subject, ss);
+			subjects.add(cloned);
 		});
 	}
 	
