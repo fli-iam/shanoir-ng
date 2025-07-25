@@ -305,7 +305,7 @@ public class SubjectServiceImpl implements SubjectService {
 				LOG.error("Unable to propagate subject update to dataset microservice: ", e);
 			}
 		});
-		return subjects.getFirst();
+		return subjects.getLast();
 	}
 
 	private void manageSubjects(List<Subject> subjects, Subject subject) {
