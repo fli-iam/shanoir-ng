@@ -178,14 +178,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.accessRequests = accessReqs;
             });
         }
-        if (this.keycloakService.isUserAdminOrExpert()) {
-            return this.fetchUsers().then(users => {
-                Study.completeMembers(this.study, users);
-            });
-        } else {
-            return Promise.resolve();
-        }
-
+        return this.fetchUsers().then(users => {Study.completeMembers(this.study, users);});
     }
 
     initEdit(): Promise<void> {
