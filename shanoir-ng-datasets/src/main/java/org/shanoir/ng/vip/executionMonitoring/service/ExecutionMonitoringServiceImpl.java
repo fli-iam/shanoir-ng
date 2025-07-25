@@ -164,9 +164,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 } catch (Exception e){
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
-                    LOG.error(ex.getMessage(), ex.getCause());
-                    setEventInError(event, execLabel + " : " + ex.getMessage());
-                    LOG.warn("Error while monitoring the processing {}. Stopping the monitoring ...", monitoring.getId());
+                    LOG.error("Error while monitoring the processing {}. Stopping the monitoring ...", monitoring.getId(), ex.getCause());
+                    if(Objects.nonNull(event)){
+                        setEventInError(event, execLabel + " : " + ex.getMessage());
+                    }
                 }
             }
 
