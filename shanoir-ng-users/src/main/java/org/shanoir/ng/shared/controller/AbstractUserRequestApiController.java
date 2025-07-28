@@ -76,14 +76,14 @@ public abstract class AbstractUserRequestApiController {
 		final StringBuilder usernameSb = new StringBuilder();
 
 		final String firstnames = user.getFirstName().trim();
-		for (final String firstname : firstnames.split("\\s+")) {
+		for (final String firstname : firstnames.replaceAll("[^a-zA-Z\\s-]", "").split("\\s+")) {
 			for (String f : firstname.split("-")) {
-				usernameSb.append(f.substring(0, 1));
+				usernameSb.append(f.charAt(0));
 			}
 		}
 
 		final String lastnames = user.getLastName().trim();
-		for (final String lastname : lastnames.split("\\s+")) {
+		for (final String lastname : lastnames.replaceAll("[^a-zA-Z\\s-]", "").split("\\s+")) {
 			for (String l : lastname.split("-")) {
 				usernameSb.append(l);
 			}
