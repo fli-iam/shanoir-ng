@@ -76,9 +76,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label>Role</label>
 							<span class="right-col left-icon fix-icon user-icon">
-								<i *ngIf="pannelStudyUser.user?.role?.displayName == 'User'" class="fas fa-user"></i>
-								<i *ngIf="pannelStudyUser.user?.role?.displayName == 'Expert'" class="fas fa-user-tie"></i>
-								<i *ngIf="pannelStudyUser.user?.role?.displayName == 'Administrator'" class="fas fa-user-cog"></i>
+								<i *ngIf="pannelStudyUser.user?.role?.id == '1'" class="fas fa-user-cog"></i>
+								<i *ngIf="pannelStudyUser.user?.role?.id == '2'" class="fas fa-user"></i>
+								<i *ngIf="pannelStudyUser.user?.role?.id == '3'" class="fas fa-user-tie"></i>
 								{{pannelStudyUser.user?.role?.displayName}}
 							</span>
 						</li>
