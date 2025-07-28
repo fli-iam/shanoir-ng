@@ -216,6 +216,7 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 			SubjectStudy subjectStudy = subjectStudyList.get(0);
 			subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
+			subjectStudy.setSubject(subject);
 		}
 		return subject;
 	}
@@ -264,12 +265,18 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			for (SubjectStudy oldSS : subjectStudyListDb) {
-				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
-						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
-				);
-				if (stillPresent) { // only update subject study in case same study
-					subjectDb.setSubjectStudyList(subjectStudyListNew);
-				}
+				subjectStudyListNew.stream().forEach(
+						newSS -> {
+						if (newSS.getStudy().getId().equals(oldSS.getStudy().getId())) {
+							oldSS.setSubjectStudyIdentifier(newSS.getSubjectStudyIdentifier());
+							oldSS.setSubjectType(newSS.getSubjectType());
+							oldSS.setPhysicallyInvolved(newSS.isPhysicallyInvolved());
+							if (oldSS.getSubjectStudyTags() == null) {
+								oldSS.setSubjectStudyTags(new ArrayList<>());
+							}
+							oldSS.getSubjectStudyTags().addAll(newSS.getSubjectStudyTags());
+						}
+					});
 			}
 		}
 		return subjectDb;
