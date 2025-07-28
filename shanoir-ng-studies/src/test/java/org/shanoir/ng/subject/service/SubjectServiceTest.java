@@ -122,7 +122,7 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
+	public void saveTest() throws MicroServiceCommunicationException, ShanoirException {
 		subjectService.create(createSubjectToSave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}

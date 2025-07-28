@@ -137,7 +137,7 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@RequestBody Subject subject,
 			@RequestParam(required = false) Long centerId,
-			final BindingResult result) throws RestServiceException {
+			final BindingResult result) throws ShanoirException, RestServiceException {
 		validate(subject, result);
 		Subject createdSubject;
 		if (centerId == null) {
