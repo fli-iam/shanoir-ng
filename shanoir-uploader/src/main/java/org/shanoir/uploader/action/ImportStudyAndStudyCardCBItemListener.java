@@ -81,6 +81,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
 				}
 				updateSubjectStudy(study, subject);
+				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
