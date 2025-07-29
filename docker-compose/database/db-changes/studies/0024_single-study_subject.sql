@@ -2,13 +2,14 @@
 DROP TABLE subject_group_of_subjects;
 DROP TABLE group_of_subjects;
 
-CREATE TABLE `subject_tag` (
-    `subject_id` bigint(20) NOT NULL,
-    `tag_id` bigint(20) DEFAULT NULL,
-    KEY `FKcc51xo4yrp74v2yp7df540a04` (`tag_id`),
-    KEY `FKe638djnyhwckgsob7qxnvcbyd` (`subject_id`),
-    CONSTRAINT `FKcc51xo4yrp74v2yp7df540a04` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`),
-    CONSTRAINT `FKe638djnyhwckgsob7qxnvcbyd` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`id`);
+CREATE TABLE subject_tag (
+    subject_id bigint(20) NOT NULL,
+    tag_id bigint(20) DEFAULT NULL,
+    KEY FKcc51xo4yrp74v2yp7df540a04 (tag_id),
+    KEY FKe638djnyhwckgsob7qxnvcbyd (subject_id),
+    CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id),
+    CONSTRAINT FKe638djnyhwckgsob7qxnvcbyd FOREIGN KEY (subject_id) REFERENCES subject (id)
+);
 
 # Remove unique constraint on subject name
 ALTER TABLE subject DROP INDEX subject_name_idx;
