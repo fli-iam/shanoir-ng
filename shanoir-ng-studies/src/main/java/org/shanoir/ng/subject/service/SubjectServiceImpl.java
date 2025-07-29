@@ -218,6 +218,7 @@ public class SubjectServiceImpl implements SubjectService {
 			subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
 			subjectStudy.setSubject(subject);
 		}
+		// todo: add else here for transition phase
 		return subject;
 	}
 

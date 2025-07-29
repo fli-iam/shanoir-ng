@@ -108,7 +108,7 @@ public class Subject extends HalEntity {
 
 	private String studyIdentifier;
 
-	private boolean physicallyInvolved;
+	private Boolean physicallyInvolved;
 
 	private Integer subjectType;
 
@@ -258,11 +258,11 @@ public class Subject extends HalEntity {
 		this.tags = subjectTags;
 	}
 	
-	public boolean isPhysicallyInvolved() {
+	public Boolean isPhysicallyInvolved() {
 		return physicallyInvolved;
 	}
 
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+	public void setPhysicallyInvolved(Boolean physicallyInvolved) {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
