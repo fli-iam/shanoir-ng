@@ -364,7 +364,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					if (examinationLocalDate.equals(studyDate)) {
 						Boolean isStudyOnServer = shanoirUploaderServiceClientNG.isStudyOnServer(importJob.getStudy().getStudyInstanceUID());
 						if (isStudyOnServer) {
-							logger.info("Import job only downloaded, manual user decision needed: existing non-empty examination with the same date found: " + examination.getId() + ", " + examinationDate
+							logger.info("Import job only downloaded, manual user decision needed: existing non-empty examination with the same date and studyInstanceUID found: " + examination.getId() + ", " + examinationDate
 								+ ", " + importJob.getExaminationComment());
 							csvWriter.addExaminationLine(false, line);
 							return false;
