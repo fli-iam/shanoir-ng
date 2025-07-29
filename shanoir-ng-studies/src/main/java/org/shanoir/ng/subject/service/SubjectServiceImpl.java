@@ -210,6 +210,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
 		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+		// Old versions of ShUp will still send subject study objects, and no studyId in subject
 		if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
 			if (subjectStudyList.size() > 1) {
 				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
