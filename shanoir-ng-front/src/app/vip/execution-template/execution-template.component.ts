@@ -50,7 +50,7 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
         super(route, 'execution-template')
         if ( this.breadcrumbsService.currentStep ) {
             localStorage.setItem('studyId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("studyId")))
-            this.studyName = this.breadcrumbsService.currentStep.getPrefilledValue("studyName")
+            this.breadcrumbsService.currentStep.getPrefilledValue("studyName").then(studyName => this.studyName = studyName)
             localStorage.setItem('studyName', this.studyName)
         }
     }
