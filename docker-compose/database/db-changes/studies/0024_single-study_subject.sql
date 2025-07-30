@@ -96,6 +96,17 @@ JOIN subject new_sub ON old_sub.name = new_sub.name
     AND old_sub.id <> new_sub.id
 SET ss.subject_id = new_sub.id;
 
+# Migrate subject_study_tags to subject_tag
+# Works as subject_ids have already be aligned before
+INSERT INTO subject_tag (subject_id, tag_id)
+SELECT 
+    ss.subject_id,
+    sst.tag_id
+FROM 
+    subject_study_tag sst
+JOIN 
+    subject_study ss ON sst.subject_study_id = ss.id;
+
 # Add constraint to subject study to avoid new entries
 # tested: all good
 ALTER TABLE subject_study
