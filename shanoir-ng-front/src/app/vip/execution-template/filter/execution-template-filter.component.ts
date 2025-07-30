@@ -29,7 +29,7 @@ export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionT
         super(route, 'execution-template-filter')
         if ( this.breadcrumbsService.currentStep ) {
             localStorage.setItem('templateId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("templateId")))
-            this.templateName = this.breadcrumbsService.currentStep.getPrefilledValue("templateName")
+            this.breadcrumbsService.currentStep.getPrefilledValue("templateName").then(templateName => this.templateName = templateName)
             localStorage.setItem('templateName', this.templateName)
         }
     }
