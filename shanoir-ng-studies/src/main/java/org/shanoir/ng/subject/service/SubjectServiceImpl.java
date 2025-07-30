@@ -17,16 +17,12 @@ package org.shanoir.ng.subject.service;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -39,10 +35,11 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.model.SubjectTag;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -208,6 +205,17 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 
+	/**
+	 * This method maps subject_study objects (old versions of e.g. ShUp)
+	 * to the new structure subject.study_id or maps the new structure of
+	 * subject.study_id to subject study, as still required by some code.
+	 * This method will be removed entirely after all clients have been
+	 * migrated and all dependencies on subject_study will be removed.
+	 * 
+	 * @param subject
+	 * @return
+	 * @throws ShanoirException
+	 */
 	private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
 		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
 		// Old versions of ShUp will still send subject study objects, and no studyId in subject
@@ -218,8 +226,26 @@ public class SubjectServiceImpl implements SubjectService {
 			SubjectStudy subjectStudy = subjectStudyList.get(0);
 			subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
 			subjectStudy.setSubject(subject);
+		// New code from Angular will be without subject study, but tree requires it still
+		} else {
+			SubjectStudy subjectStudy = new SubjectStudy();
+			subjectStudy.setStudy(subject.getStudy());
+			subjectStudy.setSubject(subject);
+			subjectStudy.setSubjectType(subject.getSubjectType());
+			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
+			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
+			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<SubjectStudyTag>();
+			subject.getSubjectTags().stream().forEach(s -> {
+				SubjectStudyTag tag = new SubjectStudyTag();
+				tag.setTag(s.getTag());
+				tag.setSubjectStudy(subjectStudy);
+				subjectStudyTagList.add(tag);
+			});
+			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
+			List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
+			subjectStudyListNew.add(subjectStudy);
+			subject.setSubjectStudyList(subjectStudyListNew);
 		}
-		// todo: add else here for transition phase
 		return subject;
 	}
 
@@ -229,7 +255,19 @@ public class SubjectServiceImpl implements SubjectService {
 		subject.setSubjectType(subjectStudy.getSubjectType());
 		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
 		subject.setQualityTag(subjectStudy.getQualityTag());
+		mapSubjectStudyTagListToSubjectTag(subject, subjectStudy);
 		return subject;
+	}
+
+	private void mapSubjectStudyTagListToSubjectTag(Subject subject, SubjectStudy subjectStudy) {
+		List<SubjectTag> subjectTagList = new ArrayList<SubjectTag>();
+		subjectStudy.getSubjectStudyTags().stream().forEach(sst -> {
+			SubjectTag tag = new SubjectTag();
+			tag.setTag(sst.getTag());
+			tag.setSubject(subject);
+			subjectTagList.add(tag);
+		});
+		subject.setTags(subjectTagList);
 	}
 
 	@Override
@@ -273,10 +311,13 @@ public class SubjectServiceImpl implements SubjectService {
 							oldSS.setSubjectStudyIdentifier(newSS.getSubjectStudyIdentifier());
 							oldSS.setSubjectType(newSS.getSubjectType());
 							oldSS.setPhysicallyInvolved(newSS.isPhysicallyInvolved());
+							// Update subject study tags with new values, in case
 							if (oldSS.getSubjectStudyTags() == null) {
 								oldSS.setSubjectStudyTags(new ArrayList<>());
 							}
 							oldSS.getSubjectStudyTags().addAll(newSS.getSubjectStudyTags());
+							// Migrate new subject study tags to subject tags as well
+							mapSubjectStudyTagListToSubjectTag(subjectDb, newSS);
 						}
 					});
 			}
