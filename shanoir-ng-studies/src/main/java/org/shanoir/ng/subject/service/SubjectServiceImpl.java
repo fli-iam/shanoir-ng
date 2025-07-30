@@ -235,12 +235,14 @@ public class SubjectServiceImpl implements SubjectService {
 			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
 			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<SubjectStudyTag>();
-			subject.getSubjectTags().stream().forEach(s -> {
-				SubjectStudyTag tag = new SubjectStudyTag();
-				tag.setTag(s.getTag());
-				tag.setSubjectStudy(subjectStudy);
-				subjectStudyTagList.add(tag);
-			});
+			if (subject.getSubjectTags() != null && !subject.getSubjectTags().isEmpty()) {
+				subject.getSubjectTags().stream().forEach(s -> {
+					SubjectStudyTag tag = new SubjectStudyTag();
+					tag.setTag(s.getTag());
+					tag.setSubjectStudy(subjectStudy);
+					subjectStudyTagList.add(tag);
+				});
+			}
 			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
 			List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
 			subjectStudyListNew.add(subjectStudy);
@@ -268,8 +270,8 @@ public class SubjectServiceImpl implements SubjectService {
 				tag.setSubject(subject);
 				subjectTagList.add(tag);
 			});
-			subject.setTags(subjectTagList);
 		}
+		subject.setTags(subjectTagList);
 	}
 
 	@Override
