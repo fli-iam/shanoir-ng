@@ -183,18 +183,17 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject createAutoIncrement(Subject subject, final Long centerId) throws ShanoirException {
 		subject = mapSubjectStudyListToSubject(subject);
-		// the first 3 numbers are the center code, search for highest existing subject with center code
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
-		String commonNameCenter = formatterCenter.format(centerId);
-		int maxCommonNameNumber = 0;
-		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
-		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
-			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
-			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		String subjectNameCenterPrefix = formatterCenter.format(centerId);
+		int maxSubjectNameNumber = 0;
+		Subject subjectMaxFoundByCenter = findSubjectFromCenterCode(subjectNameCenterPrefix);
+		if (subjectMaxFoundByCenter != null) { // subjects for centerId exist already
+			String maxNameToIncrement = subjectMaxFoundByCenter.getName().substring(subjectNameCenterPrefix.length());
+			maxSubjectNameNumber = Integer.parseInt(maxNameToIncrement);
 		}
-		maxCommonNameNumber += 1;
+		maxSubjectNameNumber += 1;
 		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
-		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+		String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
 		subject.setName(subjectName);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
