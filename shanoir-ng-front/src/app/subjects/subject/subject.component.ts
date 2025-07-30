@@ -32,6 +32,9 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import {StudyLight} from "../../studies/shared/study.dto";
+import {Tag} from "../../tags/tag.model";
+import {SubjectStudy} from "../shared/subject-study.model";
 
 @Component({
     selector: 'subject-detail',
@@ -46,6 +49,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
+    selectedStudy: IdName;
     //isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
@@ -58,6 +62,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     hasDownloadRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
+    tags: Tag[] = [];
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -70,6 +75,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         new Option<string>('F', 'Female'),
         new Option<string>('M', 'Male'),
         new Option<string>('O', 'Other'),
+    ];
+
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
     ];
 
     constructor(private route: ActivatedRoute,
@@ -155,9 +166,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [this.subject.subjectStudyList, this.mode == 'create' ? [Validators.required] : [] ],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
+            'subjectStudyIdentifier': [this.subject.subjectStudyIdentifier],
+            'physicallyInvolved': [this.subject.physicallyInvolved],
+            'tags': [this.subject.tags],
+            'study': [this.subject.study, [Validators.required]],
+            'subjectType': [this.subject.subjectType, [Validators.required]],
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
@@ -177,6 +192,15 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         }
 
         return subjectForm;
+    }
+
+    public onSelectStudy() {
+        this.studyService.get(this.selectedStudy?.id).then( study => {
+            this.subject.study = study;
+            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
+                this.subject.study.tags = tags ? tags : [];
+            })
+        });
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {

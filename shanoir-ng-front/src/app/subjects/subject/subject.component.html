@@ -177,17 +177,86 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ol>
+				<ol class="subject-study">
+					<div>
+						<li>
+							<label>Subject identifier for this study</label>
+							<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.subjectStudyIdentifier}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+									<input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudyIdentifier"
+											[ngModelOptions]="{standalone: true}"/>
+							</ng-template>
+							</span>
+						</li>
+						<li>
+							<label>Physically involved</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									<span *ngIf="subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
+									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<checkbox [(ngModel)]="subject.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+								</ng-template>
+							</span>
+						</li>
+					</div>
+				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
-				<subject-study-list
-                    [allowRemove]="true" [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-                <label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
+				<ol>
+					<li>
+						<label i18n="Subject detail |Study label@@SubjectDetailSubjectImagedObjectCategory">Study</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.study}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="study"
+											[(ngModel)]="selectedStudy"
+											[optionArr]="studies"
+											(userChange)="onSelectStudy()">
+								</select-box>
+								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Subject type</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.subjectType}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="subjectType"
+									[(ngModel)]="subject.subjectType"
+									[options]="subjectTypes">
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && forceStudy">
 				<ol>
 					<li>
 						<label>Study</label>
 						<span class="right-col">{{forceStudy.name}}</span>
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<ol>
+					<li>
+						<label>Tags</label>
+						<tag-list *ngIf="subject.study?.tags?.length" [(ngModel)]="subject.tags" [availableTags]="subject.study.tags" [ngModelOptions]="{ standalone: true }"></tag-list>
+						<span class="right-col" [ngSwitch]="mode" *ngIf="subject.study?.tags?.length == 0 && subject.study" style="color:grey; font-size:10px">
+							No subject tag available for this study
+						</span>
 					</li>
 				</ol>
 			</fieldset>

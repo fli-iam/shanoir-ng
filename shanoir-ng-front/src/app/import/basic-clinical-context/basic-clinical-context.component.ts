@@ -65,7 +65,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
             id: context.subject.id,
             name: context.subject.name,
             identifier: context.subject.identifier,
-            subjectStudyList: [context.subject.subjectStudy]
+            subjectStudyList: [context.subject.subjectStudy],
+            study: context.study
         };
         this.patient.subject = simpleSubject;
         let filteredPatient: PatientDicom = this.patient;
