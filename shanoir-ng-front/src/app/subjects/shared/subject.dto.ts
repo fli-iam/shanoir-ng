@@ -20,8 +20,10 @@ import { Tag } from '../../tags/tag.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
-import { Sex } from './subject.types';
+import {Sex, SubjectType} from './subject.types';
 import {formatDate} from "@angular/common";
+import {QualityTag} from "../../study-cards/shared/quality-card.model";
+import {Study} from "../../studies/shared/study.model";
 
 
 @Injectable()
@@ -77,6 +79,13 @@ export class SubjectDTOService {
         } else {
             entity.subjectStudyList = [];
         }
+        entity.subjectStudyIdentifier = dto.subjectStudyIdentifier;
+        entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
+        entity.subjectType = dto.subjectType;
+        entity.physicallyInvolved = dto.physicallyInvolved;
+        entity.tags = dto.tags;
+        entity.qualityTag = dto.qualityTag;
+        entity.study = dto.studyId ? { id: dto.studyId } as Study : null;
         return entity;
     }
 
@@ -103,6 +112,13 @@ export class SubjectDTO {
     selected: boolean = false;
     subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
+    subjectStudyIdentifier: string;
+    isAlreadyAnonymized: boolean = false;
+    subjectType: SubjectType;
+    physicallyInvolved: boolean;
+    tags: Tag[];
+    qualityTag: QualityTag;
+    studyId: number;
 
     constructor(subject: Subject) {
         this.id = subject.id;
@@ -121,5 +137,12 @@ export class SubjectDTO {
             dto.subject = null;
             return dto;
         }) : null;
+        this.subjectStudyIdentifier = subject.subjectStudyIdentifier;
+        this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
+        this.subjectType = subject.subjectType;
+        this.physicallyInvolved = subject.physicallyInvolved;
+        this.tags = subject.tags;
+        this.qualityTag = subject.qualityTag;
+        this.studyId = subject.study?.id;
     }
 }

@@ -110,22 +110,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </button>
             </span>
         </li>
-        <li *ngIf="editSubjectStudy" class="required">
-            <label class="required-label">Subject Type</label>
-            <span class="right-col">
-                <select-box
-                    *ngIf="subject && subject.subjectStudy"
-                    [(ngModel)]="subject.subjectStudy.subjectType"
-                    [ngModelOptions]="{standalone: true}"
-                    [options]="subjectTypes"
-                    (userChange)="onContextChange();">
-                </select-box>
-                <select-box
-                    *ngIf="!subject || !subject.subjectStudy"
-                    [disabled]="true">
-                </select-box>
-            </span>
-        </li>
     </ol>
     <ol class="subject-study">
         <legend
