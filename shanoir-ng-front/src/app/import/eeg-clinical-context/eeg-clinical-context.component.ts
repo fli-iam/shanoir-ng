@@ -191,6 +191,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         let newSubject = new Subject();
         newSubject.subjectStudyList = [subjectStudy];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        newSubject.study = this.study;
         return newSubject;
     }
 
