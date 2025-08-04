@@ -179,30 +179,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 				<ol class="subject-study">
 					<div>
-						<li>
-							<label>Subject identifier for this study</label>
-							<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.subjectStudyIdentifier}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-									<input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudyIdentifier"
-											[ngModelOptions]="{standalone: true}"/>
-							</ng-template>
-							</span>
-						</li>
-						<li>
-							<label>Physically involved</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									<span *ngIf="subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
-									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<checkbox [(ngModel)]="subject.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
-								</ng-template>
-							</span>
-						</li>
                         <li>
                             <label>Subject type</label>
                             <span class="right-col" [ngSwitch]="mode">
@@ -217,10 +193,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </ng-template>
 						    </span>
                         </li>
+                        <li>
+                            <label>Physically involved</label>
+                            <span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									<span *ngIf="subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
+									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<checkbox [(ngModel)]="subject.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+								</ng-template>
+							</span>
+                        </li>
 					</div>
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
+                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
 						<label i18n="Subject detail |Study label@@SubjectDetailSubjectImagedObjectCategory">Study</label>
@@ -238,6 +227,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li>
+                    <label>Subject identifier for this study</label>
+                    <span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.subjectStudyIdentifier}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+									<input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudyIdentifier"
+                                           [ngModelOptions]="{standalone: true}"/>
+							</ng-template>
+                        </span>
+                    </li>
 				</ol>
 				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
