@@ -133,6 +133,7 @@ public class StudyApiControllerTest {
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
+		given(studyServiceMock.findAllNames()).willReturn(Arrays.asList(new IdName()));
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
 		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
