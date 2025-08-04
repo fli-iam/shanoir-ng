@@ -272,4 +272,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             subscribtion.unsubscribe();
         }
     }
+
+    downloadFile(file) {
+        this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
+    }
 }
