@@ -40,6 +40,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.tag.model.StudyTag;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -171,6 +172,10 @@ public abstract class Dataset extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<Dataset> copies;
+
+	@JsonIgnore
+	@ManyToMany(mappedBy = "relatedDatasets", fetch = FetchType.LAZY) // no cascade
+    private List<Study> relatedStudies;
 
 	@JsonIgnore
 	@Transient
@@ -518,5 +523,13 @@ public abstract class Dataset extends AbstractEntity {
 	public void setCopies(List<Dataset> copies) {
 		this.copies = copies;
 	}
+
+    public List<Study> getRelatedStudies() {
+        return relatedStudies;
+    }
+
+    public void setRelatedStudies(List<Study> relatedStudies) {
+        this.relatedStudies = relatedStudies;
+    }
 
 }

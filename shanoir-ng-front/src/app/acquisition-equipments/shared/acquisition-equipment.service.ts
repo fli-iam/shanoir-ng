@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from './acquisition-equipment.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {ShanoirError} from "../../shared/models/error.model";
 import {StudyCard} from "../../study-cards/shared/study-card.model";
+import {ManufacturerModel} from "./manufacturer-model.model";
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
@@ -52,13 +53,22 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
                 throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'}});
             } else if (cards?.length > 1){
                 throw new ShanoirError({error: {
-                    code: 422, 
+                    code: 422,
                     message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
                     details: 'Study cards : ' + cards.map(card => card.id).join(', ')
                 }});
             }
             return super.delete(id);
         })
+    }
 
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
+            equipments => {
+                for (let equipment of equipments) {
+                    if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
+                }
+            }
+        );
     }
 }

@@ -199,6 +199,7 @@ public class QueryPACSService {
 				queryStudyLevel(association, dicomQuery, importJob);
 			}
 		} else {
+			releaseAssociation(association);
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
 		releaseAssociation(association);
