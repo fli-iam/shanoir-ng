@@ -109,6 +109,11 @@ public class DatasetDownloaderServiceImpl {
 	}
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+		massiveDownload(format,  datasets, response, withManifest, converterId, false);
+
+	}
+
+	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
 		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
 		response.setContentType("application/zip");
@@ -130,7 +135,7 @@ public class DatasetDownloaderServiceImpl {
 
 				String datasetFilePath = null;
 				if (datasets.size() != 1) {
-					datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
+					datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName, withShanoirId);
 				}
 
 				manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId, datasetDownloadName.get(dataset.getId()));
@@ -331,10 +336,10 @@ public class DatasetDownloaderServiceImpl {
 		return datasetName;
 	}
 
-	protected String getDatasetFilepath(Dataset dataset, String studyName, String subjectName) {
+	protected String getDatasetFilepath(Dataset dataset, String studyName, String subjectName, Boolean withShanoirId) {
 		Examination exam = datasetService.getExamination(dataset);
 
-		String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "_shanoirId-" + dataset.getId();
+		String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + (withShanoirId ? "_shanoirId-" + dataset.getId() : "");
 		if (exam.getComment() != null) {
 			datasetFilePath += "-" + exam.getComment();
 		}
