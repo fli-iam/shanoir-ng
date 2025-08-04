@@ -184,6 +184,8 @@ public class StudyApiSecurityTest {
 				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()), 
 				new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()),
 				new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
+		given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(
+				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName())));
 		given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
