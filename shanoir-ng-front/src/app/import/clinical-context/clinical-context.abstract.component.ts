@@ -42,6 +42,8 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
+import {SubjectStudy} from "../../subjects/shared/subject-study.model";
+import {ImagedObjectCategory} from "../../subjects/shared/imaged-object-category.enum";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -110,11 +112,18 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.reloading) {
             this.fetchStudies(false).then(() => {
                 this.reloadSavedData().finally(() => this.reloading = false);
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
             }).catch(error => {
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true);
+            this.fetchStudies(true).then( () => {
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
+            });
         }
     }
 
@@ -131,12 +140,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let promises: Promise<any>[] = [];
         let study = this.importDataService.contextBackup(this.stepTs).study;
         let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
-        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
         let center = this.importDataService.contextBackup(this.stepTs).center;
         let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
         let subject = this.importDataService.contextBackup(this.stepTs).subject;
         let examination = this.importDataService.contextBackup(this.stepTs).examination;
         this.study = study;
+        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+
         let studyOption = this.studyOptions.find(s => s.value.id == study.id);
         if (studyOption) {
             this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
@@ -146,8 +156,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.useStudyCard = useStudyCard;
                 this.onToggleUseStudyCard();
             } else if (useStudyCard && studyCard){
-                this.studycard = studyCard;
-                promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
+                promises.push(this.onSelectStudyCard());
             } else {
                 this.restoreCenter(center, acquisitionEquipment);
             }
@@ -297,6 +306,21 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
+    private getStudyCardPolicy(study: Study): Promise<string> {
+        if (study && study.id) {
+            return this.studyService.get(study.id).then(study => {
+                if (study.studyCardPolicy == 'MANDATORY') {
+                    this.useStudyCard = true;
+                } else {
+                    this.useStudyCard = false;
+                }
+                return study.studyCardPolicy;
+            })
+        } else {
+            return Promise.resolve('MANDATORY');
+        }
+    }
+
     private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
@@ -324,11 +348,16 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (studyCard && studyCenterList) {
             this.acquisitionEquipment = null;
             let eqFound: AcquisitionEquipment;
-            let scFound: StudyCenter = studyCenterList?.find(sc => {
-                eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-                return (!!eqFound);
-            })
-            this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            if (this.useStudyCard) {
+                this.center = this.studycard.acquisitionEquipment.center;
+                eqFound = this.studycard.acquisitionEquipment;
+            } else {
+                let scFound: StudyCenter = studyCenterList?.find(sc => {
+                    eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
+                    return (!!eqFound);
+                })
+                this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            }
             return this.onSelectCenter().then(() => {
                 this.acquisitionEquipment = eqFound;
             });
@@ -344,6 +373,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private selectDefaultEquipment(options: Option<AcquisitionEquipment>[]) {
+        if (options?.length == 1) {
+            this.acquisitionEquipment = options[0].value;
+        }
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.acquisitionEquipment = founded;
@@ -353,10 +385,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectStudy(): Promise<void> {
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
-        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
 
+        this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
+
+        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         let studycardsOrCentersPromise: Promise<void>;
-        if (this.useStudyCard) {
+        if (this.useStudyCard && (this.modality == 'MR' || this.modality == 'bruker')) {
             studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
                 this.studycardOptions = options;
                 return this.selectDefaultStudyCard(options);
@@ -366,6 +400,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.centerOptions = options;
                 return this.selectDefaultCenter(options);
             });
+            this.getEquipmentOptions(this.center);
         }
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
@@ -461,7 +496,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
+
+            this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledCenter());
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).center = this.updateStudyCenter(entity as Center);
@@ -479,6 +515,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             newCenter.name = this.importedCenterDataStr.split(' - ')[0] != "null" ? this.importedCenterDataStr.split(' - ')[0] : "";
             newCenter.street = this.importedCenterDataStr.split(' - ')[1] != "null" ? this.importedCenterDataStr.split(' - ')[1] : "";
         }
+        this.breadcrumbsService.currentStep.addPrefilled("entity", newCenter);
         return newCenter;
     }
 
@@ -504,26 +541,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    public openCreateSubject = () => {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        let createSubjectRoute: string = this.getCreateSubjectRoute();
-        this.router.navigate([createSubjectRoute]).then(success => {
-            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
-            this.subscribtions.push(
-                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    let sub: Subject;
-                    if(entity instanceof Subject){
-                        sub = entity;
-                    }else if(entity instanceof PreclinicalSubject){
-                        sub = entity.subject;
-                    }
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
-                })
-            );
-        });
-    }
-
     protected fillCreateSubjectStep(step: Step) {}
 
     protected fillCreateExaminationStep(step: Step) {}
@@ -538,6 +555,39 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return '/examination/create';
     }
 
+    public openCreateSubject = () => {
+        let importStep: Step = this.breadcrumbsService.currentStep;
+        let createSubjectRoute: string = this.getCreateSubjectRoute();
+        this.router.navigate([createSubjectRoute]).then(success => {
+            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
+            this.subscribtions.push(
+                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+
+                    let sub: Subject;
+                    if (entity instanceof Subject) {
+                        sub = entity;
+                    } else if (entity instanceof PreclinicalSubject) {
+                        sub = entity.subject;
+                    }
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
+                })
+            );
+        })
+    }
+
+    public openCreateExam = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        let createExamRoute: string = this.getCreateExamRoute();
+        this.router.navigate([createExamRoute]).then(success => {
+            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
+                })
+            );
+        });
+    }
+
     public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
         if (!subject) return;
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
@@ -549,20 +599,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
 
         return subjectWithSubjectStudy;
-    }
-
-    public openCreateExam = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        let createExamRoute: string = this.getCreateExamRoute();
-        this.router.navigate([createExamRoute]).then(success => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
-                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
-                })
-            );
-        });
     }
 
     private examToSubjectExam(examination: Examination): SubjectExamination {
@@ -596,7 +632,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let context = this.getContext();
         return (
             !!context.study
-            && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject?.subjectStudy?.subjectType

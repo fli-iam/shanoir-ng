@@ -104,13 +104,13 @@ public class DicomDirGeneratorService {
 		String pid = dataset.getString(Tag.PatientID, null);
 		String pBirthDate = dataset.getString(Tag.PatientBirthDate);
 		String pSex = dataset.getString(Tag.PatientSex);
-		String styuid = dataset.getString(Tag.StudyInstanceUID, null);
-		String seruid = dataset.getString(Tag.SeriesInstanceUID, null);
+		String studyInstanceUID = dataset.getString(Tag.StudyInstanceUID, null);
+		String seriesInstanceUID = dataset.getString(Tag.SeriesInstanceUID, null);
 		String seriesDescription = dataset.getString(Tag.SeriesDescription, null);
 
-		if (styuid != null) {
+		if (studyInstanceUID != null) {
 			if (pid == null) {
-				dataset.setString(Tag.PatientID, VR.LO, pid = styuid);
+				dataset.setString(Tag.PatientID, VR.LO, pid = studyInstanceUID);
 				prompt = prompt == 'F' ? 'P' : 'p';
 			}
 			Attributes patRec = in.findPatientRecord(pid);
@@ -122,7 +122,7 @@ public class DicomDirGeneratorService {
 				out.addRootDirectoryRecord(patRec);
 				num++;
 			}
-			Attributes studyRec = in.findStudyRecord(patRec, styuid);
+			Attributes studyRec = in.findStudyRecord(patRec, studyInstanceUID);
 			if (studyRec == null) {
 				studyRec = recFact.createRecord(RecordType.STUDY, null, dataset, null, null);
 				studyRec.setSpecificCharacterSet("ISO_IR 192"); // set to UTF-8
@@ -130,8 +130,8 @@ public class DicomDirGeneratorService {
 				num++;
 			}
 
-			if (seruid != null) {
-				Attributes seriesRec = in.findSeriesRecord(studyRec, seruid);
+			if (seriesInstanceUID != null) {
+				Attributes seriesRec = in.findSeriesRecord(studyRec, seriesInstanceUID);
 				if (seriesRec == null) {
 					seriesRec = recFact.createRecord(RecordType.SERIES, null, dataset, null, null);
 					seriesRec.setSpecificCharacterSet("ISO_IR 192"); // set to UTF-8

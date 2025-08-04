@@ -54,7 +54,6 @@ import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
-import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -91,9 +90,6 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyMapper studyMapper;
-
-	@Autowired
-	private StudyTagMapper studyTagMapper;
 
 	@Autowired
 	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
@@ -325,9 +321,13 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<List<Tag>> tags(@PathVariable("studyId") final Long studyId)
 			throws RestServiceException {
-		List<Tag> tags = this.studyService.getTagsFromStudy(studyId);
-		if (!tags.isEmpty()) {
-			return new ResponseEntity<>(tags, HttpStatus.OK);
+		if (studyId != null) {
+			List<Tag> tags = this.studyService.getTagsFromStudy(studyId);
+			if (!tags.isEmpty()) {
+				return new ResponseEntity<>(tags, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -351,9 +351,9 @@ public class StudyApiController implements StudyApi {
 	
 	@Override
 	public void downloadProtocolFile(
-		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-		@Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
-		HttpServletResponse response) throws RestServiceException, IOException {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+			HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
@@ -432,8 +432,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> acceptDataUserAgreement(
-		@Parameter(description = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
-		throws RestServiceException, MicroServiceCommunicationException {
+			@Parameter(description = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+			throws RestServiceException, MicroServiceCommunicationException {
 		try {
 			this.dataUserAgreementService.acceptDataUserAgreement(duaId);
 		} catch (ShanoirException e) {

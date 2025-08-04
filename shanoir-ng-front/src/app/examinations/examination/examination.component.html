@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-								<select-box formControlName="study" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
+								<select-box [formControl]="form.controls['study']" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -89,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </a>
                             </ng-template>
                             <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-                                <select-box formControlName="center" [(ngModel)]="examination.center" [optionArr]="centers">
+                                <select-box [formControl]="form.controls['center']" [(ngModel)]="examination.center" [optionArr]="centers">
                                 </select-box>
                                 <label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
                             </ng-template>

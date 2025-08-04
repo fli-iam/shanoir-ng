@@ -51,7 +51,7 @@ import jakarta.validation.constraints.Pattern;
 @SqlResultSetMapping(name="centerNameResult", classes = {
 	    @ConstructorResult(targetClass = IdName.class, 
 	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
-	})
+})
 public class Center extends HalEntity {
 
 	/**
@@ -70,7 +70,7 @@ public class Center extends HalEntity {
 	@NotBlank
 	@Column(unique = true)
 	@Unique
-	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
+	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT", "ROLE_USER" })
 	private String name;
 
 	@Pattern(regexp = "[\\+]?[\\d]*")

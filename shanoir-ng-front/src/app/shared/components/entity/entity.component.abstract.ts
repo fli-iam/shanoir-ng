@@ -100,11 +100,11 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
 
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute);
         this.addBCStep();
-        
-        setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
+        this.mode = this.activatedRoute.snapshot.data['mode'];
+
+        queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
+            if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
             let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
             if (!this.showTreeByDefault && !this.treeService.memberStudyOpened(userId) && this.treeService.treeOpened) {
                 this.treeService.closeTemporarily();
@@ -112,7 +112,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     this.mode = this.activatedRoute.snapshot.data['mode'];
-                    if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute); // at each routing event
+                    if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute); // at each routing event
                     this.addBCStep();
                     this.isMainComponent = true;
                     const id = +params['id'];
@@ -179,16 +179,23 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         Promise.all([this.entityPromise, choosePromise]).then(() => {
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
         });
+
         choosePromise.then(() => {
             this.footerState = new FooterState(this.mode);
             this.footerState.backButton = this.isMainComponent;
             this.hasEditRight().then(right => this.footerState.canEdit = right);
             this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.entity = this.breadcrumbsService.currentStep.entity as T;
-            }
-            this.breadcrumbsService.currentStep.entity = this.entity;
+
             this.manageFormSubscriptions();
+            if ((this.mode == 'create' || this.mode == 'edit')) {
+                if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
+                    this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
+                        this.entity = res as T;
+                        this.form.updateValueAndValidity();
+                        this.manageFormSubscriptions();
+                    });
+                }
+            }
         });
 
         // load called tab
@@ -482,6 +489,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     ngOnDestroy() {
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
+
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
@@ -509,6 +518,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         if (event.key == '²') {
             console.log('form', this.form);
             console.log('entity', this.entity);
+            console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})));
         }
     }
 

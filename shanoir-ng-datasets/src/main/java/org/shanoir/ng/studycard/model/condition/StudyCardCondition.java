@@ -122,7 +122,7 @@ public abstract class StudyCardCondition extends AbstractEntity {
                 return original.equals(studycardStr);
             } else if (Operation.NOT_EQUALS.equals(operation)) {
                 return !original.equals(studycardStr);
-             } else if (Operation.CONTAINS.equals(operation)) {
+            } else if (Operation.CONTAINS.equals(operation)) {
                 return original.contains(studycardStr);
             } else if (Operation.DOES_NOT_CONTAIN.equals(operation)) {
                 return !original.contains(studycardStr);
