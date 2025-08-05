@@ -31,6 +31,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
+import {dateFormat} from "../../shared/language/language.abstract";
 
 
 @Component({
@@ -47,6 +48,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
+    dateFormat = dateFormat;
 
     constructor(
             private route: ActivatedRoute,

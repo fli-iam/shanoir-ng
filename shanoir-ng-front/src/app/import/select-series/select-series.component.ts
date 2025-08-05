@@ -20,6 +20,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import {dateFormat} from "../../shared/language/language.abstract";
 
 
 @Component({
@@ -40,6 +41,7 @@ export class SelectSeriesComponent {
     public detailedStudy: any;
     public papayaLoadingCallback: () => Promise<any[]>;
     studiesCheckboxes: any = {};
+    dateFormat = dateFormat;
 
     constructor(
             private importService: ImportService,
@@ -158,5 +160,4 @@ export class SelectSeriesComponent {
             console.log('patients', this.patients);
         }
     }
-
 }

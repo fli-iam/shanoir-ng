@@ -49,6 +49,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
 import { Tag } from 'src/app/tags/tag.model';
+import {dateDisplay, dateFormat} from "../../shared/language/language.abstract";
 
 @Component({
     selector: 'study-detail',
@@ -66,6 +67,8 @@ export class StudyComponent extends EntityComponent<Study> {
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
     protected downloadState: TaskState = new TaskState();
+    protected dateFormat = dateFormat;
+    protected dateDisplay = dateDisplay;
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -153,7 +156,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
-            this.hasDownloadRight = this.keycloakService.isUserAdmin() 
+            this.hasDownloadRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
         })
 

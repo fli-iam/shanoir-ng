@@ -29,6 +29,7 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {dateDisplay, dateFormat} from "../../../../shared/language/language.abstract";
 
 @Component({
     selector: 'subject-pathology-form',
@@ -51,7 +52,8 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     models: PathologyModel[] = [];
     modelsDisplay: PathologyModel[] = [];
     locations: Reference[] = [];
-
+    dateFormat = dateFormat;
+    dateDisplay = dateDisplay;
 
     constructor(
         private route: ActivatedRoute,
@@ -257,5 +259,4 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
     }
-
 }

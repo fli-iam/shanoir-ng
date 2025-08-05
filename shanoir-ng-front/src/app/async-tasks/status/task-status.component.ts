@@ -21,10 +21,10 @@ import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-c
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {Task} from '../task.model';
 import {TaskService} from "../task.service";
-import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
-import * as AppUtils from "../../utils/app.utils";
+import { HttpClient } from "@angular/common/http";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
+import { dateFormat} from "../../shared/language/language.abstract";
 
 
 @Component({
@@ -39,6 +39,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     protected subscriptions: Subscription[] = [];
     @Input() task: Task;
     private tableRefresh: () => void;
+    protected dateFormat = dateFormat;
 
     reportColumns: ColumnDefinition[] = [
         {headerName: 'Subject Name', field: 'subjectName', width: '20%'},
@@ -60,9 +61,6 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private keycloakService: KeycloakService,
         private consoleService: ConsoleService
     ) { }
-
-    ngOnInit() {
-    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {

@@ -34,6 +34,7 @@ import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
 import {formatDate} from "@angular/common";
 import { Selection } from 'src/app/studies/study/tree.service';
+import { dateFormat} from "../../shared/language/language.abstract";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -58,8 +59,10 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public outputDatasetsColumnDefs: ColumnDefinition[];
     public isExecutionMonitoring: boolean = false;
     public executionMonitoring: ExecutionMonitoring;
+    public dateFormat = dateFormat;
     prefilledStudy: Study;
     prefilledSubject: Subject;
+
 
     constructor(
             private route: ActivatedRoute,

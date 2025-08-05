@@ -57,11 +57,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label>Creation</label>
-                <span class="right-col">{{task.creationDate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+                <span class="right-col">{{task.creationDate | date: dateFormat + ' HH:mm:ss'}}</span>
             </li>
             <li>
                 <label>Last update</label>
-                <span class="right-col">{{task.lastUpdate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+                <span class="right-col">{{task.lastUpdate | date: dateFormat + ' HH:mm:ss'}}</span>
             </li>
             <li class="message-li" *ngIf="task.report && task._eventType != 'checkQuality.event' && task._eventType != 'importDataset.event'">
                 <label>Report</label>
