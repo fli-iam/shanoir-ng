@@ -117,16 +117,6 @@ public interface DatasetService {
 	Dataset update(Dataset dataset) throws EntityNotFoundException;
 
 	/**
-	 * Find every dataset
-	 * 
-	 * @return datasets
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
-	List<Dataset> findAll();
-
-
-	/**
 	 * Fetch the asked page
 	 * 
 	 * @return datasets

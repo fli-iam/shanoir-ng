@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -114,6 +115,7 @@ public class DatasetDownloaderServiceImpl {
 		response.setHeader("Content-Disposition",
 				"attachment;filename=" + getFileName(datasets));
 		Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
+		Map<Long, String> datasetDownloadName = getDatasetDownloadName(datasets);
 
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			for (Dataset dataset : datasets) {
@@ -123,14 +125,15 @@ public class DatasetDownloaderServiceImpl {
 					subjectName = subjectName.replaceAll(File.separator, "_");
 				}
 
-				String studyName = studyRepository.findById(dataset.getStudyId()).orElse(null).getName();
+				String studyName = studyRepository.findById(dataset.getStudyId()).map(Study::getName).orElse("Unknown_study");
 
 
 				String datasetFilePath = null;
 				if (datasets.size() != 1) {
 					datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
 				}
-				manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId);
+
+				manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId, datasetDownloadName.get(dataset.getId()));
 
 			}
 			if(!filesByAcquisitionId.isEmpty()){
@@ -160,7 +163,26 @@ public class DatasetDownloaderServiceImpl {
 		}
 	}
 
-	protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws IOException, RestServiceException {
+	protected Map<Long, String> getDatasetDownloadName(List<Dataset> datasets) {
+		HashMap<Long, String> datasetDownloadName = new HashMap<>();
+		int count = 0;
+		for (Dataset dataset : datasets) {
+			String datasetName = dataset.getName();
+			if(datasetDownloadName.containsValue(datasetName)) {
+				if (datasetName.contains(".")) {
+					datasetDownloadName.put(dataset.getId(), datasetName.replaceFirst("\\.", "_" + count + "."));
+				} else {
+					datasetDownloadName.put(dataset.getId(), datasetName + "_" + count);
+				}
+				count++;
+			}else {
+				datasetDownloadName.put(dataset.getId(), dataset.getName());
+			}
+		}
+		return datasetDownloadName;
+	}
+
+	protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, String datasetDownloadName) throws IOException, RestServiceException {
 		if (!dataset.isDownloadable()) {
 			downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
 			return;
@@ -173,15 +195,15 @@ public class DatasetDownloaderServiceImpl {
 		if (dataset.getDatasetProcessing() != null) {
 			// DOWNLOAD PROCESSED DATASET
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
 		} else if (dataset instanceof EegDataset) {
 			// DOWNLOAD EEG
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath, null);
 		} else if (dataset instanceof BidsDataset) {
 			// DOWNLOAD BIDS
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, null);
 			// Manage errors here
 		} else if (Objects.equals("dcm", format)) {
 			// DOWNLOAD DICOM
@@ -199,7 +221,7 @@ public class DatasetDownloaderServiceImpl {
 				// Check that we have existing nifti, otherwise reconvert using dcm2niix by default.
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
 				if (!pathURLs.isEmpty()) {
-					List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false,  datasetFilePath);
+					List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false,  datasetFilePath, null);
 				} else {
 					// Reconvert using dcm2niix by default.
 					reconvertToNifti(format, DEFAULT_NIFTI_CONVERTER_ID, dataset, pathURLs, downloadResult, subjectName, zipOutputStream);

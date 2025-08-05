@@ -12,12 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.ListUtils;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -58,12 +67,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.shanoir.ng.dataset.dto.DatasetLight;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import jakarta.transaction.Transactional;
 
 /**
  * Dataset service implementation.
@@ -290,11 +298,6 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<Dataset> findAll() {
-		return Utils.toList(repository.findAll());
-	}
-
-	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
 
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -398,7 +401,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-		return repository.findDatasetAndOutputByExaminationId(examinationId);
+        return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
 	}
 
 	@Async

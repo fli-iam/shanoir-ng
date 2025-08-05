@@ -39,6 +39,7 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
@@ -203,18 +204,17 @@ public class SubjectServiceImpl implements SubjectService {
 				subjectStudy.setSubject(subject);
 			}
 		}
-		// the first 3 numbers are the center code, search for highest existing subject with center code
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
-		String commonNameCenter = formatterCenter.format(centerId);
-		int maxCommonNameNumber = 0;
-		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
-		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
-			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
-			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		String subjectNameCenterPrefix = formatterCenter.format(centerId);
+		int maxSubjectNameNumber = 0;
+		Subject subjectMaxFoundByCenter = findSubjectFromCenterCode(subjectNameCenterPrefix);
+		if (subjectMaxFoundByCenter != null) { // subjects for centerId exist already
+			String maxNameToIncrement = subjectMaxFoundByCenter.getName().substring(subjectNameCenterPrefix.length());
+			maxSubjectNameNumber = Integer.parseInt(maxNameToIncrement);
 		}
-		maxCommonNameNumber += 1;
+		maxSubjectNameNumber += 1;
 		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
-		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+		String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
 		subject.setName(subjectName);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
@@ -236,6 +236,7 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
 		}
 		updateSubjectValues(subjectDb, subject);
+
 		Subject newSubject = subjectRepository.save(subjectDb);
 		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
 		return newSubject;
@@ -259,21 +260,41 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+
 		if (subject.getSubjectStudyList() != null) {
 			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setSubject(subjectDb);
-				if (dbSubjectStudy.getSubjectStudyTags() == null) {
-					dbSubjectStudy.setSubjectStudyTags(new ArrayList<>());
+
+			// Supprimer les associations obsolètes
+			List<SubjectStudy> toRemove = new ArrayList<>();
+			for (SubjectStudy oldSS : subjectStudyListDb) {
+				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
+						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
+				);
+				if (!stillPresent) {
+					toRemove.add(oldSS);
+				}
+			}
+			subjectStudyListDb.removeAll(toRemove);
+
+			// Ajouter les nouvelles associations manquantes
+			for (SubjectStudy newSS : subjectStudyListNew) {
+				boolean alreadyExists = subjectStudyListDb.stream().anyMatch(existingSS ->
+						existingSS.getStudy().getId().equals(newSS.getStudy().getId())
+				);
+				if (!alreadyExists) {
+					newSS.setSubject(subjectDb);
+					if (newSS.getSubjectStudyTags() == null) {
+						newSS.setSubjectStudyTags(new ArrayList<>());
+					}
+					subjectStudyListDb.add(newSS);
 				}
 			}
 		}
+
 		return subjectDb;
 	}
-	
+
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.
