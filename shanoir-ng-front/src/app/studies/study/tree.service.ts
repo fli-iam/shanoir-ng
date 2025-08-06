@@ -48,7 +48,7 @@ export type ProcessingForChain =  {id: number, outDataset: DatasetForChain};
 
 @Injectable()
 export class TreeService {
-
+    
     private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
@@ -58,24 +58,31 @@ export class TreeService {
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
+    public previouslyOpened: boolean = false;
     selectedNode: ShanoirNode;
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
     studyLoading: boolean = false;
-
+    reopenAfterNavigation: boolean = false;
+    
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
-    }   
-
+    }
+    
     get treeOpened(): boolean {
         return this._treeOpened;
     }
 
     set treeOpened(opened: boolean) {
+        this.previouslyOpened = this._treeOpened;
         if (!this._treeOpened && opened) {
-            this._treeOpened = opened;
-            this.studyNodeInit.then(() => {
-                this.changeSelection();
-            });
+            this.changeSelection();
+            if (this.selection?.studyId && this.selection?.studyId?.includes(this.studyNode?.id)) {
+                this.studyNodeInit.then(() => {
+                    this._treeOpened = opened;
+                });
+            } else {
+                this._treeOpened = opened;
+            }
         }
         this._treeOpened = opened;
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
@@ -116,6 +123,10 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
+                if (this.reopenAfterNavigation) {
+                    this.treeOpened = true;
+                    this.reopenAfterNavigation = false;
+                }
                 setTimeout(() => {
                     let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
                     if (newState && !this.treeAvailable) {
@@ -650,6 +661,18 @@ export class TreeService {
                 attr[1].forEach(sn => this.unSelectNode(sn));
             }
         });
+    }
+
+    memberStudyOpenedAndTreeActive(userId: number): boolean {
+        return this.treeOpened && this.treeAvailable
+            && this.studyNode?.membersNode?.members 
+            && this.studyNode?.membersNode?.members != UNLOADED
+            && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
+    }
+
+    closeTemporarily() {
+        this.treeOpened = false;
+        this.reopenAfterNavigation = true;
     }
 }
 
