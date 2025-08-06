@@ -237,21 +237,57 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
-			query.addFilterQuery(
-					"{!tag=" + fieldName + "}" 
-					+ fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
-		} 
+			List<String> normalValues = new ArrayList<>();
+			boolean includesMissing = false;
+
+			for (String val : values) {
+				if (val == null || val.trim().isEmpty()) {
+					includesMissing = true;
+				} else {
+					normalValues.add(val);
+				}
+			}
+
+			if (!normalValues.isEmpty()) {
+				query.addFilterQuery(
+						"{!tag=" + fieldName + "}"
+								+ fieldName + ":(\"" + String.join("\" OR \"", normalValues) + "\")"
+				);
+			}
+
+			if (includesMissing) {
+				query.addFilterQuery("{!tag=" + fieldName + "}-" + fieldName + ":[* TO *]");
+			}
+		}
 	}
 
 
 	private void addFilterQueryFromBoolean(SolrQuery query, String fieldName, Collection<Boolean> values) {
 		if (values != null && !values.isEmpty()) {
-			query.addFilterQuery(
-					"{!tag=" + fieldName + "}"
-							+ fieldName + ":(" + values.stream().map(String::valueOf).collect(Collectors.joining(" OR "))
-							+ ")");
+			List<String> normalValues = new ArrayList<>();
+			boolean includesMissing = false;
+
+			for (Boolean val : values) {
+				if (val == null) {
+					includesMissing = true;
+				} else {
+					normalValues.add(String.valueOf(val));
+				}
+			}
+
+			if (!normalValues.isEmpty()) {
+				query.addFilterQuery(
+						"{!tag=" + fieldName + "}"
+								+ fieldName + ":(" + String.join(" OR ", normalValues) + ")"
+				);
+			}
+
+			if (includesMissing) {
+				query.addFilterQuery("{!tag=" + fieldName + "}-" + fieldName + ":[* TO *]");
+			}
 		}
 	}
+
 
 	/**
 	 * For the given query in entry, add a filter by study center.
@@ -260,54 +296,86 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	 * @param studyIdCentersMap
 	 */
 	private void addFilterQueryForCenterStudy(SolrQuery query, Map<Long, List<String>> studyIdCentersMap) {
-		String filter = "";
+		StringBuilder filter = new StringBuilder();
+		boolean firstEntry = true;
+
 		for (Entry<Long, List<String>> entry : studyIdCentersMap.entrySet()) {
-			if (!filter.equals("")) {
-				filter+=" OR ";
+			Long studyId = entry.getKey();
+			List<String> centers = entry.getValue();
+
+			if (!firstEntry) {
+				filter.append(" OR ");
 			}
-			if (CollectionUtils.isEmpty(entry.getValue())) {
-				filter = filter + STUDY_ID_FACET + ":" + entry.getKey();
+
+			if (CollectionUtils.isEmpty(centers)) {
+				filter.append(STUDY_ID_FACET).append(":").append(studyId);
 			} else {
-				boolean first = true;
-				for (String centerName: entry.getValue()) {
-					filter =  filter + (!first ? " OR " : "") + " (" + STUDY_ID_FACET + ":" + entry.getKey() + " AND " + CENTER_NAME_FACET + ":\"" + centerName + "\")";
-					first = false;
+				boolean firstCenter = true;
+				StringBuilder centerFilter = new StringBuilder();
+
+				for (String centerName : centers) {
+					if (!firstCenter) {
+						centerFilter.append(" OR ");
+					}
+					if (centerName == null || centerName.trim().isEmpty()) {
+						centerFilter.append("(")
+								.append(STUDY_ID_FACET).append(":").append(studyId)
+								.append(" AND -").append(CENTER_NAME_FACET).append(":[* TO *])");
+					} else {
+						centerFilter.append("(")
+								.append(STUDY_ID_FACET).append(":").append(studyId)
+								.append(" AND ")
+								.append(CENTER_NAME_FACET).append(":\"").append(centerName).append("\")");
+					}
+					firstCenter = false;
 				}
+				filter.append(centerFilter);
 			}
+			firstEntry = false;
 		}
-		query.addFilterQuery(filter);
+		query.addFilterQuery(filter.toString());
 	}
+
 
 	private void addFilterQueryFromLongs(SolrQuery query, String fieldName, Collection<Long> values) {
 		if (values != null && !values.isEmpty()) {
 			List<String> valueStr = new ArrayList<>();
 			for (Long longValue : values) {
-				valueStr.add(longValue.toString());
+				if (longValue != null) {
+					valueStr.add(longValue.toString());
+				} else {
+					valueStr.add("");
+				}
 			}
-			addFilterQuery(query, fieldName, valueStr);			
+			addFilterQuery(query, fieldName, valueStr);
 		}
 	}
 
 	private <T> void addFilterQueryFromRange(SolrQuery query, String fieldName, Range<T> range) {
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
-			String rangeQueryStr = fieldName + ":[" 
+			String rangeQueryStr = fieldName + ":["
 					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().toString()) : "*")
 					+ " TO "
-					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*") 	
-					+ "]";	
+					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*")
+					+ "]";
 			query.addFilterQuery(rangeQueryStr);
+
+			query.addFilterQuery("-" + fieldName + ":[* TO *]");
 		}
 	}
+
 
 	private void addFilterQueryFromDateRange(SolrQuery query, String fieldName, Range<LocalDate> range) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
-			String rangeQueryStr = fieldName + ":[" 
+			String rangeQueryStr = fieldName + ":["
 					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
 					+ " TO "
-					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*") 	
-					+ "]";	
+					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
+					+ "]";
 			query.addFilterQuery(rangeQueryStr);
+
+			query.addFilterQuery("-" + fieldName + ":[* TO *]");
 		}
 	}
 
@@ -357,8 +425,49 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
 		QueryResponse response = querySolrServer(query);
 
+		Map<String, FacetPageable> cleanedFacetPage = cleanFacetPage(response, shanoirQuery);
+
 		/* build the page object */
-		return buildShanoirSolrPage(response, pageable, shanoirQuery.getFacetPaging());
+		return buildShanoirSolrPage(response, pageable, cleanedFacetPage);
+	}
+
+	private Map<String, FacetPageable> cleanFacetPage(QueryResponse response, ShanoirSolrQuery shanoirQuery) {
+		Map<String, FacetPageable> filteredFacetPaging = new HashMap<>();
+
+		for (Map.Entry<String, FacetPageable> entry : shanoirQuery.getFacetPaging().entrySet()) {
+			String facetName = entry.getKey();
+			FacetPageable pageableFacet = entry.getValue();
+
+			FacetField facetField = response.getFacetField(facetName);
+			if (facetField == null) {
+				filteredFacetPaging.put(facetName, pageableFacet);
+				continue;
+			}
+
+			List<FacetField.Count> originalValues = facetField.getValues();
+			if (originalValues == null || originalValues.isEmpty()) {
+				filteredFacetPaging.put(facetName, pageableFacet);
+				continue;
+			}
+
+
+			List<FacetField.Count> filteredValues = originalValues.stream()
+					.filter(c -> {
+						if (c == null) return false;
+						String name = c.getName();
+						boolean isMissingName = (name == null) || name.trim().isEmpty() || "(Missing)".equals(name.trim());
+						return !(isMissingName && c.getCount() == 0);
+					})
+					.collect(Collectors.toCollection(ArrayList::new));
+
+			try {
+				originalValues.clear();
+				originalValues.addAll(filteredValues);
+			} catch (RuntimeException ignored) {}
+
+			filteredFacetPaging.put(facetName, pageableFacet);
+		}
+		return filteredFacetPaging;
 	}
 
 	private void addUserFiltering(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
@@ -496,6 +605,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 					query.set("f." + facetName + "." + FacetParams.FACET_LIMIT, facetPageable.getPageSize());
 					query.set("f." + facetName + "." + FacetParams.FACET_OFFSET, (facetPageable.getPageNumber() - 1) * facetPageable.getPageSize());
 					query.set("f." + facetName + ".numTerms", true);
+					query.set("f." + facetName + ".facet.missing", true);
 					if (facetPageable.getFilter() != null && !facetPageable.getFilter().isEmpty()) {
 						query.set("f." + facetName + "." + FacetParams.FACET_CONTAINS_IGNORE_CASE, true);
 						query.set("f." + facetName + "." + FacetParams.FACET_CONTAINS, ClientUtils.escapeQueryChars(facetPageable.getFilter()).trim());
@@ -507,5 +617,4 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			}
 		}
 	}
-
 }
