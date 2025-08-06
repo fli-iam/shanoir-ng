@@ -63,11 +63,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public examination: SubjectExamination;
     public subjectNamePrefix: string;
     protected subscribtions: Subscription[] = [];
-    public subjectTypes: Option<string>[] = [
-        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
-        new Option<string>('PATIENT', 'Patient'),
-        new Option<string>('PHANTOM', 'Phantom')
-    ];
+
     public useStudyCard: boolean = true;
 
     public scHasCoilToUpdate: boolean;
