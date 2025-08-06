@@ -20,7 +20,7 @@ ALTER TABLE subject DROP INDEX subject_name_idx;
 ALTER TABLE subject
     ADD COLUMN study_id BIGINT(20),
     ADD COLUMN study_identifier VARCHAR(255),
-    ADD COLUMN physically_involved BIT(1),
+    ADD COLUMN physically_involved BIT(1) DEFAULT b'0',
     ADD COLUMN subject_type INT(11),
     ADD COLUMN quality_tag INT(11),
     ADD CONSTRAINT unique_subject_name_study_id UNIQUE (name, study_id);
