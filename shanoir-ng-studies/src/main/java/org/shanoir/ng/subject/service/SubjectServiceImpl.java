@@ -261,7 +261,12 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	private void mapSubjectStudyTagListToSubjectTag(Subject subject, SubjectStudy subjectStudy) {
-		List<SubjectTag> subjectTagList = new ArrayList<SubjectTag>();
+		List<SubjectTag> subjectTagList;
+		if (subject.getSubjectTags() == null) {
+			subjectTagList = new ArrayList<SubjectTag>();
+		} else {
+			subjectTagList = subject.getSubjectTags();
+		}
 		if (subjectStudy.getSubjectStudyTags() != null && !subjectStudy.getSubjectStudyTags().isEmpty()) {
 			subjectStudy.getSubjectStudyTags().stream().forEach(sst -> {
 				SubjectTag tag = new SubjectTag();
