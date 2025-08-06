@@ -58,6 +58,7 @@ export class TreeService {
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
+    public previouslyOpened: boolean = false;
     selectedNode: ShanoirNode;
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
     studyLoading: boolean = false;
@@ -72,6 +73,7 @@ export class TreeService {
     }
 
     set treeOpened(opened: boolean) {
+        this.previouslyOpened = this._treeOpened;
         if (!this._treeOpened && opened) {
             this.changeSelection();
             if (this.selection?.studyId && this.selection?.studyId?.includes(this.studyNode?.id)) {
@@ -121,7 +123,10 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
-                if (this.reopenAfterNavigation) this.treeOpened = true;
+                if (this.reopenAfterNavigation) {
+                    this.treeOpened = true;
+                    this.reopenAfterNavigation = false;
+                }
                 setTimeout(() => {
                     let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
                     if (newState && !this.treeAvailable) {
@@ -658,8 +663,9 @@ export class TreeService {
         });
     }
 
-    memberStudyOpened(userId: number): boolean {
-        return this.studyNode?.membersNode?.members 
+    memberStudyOpenedAndTreeActive(userId: number): boolean {
+        return this.treeOpened && this.treeAvailable
+            && this.studyNode?.membersNode?.members 
             && this.studyNode?.membersNode?.members != UNLOADED
             && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
     }

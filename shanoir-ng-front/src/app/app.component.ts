@@ -83,7 +83,7 @@ export class AppComponent {
     }
 
     toggleTree(open: boolean) {
-        this.treeService.treeOpened = open;    
+        this.treeService.treeOpened = open;
     }
 
     isAuthenticated(): boolean {

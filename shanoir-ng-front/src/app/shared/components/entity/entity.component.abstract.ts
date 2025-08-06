@@ -106,7 +106,10 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
             let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
-            if (!this.showTreeByDefault && !this.treeService.memberStudyOpened(userId) && this.treeService.treeOpened) {
+            if (!this.showTreeByDefault
+                && this.treeService.treeOpened
+                && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
+            ) {
                 this.treeService.closeTemporarily();
             }
             this.subscriptions.push(this.activatedRoute.params.subscribe(
