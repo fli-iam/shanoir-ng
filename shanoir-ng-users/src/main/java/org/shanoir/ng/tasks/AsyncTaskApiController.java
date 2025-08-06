@@ -1,11 +1,10 @@
 package org.shanoir.ng.tasks;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventLight;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -38,15 +37,22 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
 		Long userId = KeycloakUtil.getTokenUserId();
 		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-				userId, 
-				ShanoirEventType.IMPORT_DATASET_EVENT, 
-				ShanoirEventType.COPY_DATASET_EVENT, 
-				ShanoirEventType.EXECUTION_MONITORING_EVENT, 
-				ShanoirEventType.CHECK_QUALITY_EVENT, 
-				ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
-				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
+				userId,
+				ShanoirEventType.IMPORT_DATASET_EVENT,
+				ShanoirEventType.COPY_DATASET_EVENT,
+				ShanoirEventType.EXECUTION_MONITORING_EVENT,
+				ShanoirEventType.CHECK_QUALITY_EVENT,
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
 				ShanoirEventType.DELETE_EXAMINATION_EVENT,
+				ShanoirEventType.DELETE_NIFTI_EVENT,
 				ShanoirEventType.DELETE_DATASET_EVENT);
+
+		// Get only event with last updates < 7 days
+		Date now = new Date();
+		long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
+ 		taskList = taskList.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
+
  		// Order by last update date
 		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
 			@Override
