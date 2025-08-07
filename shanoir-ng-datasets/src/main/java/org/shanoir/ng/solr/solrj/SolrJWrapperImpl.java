@@ -241,7 +241,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			boolean includesMissing = false;
 
 			for (String val : values) {
-				if (val == null || val.trim().isEmpty()) {
+				if (val == null || val.trim().isEmpty() || "None".equalsIgnoreCase(val.trim())) {
 					includesMissing = true;
 				} else {
 					normalValues.add(val);
@@ -359,8 +359,6 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*")
 					+ "]";
 			query.addFilterQuery(rangeQueryStr);
-
-			query.addFilterQuery("-" + fieldName + ":[* TO *]");
 		}
 	}
 
@@ -374,8 +372,6 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
 					+ "]";
 			query.addFilterQuery(rangeQueryStr);
-
-			query.addFilterQuery("-" + fieldName + ":[* TO *]");
 		}
 	}
 
@@ -451,18 +447,27 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			}
 
 
-			List<FacetField.Count> filteredValues = originalValues.stream()
-					.filter(c -> {
-						if (c == null) return false;
-						String name = c.getName();
-						boolean isMissingName = (name == null) || name.trim().isEmpty() || "(Missing)".equals(name.trim());
-						return !(isMissingName && c.getCount() == 0);
-					})
-					.collect(Collectors.toCollection(ArrayList::new));
+			List<FacetField.Count> renamedAndFilteredValues = new ArrayList<>();
+			for (FacetField.Count count : originalValues) {
+				if (count == null) continue;
+
+				String name = count.getName();
+				boolean isMissing = (name == null) || name.trim().isEmpty() || "(Missing)".equals(name.trim());
+
+				if (isMissing && count.getCount() == 0) {
+					continue;
+				}
+
+				if (isMissing) {
+					renamedAndFilteredValues.add(new FacetField.Count(facetField, "None", count.getCount()));
+				} else {
+					renamedAndFilteredValues.add(count);
+				}
+			}
 
 			try {
 				originalValues.clear();
-				originalValues.addAll(filteredValues);
+				originalValues.addAll(renamedAndFilteredValues);
 			} catch (RuntimeException ignored) {}
 
 			filteredFacetPaging.put(facetName, pageableFacet);
