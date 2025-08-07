@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <node
                             *ngFor="let serie of study.series"
                             label="{{serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber}}
-                            	{{serie.seriesDate | date: dateFormat}}
+                            	{{serie.seriesDate | localDateFormatPipe}}
                             	{{serie.modality}}
                             	{{serie.isEnhanced ? 'E' : ''}}
                             	{{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Birth date</td>
-                <td class="value">{{$any(detailedPatient)?.patientBirthDate | date: dateFormat}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientBirthDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Identity removed</td>
@@ -101,7 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Date</td>
-                <td class="value">{{$any(detailedStudy)?.studyDate | date: dateFormat}}</td>
+                <td class="value">{{$any(detailedStudy)?.studyDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>
@@ -134,7 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
-                <td class="value">{{$any(detailedSerie)?.seriesDate | date: dateFormat}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series number</td>

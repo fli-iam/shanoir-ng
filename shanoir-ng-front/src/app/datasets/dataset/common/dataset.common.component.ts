@@ -26,7 +26,6 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
 import { Dataset } from '../../shared/dataset.model';
-import {dateFormat} from "../../../shared/language/language.abstract";
 
 @Component({
     selector: 'common-dataset-details',
@@ -47,7 +46,6 @@ export class CommonDatasetComponent implements OnChanges {
     CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects;
     ExploredEntity = ExploredEntity;
     ProcessedDatasetType = ProcessedDatasetType;
-    dateFormat = dateFormat;
 
     constructor(
             private studyService: StudyService,

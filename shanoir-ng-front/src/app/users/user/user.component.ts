@@ -27,7 +27,7 @@ import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { Selection } from 'src/app/studies/study/tree.service';
 import { StudyUser } from 'src/app/studies/shared/study-user.model';
-import {dateDisplay, dateFormat} from "../../shared/language/language.abstract";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 
 @Component({
@@ -44,7 +44,6 @@ export class UserComponent extends EntityComponent<User> {
     public acceptLoading: boolean = false;
     public studies = [];
     public studyToDelete = [];
-    public dateFormat = dateFormat;
     public dateDisplay = dateDisplay;
 
     constructor(

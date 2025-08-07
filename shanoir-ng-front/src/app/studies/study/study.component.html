@@ -111,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
 						<span class="right-col">
 							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.startDate | date: dateFormat}}
+								{{study.startDate | localDateFormatPipe}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
 								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
@@ -123,7 +123,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{study.endDate | date: dateFormat}}
+								{{study.endDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>

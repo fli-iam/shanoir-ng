@@ -24,8 +24,6 @@ import {TaskService} from "../task.service";
 import { HttpClient } from "@angular/common/http";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
-import { dateFormat} from "../../shared/language/language.abstract";
-
 
 @Component({
     selector: 'task-status',
@@ -39,7 +37,6 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     protected subscriptions: Subscription[] = [];
     @Input() task: Task;
     private tableRefresh: () => void;
-    protected dateFormat = dateFormat;
 
     reportColumns: ColumnDefinition[] = [
         {headerName: 'Subject Name', field: 'subjectName', width: '20%'},

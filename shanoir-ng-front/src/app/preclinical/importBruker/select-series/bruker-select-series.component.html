@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Birth date</td>
-                <td class="value">{{detailedPatient?.patientBirthDate | date: dateFormat}}</td>
+                <td class="value">{{detailedPatient?.patientBirthDate | localDateFormatPipe}}</td>
             </tr>
         </table>
     </div>
@@ -97,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
-                <td class="value">{{detailedSerie?.seriesDate | date: dateFormat}}</td>
+                <td class="value">{{detailedSerie?.seriesDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series number</td>

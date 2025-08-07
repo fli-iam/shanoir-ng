@@ -31,7 +31,7 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {dateDisplay, dateFormat} from "../../../../shared/language/language.abstract";
+import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'subject-therapy-form',
@@ -53,7 +53,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     therapies: Therapy[];
     units: Reference[];
     frequencies: Enum[] = [];
-    dateFormat = dateFormat;
     dateDisplay = dateDisplay;
 
     constructor(

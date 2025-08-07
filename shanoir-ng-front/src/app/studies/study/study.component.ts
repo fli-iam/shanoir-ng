@@ -49,7 +49,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
 import { Tag } from 'src/app/tags/tag.model';
-import {dateDisplay, dateFormat} from "../../shared/language/language.abstract";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'study-detail',
@@ -67,7 +67,6 @@ export class StudyComponent extends EntityComponent<Study> {
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
     protected downloadState: TaskState = new TaskState();
-    protected dateFormat = dateFormat;
     protected dateDisplay = dateDisplay;
 
     subjects: IdName[];

@@ -22,7 +22,6 @@ import { slideDown } from '../../../shared/animations/animations';
 import * as AppUtils from '../../../utils/app.utils';
 import { PatientDicom, SerieDicom } from '../../../import/shared/dicom-data.model';
 import { ImportService } from '../../../import/shared/import.service';
-import {dateFormat} from "../../../shared/language/language.abstract";
 
 @Component({
     selector: 'bruker-select-series',
@@ -38,7 +37,6 @@ export class BrukerSelectSeriesComponent {
     public detailedPatient: any;
     public detailedSerie: any;
     public papayaLoadingCallback: () => Promise<any[]>;
-    public dateFormat = dateFormat;
 
     constructor(
             private importService: ImportService,

@@ -45,7 +45,7 @@ import {Study} from "../studies/shared/study.model";
 import {ServiceLocator} from "../utils/locator.service";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
-import {dateDisplay, dateFormat} from "../shared/language/language.abstract";
+import {dateDisplay} from "../shared/./localLanguage/localDate.abstract";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];
@@ -91,7 +91,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
-    dateFormat = dateFormat;
     dateDisplay = dateDisplay;
 
     constructor(

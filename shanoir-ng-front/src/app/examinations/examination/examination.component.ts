@@ -33,7 +33,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import {dateDisplay} from "../../shared/language/language.abstract";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'examination-detail',
@@ -56,8 +56,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
-    downloadState: TaskState = new TaskState();dateDisplay = dateDisplay;
-
+    downloadState: TaskState = new TaskState();
+    dateDisplay = dateDisplay;
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;

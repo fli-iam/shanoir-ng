@@ -34,7 +34,7 @@ import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
 import {formatDate} from "@angular/common";
 import { Selection } from 'src/app/studies/study/tree.service';
-import { dateFormat} from "../../shared/language/language.abstract";
+import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -59,7 +59,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public outputDatasetsColumnDefs: ColumnDefinition[];
     public isExecutionMonitoring: boolean = false;
     public executionMonitoring: ExecutionMonitoring;
-    public dateFormat = dateFormat;
     prefilledStudy: Study;
     prefilledSubject: Subject;
 
@@ -318,4 +317,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             String(seconds).padStart(2, "0") + "." +
             String(milliseconds).padStart(3, "0")
     }
+
+    protected readonly dateDisplay = dateDisplay;
 }
