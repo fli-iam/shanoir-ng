@@ -82,7 +82,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="footer command-zone">
             <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>
             <button type="submit" i18n="Edit user|Request account button label@@requestAccountButton" (click)="accountRequest()"
-                class="Button" [disabled]="!form.valid">Request Account</button>
+                class="Button right-icon" [disabled]="!form.valid" [disabled]="loading">
+                Request Account
+                <i class="fas fa-spinner fa-spin" *ngIf="loading"></i>
+                </button>
         </div>
 
     </form>
