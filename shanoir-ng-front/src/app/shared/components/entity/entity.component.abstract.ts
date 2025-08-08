@@ -351,6 +351,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     save(afterSave?: () => Promise<void>): Promise<T> {
         this.footerState.loading = true;
+        this.updateEntityOnSave()
         return this.modeSpecificSave(afterSave)
             .then(study => {
                 this.footerState.loading = false;
@@ -363,6 +364,10 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                 this.catchSavingErrors(reason);
                 return null;
             });
+    }
+
+    protected updateEntityOnSave() {
+        Object.assign(this.entity, this.form.value);
     }
 
 
