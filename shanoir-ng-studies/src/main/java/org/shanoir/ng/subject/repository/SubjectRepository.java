@@ -47,14 +47,9 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.studyUserList"})
 	Iterable<Subject> findAllById(Iterable<Long> ids);
 	
-	/**
-	 * Find subject by name.
-	 *
-	 * @param name
-	 *            
-	 * @return a Subject.
-	 */
-	Subject findByName(String name);
+	List<Subject> findByName(String name);
+
+	Subject findByStudyIdAndName(Long studyId, String name);
 
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
 	Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);

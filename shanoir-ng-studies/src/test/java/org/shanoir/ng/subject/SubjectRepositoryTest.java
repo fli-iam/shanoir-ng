@@ -67,7 +67,7 @@ public class SubjectRepositoryTest {
 
 	@Test
 	public void findByDataTest() throws Exception {
-		Subject subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
+		Subject subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA).getFirst();
 		assertNotNull(subjectDb);
 		assertThat(subjectDb.getId()).isEqualTo(SUBJECT_TEST_1_ID);
 	}

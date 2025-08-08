@@ -17,13 +17,17 @@ package org.shanoir.ng.subject.model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.Tag;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -39,11 +43,14 @@ import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
@@ -61,11 +68,14 @@ public class Subject extends HalEntity {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
-	@Unique
 	private String name;
 
-	/** Sex. */
 	private Integer sex;
+
+	@ManyToOne
+	@JoinColumn(name = "study_id")
+	@NotNull
+	private Study study;
 
 	/** Relations beetween the subjects and the studies. */
 	@OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -95,6 +105,18 @@ public class Subject extends HalEntity {
 	/** Personal Comments on this subject. */
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
 	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<>(0);
+
+	private String studyIdentifier;
+
+	@Column(name = "physically_involved", nullable = false)
+	private boolean physicallyInvolved;
+
+	private Integer subjectType;
+
+	@OneToMany(mappedBy = "subject", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SubjectTag> tags;
+	
+	private Integer qualityTag;
 
 	/**
 	 * Init HATEOAS links
@@ -206,6 +228,63 @@ public class Subject extends HalEntity {
 
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
+	}
+
+	public String getStudyIdentifier() {
+		return studyIdentifier;
+	}
+
+	public void setStudyIdentifier(String studyIdentifier) {
+		this.studyIdentifier = studyIdentifier;
+	}
+
+	public List<Tag> getTags() {
+        if (getSubjectTags() == null) return null;
+        return getSubjectTags().stream().map((subjectTag) -> subjectTag.getTag()).collect(Collectors.toList());
+    }
+	
+	public List<SubjectTag> getSubjectTags() {
+		return tags;
+	}
+	
+	public QualityTag getQualityTag() {
+		return QualityTag.get(qualityTag);
+	}
+	
+	public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
+
+	public void setTags(List<SubjectTag> subjectTags) {
+		this.tags = subjectTags;
+	}
+	
+	public boolean isPhysicallyInvolved() {
+		return physicallyInvolved;
+	}
+
+	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+		this.physicallyInvolved = physicallyInvolved;
+	}
+
+	public Study getStudy() {
+		return study;
+	}
+
+	public void setStudy(Study study) {
+		this.study = study;
+	}
+
+	public SubjectType getSubjectType() {
+		return SubjectType.getType(subjectType);
+	}
+
+	public void setSubjectType(SubjectType subjectType) {
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
 	}
 
 }

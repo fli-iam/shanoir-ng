@@ -17,12 +17,11 @@ package org.shanoir.ng.subjectstudy.model;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.tag.model.Tag;
 
 import jakarta.persistence.CascadeType;
@@ -43,18 +42,13 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "subject_id" }, name = "study_subject_idx") })
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class SubjectStudy extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
 	private static final long serialVersionUID = 734032331139342460L;
 
 	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
 
-	/** Study. */
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	@NotNull
@@ -76,7 +70,7 @@ public class SubjectStudy extends AbstractEntity {
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
 	
-	/** StudyCard tags associated to the subject. */
+	/** QualityCard tags associated to the subject. */
 	private Integer qualityTag;
 
 	/**
