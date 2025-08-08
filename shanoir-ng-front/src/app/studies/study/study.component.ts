@@ -547,10 +547,10 @@ export class StudyComponent extends EntityComponent<Study> {
             if (study.studyCardPolicy == 'MANDATORY') {
                 this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                     if (!studyCards || studyCards.length == 0) {
-                        this.confirmDialogService.confirm('Create a Study Card',
+                        this.confirmDialogService.choose('Create a Study Card',
                             'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                             .then(userChoice => {
-                                if (userChoice) {
+                                if (userChoice == 'yes') {
                                     this.router.navigate(['/study-card/create', {studyId: study.id}]).then(() => {
                                         setTimeout(() => {
                                             if (newStudy) this.breadcrumbsService.currentStep.data.goDUA = study.id;

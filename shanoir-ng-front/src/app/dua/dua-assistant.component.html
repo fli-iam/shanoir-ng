@@ -19,15 +19,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <h2 class="header command-zone">DUA assistant</h2>
     @if (mode == 'view') {
+        <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
         <button class="left-icon alt" (click)="generatePDF()" [disabled]="converting"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
         <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
     } @else if (mode == 'edit') {
         <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
             <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
             <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
         </form>    
     } @else if (mode == 'create' && !link) {
         <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
             <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
         </form>
     }
@@ -105,10 +108,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 } @else if (mode == 'edit' || mode == 'create') {
                     <h1>To answer/complete</h1>
                     <form *ngIf="form" [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
-                        <ul>
+                        <ol class="complete">
                             <li>
-                                <label>this.wrapTextInSpans(element);
-                                    Lien Clinical Trials de l'étude *
+                                <label>
+                                    Lien Clinical Trials *
                                     <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
                                 </label>
                                 <span class="right-col">
@@ -133,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </label>
                                 <textarea class="right-col" formControlName="papers"></textarea>
                             </li>
-                        </ul>
+                        </ol>
                     </form>
                 }
             </div>

@@ -12,13 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as html2pdf from 'html2pdf.js';
-import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../shared/components/entity/entity.component.abstract';
@@ -58,7 +57,7 @@ export class DUAAssistantComponent implements OnDestroy {
             private route: ActivatedRoute,
             private router: Router,
             protected duaService: DuaService,
-            private http: HttpClient) {
+            private location: Location) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
                 let studyIdStr: string = params['studyId'];
@@ -285,15 +284,20 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     public static openCreateDialog(studyId: number, confirmDialogService: ConfirmDialogService, router: Router) {
-        confirmDialogService.confirm('Data User Agreement',
-            'A Data User Agreement is strongly recommended for your study. '
-            + 'Once set up it will be mandatory for any study member to agree it before accessing to the data. '
-            + 'Do you want to start setting up one ?')
-            .then(userChoice => {
-                if (userChoice) {
-                    router.navigate(['/dua/create/' + studyId]);
-                }
-            });
+        confirmDialogService.choose('Data User Agreement',
+                'A Data User Agreement is strongly recommended for your study. '
+                + 'Once set up it will be mandatory for any study member to agree it before accessing to the data. '
+                + 'Do you want to start the dua creation assistant ?',
+            {yes: 'Yes', no: 'No'}
+        ).then(userChoice => {
+            if (userChoice == 'yes') {
+                router.navigate(['/dua/create/' + studyId]);
+            }
+        });
+    }
+
+    goBack() {
+        this.location.back();
     }
 
 }

@@ -33,6 +33,9 @@
     font-size: 15px;
     line-height: 150%;
 }
+.page input, .page textarea, .page select {
+    font-size: 15px;
+}
 .header { margin-bottom: 30px; }
 .created-title { color: green; }
 
@@ -50,6 +53,7 @@ form.other-logo {
 }
 .page h1 { text-align: center; margin-bottom: 60px; color: black; }
 ol li { margin-bottom: 16px; }
+.complete { padding-left: 0; }
 form.other-logo input { width: 350px; }
 form.other-logo label { display: block; margin-bottom: 20px; }
 .form-validation-alert { font-size: 12px; text-align: left; width: auto; margin-top: 10px; font-weight: bold; }
