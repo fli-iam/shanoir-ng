@@ -39,7 +39,7 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_HOST=mailpit
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
@@ -105,7 +105,7 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_HOST=mailpit
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
@@ -374,6 +374,18 @@ services:
       - "rabbitmq"
       - "nifti-conversion"
 
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "25:25"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MP_MAX_MESSAGES: 10000 # default is 500
+      MP_SMTP_BIND_ADDR: ":25"
+    networks:
+      - shanoir_ng_network
+        
 volumes:
   keycloak-database-data:
   rabbitmq-data:
