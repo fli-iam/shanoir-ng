@@ -41,6 +41,7 @@ import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -75,6 +76,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+
+	@Autowired
+	private SubjectStudyTagRepository subjectStudyTagRepository;
 	
 	@Autowired
 	private StudyRepository studyRepository;
@@ -108,6 +112,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
+		subjectStudyTagRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
 		if (subject.get().isPreclinical())
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
@@ -256,21 +261,22 @@ public class SubjectServiceImpl implements SubjectService {
 		subject.setSubjectType(subjectStudy.getSubjectType());
 		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
 		subject.setQualityTag(subjectStudy.getQualityTag());
-		mapSubjectStudyTagListToSubjectTag(subject, subjectStudy);
+		mapSubjectStudyTagListToSubjectTagList(subject, subjectStudy);
 		return subject;
 	}
 
-	private void mapSubjectStudyTagListToSubjectTag(Subject subject, SubjectStudy subjectStudy) {
+	private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
 		List<SubjectTag> subjectTagList;
 		if (subject.getSubjectTags() == null) {
 			subjectTagList = new ArrayList<SubjectTag>();
 		} else {
 			subjectTagList = subject.getSubjectTags();
 		}
-		if (subjectStudy.getSubjectStudyTags() != null && !subjectStudy.getSubjectStudyTags().isEmpty()) {
-			subjectStudy.getSubjectStudyTags().stream().forEach(sst -> {
+		subjectTagList.clear(); // always update with new state
+		if (subjectStudy.getSubjectStudyTags() != null) {
+			subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
 				SubjectTag tag = new SubjectTag();
-				tag.setTag(sst.getTag());
+				tag.setTag(st.getTag());
 				tag.setSubject(subject);
 				subjectTagList.add(tag);
 			});
@@ -294,43 +300,55 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws ShanoirException {
+	private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) throws ShanoirException {
 		// We can not update subject name, birth date, identifier and pseudonymus hash values
-		subjectDb.setSex(subject.getSex());
-		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
-		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
-		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
-		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		subjectOld.setSex(subjectNew.getSex());
+		subjectOld.setManualHemisphericDominance(subjectNew.getManualHemisphericDominance());
+		subjectOld.setLanguageHemisphericDominance(subjectNew.getLanguageHemisphericDominance());
+		subjectOld.setImagedObjectCategory(subjectNew.getImagedObjectCategory());
+		subjectOld.setUserPersonalCommentList(subjectNew.getUserPersonalCommentList());
 		// We can not update the study: attention: created exams contain study id
-		subjectDb.setStudyIdentifier(subject.getStudyIdentifier());
-		subjectDb.setSubjectType(subject.getSubjectType());
-		subjectDb.setPhysicallyInvolved(subject.isPhysicallyInvolved());
-		subjectDb.setQualityTag(subject.getQualityTag());
-		List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-		if (subjectStudyListNew != null && !subjectStudyListNew.isEmpty()) {
+		subjectOld.setStudyIdentifier(subjectNew.getStudyIdentifier());
+		subjectOld.setSubjectType(subjectNew.getSubjectType());
+		subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
+		subjectOld.setQualityTag(subjectNew.getQualityTag());
+		List<SubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
+		if (subjectStudyListNew != null) {
+			if (subjectStudyListNew.isEmpty()) {
+				throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());
+			} 
 			if (subjectStudyListNew.size() > 1) {
 				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
 			}
-			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
-			for (SubjectStudy oldSS : subjectStudyListDb) {
-				subjectStudyListNew.stream().forEach(
-						newSS -> {
-						if (newSS.getStudy().getId().equals(oldSS.getStudy().getId())) {
-							oldSS.setSubjectStudyIdentifier(newSS.getSubjectStudyIdentifier());
-							oldSS.setSubjectType(newSS.getSubjectType());
-							oldSS.setPhysicallyInvolved(newSS.isPhysicallyInvolved());
-							// Update subject study tags with new values, in case
-							if (oldSS.getSubjectStudyTags() == null) {
-								oldSS.setSubjectStudyTags(new ArrayList<>());
-							}
-							oldSS.getSubjectStudyTags().addAll(newSS.getSubjectStudyTags());
-							// Migrate new subject study tags to subject tags as well
-							mapSubjectStudyTagListToSubjectTag(subjectDb, newSS);
+			SubjectStudy sSNew = subjectStudyListNew.get(0);
+			List<SubjectStudy> subjectStudyListOld = subjectOld.getSubjectStudyList();
+			for (SubjectStudy sSOld : subjectStudyListOld) {
+				if (sSNew.getStudy().getId().equals(sSOld.getStudy().getId())) {
+					sSOld.setSubjectStudyIdentifier(sSNew.getSubjectStudyIdentifier());
+					sSOld.setSubjectType(sSNew.getSubjectType());
+					sSOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
+					List<SubjectStudyTag> existingTags = sSOld.getSubjectStudyTags();
+					if (existingTags == null) {
+						existingTags = new ArrayList<SubjectStudyTag>();
+					} else {
+						existingTags.clear();
+					}
+					if (sSNew.getSubjectStudyTags() != null) {
+						for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
+							SubjectStudyTag newTag = new SubjectStudyTag();
+							newTag.setTag(sst.getTag());
+							newTag.setSubjectStudy(sSOld);
+							existingTags.add(newTag);
 						}
-					});
+					}
+					sSOld.setSubjectStudyTags(existingTags);
+					mapSubjectStudyTagListToSubjectTagList(subjectOld, sSNew);
+					break;
+				}
 			}
+			subjectOld.setSubjectStudyList(subjectStudyListOld);
 		}
-		return subjectDb;
+		return subjectOld;
 	}
 
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
