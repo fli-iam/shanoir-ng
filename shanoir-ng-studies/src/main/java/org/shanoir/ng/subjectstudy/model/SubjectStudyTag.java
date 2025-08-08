@@ -35,13 +35,13 @@ public class SubjectStudyTag {
 
 	@Id
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "tag_id")
-	private Tag tag;
-	
-	@Id
-	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "subject_study_id")
 	private SubjectStudy subjectStudy;
+
+	@Id
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "tag_id")
+	private Tag tag;	
 
 	public SubjectStudy getSubjectStudy() {
 		return subjectStudy;
