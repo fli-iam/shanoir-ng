@@ -32,7 +32,11 @@ export abstract class Dataset extends Entity {
     datasetAcquisition: DatasetAcquisition
     datasetProcessing: DatasetProcessing
     study : Study;
+    studyId: number;
+    studyName: string;
     subject : Subject;
+    subjectId: number;
+    subjectName: string;
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
     processings: DatasetProcessing[] = [];
