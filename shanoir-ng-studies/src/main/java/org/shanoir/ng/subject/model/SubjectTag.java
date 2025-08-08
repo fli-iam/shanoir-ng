@@ -14,12 +14,12 @@ import jakarta.persistence.ManyToOne;
 public class SubjectTag {
 
 	@Id
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name = "subject_id")
 	private Subject subject;
 
 	@Id
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name = "tag_id")
 	private Tag tag;	
 
