@@ -145,6 +145,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
+
+	/** Queue to send dua draft by mail */
+	public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -375,7 +378,12 @@ public class RabbitMQConfiguration {
 	public static Queue acquisitionEquipementUpdateQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
 	}
-	
+
+	@Bean
+	public static Queue duaDraftMailQueue() {
+		return new Queue(DUA_DRAFT_MAIL_QUEUE, true);
+	}
+
 	@Bean
 	public static Queue examinationCreationQueue() {
 		return new Queue(EXAMINATION_CREATION_QUEUE, true);
