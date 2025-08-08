@@ -16,8 +16,10 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -327,7 +329,7 @@ public class SubjectServiceImpl implements SubjectService {
 					sSOld.setSubjectStudyIdentifier(sSNew.getSubjectStudyIdentifier());
 					sSOld.setSubjectType(sSNew.getSubjectType());
 					sSOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
-					mapSubjectStudyTagListToOld(sSOld, sSNew);
+					mapSubjectStudyTagListToSubjectStudyTagList(sSOld, sSNew);
 					mapSubjectStudyTagListToSubjectTagList(subjectOld, sSNew);
 					break;
 				}
@@ -336,24 +338,33 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectOld;
 	}
 
-	private void mapSubjectStudyTagListToOld(SubjectStudy sSOld, SubjectStudy sSNew) {
+	private void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
 		List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
 		if (subjectStudyTagsOld == null) {
-			subjectStudyTagsOld = new ArrayList<SubjectStudyTag>();
-		} else {
-			subjectStudyTagsOld.clear();
+			subjectStudyTagsOld = new ArrayList<>();
 		}
+		Set<Long> newTagIds = sSNew.getSubjectStudyTags() == null
+				? Collections.emptySet()
+				: sSNew.getSubjectStudyTags().stream()
+					.map(sst -> sst.getTag().getId())
+					.collect(Collectors.toSet());
+		subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
 		if (sSNew.getSubjectStudyTags() != null) {
 			for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
-				SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
-				Optional<Tag> tag = tagRepository.findById(sst.getTag().getId());
-				subjectStudyTag.setTag(tag.get());
-				subjectStudyTag.setSubjectStudy(sSOld);
-				subjectStudyTagsOld.add(subjectStudyTag);
+				boolean alreadyExists = subjectStudyTagsOld.stream()
+						.anyMatch(old -> old.getTag().getId().equals(sst.getTag().getId()));
+				if (!alreadyExists) {
+					SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+					Optional<Tag> tag = tagRepository.findById(sst.getTag().getId());
+					subjectStudyTag.setTag(tag.get());
+					subjectStudyTag.setSubjectStudy(sSOld);
+					subjectStudyTagsOld.add(subjectStudyTag);
+				}
 			}
 		}
 		sSOld.setSubjectStudyTags(subjectStudyTagsOld);
 	}
+
 
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
