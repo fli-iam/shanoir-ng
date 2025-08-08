@@ -16,21 +16,24 @@ package org.shanoir.ng.dataset.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.EegDatasetMapper;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.StudyTagDTOLight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -39,6 +42,7 @@ import org.springframework.data.domain.Page;
  * @author jlouis
  *
  */
+
 public abstract class DatasetDecorator implements DatasetMapper {
 
 	@Autowired
@@ -49,6 +53,15 @@ public abstract class DatasetDecorator implements DatasetMapper {
 
 	@Autowired
 	protected EegDatasetMapper eegMapper;
+
+	@Autowired
+	private SubjectRepository subjectRepository;
+
+	@Autowired
+	private StudyRepository studyRepository;
+
+	@Autowired
+	private DatasetMetadataMapper datasetMetadataMapper;
 
 	@Override
 	public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
@@ -64,7 +77,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
 		Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
 			public DatasetDTO apply(Dataset entity) {
 				if (entity instanceof MrDataset) {
-					return mrMapper.datasetToDatasetDTO((MrDataset)entity);
+					return  mrMapper.datasetToDatasetDTO((MrDataset)entity);
 				}
 				else if (entity instanceof EegDataset) {
 					return eegMapper.datasetToDatasetDTO((EegDataset)entity);
@@ -76,6 +89,38 @@ public abstract class DatasetDecorator implements DatasetMapper {
 		});
 		return new PageImpl<>(mappedPage);
 	}
+
+	@Override
+	public DatasetDTO datasetToDatasetDTO(Dataset dataset) {
+		if ( dataset == null ) {
+			return null;
+		}
+
+		DatasetDTO datasetDTO = new DatasetDTO();
+
+		datasetDTO.setCreationDate( dataset.getCreationDate() );
+		datasetDTO.setGroupOfSubjectsId( dataset.getGroupOfSubjectsId() );
+		datasetDTO.setId( dataset.getId() );
+		datasetDTO.setOriginMetadata( datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO( dataset.getOriginMetadata() ) );
+		datasetDTO.setStudyId( dataset.getStudyId() );
+		datasetDTO.setSubjectId( dataset.getSubjectId() );
+		datasetDTO.setUpdatedMetadata( datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO( dataset.getUpdatedMetadata() ) );
+		datasetDTO.setName( dataset.getName() );
+		if ( dataset.getType() != null ) {
+			datasetDTO.setType( dataset.getType().name() );
+		}
+		datasetDTO.setCenterId( dataset.getCenterId() );
+		datasetDTO.setInPacs( dataset.getInPacs() );
+		datasetDTO.setTags( studyTagListToStudyTagDTOLightList( dataset.getTags() ) );
+		datasetDTO.setSource( mapSourceFromDataset( dataset.getSource() ) );
+		datasetDTO.setCopies( mapCopiesFromDataset( dataset.getCopies() ) );
+
+		datasetDTO.setStudyName(Objects.nonNull(dataset.getStudyId()) ? studyRepository.findById(dataset.getStudyId()).get().getName() : "Unknown study");
+		datasetDTO.setSubjectName(Objects.nonNull(dataset.getSubjectId()) ? subjectRepository.findById(dataset.getSubjectId()).get().getName() : "Unknown subject");
+
+		return datasetDTO;
+	}
+
 
 	@Override
 	public IdName datasetToIdNameDTO(final Dataset dataset) {
@@ -90,5 +135,32 @@ public abstract class DatasetDecorator implements DatasetMapper {
 				.map(Dataset::getId)
 				.collect(Collectors.toList()));
 		return datasetDTO;
+	}
+
+	protected List<StudyTagDTOLight> studyTagListToStudyTagDTOLightList(List<StudyTag> list) {
+		if ( list == null ) {
+			return null;
+		}
+
+		List<StudyTagDTOLight> list1 = new ArrayList<StudyTagDTOLight>( list.size() );
+		for ( StudyTag studyTag : list ) {
+			list1.add( studyTagToStudyTagDTOLight( studyTag ) );
+		}
+
+		return list1;
+	}
+
+	protected StudyTagDTOLight studyTagToStudyTagDTOLight(StudyTag studyTag) {
+		if ( studyTag == null ) {
+			return null;
+		}
+
+		StudyTagDTOLight studyTagDTOLight = new StudyTagDTOLight();
+
+		studyTagDTOLight.setId( studyTag.getId() );
+		studyTagDTOLight.setName( studyTag.getName() );
+		studyTagDTOLight.setColor( studyTag.getColor() );
+
+		return studyTagDTOLight;
 	}
 }
