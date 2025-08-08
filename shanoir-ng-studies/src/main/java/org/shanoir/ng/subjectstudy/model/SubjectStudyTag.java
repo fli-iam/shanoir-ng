@@ -16,12 +16,12 @@ package org.shanoir.ng.subjectstudy.model;
 
 import org.shanoir.ng.tag.model.Tag;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 /**
  * Relation between the subjects and the studies.
@@ -30,27 +30,18 @@ import jakarta.persistence.Table;
  *
  */
 @Entity
-@Table
-@IdClass(SubjectStudyTagPk.class)
+@IdClass(SubjectStudyTagPrimaryKey.class)
 public class SubjectStudyTag {
 
 	@Id
-	@ManyToOne
-	@JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "tag_id")
 	private Tag tag;
 	
 	@Id
-	@ManyToOne
-	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "subject_study_id")
 	private SubjectStudy subjectStudy;
-
-	public Tag getTag() {
-		return tag;
-	}
-
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}
 
 	public SubjectStudy getSubjectStudy() {
 		return subjectStudy;
@@ -58,6 +49,14 @@ public class SubjectStudyTag {
 
 	public void setSubjectStudy(SubjectStudy subjectStudy) {
 		this.subjectStudy = subjectStudy;
+	}
+
+	public Tag getTag() {
+		return tag;
+	}
+
+	public void setTag(Tag tag) {
+		this.tag = tag;
 	}
 
 }
