@@ -87,7 +87,6 @@ public class SubjectServiceSecurityTest {
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findAllSubjectsOfStudyId, 1L);
 		
-		assertAccessDenied(service::findByData, "data");
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
 		assertAccessDenied(service::findByIdWithSubjectStudies, ENTITY_ID);
@@ -158,7 +157,6 @@ public class SubjectServiceSecurityTest {
 		studiesMock.add(buildStudyMock(1L));
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findAllSubjectsOfStudyId, 1L);
-		assertAccessAuthorized(service::findByData, "data");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
 		assertAccessAuthorized(service::findByIdWithSubjectStudies, ENTITY_ID);
@@ -172,33 +170,30 @@ public class SubjectServiceSecurityTest {
 		final String NAME = "data";
 		
 		Subject subjectMockNoRights = buildSubjectMock(1L);
-		given(repository.findByName(NAME)).willReturn(subjectMockNoRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockNoRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
-		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
 		assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
 		assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 		
 		Subject subjectMockWrongRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-		given(repository.findByName(NAME)).willReturn(subjectMockWrongRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockWrongRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
-		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
 		assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
 		assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 		
 		Subject subjectMockRightRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
-		given(repository.findByName(NAME)).willReturn(subjectMockRightRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockRightRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
-		assertAccessAuthorized(service::findByData, NAME);
 		assertAccessAuthorized(service::findById, 1L);
 		assertAccessAuthorized(service::findByIdWithSubjectStudies, 1L);
 		assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
