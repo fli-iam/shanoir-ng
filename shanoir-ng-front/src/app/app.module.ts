@@ -279,8 +279,9 @@ import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-proto
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
+import {LocalDateFormatPipe} from "./shared/localLanguage/localDateFormat.pipe";
 
-@NgModule({ 
+@NgModule({
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -462,7 +463,7 @@ import { SizePipe } from './shared/utils/size.pipe';
         MetadataNodeComponent,
         SizePipe
     ],
-    bootstrap: [AppComponent], 
+    bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
@@ -473,8 +474,9 @@ import { SizePipe } from './shared/utils/size.pipe';
         AppRoutingModule,
         PreclinicalRoutingModule,
         RouterModule,
-        ClipboardModule
-    ], 
+        ClipboardModule,
+        LocalDateFormatPipe
+    ],
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -564,7 +566,7 @@ import { SizePipe } from './shared/utils/size.pipe';
         TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
-    ] 
+    ]
 })
 export class AppModule {
 

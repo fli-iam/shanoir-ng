@@ -21,7 +21,6 @@ import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 
-
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
@@ -158,5 +157,4 @@ export class SelectSeriesComponent {
             console.log('patients', this.patients);
         }
     }
-
 }
