@@ -41,7 +41,6 @@ import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -76,9 +75,6 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
-
-	@Autowired
-	private SubjectStudyTagRepository subjectStudyTagRepository;
 	
 	@Autowired
 	private StudyRepository studyRepository;
@@ -112,7 +108,6 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
-		subjectStudyTagRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
 		if (subject.get().isPreclinical())
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
