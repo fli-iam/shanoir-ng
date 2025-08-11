@@ -7,8 +7,8 @@ CREATE TABLE subject_tag (
     tag_id bigint(20) DEFAULT NULL,
     KEY FKe638djnyhwckgsob7qxnvcbyd (subject_id),
     KEY FKcc51xo4yrp74v2yp7df540a04 (tag_id),
-    CONSTRAINT FKe638djnyhwckgsob7qxnvcbyd FOREIGN KEY (subject_id) REFERENCES subject (id)
-    CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id),
+    CONSTRAINT FKe638djnyhwckgsob7qxnvcbyd FOREIGN KEY (subject_id) REFERENCES subject (id),
+    CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id)
 );
 
 # Remove unique constraint on subject name
