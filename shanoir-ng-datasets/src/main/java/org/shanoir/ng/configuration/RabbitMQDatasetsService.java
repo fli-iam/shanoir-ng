@@ -185,11 +185,10 @@ public class RabbitMQDatasetsService {
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
-		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
+	public boolean receiveSubjectUpdate(final String subjectStr) {		
 		try {
-			if (su == null || su.getId() == null) throw new IllegalStateException("The entity must have an id ! Received string : \"" + subjectStr + "\"");
 			Subject received = objectMapper.readValue(subjectStr, Subject.class);
+			received = subjectRepository.save(received);
 
 			// Update BIDS
 			Set<Long> studyIds = new HashSet<>();
@@ -202,7 +201,7 @@ public class RabbitMQDatasetsService {
 
 			// Update solr references
 			List<Long> subjectIdList = new ArrayList<Long>();
-			subjectIdList.add(su.getId());
+			subjectIdList.add(received.getId());
 			try {
 				solrService.updateSubjectsAsync(subjectIdList);
 			}catch (Exception e){
