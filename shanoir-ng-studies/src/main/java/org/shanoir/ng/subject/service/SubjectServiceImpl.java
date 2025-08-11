@@ -369,7 +369,7 @@ public class SubjectServiceImpl implements SubjectService {
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.
-					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
+					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(subject));
 			// If an error happens, an exception will be thrown
 			return true;

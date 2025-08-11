@@ -199,7 +199,7 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
 		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
