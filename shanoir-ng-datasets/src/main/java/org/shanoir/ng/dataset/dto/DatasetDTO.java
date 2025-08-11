@@ -40,8 +40,12 @@ public class DatasetDTO {
 
 	private Long studyId;
 
+	private String studyName;
+
 	private Long subjectId;
-	
+
+	private String subjectName;
+
 	private Long centerId;
 
 	private DatasetMetadataDTO updatedMetadata;
@@ -219,4 +223,12 @@ public class DatasetDTO {
 	public void setCopies(List<Long> copies) {
 		this.copies = copies;
 	}
+
+	public String getStudyName() {return studyName;}
+
+	public void setStudyName(String studyName) {this.studyName = studyName;}
+
+	public String getSubjectName() {return subjectName;}
+
+	public void setSubjectName(String subjectName) {this.subjectName = subjectName;}
 }
