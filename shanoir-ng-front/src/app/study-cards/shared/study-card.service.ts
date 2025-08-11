@@ -62,9 +62,4 @@ export class StudyCardService extends EntityService<StudyCard> {
             .toPromise()
             .then();
     }
-
-    applyStudyCardOnStudy(studyCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/apply-quality-card/' + studyCardId)
-            .toPromise();
-    }
 }

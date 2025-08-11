@@ -173,7 +173,7 @@ public class SubjectApiSecurityTest {
 		
 		// No rights
 		Subject subjectMockNoRights = buildSubjectMock(1L);
-		given(repository.findByName(NAME)).willReturn(subjectMockNoRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockNoRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
@@ -198,7 +198,7 @@ public class SubjectApiSecurityTest {
 		// Wrong Rights
 		Subject subjectMockWrongRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-		given(repository.findByName(NAME)).willReturn(subjectMockWrongRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockWrongRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
@@ -221,7 +221,7 @@ public class SubjectApiSecurityTest {
 		// Right rights (!)
 		Subject subjectMockRightRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
-		given(repository.findByName(NAME)).willReturn(subjectMockRightRights);
+		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockRightRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
 		given(repository.findFirstByIdentifierAndSubjectStudyListStudyIdIn("identifier", List.of(ENTITY_ID))).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);

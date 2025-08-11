@@ -22,13 +22,12 @@ jobs:
       - name: Get latest NG tag and generate SHUP release tag
         id: get_tag
         run: |
-          latest_tag=$(git tag -l "NG_v*" | sort -V | tail -n 1)
+          latest_tag=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \ | jq -r '[.[] | select(.tag_name | test("^NG_v"))] | sort_by(.created_at) | last.tag_name')
           echo "Latest_tag: $latest_tag"
           if [[ "$latest_tag" =~ NG_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             patch="${BASH_REMATCH[3]}"
-            patch=$((patch + 1))
             version_part="${major}.${minor}.${patch}"
             new_tag="SHUP_v${version_part}"
             echo "version_part=$version_part" >> "$GITHUB_OUTPUT"

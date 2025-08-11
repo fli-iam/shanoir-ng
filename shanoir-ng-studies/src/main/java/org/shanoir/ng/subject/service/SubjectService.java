@@ -81,16 +81,6 @@ public interface SubjectService {
 	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
 	
 	/**
-	 * Find subject by data.
-	 *
-	 * @param data data.
-	 * @return a subject.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findByData(String data);
-
-	/**
 	 * Find subject by its id.
 	 *
 	 * @param id template id.
@@ -141,7 +131,7 @@ public interface SubjectService {
 	 * @return created subject.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject create(Subject subject);
+	Subject create(Subject subject) throws ShanoirException;
 	
 	/**
 	 * Save a subject and auto-increment the common name on using the centerId.
@@ -150,7 +140,7 @@ public interface SubjectService {
 	 * @return created subject.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject createAutoIncrement(Subject subject, Long centerId);
+	Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
 	
 	/**
 	 * Update a subject.
