@@ -43,7 +43,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -263,13 +262,13 @@ public class DatasetApiController implements DatasetApi {
 		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
-	public ResponseEntity<List<Dataset>> findFullDatasetsByIds(
+	public ResponseEntity<List<DatasetDTO>> findFullDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(datasets, HttpStatus.OK);
+		return new ResponseEntity<>(datasetMapper.datasetsToParentedDatasetDTO(datasets), HttpStatus.OK);
 	}
 
   	@Override
