@@ -45,7 +45,7 @@ public interface DatasetAcquisitionDatasetsMapper {
 
 	PageImpl<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(Page<DatasetAcquisition> daPage);
 
-	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
+	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true), @Mapping(target = "datasets", qualifiedByName = "standard") })
 	DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			DatasetAcquisition datasetAcquisition);
 

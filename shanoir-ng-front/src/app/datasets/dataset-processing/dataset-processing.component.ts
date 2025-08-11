@@ -250,8 +250,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return `/dataset/details/${dataset.id}`
             }},
             {headerName: "Dataset type", field: "type"},
-            {headerName: "Study", field: "study.name"},
-            {headerName: "Subject", field: "subject.name"},
+            {headerName: "Study", field: "studyName", route: (dataset : Dataset)=>{
+                    return `/dataset/details/${dataset.studyId}`
+                }},
+            {headerName: "Subject", field: "subjectName", route: (dataset : Dataset)=>{
+                    return `/subject/details/${dataset.subjectId}`
+                }},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
         this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];

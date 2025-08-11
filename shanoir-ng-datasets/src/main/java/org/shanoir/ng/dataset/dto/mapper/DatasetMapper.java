@@ -98,6 +98,15 @@ public interface DatasetMapper {
 	 */
 	IdName datasetToIdNameDTO(Dataset dataset);
 
+	/**
+	 * Map a @Dataset to a @DatasetDTO with all informations, nothing truncated
+	 *
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	List<DatasetDTO> datasetsToParentedDatasetDTO(List<Dataset> datasets);
+
 	default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
 		if (copies == null) {
 			return null;
