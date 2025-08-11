@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
@@ -92,7 +93,7 @@ public class SubjectApiControllerTest {
 	private ShanoirEventService eventService;
 
 	@BeforeEach
-	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException, ShanoirException {
 		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new SubjectDTO()));
 		doNothing().when(subjectServiceMock).deleteById(1L);
