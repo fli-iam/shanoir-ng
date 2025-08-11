@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,7 +18,7 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
 @Component({
     selector: 'datepicker',
     template: `
-            <input type="date" 
+            <input type="text"
                 [class.empty]="!this.dateString || this.dateString == ''"
                 [disabled]="disabled"
                 [ngModel]="dateString"
@@ -64,7 +64,7 @@ export class DatepickerComponent implements ControlValueAccessor {
             this.dateString = null;
         }
     }
-    
+
     registerOnChange(fn: (_: any) => void): void {
         this.onChange = fn;
     }
@@ -72,7 +72,7 @@ export class DatepickerComponent implements ControlValueAccessor {
     registerOnTouched(fn: any): void {
         this.onTouch = fn;
     }
-    
+
     public static validator = (control: AbstractControl): ValidationErrors | null => {
         if (control.value == 'invalid') {
             return { format: true }
@@ -90,9 +90,9 @@ export class DatepickerComponent implements ControlValueAccessor {
 
     private toDateString(date: Date): string {
         return date.getFullYear()
-        + '-' 
+        + '-'
         + ('0' + (date.getMonth() + 1)).slice(-2)
-        + '-' 
+        + '-'
         + ('0' + date.getDate()).slice(-2);
    }
 }
