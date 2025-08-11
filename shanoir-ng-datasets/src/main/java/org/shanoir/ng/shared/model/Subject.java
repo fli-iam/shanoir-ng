@@ -13,11 +13,18 @@
  */
 package org.shanoir.ng.shared.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author yyao
@@ -28,15 +35,20 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject extends IdName {
 
-	/** Relations beetween the subjects and the studies. */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
-	private List<SubjectStudy> subjectStudyList;
-	
 	@Id
 	protected Long id;
 	
 	protected String name;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "study_id")
+	@NotNull
+	private Study study;
+
+	private Integer qualityTag;
+
+	private Integer subjectType;
+
 	public Subject() {}
 	
 	/**
@@ -48,18 +60,12 @@ public class Subject extends IdName {
 		this.setName(name);
 	}
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
+	public Study getStudy() {
+		return study;
 	}
 
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
+	public void setStudy(Study study) {
+		this.study = study;
 	}
 
 	@Override
@@ -81,4 +87,32 @@ public class Subject extends IdName {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	/**
+	 * @return the subjectType
+	 */
+	public SubjectType getSubjectType() {
+		return SubjectType.getType(subjectType);
+	}
+
+	/**
+	 * @param subjectType
+	 *            the subjectType to set
+	 */
+	public void setSubjectType(SubjectType subjectType) {
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
+	}
+
+	public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+    
+    public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
+
 }
