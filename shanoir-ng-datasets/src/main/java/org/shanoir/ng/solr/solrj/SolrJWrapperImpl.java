@@ -80,6 +80,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private static final String PROCESSED_FACET = "processed";
 	private static final String IMPORT_DATE_FACET = "importDate";
 	private static final String USERNAME_IMPORT_FACET = "username";
+	private static final String UNKNOWN = "<none>";
 
 	private static final String[] DOCUMENT_FACET_LIST = {
 			DOCUMENT_ID_FACET,
@@ -241,7 +242,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			boolean includesMissing = false;
 
 			for (String val : values) {
-				if (val == null || val.trim().isEmpty() || "None".equalsIgnoreCase(val.trim())) {
+				if (val == null || val.trim().isEmpty() || UNKNOWN.equalsIgnoreCase(val.trim())) {
 					includesMissing = true;
 				} else {
 					normalValues.add(val);
@@ -459,7 +460,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 				}
 
 				if (isMissing) {
-					renamedAndFilteredValues.add(new FacetField.Count(facetField, "None", count.getCount()));
+					renamedAndFilteredValues.add(new FacetField.Count(facetField, UNKNOWN, count.getCount()));
 				} else {
 					renamedAndFilteredValues.add(count);
 				}
