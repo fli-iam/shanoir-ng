@@ -10,7 +10,7 @@ export class LocalDateFormatPipe implements PipeTransform{
 
     private datePipe = new DatePipe(BROWSER_LANGUAGE);
 
-    transform(date: Date, time: Boolean = false) {
+    transform(date: Date, time: boolean = false) {
         if (date) {
             let format = dateFormat
             if (time) {
