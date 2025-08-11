@@ -8,7 +8,7 @@ CREATE TABLE subject_tag (
 );
 
 # Remove unique constraint on subject name
-ALTER TABLE subject DROP INDEX subject_name_idx;
+#ALTER TABLE subject DROP INDEX subject_name_idx;
 
 # Extend subject with columns from subject_study
 ALTER TABLE subject
