@@ -7,9 +7,6 @@ CREATE TABLE subject_tag (
     CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id)
 );
 
-# Remove unique constraint on subject name
-ALTER TABLE subject DROP INDEX subject_name_idx;
-
 # Extend subject with columns from subject_study
 ALTER TABLE subject
     ADD COLUMN study_id BIGINT(20),
