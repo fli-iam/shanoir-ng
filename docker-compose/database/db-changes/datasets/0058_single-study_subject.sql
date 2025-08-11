@@ -35,4 +35,43 @@ SET
     s.quality_tag = ss.quality_tag,
     s.study_id = ss.study_id;
 
+# Add new subjects, in case of multi-study subjects and only for additional studies
+INSERT INTO subject (
+    name,
+    subject_type,
+    quality_tag,
+    study_id
+)
+SELECT
+    s.name,
+    ss.subject_type,
+    ss.quality_tag,
+    ss.study_id
+FROM subject_study ss
+JOIN subject s ON ss.subject_id = s.id
+LEFT JOIN subject existing
+    ON existing.name = s.name AND existing.study_id = ss.study_id
+WHERE existing.id IS NULL;
 
+# Update subject study to keep only one row per subject
+UPDATE subject_study ss
+JOIN subject old_sub ON ss.subject_id = old_sub.id
+JOIN subject new_sub ON old_sub.name = new_sub.name
+    AND ss.study_id = new_sub.study_id
+    AND old_sub.id <> new_sub.id
+SET ss.subject_id = new_sub.id;
+
+# Migrate subject_study_tags to subject_tag
+# Works as subject_ids have already be aligned before
+INSERT INTO subject_tag (subject_id, tag_id)
+SELECT 
+    ss.subject_id,
+    sst.tag_id
+FROM 
+    subject_study_tag sst
+JOIN 
+    subject_study ss ON sst.subject_study_id = ss.id;
+    
+DROP TABLE subject_study_tag;
+
+DROP TABLE subject_study;
