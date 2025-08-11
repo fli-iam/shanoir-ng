@@ -50,14 +50,13 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
         };
     }
 
-    getEntities(): Promise<User[]> {
-        let userPromise = this.userService.getAll();
+    getEntities(eager: boolean = false): Promise<User[]> {
+        let userPromise: Promise<User[]> = this.userService.getAll();
         // get the study-users
-        Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
+        let allPromise: Promise<User[]> = Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
             users.forEach(user => {
                 user.studyUserList = [];
-                studies.forEach(study => Array.prototype.push.apply(
-                    user.studyUserList,
+                studies.forEach(study => user.studyUserList.push(...
                     study.studyUserList
                         .filter(studyUser => (studyUser.user ? studyUser.user.id : studyUser.userId) == user.id)
                         .map(studyUser => {
@@ -66,8 +65,13 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
                         })
                 ));
             })
+            return users;
         });
-        return userPromise;
+        if (eager) {
+            return allPromise;
+        } else {
+            return userPromise;
+        }
     }
 
     // Grid columns definition

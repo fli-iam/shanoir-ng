@@ -37,7 +37,7 @@ import {Task} from "../../../async-tasks/task.model";
     standalone: false
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>> | Page<any>;
+    @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;
     @Input() rowRoute: (item: any) => string;
     @Input() columnDefs: ColumnDefinition[];
     @Input() subRowsDefs: ColumnDefinition[];
@@ -654,7 +654,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
                 let pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                let getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true)
+                let getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
                 completion = completion.then(() => { // load pages sequentially
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
