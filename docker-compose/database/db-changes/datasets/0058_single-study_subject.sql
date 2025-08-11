@@ -63,7 +63,7 @@ SET ss.subject_id = new_sub.id;
 INSERT INTO subject_tag (subject_id, tag_id)
 SELECT 
     ss.subject_id,
-    sst.tag_id
+    sst.tags_id
 FROM 
     subject_study_tag sst
 JOIN 
