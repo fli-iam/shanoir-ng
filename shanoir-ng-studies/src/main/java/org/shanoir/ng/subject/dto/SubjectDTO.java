@@ -53,6 +53,8 @@ public class SubjectDTO {
 	
 	private boolean preclinical;
 
+	private Long studyId;
+
 	/**
 	 * @return the id
 	 */
@@ -186,4 +188,13 @@ public class SubjectDTO {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
 }

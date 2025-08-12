@@ -169,7 +169,7 @@ public interface SubjectService {
 	 * @param subjectToSubjectDTO the subject DTO to update
 	 * @throws MicroServiceCommunicationException 
 	 */
-	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
+	boolean updateSubjectInMicroservices(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 
 	/**
 	 * Returns a filtered page by clinical subject name.

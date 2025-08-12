@@ -72,6 +72,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
@@ -182,35 +183,45 @@ public class RabbitMQDatasetsService {
 		return "";
 	}
 
-	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public boolean receiveSubjectUpdate(final String subjectStr) {		
 		try {
-			Subject received = objectMapper.readValue(subjectStr, Subject.class);
-			received = subjectRepository.save(received);
-
-			// Update BIDS
-			Set<Long> studyIds = new HashSet<>();
-			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
-				studyIds.add(exam.getStudyId());
-			}
-			for (Study stud : studyRepository.findAllById(studyIds)) {
-				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-			}
-
-			// Update solr references
-			List<Long> subjectIdList = new ArrayList<Long>();
-			subjectIdList.add(received.getId());
-			try {
-				solrService.updateSubjectsAsync(subjectIdList);
-			}catch (Exception e){
-				LOG.error("Solr update failed for subjects {}", subjectIdList, e);
-			}
-
+			manageSubjectUpdate(subjectStr);
 			return true;
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
+	/**
+	 * MK: to avoid endless loops rabbitmq re-sending the same message,
+	 * we separate the @Transactional and @RabbitListener in two methods,
+	 * the the Amqp exception correctly arrives back to rabbitmq.
+	 * 
+	 * @param subjectStr
+	 * @throws JsonProcessingException
+	 * @throws JsonMappingException
+	 */
+	@Transactional
+	private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+		Subject received = objectMapper.readValue(subjectStr, Subject.class);
+		received = subjectRepository.save(received);
+		// Update BIDS
+		Set<Long> studyIds = new HashSet<>();
+		for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+			studyIds.add(exam.getStudyId());
+		}
+		for (Study stud : studyRepository.findAllById(studyIds)) {
+			bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+		}
+		// Update solr references
+		List<Long> subjectIdList = new ArrayList<Long>();
+		subjectIdList.add(received.getId());
+		try {
+			solrService.updateSubjectsAsync(subjectIdList);
+		}catch (Exception e){
+			LOG.error("Solr update failed for subjects {}", subjectIdList, e);
 		}
 	}
 
@@ -284,7 +295,6 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
-
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a subject deletion
@@ -485,4 +495,5 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}
 	}
+
 }

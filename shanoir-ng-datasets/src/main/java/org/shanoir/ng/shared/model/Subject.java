@@ -18,6 +18,7 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -114,5 +115,14 @@ public class Subject extends IdName {
     public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
+
+	@JsonProperty("studyId")
+	public void setStudyId(Long studyId) {
+		if (studyId != null) {
+			Study s = new Study();
+			s.setId(studyId);
+			this.study = s;
+		}
+	}
 
 }

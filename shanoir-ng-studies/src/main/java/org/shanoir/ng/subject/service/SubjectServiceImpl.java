@@ -180,7 +180,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subject = mapSubjectStudyListToSubject(subject);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
+			updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -204,7 +204,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subject.setName(subjectName);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
+			updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -299,7 +299,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		subjectOld = updateSubjectValues(subjectOld, subjectNew);
 		subjectOld = subjectRepository.save(subjectOld);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectOld));
+		updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectOld));
 		return subjectOld;
 	}
 
@@ -365,13 +365,11 @@ public class SubjectServiceImpl implements SubjectService {
 		sSOld.setSubjectStudyTags(subjectStudyTagsOld);
 	}
 
-
-	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
+	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.
 					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(subject));
-			// If an error happens, an exception will be thrown
+					objectMapper.writeValueAsString(subjectDTO));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
