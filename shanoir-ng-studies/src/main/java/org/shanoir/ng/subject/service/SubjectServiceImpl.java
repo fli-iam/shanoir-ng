@@ -345,7 +345,7 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectOld;
 	}
 
-	private void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
+	public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
 		List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
 		if (subjectStudyTagsOld == null) {
 			subjectStudyTagsOld = new ArrayList<>();

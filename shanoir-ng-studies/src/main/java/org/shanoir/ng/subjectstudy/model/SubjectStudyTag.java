@@ -16,7 +16,6 @@ package org.shanoir.ng.subjectstudy.model;
 
 import org.shanoir.ng.tag.model.Tag;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;

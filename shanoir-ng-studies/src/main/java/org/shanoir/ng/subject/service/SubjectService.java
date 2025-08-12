@@ -25,6 +25,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -185,5 +186,7 @@ public interface SubjectService {
 	List<Subject> findByPreclinical(boolean preclinical);
 
 	boolean existsSubjectWithName(String name);
+
+	public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 
 }
