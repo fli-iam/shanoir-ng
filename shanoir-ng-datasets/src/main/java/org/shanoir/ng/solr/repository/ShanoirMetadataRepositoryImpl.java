@@ -64,16 +64,17 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN mr_dataset md ON md.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN mr_protocol mrp on mrp.id = mda.mr_protocol_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, dataset_metadata dm, mr_dataset md"
-			+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
-			+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
+			+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id";
 	public static final String PET_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -95,13 +96,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN pet_dataset pd ON pd.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, pet_dataset pd, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String CT_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -125,13 +127,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN ct_dataset cd ON cd.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, ct_dataset cd, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String GENERIC_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -156,13 +159,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN generic_dataset gd ON gd.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, generic_dataset cd, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String EEG_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -186,13 +190,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.origin_metadata_id = dm.id"
+			+ " JOIN eeg_dataset ed ON ed.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, eeg_dataset ed, dataset_metadata dm"
-			+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String BIDS_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -217,13 +222,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN bids_dataset bd ON bd.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, bids_dataset ed, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String PROCESSED_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -248,11 +254,11 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.origin_metadata_id = dm.id"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = proc.study_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, dataset_metadata dm"
-			+ " WHERE d.origin_metadata_id = dm.id"
-			+ " AND d.dataset_processing_id IS NOT NULL";
+			+ " WHERE d.dataset_processing_id IS NOT NULL";
 	public static final String MEASUREMENT_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -277,14 +283,15 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN measurement_dataset md ON md.id = d.id"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, measurement_dataset md, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String SEGMENTATION_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -309,14 +316,15 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN segmentation_dataset sd ON sd.id = d.id"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, segmentation_dataset sd, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND sd.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String XA_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -341,13 +349,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.sorting_index as sortingIndex, " +
 			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
+			+ " JOIN dataset_metadata dm ON d.updated_metadata_id = dm.id"
+			+ " JOIN xa_dataset xd ON xd.id = d.id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id, xa_dataset cd, dataset_metadata dm"
-			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+			+ " LEFT JOIN center c ON c.id = e.center_id";
 	public static final String RESULTSET_MAPPING = "SolrResult";
 
 	public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
