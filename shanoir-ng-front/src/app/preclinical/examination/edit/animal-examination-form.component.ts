@@ -45,6 +45,7 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
 import { Selection } from 'src/app/studies/study/tree.service';
+import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -76,6 +77,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     private files: File[] = [];
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    dateDisplay = dateDisplay;
 
     constructor(
         private route: ActivatedRoute,
@@ -398,5 +400,4 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
 }
