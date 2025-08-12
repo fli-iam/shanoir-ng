@@ -106,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<datepicker id="subjectTherapyStartDate"  [(ngModel)]="subjectTherapy.startDate" formControlName="startDate" ></datepicker>
-									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
 						</li>
@@ -118,7 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<datepicker id="subjectTherapyEndDate"  [(ngModel)]="subjectTherapy.endDate" formControlName="endDate" ></datepicker>
-									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">End Date should be valid ! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">End Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
 						</li>

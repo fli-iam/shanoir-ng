@@ -111,11 +111,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
 						<span class="right-col">
 							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.startDate | date: 'dd/MM/yyyy'}}
+								{{study.startDate | localDateFormatPipe}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
 								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
-								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 							</ng-container>
 						</span>
 					</li>
@@ -123,11 +123,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{study.endDate | date: 'dd/MM/yyyy'}}
+								{{study.endDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
 						</span>

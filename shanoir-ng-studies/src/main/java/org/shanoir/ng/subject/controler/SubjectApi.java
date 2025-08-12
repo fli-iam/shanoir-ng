@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -131,7 +132,7 @@ public interface SubjectApi {
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@Parameter(description = "subject to create", required = true) @RequestBody Subject subject,
 			@Parameter(description = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
-			final BindingResult result) throws RestServiceException;
+			final BindingResult result) throws ShanoirException, RestServiceException;
 	
 	// Attention: this method is used by ShanoirUploader!!!
 	@Operation(summary = "", description = "Updates a subject")
