@@ -16,7 +16,6 @@ package org.shanoir.ng.subjectstudy.service;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.slf4j.Logger;
@@ -24,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 /**
