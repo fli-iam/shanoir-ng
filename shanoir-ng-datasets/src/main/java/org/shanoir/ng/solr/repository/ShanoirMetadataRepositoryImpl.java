@@ -51,7 +51,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -84,7 +84,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, e.study_id as studyId, c.name as centerName, " +
 			"c.id as centerId, null as sliceThickness, " +
@@ -112,7 +112,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -142,7 +142,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -173,7 +173,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -203,7 +203,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -234,7 +234,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as examinationDate, " +
 			"null as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"proc.study_id as studyId, " +
@@ -263,7 +263,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName,"
 			+ "su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -295,7 +295,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName,"
 			+ "su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -327,7 +327,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
