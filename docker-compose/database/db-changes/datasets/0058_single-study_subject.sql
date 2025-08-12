@@ -1,3 +1,7 @@
+ALTER TABLE subject_study DROP FOREIGN KEY FK6iuhtwq9ujtyfywgjfct2m0jf;
+ALTER TABLE subject MODIFY COLUMN id BIGINT(20) NOT NULL auto_increment;
+ALTER TABLE subject_study ADD CONSTRAINT FK6iuhtwq9ujtyfywgjfct2m0jf FOREIGN KEY (subject_id) REFERENCES subject(id);
+
 CREATE TABLE subject_tag (
     subject_id bigint(20) NOT NULL,
     tag_id bigint(20) DEFAULT NULL,
@@ -68,7 +72,7 @@ FROM
     subject_study_tag sst
 JOIN 
     subject_study ss ON sst.subject_study_id = ss.id;
-    
+
 DROP TABLE subject_study_tag;
 
 DROP TABLE subject_study;
