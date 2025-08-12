@@ -58,19 +58,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="mode == 'create' && humanSelected() && importMode != 'EEG'">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="isAlreadyAnonymized == true"
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="subject.isAlreadyAnonymized == true"
 								/>Yes
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'subject.isAlreadyAnonymized'?'subject.isAlreadyAnonymized == false' :'true' "
 								/>No
 							</span>
 						</li>
-						<li class="info" *ngIf="!isAlreadyAnonymized && mode == 'create'" [@slideDown]="!isAlreadyAnonymized && mode == 'create'">
+						<li class="info" *ngIf="!subject.isAlreadyAnonymized && mode == 'create'" [@slideDown]="!subject.isAlreadyAnonymized && mode == 'create'">
 							<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
 							This can help you to identify a subject that has already been inserted into the database.
 							<br/>To ensure anonymity, the first name and the last name will not be saved.
 							<br/>Note that the birth date will be set to January 1st of the birth year for the same reason.
 						</li>
-						<li *ngIf="!isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
+						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First name</label>
 							<span class="right-col">
 								<input *ngIf="importMode != 'DICOM'" type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 							</span>
 						</li>
-						<li *ngIf="!isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
+						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last name</label>
 							<span class="right-col">
                                 <input *ngIf="importMode != 'DICOM'" type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
@@ -118,11 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
 							<span [ngSwitch]="mode" class="right-col">
 								<ng-template [ngSwitchCase]="'view'">
-									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+									{{subject.birthDate | localDateFormatPipe}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="'create'">
 									<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 								</ng-template>
 							</span>
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.sex}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box formControlName="sex" [(ngModel)]="subject.sex" [options]="genderOptions">
+									<select-box [formControl]="form.controls['sex']" [(ngModel)]="subject.sex" [options]="genderOptions">
 									</select-box>
 								</ng-template>
 							</span>
@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<span class="right-col">
 							<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 						</span>
 					</li>
 				</ol>

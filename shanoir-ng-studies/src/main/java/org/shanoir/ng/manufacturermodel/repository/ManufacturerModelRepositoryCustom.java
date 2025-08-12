@@ -33,7 +33,6 @@ public interface ManufacturerModelRepositoryCustom {
 	 */
 	List<IdName> findIdsAndNames();
 	
-	
 	/**
 	 * Find id and name for Manufacturer Models related to a center.
 	 * 
@@ -42,4 +41,5 @@ public interface ManufacturerModelRepositoryCustom {
 	 * @return list of Manufacturer Models.
 	 */
 	List<IdName> findIdsAndNamesForCenter(Long centerId);
+
 }

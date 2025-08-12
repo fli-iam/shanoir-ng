@@ -8,6 +8,14 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 import { KeycloakService } from './app/shared/keycloak/keycloak.service';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeDe from '@angular/common/locales/de';
+import localeEs from '@angular/common/locales/es';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeDe);
+registerLocaleData(localeEs);
 
 if (environment.production) {
     enableProdMode();
@@ -28,9 +36,8 @@ if (window.location.href == window.origin + '/shanoir-ng/'
     });
 } else {
     // private 
-    console.log(KeycloakService.auth)
     KeycloakService.init()
         .then(() => {
             platformBrowserDynamic().bootstrapModule(AppModule);
         });
-  }
+}

@@ -197,30 +197,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
-		StringBuilder instanceFilePath = new StringBuilder();
+		String instanceFilePath;
 		if (isImportFromPACS) {
-			instanceFilePath.append(folderFileAbsolutePath)
-					.append(File.separator)
-					.append(serie.getSeriesInstanceUID())
-					.append(File.separator)
-					.append(instance.getSopInstanceUID())
+			StringBuilder instanceFilePathBuilder = new StringBuilder();
+			instanceFilePathBuilder.append(folderFileAbsolutePath)
+				.append(File.separator)
+				.append(serie.getSeriesInstanceUID())
+				.append(File.separator)
+				.append(instance.getSopInstanceUID())
 					.append(SUFFIX_DCM);
+			instanceFilePath = instanceFilePathBuilder.toString();
 		} else {
-			String[] instancePathArray = instance.getReferencedFileID();
-			if (instancePathArray != null) {
-				instanceFilePath.append(folderFileAbsolutePath).append(File.separator);
-				for (int count = 0; count < instancePathArray.length; count++) {
-					instanceFilePath.append(instancePathArray[count]);
-					if (count != instancePathArray.length - 1) {
-						instanceFilePath.append(File.separator);
-					}
-				}
-			} else {
-				throw new FileNotFoundException(
-						"instancePathArray in DicomDir: missing file: " + instancePathArray);
-			}
+			instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
 		}
-		File instanceFile = new File(instanceFilePath.toString());
+		File instanceFile = new File(instanceFilePath);
 		if (instanceFile.exists()) {
 			return instanceFile;
 		} else {
@@ -362,7 +352,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
 			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
 			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 	
@@ -448,6 +438,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
 		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		if (StringUtils.isEmpty(serie.getModality())) {
+			serie.setModality(attributes.getString(Tag.Modality));
+		}
 	}
 
 	/**

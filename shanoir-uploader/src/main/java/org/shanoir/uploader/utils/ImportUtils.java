@@ -10,10 +10,8 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 import javax.swing.JProgressBar;
 
@@ -24,12 +22,17 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.shared.dataset.DatasetModalityType;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -75,7 +78,6 @@ public class ImportUtils {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
 	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
-
 
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
@@ -237,15 +239,18 @@ public class ImportUtils {
 	 * @throws DatabindException 
 	 * @throws StreamReadException 
 	 */
-	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
+	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
 		// Handle study and study card
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
 		// MS Datasets does only return StudyCard DTOs without IDs, as name is unique
 		// see: /shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
-		importJob.setStudyCardName(studyCard.getName());
-		importJob.setStudyCardId(studyCard.getId());
-		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		if (study.isWithStudyCards()) {
+			importJob.setStudyCardName(studyCard.getName());
+			importJob.setStudyCardId(studyCard.getId());
+		}
+		importJob.setCenterId(equipment.getCenter().getId());
+		importJob.setAcquisitionEquipmentId(equipment.getId());
 		importJob.setExaminationId(examinationId);
 
 		/**
@@ -383,24 +388,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	/**
-	 * 
-	 * @param subjectREST
-	 * @param subject
-	 * @param subjectName
-	 * @param category
-	 * @param languageHemDom
-	 * @param manualHemDom
-	 * @param subjectStudy
-	 * @param subjectType
-	 * @param existingSubjectInStudy
-	 * @param isPhysicallyInvolved
-	 * @param subjectStudyIdentifier
-	 * @param study
-	 * @param studyCard
-	 * @return
-	 */
-	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
+	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, AcquisitionEquipment equipment) {
 		if (subjectREST == null) {
 			try {
 				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
@@ -410,7 +398,7 @@ public class ImportUtils {
 			}
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
-				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+				Long centerId = equipment.getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
 					return null;
@@ -511,16 +499,16 @@ public class ImportUtils {
 
 	public static List<StudyCard> getAllStudyCards(List<Study> studies) throws Exception {
 		IdList idList = new IdList();
-		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
-			Study study = (Study) iterator.next();
-			idList.getIdList().add(study.getId());
-		}
+		studies.stream()
+			.filter(Study::isWithStudyCards)
+			.map(Study::getId)
+       		.forEach(idList.getIdList()::add);
 		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
 		return studyCards;
 	}
 
-	public static boolean flagStudyCardCompatible(StudyCard studyCard, String manufacturerModelName, String deviceSerialNumber) {
-		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(), manufacturerModelName, deviceSerialNumber);
+	public static boolean flagStudyCardCompatible(StudyCard studyCard, EquipmentDicom equipmentDicom) {
+		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(), equipmentDicom.getManufacturerModelName(), equipmentDicom.getDeviceSerialNumber());
 		studyCard.setCompatible(isCompatible);
 		if (isCompatible) {
 			return true; // correct equipment found, break for-loop acqEquip
@@ -542,21 +530,23 @@ public class ImportUtils {
 				return true;
 			}
 		}
-		return false;		
+		return false;
 	}
 
-	public static StudyCard createStudyCard(Study studyREST, AcquisitionEquipment equipment, ImportJob importJob) {
+	public static StudyCard createStudyCard(Study study, AcquisitionEquipment equipment) {
 		StudyCard studyCard = new StudyCard();
-		studyCard.setStudyId(studyREST.getId());
-		String studyCardName = studyREST.getName() + " - " + equipment.getCenter().getName() + " - " + equipment.getSerialNumber();
+		studyCard.setStudyId(study.getId());
+		String studyCardName = study.getName() + " - " + equipment.getCenter().getName() + " - " + equipment.getSerialNumber();
 		studyCard.setName(studyCardName);
 		studyCard.setAcquisitionEquipmentId(equipment.getId());
 		studyCard.setAcquisitionEquipment(equipment);
 		studyCard.setCenterId(equipment.getCenter().getId());
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
+		studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
+		logger.info("New study card created: {} {}", studyCard.getId(), studyCard.getName());
+		return studyCard;
 	}
 
-	public static AcquisitionEquipment createEquipment(Center center, ManufacturerModel manufacturerModel, String deviceSerialNumber) {
+	private static AcquisitionEquipment createEquipment(Center center, ManufacturerModel manufacturerModel, String deviceSerialNumber) {
 		AcquisitionEquipment equipment = new AcquisitionEquipment();
 		IdName centerIdName = new IdName();
 		centerIdName.setId(center.getId());
@@ -564,19 +554,23 @@ public class ImportUtils {
 		equipment.setCenter(centerIdName);
 		equipment.setSerialNumber(deviceSerialNumber);
 		equipment.setManufacturerModel(manufacturerModel);
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+		equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+		logger.info("New equipment created: {} {}", equipment.getId(), equipment.getSerialNumber());
+		return equipment;
 	}
 
-	public static ManufacturerModel createManufacturerModel(String manufacturerModelName, Manufacturer manufacturer, String modality, Double magneticFieldStrength) {
+	private static ManufacturerModel createManufacturerModel(String manufacturerModelName, Manufacturer manufacturer, String modality, Double magneticFieldStrength) {
 		ManufacturerModel manufacturerModel = new ManufacturerModel();
 		manufacturerModel.setName(manufacturerModelName);
 		manufacturerModel.setManufacturer(manufacturer);
 		manufacturerModel.setDatasetModalityType(modality);
 		manufacturerModel.setMagneticField(magneticFieldStrength);
-		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
+		manufacturerModel = ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
+		logger.info("New manufacturer model created: {} {}", manufacturerModel.getId(), manufacturerModel.getName());
+		return manufacturerModel;
 	}
 
-	public static Manufacturer createManufacturer(String manufacturerName) {
+	private static Manufacturer createManufacturer(String manufacturerName) {
 		Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setName(manufacturerName);
 		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturer(manufacturer);
@@ -663,6 +657,31 @@ public class ImportUtils {
 			dicomDirFile.delete();
 		}
 		return patients;
+	}
+
+	public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Center center) {
+		AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
+		if (equipment == null) {
+			logger.error("Error: could not find or create equipment.");
+		} else {
+			logger.info("Equipment found or created: {} {}", equipment.getId(), equipment.getManufacturerModel().getName());
+		}
+		return equipment;
+	}
+
+	public static Center findOrCreateCenterWithInstitutionDicom(InstitutionDicom institutionDicom, Long studyId) {
+		String institutionName = institutionDicom.getInstitutionName();
+		if (institutionName == null || institutionName.isBlank()) {
+			logger.error("Error: no institution name.");
+			return null;
+		}
+		Center center = ShUpOnloadConfig.getShanoirUploaderServiceClient().findCenterOrCreateByInstitutionDicom(institutionDicom, studyId);
+		if (center == null) {
+			logger.error("Error: could not find or create center.");
+		} else {
+			logger.info("Center found or created: {} {}", center.getId(), center.getName());
+		}
+		return center;
 	}
 
 }
