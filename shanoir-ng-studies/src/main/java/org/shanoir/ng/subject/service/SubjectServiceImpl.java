@@ -329,7 +329,14 @@ public class SubjectServiceImpl implements SubjectService {
 					sSOld.setSubjectStudyIdentifier(sSNew.getSubjectStudyIdentifier());
 					sSOld.setSubjectType(sSNew.getSubjectType());
 					sSOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
+					// keep new values in subject table up-to-date with subject study
+					subjectOld.setStudyIdentifier(sSNew.getSubjectStudyIdentifier());
+					subjectOld.setSubjectType(sSNew.getSubjectType());
+					subjectOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
+					subjectOld.setQualityTag(sSNew.getQualityTag());
+					// map values from new to old subject study tag list
 					mapSubjectStudyTagListToSubjectStudyTagList(sSOld, sSNew);
+					// map values from new to new subject tags structure
 					mapSubjectStudyTagListToSubjectTagList(subjectOld, sSNew);
 					break;
 				}
