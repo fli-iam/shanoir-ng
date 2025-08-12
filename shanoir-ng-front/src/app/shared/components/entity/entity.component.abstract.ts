@@ -66,6 +66,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
     static ActivateTreeOnThisPage: boolean = true;
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -83,9 +84,10 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     abstract initEdit(): Promise<void>;
     abstract initCreate(): Promise<void>;
     abstract buildForm(): UntypedFormGroup;
+    abstract getService(): EntityService<T>;
+    protected mapFormToEntity(): T { return null; }; // TODO : MAKE IT ABSTRACT
     protected getTreeSelection: () => Selection; //optional
     protected fetchEntity: () => Promise<any>; // optional
-    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -227,6 +229,9 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                 this.form.statusChanges.subscribe(status => {
                     this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
                     this.footerState.dirty = this.form.dirty;
+                }),
+                this.form.valueChanges.subscribe(() => {
+                    this.mapFormToEntity();
                 })
             );
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
@@ -351,11 +356,12 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     save(afterSave?: () => Promise<void>): Promise<T> {
         this.footerState.loading = true;
+        this.mapFormToEntity();
         return this.modeSpecificSave(afterSave)
-            .then(study => {
+            .then(entity => {
                 this.footerState.loading = false;
                 this.treeService.updateTree();
-                return study;
+                return entity;
             })
             /* manages "after submit" errors like a unique constraint */
             .catch(reason => {
@@ -364,7 +370,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                 return null;
             });
     }
-
 
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
@@ -517,7 +522,4 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})));
         }
     }
-
-    abstract getService(): EntityService<T>;
-
 }
