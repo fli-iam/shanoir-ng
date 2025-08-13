@@ -48,9 +48,9 @@ public class Study extends IdName {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	List<Tag> tags;
 
-	/** Relations between the subjects and the studies. */
+	/** Relations between the subjects and the study. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<SubjectStudy> subjectStudyList;
+	private List<Subject> subjectList;
 	
 	/** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -102,15 +102,15 @@ public class Study extends IdName {
 	/**
 	 * @return the subjectStudyList
 	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
+	public List<Subject> getSubjectList() {
+		return subjectList;
 	}
 
 	/**
 	 * @param subjectStudyList the subjectStudyList to set
 	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
+	public void setSubjectStudyList(List<Subject> subjectList) {
+		this.subjectList = subjectList;
 	}
 	
 	@Override
@@ -148,4 +148,5 @@ public class Study extends IdName {
 	public void setStudyTags(Set<StudyTag> studyTags) {
 		this.studyTags = studyTags;
 	}
+
 }

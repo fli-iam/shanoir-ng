@@ -25,6 +25,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -152,8 +153,8 @@ public interface SubjectService {
 	 * @throws ShanoirException
 	 * @throws RestServiceException
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject update(Subject subject) throws ShanoirException;
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subjectNew.getSubjectStudyList(), 'CAN_IMPORT'))")
+	Subject update(Subject subjectNew) throws ShanoirException;
 
 	/**
 	 * Delete a subject.
@@ -169,7 +170,7 @@ public interface SubjectService {
 	 * @param subjectToSubjectDTO the subject DTO to update
 	 * @throws MicroServiceCommunicationException 
 	 */
-	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
+	boolean updateSubjectInMicroservices(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 
 	/**
 	 * Returns a filtered page by clinical subject name.
@@ -185,5 +186,7 @@ public interface SubjectService {
 	List<Subject> findByPreclinical(boolean preclinical);
 
 	boolean existsSubjectWithName(String name);
+
+	public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 
 }

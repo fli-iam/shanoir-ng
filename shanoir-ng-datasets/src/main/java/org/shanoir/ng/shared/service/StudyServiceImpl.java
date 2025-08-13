@@ -14,19 +14,18 @@
 
 package org.shanoir.ng.shared.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 
 @Component
@@ -47,7 +46,7 @@ public class StudyServiceImpl implements StudyService {
 	public void updateStudy(Study updated, Study current) {
 
 		if (current.getId() == null)
-			throw new IllegalStateException("The entity should have an id.");
+			throw new IllegalStateException("The entity must have an ID.");
 
 		// TAGS
 		if (current.getTags() != null) {
@@ -75,33 +74,6 @@ public class StudyServiceImpl implements StudyService {
 			tag.setStudy(current);
 		}
 
-		Study studyDb = this.repository.save(current);
-
-		// SUBJECT_STUDY
-		if (current.getSubjectStudyList() != null) {
-			current.getSubjectStudyList().clear();
-		} else {
-			current.setSubjectStudyList(new ArrayList<>());
-		}
-		if (updated.getSubjectStudyList() != null) {
-			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
-		}
-
-		for (SubjectStudy sustu : current.getSubjectStudyList()) {
-			sustu.setStudy(current);
-			for (Tag tag : sustu.getTags()) {
-				if (tag.getId() == null) {
-					Tag dbTag = studyDb.getTags().stream().filter(upTag ->
-							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-					).findFirst().orElse(null);
-					if (dbTag != null) {
-						tag.setId(dbTag.getId());
-					} else {
-						throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-					}
-				}
-			}
-		}
 		this.repository.save(current);
 	}
 
@@ -123,4 +95,5 @@ public class StudyServiceImpl implements StudyService {
 
 		return errors;
 	}
+
 }

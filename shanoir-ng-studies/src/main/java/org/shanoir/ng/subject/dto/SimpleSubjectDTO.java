@@ -43,6 +43,8 @@ public class SimpleSubjectDTO {
     
     private SubjectStudyDTO subjectStudy;
 
+	private Long studyId;
+
 	public Long getId() {
 		return id;
 	}
@@ -97,6 +99,14 @@ public class SimpleSubjectDTO {
 
 	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
 		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }
