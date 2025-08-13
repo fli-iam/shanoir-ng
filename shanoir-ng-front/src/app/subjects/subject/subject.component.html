@@ -118,11 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
 							<span [ngSwitch]="mode" class="right-col">
 								<ng-template [ngSwitchCase]="'view'">
-									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+									{{subject.birthDate | localDateFormatPipe}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="'create'">
 									<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 								</ng-template>
 							</span>
@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<span class="right-col">
 							<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 						</span>
 					</li>
 				</ol>

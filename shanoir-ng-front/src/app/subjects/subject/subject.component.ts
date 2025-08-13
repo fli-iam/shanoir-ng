@@ -32,6 +32,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'subject-detail',
@@ -301,4 +302,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             subscribtion.unsubscribe();
         }
     }
+
+    protected readonly dateDisplay = dateDisplay;
 }
