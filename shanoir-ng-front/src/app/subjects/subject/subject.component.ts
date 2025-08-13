@@ -35,6 +35,7 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
 import {StudyLight} from "../../studies/shared/study.dto";
 import {Tag} from "../../tags/tag.model";
 import {SubjectStudy} from "../shared/subject-study.model";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'subject-detail',
@@ -326,4 +327,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             subscribtion.unsubscribe();
         }
     }
+
+    protected readonly dateDisplay = dateDisplay;
 }
