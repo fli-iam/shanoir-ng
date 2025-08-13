@@ -85,7 +85,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     abstract initCreate(): Promise<void>;
     abstract buildForm(): UntypedFormGroup;
     abstract getService(): EntityService<T>;
-    protected mapFormToEntity(): T { return null; }; // TODO : MAKE IT ABSTRACT
+    protected mapFormToEntity() { return null; }; // TODO : MAKE IT ABSTRACT
     protected getTreeSelection: () => Selection; //optional
     protected fetchEntity: () => Promise<any>; // optional
 
@@ -129,7 +129,21 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     public set entity(entity: T) {
-        this._entity = entity;
+        this._entity = new Proxy(entity, {
+            set(target, prop, value) {
+                let isEqual = target[prop as keyof T] == value;
+                if (!isEqual && value && typeof value === 'object' && value.hasOwnProperty('id')
+                    && target[prop as keyof T] && typeof target[prop as keyof T] === 'object') {
+                    // if the value is an object with an id, we can compare it to the current entity
+                    isEqual = value.id && target[prop as keyof T] && target[prop as keyof T]['id'] == value.id;
+                }
+                if (!isEqual && this.form) {
+                    target[prop as keyof T] = value;
+                    this.form.get(prop as string)?.setValue(value, {emitEvent: false});
+                }
+                return true;
+            }
+        });
         if (entity) this.entityPromise.resolve(entity);
     }
 

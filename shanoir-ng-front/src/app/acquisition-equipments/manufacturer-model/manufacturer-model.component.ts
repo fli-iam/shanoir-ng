@@ -13,22 +13,19 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { Enum } from '../../shared/utils/enum';
+import { Option } from '../../shared/select/select.component';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Option } from '../../shared/select/select.component';
-import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
-import {Subject} from "../../subjects/shared/subject.model";
-import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -62,7 +59,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     initEdit(): Promise<void> {
-        this.manufModel.manufacturer = this.getManufById(this.manufModel.manufacturer.id);
+        this.getManufs();
         return Promise.resolve();
     }
 
@@ -81,6 +78,14 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         });
     }
 
+    protected mapFormToEntity(): ManufacturerModel {
+        this.manufModel.name = this.form.get('name').value;
+        this.manufModel.manufacturer = this.form.get('manufacturer').value;
+        this.manufModel.magneticField = this.form.get('magneticField').value;
+        this.manufModel.datasetModalityType = this.form.get('datasetModalityType').value;
+        return this.manufModel;
+    }
+
     private getMagneticFieldValidators(): ValidatorFn | ValidatorFn[] {
         if (this.isMR) return Validators.required;
         else return;
@@ -95,13 +100,6 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
 
     public get isMR(): boolean {
         return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR;
-    }
-
-    private getManufacturerModel(): Promise<void> {
-        return this.manufModelService.get(this.id)
-            .then(manufModel => {
-                this.manufModel = manufModel;
-            });
     }
 
     private getManufs(): Promise<void> {

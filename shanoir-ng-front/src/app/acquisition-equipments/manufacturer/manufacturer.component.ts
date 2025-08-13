@@ -54,7 +54,7 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     initCreate(): Promise<void> {
-        this.entity = new Manufacturer();
+        this.manuf = new Manufacturer();
         return Promise.resolve();
     }
 
@@ -66,8 +66,8 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     mapFormToEntity(): Manufacturer {
-        this.entity.name = this.form.get('name').value;
-        return this.entity;
+        this.manuf.name = this.form.get('name').value;
+        return this.manuf;
     }
 
     public async hasEditRight(): Promise<boolean> {
