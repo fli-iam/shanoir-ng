@@ -47,7 +47,7 @@ export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_U
 
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
 
-const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
+export const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
