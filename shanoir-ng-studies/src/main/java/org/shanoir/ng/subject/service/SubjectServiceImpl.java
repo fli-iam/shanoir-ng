@@ -175,6 +175,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
+	@Transactional
 	public Subject create(Subject subject) throws ShanoirException {
 		subject = mapSubjectStudyListToSubject(subject);
 		Subject subjectDb = subjectRepository.save(subject);
@@ -187,6 +188,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject createAutoIncrement(Subject subject, final Long centerId) throws ShanoirException {
 		subject = mapSubjectStudyListToSubject(subject);
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);

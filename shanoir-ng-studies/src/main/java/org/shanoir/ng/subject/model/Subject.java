@@ -111,7 +111,7 @@ public class Subject extends HalEntity {
 
 	private String studyIdentifier;
 
-	@Column(name = "physically_involved", nullable = false)
+	@Column(name = "physically_involved", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
 	private boolean physicallyInvolved;
 
 	private Integer subjectType;
