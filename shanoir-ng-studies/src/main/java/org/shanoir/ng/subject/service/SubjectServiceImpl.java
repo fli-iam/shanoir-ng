@@ -239,18 +239,21 @@ public class SubjectServiceImpl implements SubjectService {
 			subjectStudy.setSubjectType(subject.getSubjectType());
 			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
-			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<SubjectStudyTag>();
+			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<>();
 			if (subject.getTags() != null && !subject.getTags().isEmpty()) {
-				subject.getTags().stream().forEach(s -> {
-					Optional<Tag> tagOpt = tagRepository.findById(s.getId());
-					if (tagOpt.isPresent()) {
-						Tag tag = tagOpt.get();
-						SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
-						subjectStudyTag.setTag(tag);
-						subjectStudyTag.setSubjectStudy(subjectStudy);
-						subjectStudyTagList.add(subjectStudyTag);
-					}
-				});
+			    Set<Tag> managedTags = new HashSet<>();
+				List<Long> tagIds = subject.getTags().stream()
+						.map(Tag::getId)
+						.collect(Collectors.toList());
+				Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+			    managedTagsIt.forEach(managedTags::add);
+				subject.setTags((managedTags));
+				for (Tag managedTag : managedTags) {
+					SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+					subjectStudyTag.setTag(managedTag);
+					subjectStudyTag.setSubjectStudy(subjectStudy);
+					subjectStudyTagList.add(subjectStudyTag);
+				}
 			}
 			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
 			List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
