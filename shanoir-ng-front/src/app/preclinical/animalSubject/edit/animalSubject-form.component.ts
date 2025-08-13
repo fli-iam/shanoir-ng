@@ -75,6 +75,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     references: Reference[] = [];
     hasDownloadRight: boolean = false;
     downloadState: TaskState = new TaskState();
+    animalSubjectForm: UntypedFormGroup;
 
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
@@ -283,7 +284,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     buildForm(): UntypedFormGroup {
         let animal: boolean = this.animalSelected();
-        let subjectForm = this.formBuilder.group({
+         this.animalSubjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
             'name': [this.preclinicalSubject.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
@@ -292,17 +293,17 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
             'provider': [this.preclinicalSubject.animalSubject.provider, animal ? [Validators.required] : []],
             'stabulation': [this.preclinicalSubject.animalSubject.stabulation, animal ? [Validators.required] : []],
-            'sex': [this.preclinicalSubject.subject.sex, animal ? [Validators.required] : []],
+            'sex': [this.preclinicalSubject.animalSubject.sex, animal ? [Validators.required] : []],
             'therapies': [this.preclinicalSubject.therapies],
             'pathologies': [this.preclinicalSubject.pathologies],
             'subjectStudyList': []
         });
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
-                this.onChangeImagedObjectCategory(subjectForm);
+            this.animalSubjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+                this.onChangeImagedObjectCategory(this.animalSubjectForm);
             })
         );
-        return subjectForm;
+        return this.animalSubjectForm;
     }
 
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
