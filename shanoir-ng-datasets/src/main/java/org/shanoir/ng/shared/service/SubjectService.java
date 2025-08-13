@@ -52,25 +52,25 @@ public class SubjectService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	public List<Subject> update(final Iterable<Subject> subjects) throws EntityNotFoundException, MicroServiceCommunicationException {
-        if (subjects == null) return null;
+	public List<Subject> update(final Iterable<Subject> subjectsNew) throws EntityNotFoundException, MicroServiceCommunicationException {
+        if (subjectsNew == null) return null;
 		Set<Long> ids = new HashSet<>();
-	    for (Subject subject : subjects) {
-	        ids.add(subject.getId());
+	    for (Subject subjectNew : subjectsNew) {
+	        ids.add(subjectNew.getId());
 	    }
-		final Iterable<Subject> subjectStudiesDb = subjectRepository.findAllById(ids);
-        for (Subject Subject : subjectStudiesDb) {
-            for (Subject SubjectDb : subjectStudiesDb) {
-                if (SubjectDb.getId().equals(Subject.getId())) {
-                    updateSubjectValues(SubjectDb, Subject);
+		final Iterable<Subject> subjectsOld = subjectRepository.findAllById(ids);
+        for (Subject subjectNew : subjectsNew) {
+            for (Subject subjectOld : subjectsOld) {
+                if (subjectOld.getId().equals(subjectNew.getId())) {
+                    updateSubjectValues(subjectOld, subjectNew);
                     break;
                 }
             }
         }
-		subjectRepository.saveAll(subjectStudiesDb);
-        List<SubjectQualityTagDTO> SubjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectStudiesDb));
+		subjectRepository.saveAll(subjectsOld);
+        List<SubjectQualityTagDTO> SubjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectsOld));
         this.send(SubjectTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
-		return Utils.toList(subjectStudiesDb);
+		return Utils.toList(subjectsOld);
 	}
 	
     private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) {
