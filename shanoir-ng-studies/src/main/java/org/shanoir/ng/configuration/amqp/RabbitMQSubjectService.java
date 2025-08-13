@@ -153,13 +153,9 @@ public class RabbitMQSubjectService {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 			Subject subject = mapper.readValue(subjectAsString, Subject.class);
-
 			Long studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
-			
 			Study study = studyRepository.findById(studyId).get();
-
-			// Check subject existence by name
-			Subject existingSubject = this.subjectRepository.findByName(subject.getName());
+			Subject existingSubject = this.subjectRepository.findByStudyIdAndName(studyId, subject.getName());
 
 			// If it exists, update subject study list
 			if (existingSubject != null) {

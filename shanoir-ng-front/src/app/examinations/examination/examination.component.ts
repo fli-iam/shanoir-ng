@@ -33,9 +33,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import {ExaminationNode} from "../../tree/tree.model";
-import {Subject} from "../../subjects/shared/subject.model";
-import {SubjectStudy} from "../../subjects/shared/subject-study.model";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'examination-detail',
@@ -59,7 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
     downloadState: TaskState = new TaskState();
-
+    dateDisplay = dateDisplay;
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
@@ -271,5 +269,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
+    }
+
+    downloadFile(file) {
+        this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }
 }
