@@ -13,16 +13,23 @@
  */
 package org.shanoir.ng.shared.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
+import org.shanoir.ng.tag.model.Tag;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +52,14 @@ public class Subject extends IdName {
 	@JoinColumn(name = "study_id")
 	@NotNull
 	private Study study;
+
+	@ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+			name = "subject_tag", 
+			joinColumns = { @JoinColumn(name = "subject_id") }, 
+			inverseJoinColumns = { @JoinColumn(name = "tag_id") }
+    )
+	private Set<Tag> tags = new HashSet<Tag>();
 
 	private Integer qualityTag;
 
@@ -123,6 +138,14 @@ public class Subject extends IdName {
 			s.setId(studyId);
 			this.study = s;
 		}
+	}
+
+	public Set<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
 	}
 
 }
