@@ -16,8 +16,9 @@ package org.shanoir.ng.subject.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -44,6 +45,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -113,8 +116,13 @@ public class Subject extends HalEntity {
 
 	private Integer subjectType;
 
-	@OneToMany(mappedBy = "subject", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<SubjectTag> tags;
+	@ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+			name = "subject_tag", 
+			joinColumns = { @JoinColumn(name = "subject_id") }, 
+			inverseJoinColumns = { @JoinColumn(name = "tag_id") }
+    )
+	private Set<Tag> tags = new HashSet<Tag>();
 	
 	private Integer qualityTag;
 
@@ -238,14 +246,9 @@ public class Subject extends HalEntity {
 		this.studyIdentifier = studyIdentifier;
 	}
 
-	public List<Tag> getTags() {
-        if (getSubjectTags() == null) return null;
-        return getSubjectTags().stream().map((subjectTag) -> subjectTag.getTag()).collect(Collectors.toList());
+	public Set<Tag> getTags() {
+        return tags;
     }
-	
-	public List<SubjectTag> getSubjectTags() {
-		return tags;
-	}
 	
 	public QualityTag getQualityTag() {
 		return QualityTag.get(qualityTag);
@@ -255,8 +258,8 @@ public class Subject extends HalEntity {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
-	public void setTags(List<SubjectTag> subjectTags) {
-		this.tags = subjectTags;
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
 	}
 	
 	public boolean isPhysicallyInvolved() {
