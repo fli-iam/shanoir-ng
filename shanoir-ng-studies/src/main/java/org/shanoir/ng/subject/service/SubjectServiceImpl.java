@@ -16,8 +16,10 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -35,12 +37,13 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectTag;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -78,6 +81,9 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private StudyRepository studyRepository;
+
+	@Autowired
+	private TagRepository tagRepository;
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
@@ -234,12 +240,16 @@ public class SubjectServiceImpl implements SubjectService {
 			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
 			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<SubjectStudyTag>();
-			if (subject.getSubjectTags() != null && !subject.getSubjectTags().isEmpty()) {
-				subject.getSubjectTags().stream().forEach(s -> {
-					SubjectStudyTag tag = new SubjectStudyTag();
-					tag.setTag(s.getTag());
-					tag.setSubjectStudy(subjectStudy);
-					subjectStudyTagList.add(tag);
+			if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+				subject.getTags().stream().forEach(s -> {
+					Optional<Tag> tagOpt = tagRepository.findById(s.getId());
+					if (tagOpt.isPresent()) {
+						Tag tag = tagOpt.get();
+						SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+						subjectStudyTag.setTag(tag);
+						subjectStudyTag.setSubjectStudy(subjectStudy);
+						subjectStudyTagList.add(subjectStudyTag);
+					}
 				});
 			}
 			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
@@ -261,22 +271,23 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
-		List<SubjectTag> subjectTagList;
-		if (subject.getSubjectTags() == null) {
-			subjectTagList = new ArrayList<SubjectTag>();
+		Set<Tag> tags;
+		if (subject.getTags() == null) {
+			tags = new HashSet<Tag>();
 		} else {
-			subjectTagList = subject.getSubjectTags();
+			tags = subject.getTags();
 		}
-		subjectTagList.clear(); // always update with new state
+		tags.clear(); // always update with new state
 		if (subjectStudy.getSubjectStudyTags() != null) {
 			subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
-				SubjectTag tag = new SubjectTag();
-				tag.setTag(st.getTag());
-				tag.setSubject(subject);
-				subjectTagList.add(tag);
+				Optional<Tag> tagOpt = tagRepository.findById(st.getTag().getId());
+				if (tagOpt.isPresent()) {
+					Tag tag = tagOpt.get();
+					tags.add(tag);
+				}
 			});
 		}
-		subject.setTags(subjectTagList);
+		subject.setTags(tags);
 	}
 
 	@Override
