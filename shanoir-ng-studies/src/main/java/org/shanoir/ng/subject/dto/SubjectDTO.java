@@ -56,6 +56,10 @@ public class SubjectDTO {
 
 	private Long studyId;
 
+	private boolean physicallyInvolved;
+
+	private Integer subjectType;
+
 	private List<TagDTO> tags;
 
 	/**
@@ -206,6 +210,22 @@ public class SubjectDTO {
 
 	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
+	}
+
+	public boolean isPhysicallyInvolved() {
+		return physicallyInvolved;
+	}
+
+	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+		this.physicallyInvolved = physicallyInvolved;
+	}
+
+	public Integer getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Integer subjectType) {
+		this.subjectType = subjectType;
 	}
 
 }
