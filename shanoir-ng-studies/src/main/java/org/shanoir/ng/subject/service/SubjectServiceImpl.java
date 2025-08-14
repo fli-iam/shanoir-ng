@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -165,8 +166,11 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject findById(final Long id) {
-		return subjectRepository.findById(id).orElse(null);
+		Subject subject = subjectRepository.findById(id).orElse(null);
+		Hibernate.initialize(subject.getTags());
+		return subject;
 	}
 
 	@Override
@@ -299,6 +303,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
 		Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
+		Hibernate.initialize(subject.getTags());
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
