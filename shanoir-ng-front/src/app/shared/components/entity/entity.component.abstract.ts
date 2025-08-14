@@ -85,7 +85,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     abstract initCreate(): Promise<void>;
     abstract buildForm(): UntypedFormGroup;
     abstract getService(): EntityService<T>;
-    protected mapFormToEntity() { return null; }; // TODO : MAKE IT ABSTRACT
     protected getTreeSelection: () => Selection; //optional
     protected fetchEntity: () => Promise<any>; // optional
 
@@ -130,16 +129,29 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     public set entity(entity: T) {
         this._entity = new Proxy(entity, {
-            set(target, prop, value) {
-                let isEqual = target[prop as keyof T] == value;
-                if (!isEqual && value && typeof value === 'object' && value.hasOwnProperty('id')
-                    && target[prop as keyof T] && typeof target[prop as keyof T] === 'object') {
-                    // if the value is an object with an id, we can compare it to the current entity
-                    isEqual = value.id && target[prop as keyof T] && target[prop as keyof T]['id'] == value.id;
+            get: (target, prop, receiver) => {
+                return Reflect.get(target, prop, receiver);
+            },
+            set: (target, prop, value, receiver) => {
+                const oldValue = Reflect.get(target, prop, receiver);
+                let isEqual = oldValue === value;
+                // Deal with non primitives properties
+                if (!isEqual
+                        && value && typeof value === 'object'
+                        && Object.prototype.hasOwnProperty.call(value, 'id')
+                        && oldValue && typeof oldValue === 'object') {
+                    const oldId = (oldValue as any)['id'];
+                    const newId = (value as any)['id'];
+                    isEqual = oldId === newId;
                 }
+                const ok = Reflect.set(target, prop, value, receiver);
+                if (!ok) return false;
+                // Sync form
                 if (!isEqual && this.form) {
-                    target[prop as keyof T] = value;
-                    this.form.get(prop as string)?.setValue(value, {emitEvent: false});
+                    const ctrl = this.form.get(String(prop));
+                    if (ctrl) {
+                        ctrl.patchValue(value);
+                    }
                 }
                 return true;
             }
@@ -385,6 +397,17 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             });
     }
 
+    /**
+     * Maps the form values to the entity properties.
+     * This method should be called after the form is built and before saving the entity.
+     */
+    protected mapFormToEntity() {
+        Object.keys(this.form.controls).forEach((control) => {
+            const name = control as keyof T;
+            this._entity[name] = this.form.get(control).value;
+        });
+    };
+
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
@@ -531,9 +554,10 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
-            console.log('form', this.form);
             console.log('entity', this.entity);
-            console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})));
+            console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})), 
+                this.form.status, this.form.dirty, this.form.touched);
+            console.log('footer state', this.footerState);
         }
     }
 }

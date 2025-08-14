@@ -25,7 +25,7 @@ export class Queue {
     }
 
     waitForTurn(): Promise<() => void> {
-        const stop: Subject<any> = new Subject<any>();
+        const stop: Subject<void> = new Subject<void>();
         const ticket: number = this._nextTicket++;
         return new Promise((resolve, reject) => {
             const sub: Subscription = this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {

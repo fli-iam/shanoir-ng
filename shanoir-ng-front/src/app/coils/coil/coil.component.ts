@@ -120,8 +120,20 @@ export class CoilComponent extends EntityComponent<Coil> {
             else {
                 this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
             }
-        })
+        });
+        form.get('center').valueChanges.subscribe((centerId: number) => {
+            this.updateManufList(centerId);
+        });
         return form;
+    }
+
+    protected mapFormToEntity() {
+        this.coil.name = this.form.get('name').value;
+        this.coil.center = this.form.get('center').value;
+        this.coil.manufacturerModel = this.form.get('acquiEquipModel').value;
+        this.coil.coilType = this.form.get('coilType').value;
+        this.coil.numberOfChannels = this.form.get('nbChannel').value;
+        this.coil.serialNumber = this.form.get('serialNb').value;
     }
 
     updateManufList(centerId: number): void {

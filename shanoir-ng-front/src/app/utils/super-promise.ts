@@ -14,12 +14,13 @@
 
 export class SuperPromise<T> implements Promise<T> {
 
-    public resolve: (value: T | PromiseLike<T>) => void;
-    public reject: (reason?: any) => void;
+    private _resolve: (value: T | PromiseLike<T>) => void;
+    private _reject: (reason?: any) => void;
     private promise: Promise<T> = new Promise<T>((resolve, reject) => { 
-        this.resolve = resolve;
-        this.reject = reject
+        this._resolve = resolve;
+        this._reject = reject
     });
+    private isCancelled: boolean = false;
 
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined): Promise<TResult1 | TResult2> {
         return this.promise.then(onfulfilled, onrejected);
@@ -33,6 +34,27 @@ export class SuperPromise<T> implements Promise<T> {
         return this.promise.finally(onfinally);
     }
 
+    resolve(value?: T | PromiseLike<T>): void {
+        if (!this.isCancelled) {
+            this._resolve(value);
+        }
+    }
+
+    reject(reason?: any): void {
+        if (!this.isCancelled) {
+            this._reject(reason);
+        }
+    }
+
+    cancel(): void {
+        if(!this.isCancelled) {
+            this.isCancelled = true;
+            const err = new Error('Promise cancelled');
+            err.name = 'AbortError';
+            this.reject(err);
+        }   
+    }
+
     get [Symbol.toStringTag](): string {
         return this.promise[Symbol.toStringTag];
     }
@@ -44,5 +66,4 @@ export class SuperPromise<T> implements Promise<T> {
         }, milliseconds);
         return superPromise;
     }
-
 }

@@ -13,22 +13,22 @@
  */
 
 import { Component } from '@angular/core';
-import {AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
-import { ManufacturerModelService } from '../shared/manufacturer-model.service';
-import { Center } from '../../centers/shared/center.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -174,15 +174,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
                 form.get('serialNumber').updateValueAndValidity();
             })
         );
-    }
-
-    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
-                && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
-                && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
-            return {unique: true};
-        }
-        return null;
     }
 
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {

@@ -78,7 +78,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         });
     }
 
-    protected mapFormToEntity(): ManufacturerModel {
+    mapFormToEntity(): ManufacturerModel {
         this.manufModel.name = this.form.get('name').value;
         this.manufModel.manufacturer = this.form.get('manufacturer').value;
         this.manufModel.magneticField = this.form.get('magneticField').value;
