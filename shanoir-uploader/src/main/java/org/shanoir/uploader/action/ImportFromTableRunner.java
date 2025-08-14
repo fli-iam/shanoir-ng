@@ -334,7 +334,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		subjectREST = ImportUtils.manageSubject(subjectREST,
 			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
-			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, equipment);
+			SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, equipment);
 		if (subjectREST == null) {
 				line[6] = "Error with subject";
 				csvWriter.addExaminationLine(false, line);
