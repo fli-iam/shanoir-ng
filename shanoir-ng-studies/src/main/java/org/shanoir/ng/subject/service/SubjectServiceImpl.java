@@ -16,10 +16,13 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -35,12 +38,13 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectTag;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -78,6 +82,9 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private StudyRepository studyRepository;
+
+	@Autowired
+	private TagRepository tagRepository;
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
@@ -159,8 +166,11 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject findById(final Long id) {
-		return subjectRepository.findById(id).orElse(null);
+		Subject subject = subjectRepository.findById(id).orElse(null);
+		Hibernate.initialize(subject.getTags());
+		return subject;
 	}
 
 	@Override
@@ -169,6 +179,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
+	@Transactional
 	public Subject create(Subject subject) throws ShanoirException {
 		subject = mapSubjectStudyListToSubject(subject);
 		Subject subjectDb = subjectRepository.save(subject);
@@ -181,6 +192,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
+	@Transactional
 	public Subject createAutoIncrement(Subject subject, final Long centerId) throws ShanoirException {
 		subject = mapSubjectStudyListToSubject(subject);
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
@@ -233,14 +245,21 @@ public class SubjectServiceImpl implements SubjectService {
 			subjectStudy.setSubjectType(subject.getSubjectType());
 			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
-			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<SubjectStudyTag>();
-			if (subject.getSubjectTags() != null && !subject.getSubjectTags().isEmpty()) {
-				subject.getSubjectTags().stream().forEach(s -> {
-					SubjectStudyTag tag = new SubjectStudyTag();
-					tag.setTag(s.getTag());
-					tag.setSubjectStudy(subjectStudy);
-					subjectStudyTagList.add(tag);
-				});
+			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<>();
+			if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+			    Set<Tag> managedTags = new HashSet<>();
+				List<Long> tagIds = subject.getTags().stream()
+						.map(Tag::getId)
+						.collect(Collectors.toList());
+				Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+			    managedTagsIt.forEach(managedTags::add);
+				subject.setTags((managedTags));
+				for (Tag managedTag : managedTags) {
+					SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+					subjectStudyTag.setTag(managedTag);
+					subjectStudyTag.setSubjectStudy(subjectStudy);
+					subjectStudyTagList.add(subjectStudyTag);
+				}
 			}
 			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
 			List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
@@ -261,28 +280,30 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
-		List<SubjectTag> subjectTagList;
-		if (subject.getSubjectTags() == null) {
-			subjectTagList = new ArrayList<SubjectTag>();
+		Set<Tag> tags;
+		if (subject.getTags() == null) {
+			tags = new HashSet<Tag>();
 		} else {
-			subjectTagList = subject.getSubjectTags();
+			tags = subject.getTags();
 		}
-		subjectTagList.clear(); // always update with new state
+		tags.clear(); // always update with new state
 		if (subjectStudy.getSubjectStudyTags() != null) {
 			subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
-				SubjectTag tag = new SubjectTag();
-				tag.setTag(st.getTag());
-				tag.setSubject(subject);
-				subjectTagList.add(tag);
+				Optional<Tag> tagOpt = tagRepository.findById(st.getTag().getId());
+				if (tagOpt.isPresent()) {
+					Tag tag = tagOpt.get();
+					tags.add(tag);
+				}
 			});
 		}
-		subject.setTags(subjectTagList);
+		subject.setTags(tags);
 	}
 
 	@Override
 	@Transactional
 	public Subject update(final Subject subject) throws ShanoirException {
 		Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
+		Hibernate.initialize(subject.getTags());
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
