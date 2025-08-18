@@ -17,9 +17,12 @@
  */
 package org.shanoir.ng.subject.dto;
 
+import java.util.List;
+
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * Simple DTO for Subject.
@@ -44,6 +47,8 @@ public class SimpleSubjectDTO {
     private SubjectStudyDTO subjectStudy;
 
 	private Long studyId;
+
+	private List<TagDTO> tags;
 
 	public Long getId() {
 		return id;
@@ -107,6 +112,14 @@ public class SimpleSubjectDTO {
 
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+
+	public List<TagDTO> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<TagDTO> tags) {
+		this.tags = tags;
 	}
 
 }

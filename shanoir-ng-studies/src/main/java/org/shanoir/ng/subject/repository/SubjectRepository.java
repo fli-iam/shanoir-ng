@@ -59,6 +59,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	
 	Page<Subject> findByNameContaining(String name, Pageable pageable);
 	
+	@EntityGraph(attributePaths = {"tags"})
 	Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 	
 	/**

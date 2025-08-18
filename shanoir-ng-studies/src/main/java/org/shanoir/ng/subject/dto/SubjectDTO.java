@@ -22,6 +22,7 @@ import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.TagDTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -54,6 +55,12 @@ public class SubjectDTO {
 	private boolean preclinical;
 
 	private Long studyId;
+
+	private boolean physicallyInvolved;
+
+	private Integer subjectType;
+
+	private List<TagDTO> tags;
 
 	/**
 	 * @return the id
@@ -195,6 +202,30 @@ public class SubjectDTO {
 
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+	
+	public List<TagDTO> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<TagDTO> tags) {
+		this.tags = tags;
+	}
+
+	public boolean isPhysicallyInvolved() {
+		return physicallyInvolved;
+	}
+
+	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+		this.physicallyInvolved = physicallyInvolved;
+	}
+
+	public Integer getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Integer subjectType) {
+		this.subjectType = subjectType;
 	}
 
 }
