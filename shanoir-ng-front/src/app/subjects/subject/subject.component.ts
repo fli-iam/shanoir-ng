@@ -171,7 +171,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'subjectStudyIdentifier': [this.subject.subjectStudyIdentifier],
+            'studyIdentifier': [this.subject.studyIdentifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
             'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
@@ -249,6 +249,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
+        this.subject.subjectStudyList = null;
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })

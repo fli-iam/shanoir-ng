@@ -26,7 +26,7 @@ export class SubjectStudyDTO {
     subject: IdName;
     subjectPreclinical: boolean;
     study: SimpleStudyDTO;
-    subjectStudyIdentifier: string;
+    studyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     subjectStudyTags: SubjectStudyTagDTO[];
@@ -44,7 +44,7 @@ export class SubjectStudyDTO {
             this.subjectPreclinical = false;
         }
         this.study = subjectStudy.study ? new SimpleStudyDTO(subjectStudy.study) : null;
-        this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
+        this.studyIdentifier = subjectStudy.studyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
         this.subjectStudyTags = subjectStudy.tags ? subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag)) : null;

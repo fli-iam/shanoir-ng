@@ -35,7 +35,7 @@ export class Subject extends Entity {
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
-    subjectStudyIdentifier: string;
+    studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
     subjectType: SubjectType;
     physicallyInvolved: boolean;

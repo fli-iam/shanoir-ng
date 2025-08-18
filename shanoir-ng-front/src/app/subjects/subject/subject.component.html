@@ -232,10 +232,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <label>Subject identifier for this study</label>
                     <span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{subject.subjectStudyIdentifier}}
+								{{subject.studyIdentifier}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-									<input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudyIdentifier"
+									<input type="text" id="studyIdentifier" [(ngModel)]="subject.studyIdentifier"
                                            [ngModelOptions]="{standalone: true}"/>
 							</ng-template>
                         </span>

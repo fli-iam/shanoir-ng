@@ -243,7 +243,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
     	let fixedSubjectStudy = new SubjectStudy();
     	fixedSubjectStudy.id = subjectStudy.id;
-    	fixedSubjectStudy.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
+    	fixedSubjectStudy.studyIdentifier = subjectStudy.studyIdentifier;
     	fixedSubjectStudy.subjectType = subjectStudy.subjectType;
     	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
     	fixedSubjectStudy.subject = this.copySubject(subjectStudy.subject);

@@ -79,7 +79,7 @@ export class SubjectDTOService {
         } else {
             entity.subjectStudyList = [];
         }
-        entity.subjectStudyIdentifier = dto.subjectStudyIdentifier;
+        entity.studyIdentifier = dto.studyIdentifier;
         entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
         entity.subjectType = dto.subjectType;
         entity.physicallyInvolved = dto.physicallyInvolved;
@@ -113,7 +113,7 @@ export class SubjectDTO {
     selected: boolean = false;
     subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
-    subjectStudyIdentifier: string;
+    studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
@@ -139,7 +139,7 @@ export class SubjectDTO {
             dto.subject = null;
             return dto;
         }) : null;
-        this.subjectStudyIdentifier = subject.subjectStudyIdentifier;
+        this.studyIdentifier = subject.studyIdentifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;
         this.physicallyInvolved = subject.physicallyInvolved;

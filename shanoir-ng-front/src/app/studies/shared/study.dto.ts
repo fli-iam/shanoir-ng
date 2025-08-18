@@ -218,7 +218,7 @@ export class StudyDTOService {
             subjectStudy.subject.name = subjectStudyDto.subject.name;
             subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
         }
-        subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
+        subjectStudy.studyIdentifier = subjectStudyDto.studyIdentifier;
         subjectStudy.subjectType = subjectStudyDto.subjectType;
         if (subjectStudyDto.tags) {
           subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
