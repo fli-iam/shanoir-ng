@@ -63,6 +63,8 @@ public class SubjectDTO {
 
 	private List<TagDTO> tags;
 
+	private String studyIdentifier;
+
 	/**
 	 * @return the id
 	 */
@@ -227,6 +229,14 @@ public class SubjectDTO {
 
 	public void setSubjectType(SubjectType subjectType) {
 		this.subjectType = subjectType;
+	}
+
+	public String getStudyIdentifier() {
+		return studyIdentifier;
+	}
+
+	public void setStudyIdentifier(String studyIdentifier) {
+		this.studyIdentifier = studyIdentifier;
 	}
 
 }
