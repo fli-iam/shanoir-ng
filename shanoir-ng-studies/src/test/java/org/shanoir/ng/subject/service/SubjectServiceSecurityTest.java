@@ -137,6 +137,7 @@ public class SubjectServiceSecurityTest {
 		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_IMPORT);
 		given(studyRepository.findAllById(Arrays.asList(new Long[]{1L}))).willReturn(studiesMock);
 		given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
+		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock1));
 		assertAccessAuthorized(service::update, subjectMock1);
 		
 		Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
@@ -239,7 +240,7 @@ public class SubjectServiceSecurityTest {
 		given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
 		given(studyUserRepository.findByStudy_Id(13L)).willReturn(studiesMock.get(0).getStudyUserList());
 		newSubjectMock = buildSubjectMock(null);
-		addStudyToMock(newSubjectMock, 13L);
+		addStudyToMock(newSubjectMock, 13L, StudyUserRight.CAN_IMPORT);
 		assertAccessAuthorized(service::create, newSubjectMock);
 	}
 	

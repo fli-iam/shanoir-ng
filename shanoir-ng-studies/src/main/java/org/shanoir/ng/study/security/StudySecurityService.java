@@ -35,6 +35,7 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
@@ -42,6 +43,8 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -66,6 +69,8 @@ public class StudySecurityService {
 
 	@Autowired
 	StudyTagRepository studyTagRepository;
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudySecurityService.class);
 
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -208,10 +213,11 @@ public class StudySecurityService {
 	 * @return true or false
 	 * @throws EntityNotFoundException
 	 */
-	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
+	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) {
 		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
-			throw new EntityNotFoundException("Subject not found with id: " + subjectId);
+			LOG.error("Subject not found with id: " + subjectId);
+			return false;
 		}
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
 		if (subject.getStudy() != null) {
@@ -229,6 +235,10 @@ public class StudySecurityService {
 			}
 		}
 		return false;
+	}
+
+	public boolean hasRightOnSubjectForOneStudy(Subject subject, String rightStr) {
+		return hasRightOnSubjectForOneStudy(subject.getId(), rightStr);
 	}
 
 	/**
