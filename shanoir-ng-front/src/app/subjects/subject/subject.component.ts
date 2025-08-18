@@ -36,6 +36,8 @@ import {StudyLight} from "../../studies/shared/study.dto";
 import {Tag} from "../../tags/tag.model";
 import {SubjectStudy} from "../shared/subject-study.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
+import {SubjectType} from "../shared/subject.types";
+import {isDarkColor} from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',
@@ -113,7 +115,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = []);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
@@ -172,8 +174,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'subjectStudyIdentifier': [this.subject.subjectStudyIdentifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
-            'study': [this.subject.study, [Validators.required]],
-            'subjectType': [this.subject.subjectType, [Validators.required]],
+            'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
+            'subjectType': [this.subject.subjectType, Validators.required],
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
@@ -323,9 +325,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
 
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
+    }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
     }
 
     protected readonly dateDisplay = dateDisplay;

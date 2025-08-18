@@ -95,7 +95,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
             }
             return options;
         }, []);
-        this.tagOptions.sort(this.sortTags);
+        this.tagOptions?.sort(this.sortTags);
     }
 
     private sortTags(o1: Option<Tag>, o2: Option<Tag>): number {

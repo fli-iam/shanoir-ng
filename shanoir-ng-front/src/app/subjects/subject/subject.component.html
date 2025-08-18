@@ -143,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
-							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
+							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual hemispheric dominance</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
 									{{subject.manualHemisphericDominance}}
@@ -155,7 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
-							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
+							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language hemispheric dominance</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
 									{{subject.languageHemisphericDominance}}
@@ -208,21 +208,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</div>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && !forceStudy">
+			<fieldset *ngIf="!forceStudy">
                 <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
-						<label i18n="Subject detail |Study label@@SubjectDetailSubjectImagedObjectCategory">Study</label>
+						<label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.study}}
+							<ng-template [ngSwitchCase]="'create'">
+								<select-box
+                                    formControlName="study"
+                                    [(ngModel)]="selectedStudy"
+                                    [optionArr]="studies"
+                                    (userChange)="onSelectStudy()">
+                                </select-box>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study"
-											[(ngModel)]="selectedStudy"
-											[optionArr]="studies"
-											(userChange)="onSelectStudy()">
-								</select-box>
+                                {{studies[0]?.name}}
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
@@ -242,7 +243,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && forceStudy">
+			<fieldset *ngIf="forceStudy">
 				<ol>
 					<li>
 						<label>Study</label>
@@ -254,11 +255,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ol>
 					<li>
 						<label>Tags</label>
-						<tag-list *ngIf="subject.study?.tags?.length" [(ngModel)]="subject.tags" [availableTags]="subject.study.tags" [ngModelOptions]="{ standalone: true }"></tag-list>
-						<span class="right-col" [ngSwitch]="mode" *ngIf="subject.study?.tags?.length == 0 && subject.study" style="color:grey; font-size:10px">
-							No subject tag available for this study
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								    <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
+                                        {{tag.name}}
+                                    </span>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<tag-list [(ngModel)]="subject.tags" [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
+							</ng-template>
 						</span>
-                        <tag-creator *ngIf="mode == 'view'" [tagsInUse]="subject.study?.tags"></tag-creator>
                     </li>
 				</ol>
 			</fieldset>

@@ -85,7 +85,8 @@ export class SubjectDTOService {
         entity.physicallyInvolved = dto.physicallyInvolved;
         entity.tags = dto.tags;
         entity.qualityTag = dto.qualityTag;
-        entity.study = dto.study;
+        entity.study = new Study();
+        entity.study.id = dto.studyId;
         return entity;
     }
 
@@ -119,6 +120,7 @@ export class SubjectDTO {
     tags: Tag[];
     qualityTag: QualityTag;
     study: Study;
+    studyId: number;
 
     constructor(subject: Subject) {
         this.id = subject.id;
@@ -144,5 +146,6 @@ export class SubjectDTO {
         this.tags = subject.tags;
         this.qualityTag = subject.qualityTag;
         this.study = subject.study;
+        this.studyId = subject.study.id;
     }
 }

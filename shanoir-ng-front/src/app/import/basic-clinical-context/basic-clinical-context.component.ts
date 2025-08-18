@@ -65,7 +65,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
             id: context.subject.id,
             name: context.subject.name,
             identifier: context.subject.identifier,
-            subjectStudyList: [context.subject.subjectStudy],
+            subjectStudyList: [],
             study: context.study
         };
         this.patient.subject = simpleSubject;
@@ -125,7 +125,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.subjectStudyList = [];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
         return newSubject;
