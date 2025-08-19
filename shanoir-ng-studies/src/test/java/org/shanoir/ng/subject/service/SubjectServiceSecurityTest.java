@@ -195,7 +195,7 @@ public class SubjectServiceSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
-		given(studyRepository.findById(1L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
+		given(studyRepository.findById(100L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
 		assertAccessAuthorized(service::findById, 1L);
 		assertAccessAuthorized(service::findByIdWithSubjectStudies, 1L);
 		assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
@@ -271,6 +271,7 @@ public class SubjectServiceSecurityTest {
 	
 	private void addStudyToMock(Subject mock, Long id, StudyUserRight... rights) {
 		Study study = buildStudyMock(id, rights);
+		mock.setStudy(study);
 		
 		SubjectStudy subjectStudy = new SubjectStudy();
 		subjectStudy.setSubject(mock);
