@@ -330,18 +330,21 @@ public class StudySecurityService {
 	 * @return true or false
 	 */
 	public boolean hasRightOnTrustedSubjectForOneStudy(Subject subject, String rightStr) {
-		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		if (subject != null) {
-			if (subject.getStudy() != null) {
-				return hasPrivilegeOnStudyInDatabase(subject.getStudy().getId(), right);
-			// @todo: remove later usage of subject study list
-			} else if (subject.getSubjectStudyList() != null) {
-				for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-					return hasPrivilegeOnStudyInDatabase(subjectStudy.getStudy().getId(), right);
-				}
-			}
+		if (subject == null || rightStr == null) {
+			return false;
 		}
-		return false;
+		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		if (subject.getStudy() != null) {
+			return hasPrivilegeOnStudy(subject.getStudy().getId(), right);
+		}
+		// @todo: remove later usage of subject study list
+		if (subject.getSubjectStudyList() != null) {
+			return subject.getSubjectStudyList().stream()
+					.map(SubjectStudy::getStudy)
+					.map(Study::getId)
+					.allMatch(studyId -> hasPrivilegeOnStudy(studyId, right));
+		}
+	    return false;
 	}
 
 	/**
@@ -352,14 +355,10 @@ public class StudySecurityService {
 	 * @param right
 	 * @return
 	 */
-	private boolean hasPrivilegeOnStudyInDatabase(Long studyId, StudyUserRight right) {
-		Optional<Study> study = studyRepository.findById(studyId);
-		if (study.isPresent()) {
-			if (hasPrivilege(study.get(), right)) {
-				return true;
-			}
-		}
-		return false;
+	private boolean hasPrivilegeOnStudy(Long studyId, StudyUserRight right) {
+		return studyRepository.findById(studyId)
+				.map(study -> hasPrivilege(study, right))
+				.orElse(false);
 	}
 
 	/**
