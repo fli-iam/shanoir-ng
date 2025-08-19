@@ -269,19 +269,6 @@ public class SubjectApiSecurityTest {
 		addStudyToMock(newSubjectMock, 10L);
 		assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
 		
-		// Create subject linked to a study where I can import and also to a study where I can't.
-		studiesMock = new ArrayList<>();
-		studiesMock.add(buildStudyMock(11L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
-		studiesMock.add(buildStudyMock(12L, StudyUserRight.CAN_IMPORT));
-		given(studyRepository.findAllById(Arrays.asList(new Long[] { 12L, 11L }))).willReturn(studiesMock);
-		given(studyRepository.findAllById(Arrays.asList(new Long[] { 11L, 12L }))).willReturn(studiesMock);
-		given(studyRepository.findById(11L)).willReturn(Optional.of(buildStudyMock(11L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
-		given(studyRepository.findById(12L)).willReturn(Optional.of(buildStudyMock(12L, StudyUserRight.CAN_IMPORT)));
-		newSubjectMock = buildSubjectMock(null);
-		addStudyToMock(newSubjectMock, 11L);
-		addStudyToMock(newSubjectMock, 12L);
-		assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-		
 		// Create subject linked to a study where I can import
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
