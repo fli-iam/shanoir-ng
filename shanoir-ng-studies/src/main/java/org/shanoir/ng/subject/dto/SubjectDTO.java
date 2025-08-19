@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
@@ -58,9 +59,11 @@ public class SubjectDTO {
 
 	private boolean physicallyInvolved;
 
-	private Integer subjectType;
+	private SubjectType subjectType;
 
 	private List<TagDTO> tags;
+
+	private String studyIdentifier;
 
 	/**
 	 * @return the id
@@ -220,12 +223,20 @@ public class SubjectDTO {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
-	public Integer getSubjectType() {
+	public SubjectType getSubjectType() {
 		return subjectType;
 	}
 
-	public void setSubjectType(Integer subjectType) {
+	public void setSubjectType(SubjectType subjectType) {
 		this.subjectType = subjectType;
+	}
+
+	public String getStudyIdentifier() {
+		return studyIdentifier;
+	}
+
+	public void setStudyIdentifier(String studyIdentifier) {
+		this.studyIdentifier = studyIdentifier;
 	}
 
 }
