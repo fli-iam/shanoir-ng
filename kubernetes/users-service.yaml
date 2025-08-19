@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: users
+  name: users
+spec:
+  ports:
+    - name: "9901"
+      port: 9901
+      targetPort: 9901
+    - name: "9911"
+      port: 9911
+      targetPort: 9911
+  selector:
+    io.kompose.service: users
