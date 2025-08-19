@@ -1,4 +1,4 @@
-.min-list { max-height: 286px; margin: 5px 0; }
+.min-list { max-height: 286px; margin: 5px 0 0; padding-bottom: 2px; }
 .loader { text-align: center; }
 .remove-selected { cursor: pointer; }
 .selections { margin: 5px 0; transition:height .5s ease-in-out; }
