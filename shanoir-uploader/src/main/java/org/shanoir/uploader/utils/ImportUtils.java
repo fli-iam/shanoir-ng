@@ -360,7 +360,6 @@ public class ImportUtils {
 				return null;
 			}
 			if(addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
-				// create subject with subject-study filled to avoid access denied exception because of rights check
 				Long centerId = equipment.getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
@@ -370,12 +369,6 @@ public class ImportUtils {
 				}
 			}
 		} else {
-			// if rel-subject-study does not exist for existing subject, create one
-			if (addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
-				if (ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubjectStudy(subjectREST) == null) {
-					return null;
-				}
-			} // in case subject is already in study, do nothing
 			logger.info("Subject used on server with ID: " + subjectREST.getId());
 		}
 		return subjectREST;
