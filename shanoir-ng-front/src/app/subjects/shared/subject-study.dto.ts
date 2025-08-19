@@ -45,7 +45,7 @@ export class SubjectStudyDTO {
         }
         this.study = subjectStudy.study ? new SimpleStudyDTO(subjectStudy.study) : null;
         this.studyIdentifier = subjectStudy.studyIdentifier;
-        this.subjectType = subjectStudy.subjectType;
+        this.subjectType = subjectStudy.subject.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
         this.subjectStudyTags = subjectStudy.tags ? subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag)) : null;
         this.qualityTag = subjectStudy.qualityTag;

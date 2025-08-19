@@ -139,7 +139,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
-            && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
             && (!!context.coordinatesSystem || !this.hasPosition)
         );

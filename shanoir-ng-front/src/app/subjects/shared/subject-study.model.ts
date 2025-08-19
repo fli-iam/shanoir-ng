@@ -27,7 +27,6 @@ export class SubjectStudy {
     study: SimpleStudy;
     studyId: number;
     studyIdentifier: string;
-    subjectType: SubjectType;
     physicallyInvolved: boolean;
     tags: Tag[];
     qualityTag: QualityTag;

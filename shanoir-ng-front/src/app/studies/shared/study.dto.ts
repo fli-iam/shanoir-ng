@@ -72,7 +72,7 @@ export class StudyDTOService {
                 entity.name = dto.name;
                 entity.identifier = dto.identifier;
                 entity.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
-                entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
+                entity.subjectStudy = null; // dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
                 result.push(entity);
             }
         }
@@ -217,9 +217,9 @@ export class StudyDTOService {
             subjectStudy.subjectId = subjectStudyDto.subject.id;
             subjectStudy.subject.name = subjectStudyDto.subject.name;
             subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
+            subjectStudy.subject.subjectType = subjectStudyDto.subjectType;
         }
         subjectStudy.studyIdentifier = subjectStudyDto.studyIdentifier;
-        subjectStudy.subjectType = subjectStudyDto.subjectType;
         if (subjectStudyDto.tags) {
           subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
         } else {

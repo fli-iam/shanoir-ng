@@ -48,7 +48,7 @@ export class Subject extends Entity {
         subject.id = id;
         subject.name = name;
         subject.identifier = identifier;
-        subject.subjectStudyList = [subjectStudy];
+        subject.subjectStudyList = null;
         return subject;
     }
 }

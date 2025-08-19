@@ -30,7 +30,7 @@ export class SubjectStudyPipe implements PipeTransform {
             } else {
                 displayedIdentifier = subjectStudy.subject.name;
             }
-            displayedIdentifier += (subjectStudy.subjectType ? ' (' + subjectStudy.subjectType + ')' : '')
+            displayedIdentifier += (subjectStudy.subject.subjectType ? ' (' + subjectStudy.subject.subjectType + ')' : '')
         }
         return displayedIdentifier;
     }

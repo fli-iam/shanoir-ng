@@ -224,6 +224,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         };
     }
 
+    onIdentifierChange() {
+        this.form.get('studyIdentifier').markAsDirty();
+        this.form.get('studyIdentifier').updateValueAndValidity();
+    }
+
     private updateFormControl(formGroup: UntypedFormGroup) {
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {

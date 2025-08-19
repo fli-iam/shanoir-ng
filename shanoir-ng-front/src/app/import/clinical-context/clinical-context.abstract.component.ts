@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, OnDestroy, OnInit } from '@angular/core';
+import {Directive, HostListener, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -455,7 +455,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectSubject(): Promise<any> {
         this.loading++;
         this.examination = null;
-        if (this.subject && !this.subject.subjectStudy) this.subject = null;
+        // if (this.subject && !this.subject.subjectStudy) this.subject = null;
 
         this.examinations = [];
         if (this.subject) {
@@ -591,9 +591,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectWithSubjectStudy.id = subject.id;
         subjectWithSubjectStudy.name = subject.name;
         subjectWithSubjectStudy.identifier = subject.identifier;
-        if(subject.subjectStudyList){
+        // if(subject.subjectStudyList) {
             subjectWithSubjectStudy.subjectStudy = null;
-        }
+        // }
 
         return subjectWithSubjectStudy;
     }
@@ -631,9 +631,16 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             !!context.study
             && !!context.center
             && !!context.acquisitionEquipment
-            && !!context.subject?.subjectStudy?.subjectType
+            && !!context.subject
             && !!context.examination
         );
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            let context = this.getContext();
+            console.log('context', context);
+        }
     }
 
     abstract getNextUrl(): string;
@@ -643,25 +650,39 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     startImportJob(): void {
-        let context = this.importDataService.contextData;
-        this.subjectService
-            .updateSubjectStudyValues(context.subject.subjectStudy)
+        this.importData(this.stepTs)
             .then(() => {
-                let that = this;
-                this.importData(this.stepTs)
-                    .then(() => {
-                        this.importDataService.reset();
-                        setTimeout(() => {
-                            that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
-                        }, 0);
-                        this.router.navigate([this.getNextUrl()]);
-                    }).catch(error => {
-                        throw error;
-                    });
+                this.importDataService.reset();
+                setTimeout(() => {
+                    this.consoleService.log('info', 'Import successfully started for subject "' + this.subject.name + '" in study "' + this.study.name + '"');
+                }, 0);
+                this.router.navigate([this.getNextUrl()]);
             }).catch(error => {
-                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
-            });
+            throw error;
+        });
     }
+
+    // startImportJob(): void {
+    //     let context = this.importDataService.contextData;
+    //     console.log("subject : ", context.subject);
+    //     this.subjectService
+    //         .updateSubjectStudyValues(context.subject.subjectStudy)
+    //         .then(() => {
+    //             let that = this;
+    //             this.importData(this.stepTs)
+    //                 .then(() => {
+    //                     this.importDataService.reset();
+    //                     setTimeout(() => {
+    //                         that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
+    //                     }, 0);
+    //                     this.router.navigate([this.getNextUrl()]);
+    //                 }).catch(error => {
+    //                     throw error;
+    //                 });
+    //         }).catch(error => {
+    //             throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
+    //         });
+    // }
 
     abstract importData(timestamp: number): Promise<any>;
 
