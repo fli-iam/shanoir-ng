@@ -131,7 +131,7 @@ public interface SubjectService {
 	 * @param subject subject to create.
 	 * @return created subject.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	Subject create(Subject subject) throws ShanoirException;
 	
 	/**
@@ -140,7 +140,7 @@ public interface SubjectService {
 	 * @param subject subject to create.
 	 * @return created subject.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
 	
 	/**
@@ -153,7 +153,7 @@ public interface SubjectService {
 	 * @throws ShanoirException
 	 * @throws RestServiceException
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subjectNew.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subjectNew, 'CAN_IMPORT'))")
 	Subject update(Subject subjectNew) throws ShanoirException;
 
 	/**
