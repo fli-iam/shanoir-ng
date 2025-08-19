@@ -78,14 +78,6 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         });
     }
 
-    mapFormToEntity(): ManufacturerModel {
-        this.manufModel.name = this.form.get('name').value;
-        this.manufModel.manufacturer = this.form.get('manufacturer').value;
-        this.manufModel.magneticField = this.form.get('magneticField').value;
-        this.manufModel.datasetModalityType = this.form.get('datasetModalityType').value;
-        return this.manufModel;
-    }
-
     private getMagneticFieldValidators(): ValidatorFn | ValidatorFn[] {
         if (this.isMR) return Validators.required;
         else return;
@@ -109,28 +101,12 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             });
     }
 
-    private getManufById(id: number): Manufacturer {
-        for (let manuf of this.manufs) {
-            if (id == manuf.id) {
-                return manuf;
-            }
-        }
-        return null;
-    }
-
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
     openNewManuf() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer/create']).then(success => {
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    this.entity.manufacturer = entity as Manufacturer;
-                })
-            );
-        });
+        this.navigateToAttributeCreateStep('/manufacturer/create', 'manufacturer');
     }
 
     getUnit(key: string) {

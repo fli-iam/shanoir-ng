@@ -65,11 +65,6 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
 
     }
 
-    mapFormToEntity(): Manufacturer {
-        this.manuf.name = this.form.get('name').value;
-        return this.manuf;
-    }
-
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }

@@ -31,7 +31,7 @@ export class BreadcrumbsService implements OnDestroy {
     private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
-    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
+    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE' | 'FOCUS'}> = new BehaviorSubject({steps: this.steps});
 
     constructor(
         private router: Router,
@@ -98,7 +98,7 @@ export class BreadcrumbsService implements OnDestroy {
         for (let i=index+1; i<this.steps.length; i++) {
             this.steps[i].disabled = true;
         }
-        this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
+        this.onUpdateSteps.next({steps: this.steps, operation: 'FOCUS'});
     }
 
     public nameStep(label: string) {
@@ -176,40 +176,6 @@ export class BreadcrumbsService implements OnDestroy {
         }
         return false;
     }
-
-    // public saveSession() {
-    //     let stepsJSON = [];
-    //     for(let step of this.steps) {
-    //         stepsJSON.push(step.save())
-    //     }
-
-    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({
-    //         steps: stepsJSON,
-    //         popFoundedStepIndex: this.popFoundedStepIndex,
-    //         replace: this.replace,
-    //         currentStepIndex: this.currentStepIndex,
-    //         nextLabel: this.nextLabel,
-    //         nextMilestone: this.nextMilestone }));
-    // }
-
-    // public loadSession() {
-    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
-    //     if(json == null) {
-    //         return;
-    //     }
-    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
-    //     this.replace = json.replace;
-    //     this.currentStepIndex = json.currentStepIndex;
-    //     this.nextLabel = json.nextLabel;
-    //     this.nextMilestone = json.nextMilestone;
-    //     this.steps = [];
-    //     for(let step of json.steps) {
-    //         this.steps.push(Step.load(step));
-    //     }
-
-    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
-    //     this.ignoreNavigationEnd = true;
-    // }
 
     public findImportMode(): ImportMode {
         for (let i=this.currentStepIndex; i>=0; i--) {

@@ -11,37 +11,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Location} from '@angular/common';
+import { Location } from '@angular/common';
 
 import {
+    Directive,
     ElementRef,
     EventEmitter,
     HostListener,
     Input,
     OnChanges,
     OnDestroy,
-    OnInit,
     Output,
     SimpleChanges,
-    ViewChild,
-    Directive
+    ViewChild
 } from '@angular/core';
-import {AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {Subject, Subscription} from 'rxjs';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
-import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
-import {BreadcrumbsService} from '../../../breadcrumbs/breadcrumbs.service';
-import {Router} from '@angular/router';
-import {ServiceLocator} from '../../../utils/locator.service';
-import {KeycloakService} from '../../keycloak/keycloak.service';
-import {ShanoirError} from '../../models/error.model';
-import {ConsoleService} from '../../console/console.service';
-import {FooterState} from '../form-footer/footer-state.model';
-import {Entity, EntityRoutes} from './entity.abstract';
-import {EntityService} from './entity.abstract.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Router } from '@angular/router';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
+import { ServiceLocator } from '../../../utils/locator.service';
+import { ConsoleService } from '../../console/console.service';
+import { KeycloakService } from '../../keycloak/keycloak.service';
+import { ShanoirError } from '../../models/error.model';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { FooterState } from '../form-footer/footer-state.model';
+import { Entity, EntityRoutes } from './entity.abstract';
+import { EntityService } from './entity.abstract.service';
 
 
 export type Mode = "view" | "edit" | "create";
@@ -150,7 +149,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                 if (!isEqual && this.form) {
                     const ctrl = this.form.get(String(prop));
                     if (ctrl) {
-                        ctrl.patchValue(value);
+                        ctrl.setValue(value, {emitEvent: true});
                     }
                 }
                 return true;
@@ -217,6 +216,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                         this.entity = res as T;
                         this.form.updateValueAndValidity();
                         this.manageFormSubscriptions();
+                        this.prefillProperties();
                     });
                 }
             }
@@ -401,7 +401,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
      * Maps the form values to the entity properties.
      * This method should be called after the form is built and before saving the entity.
      */
-    protected mapFormToEntity() {
+    private mapFormToEntity() {
         Object.keys(this.form.controls).forEach((control) => {
             const name = control as keyof T;
             this._entity[name] = this.form.get(control).value;
@@ -451,6 +451,36 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         } else {
             this.goToView(entity.id);
         }
+    }
+
+    /** 
+     * Navigate to a create step for an attribute of the current entity.
+     * This method will wait for the step to be saved and return the created entity.
+     */
+    navigateToAttributeCreateStep(route: string, attributeName: string): Promise<void> {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        return this.router.navigate([route]).then(success => {
+            return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
+                currentStep.addPrefilled(attributeName, savedDependency);
+                // Then it will be used to automatically prefill the entity when going back to the current step.
+                // This has to be done in two methods since 'this' changes when going back, leading to difficulties.
+                // see @this.prefillProperties() method
+            });
+        });
+        
+    }
+
+    /**
+     * Automatically prefill the entity properties with the values stored in the breadcrumbs service.
+     */
+    protected prefillProperties() {
+        Object.keys(this.entity).forEach((key) => {
+            if (this.breadcrumbsService.currentStep.isPrefilled(key)) { // meaning it wont work afterwards
+                this.breadcrumbsService.currentStep.getPrefilledValue(key).then(res => {
+                    this.entity[key] = res;
+                });
+            }
+        });  
     }
 
     delete(): void {

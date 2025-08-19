@@ -107,18 +107,18 @@ export class CoilComponent extends EntityComponent<Coil> {
     buildForm(): UntypedFormGroup {
         let form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
-            'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
+            'manufacturerModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
             'coilType': [this.coil.coilType],
-            'nbChannel': [this.coil.numberOfChannels],
-            'serialNb': [this.coil.serialNumber]
+            'numberOfChannels': [this.coil.numberOfChannels],
+            'serialNumber': [this.coil.serialNumber]
         });
         form.valueChanges.subscribe((newValue: Coil) => {
             if (newValue.center && !this.prefilledManuf) {
-                this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
+                this.form.get('manufacturerModel').enable({onlySelf: true, emitEvent:false});
             }
             else {
-                this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+                this.form.get('manufacturerModel').disable({onlySelf: true, emitEvent:false});
             }
         });
         form.get('center').valueChanges.subscribe((centerId: number) => {
@@ -127,20 +127,11 @@ export class CoilComponent extends EntityComponent<Coil> {
         return form;
     }
 
-    protected mapFormToEntity() {
-        this.coil.name = this.form.get('name').value;
-        this.coil.center = this.form.get('center').value;
-        this.coil.manufacturerModel = this.form.get('acquiEquipModel').value;
-        this.coil.coilType = this.form.get('coilType').value;
-        this.coil.numberOfChannels = this.form.get('nbChannel').value;
-        this.coil.serialNumber = this.form.get('serialNb').value;
-    }
-
     updateManufList(centerId: number): void {
         if (!this.prefilledManuf) {
             const center: Center = this.centers?.find(c => c.id == centerId);
             this.coil.center = center;
-            if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
+            if (this.form) this.form.get('manufacturerModel').markAsUntouched();
             this.manufModels = center?.acquisitionEquipments?.map(acqEq => acqEq.manufacturerModel);
             if (!this.coil.manufacturerModel || !this.manufModels?.find(model => model.id == this.coil.manufacturerModel.id)) {
                 this.coil.manufacturerModel = this.manufModels?.[0];

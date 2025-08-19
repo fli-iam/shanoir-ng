@@ -37,7 +37,6 @@ import { GlobalService } from '../services/global.service';
     selector: 'select-box',
     templateUrl: 'select.component.html',
     styleUrls: ['select.component.css'],
-    //changeDetection: ChangeDetectionStrategy.,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
