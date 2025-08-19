@@ -222,6 +222,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findFirstByIdentifierAndSubjectStudyListStudyIdIn("identifier", List.of(ENTITY_ID))).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
+		given(studyRepository.findById(100L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
 		
