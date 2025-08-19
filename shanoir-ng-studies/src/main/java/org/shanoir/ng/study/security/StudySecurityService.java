@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.core.model.IdName;
@@ -300,12 +301,14 @@ public class StudySecurityService {
 		}
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
 		if (subject.getStudy() != null) {
+			// As the subject is already from the database, study object is valid
 			if (!hasPrivilege(subject.getStudy(), right)) {
 				return false;
 			}
 		// @todo: remove later usage of subject study list
 		} else {
 			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				// As the subject is already from the database, study object is valid
 				if (!hasPrivilege(subjectStudy.getStudy(), right)) {
 					return false;
 				}
@@ -330,16 +333,30 @@ public class StudySecurityService {
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
 		if (subject != null) {
 			if (subject.getStudy() != null) {
-				if (hasPrivilege(subject.getStudy(), right)) {
-					return true;
-				}
+				return hasPrivilegeOnStudyInDatabase(subject.getStudy().getId(), right);
 			// @todo: remove later usage of subject study list
 			} else if (subject.getSubjectStudyList() != null) {
 				for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-					if (hasPrivilege(subjectStudy.getStudy(), right)) {
-						return true;
-					}
+					return hasPrivilegeOnStudyInDatabase(subjectStudy.getStudy().getId(), right);
 				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * For security reasons, we have to go to the database here,
+	 * if not any user can send a json and create a subject.
+	 * 
+	 * @param studyId
+	 * @param right
+	 * @return
+	 */
+	private boolean hasPrivilegeOnStudyInDatabase(Long studyId, StudyUserRight right) {
+		Optional<Study> study = studyRepository.findById(studyId);
+		if (study.isPresent()) {
+			if (hasPrivilege(study.get(), right)) {
+				return true;
 			}
 		}
 		return false;
