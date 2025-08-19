@@ -195,6 +195,7 @@ public class SubjectServiceSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
+		given(studyRepository.findById(1L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
 		assertAccessAuthorized(service::findById, 1L);
 		assertAccessAuthorized(service::findByIdWithSubjectStudies, 1L);
 		assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
@@ -236,8 +237,10 @@ public class SubjectServiceSecurityTest {
 		
 		// Create subject linked to a study where I can import
 		studiesMock = new ArrayList<>();
-		studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
+		Study studyMock = buildStudyMock(13L, StudyUserRight.CAN_IMPORT);
+		studiesMock.add(studyMock);
 		given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
+		given(studyRepository.findById(13L)).willReturn(Optional.of(studyMock));
 		given(studyUserRepository.findByStudy_Id(13L)).willReturn(studiesMock.get(0).getStudyUserList());
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 13L, StudyUserRight.CAN_IMPORT);
