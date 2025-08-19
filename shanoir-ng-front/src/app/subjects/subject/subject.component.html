@@ -228,21 +228,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-                    <li>
-                    <label>Subject identifier for this study</label>
-                    <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.studyIdentifier}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-									<input type="text" id="studyIdentifier" [(ngModel)]="subject.studyIdentifier" [ngModelOptions]="{standalone: true}" (input)="onIdentifierChange()"/>
-							</ng-template>
-                        </span>
-                    </li>
 				</ol>
 				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
 			<fieldset *ngIf="forceStudy">
+                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
 						<label>Study</label>
@@ -250,7 +240,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+            <fieldset>
+                <ol>
+                    <li>
+                        <label>Subject identifier for this study</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                                <ng-template [ngSwitchCase]="'view'">
+                                    {{subject.studyIdentifier}}
+                                </ng-template>
+                                <ng-template ngSwitchDefault>
+                                        <input type="text" id="studyIdentifier" [(ngModel)]="subject.studyIdentifier" [ngModelOptions]="{standalone: true}" (input)="onIdentifierChange()"/>
+                                </ng-template>
+                            </span>
+                    </li>
+                </ol>
 				<ol>
 					<li>
 						<label>Tags</label>

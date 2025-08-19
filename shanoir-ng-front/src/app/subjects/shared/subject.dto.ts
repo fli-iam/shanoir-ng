@@ -23,7 +23,7 @@ import { Subject } from './subject.model';
 import {Sex, SubjectType} from './subject.types';
 import {formatDate} from "@angular/common";
 import {QualityTag} from "../../study-cards/shared/quality-card.model";
-import {Study} from "../../studies/shared/study.model";
+import {SimpleStudy, Study} from "../../studies/shared/study.model";
 
 
 @Injectable()
@@ -85,7 +85,7 @@ export class SubjectDTOService {
         entity.physicallyInvolved = dto.physicallyInvolved;
         entity.tags = dto.tags;
         entity.qualityTag = dto.qualityTag;
-        entity.study = new Study();
+        entity.study = new Study()
         entity.study.id = dto.studyId;
         return entity;
     }
@@ -119,7 +119,7 @@ export class SubjectDTO {
     physicallyInvolved: boolean;
     tags: Tag[];
     qualityTag: QualityTag;
-    study: Study;
+    study: SimpleStudy;
     studyId: number;
 
     constructor(subject: Subject) {
@@ -145,7 +145,6 @@ export class SubjectDTO {
         this.physicallyInvolved = subject.physicallyInvolved;
         this.tags = subject.tags;
         this.qualityTag = subject.qualityTag;
-        this.study = subject.study;
-        this.studyId = subject.study.id;
+        this.study = new SimpleStudy(subject.study);
     }
 }

@@ -206,7 +206,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;

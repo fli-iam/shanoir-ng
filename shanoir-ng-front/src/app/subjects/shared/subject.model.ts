@@ -18,7 +18,7 @@ import { SubjectStudy } from './subject-study.model';
 import {Sex, SubjectType} from './subject.types';
 import {Tag} from "../../tags/tag.model";
 import {QualityTag} from "../../study-cards/shared/quality-card.model";
-import {Study} from "../../studies/shared/study.model";
+import {SimpleStudy, Study} from "../../studies/shared/study.model";
 
 
 export class Subject extends Entity {
@@ -43,20 +43,29 @@ export class Subject extends Entity {
     qualityTag: QualityTag;
     study: Study;
 
-    public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
+    public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
         let subject = new Subject();
         subject.id = id;
         subject.name = name;
         subject.identifier = identifier;
-        subject.subjectStudyList = null;
+        subject.study = new Study()
+        subject.study.id = study.id;
         return subject;
     }
 }
 
-export interface SimpleSubject {
+export class SimpleSubject {
     id: number;
     name: string;
     identifier: string;
     subjectStudyList: SubjectStudy[];
-    study: Study;
+    study: SimpleStudy;
+
+    constructor(subject: Subject) {
+        this.id = subject.id ? subject.id : null;
+        this.name = subject.name;
+        this.identifier = subject.studyIdentifier;
+        this.subjectStudyList = null;
+        this.study = subject.study;
+    }
 }

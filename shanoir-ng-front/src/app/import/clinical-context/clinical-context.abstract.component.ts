@@ -38,12 +38,9 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
-import {SubjectStudy} from "../../subjects/shared/subject-study.model";
-import {ImagedObjectCategory} from "../../subjects/shared/imaged-object-category.enum";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -53,13 +50,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public centerOptions: Option<Center>[] = [];
     private allCenters: Center[];
     public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
-    public subjects: SubjectWithSubjectStudy[] = [];
+    public subjects: Subject[] = [];
     public examinations: SubjectExamination[] = [];
     public study: Study;
     public studycard: StudyCard;
     public center: Center;
     public acquisitionEquipment: AcquisitionEquipment;
-    public subject: SubjectWithSubjectStudy;
+    public subject: Subject;
     public examination: SubjectExamination;
     public subjectNamePrefix: string;
     protected subscriptions: Subscription[] = [];
@@ -328,7 +325,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
-    protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
+    protected getSubjectList(studyId: number): Promise<Subject[]> {
         this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
@@ -558,7 +555,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    console.log("entity : ", entity);
 
                     let sub: Subject;
                     if (entity instanceof Subject) {
@@ -566,7 +562,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                     } else if (entity instanceof PreclinicalSubject) {
                         sub = entity.subject;
                     }
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
+                    this.importDataService.contextBackup(this.stepTs).subject = sub;
                 })
             );
         })
@@ -585,18 +581,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
-        if (!subject) return;
-        let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
-        subjectWithSubjectStudy.id = subject.id;
-        subjectWithSubjectStudy.name = subject.name;
-        subjectWithSubjectStudy.identifier = subject.identifier;
-        // if(subject.subjectStudyList) {
-            subjectWithSubjectStudy.subjectStudy = null;
-        // }
 
-        return subjectWithSubjectStudy;
-    }
 
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
@@ -661,28 +646,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             throw error;
         });
     }
-
-    // startImportJob(): void {
-    //     let context = this.importDataService.contextData;
-    //     console.log("subject : ", context.subject);
-    //     this.subjectService
-    //         .updateSubjectStudyValues(context.subject.subjectStudy)
-    //         .then(() => {
-    //             let that = this;
-    //             this.importData(this.stepTs)
-    //                 .then(() => {
-    //                     this.importDataService.reset();
-    //                     setTimeout(() => {
-    //                         that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
-    //                     }, 0);
-    //                     this.router.navigate([this.getNextUrl()]);
-    //                 }).catch(error => {
-    //                     throw error;
-    //                 });
-    //         }).catch(error => {
-    //             throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
-    //         });
-    // }
 
     abstract importData(timestamp: number): Promise<any>;
 
