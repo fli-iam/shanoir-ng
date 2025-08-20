@@ -1,5 +1,6 @@
 package org.shanoir.ng.key.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -7,6 +8,7 @@ import jakarta.persistence.Id;
 public class KeyValue {
 
     @Id
+    @Column(name = "kv_key")
     private String key;
 
     private String value;

@@ -56,6 +56,7 @@ public class ReadyState implements State {
 				ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
+				throw new IOException("Mode pseudonymus requires Pseudonymizer.");
 			}	
 		}
 		MainWindow frame = initJFrame();
