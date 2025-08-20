@@ -868,8 +868,7 @@ public class ShanoirUploaderServiceClient {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLKeysFindValue + key)) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
-				String value = Util.getMappedObject(response, String.class);
-				return value;
+				return EntityUtils.toString(response.getEntity());
 			} else {
 				logger.error("Could not get value from server (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				return null;
