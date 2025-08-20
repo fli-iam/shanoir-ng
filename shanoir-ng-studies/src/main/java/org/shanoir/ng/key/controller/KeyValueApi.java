@@ -13,8 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "key", description = "the key value API")
-@RequestMapping("/key")
+@Tag(name = "keys", description = "the key value API")
+@RequestMapping("/keys")
 public interface KeyValueApi {
 
     @Operation(
