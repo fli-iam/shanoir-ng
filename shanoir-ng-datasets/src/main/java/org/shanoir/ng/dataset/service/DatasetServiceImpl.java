@@ -409,10 +409,6 @@ public class DatasetServiceImpl implements DatasetService {
 		return Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
 	}
 
-	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-        return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
-	}
-
 	@Override
 	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
         return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
