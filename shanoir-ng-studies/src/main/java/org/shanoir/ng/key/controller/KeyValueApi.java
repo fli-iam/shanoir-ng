@@ -27,7 +27,7 @@ public interface KeyValueApi {
             description = "Value found",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(type = "string", example = "abc123hash")
+                schema = @Schema(type = "string", example = "hash")
             )
             ),
         @ApiResponse(responseCode = "204", description = "No value found for the key"),
