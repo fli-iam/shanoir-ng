@@ -57,6 +57,9 @@ public class Pseudonymizer {
 
 	public Pseudonymizer(final String pseudonymusKey, final String pseudonymusFolderPath) throws PseudonymusException {
 		logger.info("Pseudonymizer: initialization started.");
+		if (pseudonymusKey == null) {
+			throw new PseudonymusException("Pseudonymus key is null.");
+		}
 		this.pseudonymusKey = pseudonymusKey;
 		final File pseudonymusFolder = new File(pseudonymusFolderPath);
 		if (!pseudonymusFolder.exists()) {

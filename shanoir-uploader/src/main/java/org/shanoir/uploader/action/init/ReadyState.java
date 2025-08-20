@@ -51,8 +51,8 @@ public class ReadyState implements State {
 		if (ShUpConfig.isModePseudonymus()) {
 			File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 			try {
-				String pseudonymusKeyValue = ShUpOnloadConfig.getShanoirUploaderServiceClient().findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
-				Pseudonymizer pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
+				String pseudonymusKey = ShUpOnloadConfig.getShanoirUploaderServiceClient().findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+				Pseudonymizer pseudonymizer = new Pseudonymizer(pseudonymusKey, pseudonymusFolder.getAbsolutePath());
 				ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
