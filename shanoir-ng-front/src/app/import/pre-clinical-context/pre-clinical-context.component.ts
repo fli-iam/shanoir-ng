@@ -72,7 +72,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let contextImportJob = this.importDataService.archiveUploaded;
         let importJob = new ImportJob();
         importJob.patients = new Array<PatientDicom>();
-        // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
         this.patient.subject = Subject.makeSubject(
                 context.subject.id,
                 context.subject.name,
@@ -141,6 +140,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
+        newSubject.preclinical = true;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;

@@ -232,12 +232,23 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.studyService.getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-                this.updateStudiesList();
+                // this.updateStudiesList();
             })
             .catch((error) => {
                 // TODO: display error
                 console.error("error getting study list!");
         });
+    }
+
+    public onSelectStudy() {
+        console.log("this.preclinicalSubject.animalSubject.study : ", this.preclinicalSubject.animalSubject.study);
+        console.log("this.preclinicalSubject.subject.study : ", this.preclinicalSubject.subject.study);
+        this.preclinicalSubject.animalSubject.study = this.preclinicalSubject.subject.study.id;
+        // this.studyService.get(this.preclinicalSubject.animalSubject.studyId).then( res => {
+        //     this.preclinicalSubject.animalSubject.study = res;
+        //     console.log("study : ", this.preclinicalSubject.animalSubject.study);
+        // });
+
     }
 
     copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
@@ -294,6 +305,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'sex': [this.preclinicalSubject.subject.sex, animal ? [Validators.required] : []],
             'therapies': [this.preclinicalSubject.therapies],
             'pathologies': [this.preclinicalSubject.pathologies],
+            'study': [this.preclinicalSubject.subject.study, animal ? [Validators.required] : []],
             'subjectStudyList': []
         });
         this.subscriptions.push(
@@ -356,7 +368,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.catchSavingErrors(reason);
                 return null;
             });
-        }else{
+        } else {
             return this.addSubject().then(subject => {
                 if (subject == null) {
                     return;
@@ -528,32 +540,32 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return hex;
     }
 
-    ngDoCheck() {
-        const change = this.differ.diff(this);
-        if (change) {
-          change.forEachChangedItem(item => {
-            if (item.key=="entity") {
-                this.updateStudiesList();
-            }
-          });
-        }
-    }
-
-    updateStudiesList(){
-        if (this.preclinicalSubject && this.preclinicalSubject.subject
-            && this.preclinicalSubject.subject.subjectStudyList
-            && this.preclinicalSubject.subject.subjectStudyList.length > 0){
-            for(let st of this.preclinicalSubject.subject.subjectStudyList){
-                if (this.studies && this.studies.length > 0){
-                    for (let s of this.studies){
-                        if (s.id ==st.study.id){
-                            s.selected = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // ngDoCheck() {
+    //     const change = this.differ.diff(this);
+    //     if (change) {
+    //       change.forEachChangedItem(item => {
+    //         if (item.key=="entity") {
+    //             this.updateStudiesList();
+    //         }
+    //       });
+    //     }
+    // }
+    //
+    // updateStudiesList(){
+    //     if (this.preclinicalSubject && this.preclinicalSubject.subject
+    //         && this.preclinicalSubject.subject.subjectStudyList
+    //         && this.preclinicalSubject.subject.subjectStudyList.length > 0){
+    //         for(let st of this.preclinicalSubject.subject.subjectStudyList){
+    //             if (this.studies && this.studies.length > 0){
+    //                 for (let s of this.studies){
+    //                     if (s.id ==st.study.id){
+    //                         s.selected = true;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     public validateForm(eventName: string) {
         if (["create", "delete"].indexOf(eventName) != -1) {
