@@ -23,6 +23,8 @@ public class SubjectDto {
     @JsonProperty("name")
     private String name;
 
+    private String identifier;
+
     @JsonProperty("birthDate")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -147,6 +149,14 @@ public class SubjectDto {
 
     public void setTags(List<TagDto> tags) {
         this.tags = tags;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
 }
