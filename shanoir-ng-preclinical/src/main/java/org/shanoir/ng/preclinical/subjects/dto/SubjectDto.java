@@ -3,14 +3,16 @@ package org.shanoir.ng.preclinical.subjects.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubjectDto {
@@ -39,7 +41,7 @@ public class SubjectDto {
     @JsonProperty("preclinical")
     private boolean preclinical;
 
-    private Long studyId;
+    private IdName study;
 
     private boolean physicallyInvolved;
 
@@ -115,12 +117,12 @@ public class SubjectDto {
         this.preclinical = preclinical;
     }
 
-    public Long getStudyId() {
-        return studyId;
+    public IdName getStudy() {
+        return study;
     }
 
-    public void setStudyId(Long studyId) {
-        this.studyId = studyId;
+    public void setStudy(IdName study) {
+        this.study = study;
     }
 
     public boolean isPhysicallyInvolved() {
