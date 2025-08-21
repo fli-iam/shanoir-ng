@@ -10,10 +10,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
-@JsonIgnoreProperties(
-        ignoreUnknown = true
-)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SubjectDto {
 
     @JsonProperty("id")
@@ -39,6 +38,14 @@ public class SubjectDto {
 
     @JsonProperty("preclinical")
     private boolean preclinical;
+
+    private Long studyId;
+
+    private boolean physicallyInvolved;
+
+    private SubjectType subjectType;
+
+    private List<TagDto> tags;
 
     public Long getId() {
         return id;
@@ -107,4 +114,37 @@ public class SubjectDto {
     public void setPreclinical(boolean preclinical) {
         this.preclinical = preclinical;
     }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
+
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
+
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public List<TagDto> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagDto> tags) {
+        this.tags = tags;
+    }
+
 }
