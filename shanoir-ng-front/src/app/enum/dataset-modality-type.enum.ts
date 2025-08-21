@@ -34,7 +34,8 @@ export enum DatasetModalityType {
     }
 
     export function getLabel(type: DatasetModalityType): string {
-        return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
+        if (type === undefined || type === null) return null;
+        else return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
     }
 
     export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));

@@ -199,7 +199,7 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: { field: string, value: SuperPromise<any>}[] = [];
 
-    private resolvedPrefilledValues: { [field: string]: any } = {};
+    private resolvedPrefilledData: { [field: string]: {value: any, readonly?: boolean} } = {};
 
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
@@ -208,6 +208,8 @@ export class Step {
     public data: any = {};
     public importStart: boolean = false;
     public importMode: ImportMode;
+
+    public uniqueId: number = Math.floor(Math.random() * 1000000);
 
     private onSave(): Subject<any> {
         this.subscribers++;
@@ -241,35 +243,39 @@ export class Step {
         return this.prefilled.filter(obj => obj.field == field).length > 0;
     }
 
-    public addPrefilled(field: string, value: any) {
+    public addPrefilled(field: string, value: any, readOnly: boolean = false) {
         const found = this.prefilled.find(obj => obj.field === field);
-
         if (found) {
-            this.resolvedPrefilledValues[field] = value;
-            return found.value.resolve(value);
+            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
+            found.value.resolve(value);
         } else {
-            const superPro = new SuperPromise();
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
             this.prefilled.push({ field, value: superPro });
-            this.resolvedPrefilledValues[field] = value;
+            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
             superPro.resolve(value);
-            return superPro;
         }
     }
 
-    public async getPrefilledValue(field: string): Promise<any> {
+    public getPrefilled(field: string): Promise<{value: any, readonly?: boolean}> {
         const found = this.prefilled.find(obj => obj.field === field);
-
         if (found) {
             return SuperPromise.timeoutPromise().then(() => {
-                return this.resolvedPrefilledValues[field];
+                return this.resolvedPrefilledData[field];
             });
         } else {
-            const superPro = new SuperPromise();
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
             this.prefilled.push({ field, value: superPro });
             return superPro;
         }
     }
 
+    public getPrefilledKeys(): string[] {
+        return Object.entries(this.resolvedPrefilledData).map(([key, value]) => key);
+    }
+
+    getPrefilledValue(field: string): Promise<any> {
+        return this.getPrefilled(field).then(res => res.value);
+    }
 
     public resetWait() {
         this.waitStep = null;

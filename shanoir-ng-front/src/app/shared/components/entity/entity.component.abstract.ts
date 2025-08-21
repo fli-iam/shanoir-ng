@@ -127,35 +127,43 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     public set entity(entity: T) {
-        this._entity = new Proxy(entity, {
-            get: (target, prop, receiver) => {
-                return Reflect.get(target, prop, receiver);
-            },
-            set: (target, prop, value, receiver) => {
-                const oldValue = Reflect.get(target, prop, receiver);
-                let isEqual = oldValue === value;
-                // Deal with non primitives properties
-                if (!isEqual
-                        && value && typeof value === 'object'
-                        && Object.prototype.hasOwnProperty.call(value, 'id')
-                        && oldValue && typeof oldValue === 'object') {
-                    const oldId = (oldValue as any)['id'];
-                    const newId = (value as any)['id'];
-                    isEqual = oldId === newId;
-                }
-                const ok = Reflect.set(target, prop, value, receiver);
-                if (!ok) return false;
-                // Sync form
-                if (!isEqual && this.form) {
-                    const ctrl = this.form.get(String(prop));
-                    if (ctrl) {
-                        ctrl.setValue(value, {emitEvent: true});
+        if (!EntityComponent.isProxy(entity)) {
+            this._entity = new Proxy(entity, {
+                get: (target, prop, receiver) => {
+                    if (prop === 'IS_PROXY') return true;
+                    return Reflect.get(target, prop, receiver);
+                },
+                set: (target, prop, value, receiver) => {
+                    const oldValue = Reflect.get(target, prop, receiver);
+                    let isEqual = oldValue === value;
+                    // Deal with non primitives properties
+                    if (!isEqual
+                            && value && typeof value === 'object'
+                            && Object.prototype.hasOwnProperty.call(value, 'id')
+                            && oldValue && typeof oldValue === 'object') {
+                        const oldId = (oldValue as any)['id'];
+                        const newId = (value as any)['id'];
+                        isEqual = oldId === newId;
                     }
+                    const ok = Reflect.set(target, prop, value, receiver);
+                    if (!ok) return false;
+                    // Sync form
+                    if (!isEqual && this.form) {
+                        const ctrl = this.form.get(String(prop));
+                        if (ctrl) {
+                            ctrl.setValue(value, {emitEvent: true});
+                        }
+                    }
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+        }
+        this.mapEntityToForm();
         if (entity) this.entityPromise.resolve(entity);
+    }
+
+    static isProxy(entity: any): boolean {
+        return entity && entity['IS_PROXY'] === true;
     }
 
     public get activeTab(): string {
@@ -208,14 +216,11 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.footerState.backButton = this.isMainComponent;
             this.hasEditRight().then(right => this.footerState.canEdit = right);
             this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-
             this.manageFormSubscriptions();
             if ((this.mode == 'create' || this.mode == 'edit')) {
                 if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
-                        this.entity = res as T;
-                        this.form.updateValueAndValidity();
-                        this.manageFormSubscriptions();
+                        this.mapEntityToEntity(res)
                         this.prefillProperties();
                     });
                 }
@@ -256,14 +261,24 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                     this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
                     this.footerState.dirty = this.form.dirty;
                 }),
-                this.form.valueChanges.subscribe(() => {
-                    this.mapFormToEntity();
-                })
             );
+            this.subscribeEntityPropsUpdatesFromForm();
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
             this.footerState.valid = false;
         }
+    }
+
+    private subscribeEntityPropsUpdatesFromForm() {
+        Object.keys(this.form.controls).forEach(key => {
+            const control = this.form.get(key);
+            let sub: Subscription = control.valueChanges.subscribe(value => {
+                if (this.entity && this.entity[key] !== value && !Entity.equals(this.entity?.[key], value)) {
+                    this.entity[key] = value;
+                }
+            });
+            this.subscriptions.push(sub);
+        });
     }
 
     private addBCStep() {
@@ -408,6 +423,34 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         });
     };
 
+    private mapEntityToForm() {
+        if (this.form && this.entity) {
+            Object.keys(this.form.controls).forEach((control) => {
+                const name = control as keyof T;
+                if (this.entity[name] !== undefined) {
+                    this.form.get(control).setValue(this.entity[name], {emitEvent: false});
+                } else {
+                    this.form.get(control).setValue(null, {emitEvent: false});
+                }
+            });
+        }
+    }
+
+    private mapEntityToEntity(entity: T) {
+        if (this.entity && entity) {
+            Object.keys(entity).forEach((key) => {
+                this.entity[key] = null;
+            });
+            Object.keys(entity).forEach((key) => {
+                if (entity[key] !== undefined) {
+                    this.entity[key] = entity[key];
+                } else {
+                    this.entity[key] = null;
+                }
+            });
+        }
+    }
+
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
@@ -461,7 +504,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         let currentStep: Step = this.breadcrumbsService.currentStep;
         return this.router.navigate([route]).then(success => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
-                currentStep.addPrefilled(attributeName, savedDependency);
+                currentStep.addPrefilled('entity.' + attributeName, savedDependency);
                 // Then it will be used to automatically prefill the entity when going back to the current step.
                 // This has to be done in two methods since 'this' changes when going back, leading to difficulties.
                 // see @this.prefillProperties() method
@@ -474,13 +517,17 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
      * Automatically prefill the entity properties with the values stored in the breadcrumbs service.
      */
     protected prefillProperties() {
-        Object.keys(this.entity).forEach((key) => {
-            if (this.breadcrumbsService.currentStep.isPrefilled(key)) { // meaning it wont work afterwards
-                this.breadcrumbsService.currentStep.getPrefilledValue(key).then(res => {
-                    this.entity[key] = res;
+        const initializedProps = Object.keys(this.entity);
+        this.breadcrumbsService.currentStep.getPrefilledKeys().forEach(key => {
+            if (key.startsWith('entity.')) {
+                const propKey = key.substring(7); // remove 'entity.' prefix
+                const propValue = this.breadcrumbsService.currentStep.getPrefilled(key).then(res => {
+                    if (res?.value === undefined || res?.value === null) return;
+                    this.entity[propKey] = res.value;
+                    if (res.readonly) this.form.get(propKey).disable({emitEvent: false});
                 });
-            }
-        });  
+            } 
+        });
     }
 
     delete(): void {
@@ -558,7 +605,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     ngOnDestroy() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
-
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
