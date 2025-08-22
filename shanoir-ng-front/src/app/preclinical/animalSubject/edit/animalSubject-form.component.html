@@ -189,12 +189,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                     <label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
                     <span class="right-col">
-                        <select-box
-                            formControlName="study"
-                            [(ngModel)]="selectedStudy"
-                            [optionArr]="studies"
-                            (userChange)="onSelectStudy()">
-                        </select-box>
+						<span class="right-col">{{preclinicalSubject.subject.study.name}}</span>
                     </span>
                 </li>
 			</fieldset>

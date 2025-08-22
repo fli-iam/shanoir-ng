@@ -139,6 +139,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
         newSubject.preclinical = true;
+        newSubject.study = this.study;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;

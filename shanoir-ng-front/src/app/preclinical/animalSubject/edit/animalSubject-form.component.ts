@@ -134,20 +134,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return Selection.fromPreclinicalSubject(this.entity);
     }
 
-    // private addToCache(key: string, toBeCached: any) {
-    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))	{
-    //         this.breadcrumbsService.currentStep.addPrefilled(key, []);
-    //     }
-    //     this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
-    // }
-
-    // private getCache(key: string) {
-    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
-    //        this.breadcrumbsService.currentStep.addPrefilled(key, []);
-    //     }
-    //     return this.breadcrumbsService.currentStep.getPrefilledValue(key);
-    // }
-
     protected fetchEntity: () => Promise<PreclinicalSubject> = () => {
         return this.idPromise.then(id => {
             return this.getService().get(id).then(ps => {
@@ -247,22 +233,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
     }
 
-    public onSelectStudy() {
-        console.log("this.preclinicalSubject.animalSubject.study : ", this.preclinicalSubject.animalSubject.study);
-        console.log("this.preclinicalSubject.subject.study : ", this.preclinicalSubject.subject.study);
-
-        this.studyService.get(this.selectedStudy?.id).then( study => {
-            this.preclinicalSubject.subject.study = study;
-            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
-                this.preclinicalSubject.subject.study.tags = tags ? tags : [];
-            })
-        });
-        // this.studyService.get(this.preclinicalSubject.animalSubject.studyId).then( res => {
-        //     this.preclinicalSubject.animalSubject.study = res;
-        //     console.log("study : ", this.preclinicalSubject.animalSubject.study);
-        // });
-
-    }
 
     copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
     	let fixedSubjectStudy = new SubjectStudy();
