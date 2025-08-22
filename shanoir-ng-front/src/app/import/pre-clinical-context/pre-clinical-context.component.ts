@@ -22,7 +22,7 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { Subject } from '../../subjects/shared/subject.model';
+import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
@@ -72,11 +72,9 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let contextImportJob = this.importDataService.archiveUploaded;
         let importJob = new ImportJob();
         importJob.patients = new Array<PatientDicom>();
-        this.patient.subject = Subject.makeSubject(
-                context.subject.id,
-                context.subject.name,
-                context.subject.identifier,
-                context.study);
+
+        this.patient.subject = new SimpleSubject(context.subject);
+
         importJob.patients.push(this.patient);
         importJob.workFolder = contextImportJob.workFolder;
         importJob.fromDicomZip = true;

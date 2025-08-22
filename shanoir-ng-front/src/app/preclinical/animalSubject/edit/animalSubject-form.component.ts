@@ -21,7 +21,7 @@ import { EntityComponent } from '../../../shared/components/entity/entity.compon
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
-import { Study } from '../../../studies/shared/study.model';
+import {SimpleStudy, Study} from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
@@ -48,6 +48,7 @@ import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import {isDarkColor} from "../../../utils/app.utils";
 
 
 @Component({
@@ -83,7 +84,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     private subjectStudyList: SubjectStudy[] = [];
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
-    private selectedStudy : IdName;
+    selectedStudy : IdName;
     differ: KeyValueDiffer<string, any>;
 
     catOptions: Option<ImagedObjectCategory>[] = [
@@ -96,6 +97,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     genderOptions: Option<string>[] = [
         new Option<string>('F', 'Female'),
         new Option<string>('M', 'Male'),
+    ];
+
+    subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
     ];
 
     constructor(private route: ActivatedRoute,
@@ -243,7 +250,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     public onSelectStudy() {
         console.log("this.preclinicalSubject.animalSubject.study : ", this.preclinicalSubject.animalSubject.study);
         console.log("this.preclinicalSubject.subject.study : ", this.preclinicalSubject.subject.study);
-        this.preclinicalSubject.animalSubject.study = this.preclinicalSubject.subject.study.id;
+
+        this.studyService.get(this.selectedStudy?.id).then( study => {
+            this.preclinicalSubject.subject.study = study;
+            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
+                this.preclinicalSubject.subject.study.tags = tags ? tags : [];
+            })
+        });
         // this.studyService.get(this.preclinicalSubject.animalSubject.studyId).then( res => {
         //     this.preclinicalSubject.animalSubject.study = res;
         //     console.log("study : ", this.preclinicalSubject.animalSubject.study);
@@ -306,7 +319,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'therapies': [this.preclinicalSubject.therapies],
             'pathologies': [this.preclinicalSubject.pathologies],
             'study': [this.preclinicalSubject.subject.study, animal ? [Validators.required] : []],
-            'subjectStudyList': []
+            'subjectStudyList': [],
+            'studyIdentifier': [this.preclinicalSubject.subject.studyIdentifier],
+            'physicallyInvolved': [this.preclinicalSubject.subject.physicallyInvolved],
+            'tags': [this.preclinicalSubject.subject.tags],
+            'subjectType': [this.preclinicalSubject.subject.subjectType, Validators.required],
         });
         this.subscriptions.push(
             subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
@@ -369,6 +386,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 return null;
             });
         } else {
+            this.preclinicalSubject.subject = { ...this.preclinicalSubject.subject, study: { id: this.preclinicalSubject.subject.study.id } as Study };
             return this.addSubject().then(subject => {
                 if (subject == null) {
                     return;
@@ -429,7 +447,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             return;
         }
 
-        this.generateSubjectIdentifier();
         this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
             .then(subject => {
@@ -540,33 +557,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return hex;
     }
 
-    // ngDoCheck() {
-    //     const change = this.differ.diff(this);
-    //     if (change) {
-    //       change.forEachChangedItem(item => {
-    //         if (item.key=="entity") {
-    //             this.updateStudiesList();
-    //         }
-    //       });
-    //     }
-    // }
-    //
-    // updateStudiesList(){
-    //     if (this.preclinicalSubject && this.preclinicalSubject.subject
-    //         && this.preclinicalSubject.subject.subjectStudyList
-    //         && this.preclinicalSubject.subject.subjectStudyList.length > 0){
-    //         for(let st of this.preclinicalSubject.subject.subjectStudyList){
-    //             if (this.studies && this.studies.length > 0){
-    //                 for (let s of this.studies){
-    //                     if (s.id ==st.study.id){
-    //                         s.selected = true;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
     public validateForm(eventName: string) {
         if (["create", "delete"].indexOf(eventName) != -1) {
            this.form.get("therapies").updateValueAndValidity({onlySelf: false, emitEvent: true});
@@ -590,5 +580,14 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     download() {
         // TODO : select study
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.preclinicalSubject.subject.id, this.downloadState);
+    }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
+    }
+
+    onIdentifierChange() {
+        this.form.get('studyIdentifier').markAsDirty();
+        this.form.get('studyIdentifier').updateValueAndValidity();
     }
 }

@@ -241,17 +241,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
             <fieldset>
-                <ol>
+                <ol *ngIf="subject.studyIdentifier != null">
                     <li>
                         <label>Subject identifier for this study</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                                <ng-template [ngSwitchCase]="'view'">
-                                    {{subject.studyIdentifier}}
-                                </ng-template>
-                                <ng-template ngSwitchDefault>
-                                        <input type="text" id="studyIdentifier" [(ngModel)]="subject.studyIdentifier" [ngModelOptions]="{standalone: true}" (input)="onIdentifierChange()"/>
-                                </ng-template>
-                            </span>
+                        <span class="right-col">
+                            {{subject.studyIdentifier}}
+                        </span>
                     </li>
                 </ol>
 				<ol>
