@@ -129,3 +129,13 @@ JOIN studies.subject old_sub ON e.subject_id = old_sub.id
 JOIN studies.subject new_sub ON old_sub.name = new_sub.name AND e.study_id = new_sub.study_id
     AND old_sub.id <> new_sub.id
 SET e.subject_id = new_sub.id;
+
+# Add new subjects from ms studies to ms datasets
+# tested: all good
+INSERT INTO datasets.subject
+  (id, name)
+SELECT s.id, s.name
+FROM subject s
+  LEFT JOIN datasets.subject ds ON s.id = ds.id
+WHERE ds.id IS NULL;
+
