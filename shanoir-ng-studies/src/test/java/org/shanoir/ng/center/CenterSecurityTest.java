@@ -93,7 +93,7 @@ public class CenterSecurityTest {
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findIdsAndNames);
 		assertAccessAuthorized(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
+		assertAccessAuthorized(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 		assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
 	}
