@@ -413,7 +413,7 @@ public class ImportUtils {
 					return null;
 				}
 			} // in case subject is already in study, do nothing
-			logger.info("Subject used on server with ID: " + subjectREST.getId());
+			logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
 		}
 		return subjectREST;
 	}
