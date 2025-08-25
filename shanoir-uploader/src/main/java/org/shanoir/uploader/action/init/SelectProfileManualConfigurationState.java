@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 public class SelectProfileManualConfigurationState  implements State {
 
 	@Autowired
-	private AuthenticationConfigurationState authenticationConfigurationState;
+	private ProxyConfigurationState proxyConfigurationState;
 
 	public void load(StartupStateContext context) {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
 		shUpStartupDialog.showSelectProfileForm();
-		context.setState(authenticationConfigurationState);
+		context.setState(proxyConfigurationState);
 	}
 
 }

@@ -47,23 +47,19 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.studyUserList"})
 	Iterable<Subject> findAllById(Iterable<Long> ids);
 	
-	/**
-	 * Find subject by name.
-	 *
-	 * @param name
-	 *            
-	 * @return a Subject.
-	 */
-	Subject findByName(String name);
+	List<Subject> findByName(String name);
+
+	Subject findByStudyIdAndName(Long studyId, String name);
 
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
 	Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
 	
-	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
 	
 	Page<Subject> findByNameContaining(String name, Pageable pageable);
 	
+	@EntityGraph(attributePaths = {"tags"})
 	Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 	
 	/**

@@ -14,13 +14,20 @@
 
 package org.shanoir.ng.dataset.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -30,7 +37,6 @@ import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -62,6 +68,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -71,7 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.shanoir.ng.dataset.dto.DatasetLight;
+import jakarta.transaction.Transactional;
 
 /**
  * Dataset service implementation.
@@ -231,6 +239,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<DatasetLight> findLightByStudyId(Long studyId) {
+		return Utils.toList(repository.findAllLightByStudyId(studyId));
+	}
+
+	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
 		Long studyId;
@@ -255,7 +268,12 @@ public class DatasetServiceImpl implements DatasetService {
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		try {
-			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			Long studyId;
+			if (ds.getDatasetProcessing() == null) {
+				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			} else {
+				studyId = ds.getStudyId();
+			}
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
@@ -287,11 +305,6 @@ public class DatasetServiceImpl implements DatasetService {
 			((MrDataset) datasetDb).setUpdatedMrMetadata(mrDataset.getUpdatedMrMetadata());
 		}
 		return datasetDb;
-	}
-
-	@Override
-	public List<Dataset> findAll() {
-		return Utils.toList(repository.findAll());
 	}
 
 	@Override
@@ -396,6 +409,7 @@ public class DatasetServiceImpl implements DatasetService {
 		return Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
 	}
 
+	@Override
 	public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
         return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
 	}
@@ -454,22 +468,22 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @return
 	 */
 	@Override
-	public Long getStudyId(Dataset dataset){
+	public Long getStudyId(Dataset dataset) {
 		if (dataset.getStudyId() != null) {
 			return dataset.getStudyId();
 		}
 		if (dataset.getDatasetProcessing() != null) {
 			return dataset.getDatasetProcessing().getStudyId();
 		}
-		try {
-			LOG.error(objectMapper.writeValueAsString(dataset));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
 		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
-		return null;
+		try {
+			LOG.error(objectMapper.writeValueAsString(dataset));
+			return null;
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

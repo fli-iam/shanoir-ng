@@ -250,9 +250,9 @@ public class DicomSEGAndSRImporterService {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
-				|| acquisition instanceof CtDatasetAcquisition
-				|| acquisition instanceof PetDatasetAcquisition
-				|| acquisition instanceof XaDatasetAcquisition) {
+					|| acquisition instanceof CtDatasetAcquisition
+					|| acquisition instanceof PetDatasetAcquisition
+					|| acquisition instanceof XaDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				for (Dataset dataset : datasets) {
 					List<DatasetExpression> expressions = dataset.getDatasetExpressions();

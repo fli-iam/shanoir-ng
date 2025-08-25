@@ -14,7 +14,12 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -26,12 +31,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.shanoir.ng.dataset.dto.DatasetLight;
 
 /**
  * Dataset service.
@@ -95,6 +94,9 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_SEE_ALL')")
 	List<DatasetLight> findLightByIdIn(List<Long> ids);
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL')")
+	List<DatasetLight> findLightByStudyId(Long studyId);
+
 	/**
 	 * Save a dataset.
 	 *
@@ -113,16 +115,6 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	Dataset update(Dataset dataset) throws EntityNotFoundException;
-
-	/**
-	 * Find every dataset
-	 * 
-	 * @return datasets
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
-	List<Dataset> findAll();
-
 
 	/**
 	 * Fetch the asked page

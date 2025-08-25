@@ -45,6 +45,7 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
 import { Selection } from 'src/app/studies/study/tree.service';
+import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -76,6 +77,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     private files: File[] = [];
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    dateDisplay = dateDisplay;
 
     constructor(
         private route: ActivatedRoute,
@@ -96,7 +98,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     get examination(): Examination { return this.entity; }
-    set examination(examination: Examination) { this.entity = examination; }
+    set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
         return this.examinationService;
@@ -104,6 +106,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromExamination(this.examination);
+    }
+
+    init() {
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);
+        }
     }
 
     initView(): Promise<void> {
@@ -391,5 +400,4 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
 }

@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
 
+import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.tag.model.StudyTag;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
@@ -86,8 +88,23 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	@Query(value="SELECT ds.id FROM dataset as ds " +
 			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
-			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
-	List<Dataset> findDatasetsByProcessingId(Long processingId);
+			"WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
+	List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
+
+	@Query("""
+		SELECT DISTINCT
+			ds.id                      AS id,
+			ex.study.id                AS studyId,
+			ex.centerId                AS centerId,
+			relSt.id                   AS relatedStudiesIds
+		FROM DatasetProcessing dp
+			JOIN dp.inputDatasets ds
+			LEFT JOIN ds.datasetAcquisition da
+			LEFT JOIN da.examination ex
+			LEFT JOIN ds.relatedStudies relSt
+		WHERE dp.id IN :processingIds
+			""")
+	List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
 			+ "ds.id, dm.name, TYPE(ds), " 
@@ -99,5 +116,33 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			+ "LEFT JOIN da.examination e "  
 			+ "LEFT JOIN e.study s " 
 			+ "WHERE ds.id IN :ids")
-List<DatasetLight> findAllLightById(List<Long> ids);
+	List<DatasetLight> findAllLightById(List<Long> ids);
+
+	// select rd.study_id from related_datasets rd where dataset_id = ?1
+	@Query("""
+		SELECT DISTINCT 
+		ds.id                      AS id,
+		ex.study.id                AS studyId,
+		ex.centerId                AS centerId,
+		relSt.id                   AS relatedStudiesIds
+		FROM Dataset ds
+		LEFT JOIN ds.datasetAcquisition da
+			LEFT JOIN da.examination ex
+		LEFT JOIN ds.relatedStudies relSt
+		WHERE ds.id IN :ids
+			""")
+  List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
+	
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
+			+ "ds.id, dm.name, TYPE(ds), " 
+			+ "ds.datasetAcquisition.examination.study.id, "  
+			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) " 
+			+ "FROM Dataset ds " 
+			+ "JOIN ds.originMetadata dm " 
+			+ "LEFT JOIN ds.datasetAcquisition da "  
+			+ "LEFT JOIN da.examination e "  
+			+ "LEFT JOIN e.study s " 
+			+ "WHERE s.id = :studyId")
+	List<DatasetLight> findAllLightByStudyId(Long studyId);
+	
 }

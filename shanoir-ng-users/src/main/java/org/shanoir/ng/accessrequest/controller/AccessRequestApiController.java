@@ -267,8 +267,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 	}
 
 	public ResponseEntity<List<AccessRequest>> findAllByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
-			) throws RestServiceException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException {
 		
 		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
 	}

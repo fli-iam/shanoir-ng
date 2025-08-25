@@ -52,9 +52,9 @@ public class ExaminationData {
         setExaminationDate(examination.getExaminationDate());
         setSubjectName(examination.getSubject().getName());
         setSubjectStudy(
-            examination.getSubject().getSubjectStudyList().stream()
-                .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
-                .findFirst().orElse(null));
+                examination.getSubject().getSubjectStudyList().stream()
+                        .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
+                        .findFirst().orElse(null));
     }
 
     public String getSubjectName() {

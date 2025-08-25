@@ -75,7 +75,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
-		@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		    @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
         try {
             if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
                 throw new RestServiceException(
