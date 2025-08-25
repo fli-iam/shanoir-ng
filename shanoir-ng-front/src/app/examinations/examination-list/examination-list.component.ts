@@ -21,6 +21,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {Study} from "../../studies/shared/study.model";
 
 
 @Component({
@@ -89,11 +90,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     canEdit(ex: Examination): boolean {
         return this.keycloakService.isUserAdmin() || (
-            ex.subjectStudy &&
-			ex.subjectStudy.subjectStudy &&
-			ex.subjectStudy.subjectStudy.study &&
-            ex.subjectStudy.subjectStudy.study.studyUserList &&
-            ex.subjectStudy.subjectStudy.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
+            ex.subject &&
+			ex.study &&
+            (ex.study as Study).studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
         );
     }
 
