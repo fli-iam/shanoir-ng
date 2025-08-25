@@ -121,6 +121,8 @@ public class ImportJob implements Serializable {
 	// Used by ShanoirUploader to store the upload percentage
 	private String uploadPercentage; 
 
+	private Boolean useStudyCard;
+
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -359,6 +361,14 @@ public class ImportJob implements Serializable {
 
 	public void setUploadPercentage(String uploadPercentage) {
 		this.uploadPercentage = uploadPercentage;
+	}
+
+	public Boolean getUseStudyCard() {
+		return useStudyCard;
+	}
+
+	public void setUseStudyCard(Boolean useStudyCard) {
+		this.useStudyCard = useStudyCard;
 	}
 
 	@Override
