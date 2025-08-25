@@ -32,7 +32,7 @@ public class ShUpConfig {
 
 	public static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
 	
-	public static final String MODE_PSEUDONYMUS_KEY_FILE = "key";
+	public static final String MODE_PSEUDONYMUS_KEY = "PSEUDONYMUS";
 	
 	public static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
 	
