@@ -409,7 +409,7 @@ public class ImportUtils {
 					return null;
 				}
 			} // in case subject is already in study, do nothing
-			logger.info("Subject used on server with ID: " + subjectREST.getId());
+			logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
 		}
 		return subjectREST;
 	}
@@ -660,7 +660,7 @@ public class ImportUtils {
 		if (equipment == null) {
 			logger.error("Error: could not find or create equipment.");
 		} else {
-			logger.info("Equipment found or created: {} {}", equipment.getId(), equipment.getManufacturerModel().getName());
+			logger.info("Equipment found or created: Id: {}, Name: {}", equipment.getId(), equipment.getManufacturerModel().getName());
 		}
 		return equipment;
 	}
@@ -675,7 +675,7 @@ public class ImportUtils {
 		if (center == null) {
 			logger.error("Error: could not find or create center.");
 		} else {
-			logger.info("Center found or created: {} {}", center.getId(), center.getName());
+			logger.info("Center found or created: Id: {}, Name: {}", center.getId(), center.getName());
 		}
 		return center;
 	}

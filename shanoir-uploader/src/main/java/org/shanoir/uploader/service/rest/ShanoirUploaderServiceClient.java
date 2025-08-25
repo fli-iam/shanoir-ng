@@ -438,7 +438,7 @@ public class ShanoirUploaderServiceClient {
 					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
-					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
 				}
 			}
 		}
