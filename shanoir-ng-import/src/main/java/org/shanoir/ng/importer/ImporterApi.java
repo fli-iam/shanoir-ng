@@ -84,16 +84,17 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "200", description = "Unexpected Error")})
-    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/equipment/{equipmentId}/",
+    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/equipment/{equipmentId}/useStudyCard/{useStudyCard}/",
             produces = {"application/json"},
             consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-            @Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
-            @Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-            @Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-            @Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException;
+    		@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
+    		@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+    		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId,
+            @Parameter(name = "useStudyCard") @PathVariable("useStudyCard") Boolean useStudyCard) throws RestServiceException;
 
     @Operation(summary = "Upload one EEG file", description = "Upload channel and metadata from EEG file")
     @ApiResponses(value = {

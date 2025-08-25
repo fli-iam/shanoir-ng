@@ -700,7 +700,8 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
 			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
+			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId,
+			@Parameter(name = "useStudyCard") @PathVariable("useStudyCard") Boolean useStudyCard) throws RestServiceException {
 		LOG.warn("Multiple examination import.");
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
@@ -780,17 +781,20 @@ public class ImporterApiController implements ImporterApi {
 						Properties props = new Properties();
 						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
 						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
-						props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
+						if (useStudyCard) {
+							props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
 
-						Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
-						if (newStudyCardId != null)  {
-							studyCardId = newStudyCardId;
+							Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
+							if (newStudyCardId != null) {
+								studyCardId = newStudyCardId;
+							}
 						}
 						job.setAcquisitionEquipmentId(equipmentIdFromDicom);
 					}
 				}
 
-				job.setStudyCardId(studyCardId);
+				if (useStudyCard)
+					job.setStudyCardId(studyCardId);
 
 				// STEP 4.2 Create examination
 				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());
@@ -816,6 +820,7 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyName(studyName);
 				job.setAcquisitionEquipmentId(equipmentId);
 				job.setAnonymisationProfileToUse(anonymizationProfile);
+				job.setUseStudyCard(useStudyCard);
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
