@@ -49,7 +49,6 @@ public class StartupStateContext {
 			getState().load(this);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			System.exit(0);
 		}
 	}
 

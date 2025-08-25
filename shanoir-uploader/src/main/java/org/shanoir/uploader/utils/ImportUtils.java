@@ -11,7 +11,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.JProgressBar;
 
@@ -22,15 +21,12 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
-import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.UploadState;
-import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;

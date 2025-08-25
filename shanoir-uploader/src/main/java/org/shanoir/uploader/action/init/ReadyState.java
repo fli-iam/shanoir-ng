@@ -17,7 +17,6 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
@@ -56,7 +55,8 @@ public class ReadyState implements State {
 				ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
-				throw new IOException("Mode pseudonymus requires Pseudonymizer.");
+				logger.error("Mode pseudonymus requires Pseudonymizer.");
+				System.exit(0);
 			}	
 		}
 		MainWindow frame = initJFrame();

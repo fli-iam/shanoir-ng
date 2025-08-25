@@ -79,6 +79,7 @@ public abstract class AbstractTest {
 					pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
 				} catch (PseudonymusException e) {
 					logger.error(e.getMessage(), e);
+					System.exit(0);
 				}	
 			}
 		} catch (Exception e) {
