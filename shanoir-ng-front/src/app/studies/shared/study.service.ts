@@ -23,7 +23,6 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
@@ -32,10 +31,11 @@ import {
     StudyDTO,
     StudyDTOService,
     StudyLight,
-    StudyStorageVolumeDTO,
-    SubjectWithSubjectStudyDTO
+    StudyStorageVolumeDTO
 } from './study.dto';
 import { Study } from './study.model';
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
+import {Subject} from "../../subjects/shared/subject.model";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -46,7 +46,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService, 
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService,
             private downloadService: SingleDownloadService) {
         super(http);
     }
@@ -66,7 +66,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
           return typeResult;
         });
     }
-    
+
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
         .toPromise()
@@ -116,14 +116,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
-    findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise().then(this.mapSubjectWithSubjectStudyList);
+    findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
+        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+            .toPromise().then(this.mapSubjectList);
     }
 
-    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
-            .toPromise().then(this.mapSubjectWithSubjectStudyList);
+    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<Subject[]> {
+        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
+            .toPromise().then(this.mapSubjectList);
     }
 
     private findStudiesIcanAdmin(): Promise<Study[]> {
@@ -257,9 +257,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if (dtos) return this.studyDTOService.toEntityList(dtos, result);
     }
 
-    private mapSubjectWithSubjectStudyList = (dtos: SubjectWithSubjectStudyDTO[], result?: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> => {
+    private mapSubjectList = (dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]> => {
         if (result == undefined) result = [];
-        if (dtos) return this.studyDTOService.toSubjectWithSubjectStudyList(dtos, result);
+        if (dtos) return this.studyDTOService.toSubjectList(dtos, result);
     }
 
     ngOnDestroy() {

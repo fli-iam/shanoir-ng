@@ -643,7 +643,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     exportTable() {
-        const MAX_ROWS: number = 10000;
+        const MAX_ROWS: number = 50000;
         if (this.page.totalElements > MAX_ROWS) {
             this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
                 + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');

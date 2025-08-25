@@ -37,7 +37,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -85,8 +85,8 @@ public class DatasetDownloaderServiceTest {
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
 	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+	@MockBean(name = "controllerSecurityService")
+	private ControllerSecurityService controllerSecurityService;
 	
     @TempDir
     public File tempDir;
@@ -125,7 +125,7 @@ public class DatasetDownloaderServiceTest {
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
+		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);

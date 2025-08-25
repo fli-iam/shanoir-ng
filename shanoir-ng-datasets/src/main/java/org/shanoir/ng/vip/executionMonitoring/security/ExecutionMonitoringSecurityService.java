@@ -1,14 +1,14 @@
 package org.shanoir.ng.vip.executionMonitoring.security;
 
-import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ExecutionMonitoringSecurityService {
@@ -27,7 +27,12 @@ public class ExecutionMonitoringSecurityService {
      * @return boolean
      */
     public boolean hasRightOnExecutionMonitoringById(Long id, String rightStr){
-        return hasRightOnExecutionMonitoring(executionMonitoringRepository.findById(id).get(), rightStr);
+        Optional<ExecutionMonitoring> monitoring = executionMonitoringRepository.findById(id);
+        if (monitoring.isPresent()) {
+            return hasRightOnExecutionMonitoring(executionMonitoringRepository.findById(id).get(), rightStr);
+        } else {
+            return true;
+        }
     }
 
     /**

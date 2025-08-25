@@ -25,18 +25,17 @@ import { Reference }    from '../../../reference/shared/reference.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Enum } from "../../../../shared/utils/enum";
-import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'subject-therapy-form',
     templateUrl: 'subjectTherapy-form.component.html',
-    providers: [SubjectTherapyService, TherapyService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
@@ -54,6 +53,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     therapies: Therapy[];
     units: Reference[];
     frequencies: Enum[] = [];
+    dateDisplay = dateDisplay;
 
     constructor(
         private route: ActivatedRoute,
@@ -229,5 +229,4 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
     }
-
 }

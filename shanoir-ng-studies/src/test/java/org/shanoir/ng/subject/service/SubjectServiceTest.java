@@ -32,8 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -56,7 +54,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 /**
  * Subject service test.
@@ -84,7 +81,6 @@ public class SubjectServiceTest {
 	
 	@Mock
 	private ObjectMapper objectMapper;
-
 	
 	@Mock
 	private StudyExaminationRepository studyExaminationRepository;
@@ -93,15 +89,19 @@ public class SubjectServiceTest {
 	public void setup() {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
-		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
-		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
+		List<Subject> subjects = new ArrayList<Subject>();
+		Subject subject = createSubjectToUpdate();
+		subject.setStudy(ModelsUtil.createStudy());
+		subjects.add(subject);
+		given(subjectRepository.findByName(ModelsUtil.SUBJECT_NAME)).willReturn(subjects);
+		given(subjectRepository.findByName("new name")).willReturn(subjects);
+		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectToSave());
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws EntityNotFoundException {
 		subjectService.deleteById(SUBJECT_ID);
-
 		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
@@ -110,7 +110,6 @@ public class SubjectServiceTest {
 		final List<Subject> subjects = subjectService.findAll();
 		Assertions.assertNotNull(subjects);
 		Assertions.assertTrue(subjects.size() == 1);
-
 		Mockito.verify(subjectRepository, Mockito.times(1)).findAll();
 	}
 
@@ -119,22 +118,22 @@ public class SubjectServiceTest {
 		final Subject subject = subjectService.findById(SUBJECT_ID);
 		Assertions.assertNotNull(subject);
 		Assertions.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
-
 		Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
-		subjectService.create(createSubjectTosave());
+	public void saveTest() throws MicroServiceCommunicationException, ShanoirException {
+		subjectService.create(createSubjectToSave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
 	public void updateTest() throws RestServiceException, ShanoirException {
-		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
+		Subject subject = createSubjectToUpdate();
+		subject.setStudy(ModelsUtil.createStudy());
+		final Subject updatedSubject = subjectService.update(subject);
 		Assertions.assertNotNull(updatedSubject);
 		Assertions.assertTrue(Sex.F.equals(updatedSubject.getSex()));
-
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
@@ -146,7 +145,7 @@ public class SubjectServiceTest {
 			subjectService.update(updated);
 		} catch (ShanoirException exception) {
 			assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
-			assertEquals("You cannot update subject common name.", exception.getMessage());
+			assertEquals("You can not update the subject name.", exception.getMessage());
 			return;
 		}
 		fail();
@@ -160,13 +159,10 @@ public class SubjectServiceTest {
 		return subject;
 	}
 
-	private Subject createSubjectTosave() {
+	private Subject createSubjectToSave() {
 		final Subject subject = new Subject();
-		//subject.setName("Toto");
-		//subject.setId(1L);
 		subject.setBirthDate(Instant.ofEpochMilli(1392122691000L).atZone(ZoneId.systemDefault()).toLocalDate());
 		subject.setIdentifier("Titi");
-
 		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
 		subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
 		subject.setManualHemisphericDominance(HemisphericDominance.Left);
@@ -184,4 +180,5 @@ public class SubjectServiceTest {
 		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
 	}
+
 }

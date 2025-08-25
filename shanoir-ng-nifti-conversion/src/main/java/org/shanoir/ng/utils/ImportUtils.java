@@ -14,37 +14,6 @@
 
 package org.shanoir.ng.utils;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.SecureRandom;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 
 /**
  * Utility class
@@ -66,30 +35,30 @@ public class ImportUtils {
 		for (int i = 0, is = wildcard.length(); i < is; i++) {
 			char c = wildcard.charAt(i);
 			switch (c) {
-			case '*':
-				s.append(".*");
-				break;
-			case '?':
-				s.append(".");
-				break;
-				// escape special regexp-characters
-			case '(':
-			case ')':
-			case '[':
-			case ']':
-			case '$':
-			case '^':
-			case '.':
-			case '{':
-			case '}':
-			case '|':
-			case '\\':
-				s.append("\\");
-				s.append(c);
-				break;
-			default:
-				s.append(c);
-				break;
+				case '*':
+					s.append(".*");
+					break;
+				case '?':
+					s.append(".");
+					break;
+					// escape special regexp-characters
+				case '(':
+				case ')':
+				case '[':
+				case ']':
+				case '$':
+				case '^':
+				case '.':
+				case '{':
+				case '}':
+				case '|':
+				case '\\':
+					s.append("\\");
+					s.append(c);
+					break;
+				default:
+					s.append(c);
+					break;
 			}
 		}
 		s.append('$');

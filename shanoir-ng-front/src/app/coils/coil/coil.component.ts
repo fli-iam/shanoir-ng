@@ -53,7 +53,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     get coil(): Coil { return this.entity; }
-    set coil(coil: Coil) { this.entity = coil; }
+    set coil(coil: Coil) { this.entity = coil; }
 
     getService(): EntityService<Coil> {
         return this.coilService;
@@ -62,7 +62,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromCoil(this.coil);
     }
-    
+
     initView(): Promise<void> {
         return this.centerService.getAll().then(centers => {
             this.coil.center = centers.find(center => center.id == this.coil.center.id);
@@ -85,7 +85,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        this.prefilledCenter = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+        this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => this.prefilledCenter = res);
         let centerPromise: Promise<void>;
         if (this.prefilledCenter) {
             this.coil.center = this.prefilledCenter;
@@ -96,7 +96,7 @@ export class CoilComponent extends EntityComponent<Coil> {
                 this.centers = centers;
             });
         }
-        this.prefilledManuf = this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel');
+        this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel').then(res => this.prefilledManuf = res);
         if (this.prefilledManuf) {
             this.coil.manufacturerModel = this.prefilledManuf;
             this.manufModels = [this.prefilledManuf];
@@ -145,7 +145,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         this.router.navigate(['/center/create']).then(success => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as Coil).center = entity as Center;
+                    this.entity.center = entity as Center;
                 })
             );
         });
@@ -157,9 +157,8 @@ export class CoilComponent extends EntityComponent<Coil> {
             this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    let currentCoil: Coil = currentStep.entity as Coil;
-                    currentCoil.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);
-                    currentCoil.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    this.entity.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    this.entity.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);
                 })
             );
         });

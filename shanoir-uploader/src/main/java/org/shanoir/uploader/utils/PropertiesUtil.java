@@ -3,8 +3,10 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -29,6 +31,19 @@ public class PropertiesUtil {
 			logger.error(e.getMessage(), e);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public static void storePropertyToFile(String filePath, Properties properties, String key, String value) {
+		final File propertiesFile = new File(filePath);
+		boolean propertiesExists = propertiesFile.exists();
+		if (propertiesExists) {
+			try (OutputStream out = new FileOutputStream(propertiesFile);) {
+				properties.setProperty(key, value);
+				properties.store(out, "");
+			} catch (Exception e) {
+				logger.error("Failed to store property: " + e.getMessage(), e);
+			}
 		}
 	}
 
