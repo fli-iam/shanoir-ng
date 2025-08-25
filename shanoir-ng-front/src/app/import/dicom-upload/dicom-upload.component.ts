@@ -13,7 +13,7 @@
  */
 
 import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import {Component, HostListener, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -135,14 +135,16 @@ export class DicomUploadComponent implements OnDestroy {
             );
         } else {
             // Send to multiple
+            console.log("uploadToServer");
             let job = new ImportJob();
-            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
+            job.acquisitionEquipmentId = this.useStudyCard ? this.studyCard.acquisitionEquipment.id : this.acquisitionEquipment.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
-            job.studyCardId = this.studyCard.id;
-            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
-            job.centerId = this.studyCard.acquisitionEquipment.center.id;
+            job.studyCardId = this.useStudyCard ? this.studyCard?.id : 0;
+            // job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
+            job.centerId = this.useStudyCard ? this.studyCard.acquisitionEquipment.center.id : this.acquisitionEquipment.center.id;
             job.anonymisationProfileToUse = this.study.profile.profileName;
+            job.useStudyCard = this.useStudyCard;
 
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
@@ -246,7 +248,8 @@ export class DicomUploadComponent implements OnDestroy {
         return undefined;
     }
 
-    onSelectStudyCard(){
+    onSelectStudyCard() {
+        console.log("select study card");
         this.center = this.studyCard.acquisitionEquipment.center;
     }
 
@@ -257,6 +260,15 @@ export class DicomUploadComponent implements OnDestroy {
     ngOnDestroy() {
         for(let subscription of this.subscriptions) {
             subscription.unsubscribe();
+        }
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('study', this.study);
+            console.log('studyCard', this.studyCard);
+            console.log('acquisitionEquipment', this.acquisitionEquipment);
+            console.log('center', this.center);
         }
     }
 }

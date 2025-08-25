@@ -37,7 +37,8 @@ export class ImportService {
                                                                                            + "/studyName/" + job.studyName
                                                                                            + "/studyCard/" + job.studyCardId
                                                                                            + "/center/" + job.centerId
-                                                                                           + "/equipment/" + job.acquisitionEquipmentId + "/", formData,
+                                                                                           + "/equipment/" + job.acquisitionEquipmentId
+                                                                                           + "/useStudyCard/" + job.useStudyCard + "/", formData,
                 {reportProgress: true,
                 observe: 'events'});
     }
