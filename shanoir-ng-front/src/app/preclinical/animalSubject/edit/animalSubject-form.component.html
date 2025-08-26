@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
 									<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
 									<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-								</ng-template>
+                            </ng-template>
 						</span>
 					</li>
                     </ol>
@@ -152,11 +152,72 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ol>
+                <ol class="subject-study">
+                    <div>
+                        <li>
+                            <label>Subject type</label>
+                            <span class="right-col" [ngSwitch]="mode">
+                                <ng-template [ngSwitchCase]="'view'">
+                                    {{preclinicalSubject.subject.subjectType}}
+                                </ng-template>
+                                <ng-template ngSwitchDefault>
+                                    <select-box formControlName="subjectType"
+                                                [(ngModel)]="preclinicalSubject.subject.subjectType"
+                                                [options]="subjectTypes">
+                                    </select-box>
+                                </ng-template>
+						    </span>
+                        </li>
+                        <li>
+                            <label>Physically involved</label>
+                            <span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									<span *ngIf="preclinicalSubject.subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
+									<span *ngIf="!preclinicalSubject.subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<checkbox [(ngModel)]="preclinicalSubject.subject.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+								</ng-template>
+							</span>
+                        </li>
+                    </div>
+                </ol>
 			</fieldset>
 
+            <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 			<fieldset *ngIf="mode !== 'view'">
-				<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+                <li>
+                    <label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+                    <span class="right-col">
+						<span class="right-col">{{preclinicalSubject.subject.study.name}}</span>
+                    </span>
+                </li>
 			</fieldset>
+            <fieldset>
+            <ol *ngIf="preclinicalSubject.subject.studyIdentifier != null">
+                <li>
+                    <label>Subject identifier for this study</label>
+                    <span class="right-col">
+                        {{ preclinicalSubject.subject.studyIdentifier }}
+                    </span>
+                </li>
+            </ol>
+            <ol>
+                <li>
+                    <label>Tags</label>
+                    <span class="right-col" [ngSwitch]="mode">
+                        <ng-template [ngSwitchCase]="'view'">
+                                <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of preclinicalSubject.subject.tags">
+                                    {{tag.name}}
+                                </span>
+                        </ng-template>
+                        <ng-template ngSwitchDefault>
+                            <tag-list [(ngModel)]="preclinicalSubject.subject.tags" [availableTags]="preclinicalSubject.subject.study?.tags" formControlName="tags"></tag-list>
+                        </ng-template>
+                    </span>
+                </li>
+            </ol>
+        </fieldset>
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>
 					<legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
