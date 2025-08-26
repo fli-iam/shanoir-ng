@@ -14,8 +14,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select DICOM archive</div>
 	<fieldset class="step dicom">
-	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox>
-	    <label> Multiple examination import.</label>
+
+	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox> 
+	    <label>Multi-examination import</label>
 	    <div *ngIf="!multipleExamImport">
 	    <p>Please select a DICOM zip archive to import.</p>
 	    <p>This archive may contain a DICOMDIR file at its root :</p>
@@ -25,74 +26,49 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	    </ul>
 	    </div>
 	    <div *ngIf="multipleExamImport">
-            <p> Multi examination allows a more simple and automatic import, with multiple possible examinations. </p>
-            <p>Select a subject folder with on or multiple examinations sub folders and zip it.</p>
-            <p>The files should be organized like this:</p>
-            <p>SUBJECT_NAME.zip <br/>
-             - [subject-name] <br/>
-             - - [examination-comment] <br/>
-             - - - [series] <br/>
-             - - - - [list of dicom] <br/>
-            </p>
-                <u>1) Subject: </u><br/>
-                The subject will be automaticaly created, based on the subject name, and information found in the dicom.
-                Please note that there should be only ONE subject
-            <p>
-                <u>2) Examination: </u><br/>
-                The examination will be automatically created based on examination comment.<br/>
-                Examination date and other informations will be gathered from informations found in the dicom.
-            </p>
-            <p>
-                Please select a study in which the data will be imported, and a default study card if none adapted to the equipment are found.
-            </p>
-            <ol>
-                <li>
-                <label class="required-label">Select a research study</label>
-                <span class="right-col">
-                    <select-box
-                            [(ngModel)]="study"
-                            (userChange)="onSelectStudy()"
-                            [viewDisabled]="!study"
-                            [options]="studyOptions">
-                    </select-box>
-                </span>
-                </li>
-                <li *ngIf="useStudyCard">
-                    <label class="required-label">Default study card</label>
-                    <span class="right-col">
-                        <select-box
-                                [(ngModel)]="studyCard"
-                                (userChange)="onSelectStudyCard()"
-                                [options]="studycardOptions">
-                        </select-box>
-                    </span>
-                </li>
-                <li *ngIf="!useStudyCard">
-                    <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an acquisition center</label>
-                    <span class="right-col">
-                        <select-box *ngIf="!useStudyCard || center"
-                                [disabled]="(!useStudyCard && (!study || !centerOptions))"
-                                [readOnly]="useStudyCard"
-                                [(ngModel)]="center"
-                                (userChange)="onSelectCenter()"
-                                [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                                [options]="centerOptions">
-                        </select-box>
-                    </span>
-                </li>
-                <li *ngIf="!useStudyCard">
-                    <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an center equipment</label>
-                    <span class="right-col">
-                        <select-box *ngIf="!useStudyCard || acquisitionEquipment"
-                                    [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions))"
-                                    [readOnly]="useStudyCard"
-                                    [(ngModel)]="acquisitionEquipment"
-                                    [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                                    [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
-                        </select-box>
-                    </span>
-                </li>
-            </ol>
+	    <p>Multi-examination allows a more simple and automatic import, with multiple possible examinations (DICOM studies).</p>
+	    <p>Select a subject folder with one or multiple examination sub-folders and zip it.</p>
+	    <p>The files should be organized like this:</p>
+	    <p>SUBJECT_NAME.zip <br/>
+	     - [subject-name] <br/>
+	     - - [examination-comment] <br/>
+	     - - - [series] <br/>
+	     - - - - [list of dicom] <br/>
+	     </p>
+	        <u>1) Subject: </u><br/>
+	        The subject will be automatically created, based on the subject name, and information found in the DICOM.
+	        Please note that there should be only ONE subject.
+	     <p>
+	        <u>2) Examination: </u><br/>
+	        The examination will be automatically created based on the examination comment.<br/>
+	        Examination date and other information will be gathered from information found in the DICOM.
+	     </p>
+	     <p>
+            Please select a study in which the data will be imported, and a default study card (if none adapted to the equipment can be found).
+         </p>
+	    <ol>
+		    <li>
+	        <label class="required-label">Select a research study</label> 
+	        <span class="right-col">
+	            <select-box 
+	                    [(ngModel)]="study" 
+	                    (userChange)="onSelectStudy()" 
+	                    [viewDisabled]="!study" 
+	                    [options]="studyOptions">
+	            </select-box>
+	        </span>
+	        </li>
+	        <li>
+	            <label class="required-label">Default study card</label> 
+	            <span class="right-col">
+	                <select-box 
+	                        [(ngModel)]="studyCard"
+	                        (userChange)="onSelectStudyCard()" 
+	                        [options]="studycardOptions">
+	                </select-box>
+	            </span>
+		    </li>
+	    </ol>
         </div>
 	    <upload-file [disabled]="multipleExamImport && ((!studyCard && useStudyCard) || (!useStudyCard && (!center || !acquisitionEquipment)))" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
 	    <div [hidden]="!uploadState?.progress">
@@ -119,3 +95,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </p>
 	</fieldset>
 <button *ngIf="!multipleExamImport" class="next" [disabled]="!valid" (click)="next()">Next</button>
+
