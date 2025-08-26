@@ -724,7 +724,7 @@ public class ImporterApiController implements ImporterApi {
 			File subjectFolder = subjectFolders[0];
 			File[] examinationsFolders = subjectFolder.listFiles();
 
-			String subjectName = studyName + "_" + subjectFolder.getName();
+			String subjectName = subjectFolder.getName();
 			Subject subject = null;
 
 			// Sort examination folders by alphabetical order
