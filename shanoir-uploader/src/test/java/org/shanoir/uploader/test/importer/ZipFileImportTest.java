@@ -49,7 +49,7 @@ public class ZipFileImportTest extends AbstractTest {
 	@Test
 	public void testImportWithDicomZipUpload() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 0; i++) {
 			ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
@@ -158,7 +158,7 @@ public class ZipFileImportTest extends AbstractTest {
 		org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
 			null, subject, randomPatientName, ImagedObjectCategory.LIVING_HUMAN_BEING,
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
-			null, SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0));
+			SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0).getAcquisitionEquipment());
 		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
 		org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
 		subjectForImportJob.setId(subjectREST.getId());

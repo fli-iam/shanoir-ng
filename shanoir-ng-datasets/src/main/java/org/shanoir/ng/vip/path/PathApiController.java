@@ -34,23 +34,29 @@ public class PathApiController implements PathApi {
     @Override
     public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, HttpServletResponse response)
             throws IOException, RestServiceException, EntityNotFoundException {
+        LOG.debug("completePath: {}, action: {}, format: {}, converterId: {}, response: {}", completePath, action, format, converterId, response);
         // TODO implement those actions
-        switch (action) {
-            case "exists":
-            case "list":
-            case "md5":
-            case "properties":
-                return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
-            case "content":
-                List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(completePath);
+        try{
+            switch (action) {
+                case "exists":
+                case "list":
+                case "md5":
+                case "properties":
+                    return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+                case "content":
+                    List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(completePath);
 
-                if (datasets.isEmpty()) {
-                    LOG.error("No dataset found for resource id [{}]", completePath);
-                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-                }
+                    if (datasets.isEmpty()) {
+                        LOG.error("No dataset found for resource id [{}]", completePath);
+                        return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                    }
 
-                datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId);
-                return new ResponseEntity<Void>(HttpStatus.OK);
+                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true);
+                    return new ResponseEntity<Void>(HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            LOG.error("Error while VIP downloading data", e);
+            throw e;
         }
         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
     }

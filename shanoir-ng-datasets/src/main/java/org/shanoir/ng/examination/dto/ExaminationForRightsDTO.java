@@ -12,12 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SubjectStudy } from "./subject-study.model";
+package org.shanoir.ng.examination.dto;
 
-export class SubjectWithSubjectStudy {
-    id: number;
-    name: string;
-    identifier: string;
-    subjectStudy: SubjectStudy;
-    birthDate: Date;
+
+public interface ExaminationForRightsDTO {
+
+	public Long getId();
+
+    public Long getCenterId();
+
+    public Long getStudyId();
+
 }

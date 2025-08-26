@@ -62,7 +62,7 @@ public class CenterRepositoryTest {
 	
 	@Test
 	public void findByNameTest() throws Exception {
-		Optional<Center> centerDb = repository.findByName(CENTER_TEST_1_NAME);
+		Optional<Center> centerDb = repository.findFirstByNameContainingOrderByIdAsc(CENTER_TEST_1_NAME);
 		assertNotNull(centerDb.get());
 		assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
 	}

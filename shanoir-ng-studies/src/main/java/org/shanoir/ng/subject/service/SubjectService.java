@@ -81,16 +81,6 @@ public interface SubjectService {
 	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
 	
 	/**
-	 * Find subject by data.
-	 *
-	 * @param data data.
-	 * @return a subject.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findByData(String data);
-
-	/**
 	 * Find subject by its id.
 	 *
 	 * @param id template id.
@@ -140,8 +130,8 @@ public interface SubjectService {
 	 * @param subject subject to create.
 	 * @return created subject.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject create(Subject subject);
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+	Subject create(Subject subject) throws ShanoirException;
 	
 	/**
 	 * Save a subject and auto-increment the common name on using the centerId.
@@ -149,8 +139,8 @@ public interface SubjectService {
 	 * @param subject subject to create.
 	 * @return created subject.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject createAutoIncrement(Subject subject, Long centerId);
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+	Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
 	
 	/**
 	 * Update a subject.
@@ -162,7 +152,7 @@ public interface SubjectService {
 	 * @throws ShanoirException
 	 * @throws RestServiceException
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	Subject update(Subject subject) throws ShanoirException;
 
 	/**

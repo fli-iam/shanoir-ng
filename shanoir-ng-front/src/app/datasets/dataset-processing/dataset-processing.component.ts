@@ -34,6 +34,7 @@ import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
 import {formatDate} from "@angular/common";
 import { Selection } from 'src/app/studies/study/tree.service';
+import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -60,6 +61,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public executionMonitoring: ExecutionMonitoring;
     prefilledStudy: Study;
     prefilledSubject: Subject;
+
 
     constructor(
             private route: ActivatedRoute,
@@ -119,8 +121,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        this.prefilledStudy = this.breadcrumbsService.currentStep.getPrefilledValue('study');
-        this.prefilledSubject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
+        this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
+        this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
         return Promise.resolve().then(() => {
             if (!!this.prefilledStudy) {
                 this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
@@ -315,4 +317,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             String(seconds).padStart(2, "0") + "." +
             String(milliseconds).padStart(3, "0")
     }
+
+    protected readonly dateDisplay = dateDisplay;
 }

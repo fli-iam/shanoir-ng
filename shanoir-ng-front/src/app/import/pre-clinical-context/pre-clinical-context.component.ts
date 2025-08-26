@@ -22,12 +22,12 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
+import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import {SimpleStudy} from "../../studies/shared/study.model";
 
 
 @Component({
@@ -47,13 +47,14 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     postConstructor() {
         this.patient = this.importDataService.patients[0];
         this.useStudyCard = true;
+        this.modality = 'bruker';
     }
 
     protected exitCondition(): boolean {
         return !this.importDataService.patients || !this.importDataService.patients[0];
     }
 
-    protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
+    protected getSubjectList(studyId: number): Promise<Subject[]> {
         this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
@@ -71,12 +72,9 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let contextImportJob = this.importDataService.archiveUploaded;
         let importJob = new ImportJob();
         importJob.patients = new Array<PatientDicom>();
-        // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
-        this.patient.subject = Subject.makeSubject(
-                context.subject.id,
-                context.subject.name,
-                context.subject.identifier,
-                context.subject.subjectStudy);
+
+        this.patient.subject = new SimpleSubject(context.subject);
+
         importJob.patients.push(this.patient);
         importJob.workFolder = contextImportJob.workFolder;
         importJob.fromDicomZip = true;
@@ -116,12 +114,13 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
-        step.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
-        step.data.patientName = this.patient.patientName;
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
@@ -135,18 +134,20 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.subjectStudyList = [];
         let newPreclinicalSubject = new PreclinicalSubject();
         let newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
+        newSubject.preclinical = true;
+        newSubject.study = this.study;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;
     }
 
     protected fillCreateExaminationStep(step: Step): void {
-        step.entity = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {
@@ -157,7 +158,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
@@ -209,7 +209,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let context = this.getContext();
         return (
             context.study
-            && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject

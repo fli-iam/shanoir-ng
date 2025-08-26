@@ -16,7 +16,6 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { InstrumentBasedAssessment } from '../instrument-assessment/instrument.model';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
@@ -29,7 +28,6 @@ export class Examination extends Entity {
     study: IdName | Study;
     center: IdName | Center;
     examinationExecutive: IdName;
-    subjectStudy: SubjectWithSubjectStudy;
     comment: string;
     note: string;
     subjectWeight: number;
