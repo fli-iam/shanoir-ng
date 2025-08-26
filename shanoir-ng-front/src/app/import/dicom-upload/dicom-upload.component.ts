@@ -139,7 +139,7 @@ export class DicomUploadComponent implements OnDestroy {
             job.acquisitionEquipmentId = this.useStudyCard ? this.studyCard.acquisitionEquipment.id : this.acquisitionEquipment.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
-            job.studyCardId = this.studyCard?.id;
+            job.studyCardId = this.useStudyCard ? this.studyCard?.id : 0;
             job.centerId = this.useStudyCard ? this.studyCard.acquisitionEquipment.center.id : this.acquisitionEquipment.center.id;
             job.anonymisationProfileToUse = this.study.profile.profileName;
 

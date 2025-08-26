@@ -698,10 +698,15 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
 			@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
+			@Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId,
-			@RequestParam(name = "studyCardId", required = false) Long studyCardId) throws RestServiceException {
+			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		LOG.warn("Multiple examination import.");
+		// studyCardId is null for studies with studyCardPolicy = DISABLED, in this case the frontend sends 0 instead
+		if (studyCardId == 0L) {
+			studyCardId = null;
+		}
+
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -776,7 +781,6 @@ public class ImporterApiController implements ImporterApi {
 				Long equipmentIdFromDicom = null;
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
 					equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
-					System.out.println("studyCardId : " + studyCardId);
 					if (equipmentIdFromDicom != null) {
 						if (studyCardId != null) {
 							Properties props = new Properties();
