@@ -702,11 +702,6 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		LOG.warn("Multiple examination import.");
-		// studyCardId is null for studies with studyCardPolicy = DISABLED, in this case the frontend sends 0 instead
-		if (studyCardId == 0L) {
-			studyCardId = null;
-		}
-
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
