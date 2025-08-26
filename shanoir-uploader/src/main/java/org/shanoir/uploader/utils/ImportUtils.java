@@ -47,7 +47,6 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadJobManager;
@@ -81,46 +80,14 @@ public class ImportUtils {
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
-	/**
-	 * Adds a subjectStudy to a given subject with the given study
-	 * and in case subject is already in study, nothing is made.
-	 * 
-	 * @param study the added study
-	 * @param subject the subject we add a subjectStudy on
-	 * @param subjectType the type of suject
-	 * @param physicallyInvolved is the subject physically involved
-	 * @param subjectStudyIdentifier the subject study identifier
-	 */
-	public static boolean addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String subjectStudyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
-		SubjectStudy subjectStudy = new SubjectStudy();
-		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
-		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
-		if (!StringUtils.isEmpty(subjectStudyIdentifier)) {
-			subjectStudy.setSubjectStudyIdentifier(subjectStudyIdentifier);
+	public static boolean addStudyToSubject(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
+		subject.setStudy(new IdName(study.getId(), study.getName()));
+		if (!StringUtils.isEmpty(studyIdentifier)) {
+			subject.setStudyIdentifier(studyIdentifier);
 		}
-		subjectStudy.setSubjectType(subjectType);
-		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
-		subjectStudy.setTags(new ArrayList<>());
-		// Challenge here: findSubjectByIdentifier returns a subjectStudyList and findSubjectsByStudyId a subjectStudy attribute
-		if (subject.getSubjectStudyList() == null) {
-			subject.setSubjectStudyList(new ArrayList<>());
-			SubjectStudy existingSubjectStudy = subject.getSubjectStudy();
-			if (existingSubjectStudy != null) {
-				// do nothing: call of findSubjectsByStudyId
-				return false;
-			}
-			subject.getSubjectStudyList().add(subjectStudy);
-		} else {
-			// Check that this SubjectStudy does not exist yet
-			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
-				if (sustu.getStudy().getId().equals(study.getId())) {
-					// Do not add a new SubjectStudy if it already exists
-					return false;
-				}
-			}
-			// Not yet existing: add it
-			subject.getSubjectStudyList().add(subjectStudy);
-		}
+		subject.setSubjectType(subjectType);
+		subject.setPhysicallyInvolved(physicallyInvolved);
+		subject.setTags(new ArrayList<>());
 		return true;
 	}
 
@@ -384,7 +351,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, AcquisitionEquipment equipment) {
+	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
 		if (subjectREST == null) {
 			try {
 				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
@@ -392,8 +359,7 @@ public class ImportUtils {
 				logger.error(e.getMessage(), e);
 				return null;
 			}
-			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
-				// create subject with subject-study filled to avoid access denied exception because of rights check
+			if(addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
 				Long centerId = equipment.getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
@@ -403,12 +369,6 @@ public class ImportUtils {
 				}
 			}
 		} else {
-			// if rel-subject-study does not exist for existing subject, create one
-			if (addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
-				if (ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubjectStudy(subjectREST) == null) {
-					return null;
-				}
-			} // in case subject is already in study, do nothing
 			logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
 		}
 		return subjectREST;
@@ -442,7 +402,6 @@ public class ImportUtils {
 		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
 			subjectREST.setManualHemisphericDominance(HemisphericDominance.Right);
 		}
-		subjectREST.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		return subjectREST;
 	}
 

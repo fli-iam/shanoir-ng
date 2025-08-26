@@ -58,8 +58,7 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
 			mainWindow.importDialog.subjectPersonalCommentTextArea.setText("");
 			mainWindow.importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			mainWindow.importDialog.subjectPersonalCommentTextArea.setEditable(true);
-            // Clear subject-study
-            ImportStudyAndStudyCardCBItemListener.updateSubjectStudyInImportDialog(null, mainWindow.importDialog);
+            ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(null, mainWindow.importDialog);
             // Clear examinations
             mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
             mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
@@ -68,7 +67,6 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
             mainWindow.importDialog.existingSubjectsCB.setEnabled(true);
             Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
             ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, mainWindow.importDialog);
-            ImportStudyAndStudyCardCBItemListener.updateSubjectStudyInImportDialog(subject.getSubjectStudy(), mainWindow.importDialog);
             // Update examinations and clear cache
             if (examinationsOfExistingSubject.isEmpty()) {
                 mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
