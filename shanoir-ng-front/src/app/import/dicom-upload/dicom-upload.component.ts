@@ -241,7 +241,6 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     onSelectStudyCard() {
-        console.log("select study card");
         this.center = this.studyCard.acquisitionEquipment.center;
     }
 
