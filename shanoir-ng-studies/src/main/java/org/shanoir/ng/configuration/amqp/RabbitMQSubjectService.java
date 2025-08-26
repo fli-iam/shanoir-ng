@@ -165,17 +165,16 @@ public class RabbitMQSubjectService {
 		if (subject.getStudy() != null) {
 			studyId = subject.getStudy().getId();
 		}
-		// @todo: to be remove later
+		// @todo: to be removed later
 		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
 			studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
 		}
-		// Update and create take care of subject study list mappings
-		if (subjectRepository.existsByStudyIdAndName(studyId, subject.getName())) {
-			subject = subjectService.update(subject);
+		Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
+		if (subjectOld == null) {
+			return subjectService.create(subject);
 		} else {
-			subject = subjectService.create(subject);
+			return subjectOld;
 		}
-		return subject;
 	}
 
 }
