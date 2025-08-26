@@ -28,6 +28,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -154,7 +155,7 @@ public interface SubjectService {
 	 * @throws RestServiceException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-	Subject update(Subject subject) throws ShanoirException;
+	Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
 
 	/**
