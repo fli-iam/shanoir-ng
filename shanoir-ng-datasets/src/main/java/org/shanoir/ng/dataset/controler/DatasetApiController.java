@@ -301,7 +301,6 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-	
 		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

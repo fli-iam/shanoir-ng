@@ -157,53 +157,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </button>
             </span>
         </li>
-        <li *ngIf="editSubjectStudy" class="required">
-            <label class="required-label">Subject type</label>
-            <span class="right-col">
-                <select-box
-                    *ngIf="subject && subject.subjectStudy"
-                    [(ngModel)]="subject.subjectStudy.subjectType"
-                    [ngModelOptions]="{standalone: true}"
-                    [options]="subjectTypes"
-                    (userChange)="onContextChange();">
-                </select-box>
-                <select-box
-                    *ngIf="!subject || !subject.subjectStudy"
-                    [disabled]="true">
-                </select-box>
-            </span>
-        </li>
+
     </ol>
-    <ol class="subject-study">
-        <legend
-                class="clickable"
-                [class.disabled]="!subject || !subject.subjectStudy"
-                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
-            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
-        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
-            <li>
-                <label>Common name</label>
-                <span class="right-col">{{subject.name}}</span>
-            </li>
-            <li>
-                <label>Subject identifier for this study</label>
-                <span class="right-col">
-                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier"
-                    [ngModelOptions]="{standalone: true}"/>
-                </span>
-            </li>
-            <li>
-                <label>Physically involved</label>
-                <span class="right-col">
-                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
-                </span>
-            </li>
-            <li *ngIf="study?.tags">
-                <label>Tags</label>
-                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="study?.tags"></tag-list>
-            </li>
-        </div>
-    </ol>
+
 
     <ol>
         <legend>
