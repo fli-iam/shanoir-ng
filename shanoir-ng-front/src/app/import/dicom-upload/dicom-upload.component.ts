@@ -135,16 +135,13 @@ export class DicomUploadComponent implements OnDestroy {
             );
         } else {
             // Send to multiple
-            console.log("uploadToServer");
             let job = new ImportJob();
             job.acquisitionEquipmentId = this.useStudyCard ? this.studyCard.acquisitionEquipment.id : this.acquisitionEquipment.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
-            job.studyCardId = this.useStudyCard ? this.studyCard?.id : 0;
-            // job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
+            job.studyCardId = this.studyCard?.id;
             job.centerId = this.useStudyCard ? this.studyCard.acquisitionEquipment.center.id : this.acquisitionEquipment.center.id;
             job.anonymisationProfileToUse = this.study.profile.profileName;
-            job.useStudyCard = this.useStudyCard;
 
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
@@ -155,11 +152,6 @@ export class DicomUploadComponent implements OnDestroy {
                     } else if (event.type === HttpEventType.UploadProgress) {
                         this.uploadState.progress = (event.loaded / event.total);
                     } else if (event instanceof HttpResponse) {
-                        let patientDicomList =  event.body;
-                        this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
-                        if (this.modality) {
-                            this.importDataService.patientList = patientDicomList;
-                        }
                         this.setArchiveStatus('uploaded');
                     }
                 }, error => {

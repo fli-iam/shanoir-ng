@@ -33,13 +33,17 @@ export class ImportService {
     }
 
     uploadFileMultiple(formData: FormData, job: ImportJob): Observable<HttpEvent<ImportJob>> {
-           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL + "study/" + job.studyId
-                                                                                           + "/studyName/" + job.studyName
-                                                                                           + "/studyCard/" + job.studyCardId
-                                                                                           + "/center/" + job.centerId
-                                                                                           + "/equipment/" + job.acquisitionEquipmentId
-                                                                                           + "/useStudyCard/" + job.useStudyCard + "/", formData,
-                {reportProgress: true,
+        let url = AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL
+            + "study/" + job.studyId
+            + "/studyName/" + job.studyName
+            + "/center/" + job.centerId
+            + "/equipment/" + job.acquisitionEquipmentId;
+
+        if (job.studyCardId) {
+            url += "?studyCardId=" + job.studyCardId;
+        }
+        return this.http.post<ImportJob>(url, formData,
+            {reportProgress: true,
                 observe: 'events'});
     }
 

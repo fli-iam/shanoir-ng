@@ -698,10 +698,9 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
 			@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
-			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId,
-			@Parameter(name = "useStudyCard") @PathVariable("useStudyCard") Boolean useStudyCard) throws RestServiceException {
+			@RequestParam(name = "studyCardId", required = false) Long studyCardId) throws RestServiceException {
 		LOG.warn("Multiple examination import.");
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
@@ -777,11 +776,12 @@ public class ImporterApiController implements ImporterApi {
 				Long equipmentIdFromDicom = null;
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
 					equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
+					System.out.println("studyCardId : " + studyCardId);
 					if (equipmentIdFromDicom != null) {
-						Properties props = new Properties();
-						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
-						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
-						if (useStudyCard) {
+						if (studyCardId != null) {
+							Properties props = new Properties();
+							props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
+							props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
 							props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
 
 							Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
@@ -790,10 +790,12 @@ public class ImporterApiController implements ImporterApi {
 							}
 						}
 						job.setAcquisitionEquipmentId(equipmentIdFromDicom);
+					} else {
+						job.setAcquisitionEquipmentId(equipmentId);
 					}
 				}
 
-				if (useStudyCard)
+				if (studyCardId != null)
 					job.setStudyCardId(studyCardId);
 
 				// STEP 4.2 Create examination
@@ -820,7 +822,6 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyName(studyName);
 				job.setAcquisitionEquipmentId(equipmentId);
 				job.setAnonymisationProfileToUse(anonymizationProfile);
-				job.setUseStudyCard(useStudyCard);
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
