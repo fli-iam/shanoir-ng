@@ -145,8 +145,9 @@ jobs:
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       - name: Build docker images
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           files: |
             docker-compose-dev.yml
             docker-bake.json
