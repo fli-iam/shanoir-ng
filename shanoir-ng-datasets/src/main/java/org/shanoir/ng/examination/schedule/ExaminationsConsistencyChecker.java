@@ -82,8 +82,7 @@ public class ExaminationsConsistencyChecker {
 	
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
-//    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-	@Scheduled(fixedRate = 60000) // Run every 2 hours (in milliseconds)
+    @Scheduled(fixedRate = 30 * 60 * 1000) // Run every 1/2 hour (in milliseconds)
 	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
