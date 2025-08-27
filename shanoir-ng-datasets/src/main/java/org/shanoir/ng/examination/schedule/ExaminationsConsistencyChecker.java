@@ -27,10 +27,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.opencsv.CSVWriter;
 
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 /**
  * This class iterates over all examinations in the database of Shanoir and
@@ -164,6 +166,8 @@ public class ExaminationsConsistencyChecker {
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
 						writer.writeNext(header);
 					}
+					LOG.info("Checking examinations in range [{}-{}]",
+						examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
 						examinationLastChecked = checkExamination(examinationLastChecked,
 							examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
@@ -251,6 +255,7 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 	
+	@Transactional(value = TxType.REQUIRES_NEW)
 	private boolean checkExamination(Examination examination, String[] line, List<String> filesInPACS, List<Long> emptyExaminations) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		if (acquisitions != null && !acquisitions.isEmpty()) {
