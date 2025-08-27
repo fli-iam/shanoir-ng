@@ -274,7 +274,7 @@ public class ExaminationsConsistencyChecker {
 		} else {
 			line[2] = "1";
 			emptyExaminations.add(examination.getId());
-			LOG.warn("Examination {}: found without acquisitions.", examination.getId());
+			LOG.warn("Examination {}: no acquisitions.", examination.getId());
 			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
 			if (extraDataFilePaths != null && !extraDataFilePaths.isEmpty()) {
 				// keep examination for extra data
