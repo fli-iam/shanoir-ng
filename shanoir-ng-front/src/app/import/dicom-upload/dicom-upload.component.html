@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             Examination date and other information will be gathered from information found in the DICOM.
             </p>
             <p>
-            Please select a study in which the data will be imported, and a default study card (if none adapted to the equipment can be found).
+            Please select a study in which the data will be imported, and a study card (if study card policy is set to "mandatory") or select a center and an equipment.
             </p>
             <ol>
                 <li>
@@ -81,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 </li>
                 <li *ngIf="!useStudyCard">
-                    <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an center equipment</label>
+                    <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select a center equipment</label>
                     <span class="right-col">
                         <select-box *ngIf="!useStudyCard || acquisitionEquipment"
                         [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions))"
