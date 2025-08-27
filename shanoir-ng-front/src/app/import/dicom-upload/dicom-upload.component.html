@@ -14,6 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select DICOM archive</div>
 	<fieldset class="step dicom">
+
 	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox> 
 	    <label>Multi-examination import</label>
 	    <div *ngIf="!multipleExamImport">
@@ -69,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		    </li>
 	    </ol>
         </div>
-	    <upload-file [disabled]="multipleExamImport && !studyCard" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+	    <upload-file [disabled]="multipleExamImport && ((!studyCard && useStudyCard) || (!useStudyCard && (!center || !acquisitionEquipment)))" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
 	    <div [hidden]="!uploadState?.progress">
 	        <progress-bar [progress]="uploadState?.progress" [text]="'Preparing upload'"></progress-bar>
 	    </div>
@@ -85,7 +86,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	    <label *ngIf="otherErrorMessage" class="form-validation-alert" i18n="Import label">
             {{otherErrorMessage}}
         </label>
-	    
+
 	    <p *ngIf="modality && !multipleExamImport" class="modality">
 	        The modality of the dataset(s) that you are importing is {{modality}}
 	    </p>
