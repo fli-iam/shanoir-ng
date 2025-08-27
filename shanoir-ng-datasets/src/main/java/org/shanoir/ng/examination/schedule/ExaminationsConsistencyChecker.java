@@ -81,14 +81,9 @@ public class ExaminationsConsistencyChecker {
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
 	
-	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
-
     @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
-		if (!isTaskRunning.compareAndSet(false, true)) {
-            return;
-        }
 		try {
 			LOG.info("---------------");
 			LOG.info("---------------");
@@ -144,8 +139,6 @@ public class ExaminationsConsistencyChecker {
 		} catch(Exception e) {
 			LOG.info("STOPPED with exception...");
 			LOG.error(e.getMessage(), e);
-		} finally {
-			isTaskRunning.set(false);			
 		}
 	}
 
