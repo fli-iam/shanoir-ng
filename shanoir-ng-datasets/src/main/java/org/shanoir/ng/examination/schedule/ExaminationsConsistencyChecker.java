@@ -84,7 +84,7 @@ public class ExaminationsConsistencyChecker {
 	
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
-    @Scheduled(fixedRate = 30 * 60 * 1000) // Run every 1/2 hour (in milliseconds)
+    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
@@ -167,7 +167,7 @@ public class ExaminationsConsistencyChecker {
 						writer.writeNext(header);
 					}
 					LOG.info("Checking examinations in range [{}-{}]",
-						examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
+							examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
 						examinationLastChecked = checkExamination(examinationLastChecked,
 							examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
