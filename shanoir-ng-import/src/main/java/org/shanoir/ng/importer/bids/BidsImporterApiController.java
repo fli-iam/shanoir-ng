@@ -25,7 +25,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -144,22 +142,17 @@ public class BidsImporterApiController implements BidsImporterApi {
 			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
 				// We found a subject
-				subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
+				subjectName = subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
-				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
+				subject.setStudyId(studyId);
 				importJob.setSubjectName(subjectName);
-
-				LOG.debug("We found a subject " + subjectName);
 
 				// Create subject
 				subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 				if (subjectId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
 				}
-
-				importJob.setSubjectName(subjectName);
-
 			} else {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
 			}

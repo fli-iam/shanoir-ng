@@ -34,7 +34,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -415,22 +414,19 @@ public class ImportUtils {
 		IdName center = new IdName();
 		center.setId(centerId);
 		examination.setCenter(center);
-
 		examination.setComment(comment);
-
 		examination.setExaminationDate(examDate);
 		
 		return examination;
 	}
 
-	public static Subject createSubject(String name, LocalDate birthDate, String sex, Integer imagedObjectCategory,
-			List<SubjectStudy> subjectStudyList) {
+	public static Subject createSubject(String name, Long studyId, LocalDate birthDate, String sex, Integer imagedObjectCategory) {
 		Subject subject = new Subject();
 		subject.setName(name);
+		subject.setStudyId(studyId);
 		subject.setBirthDate(birthDate);
 		subject.setSex(sex);
 		subject.setImagedObjectCategory(imagedObjectCategory);
-		subject.setSubjectStudyList(subjectStudyList);
 		return subject;
 	}
 
