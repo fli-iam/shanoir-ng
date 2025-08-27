@@ -757,7 +757,7 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 					// Update birth date to 1st of january of the year
 					LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
-					subject = ImportUtils.createSubject(subjectName, studyId, updateBirthdate, patient.getPatientSex(), 1);
+					subject = ImportUtils.createSubject(subjectName, studyId, studyName, updateBirthdate, patient.getPatientSex(), 1);
 					Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 					if (subjectId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject could not be created, please check data", null));

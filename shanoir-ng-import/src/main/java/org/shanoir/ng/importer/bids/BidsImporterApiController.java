@@ -145,7 +145,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 				subjectName = subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
-				subject.setStudyId(studyId);
+				subject.setStudy(new IdName(studyId, studyName));
 				importJob.setSubjectName(subjectName);
 
 				// Create subject

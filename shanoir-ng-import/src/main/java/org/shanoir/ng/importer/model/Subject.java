@@ -16,6 +16,8 @@ package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
 
+import org.shanoir.ng.shared.core.model.IdName;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,8 +33,8 @@ public class Subject {
 	@JsonProperty("name")
 	private String name;
 
-	@JsonProperty("studyId")
-	private Long studyId;
+	@JsonProperty("study")
+	private IdName study;
 
 	@JsonProperty("identifier")
 	private String identifier;
@@ -117,12 +119,12 @@ public class Subject {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
 
-	public Long getStudyId() {
-		return studyId;
+	public IdName getStudy() {
+		return study;
 	}
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
+	public void setStudy(IdName study) {
+		this.study = study;
 	}
 
 }

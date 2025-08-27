@@ -420,10 +420,10 @@ public class ImportUtils {
 		return examination;
 	}
 
-	public static Subject createSubject(String name, Long studyId, LocalDate birthDate, String sex, Integer imagedObjectCategory) {
+	public static Subject createSubject(String name, Long studyId, String studyName, LocalDate birthDate, String sex, Integer imagedObjectCategory) {
 		Subject subject = new Subject();
 		subject.setName(name);
-		subject.setStudyId(studyId);
+		subject.setStudy(new IdName(studyId, studyName));
 		subject.setBirthDate(birthDate);
 		subject.setSex(sex);
 		subject.setImagedObjectCategory(imagedObjectCategory);
