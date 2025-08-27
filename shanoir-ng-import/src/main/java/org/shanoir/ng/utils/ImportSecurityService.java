@@ -25,7 +25,6 @@ public class ImportSecurityService {
 	
 	@Autowired
 	StudyRightsService rightsService;
-		
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -68,4 +67,5 @@ public class ImportSecurityService {
 		}
     	return KeycloakUtil.canImportFromPACS();
     }
+
 }

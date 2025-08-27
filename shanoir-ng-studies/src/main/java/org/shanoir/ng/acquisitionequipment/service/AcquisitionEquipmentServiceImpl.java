@@ -184,7 +184,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
 	private AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom) {
 		Optional<ManufacturerModel> manufacturerModelOpt = 
-	        	manufacturerModelRepository.findByNameIgnoreCase(equipmentDicom.getManufacturerModelName());
+	        	manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
 		ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
 			Manufacturer manufacturer = manufacturerRepository
 					.findByNameIgnoreCase(equipmentDicom.getManufacturer())

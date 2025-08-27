@@ -272,7 +272,7 @@ public class ImporterService {
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
-        if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
+        if (importJob.getStudyCardId() != null && importJob.getStudyCardId() != 0L) { // makes sense: imports without studycard exist
             StudyCard studyCard = getStudyCard(importJob.getStudyCardId());
             return studyCard;
         } else {
