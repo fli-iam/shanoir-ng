@@ -13,26 +13,86 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">1. Select DICOM archive</div>
-<fieldset class="step dicom">
-    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox>
-    <label>Multi-examination import</label>
-    <div *ngIf="!multipleExamImport">
-        <p>Please select a DICOM zip archive to import.</p>
-        <p>This archive may contain a DICOMDIR file at its root :</p>
-        <ul>
-            <li>If a DICOMDIR is present, it will be used to import the data (RECOMMENDED).</li>
-            <li>If not, one will be automatically generated from DICOM images <strong>at the root of the archive.</strong></li>
-        </ul>
-    </div>
-    <div *ngIf="multipleExamImport">
-        <p>Multi-examination allows a more simple and automatic import, with multiple possible examinations (DICOM studies).</p>
-        <p>Select a subject folder with one or multiple examination sub-folders and zip it.</p>
-        <p>The files should be organized like this:</p>
-        <p>SUBJECT_NAME.zip <br/>
-            - [subject-name] <br/>
-            - - [examination-comment] <br/>
-            - - - [series] <br/>
-            - - - - [list of dicom] <br/>
+
+	<fieldset class="step dicom">
+
+	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox> 
+	    <label>Multi-examination import</label>
+	    <div *ngIf="!multipleExamImport">
+	    <p>Please select a DICOM zip archive to import.</p>
+	    <p>This archive may contain a DICOMDIR file at its root :</p>
+	    <ul>
+	        <li>If a DICOMDIR is present, it will be used to import the data (RECOMMENDED).</li>
+	        <li>If not, one will be automatically generated from DICOM images <strong>at the root of the archive.</strong></li>
+	    </ul>
+	    </div>
+	    <div *ngIf="multipleExamImport">
+	    <p>Multi-examination allows a more simple and automatic import, with multiple possible examinations (DICOM studies).</p>
+	    <p>Select a subject folder with one or multiple examination sub-folders and zip it.</p>
+	    <p>The files should be organized like this:</p>
+	    <p>SUBJECT_NAME.zip <br/>
+	     - [subject-name] <br/>
+	     - - [examination-comment] <br/>
+	     - - - [series] <br/>
+	     - - - - [list of dicom] <br/>
+	     </p>
+	        <u>1) Subject: </u><br/>
+	        The subject will be automatically created, based on the subject name, and information found in the DICOM.
+	        Please note that there should be only ONE subject.
+	     <p>
+	        <u>2) Examination: </u><br/>
+	        The examination will be automatically created based on the examination comment.<br/>
+	        Examination date and other information will be gathered from information found in the DICOM.
+	     </p>
+	     <p>
+            Please select a study in which the data will be imported, and a default study card (if none adapted to the equipment can be found).
+         </p>
+	    <ol>
+		    <li>
+	        <label class="required-label">Select a research study</label> 
+	        <span class="right-col">
+	            <select-box 
+	                    [(ngModel)]="study" 
+	                    (userChange)="onSelectStudy()" 
+	                    [viewDisabled]="!study" 
+	                    [options]="studyOptions">
+	            </select-box>
+	        </span>
+	        </li>
+	        <li>
+	            <label class="required-label">Default study card</label> 
+	            <span class="right-col">
+	                <select-box 
+	                        [(ngModel)]="studyCard"
+	                        (userChange)="onSelectStudyCard()" 
+	                        [options]="studycardOptions">
+	                </select-box>
+	            </span>
+		    </li>
+	    </ol>
+        </div>
+	    <upload-file [disabled]="multipleExamImport && ((!studyCard && useStudyCard) || (!useStudyCard && (!center || !acquisitionEquipment)))" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+	    <div [hidden]="!uploadState?.progress">
+	        <progress-bar [progress]="uploadState?.progress" [text]="'Preparing upload'"></progress-bar>
+	    </div>
+	    <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
+	        A DICOM zip archive is required!
+	    </label>
+	    <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">
+	        DICOMDIR is missing in .zip file!
+	    </label>
+	    <label *ngIf="fileTooBigError" class="form-validation-alert" i18n="Import|fileTooBigError label">
+	        The uploaded file is too big, it should be less then 5Gb.
+	    </label>
+	    <label *ngIf="otherErrorMessage" class="form-validation-alert" i18n="Import label">
+            {{otherErrorMessage}}
+        </label>
+
+	    <p *ngIf="modality && !multipleExamImport" class="modality">
+	        The modality of the dataset(s) that you are importing is {{modality}}
+	    </p>
+	   <p *ngIf="multipleExamImport && archiveStatus=='uploaded'" class="modality">
+            The import successfully started. Please check "Jobs" tab to follow its progress.
         </p>
         <u>1) Subject: </u><br/>
         The subject will be automatically created, based on the subject name, and information found in the DICOM.
