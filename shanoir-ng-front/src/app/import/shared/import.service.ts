@@ -64,7 +64,7 @@ export class ImportService {
 
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
-            importJob.patients.forEach(patient => patient.subject.subjectStudyList.forEach(subjectStudy => subjectStudy.subject = null));
+            // importJob.patients.forEach(patient => patient.subject.subjectStudyList.forEach(subjectStudy => subjectStudy.subject = null));
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
         }

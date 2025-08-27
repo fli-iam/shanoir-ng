@@ -22,11 +22,11 @@ import { SubjectType } from './subject.types';
 
 export class SubjectStudyDTO {
     id: number;
-    examinations: number[];
+    // examinations: number[];
     subject: IdName;
     subjectPreclinical: boolean;
     study: SimpleStudyDTO;
-    subjectStudyIdentifier: string;
+    studyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     subjectStudyTags: SubjectStudyTagDTO[];
@@ -35,7 +35,7 @@ export class SubjectStudyDTO {
 
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
-        this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
+        // this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
         if(subjectStudy.subject != null){
             this.subject = new IdName(subjectStudy.subject.id, subjectStudy.subject.name);
             this.subjectPreclinical = subjectStudy.subject.preclinical;
@@ -44,8 +44,8 @@ export class SubjectStudyDTO {
             this.subjectPreclinical = false;
         }
         this.study = subjectStudy.study ? new SimpleStudyDTO(subjectStudy.study) : null;
-        this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
-        this.subjectType = subjectStudy.subjectType;
+        this.studyIdentifier = subjectStudy.studyIdentifier;
+        this.subjectType = subjectStudy.subject.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
         this.subjectStudyTags = subjectStudy.tags ? subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag)) : null;
         this.qualityTag = subjectStudy.qualityTag;
