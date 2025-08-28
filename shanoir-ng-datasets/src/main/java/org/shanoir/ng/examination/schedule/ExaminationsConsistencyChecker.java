@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -81,7 +80,8 @@ public class ExaminationsConsistencyChecker {
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
 	
-    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
+//    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
+	@Scheduled(fixedDelay = 5 * 60 * 1000) // Run every 5 minutes (in milliseconds)
 	@Transactional
 	public void check() {
 		try {
@@ -236,7 +236,7 @@ public class ExaminationsConsistencyChecker {
 
 	private void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
 		String studyInstanceUID = studyInstanceUIDs.iterator().next();
-		if(examination.getStudyInstanceUID() != null && examination.getStudyInstanceUID().isBlank()) {
+		if(examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
 			examination.setStudyInstanceUID(studyInstanceUID);
 			examinationRepository.save(examination);
 			LOG.debug("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
