@@ -37,9 +37,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.quality.QualityTag;
-import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityException;
@@ -70,6 +70,9 @@ public class ImporterService {
     private ExaminationService examinationService;
 
     @Autowired
+    private SubjectService subjectService;
+
+    @Autowired
     private ExaminationRepository examinationRepository;
 
     @Autowired
@@ -89,9 +92,6 @@ public class ImporterService {
    
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
-
-    @Autowired
-	private SubjectStudyService subjectStudyService;
 
     @Autowired
     private QualityService qualityService;
@@ -120,10 +120,8 @@ public class ImporterService {
                 generatedAcquisitions = generateAcquisitions(examination, importJob, event);
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
                 // Quality check
-                SubjectStudy subjectStudy = examination.getSubject().getSubjectStudyList().stream()
-                        .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
-                        .findFirst().orElse(null);
-                QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
+                Subject subject = examination.getSubject();
+                QualityTag tagSave = subject != null ? subject.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
                 QualityCardResult qualityResult;
@@ -137,9 +135,9 @@ public class ImporterService {
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
                         LOG.info("Retrieving Quality Control result from ShanoirUploader.");
-                        if(subjectStudy != null) {
-                            subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
-                            qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                        if(subject != null) {
+                            subject.setQualityTag(qualityResult.get(0).getTagSet());
+                            qualityResult.addUpdatedSubject(subject);
                         }
                     }
                 }
@@ -153,7 +151,7 @@ public class ImporterService {
                             event.setReport(qualityResult.toString());
                         }
                         // add tag to subject-study
-                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        subjectService.update(qualityResult.getUpdatedSubjects());
                     }
                 	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
@@ -164,9 +162,9 @@ public class ImporterService {
                             datasetAcquisitionService.deleteById(acquisition.getId(), null);
                         }
                         // revert quality tag
-                        if(subjectStudy != null) {
-                            subjectStudy.setQualityTag(tagSave);
-                            subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        if(subject != null) {
+                            subject.setQualityTag(tagSave);
+                            subjectService.update(qualityResult.getUpdatedSubjects());
                         }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }

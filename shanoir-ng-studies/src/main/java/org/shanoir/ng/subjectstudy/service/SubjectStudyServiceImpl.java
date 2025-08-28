@@ -15,10 +15,15 @@
 package org.shanoir.ng.subjectstudy.service;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 /**
  * SubjectStudy service implementation.
@@ -29,21 +34,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class SubjectStudyServiceImpl implements SubjectStudyService {
 
+	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyServiceImpl.class);
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
+	@Autowired
+	private SubjectService subjectService;
+	
 	@Override
 	public SubjectStudy findById(final Long id) {
 		return subjectStudyRepository.findById(id).orElse(null);
 	}
 
 	@Override
-	public SubjectStudy update(final SubjectStudy subjectStudy) throws EntityNotFoundException {
-		final SubjectStudy subjectStudyDb = subjectStudyRepository.findById(subjectStudy.getId()).orElse(null);
-		if (subjectStudyDb == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
-		updateSubjectStudyValues(subjectStudyDb, subjectStudy);
-		subjectStudyRepository.save(subjectStudyDb);
-		return subjectStudyDb;
+	@Transactional
+	public SubjectStudy update(final SubjectStudy subjectStudyNew) throws EntityNotFoundException {
+		final SubjectStudy subjectStudyOld = subjectStudyRepository.findById(subjectStudyNew.getId()).orElse(null);
+		if (subjectStudyOld == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudyNew.getId());
+		updateSubjectStudyValues(subjectStudyOld, subjectStudyNew);
+		subjectStudyRepository.save(subjectStudyOld);
+		return subjectStudyOld;
 	}
 	
 	/*
@@ -53,13 +64,12 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	 * @param subjectStudy subjectStudy with new values.
 	 * @return database subjectStudy with new values.
 	 */
-	private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyDb, final SubjectStudy subjectStudy) {
-		subjectStudyDb.setId(subjectStudy.getId());
-		subjectStudyDb.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-		subjectStudyDb.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-		subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
-		subjectStudyDb.setSubjectStudyTags(subjectStudy.getSubjectStudyTags());
-		return subjectStudyDb;
+	private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyOld, final SubjectStudy subjectStudyNew) {
+		subjectStudyOld.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
+		subjectStudyOld.setSubjectStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
+		subjectStudyOld.setSubjectType(subjectStudyNew.getSubjectType());
+		subjectService.mapSubjectStudyTagListToSubjectStudyTagList(subjectStudyOld, subjectStudyNew);
+		return subjectStudyOld;
 	}
 
 }

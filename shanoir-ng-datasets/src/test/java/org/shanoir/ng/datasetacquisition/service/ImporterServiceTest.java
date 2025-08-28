@@ -1,5 +1,14 @@
 package org.shanoir.ng.datasetacquisition.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -8,21 +17,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.Spy;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -45,9 +46,8 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
-import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -106,7 +106,7 @@ public class ImporterServiceTest {
 	private ImporterMailService importerServiceMail;
 
 	@Mock
-	private SubjectStudyService subjectStudyService;
+	private SubjectService subjectService;
 
 	private Examination exam;
 
@@ -163,8 +163,6 @@ public class ImporterServiceTest {
 		importJob.setFromShanoirUploader(false);
 
 		org.shanoir.ng.shared.model.Subject subject = new org.shanoir.ng.shared.model.Subject();
-		List<SubjectStudy> subjectStudyList = new ArrayList<>();
-		subject.setSubjectStudyList(subjectStudyList);
 
 		Examination examination = new Examination();
 		examination.setId(2L);

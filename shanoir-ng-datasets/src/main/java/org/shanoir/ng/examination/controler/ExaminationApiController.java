@@ -245,7 +245,7 @@ public class ExaminationApiController implements ExaminationApi {
 		examination.setComment(file.getOriginalFilename());
 		examination.setCenterId(centerId);
 		examination.setSubject(subject);
-		examination.setStudy(subject.getSubjectStudyList().get(0).getStudy());
+		examination.setStudy(subject.getStudy());
 		examination.setExaminationDate(LocalDate.now());
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());

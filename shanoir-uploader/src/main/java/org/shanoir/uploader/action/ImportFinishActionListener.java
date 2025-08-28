@@ -241,7 +241,7 @@ public class ImportFinishActionListener implements ActionListener {
 				logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
 			} else {
 				// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
-				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
+				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjects().isEmpty()) {
 					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
 						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
@@ -251,7 +251,7 @@ public class ImportFinishActionListener implements ActionListener {
 					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
 					if (!qualityControlResult.hasFailedValid()) {
 						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+						importJob.setQualityTag(qualityControlResult.getUpdatedSubjects().get(0).getQualityTag());
 					}
 				}				
 			}
