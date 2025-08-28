@@ -66,7 +66,7 @@ public class ExaminationsConsistencyChecker {
 	
 	private static final String ECC_CSV = "ecc.csv";
 
-	public static final int EXAMINATION_BATCH_SIZE = 100;
+	public static final int EXAMINATION_BATCH_SIZE = 1000;
 
 	@Value("${logging.file.name}")
     private String loggingFileName;
@@ -109,20 +109,18 @@ public class ExaminationsConsistencyChecker {
 			int pageNumber = 0;
 			int totalExaminationsChecked = 0;
 			List<Examination> examinationsToCheck;
-			do {
-				if (lastExamination != null) {
-					examinationsToCheck = examinationRepository.findByIdGreaterThan(lastExamination.getId(), PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
-				} else {
-					LOG.info("First run of ECC, start with first examination (or last checked deleted).");
-					examinationsToCheck = examinationRepository.findAll(PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
-				}
-				if (!examinationsToCheck.isEmpty()) {
-					checkExaminations(examinationsToCheck, examinationLastChecked, examinationIDToStudyInstanceUID, emptyExaminations);
-					totalExaminationsChecked += examinationsToCheck.size();
-					lastExamination = examinationsToCheck.get(examinationsToCheck.size() - 1);
-					pageNumber++;
-				}				
-			} while (!examinationsToCheck.isEmpty());
+			if (lastExamination != null) {
+				examinationsToCheck = examinationRepository.findByIdGreaterThan(lastExamination.getId(), PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
+			} else {
+				LOG.info("First run of ECC, start with first examination (or last checked deleted).");
+				examinationsToCheck = examinationRepository.findAll(PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
+			}
+			if (!examinationsToCheck.isEmpty()) {
+				checkExaminations(examinationsToCheck, examinationLastChecked, examinationIDToStudyInstanceUID, emptyExaminations);
+				totalExaminationsChecked += examinationsToCheck.size();
+				lastExamination = examinationsToCheck.get(examinationsToCheck.size() - 1);
+				pageNumber++;
+			}				
 			
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
