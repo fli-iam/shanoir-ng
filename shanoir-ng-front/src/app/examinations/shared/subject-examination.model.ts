@@ -17,6 +17,7 @@ import { DatasetAcquisition } from "../../dataset-acquisitions/shared/dataset-ac
 export class SubjectExamination {
     id: number;
     comment: string;
+    studyInstanceUID: string;
     examinationDate: Date;
     datasetAcquisitions: DatasetAcquisition[];
     extraDataFilePathList: string[] = [];

@@ -98,7 +98,8 @@ public class ImporterService {
 
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
-        instancesCreated++;
+        LOG.info("New server-instance created of ImporterService.");
+        instancesCreated = instancesCreated + 1;
     }
 
     public static int getInstancesCreated(){
@@ -106,7 +107,7 @@ public class ImporterService {
     }
 
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-        LOG.info("createAllDatasetAcquisition: " + this + " instances: " + getInstancesCreated());
+        LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
@@ -316,7 +317,7 @@ public class ImporterService {
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, "", rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());

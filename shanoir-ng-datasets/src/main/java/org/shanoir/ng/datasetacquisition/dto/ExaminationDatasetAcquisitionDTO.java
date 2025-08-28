@@ -63,4 +63,5 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	public void setExaminationId(Long examinationId) {
 		this.examinationId = examinationId;
 	}
+
 }
