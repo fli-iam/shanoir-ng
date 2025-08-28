@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -53,9 +52,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +136,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private StudyRepository studyRepo;
 
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+	private SubjectRepository subjectRepository;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -237,8 +235,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
 		// Get the list of subjects
-		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudy_Id(studyId);
-		return subjectStudies.stream().map(SubjectStudy::getSubject).collect(Collectors.toList());
+		List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
+		return subjects;
 	}
 
 	/**

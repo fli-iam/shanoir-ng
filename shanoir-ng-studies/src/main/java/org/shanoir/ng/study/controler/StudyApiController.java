@@ -255,13 +255,11 @@ public class StudyApiController implements StudyApi {
 			@RequestParam(value = "centerIds", required = true) List<Long> centerIds,
 			@Parameter(description = "subject id of datasets", required = true)
 			@RequestParam(value = "subjectIdStudyId", required = true) List<String> subjectIdStudyId) {
-
 		String res = null;
 		try {
 			Long studyId = Long.valueOf(studyIdAsStr);
 			res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
 			relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
-
 		} catch (Exception e) {
 			LOG.error("Error during copy for datasetsIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

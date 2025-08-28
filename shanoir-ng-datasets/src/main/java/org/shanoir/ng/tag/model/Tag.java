@@ -4,8 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 
 @Entity
 public class Tag {
@@ -21,6 +27,10 @@ public class Tag {
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	private Study study;
+
+	@JsonIgnore
+	@ManyToMany(mappedBy = "tags")
+	private Set<Subject> subjects = new HashSet<>();
 
 	/**
 	 * @return the id
@@ -78,4 +88,13 @@ public class Tag {
 	public void setStudy(Study study) {
 		this.study = study;
 	}
+
+	public Set<Subject> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(Set<Subject> subjects) {
+		this.subjects = subjects;
+	}
+
 }
