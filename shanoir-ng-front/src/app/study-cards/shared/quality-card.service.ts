@@ -20,6 +20,10 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { QualityCardDTOService } from './quality-card.dto';
 import { QualityCardDTO } from './quality-card.dto.model';
 import { QualityCard } from './quality-card.model';
+import { NotificationsService } from 'src/app/shared/notifications/notifications.service';
+import { TaskStatus } from 'src/app/async-tasks/task.model';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Subscription } from 'rxjs';
 
 export class Interval {
     constructor(public from: number, public to: number) {}
@@ -31,6 +35,8 @@ export class QualityCardService extends EntityService<QualityCard> {
     API_URL = AppUtils.BACKEND_API_QUALITY_CARD_URL;
 
     private qualityCardDTOService: QualityCardDTOService = ServiceLocator.injector.get(QualityCardDTOService);
+
+    private notificationService: NotificationsService = ServiceLocator.injector.get(NotificationsService);
     
     constructor(protected http: HttpClient) {
         super(http)
@@ -62,20 +68,31 @@ export class QualityCardService extends EntityService<QualityCard> {
     }
 
     applyOnStudy(qualityCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/apply/' + qualityCardId)
-            .toPromise();
+        return this.http.get<number>(this.API_URL + '/apply/' + qualityCardId)
+            .toPromise().then(taskId => this.findReport(taskId));
     }
 
     testOnStudy(qualityCardId: number, start?: number, stop?: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId 
+        return this.http.get<number>(this.API_URL + '/test/' + qualityCardId 
             + (start != null && start != undefined && stop != null && stop != undefined
                 ? '/' + (start - 1) + '/' + stop : '')
-            ).toPromise();
+            ).toPromise().then(taskId => this.findReport(taskId));
     }
 
-    testOnExamination(qualityCardId: number, examinationId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId + '/exam/' + examinationId)
-            .toPromise();
+    private findReport(taskId: number): Promise<any> {
+        let end: SuperPromise<any> = new SuperPromise();
+        let subscription: Subscription = this.notificationService.backTaskSubject.subscribe(task => {
+            if (task?.id == taskId && [TaskStatus.DONE, TaskStatus.DONE_BUT_WARNING].includes(task.status)) {
+                let report: any;
+                report = JSON.parse(task.report);
+                end.resolve(report);
+            }
+        })
+        return end.then(report => {
+            return report;
+        }).finally(() => {
+            subscription.unsubscribe();
+        });
     }
 
 }

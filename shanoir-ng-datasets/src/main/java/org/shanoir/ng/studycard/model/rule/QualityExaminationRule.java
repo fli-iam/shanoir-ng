@@ -17,7 +17,9 @@ package org.shanoir.ng.studycard.model.rule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
@@ -84,25 +86,25 @@ public class QualityExaminationRule extends AbstractEntity {
         this.orConditions = orConditions;
     }
 
-    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
-        apply(examination, null, result, downloader);	        
+    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader, Set<Integer> tagsInUse) {
+        apply(examination, null, result, downloader, tagsInUse);	        
     }
 
-    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
-        apply(examination, null, result, downloader);
+    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader, Set<Integer> tagsInUse) {
+        apply(examination, null, result, downloader, tagsInUse);
     }
 	
-	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader, Set<Integer> tagsInUse) {
 	    ExaminationData examData = new ExaminationData(examination);
 	    if (examData.getSubjectId() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
 	        log.warn("No subject in exam " + examination.getId());
 	    } else {
-	        apply(examData, examinationDicomAttributes, result, downloader);	        
+	        apply(examData, examinationDicomAttributes, result, downloader, tagsInUse);	        
 	    }
     }
 
-    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader, Set<Integer> tagsInUse) {
         // In case a rule was added without condition (= set as Always in gui)
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
             QualityCardResultEntry resultEntry = initResult(examination);
@@ -112,7 +114,7 @@ public class QualityExaminationRule extends AbstractEntity {
             result.addUpdatedSubject( 
                     setTagToSubject(examination.getSubjectId()));
         } else {
-            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
+            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader, tagsInUse);
             if (conditionResult.isFulfilled()) {
                 result.addUpdatedSubject( 
                         setTagToSubject(examination.getSubjectId()));
@@ -157,7 +159,7 @@ public class QualityExaminationRule extends AbstractEntity {
      * @param result
      * @return
      */
-    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result, WADODownloaderService downloader, Set<Integer> tagsInUse) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
@@ -167,7 +169,7 @@ public class QualityExaminationRule extends AbstractEntity {
             pilotedByDicomAttributes = true;
         } else {
             pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
+            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler(), tagsInUse);
         }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
@@ -271,5 +273,17 @@ public class QualityExaminationRule extends AbstractEntity {
             }
         }
         return false;
+    }
+
+    public Set<Integer> getConditionsDICOMtags() {
+        Set<Integer> result = new HashSet<>();
+        if (getConditions() != null) {
+            for (StudyCardCondition condition: getConditions()) {
+                if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                    result.add(((StudyCardDICOMConditionOnDatasets) condition).getDicomTag());
+                }
+            }
+        }
+        return result;
     }
 }
