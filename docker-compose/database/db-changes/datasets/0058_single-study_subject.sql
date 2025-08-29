@@ -32,24 +32,6 @@ SET
     s.quality_tag = ss.quality_tag,
     s.study_id = ss.study_id;
 
-# Add new subjects, in case of multi-study subjects and only for additional studies
-INSERT INTO subject (
-    name,
-    subject_type,
-    quality_tag,
-    study_id
-)
-SELECT
-    s.name,
-    ss.subject_type,
-    ss.quality_tag,
-    ss.study_id
-FROM subject_study ss
-JOIN subject s ON ss.subject_id = s.id
-LEFT JOIN subject existing
-    ON existing.name = s.name AND existing.study_id = ss.study_id
-WHERE existing.id IS NULL;
-
 # Update subject study to keep only one row per subject
 UPDATE subject_study ss
 JOIN subject old_sub ON ss.subject_id = old_sub.id
