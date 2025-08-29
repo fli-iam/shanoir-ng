@@ -14,11 +14,12 @@
 
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Field } from 'src/app/shared/reflect/field.decorator';
 
 export class Therapy extends Entity {
-    id: number;
-    name: string;
-    comment: string;
-    therapyType: TherapyType;
+    @Field() id: number;
+    @Field() name: string;
+    @Field() comment: string;
+    @Field() therapyType: TherapyType;
 }
 

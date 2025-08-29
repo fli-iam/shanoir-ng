@@ -14,11 +14,12 @@
 
 import { Reference } from '../../../reference/shared/reference.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Field } from 'src/app/shared/reflect/field.decorator';
 
 export class AnestheticIngredient extends Entity {
-  id: number;
-  name: Reference;
-  concentration: number;
-  concentration_unit: Reference;
+    @Field() id: number;
+    @Field() name: Reference;
+    @Field() concentration: number;
+    @Field() concentrationUnit: Reference;
 }
 

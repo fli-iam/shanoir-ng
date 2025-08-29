@@ -78,7 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="name" [(ngModel)]="study.name" />
+							<input type="text" formControlName="name"/>
 							<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
 							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.description}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<textarea type="text" formControlName="description" [(ngModel)]="study.description"></textarea>
+							<textarea type="text" formControlName="description"></textarea>
 						</ng-template>
 						</span>
                     </li>
@@ -103,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.license}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="license" [(ngModel)]="study.license">
+							<input type="text" formControlName="license">
 						</ng-template>
 						</span>
                     </li>
@@ -114,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{study.startDate | localDateFormatPipe}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
-								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
+								<datepicker formControlName="startDate"></datepicker>
 								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 							</ng-container>
 						</span>
@@ -126,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{study.endDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
+								<datepicker formControlName="endDate"></datepicker>
 								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
@@ -139,7 +139,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus" [options]="studyStatusOptions">
+								<select-box formControlName="studyStatus" [options]="studyStatusOptions">
 								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
@@ -152,7 +152,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{study.profile?.profileName}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
-								<select-box formControlName="profile" [(ngModel)]="study.profile" [options]="profileOptions">
+								<select-box formControlName="profile" [options]="profileOptions">
 								</select-box>
 								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
 							</ng-container>
@@ -167,8 +167,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							    </ng-container>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
-                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
+                                <input type="radio" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
+                                <input type="radio" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
                             </ng-template>
 						</span>
                     </li>
@@ -211,7 +211,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span *ngIf="!study.clinical" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.clinical" formControlName="clinical"></checkbox>
+								<checkbox formControlName="clinical"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -223,7 +223,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+								<checkbox formControlName="challenge"></checkbox>
 							</ng-template>
 						</span>
                     </li>
@@ -235,7 +235,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
                             </ng-template>
                             <ng-template ngSwitchDefault>
-                                <checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
+                                <checkbox formControlName="visibleByDefault"></checkbox>
                             </ng-template>
 						</span>
 					</li>
@@ -283,8 +283,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                 <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
@@ -300,14 +300,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [(ngModel)]="selectedCenter" formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
+							<select-box formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<span class="study-center-list">
-							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
+							<input type="hidden" formControlName="studyCenterList"/>
 							<table>
 								<tr>
 									<th>Acquisition Center</th>
@@ -370,7 +370,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
-					[(ngModel)]="study.studyUserList"
 					[users]="users"
 					[studyCenters]="study.studyCenterList"
 					[study] = "study"
@@ -395,7 +394,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>

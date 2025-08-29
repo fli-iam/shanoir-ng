@@ -159,7 +159,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.columnDefs = [
             {headerName: "Name", field: "name.value"},
             {headerName: "Concentration", field: "concentration", type: "number"},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "number"}
+            {headerName: "Concentration Unit", field: "concentrationUnit.value", type: "number"}
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
@@ -213,7 +213,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
                 let strIngredient = '';
                 strIngredient = strIngredient.concat(ingredient.name.value.substring(0, 3)).concat('. ');
                 if (ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
-                if (ingredient.concentration_unit) strIngredient = strIngredient.concat(ingredient.concentration_unit.value);
+                if (ingredient.concentrationUnit) strIngredient = strIngredient.concat(ingredient.concentrationUnit.value);
                 strIngredient = strIngredient.concat(' ');
                 if (generatedName.indexOf(strIngredient) < 0) {
                     generatedName = generatedName.concat(strIngredient);

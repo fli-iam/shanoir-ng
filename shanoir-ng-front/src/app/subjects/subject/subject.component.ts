@@ -143,7 +143,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
         return Promise.resolve();
     }
 
@@ -170,6 +169,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         );
         this.subscriptions.push(
             subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
+                this.toggleAnonymised
                 this.updateFormControl(subjectForm);
             })
         );
@@ -290,17 +290,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         studyListStr += '\n\nWarning: this action deletes ALL datasets ';
         (entity.subjectStudyList.length > 0) ? studyListStr += 'from ALL studies listed above.' : studyListStr += 'from this subject.';
         return Promise.resolve(studyListStr);
-    }
-
-    ngOnDestroy() {
-        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
-        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
-
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
-        }
     }
 
     protected readonly dateDisplay = dateDisplay;

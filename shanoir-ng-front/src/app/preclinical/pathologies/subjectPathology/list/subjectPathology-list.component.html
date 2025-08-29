@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button *ngIf="toggleForm==false" (click)="toggleSubjectItemForm()">Add a {{getEntityName()}}</button>
 </div>
 <div>
-    <subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createMode"
+    <subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createMode" [embedded]="true"
                 [toggleForm]="toggleForm" [subjectpathoSelected]="selectedEntity" (onEvent)="refreshDisplayEntity($event[0], $event[1])" (onCancel)="toggleForm = false">
     </subject-pathology-form>
 </div>

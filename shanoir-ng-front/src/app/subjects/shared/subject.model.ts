@@ -11,6 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Field } from 'src/app/shared/reflect/field.decorator';
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
@@ -20,19 +21,19 @@ import { Sex } from './subject.types';
 
 export class Subject extends Entity {
 
-    id: number;
-    examinations: Examination[];
-    name: string;
-    identifier: string;
-    birthDate: Date;
-    preclinical: boolean;
-    languageHemisphericDominance: "Left" | "Right";
-    manualHemisphericDominance: "Left" | "Right";
-    imagedObjectCategory: ImagedObjectCategory;
-    sex: Sex;
-    selected: boolean = false;
-    subjectStudyList: SubjectStudy[] = [];
-    isAlreadyAnonymized: boolean = false;
+    @Field() id: number;
+    @Field() examinations: Examination[];
+    @Field() name: string;
+    @Field() identifier: string;
+    @Field() birthDate: Date;
+    @Field() preclinical: boolean;
+    @Field() languageHemisphericDominance: "Left" | "Right";
+    @Field() manualHemisphericDominance: "Left" | "Right";
+    @Field() imagedObjectCategory: ImagedObjectCategory;
+    @Field() sex: Sex;
+    @Field() selected: boolean = false;
+    @Field() subjectStudyList: SubjectStudy[] = [];
+    @Field() isAlreadyAnonymized: boolean = false;
 
     public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();

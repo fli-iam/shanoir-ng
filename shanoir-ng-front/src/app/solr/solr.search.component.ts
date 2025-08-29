@@ -46,6 +46,7 @@ import {ServiceLocator} from "../utils/locator.service";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import {dateDisplay} from "../shared/./localLanguage/localDate.abstract";
+import { combineLatest, merge, Subscription } from 'rxjs';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];
@@ -92,6 +93,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
     dateDisplay = dateDisplay;
+    private subscriptions: Subscription[] = [];
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
@@ -168,14 +170,23 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             'importStartDate': [this.solrRequest.importStartDate, [DatepickerComponent.validator]],
             'importEndDate': [this.solrRequest.importEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
         });
-
-        formGroup.valueChanges.subscribe(() => {
-            formGroup.get('importEndDate').updateValueAndValidity({ emitEvent: false });
-        });
-        formGroup.valueChanges.subscribe(() => {
-            formGroup.get('endDate').updateValueAndValidity({ emitEvent: false });
-        });
-
+        // binding the model
+        this.subscriptions.push(formGroup.get('startDate').valueChanges.subscribe(value => {
+            this.solrRequest.datasetStartDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('endDate').valueChanges.subscribe(value => {
+            this.solrRequest.datasetEndDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('importStartDate').valueChanges.subscribe(value => {
+            this.solrRequest.importStartDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('importEndDate').valueChanges.subscribe(value => {
+            this.solrRequest.importEndDate = value;
+            this.onDateChange(value);
+        }));
         return formGroup;
     }
 
@@ -224,28 +235,41 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     updateSelections() {
         this.selections = [];
+        console.log(this.solrRequest.datasetStartDate, this.solrRequest.datasetEndDate)
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.datasetStartDate = null
+                () => {
+                    this.solrRequest.datasetStartDate = null;
+                    this.form.get('startDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.datasetEndDate = null
+                () => {
+                    this.solrRequest.datasetEndDate = null;
+                    this.form.get('endDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.importStartDate && this.solrRequest.importStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'from: ' + formatDate(this.solrRequest.importStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.importStartDate = null
+                () => {
+                    this.solrRequest.importStartDate = null;
+                    this.form.get('importStartDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.importEndDate && this.solrRequest.importEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'to: ' + formatDate(this.solrRequest.importEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.importEndDate = null
+                () => {
+                    this.solrRequest.importEndDate = null;
+                    this.form.get('importEndDate').setValue(null);
+                }
             ));
         }
         TextualFacetNames.forEach(facetName => {

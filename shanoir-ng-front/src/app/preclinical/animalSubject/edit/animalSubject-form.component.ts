@@ -76,7 +76,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     hasDownloadRight: boolean = false;
     downloadState: TaskState = new TaskState();
 
-    @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
     @ViewChild('therapiesComponent', { static: false }) therapiesComponent: SubjectTherapiesListComponent;
     @ViewChild('pathologiesComponent', { static: false }) pathologiesComponent: SubjectPathologiesListComponent;
@@ -126,20 +125,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromPreclinicalSubject(this.entity);
     }
-
-    // private addToCache(key: string, toBeCached: any) {
-    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))	{
-    //         this.breadcrumbsService.currentStep.addPrefilled(key, []);
-    //     }
-    //     this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
-    // }
-
-    // private getCache(key: string) {
-    //     if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
-    //        this.breadcrumbsService.currentStep.addPrefilled(key, []);
-    //     }
-    //     return this.breadcrumbsService.currentStep.getPrefilledValue(key);
-    // }
 
     protected fetchEntity: () => Promise<PreclinicalSubject> = () => {
         return this.idPromise.then(id => {
@@ -303,6 +288,38 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             })
         );
         return subjectForm;
+    }
+
+    protected mapFormToEntity(): void {
+        this.preclinicalSubject.subject.imagedObjectCategory = this.form.get('imagedObjectCategory').value;
+        this.preclinicalSubject.subject.isAlreadyAnonymized = this.form.get('isAlreadyAnonymized').value;
+        this.preclinicalSubject.subject.name = this.form.get('name').value;
+        this.preclinicalSubject.animalSubject.specie = this.form.get('specie').value;
+        this.preclinicalSubject.animalSubject.strain = this.form.get('strain').value;
+        this.preclinicalSubject.animalSubject.biotype = this.form.get('biotype').value;
+        this.preclinicalSubject.animalSubject.provider = this.form.get('provider').value;
+        this.preclinicalSubject.animalSubject.stabulation = this.form.get('stabulation').value;
+        this.preclinicalSubject.animalSubject.sex = this.form.get('sex').value;
+        this.preclinicalSubject.therapies = this.form.get('therapies').value;
+        this.preclinicalSubject.pathologies = this.form.get('pathologies').value;
+        this.preclinicalSubject.subject.subjectStudyList = this.form.get('subjectStudyList').value;
+    }
+
+    protected mapEntityToForm(): void {
+        if (this.form) {
+            this.form.get('imagedObjectCategory').setValue(this.preclinicalSubject.subject.imagedObjectCategory);
+            this.form.get('isAlreadyAnonymized').setValue(this.preclinicalSubject.subject.isAlreadyAnonymized);
+            this.form.get('name').setValue(this.preclinicalSubject.subject.name);
+            this.form.get('specie').setValue(this.preclinicalSubject.animalSubject.specie);
+            this.form.get('strain').setValue(this.preclinicalSubject.animalSubject.strain);
+            this.form.get('biotype').setValue(this.preclinicalSubject.animalSubject.biotype);
+            this.form.get('provider').setValue(this.preclinicalSubject.animalSubject.provider);
+            this.form.get('stabulation').setValue(this.preclinicalSubject.animalSubject.stabulation);
+            this.form.get('sex').setValue(this.preclinicalSubject.animalSubject.sex);
+            this.form.get('therapies').setValue(this.preclinicalSubject.therapies);
+            this.form.get('pathologies').setValue(this.preclinicalSubject.pathologies);
+            this.form.get('subjectStudyList').setValue(this.preclinicalSubject.subject.subjectStudyList);
+        }
     }
 
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){

@@ -24,6 +24,7 @@ import {TaskService} from "../task.service";
 import { HttpClient } from "@angular/common/http";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
+import { getDeclaredFields } from 'src/app/shared/reflect/field.decorator';
 
 @Component({
     selector: 'task-status',
@@ -57,7 +58,9 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private http: HttpClient,
         private keycloakService: KeycloakService,
         private consoleService: ConsoleService
-    ) { }
+    ) {
+        console.log(getDeclaredFields(new Task()));
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {

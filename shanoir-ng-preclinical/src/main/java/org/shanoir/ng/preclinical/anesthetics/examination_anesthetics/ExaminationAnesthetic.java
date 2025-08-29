@@ -39,36 +39,27 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({"_links"})
 public class ExaminationAnesthetic extends HalEntity {
 
-    @JsonProperty("examination_id")
     @NotNull
     private Long examinationId;
 
-    @JsonProperty("anesthetic")
     @ManyToOne
     @NotNull
     private Anesthetic anesthetic = null;
 
-    @JsonProperty("dose")
     private Double dose;
 
-    @JsonProperty("dose_unit")
     //@RefValueExists
     @ManyToOne
     private Reference doseUnit = null;
 
-    @JsonProperty("injection_interval")
     private String injectionInterval;
 
-    @JsonProperty("injection_site")
     private String injectionSite;
 
-    @JsonProperty("injection_type")
     private String injectionType;
 
-    @JsonProperty("startDate")
     private Date startDate = null;
 
-    @JsonProperty("endDate")
     private Date endDate = null;
 
     /**

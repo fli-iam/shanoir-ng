@@ -51,7 +51,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${datatype}`;
         return this.http.post<ExtraData>(url, JSON.stringify(extradata)).toPromise();
     }
         
@@ -75,19 +75,19 @@ export class ExtraDataService extends EntityService<ExtraData>{
     
         
     deleteExtradata(extradata: ExtraData): Promise<void> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}`;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}`;
         return this.http.delete<void>(url)
             .toPromise();
     }
     
     download(extradata:ExtraData): Observable<any>{
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
         return this.http.get<ExtraData>(url);
     }
     
         
     updateExtradata(datatype :string, id: number,extradata : ExtraData): Observable<ExtraData> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/`+datatype+`/`+id;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/`+datatype+`/`+id;
         return this.http
         .put<ExtraData>(url, JSON.stringify(extradata));
     }

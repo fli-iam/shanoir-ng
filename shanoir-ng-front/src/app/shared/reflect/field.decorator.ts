@@ -1,4 +1,3 @@
-
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -13,15 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Entity } from '../../shared/components/entity/entity.abstract';
-import { Manufacturer } from './manufacturer.model';
-import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import "reflect-metadata";
 
-export class ManufacturerModel extends Entity {
-    @Field() id: number;
-    @Field() name: string;
-    @Field() manufacturer: Manufacturer;
-    @Field() magneticField: number;
-    @Field() datasetModalityType: DatasetModalityType;
+const FIELDS_KEY = Symbol("fields");
+
+/**
+ * Decorator to mark a class property as a field.
+ */
+export function Field(): PropertyDecorator {
+    return (target: Object, propertyKey: string | symbol) => {
+        const fields: string[] = Reflect.getMetadata(FIELDS_KEY, target) || [];
+        fields.push(propertyKey as string);
+        Reflect.defineMetadata(FIELDS_KEY, fields, target);
+    };
+}
+
+export function getDeclaredFields(obj: any): string[] {
+    return Reflect.getMetadata(FIELDS_KEY, obj) || [];
 }

@@ -39,7 +39,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
 
-    @Input() examination_id:number;
+    @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
     @Input() canModify: Boolean = false;
     @Output() physioDataReady = new EventEmitter();
@@ -64,7 +64,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     protected fetchEntity: () => Promise<PhysiologicalData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
             return this.getExaminationExtraDatas(extradatas);
         });
     }

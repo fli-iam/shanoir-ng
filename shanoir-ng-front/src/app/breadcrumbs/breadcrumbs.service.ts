@@ -27,11 +27,10 @@ export class BreadcrumbsService implements OnDestroy {
 
     private popFoundedStepIndex: number;
     public currentStepIndex: number;
-    private nextLabel: string;
-    private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
     onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE' | 'FOCUS'}> = new BehaviorSubject({steps: this.steps});
+    private nextPrefill: { field: string; value: any; readOnly: boolean; };
 
     constructor(
         private router: Router,
@@ -69,21 +68,17 @@ export class BreadcrumbsService implements OnDestroy {
                     locationStrategy.replaceState(this.steps[this.popFoundedStepIndex].timestamp, 'todo', this.router.url, '');
                 } else {
                     this.removeStepsAfter(this.currentStepIndex);
-                    this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
+                    this.steps.push(new Step(null, this.router.url, timestamp));
                     this.onUpdateSteps.next({steps: this.steps, operation: 'ADD'});
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
-                    titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
                 }
-                if (this.nextMilestone) this.processMilestone();
-                this.nextMilestone = false;
-                this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                // this.saveSession();
+                this.currentStep.addPrefilled(this.nextPrefill?.field, this.nextPrefill?.value, this.nextPrefill?.readOnly);
+                this.nextPrefill = null;
             }
         }));
-        // this.loadSession();
     }
 
     ngOnDestroy(): void {
@@ -102,17 +97,16 @@ export class BreadcrumbsService implements OnDestroy {
     }
 
     public nameStep(label: string) {
-        this.nextLabel = label;
-        // this.saveSession();
+        setTimeout(() => {
+            this.currentStep.label = label;
+            this.titleService.setTitle('Shanoir' + (label ? ' - ' + label : ''));
+        });
     }
 
     public markMilestone() {
-        this.nextMilestone = true;
-        // this.saveSession();
-    }
-
-    public resetMilestone() {
-        this.nextMilestone = false;
+        setTimeout(() => {
+            this.processMilestone();
+        });
     }
 
     public currentStepAsMilestone(label?: string) {
@@ -182,6 +176,10 @@ export class BreadcrumbsService implements OnDestroy {
             if (this.steps[i].importStart) return this.steps[i].importMode;
         }
         return null;
+    }
+
+    public addNextStepPrefilled(field: string, value: any, readOnly: boolean = false) {
+        this.nextPrefill = { field, value, readOnly };
     }
 
 }
@@ -274,7 +272,7 @@ export class Step {
     }
 
     getPrefilledValue(field: string): Promise<any> {
-        return this.getPrefilled(field).then(res => res.value);
+        return this.getPrefilled(field).then(res => res?.value);
     }
 
     public resetWait() {

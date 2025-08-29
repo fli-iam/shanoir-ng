@@ -42,43 +42,33 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({"_links", "name", "", ""})
 public class ContrastAgent extends HalEntity {
 
-    @JsonProperty("protocol_id")
     @NotNull
     private Long protocolId;
 
-    @JsonProperty("name")
     //@RefValueExists
     @ManyToOne
     private Reference name = null;
 
-    @JsonProperty("manufactured_name")
     private String manufacturedName = null;
 
-    @JsonProperty("concentration")
     private Double concentration;
 
-    @JsonProperty("concentration_unit")
     //@RefValueExists
     @ManyToOne
     private Reference concentrationUnit = null;
 
-    @JsonProperty("dose")
     private Double dose;
 
-    @JsonProperty("dose_unit")
     //@RefValueExists
     @ManyToOne
     private Reference doseUnit = null;
 
-    @JsonProperty("injection_interval")
     @Enumerated(EnumType.STRING)
     private InjectionInterval injectionInterval;
 
-    @JsonProperty("injection_site")
     @Enumerated(EnumType.STRING)
     private InjectionSite injectionSite;
 
-    @JsonProperty("injection_type")
     @Enumerated(EnumType.STRING)
     private InjectionType injectionType;
 

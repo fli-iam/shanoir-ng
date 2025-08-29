@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from "src/app/shared/reflect/field.decorator";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
 
 export class Pathology  extends Entity {
-  id: number;
-  name: string;
+    @Field() id: number;
+    @Field() name: string;
 }
 

@@ -18,25 +18,26 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { InstrumentBasedAssessment } from '../instrument-assessment/instrument.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { Field } from 'src/app/shared/reflect/field.decorator';
 
 
 export class Examination extends Entity {
-    id: number;
-    examinationDate: Date;
-    subject: IdName | Subject;
-    study: IdName | Study;
-    center: IdName | Center;
-    examinationExecutive: IdName;
-    subjectStudy: SubjectWithSubjectStudy;
-    comment: string;
-    note: string;
-    subjectWeight: number;
-    weightUnitOfMeasure: UnitOfMeasure;
-    instrumentBasedAssessmentList: InstrumentBasedAssessment[];
-    extraDataFilePathList: string[] = [];
-    preclinical: boolean;
-    hasStudyCenterData: boolean = false;
-    copies: number[];
-    source: number;
+    @Field() id: number;
+    @Field() examinationDate: Date;
+    @Field() subject: IdName | Subject;
+    @Field() study: IdName | Study;
+    @Field() center: IdName | Center;
+    @Field() examinationExecutive: IdName;
+    @Field() subjectStudy: SubjectWithSubjectStudy;
+    @Field() comment: string;
+    @Field() note: string;
+    @Field() subjectWeight: number;
+    @Field() weightUnitOfMeasure: UnitOfMeasure;
+    @Field() instrumentBasedAssessmentList: InstrumentBasedAssessment[];
+    @Field() extraDataFilePathList: string[] = [];
+    @Field() preclinical: boolean;
+    @Field() hasStudyCenterData: boolean = false;
+    @Field() copies: number[];
+    @Field() source: number;
 }

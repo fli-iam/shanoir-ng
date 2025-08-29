@@ -56,9 +56,6 @@ export class CenterComponent extends EntityComponent<Center> {
 
     init() {
         super.init();
-        if (this.mode == 'create' && this.breadcrumbsService.currentStep.isPrefilled("entity")) {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.center = res);
-        }
     }
 
     initView(): Promise<void> {

@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{ingredient?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="name" formControlName="name" [(ngModel)]="ingredient.name">
+									<select id="name" formControlName="name">
 										<option *ngFor="let name of names" [ngValue]="name">{{name.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new ingredient name" (click)="goToRefPage('anesthetic','ingredient')">
@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{ingredient?.concentration}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="concentration" formControlName="concentration" [(ngModel)]="ingredient.concentration"/>
+									<input type="text" id="concentration" formControlName="concentration"/>
 								</ng-template>
 							</span>
 						</li>
@@ -56,10 +56,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit anestheticingredient|ConcentrationUnit label">Concentration Unit</label> 
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
-										{{ingredient?.concentration_unit?.value}}
+										{{ingredient?.concentrationUnit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="concentration_unit" required formControlName="concentration_unit" [(ngModel)]="ingredient.concentration_unit">
+									<select id="concentrationUnit" required formControlName="concentrationUnit">
 										<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new concentration unit" (click)="goToRefPage('unit','concentration')">

@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from 'src/app/shared/reflect/field.decorator';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 
 export class DataUserAgreement extends Entity {
     
-    id: number;
-    studyId: number;
-    timestampOfAccepted: number;
-    timestampOfNew: number;
-    userId: number;
-    isChallenge: boolean;
-    studyName: string;
-    path: string;
+    @Field() id: number;
+    @Field() studyId: number;
+    @Field() timestampOfAccepted: number;
+    @Field() timestampOfNew: number;
+    @Field() userId: number;
+    @Field() isChallenge: boolean;
+    @Field() studyName: string;
+    @Field() path: string;
 }

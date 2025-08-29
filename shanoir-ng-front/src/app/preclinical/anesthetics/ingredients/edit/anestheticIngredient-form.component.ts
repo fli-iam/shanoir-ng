@@ -88,7 +88,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         return this.formBuilder.group({
             'name': [this.ingredient.name, Validators.required],
             'concentration': [this.ingredient.concentration, Validators.required],
-            'concentration_unit': [this.ingredient.concentration_unit, Validators.required]
+            'concentrationUnit': [this.ingredient.concentrationUnit, Validators.required]
         });
     }
 
@@ -128,9 +128,9 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
 
         if(this.units){
             for (let unit of this.units) {
-                if(ingredientSelected.concentration_unit){
-                    if (ingredientSelected.concentration_unit.id == unit.id) {
-                        this.ingredient.concentration_unit = unit;
+                if(ingredientSelected.concentrationUnit){
+                    if (ingredientSelected.concentrationUnit.id == unit.id) {
+                        this.ingredient.concentrationUnit = unit;
                     }
                 }
                 }
@@ -200,7 +200,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                     this.entity.name = entity as Reference;
                 }else if (reftype == 'concentration'){
                     this.units.push(entity as Reference);
-                    this.entity.concentration_unit = entity as Reference;
+                    this.entity.concentrationUnit = entity as Reference;
                 }
         });
         });

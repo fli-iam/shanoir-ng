@@ -87,7 +87,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             'name': [this.model.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'pathology': [this.model.pathology, Validators.required],
             'comment': [this.model.comment],
-            'specifications': [this.model.filename]
+            'filename': [this.model.filename]
         });
     }
 

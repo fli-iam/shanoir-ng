@@ -48,19 +48,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label>Study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-                            <a [routerLink]="['/study/details/', study?.id]">
-                                {{study?.name}}
+                            <a [routerLink]="['/study/details/', datasetProcessing?.studyId]">
+                                {{studyName}}
                             </a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select-box formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()"></select-box>
+							<select-box formControlName="studyId" [options]="studyOptions" [validateChange]="askForStudyChangeConfirmation.bind(this)" (userChange)="onStudyChange($event)"></select-box>
 						</ng-template>
 					</span>
 				</li>
 				<li *ngIf="mode != 'view'">
 					<label>Subject</label>
 					<span class="right-col">
-						<select-box formControlName="subject" [(ngModel)]="subject" [options]="subjectOptions" (userChange)="onSubjectChange()"></select-box>
+						<select-box formControlName="subject" [options]="subjectOptions" [validateChange]="askForSubjectChangeConfirmation.bind(this)" (userChange)="onSubjectChange($event)"></select-box>
 					</span>
 				</li>
 				<li>
@@ -70,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{datasetProcessing.datasetProcessingType}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select-box formControlName="processingType" [(ngModel)]="datasetProcessing.datasetProcessingType" [options]="datasetProcessingTypes">
+							<select-box formControlName="datasetProcessingType" [options]="datasetProcessingTypes">
 							</select-box>
 						</ng-template>
 					</span>
@@ -83,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{datasetProcessing.processingDate | localDateFormatPipe }}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<datepicker formControlName="processingDate" [(ngModel)]="datasetProcessing.processingDate"></datepicker>
+							<datepicker formControlName="processingDate"></datepicker>
 							<label *ngIf="hasError('processingDate', ['format'])" class="form-validation-alert" i18n="Processing detail|Date valid error@@dateValidError">Invalid date, it must follow the format: {{ dateDisplay }}</label>
 							<label *ngIf="hasError('processingDate', ['required'])" class="form-validation-alert" i18n="Processing detail|BirthDate required error@@processingDetailBirthDateRequiredError">Required</label>
 						</ng-template>
@@ -97,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{datasetProcessing.comment}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="comment" formControlName="comment" [(ngModel)]="datasetProcessing.comment" />
+							<input type="text" id="comment" formControlName="comment"/>
 						</ng-template>
 					</span>
 				</li>
@@ -164,8 +164,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>
 				</legend>
 				<multi-select-table
-						formControlName="inputDatasetList"
-						[(ngModel)]="datasetProcessing.inputDatasets"
+						formControlName="inputDatasets"
 						[options]="inputDatasetOptions"
 						[columnDefs]="inputDatasetsColumnDefs"
 						[readOnly]="mode == 'view'">
@@ -176,8 +175,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <tool-tip>Datasets resulting from this dataset processing.</tool-tip>
                     </legend>
                     <multi-select-table
-                            formControlName="outputDatasetList"
-                            [(ngModel)]="datasetProcessing.outputDatasets"
+                            formControlName="outputDatasets"
                             [options]="outputDatasetOptions"
                             [columnDefs]="outputDatasetsColumnDefs"
                             [readOnly]="mode == 'view'">

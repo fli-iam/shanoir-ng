@@ -124,7 +124,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
             },
             { headerName: "Dose", field: "dose", type: "number" },
             { headerName: "Molecule", field: "molecule", type: "string" },
-            { headerName: "Dose Unit", field: "dose_unit.value" },
+            { headerName: "Dose Unit", field: "doseUnit.value" },
             {
                 headerName: "Type", field: "frequency", cellRenderer: function (params: any) {
                     return Frequency[params.data.frequency];

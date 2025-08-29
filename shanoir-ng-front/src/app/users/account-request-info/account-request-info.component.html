@@ -19,31 +19,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <ng-container *ngIf="editMode">
                 <select-box 
                     formControlName="studyId"
-                    [(ngModel)]="info.studyId"
                     [options]="studyOptions"
                     (change)="onStudyIdChange($event)">
                 </select-box>
                 <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
             </ng-container>
             <input type = "hidden"
-                [(ngModel)]="info.studyName"
                 formControlName="studyName">
             <span *ngIf="!editMode">{{info.studyName}}</span>
         </span>
     </li>
     <li *ngIf="presetStudyId" class="hidden">
         <input type = "hidden"
-            [(ngModel)]="info.studyId"
             formControlName="studyId">
         <input type = "hidden"
-            [(ngModel)]="info.studyName"
             formControlName="studyName">
     </li>
     <li>
         <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label> 
         <span class="right-col">
             <ng-container *ngIf="editMode">
-                <input type="text" formControlName="institution" [(ngModel)]="info.institution" (change)="onInfoChange()"/>
+                <input type="text" formControlName="institution" (change)="onInfoChange()"/>
                 <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
                 <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
             </ng-container>

@@ -25,6 +25,7 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
     protected browserPaging: BrowserPaging<T>;
 
     ngOnInit() {
+        super.ngOnInit();
         this.loadEntities();
     }
     

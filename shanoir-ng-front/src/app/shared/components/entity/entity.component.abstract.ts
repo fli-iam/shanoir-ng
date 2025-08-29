@@ -21,11 +21,12 @@ import {
     Input,
     OnChanges,
     OnDestroy,
+    OnInit,
     Output,
     SimpleChanges,
     ViewChild
 } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
@@ -41,17 +42,19 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
+import { getDeclaredFields } from '../../reflect/field.decorator';
 
 
 export type Mode = "view" | "edit" | "create";
 
 @Directive()
-export abstract class EntityComponent<T extends Entity> implements OnDestroy, OnChanges {
+export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
 
     private _entity: T;
     @Input() mode: Mode;
     @Input() id: number; // if not given via url
     @Input() entityInput: T; // if id not given via url
+    @Input() embedded: boolean = false;
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
@@ -66,6 +69,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     entityPromise: SuperPromise<T> = new SuperPromise();
     static ActivateTreeOnThisPage: boolean = true;
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    protected destroy$: Subject<void> = new Subject<void>();
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -100,7 +104,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
 
-        this.addBCStep();
         this.mode = this.activatedRoute.snapshot.data['mode'];
 
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
@@ -122,44 +125,65 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         });
     }
 
+    ngOnInit(): void {
+        this.addBCStep();
+    }
+
     public get entity(): T {
         return this._entity;
     }
 
     public set entity(entity: T) {
         if (!EntityComponent.isProxy(entity)) {
-            this._entity = new Proxy(entity, {
-                get: (target, prop, receiver) => {
-                    if (prop === 'IS_PROXY') return true;
-                    return Reflect.get(target, prop, receiver);
-                },
-                set: (target, prop, value, receiver) => {
-                    const oldValue = Reflect.get(target, prop, receiver);
-                    let isEqual = oldValue === value;
-                    // Deal with non primitives properties
-                    if (!isEqual
-                            && value && typeof value === 'object'
-                            && Object.prototype.hasOwnProperty.call(value, 'id')
-                            && oldValue && typeof oldValue === 'object') {
-                        const oldId = (oldValue as any)['id'];
-                        const newId = (value as any)['id'];
-                        isEqual = oldId === newId;
-                    }
-                    const ok = Reflect.set(target, prop, value, receiver);
-                    if (!ok) return false;
-                    // Sync form
-                    if (!isEqual && this.form) {
-                        const ctrl = this.form.get(String(prop));
-                        if (ctrl) {
-                            ctrl.setValue(value, {emitEvent: true});
-                        }
-                    }
-                    return true;
-                }
-            });
+            this._entity = EntityComponent.wrapAsProxy(entity, this.form);
         }
         this.mapEntityToForm();
         if (entity) this.entityPromise.resolve(entity);
+    }
+
+    private static wrapAsProxy<T extends Object>(object: T, form: FormGroup): T {
+        return new Proxy(object, {
+            get: (target, prop, receiver) => {
+                if (prop === 'IS_PROXY') return true;
+                return Reflect.get(target, prop, receiver);
+            },
+            set: (target, prop, value, receiver) => {
+                const oldValue = Reflect.get(target, prop, receiver);
+                let isEqual = this.deepEquals(oldValue, value);
+                // Deal with non primitives properties
+                if (!isEqual
+                        && value && typeof value === 'object'
+                        && Object.prototype.hasOwnProperty.call(value, 'id')
+                        && oldValue && typeof oldValue === 'object') {
+                    const oldId = (oldValue as any)['id'];
+                    const newId = (value as any)['id'];
+                    isEqual = oldId === newId;
+                }
+                const ok = Reflect.set(target, prop, value, receiver);
+                if (!ok) return false;
+                // Sync form
+                if (!isEqual && form) {
+                    const ctrl = form.get(String(prop));
+                    if (ctrl) {
+                        ctrl.setValue(value, {emitEvent: true});
+                    }
+                }
+                return true;
+            }
+        });
+    }
+
+    private static deepEquals(a: any, b: any): boolean {
+        if (a === b) return true;
+        else if (a instanceof Entity && b instanceof Entity) return Entity.equals(a, b);
+        else if (a instanceof Object && b instanceof Object) {
+            const aKeys = Object.keys(a);
+            const bKeys = Object.keys(b);
+            if (aKeys.length !== bKeys.length) return false;
+            return aKeys.every(key => this.deepEquals(a[key], b[key]));
+        } else if (a instanceof Array && b instanceof Array) {
+            return a.length === b.length && a.every((v, i) => this.deepEquals(v, b[i]));
+        } else return false;
     }
 
     static isProxy(entity: any): boolean {
@@ -223,6 +247,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                         this.mapEntityToEntity(res)
                         this.prefillProperties();
                     });
+                } else {
+                    this.prefillProperties();
                 }
             }
         });
@@ -273,7 +299,11 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         Object.keys(this.form.controls).forEach(key => {
             const control = this.form.get(key);
             let sub: Subscription = control.valueChanges.subscribe(value => {
-                if (this.entity && this.entity[key] !== value && !Entity.equals(this.entity?.[key], value)) {
+                const declaredFields: string[] = getDeclaredFields(this.entity);
+                if (this.entity
+                        && declaredFields.indexOf(key) >= 0
+                        && this.entity[key] !== value 
+                        && !Entity.equals(this.entity?.[key], value)) {
                     this.entity[key] = value;
                 }
             });
@@ -282,11 +312,13 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     private addBCStep() {
-        let label: string;
-        if (this.mode == "create") label = 'New ' + this.ROUTING_NAME;
-        else if (this.mode == 'edit') label = 'Edit ' + this.ROUTING_NAME;
-        else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
-        this.breadcrumbsService.nameStep(label);
+        if (!this.embedded) {
+            let label: string;
+            if (this.mode == "create") label = 'New ' + this.ROUTING_NAME;
+            else if (this.mode == 'edit') label = 'Edit ' + this.ROUTING_NAME;
+            else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
+            this.breadcrumbsService.nameStep(label);
+        }
     }
 
     private styleRequiredLabels() {
@@ -416,32 +448,47 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
      * Maps the form values to the entity properties.
      * This method should be called after the form is built and before saving the entity.
      */
-    private mapFormToEntity() {
+    protected mapFormToEntity() {
         Object.keys(this.form.controls).forEach((control) => {
             const name = control as keyof T;
-            this._entity[name] = this.form.get(control).value;
+            const declaredFields: string[] = getDeclaredFields(this.entity);
+            if (declaredFields.indexOf(name as string) >= 0) {
+                this._entity[name] = this.form.get(control).value;
+            }
         });
     };
 
-    private mapEntityToForm() {
+    /**
+     * Maps the current entity properties to the form values.
+     * Used to sync the form when the entity is updated outside of the form.
+     */
+    protected mapEntityToForm() {
         if (this.form && this.entity) {
+            const declaredFields: string[] = getDeclaredFields(this.entity);
             Object.keys(this.form.controls).forEach((control) => {
+                if (this.form.get(control).value instanceof FormArray) return; // not supported yet
                 const name = control as keyof T;
                 if (this.entity[name] !== undefined) {
                     this.form.get(control).setValue(this.entity[name], {emitEvent: false});
-                } else {
-                    this.form.get(control).setValue(null, {emitEvent: false});
+                } else if (declaredFields.indexOf(name as string) !== -1) {
+                    const ctrl = this.form.get(control);
+                    if (ctrl instanceof FormArray) {
+                        ctrl.clear({ emitEvent: false }); // vide le tableau
+                    } else if (ctrl instanceof FormGroup) {
+                        ctrl.reset({}, { emitEvent: false });
+                    } else {
+                        ctrl.setValue(null, { emitEvent: false });
+                    }
                 }
             });
         }
     }
 
-    private mapEntityToEntity(entity: T) {
+    /** Maps an entity to the current entity. Used when restoring an entity from a back navigation. */
+    protected mapEntityToEntity(entity: T) {
         if (this.entity && entity) {
-            Object.keys(entity).forEach((key) => {
-                this.entity[key] = null;
-            });
-            Object.keys(entity).forEach((key) => {
+            const declaredFields: string[] = getDeclaredFields(this.entity);
+            declaredFields.forEach((key) => {
                 if (entity[key] !== undefined) {
                     this.entity[key] = entity[key];
                 } else {
@@ -500,7 +547,13 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
      * Navigate to a create step for an attribute of the current entity.
      * This method will wait for the step to be saved and return the created entity.
      */
-    navigateToAttributeCreateStep(route: string, attributeName: string): Promise<void> {
+    navigateToAttributeCreateStep(route: string, attributeName: string, prefills?: {propName: string, value: any}[]): Promise<void> {
+        if (prefills) {
+            // Add read only properties to the intermediate step
+            prefills.forEach(readOnlyProp => {
+                this.breadcrumbsService.addNextStepPrefilled('entity.' + readOnlyProp.propName, readOnlyProp.value, true);
+            });
+        } 
         let currentStep: Step = this.breadcrumbsService.currentStep;
         return this.router.navigate([route]).then(success => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
@@ -608,6 +661,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
+        this.destroy$?.next();
+        this.destroy$?.complete();
     }
 
     /**

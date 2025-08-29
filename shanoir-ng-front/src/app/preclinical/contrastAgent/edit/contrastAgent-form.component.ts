@@ -47,7 +47,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     sites: Enum[] = [];
     intervals: Enum[] = [];
     injtypes: Enum[] = [];
-    dose_units: Reference[] = [];
+    doseUnits: Reference[] = [];
     concentration_units: Reference[] = [];
     references: Reference[] = [];
 
@@ -74,8 +74,8 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         return this.contrastAgentsService.getContrastAgent(this.protocol_id).then(agent => {
             if (agent) {
                 agent.name = this.getReferenceById(agent.name);
-                agent.dose_unit = this.getReferenceById(agent.dose_unit);
-                agent.concentration_unit = this.getReferenceById(agent.concentration_unit);
+                agent.doseUnit = this.getReferenceById(agent.doseUnit);
+                agent.concentrationUnit = this.getReferenceById(agent.concentrationUnit);
                 this.agent = agent;
             }  
         });
@@ -88,8 +88,8 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         return this.contrastAgentsService.getContrastAgent(this.protocol_id).then(agent => {
             if (agent) {
                 agent.name = this.getReferenceById(agent.name);
-                agent.dose_unit = this.getReferenceById(agent.dose_unit);
-                agent.concentration_unit = this.getReferenceById(agent.concentration_unit);
+                agent.doseUnit = this.getReferenceById(agent.doseUnit);
+                agent.concentrationUnit = this.getReferenceById(agent.concentrationUnit);
                 this.agent = agent;
             }  
         });
@@ -103,17 +103,21 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        let form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.agent.name, Validators.required],
-            'manufactured_name': [this.agent.manufactured_name],
+            'manufacturedName': [this.agent.manufacturedName],
             'dose': [this.agent.dose],
-            'dose_unit': [this.agent.dose_unit],
+            'doseUnit': [this.agent.doseUnit],
             'concentration': [this.agent.concentration],
-            'concentration_unit': [this.agent.concentration_unit],
-            'injectionInterval': [this.agent.injection_interval],
-            'injectionSite': [this.agent.injection_site],
-            'injectionType': [this.agent.injection_type],
+            'concentrationUnit': [this.agent.concentrationUnit],
+            'injectionInterval': [this.agent.injectionInterval],
+            'injectionSite': [this.agent.injectionSite],
+            'injectionType': [this.agent.injectionType],
         });
+        form.valueChanges.subscribe(() => {
+            this.onAgentChange     
+        });
+        return form;
     }
 
     loadReferences() {
@@ -121,11 +125,11 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
             this.agentNames = names;
         });
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => {
-            this.dose_units = units;
+            this.doseUnits = units;
         });
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => {
             this.concentration_units = units;
-            this.references = this.agentNames.concat(this.dose_units.concat(this.concentration_units));
+            this.references = this.agentNames.concat(this.doseUnits.concat(this.concentration_units));
         });
     }
 

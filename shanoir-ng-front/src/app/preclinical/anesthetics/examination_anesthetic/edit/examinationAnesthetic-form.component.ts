@@ -73,7 +73,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             if (examAnesthetics && examAnesthetics.length > 0) {
                 //Should be only one
                 let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                examAnesthetic.internal_id = examAnesthetic.id;
+                examAnesthetic.internalId = examAnesthetic.id;
                 return examAnesthetic;
             }
         });
@@ -90,7 +90,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         return this.loadData().then(() => {
             //Should be only one
-            this.examinationAnesthetic.dose_unit = this.getReferenceById(this.examinationAnesthetic.dose_unit);
+            this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
             this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
 
         });
@@ -100,21 +100,25 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         this.loadData();
         this.examinationAnesthetic = new ExaminationAnesthetic();
-        this.examinationAnesthetic.examination_id = this.id;
+        this.examinationAnesthetic.examinationId = this.id;
         return Promise.resolve();
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        let form: UntypedFormGroup = this.formBuilder.group({
             'anesthetic': [this.examinationAnesthetic.anesthetic],
-            'injectionInterval': [this.examinationAnesthetic.injection_interval],
-            'injectionSite': [this.examinationAnesthetic.injection_site],
-            'injectionType': [this.examinationAnesthetic.injection_type],
+            'injectionInterval': [this.examinationAnesthetic.injectionInterval],
+            'injectionSite': [this.examinationAnesthetic.injectionSite],
+            'injectionType': [this.examinationAnesthetic.injectionType],
             'dose': [this.examinationAnesthetic.dose],
-            'dose_unit': [this.examinationAnesthetic.dose_unit],
+            'doseUnit': [this.examinationAnesthetic.doseUnit],
             'startDate': [this.examinationAnesthetic.startDate],
             'endDate': [this.examinationAnesthetic.endDate]
         });
+        form.valueChanges.subscribe(value => {
+            this.eaChange();
+        });
+        return form;
     }
 
 
@@ -167,7 +171,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
     
     
-    eaChange(){
+    eaChange() {
         if(!this.isStandalone && this.examinationAnesthetic) {
             this.examAnestheticChange.emit(this.examinationAnesthetic);
         }       
@@ -175,7 +179,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     
 
-    goToAddAnesthetic(){
+    goToAddAnesthetic() {
         this.router.navigate(['/preclinical-anesthetic/create']);
     }
 
@@ -201,12 +205,12 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         if (!this.examinationAnesthetic) { 
             return Promise.resolve(null); 
         } else {
-            return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic));
+            return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examinationId, this.examinationAnesthetic));
         }
     }
 
     updateExaminationAnesthetic(): Promise<ExaminationAnesthetic> {
-        return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic).then(() => this.examinationAnesthetic);
+        return this.examAnestheticService.update(this.examinationAnesthetic.examinationId, this.examinationAnesthetic).then(() => this.examinationAnesthetic);
     }
 
     public async hasDeleteRight(): Promise<boolean> {

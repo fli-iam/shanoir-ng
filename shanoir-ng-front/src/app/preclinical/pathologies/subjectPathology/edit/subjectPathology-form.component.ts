@@ -238,6 +238,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if (!this.subjectPathology) {
             return;
         }
+        if (!this.preclinicalSubject) {
+            this.preclinicalSubject = new PreclinicalSubject();
+        }
         if(this.preclinicalSubject.pathologies === undefined){
             this.preclinicalSubject.pathologies = [];
         }

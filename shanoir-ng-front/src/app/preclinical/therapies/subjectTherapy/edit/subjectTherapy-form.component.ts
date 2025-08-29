@@ -106,7 +106,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             'id': [this.subjectTherapy.id],
             'therapy': [this.subjectTherapy.therapy, Validators.required],
             'dose': [this.subjectTherapy.dose],
-            'dose_unit': [this.subjectTherapy.dose_unit],
+            'doseUnit': [this.subjectTherapy.doseUnit],
             'frequency': [this.subjectTherapy.frequency],
             'startDate': [this.subjectTherapy.startDate],
             'molecule': [this.subjectTherapy.molecule],
@@ -176,8 +176,8 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
         if (this.units) {
             for (let unit of this.units) {
-                if (selectedTherapy.dose_unit && selectedTherapy.dose_unit.id == unit.id) {
-                    this.subjectTherapy.dose_unit = unit;
+                if (selectedTherapy.doseUnit && selectedTherapy.doseUnit.id == unit.id) {
+                    this.subjectTherapy.doseUnit = unit;
                 }
             }
         }

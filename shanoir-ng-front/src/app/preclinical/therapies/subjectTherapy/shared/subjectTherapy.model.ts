@@ -12,19 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Reference } from '../../../reference/shared/reference.model';
-import { Therapy } from '../../therapy/shared/therapy.model';
-import { Frequency } from "../../../shared/enum/frequency";
+import { Field } from 'src/app/shared/reflect/field.decorator';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Reference } from '../../../reference/shared/reference.model';
+import { Frequency } from "../../../shared/enum/frequency";
+import { Therapy } from '../../therapy/shared/therapy.model';
 
 export class SubjectTherapy  extends Entity{
-    id: number;
-    therapy: Therapy;
-    dose: number;
-    dose_unit: Reference;
-    frequency: Frequency;
-    molecule: string;
-    startDate: Date;
-    endDate : Date;
+    @Field() id: number;
+    @Field() therapy: Therapy;
+    @Field() dose: number;
+    @Field() doseUnit: Reference;
+    @Field() frequency: Frequency;
+    @Field() molecule: string;
+    @Field() startDate: Date;
+    @Field() endDate : Date;
 }
 

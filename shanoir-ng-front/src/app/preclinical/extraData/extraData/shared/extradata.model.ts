@@ -12,13 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from "src/app/shared/reflect/field.decorator";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
 
 
 export class ExtraData extends Entity{
-  id: number;
-  examination_id: number;
-  filename: string;
-  extradatatype:string;
+    @Field() id: number;
+    @Field() examinationId: number;
+    @Field() filename: string;
+    @Field() extradatatype:string;
 }
 

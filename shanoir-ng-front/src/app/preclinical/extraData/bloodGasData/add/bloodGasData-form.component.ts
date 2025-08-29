@@ -37,7 +37,7 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
 @ModesAware
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
-    @Input() examination_id:number;
+    @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
     @Input() canModify: Boolean = false;
   
@@ -59,7 +59,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     protected fetchEntity: () => Promise<BloodGasData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
             return this.loadExaminationExtraDatas(extradatas);
         });
     }

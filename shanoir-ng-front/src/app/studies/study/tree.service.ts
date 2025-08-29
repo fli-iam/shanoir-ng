@@ -348,10 +348,10 @@ export class TreeService {
             datasetPromise = Promise.resolve(dataset);
         }
         return datasetPromise.then(ds => {
-            if (ds.hasProcessing) {
+            if (ds?.hasProcessing) {
                 return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
-                return Promise.resolve({id: ds.id,
+                return Promise.resolve({id: ds?.id,
                     acqId: ds.datasetAcquisition?.id,
                     examId: ds.datasetAcquisition?.examination?.id,
                     subjectId: ds.datasetAcquisition?.examination?.subject?.id || ds.subject?.id,
@@ -384,7 +384,7 @@ export class TreeService {
             processingPromise = Promise.resolve(processing);
         }
         return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);

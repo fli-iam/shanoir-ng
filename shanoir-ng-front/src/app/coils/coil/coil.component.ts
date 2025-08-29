@@ -69,7 +69,9 @@ export class CoilComponent extends EntityComponent<Coil> {
         return this.centerService.getAll().then(centers => {
             this.centers = centers;
             this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
-            this.updateManufList(this.coil.center);
+            setTimeout(() => {
+                this.updateManufList(this.coil.center);
+            });
             this.coil.manufacturerModel = this.manufModels.filter(manuf => manuf.id == this.entity.manufacturerModel.id)[0];
         });
     }

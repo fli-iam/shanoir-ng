@@ -12,29 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, ViewChild} from '@angular/core';
-import {UntypedFormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {Option} from '../../shared/select/select.component';
-import {EntityComponent} from '../../shared/components/entity/entity.component.abstract';
-import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
-import {Dataset} from '../shared/dataset.model';
-import {DatasetService} from '../shared/dataset.service';
-import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
-import {DatasetProcessingService} from '../shared/dataset-processing.service';
-import {StudyService} from '../../studies/shared/study.service';
-import {Study} from '../../studies/shared/study.model';
-import {Subject} from '../../subjects/shared/subject.model';
-import {EntityService} from '../../shared/components/entity/entity.abstract.service';
-import {TableComponent} from '../../shared/components/table/table.component';
-import {ColumnDefinition} from '../../shared/components/table/column.definition.type';
-import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
-import {ExecutionService} from "../../vip/execution/execution.service";
-import * as AppUtils from "../../utils/app.utils";
-import {formatDate} from "@angular/common";
+import { formatDate } from "@angular/common";
+import { Component } from '@angular/core';
+import { UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { distinctUntilChanged, takeUntil } from 'rxjs';
 import { Selection } from 'src/app/studies/study/tree.service';
-import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
+import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
+import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { dateDisplay } from "../../shared/localLanguage/localDate.abstract";
+import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { Subject } from '../../subjects/shared/subject.model';
+import * as AppUtils from "../../utils/app.utils";
+import { ExecutionService } from "../../vip/execution/execution.service";
+import { DatasetProcessingService } from '../shared/dataset-processing.service';
+import { Dataset } from '../shared/dataset.model';
+import { DatasetService } from '../shared/dataset.service';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -45,13 +45,9 @@ import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
 
-    @ViewChild('inputDatasetsTable', {static: false}) inputDatasetsTable: TableComponent;
-    @ViewChild('outputDatasetsTable', {static: false}) outputDatasetsTable: TableComponent;
-
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
-    public study: Study;
-    public subject: Subject;
-    public studyOptions: Option<Study>[] = [];
+    public _subject: Subject;
+    public studyOptions: Option<number>[] = [];
     public subjectOptions: Option<Subject>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
     public outputDatasetOptions: Option<Dataset>[] = [];
@@ -75,6 +71,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         super(route, 'dataset-processing');
     }
 
+    get subject(): Subject { return this._subject; }
+    
+    set subject(subject: Subject) { 
+        this._subject = subject;
+        this.form.get('subject').setValue(subject);
+    }
+
     ngOnInit(): void {
         this.createColumnDefs();
     }
@@ -91,6 +94,9 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     initView(): Promise<void> {
+        this.studyService.get(this.datasetProcessing.studyId, "lazy").then(study => {
+            this.studyOptions = [new Option<number>(study.id, study.name)];
+        });
         // checking if the datasetProcessing is not execution monitoring
         this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
             (executionMonitoring: ExecutionMonitoring) => {
@@ -100,69 +106,67 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 this.resetExecutionMonitoring();
             }
         )
-        this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
-            this.study = this.studyOptions?.[0]?.value;
-        });
         return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.fetchStudies().then(() => {
-            this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
-            let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
-            this.fetchSubjects().then(() => {
-                this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
-            }).then(() => {
-                return this.fetchDatasets();
-            });
+            const firstDatasetId: number = this.datasetProcessing.inputDatasets?.[0]?.id;
+            if (!!firstDatasetId) {
+                Promise.all([
+                    this.datasetService.get(this.datasetProcessing.inputDatasets?.[0]?.id),
+                    this.fetchSubjects()
+                ]).then(([dataset]) => {
+                    if (dataset) {
+                        const subjectId = dataset.subject?.id;
+                        this.fetchDatasets();
+                        this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
+                    }   
+                });
+
+            }
         });
         return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
-        this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
-        return Promise.resolve().then(() => {
-            if (!!this.prefilledStudy) {
-                this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
-                this.study = this.prefilledStudy;
-                this.datasetProcessing.studyId = this.study?.id;
-            } else {
-                return this.fetchStudies();
-            }
-        }).then(() => {
-            if (!!this.prefilledSubject) {
-                this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
-                this.subject = this.prefilledSubject;
-                return this.fetchDatasets();
-            }
-        })
+        return Promise.resolve();
     }
 
-    onStudyChange() {
-        this.datasetProcessing.studyId = this.study?.id;
+    onStudyChange(newValue: number) {
         this.subjectOptions = [];
-        this.subject = null;
-        if (this.study) {
+        if (newValue) {
             this.fetchSubjects();
+        }
+        this.subject = null;
+        this.onSubjectChange(null);
+    }
+
+    onSubjectChange(newValue: Subject) {
+        this.subject = newValue;
+        this.datasetProcessing.inputDatasets = [];
+        this.datasetProcessing.outputDatasets = [];
+        this.inputDatasetOptions = [];
+        this.outputDatasetOptions = [];
+        if (newValue) {
+            this.fetchDatasets();
         }
     }
 
-    onSubjectChange() {
-        this.inputDatasetOptions = [];
-        this.outputDatasetOptions = [];
+    askForSubjectChangeConfirmation(): Promise<boolean> {
         if (this.datasetProcessing.inputDatasets?.length > 0 || this.datasetProcessing.outputDatasets?.length > 0) {
-            this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input and output will be removed from the current lists.')
-            .then(response => {
-                if (response) {
-                    this.datasetProcessing.inputDatasets = [];
-                    this.datasetProcessing.outputDatasets = [];
-                    this.fetchDatasets();
-                }
-            });
+            return this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input and output will be removed from the current lists.');
         } else {
-            this.fetchDatasets();
+            return Promise.resolve(true);
+        }
+    }
+
+    askForStudyChangeConfirmation(): Promise<boolean> {
+        if (this.datasetProcessing.inputDatasets?.length > 0 || this.datasetProcessing.outputDatasets?.length > 0) {
+            return this.confirmDialogService.confirm('Change Study', 'Are you sure you want to change the study for this processing ? Every dataset input and output will be removed from the current lists.');
+        } else {
+            return Promise.resolve(true);
         }
     }
 
@@ -177,19 +181,24 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     fetchStudies(): Promise<void> {
         return this.studyService.getAll().then(studies => {
-            this.studyOptions = studies?.map(study => new Option<Study>(study, study.name));
+            this.studyOptions = studies?.map(study => new Option<number>(study.id, study.name));
         });
     }
 
     fetchOneStudy(studyId: number): Promise<void> {
         return this.studyService.get(studyId).then(study=> {
-            this.studyOptions = [new Option<Study>(study, study.name)];
+            this.studyOptions = [new Option<number>(study.id, study.name)];
         });
     }
 
+    get studyName(): string {
+        let studyOption = this.studyOptions?.find(opt => opt.value == this.datasetProcessing?.studyId);
+        return studyOption ? studyOption.label : '';
+    }
+
     fetchSubjects(): Promise<void> {
-        if (!this.study?.id) return Promise.resolve();
-        return this.studyService.findSubjectsByStudyId(this.study.id).then(subjects => {
+        if (!this.datasetProcessing?.studyId) return Promise.resolve();
+        return this.studyService.findSubjectsByStudyId(this.datasetProcessing.studyId).then(subjects => {
             this.subjectOptions = subjects?.map(sub => {
                 let subject: Subject = new Subject();
                 subject.id = sub.id;
@@ -201,8 +210,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     fetchDatasets(): Promise<void> {
-        if (!this.study?.id || !this.subject?.id) return Promise.resolve();
-        return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
+        if (!this.datasetProcessing?.studyId || !this.subject?.id) return Promise.resolve();
+        return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
             for (let dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
@@ -212,29 +221,60 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     buildForm(): UntypedFormGroup {
         let formGroup: UntypedFormGroup = this.formBuilder.group({
-            'study': [{value: this.study?.id, disabled: !!this.prefilledStudy}, Validators.required],
-            'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.study)}, Validators.required],
-            'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
+            'studyId': [{value: this.datasetProcessing?.studyId , disabled: !!this.prefilledStudy}, Validators.required],
+            'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.datasetProcessing?.studyId)}, Validators.required],
+            'datasetProcessingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
-            'inputDatasetList': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
-            'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
+            'inputDatasets': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
+            'outputDatasets': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
-        this.subscriptions.push(
-            formGroup.get('study').valueChanges.subscribe(studyVal => {
-                if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
-                else formGroup.get('subject').enable();
-            }), formGroup.get('subject').valueChanges.subscribe(subjectVal => {
-                if (!subjectVal) {
-                    formGroup.get('inputDatasetList').disable();
-                    formGroup.get('outputDatasetList').disable();
+        formGroup.get('studyId').valueChanges
+            .pipe(
+                distinctUntilChanged(),
+                takeUntil(this.destroy$)
+            ).subscribe(studyVal => {
+                if (!!this.prefilledSubject || !studyVal) {
+                    formGroup.get('subject').disable();
                 } else {
-                    formGroup.get('inputDatasetList').enable();
-                    formGroup.get('outputDatasetList').enable();
+                    formGroup.get('subject').enable();
+                }
+            });
+        formGroup.get('subject').valueChanges
+            .pipe(
+                distinctUntilChanged(),
+                takeUntil(this.destroy$)
+            ).subscribe(subjectVal => {
+                if (!subjectVal) {
+                    formGroup.get('inputDatasets').disable();
+                    formGroup.get('outputDatasets').disable();
+                } else {
+                    formGroup.get('inputDatasets').enable();
+                    formGroup.get('outputDatasets').enable();
                 }
             })
-        );
         return formGroup;
+    }
+
+    protected prefillProperties(): void {
+        super.prefillProperties();
+        this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
+        this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
+        if (!!this.prefilledStudy) {
+            this.studyOptions = [new Option(this.prefilledStudy.id, this.prefilledStudy.name)];
+            this.datasetProcessing.studyId = this.prefilledStudy.id;
+        } else {
+            this.fetchStudies();
+        }
+        if (!!this.prefilledSubject) {
+            this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
+            this.subject = this.prefilledSubject;
+            this.fetchDatasets();
+        }
+    }
+
+    protected mapEntityToForm(): void {
+        super.mapEntityToForm();
     }
 
     public async hasEditRight(): Promise<boolean> {

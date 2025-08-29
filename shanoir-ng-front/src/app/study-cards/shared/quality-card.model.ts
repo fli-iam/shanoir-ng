@@ -11,6 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Field } from 'src/app/shared/reflect/field.decorator';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Option } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
@@ -20,11 +21,11 @@ import { StudyCardCondition } from './study-card.model';
 
 export class QualityCard extends Entity {
 
-    id: number;
-    name: string;
-    study: Study;
-    rules: QualityCardRule[] = [];
-    toCheckAtImport: boolean = false;
+    @Field() id: number;
+    @Field() name: string;
+    @Field() study: Study;
+    @Field() rules: QualityCardRule[] = [];
+    @Field() toCheckAtImport: boolean = false;
 }
 
 

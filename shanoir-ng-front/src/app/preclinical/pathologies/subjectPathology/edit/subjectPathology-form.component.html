@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{subjectPathology?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="pathology" formControlName="pathology" [(ngModel)]="subjectPathology.pathology" (change)="refreshModelsByPathology()">
+									<select id="pathology" formControlName="pathology" (change)="refreshModelsByPathology()">
 										<option *ngFor="let pathology of pathologies" [ngValue]="pathology">{{pathology.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology" (click)="goToAddPathology()">
@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{subjectPathology?.pathologyModel?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="pathologyModel" formControlName="pathologyModel" [(ngModel)]="subjectPathology.pathologyModel">
+									<select id="pathologyModel" formControlName="pathologyModel">
 										<option *ngFor="let model of modelsDisplay" [ngValue]="model">{{model.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology model" (click)="goToAddPathologyModel()">
@@ -74,7 +74,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{subjectPathology?.location?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="location" formControlName="location" [(ngModel)]="subjectPathology.location">
+									<select id="location" formControlName="location">
 										<option *ngFor="let location1 of locations" [ngValue]="location1">{{location1.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new location" (click)="goToAddLocation()">
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{subjectPathology?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<datepicker id="startDate"  [(ngModel)]="subjectPathology.startDate" formControlName="startDate" ></datepicker>
+									<datepicker id="startDate" formControlName="startDate" ></datepicker>
 									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{subjectPathology?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<datepicker id="endDate"  [(ngModel)]="subjectPathology.endDate" formControlName="endDate" ></datepicker>
+									<datepicker id="endDate" formControlName="endDate" ></datepicker>
 									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">End Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
