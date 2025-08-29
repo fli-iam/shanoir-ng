@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,24 +43,24 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
     
     private List<SubjectStudy> updatedSubjectStudies = new ArrayList<>();
     
-    public List<SubjectStudy> getUpdatedSubjectStudies() {
-        return updatedSubjectStudies;
+    public List<Subject> getUpdatedSubjects() {
+        return updatedSubjects;
     }
 
-    private void setUpdatedSubjectStudies(List<SubjectStudy> updatedSubjectStudies) {
-        this.updatedSubjectStudies = updatedSubjectStudies;
+    private void setUpdatedSubjects(List<Subject> updatedSubjects) {
+        this.updatedSubjects = updatedSubjects;
     }
     
-    public void addUpdatedSubjectStudy(SubjectStudy subjectStudy) {
-        if (getUpdatedSubjectStudies() == null) setUpdatedSubjectStudies(new ArrayList<>());
-        if (subjectStudy == null || subjectStudy.getId() == null) return;
-        for (SubjectStudy presentSubStu : getUpdatedSubjectStudies()) {
-            if (subjectStudy.getId().equals(presentSubStu.getId()) 
-                    && presentSubStu.getQualityTag().getId() >= subjectStudy.getQualityTag().getId()) {
+    public void addUpdatedSubject(Subject subject) {
+        if (getUpdatedSubjects() == null) setUpdatedSubjects(new ArrayList<>());
+        if (subject == null || subject.getId() == null) return;
+        for (Subject presentSub : getUpdatedSubjects()) {
+            if (subject.getId().equals(presentSub.getId()) 
+                    && presentSub.getQualityTag().getId() >= subject.getQualityTag().getId()) {
                 return;
             }
         }
-        getUpdatedSubjectStudies().add(subjectStudy);
+        getUpdatedSubjects().add(subject);
     }
 
     /***
@@ -68,21 +68,21 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
      * @param study the study containing the original subject-studies
      */
     public void removeUnchanged(Study study) {
-        if (getUpdatedSubjectStudies() == null) return;
-        for (SubjectStudy original : study.getSubjectStudyList()) {
-            getUpdatedSubjectStudies().removeIf(updated -> 
-                updated.getId().equals(original.getId()) 
-                && updated.getQualityTag() != null
-                && updated.getQualityTag().equals(original.getQualityTag())
-             );
+        if (getUpdatedSubjects() == null) return;
+        for (Subject original : study.getSubjectList()) {
+            getUpdatedSubjects().removeIf(updated -> 
+                    updated.getId().equals(original.getId()) 
+                    && updated.getQualityTag() != null
+                    && updated.getQualityTag().equals(original.getQualityTag())
+            );
         }
     }
 
     public void merge(QualityCardResult result) {
         this.addAll(result);
-        if (result.getUpdatedSubjectStudies() != null) {
-            for (SubjectStudy subjectStudy : result.getUpdatedSubjectStudies()) {
-                this.addUpdatedSubjectStudy(subjectStudy);
+        if (result.getUpdatedSubjects() != null) {
+            for (Subject subjectStudy : result.getUpdatedSubjects()) {
+                this.addUpdatedSubject(subjectStudy);
             }
         }
     }

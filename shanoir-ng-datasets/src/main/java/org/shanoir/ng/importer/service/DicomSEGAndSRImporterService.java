@@ -250,9 +250,9 @@ public class DicomSEGAndSRImporterService {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
-				|| acquisition instanceof CtDatasetAcquisition
-				|| acquisition instanceof PetDatasetAcquisition
-				|| acquisition instanceof XaDatasetAcquisition) {
+					|| acquisition instanceof CtDatasetAcquisition
+					|| acquisition instanceof PetDatasetAcquisition
+					|| acquisition instanceof XaDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				for (Dataset dataset : datasets) {
 					List<DatasetExpression> expressions = dataset.getDatasetExpressions();
@@ -302,12 +302,7 @@ public class DicomSEGAndSRImporterService {
 		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
 		createDatasetExpression(datasetAttributes, newMsOrSegDataset);
 		Dataset createdDataset = datasetService.create(newMsOrSegDataset);
-		try {
-			solrService.indexDataset(createdDataset.getId());
-		} catch(Exception e) {
-			LOG.error(e.getMessage(), e);
-			LOG.error("DICOM SEG or SR not indexed into Solr.");
-		}
+		solrService.indexDataset(createdDataset.getId());
 	}
 
 	/**

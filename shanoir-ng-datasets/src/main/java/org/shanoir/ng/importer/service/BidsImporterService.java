@@ -109,58 +109,58 @@ public class BidsImporterService {
 
 			// Check data type according to data type
 			switch (workfolder.getName()) {
-			case "anat":
-				importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "func":
-				importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "dwi":
-				importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "fmap":
-				importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "perf":
-				importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "meg":
-				importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
-				break;
-			case "ieeg":
-				importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
-				break;
-			case "eeg":
-				importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
-				break;
-			case "ct":
-				importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
-				break;
-			case "beh":
-				importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
-				break;
-			case "pet":
-				importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
-				break;
-			case "micr":
-				importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
-				break;
-			case "nirs":
-				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
-				break;
-			case "xa":
-				importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
-				break;
-			default:
-				if (event != null) {
-					String msg = "The data type folder is not recognized (given: " + workfolder.getName() + "). Please update your BIDS archive following the rules.";
-					LOG.error(msg);
-					event.setStatus(ShanoirEvent.ERROR);
-					event.setMessage(msg);
-					event.setProgress(-1f);
-					eventService.publishEvent(event);
-				}
-				break;
+				case "anat":
+					importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "func":
+					importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "dwi":
+					importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "fmap":
+					importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "perf":
+					importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "meg":
+					importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
+					break;
+				case "ieeg":
+					importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
+					break;
+				case "eeg":
+					importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
+					break;
+				case "ct":
+					importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
+					break;
+				case "beh":
+					importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
+					break;
+				case "pet":
+					importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
+					break;
+				case "micr":
+					importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
+					break;
+				case "nirs":
+					importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
+					break;
+				case "xa":
+					importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
+					break;
+				default:
+					if (event != null) {
+						String msg = "The data type folder is not recognized (given: " + workfolder.getName() + "). Please update your BIDS archive following the rules.";
+						LOG.error(msg);
+						event.setStatus(ShanoirEvent.ERROR);
+						event.setMessage(msg);
+						event.setProgress(-1f);
+						eventService.publishEvent(event);
+					}
+					break;
 			}
 		} catch (Exception e) {
 			LOG.error("An unexpected exception occured during the import of a BIDS dataset.", e);

@@ -7,13 +7,15 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
+import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -47,7 +49,7 @@ public class RabbitMQStudiesService {
 	private StudyService studyService;
 
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+	private SubjectRepository subjectRepository;
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
@@ -191,21 +193,21 @@ public class RabbitMQStudiesService {
 	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
 		try {
 		    LOG.info(messageStr);
-			List<SubjectStudyQualityTagDTO> subjectStudyStudyCardTagList =
-					objectMapper.readValue(messageStr, new TypeReference<List<SubjectStudyQualityTagDTO>>(){});
+			List<SubjectQualityTagDTO> subjectStudyCardTagList =
+					objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>(){});
 			// build a id -> dto map
-			Map<Long, SubjectStudyQualityTagDTO> dtoMap = new HashMap<>();
-			for (SubjectStudyQualityTagDTO dto : subjectStudyStudyCardTagList) {
-			    dtoMap.put(dto.getSubjectStudyId(), dto);
+			Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
+			for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
+			    dtoMap.put(dto.getSubjectId(), dto);
 			}
-			// get subject studies from db
-			Iterable<SubjectStudy> dbList = subjectStudyRepository.findAllById(dtoMap.keySet());
-			// update subject studies
-			for (SubjectStudy subjectStudy : dbList) {
-			    subjectStudy.setQualityTag(dtoMap.get(subjectStudy.getId()).getTag());
+			// get subjects from db
+			Iterable<Subject> dbList = subjectRepository.findAllById(dtoMap.keySet());
+			// update subjects
+			for (Subject subject : dbList) {
+			    subject.setQualityTag(dtoMap.get(subject.getId()).getTag());
 			}
 			// save
-			subjectStudyRepository.saveAll(dbList);			
+			subjectRepository.saveAll(dbList);			
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}

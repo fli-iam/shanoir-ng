@@ -89,7 +89,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
-			 Long studyId) {
+			Long studyId) {
 		final List<QualityCard> qualityCards = qualityCardService.findByStudy(studyId);
 		if (qualityCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

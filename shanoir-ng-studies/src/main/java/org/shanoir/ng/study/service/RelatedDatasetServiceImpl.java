@@ -18,7 +18,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
-import org.shanoir.ng.messaging.SubjectStudyUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -73,9 +72,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	private SubjectStudyUpdateBroadcastService subjectStudyUpdateBroadcastService;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 	private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
@@ -118,12 +114,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				studyTarget.setSubjectStudyList(subjectStudyList);
 
 				studyRepository.save(studyTarget);
-				// then send it to dataset ms which has a duplicated table
-				try {
-					subjectStudyUpdateBroadcastService.send(subjectStudyList);
-				} catch (Exception e) {
-					throw new AmqpRejectAndDontRequeueException("subject studies could not be replicated into datasets ms after datasets copy", e);
-				}
 			}
 		}
 	}
@@ -195,4 +185,5 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 					"Error while communicating with datasets MS to copy datasets to study.", e);
 		}
 	}
+
 }

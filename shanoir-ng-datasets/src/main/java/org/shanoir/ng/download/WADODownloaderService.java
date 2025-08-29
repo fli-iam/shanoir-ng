@@ -330,15 +330,13 @@ public class WADODownloaderService {
 		}
 		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>(tagsInUse);
 		// remove this ?
-		datasets.forEach(
-			dataset -> {
-				try {
-					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
-				} catch (PacsException e) {
-					throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
-				}
+		datasets.forEach(dataset -> {
+			try {
+				dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
+			} catch (PacsException e) {
+				throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
 			}
-		);
+		});
 		LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
 		return dAcquisitionAttributes;
 	}

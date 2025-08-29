@@ -48,4 +48,5 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
+	
 }

@@ -21,7 +21,6 @@ import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 
-
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
@@ -38,8 +37,7 @@ export class SelectSeriesComponent {
     public detailedPatient: any;
     public detailedSerie: any;
     public detailedStudy: any;
-    public papayaParams: object[];
-    public papayaError: boolean = false;
+    public papayaLoadingCallback: () => Promise<any[]>;
     studiesCheckboxes: any = {};
 
     constructor(
@@ -66,9 +64,7 @@ export class SelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = serie;
-            setTimeout(() => { // so the details display has no delay
-                if (serie && serie.images) this.initPapaya(serie);
-            });
+            if (serie && serie.images) this.papayaLoadingCallback = () => this.initPapaya(serie);
         }
     }
 
@@ -123,19 +119,15 @@ export class SelectSeriesComponent {
         this.importDataService.patients = this.patients;
     }
 
-    private initPapaya(serie: SerieDicom): void {
-        this.papayaError = false;
+    private initPapaya(serie: SerieDicom): Promise<any[]> {
         let listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
         let promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then((values) => {
-            let params: object[] = [];
+        return promiseOfList.then((values) => {
+            let params: any[] = [];
             params['binaryImages'] = [values];
-            this.papayaParams = params;
-        }).catch(reason => {
-            this.papayaError = true;
-            console.error(reason);
+            return params;
         });
     }
 
@@ -165,5 +157,4 @@ export class SelectSeriesComponent {
             console.log('patients', this.patients);
         }
     }
-
 }

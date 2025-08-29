@@ -1,30 +1,20 @@
 package org.shanoir.uploader.dicom;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import javax.swing.JProgressBar;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.io.DicomInputStream;
-import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
-import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weasis.dicom.param.DicomNode;
@@ -143,10 +133,10 @@ public class DicomServerClient implements IDicomServerClient {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		if (selectedSeries != null && !selectedSeries.isEmpty()) {
 			try {
-				cleanTempFolders(studyInstanceUID);
+				FileUtil.cleanTempFolders(workFolder, studyInstanceUID);
 				downloadFromDicomServer(studyInstanceUID, selectedSeries, progressBar, downloadOrCopyReport);
-				readAndCopyDicomFilesToUploadFolder(studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
-				deleteFolderDownloadFromDicomServer(studyInstanceUID, selectedSeries);
+				FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
+				FileUtil.deleteFolderDownloadFromDicomServer(workFolder, studyInstanceUID, selectedSeries);
 			} catch (Exception e) {
 				logger.error(":\n\n Download of "
 						+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
@@ -157,105 +147,12 @@ public class DicomServerClient implements IDicomServerClient {
 		return retrievedDicomFiles;
 	}
 
-	private void cleanTempFolders(String studyInstanceUID) {
-		File tempStudyInstanceUIDFolder = new File(workFolder, studyInstanceUID);
-		if (tempStudyInstanceUIDFolder.exists()) {
-			tempStudyInstanceUIDFolder.delete();
-			logger.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
-		}
-	}
-
 	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
 		// c-move: download images from DICOM server for all series
 		// we have to call here for all series as the connection set up
 		// and release is very time consuming and error prone, so we do
 		// it only once in QueryPACSService.
 		queryPACSService.queryCMOVEs(studyInstanceUID, selectedSeries, progressBar);
-	}
-	
-	private void readAndCopyDicomFilesToUploadFolder(String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
-			final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
-		for (Serie serie : selectedSeries) {
-			List<String> fileNamesForSerie = new ArrayList<String>();
-			final String seriesInstanceUID = serie.getSeriesInstanceUID();
-			File serieFolder = new File(workFolder
-				+ File.separator + studyInstanceUID
-				+ File.separator + seriesInstanceUID);
-			if (serieFolder.exists()) {
-				List<Instance> instances = new ArrayList<>();
-				File[] serieFiles = serieFolder.listFiles();
-				for (int i = 0; i < serieFiles.length; i++) {
-					String dicomFileName = serieFiles[i].getName();
-					fileNamesForSerie.add(dicomFileName);
-					File sourceFileFromPacs = serieFiles[i];
-					try (DicomInputStream dIS = new DicomInputStream(sourceFileFromPacs)) { // keep try to finally close input stream
-						Attributes attributes = dIS.readDataset();
-						if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
-							Instance instance = new Instance(attributes);
-							instances.add(instance);						
-							File destSerieFolder = new File(uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
-							if (!destSerieFolder.exists())
-								destSerieFolder.mkdirs();
-							File destDicomFile = new File(destSerieFolder, dicomFileName);
-							Files.copy(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-							sourceFileFromPacs.delete();
-						}
-					}
-				}
-				if (!instances.isEmpty()) {
-					instances.sort(new InstanceNumberSorter());
-					serie.setInstances(instances);
-					logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
-				} else {
-					logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-					serie.setIgnored(true);
-					serie.setSelected(false);
-				}
-				downloadOrCopyReport.append("Download: serie "
-					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-					+ serie.getSeriesDescription()
-					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
-				if (serie.getInstances().size() != fileNamesForSerie.size()) {
-					downloadOrCopyReport.append("Error: Download: serie "
-						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-						+ serie.getSeriesDescription()
-						+ " downloaded with " + fileNamesForSerie.size()
-						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
-				}
-				if (serie.getNumberOfSeriesRelatedInstances() != null
-					&& serie.getNumberOfSeriesRelatedInstances().intValue() != 0
-					&& serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
-					logger.warn("Download: serie "
-						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-						+ serie.getSeriesDescription()
-						+ " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
-						+ ") != " + serie.getInstances().size()
-					);
-				}
-				retrievedDicomFiles.addAll(fileNamesForSerie);
-				logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
-						+ " was successful.\n\n");
-			} else {
-				downloadOrCopyReport.append("Error: Download: serie "
-					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-				 	+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
-				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
-						+ " has failed.\n\n");
-			}
-		}
-	}
-	
-	private void deleteFolderDownloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries) throws IOException {
-		if (selectedSeries != null && !selectedSeries.isEmpty()) {
-			File studyFolder = new File(workFolder + File.separator + studyInstanceUID);
-			try (Stream<Path> walk = Files.walk(studyFolder.toPath())) {
-				walk.sorted(Comparator.reverseOrder())
-					.map(Path::toFile)
-					.forEach(File::delete);
-			}
-		}
 	}
 
 	/*

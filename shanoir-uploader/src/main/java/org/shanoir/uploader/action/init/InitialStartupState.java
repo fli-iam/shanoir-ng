@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
@@ -47,17 +49,11 @@ import org.springframework.stereotype.Component;
 public class InitialStartupState implements State {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
-	
-	private static final String SU_V6_0_3 = ".su_v6.0.3";
 
-	private static final String SU_V6_0_4 = ".su_v6.0.4";
-
-	private static final String SU_V7_0_1 = ".su_v7.0.1";
-
-	private static final String SU_V8_0_0 = ".su_v8.0.0";
+	private static final String USER_HOME_FOLDER = System.getProperty(ShUpConfig.USER_HOME);
 
 	@Autowired
-	private ProxyConfigurationState proxyConfigurationState;
+	private SelectProfileConfigurationState selectProfileConfigurationState;
 
 	@Autowired
 	private ShUpStartupDialog shUpStartupDialog;
@@ -65,7 +61,6 @@ public class InitialStartupState implements State {
 	public void load(StartupStateContext context) throws Exception {
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
-		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
 		logger.info("Java Vendor: " + System.getProperty("java.vendor"));
 		logger.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
 		logger.info("Java Version: " + System.getProperty("java.version"));
@@ -84,42 +79,53 @@ public class InitialStartupState implements State {
 		initProfile();
 		initCredentials();
 		initStartupDialog(context);
-		context.setState(proxyConfigurationState);
+		context.setState(selectProfileConfigurationState);
 		context.nextState();
 	}
 
 	private void doMigration() throws IOException {
-		// as properties, that exist already are not replaced/changed, start with the last version before,
-		// as considered as more important
-		// overwrite with properties from ShanoirUploader v7.0.1, v6.0.4 or v6.0.3, if existing
-		migrateFromVersion(SU_V8_0_0);
-		migrateFromVersion(SU_V7_0_1);
-		migrateFromVersion(SU_V6_0_4);
-		migrateFromVersion(SU_V6_0_3);
-		// migrate properties from ShanoirUploader v5.2
-		migrateFromVersion(ShUpConfig.SU);
+		// We run through all previous versions folders in user home folder and delete them after migrating properties.
+		File userHomeFolderPath = new File(USER_HOME_FOLDER);
+		// We list all version folders starting with ".su" and not containing the current version or "dev" in their name.
+		File[] obsoleteFolders = Arrays.stream(userHomeFolderPath.listFiles())
+    		.filter(file -> file.getName().startsWith(ShUpConfig.SU))
+    		.filter(file -> !file.getName().contains(ShUpConfig.SHANOIR_UPLOADER_VERSION))
+			.filter(file -> !file.getName().contains(ShUpConfig.DEV))
+    		.filter(File::isDirectory)
+    		.toArray(File[]::new);
+
+		if (obsoleteFolders == null || obsoleteFolders.length == 0) return;
+
+		Arrays.sort(obsoleteFolders, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+		for (File folder : obsoleteFolders) {
+    		migrateFromVersion(folder);
+		}
 	}
 
-	private void migrateFromVersion(String version) throws IOException {
-		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
-		final String shanoirUploaderFolderPathForVersion = userHomeFolderPath + File.separator + version;
-		final File shanoirUploaderFolderForVersion = new File(shanoirUploaderFolderPathForVersion);
-		boolean shanoirUploaderFolderExistsForVersion = shanoirUploaderFolderForVersion.exists();
-		if (shanoirUploaderFolderExistsForVersion) {
-			logger.info("Start migrating properties from version " + version + " of ShUp.");
-			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
-			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
-			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
-			logger.info("Finished migrating properties from version " + version + " of ShUp: language, proxy, dicom_server.");
+	private void migrateFromVersion(File shupFolder) throws IOException {
+		String previousVersion;
+		// If previous shup folder contains version in its name, we extract it.
+		if (shupFolder.getName().contains("_v")) {
+			previousVersion = shupFolder.getName().replaceFirst("^\\.su_v", "");
+		// otherwise it is a folder from version 5.2, which does not contain version in its name.
+		} else {
+			previousVersion = "5.2";
 		}
+		logger.info("Start migrating properties from version " + previousVersion + " of ShUp.");
+		copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
+		copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
+		copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
+		logger.info("Finished migrating properties from version " + previousVersion + " of ShUp: language, proxy, dicom_server.");
+		Utils.deleteFolder(shupFolder);
+		logger.info("Folder " + shupFolder.getName() + " was successfully deleted.");
 	}
 
 	private void copyPropertiesFile(final File srcDir, final File destDir, final String fileName) throws IOException {
 		final File propertiesSrc = new File(srcDir, fileName);
 		final File propertiesDest = new File(destDir, fileName);
 		if (propertiesDest.exists()) {
-			// do nothing in case of existing
-			logger.info("Start migrating properties: property not copied, because of existing already.");
+			// do nothing in case of already existing property file
+			logger.info("Start migrating properties: property not copied, because of existing already in destination folder: " + propertiesDest.getAbsolutePath());
 		} else {
 			Util.copyFileUsingStream(propertiesSrc, propertiesDest);			
 		}

@@ -24,43 +24,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EDFAnnotation
-{
-        private double onSet = 0;
-        private double duration = 0;
-        private final List<String> annotations = new ArrayList<>();
+public class EDFAnnotation {
 
-        EDFAnnotation(String onSet, String duration, String[] annotations)
-        {
-                this.onSet = Double.parseDouble(onSet);
-                if (duration != null && !Objects.equals(duration, ""))
-                        this.duration = Double.parseDouble(duration);
-                for (int i = 0; i < annotations.length; i++)
-                {
-                        if (annotations[i] == null || annotations[i].trim().equals(""))
-                                continue;
-                        this.annotations.add(annotations[i]);
-                }
-        }
+    private double onSet = 0;
+    private double duration = 0;
+    private final List<String> annotations = new ArrayList<>();
 
-        public double getOnSet()
-        {
-                return onSet;
+    EDFAnnotation(String onSet, String duration, String[] annotations) {
+        this.onSet = Double.parseDouble(onSet);
+        if (duration != null && !Objects.equals(duration, "")) {
+            this.duration = Double.parseDouble(duration);
         }
+        for (int i = 0; i < annotations.length; i++) {
+            if (annotations[i] == null || annotations[i].trim().equals("")) {
+                continue;
+            }
+            this.annotations.add(annotations[i]);
+        }
+    }
 
-        public double getDuration()
-        {
-                return duration;
-        }
+    public double getOnSet() {
+        return onSet;
+    }
 
-        public List<String> getAnnotations()
-        {
-                return annotations;
-        }
+    public double getDuration() {
+        return duration;
+    }
 
-        @Override
-        public String toString()
-        {
-                return "Annotation [onSet=" + onSet + ", duration=" + duration + ", annotations=" + annotations + "]";
-        }
+    public List<String> getAnnotations() {
+        return annotations;
+    }
+
+    @Override
+    public String toString() {
+        return "Annotation [onSet=" + onSet + ", duration=" + duration + ", annotations=" + annotations + "]";
+    }
 }

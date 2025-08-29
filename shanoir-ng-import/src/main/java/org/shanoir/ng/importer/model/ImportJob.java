@@ -17,34 +17,35 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.quality.QualityTag;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * One ImportJob is related to the import of ONE DICOM STUDY,
- * which equals ONE EXAM in Shanoir. We are doing this, as one
- * DICOM study can have a size of up to 10Gb nowadays. This means
- * we process already a huge amount of data for one import, that
- * can take up to 30-45 minutes. There is no sense in extending this
- * further for the future to anything like multi-exam in one import,
- * so the model has to be kept:
- * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
- *                                  - 1 exam relation
- * IF in an ImportJob contains a subject object, it means to create one
- * in ms studies during the import.
- * If it contains a subjectName, an existing subject is to use.
- * Same logic for the exams.
- * 
- * @todo: later we will remove the patients list from here, that is a
- * legacy error, that has to be corrected, e.g. move the subject out into
- * import job as written above.
- * 
- * @author mkain
- */
+* which equals ONE EXAM in Shanoir. We are doing this, as one
+* DICOM study can have a size of up to 10Gb nowadays. This means
+* we process already a huge amount of data for one import, that
+* can take up to 30-45 minutes. There is no sense in extending this
+* further for the future to anything like multi-exam in one import,
+* so the model has to be kept:
+* 1 ImportJob (1 DICOM study/exam) - 1 subject relation
+*                                  - 1 exam relation
+* IF in an ImportJob contains a subject object, it means to create one
+* in ms studies during the import.
+* If it contains a subjectName, an existing subject is to use.
+* Same logic for the exams.
+* 
+* @todo: later we will remove the patients list from here, that is a
+* legacy error, that has to be corrected, e.g. move the subject out into
+* import job as written above.
+* 
+* @author mkain
+*/
 public class ImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
@@ -56,36 +57,36 @@ public class ImportJob implements Serializable {
 
 	private boolean fromDicomZip;
 
-    private boolean fromShanoirUploader;
+	private boolean fromShanoirUploader;
 
-    private boolean fromPacs;
-    
+	private boolean fromPacs;
+	
 	private String workFolder;
 
 	// @todo: remove this list here later
-    private List<Patient> patients;
+	private List<Patient> patients;
 
 	// DICOM patient for this import job
 	private Patient patient;
 
 	private PatientVerification patientVerification;
-    
+	
 	// DICOM study for this import job
 	private Study study;
 
 	// series to import with this import job
-	private Set<Serie> selectedSeries;
+	private List<Serie> selectedSeries;
 
 	// Shanoir study
-    private Long studyId;
-    
+	private Long studyId;
+	
 	private String studyName;
 
-    private Long studyCardId;
-    
+	private Long studyCardId;
+	
 	private String studyCardName;
 	
-    private Long acquisitionEquipmentId;
+	private Long acquisitionEquipmentId;
 	
 	// subject: use already existing
 	private String subjectName;
@@ -94,14 +95,14 @@ public class ImportJob implements Serializable {
 	private Subject subject;
 
 	// examination: use already existing
-    private Long examinationId;
+	private Long examinationId;
 
 	private String examinationComment;
 
 	private String anonymisationProfileToUse;
 
-    private String archive;
-    
+	private String archive;
+	
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;
@@ -114,15 +115,21 @@ public class ImportJob implements Serializable {
 
 	private QualityTag qualityTag;
 
+	// Used by ShanoirUploader to store the upload state
+	private UploadState uploadState;
+
+	// Used by ShanoirUploader to store the upload percentage
+	private String uploadPercentage;
+
 	public long getTimestamp() {
-        return timestamp;
-    }
+		return timestamp;
+	}
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
 
-    public String getArchive() {
+	public String getArchive() {
 		return archive;
 	}
 
@@ -170,7 +177,7 @@ public class ImportJob implements Serializable {
 		this.examinationId = examinationId;
 	}
 
-    public String getWorkFolder() {
+	public String getWorkFolder() {
 		return workFolder;
 	}
 
@@ -210,7 +217,7 @@ public class ImportJob implements Serializable {
 		this.studyCardId = studyCardId;
 	}
 
-    public String getAnonymisationProfileToUse() {
+	public String getAnonymisationProfileToUse() {
 		return anonymisationProfileToUse;
 	}
 
@@ -258,6 +265,102 @@ public class ImportJob implements Serializable {
 		this.username = username;
 	}
 
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+	public Subject getSubject() {
+		return subject;
+	}
+
+	public void setSubject(Subject subject) {
+		this.subject = subject;
+	}
+
+	public Study getStudy() {
+		return study;
+	}
+
+	public void setStudy(Study study) {
+		this.study = study;
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public List<Serie> getSelectedSeries() {
+		return selectedSeries;
+	}
+
+	public void setSelectedSeries(List<Serie> selectedSeries) {
+		this.selectedSeries = selectedSeries;
+	}
+
+	public DicomQuery getDicomQuery() {
+		return dicomQuery;
+	}
+
+	public void setDicomQuery(DicomQuery dicomQuery) {
+		this.dicomQuery = dicomQuery;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public String getExaminationComment() {
+		return examinationComment;
+	}
+
+	public void setExaminationComment(String examinationComment) {
+		this.examinationComment = examinationComment;
+	}
+
+	public PatientVerification getPatientVerification() {
+		return patientVerification;
+	}
+
+	public void setPatientVerification(PatientVerification patientVerification) {
+		this.patientVerification = patientVerification;
+	}
+
+	public QualityTag getQualityTag() {
+		return qualityTag;
+	}
+
+	public void setQualityTag(QualityTag qualityTag) {
+		this.qualityTag = qualityTag;
+	}
+
+	public UploadState getUploadState() {
+		return uploadState;
+	}
+
+	public void setUploadState(UploadState uploadState) {
+		this.uploadState = uploadState;
+	}
+
+	public String getUploadPercentage() {
+		return uploadPercentage;
+	}
+
+	public void setUploadPercentage(String uploadPercentage) {
+		this.uploadPercentage = uploadPercentage;
+	}
+
 	@Override
 	public String toString() {
 		String importType;
@@ -302,85 +405,12 @@ public class ImportJob implements Serializable {
 				",seriesNames=" + seriesNames.toString();
 	}
 
-	public Long getCenterId() {
-		return centerId;
-	}
-
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
-
-	public Subject getSubject() {
-		return subject;
-	}
-
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
-
-	public Study getStudy() {
-		return study;
-	}
-
-	public void setStudy(Study study) {
-		this.study = study;
-	}
-
-	public Patient getPatient() {
-		return patient;
-	}
-
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-
-	public Set<Serie> getSelectedSeries() {
-		return selectedSeries;
-	}
-
-	public void setSelectedSeries(Set<Serie> selectedSeries) {
-		this.selectedSeries = selectedSeries;
-	}
-
-    public DicomQuery getDicomQuery() {
-		return dicomQuery;
-	}
-
-	public void setDicomQuery(DicomQuery dicomQuery) {
-		this.dicomQuery = dicomQuery;
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
-
-	public String getExaminationComment() {
-		return examinationComment;
-	}
-
-	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
-	}
-
-	public PatientVerification getPatientVerification() {
-		return patientVerification;
-	}
-
-	public void setPatientVerification(PatientVerification patientVerification) {
-		this.patientVerification = patientVerification;
-	}
-
-	public QualityTag getQualityTag() {
-		return qualityTag;
-	}
-
-	public void setQualityTag(QualityTag qualityTag) {
-		this.qualityTag = qualityTag;
-	}
+	@JsonIgnore
+	public Serie getFirstSelectedSerie() {
+		if (CollectionUtils.isNotEmpty(selectedSeries)) {
+			return selectedSeries.iterator().next();
+		}
+		return null;
+	}	
 
 }
-

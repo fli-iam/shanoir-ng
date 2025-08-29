@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,8 +36,7 @@ export class BrukerSelectSeriesComponent {
     private workFolder: string;
     public detailedPatient: any;
     public detailedSerie: any;
-    public papayaParams: object[];
-    public papayaError: boolean = false;
+    public papayaLoadingCallback: () => Promise<any[]>;
 
     constructor(
             private importService: ImportService,
@@ -61,9 +60,7 @@ export class BrukerSelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = serie;
-            setTimeout(() => { // so the details display has no delay
-                if (serie && serie.images) this.initPapaya(serie); 
-            });
+            if (serie && serie.images) this.papayaLoadingCallback = () => this.initPapaya(serie);
         }
     }
 
@@ -75,20 +72,16 @@ export class BrukerSelectSeriesComponent {
             this.detailedPatient = nodeParams;
         }
     }
-    
-    private initPapaya(serie: SerieDicom): void {
-        this.papayaError = false;
+
+    private initPapaya(serie: SerieDicom): Promise<any[]> {
         let listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
         let promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then((values) => {
+        return promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
-            this.papayaParams = params;
-        }).catch(reason => {
-            this.papayaError = true;
-            console.error(reason);
+            return params;
         });
     }
 

@@ -21,7 +21,6 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
@@ -29,6 +28,7 @@ import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
 import {Profile} from '../../shared/models/profile.model';
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
 
 @Injectable()
 export class StudyDTOService {
@@ -63,16 +63,15 @@ export class StudyDTOService {
         return Promise.resolve(result);
     }
 
-    public toSubjectWithSubjectStudyList(dtos: SubjectWithSubjectStudyDTO[], result: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> {
+    public toSubjectList(dtos: SubjectDTO[], result: Subject[]): Promise<Subject[]> {
         if (!result) result = [];
         if (dtos) {
             for (let dto of dtos) {
-                let entity = new SubjectWithSubjectStudy();
+                let entity = new Subject();
                 entity.id = dto.id;
                 entity.name = dto.name;
                 entity.identifier = dto.identifier;
                 entity.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
-                entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
                 result.push(entity);
             }
         }
@@ -217,9 +216,9 @@ export class StudyDTOService {
             subjectStudy.subjectId = subjectStudyDto.subject.id;
             subjectStudy.subject.name = subjectStudyDto.subject.name;
             subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
+            subjectStudy.subject.subjectType = subjectStudyDto.subjectType;
         }
-        subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
-        subjectStudy.subjectType = subjectStudyDto.subjectType;
+        subjectStudy.studyIdentifier = subjectStudyDto.studyIdentifier;
         if (subjectStudyDto.tags) {
           subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
         } else {
@@ -334,23 +333,6 @@ export class StudyDTO {
 
 }
 
-export class SubjectWithSubjectStudyDTO {
-
-    id: number;
-    name: string;
-    identifier: string;
-    subjectStudy: SubjectStudyDTO;
-    birthDate: Date;
-
-    constructor(subject: SubjectWithSubjectStudy) {
-        this.id = subject.id;
-        this.name = subject.name;
-        this.identifier = subject.identifier;
-        this.subjectStudy = subject.subjectStudy ? new SubjectStudyDTO(subject.subjectStudy) : null;
-        this.birthDate = subject.birthDate;
-    }
-}
-
 export class CenterStudyDTO {
 
     id: number;
@@ -374,6 +356,7 @@ export class StudyLight {
   description: string;
   license: string;
   studyTags: Tag[];
+  profile: Profile;
 }
 
 

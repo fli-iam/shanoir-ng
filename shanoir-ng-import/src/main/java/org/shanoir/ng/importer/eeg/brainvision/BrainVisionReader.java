@@ -282,15 +282,15 @@ public class BrainVisionReader {
 				// Read DataFormat
 				else if (zeile.startsWith("DataFormat=")) {
 					switch (zeile.substring(11)) {
-					case "BINARY":
-						dataFormat = DataFormat.BINARY;
-						break;
-					case "ASCII":
-						dataFormat = DataFormat.ASCII;
-						break;
-					default:
-						dataFormat = DataFormat.UNKNOWN;
-						break;
+						case "BINARY":
+							dataFormat = DataFormat.BINARY;
+							break;
+						case "ASCII":
+							dataFormat = DataFormat.ASCII;
+							break;
+						default:
+							dataFormat = DataFormat.UNKNOWN;
+							break;
 					}
 					entititesInError.remove("DataFormat");
 				}
@@ -298,15 +298,15 @@ public class BrainVisionReader {
 				// Read DataOrientation
 				else if (zeile.startsWith("DataOrientation=")) {
 					switch (zeile.substring(16)) {
-					case "MULTIPLEXED":
-						dataOrientation = DataOrientation.MULTIPLEXED;
-						break;
-					case "VECTORIZED":
-						dataOrientation = DataOrientation.VECTORIZED;
-						break;
-					default:
-						dataOrientation = DataOrientation.UNKNOWN;
-						break;
+						case "MULTIPLEXED":
+							dataOrientation = DataOrientation.MULTIPLEXED;
+							break;
+						case "VECTORIZED":
+							dataOrientation = DataOrientation.VECTORIZED;
+							break;
+						default:
+							dataOrientation = DataOrientation.UNKNOWN;
+							break;
 					}
 					entititesInError.remove("DataOrientation");
 				}
@@ -349,25 +349,25 @@ public class BrainVisionReader {
 				else if (zeile.startsWith("BinaryFormat=")) {
 					bytes = 2; // default
 					switch (zeile.substring(13)) {
-					case "UINT_16":
-						binaryFormat = BinaryFormat.UINT_16;
-						bytes = 2;
-						break;
-					case "INT_16":
-						binaryFormat = BinaryFormat.INT_16;
-						bytes = 2;
-						break;
-					case "IEEE_FLOAT_32":
-						binaryFormat = BinaryFormat.IEEE_FLOAT_32;
-						bytes = 4;
-						break;
-					case "IEEE_FLOAT_64":
-						binaryFormat = BinaryFormat.IEEE_FLOAT_64;
-						bytes = 8;
-						break;
-					default:
-						binaryFormat = BinaryFormat.UNKNOWN;
-						break;
+						case "UINT_16":
+							binaryFormat = BinaryFormat.UINT_16;
+							bytes = 2;
+							break;
+						case "INT_16":
+							binaryFormat = BinaryFormat.INT_16;
+							bytes = 2;
+							break;
+						case "IEEE_FLOAT_32":
+							binaryFormat = BinaryFormat.IEEE_FLOAT_32;
+							bytes = 4;
+							break;
+						case "IEEE_FLOAT_64":
+							binaryFormat = BinaryFormat.IEEE_FLOAT_64;
+							bytes = 8;
+							break;
+						default:
+							binaryFormat = BinaryFormat.UNKNOWN;
+							break;
 					}
 					entititesInError.remove("BinaryFormat");
 				}
@@ -375,15 +375,15 @@ public class BrainVisionReader {
 				// Read endian order
 				else if (zeile.startsWith("UseBigEndianOrder=")) {
 					switch (zeile.substring(18)) {
-					case "NO":
-						useBigEndianOrder = false;
-						break;
-					case "YES":
-						useBigEndianOrder = true;
-						break;
-					default:
-						useBigEndianOrder = false;
-						break;
+						case "NO":
+							useBigEndianOrder = false;
+							break;
+						case "YES":
+							useBigEndianOrder = true;
+							break;
+						default:
+							useBigEndianOrder = false;
+							break;
 					}
 				}
 

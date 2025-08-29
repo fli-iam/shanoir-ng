@@ -105,6 +105,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-container>
 							<ng-container *ngIf="mode != 'view'">
 								<checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+								<div class="info left-icon import-info" *ngIf="qualityCard.toCheckAtImport">
+									<i class="fa-solid fa-triangle-exclamation"></i>
+									Be aware that a rule with an <span class="tag"><i class="fa-solid fa-times-circle"></i>Error</span> tag
+									will block any import <b>that would match</b> this rule.
+								</div>
 							</ng-container>
 						</span>
 					</li>

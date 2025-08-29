@@ -18,9 +18,9 @@ import { ComponentRef, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
-import { Task, TaskState } from 'src/app/async-tasks/task.model';
+import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
@@ -78,6 +78,8 @@ export class MassDownloadService {
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
     readonly REPORT_FILENAME: string = 'downloadReport.json';
     winOs: boolean;
+    // @ts-ignore
+    public advancedDownloadCompat: boolean = !!window.showDirectoryPicker;
 
     constructor(
         private datasetService: DatasetService,
@@ -88,6 +90,10 @@ export class MassDownloadService {
         deviceInformationService: AngularDeviceInformationService) {
 
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
+    }
+
+    downloadAllByStudyId(studyId: number, totalSize: number, downloadState?: TaskState) {
+        return this.downloadByDatasets({studyId: studyId}, downloadState, totalSize);
     }
 
     downloadAllByExaminationId(examinationId: number, downloadState?: TaskState): Promise<void> {
@@ -109,8 +115,8 @@ export class MassDownloadService {
     /**
      * This method is the generic entry to download multiple datasets.
      */
-    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState): Promise<void> {
-        return this.openModal(inputIds).then(ret => {
+    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number): Promise<void> {
+        return this.openModal(inputIds, totalSize).then(ret => {
             if (ret != 'cancel') {
                 return this._downloadDatasets(ret, downloadState);
             } else return Promise.resolve();
@@ -139,8 +145,7 @@ export class MassDownloadService {
 
     // This method is used to download in
     private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
-        let task: Task = this.createTask(datasetIds.length);
-
+        let task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
@@ -214,7 +219,7 @@ export class MassDownloadService {
                 .then(handle => this.makeRootSubdirectory(handle, datasetIds.length));
         }
         return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
-            if (!task) task = this.createTask(datasetIds.length);
+            if (!task) task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
             if (downloadState) downloadState.status = task.status;
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
@@ -253,6 +258,7 @@ export class MassDownloadService {
         task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
             task.status = 3;
+            task.progress = 1;
             const tab: string = '- ';
             task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
@@ -386,15 +392,23 @@ export class MassDownloadService {
         let str: string = '/';
         if (setup.subjectFolders) {
             str += 'Subject-' + (
-                dataset.datasetProcessing
+                dataset.hasProcessing
                     ? dataset.subject?.name + '_' + dataset.subject?.id
                     : dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
-        if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder
+        if (setup.examinationFolders && !dataset.hasProcessing) { // for processed datasets, skip the exam folder
             str += dataset.datasetAcquisition?.examination?.comment
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
+        }
+        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
+            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+                || dataset.datasetAcquisition.type + '_acquisition';
+            str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
+            + '_' + dataset.datasetAcquisition.id
+            + '/';
         }
         return str;
     }
@@ -403,13 +417,16 @@ export class MassDownloadService {
         let str: string = '/';
         if (setup.subjectFolders) {
             str += 'subj'+ (
-                dataset.datasetProcessing
+                dataset.hasProcessing
                     ? dataset.subject?.id
                     : dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
-        if (setup.examinationFolders && !dataset.datasetProcessing) {
+        if (setup.examinationFolders && !dataset.hasProcessing) {
             str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
+        }
+        if (setup.acquisitionFolders && !dataset.hasProcessing) {
+            str += 'acq' + dataset.datasetAcquisition.sortingIndex + '_' + dataset.datasetAcquisition?.id + '/';
         }
         return str;
     }
@@ -512,29 +529,30 @@ export class MassDownloadService {
         return report;
     }
 
-    private createTask(nbDatasets: number): Task {
-        return this._createTask('Download launched for ' + nbDatasets + ' datasets');
+    private createTask(nbDatasets: number, status: TaskStatus = 2): Task {
+        return this._createTask('Download launched for ' + nbDatasets + ' datasets', status);
     }
 
-    private _createTask(message: string): Task {
+    private _createTask(message: string, status: TaskStatus = 2): Task {
         let task: Task = new Task();
         task.id = Date.now();
         task.creationDate = new Date();
         task.lastUpdate = task.creationDate;
         task.message = message;
         task.progress = 0;
-        task.status = 2;
+        task.status = status;
         task.eventType = 'downloadDataset.event';
         task.sessionId = this.sessionService.sessionId;
         this.notificationService.pushLocalTask(task);
         return task;
     }
 
-    private openModal(inputIds: DownloadInputIds): Promise<DownloadSetup | 'cancel'> {
+    private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
+            modalRef.instance.totalSize = totalSize;
             return this.waitForEnd(modalRef);
         } else {
             return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);
@@ -631,7 +649,8 @@ export class DownloadSetup {
     shortPath?: boolean = false;
     subjectFolders: boolean = true;
     examinationFolders: boolean = true;
+    acquisitionFolders: boolean = false;
     datasetFolders: boolean = true;
     converter: number;
-    datasets: Dataset[] = [];
+    datasets: Dataset[] | DatasetLight[] = [];
 }
