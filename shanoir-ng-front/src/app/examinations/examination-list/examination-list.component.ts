@@ -34,6 +34,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private examinationService: ExaminationService,
@@ -41,6 +42,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Examination> {
@@ -89,11 +91,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     canEdit(ex: Examination): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            ex.subject &&
-			ex.study &&
-            (ex.study as Study).studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || (this.studyIdsForCurrentUser.includes(ex.study.id));
     }
 
     canDelete(exam: Examination): boolean {
