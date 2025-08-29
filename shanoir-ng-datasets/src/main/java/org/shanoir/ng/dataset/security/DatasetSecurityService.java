@@ -37,7 +37,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -132,12 +131,10 @@ public class DatasetSecurityService {
     	if (subject.isEmpty()) {
     		return false;
     	}
-    	for (SubjectStudy subjectStudy : subject.get().getSubjectStudyList()) {
-    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
-    		if (hasRight) {
-    			return true;
-    		}
-    	}
+		boolean hasRight = commService.hasRightOnStudy(subject.get().getStudy().getId(), rightStr);
+		if (hasRight) {
+			return true;
+		}
     	return false;
     }
     
@@ -156,35 +153,11 @@ public class DatasetSecurityService {
     	if (subject == null) {
     		return false;
     	}
-    	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
-    		if (hasRight) {
-    			return true;
-    		}
-    	}
+		boolean hasRight = commService.hasRightOnStudy(subject.getStudy().getId(), rightStr);
+		if (hasRight) {
+			return true;
+		}
     	return false;
-    }
-    
-    /**
-     * Check that the connected user has the given right for the given subject studies.
-     * 
-     * @param subjectName the study name
-     * @param rightStr the right
-     * @return true or false
-     */
-    public boolean hasRightOnSubjectStudies(List<SubjectStudy> subjectstudies, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-            return true;
-        } 
-        if (subjectstudies != null) {
-            for (SubjectStudy subjectStudy : subjectstudies) {
-                boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
-                if (!hasRight) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
     
     /**
