@@ -35,10 +35,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -57,7 +53,7 @@ public class DICOMWebService {
 	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
-	
+
 	private static final String RELATED = "related";
 
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -82,19 +78,19 @@ public class DICOMWebService {
 
 	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePort;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
 	private String dicomWebRSUpload;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
 
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
 	private int dicomWebHttpClientMaxPerRoute;
-	
+
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
 
@@ -103,8 +99,8 @@ public class DICOMWebService {
 		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
 		try {
 			final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-	        cm.setMaxTotal(dicomWebHttpClientMaxTotal);
-	        cm.setDefaultMaxPerRoute(dicomWebHttpClientMaxPerRoute);
+			cm.setMaxTotal(dicomWebHttpClientMaxTotal);
+			cm.setDefaultMaxPerRoute(dicomWebHttpClientMaxPerRoute);
 			httpClient = HttpClients.custom().setConnectionManager(cm).build();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -121,7 +117,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);					
+					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
 				}
 			}
 		} catch (Exception e) {
@@ -150,9 +146,10 @@ public class DICOMWebService {
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					return  EntityUtils.toString(entity, "UTF-8");
+					return EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
+					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: "
+							+ studyInstanceUID);
 				}
 			}
 		} catch (Exception e) {
@@ -171,7 +168,8 @@ public class DICOMWebService {
 	 */
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata?excludeprivate=false";
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID
+					+ "/metadata?excludeprivate=false";
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -179,7 +177,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");				
+					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -212,10 +210,10 @@ public class DICOMWebService {
 					HttpHeaders responseHeaders = new HttpHeaders();
 					if (!entity.isChunked() && entity.getContentLength() >= 0) {
 						responseHeaders.setContentLength(entity.getContentLength());
-					}					
+					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
-					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				
+					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -223,7 +221,7 @@ public class DICOMWebService {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * This method is used by OHIF viewer, double-click on DICOM SEG.
 	 * ShanoirUploader is calling it to get a DICOM instance,
@@ -236,7 +234,8 @@ public class DICOMWebService {
 	 */
 	public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
+					+ sopInstanceUID;
 			HttpGet httpGet = new HttpGet(url);
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
@@ -248,7 +247,7 @@ public class DICOMWebService {
 					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
-					LOG.error("DICOMWeb: findInstance: empty response entity.");				
+					LOG.error("DICOMWeb: findInstance: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -258,21 +257,23 @@ public class DICOMWebService {
 	}
 
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws ShanoirException {
-		if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists() || !directoryWithDicomFiles.isDirectory()) {
+		if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists()
+				|| !directoryWithDicomFiles.isDirectory()) {
 			LOG.error("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
-			throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
+			throw new ShanoirException(
+					"sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
-		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+				+ directoryWithDicomFiles.getAbsolutePath());
 		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
 		multipartEntityBuilder.setBoundary(BOUNDARY);
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-			try(
-				FileInputStream fileIS = new FileInputStream(dicomFile);
-				ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());
-			) {
+			try (
+					FileInputStream fileIS = new FileInputStream(dicomFile);
+					ByteArrayInputStream byteArrIS = new ByteArrayInputStream(fileIS.readAllBytes());) {
 				ContentBody contentBody = new InputStreamBody(byteArrIS, ContentType.create(CONTENT_TYPE_DICOM));
 				// build MultipartPart
 				MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
@@ -280,14 +281,15 @@ public class DICOMWebService {
 				partBuilder.setBody(contentBody);
 				MultipartPart multipartPart = partBuilder.build();
 				multipartEntityBuilder.addPart(multipartPart);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
 				throw new ShanoirException(e.getMessage());
 			}
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
-		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+				+ directoryWithDicomFiles.getAbsolutePath());
 	}
 
 	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
@@ -305,8 +307,9 @@ public class DICOMWebService {
 		LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
 	}
 
-	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
-		try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
+	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder)
+			throws ShanoirException {
+		try (FileInputStream fileIS = new FileInputStream(dicomFile)) {
 			ContentBody contentBody = new InputStreamBody(
 					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
 			// build MultipartPart
@@ -315,7 +318,7 @@ public class DICOMWebService {
 			partBuilder.setBody(contentBody);
 			MultipartPart multipartPart = partBuilder.build();
 			multipartEntityBuilder.addPart(multipartPart);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
@@ -340,7 +343,7 @@ public class DICOMWebService {
 			multipartEntityBuilder.addPart(multipartPart);
 			HttpEntity entity = multipartEntityBuilder.build();
 			sendMultipartRequest(entity);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
@@ -349,13 +352,14 @@ public class DICOMWebService {
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
 		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE,
+				CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
 			if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
 				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
-				LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
+				LOG.error("Associated message: " + EntityUtils.toString(response.getEntity()));
 				throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
 			}
 		} catch (Exception e) {
@@ -394,12 +398,14 @@ public class DICOMWebService {
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
 						+ " for rejectURL: " + url);
-				// in case one URL is Not Found (no DICOM instance present), we continue with deletion
+				// in case one URL is Not Found (no DICOM instance present), we continue with
+				// deletion
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
 					return;
 				} else {
-					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-							+ " for rejectURL: " + url);
+					throw new ShanoirException(
+							response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+									+ " for rejectURL: " + url);
 				}
 			}
 		} catch (IOException e) {
@@ -408,9 +414,10 @@ public class DICOMWebService {
 		}
 	}
 
-	@Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 */30 * * * *", zone = "Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
-		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
+		// Doc :
+		// https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.info("Scheduled call to delete all rejected instances from pacs.");
 		String url = this.serverURL.substring(0, this.serverURL.indexOf("/aets/")) + REJECT_SUFFIX;
 		HttpDelete httpDelete = new HttpDelete(url);
@@ -421,13 +428,14 @@ public class DICOMWebService {
 			} else {
 				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
 						+ "for deleteURL: " + url);
-				throw new ShanoirException(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
-						+ "for deleteURL: " + url);
+				throw new ShanoirException(
+						response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
+								+ "for deleteURL: " + url);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
 	}
-	
+
 }
