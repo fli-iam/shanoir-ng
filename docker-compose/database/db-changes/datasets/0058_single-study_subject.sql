@@ -34,12 +34,14 @@ SET
 
 # Add new subjects, in case of multi-study subjects and only for additional studies
 INSERT INTO subject (
+    id,
     name,
     subject_type,
     quality_tag,
     study_id
 )
 SELECT
+    s.id,
     s.name,
     ss.subject_type,
     ss.quality_tag,
