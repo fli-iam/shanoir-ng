@@ -37,7 +37,7 @@ export class PreclinicalSubjectDTO {
 	therapies: SubjectTherapy[];
 
     constructor(entity: PreclinicalSubject) {
-        this.id = entity.id;
+        this.id = entity.id ? entity.id : null;
 		this.animalSubject = entity.animalSubject;
         this.subject = new SubjectDTO(entity.subject);
 		this.pathologies = entity.pathologies;

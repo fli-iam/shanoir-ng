@@ -30,10 +30,10 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
+import {Subject} from "../../subjects/shared/subject.model";
 
 @Component({
     selector: 'examination-detail',
@@ -47,7 +47,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public centers: IdName[];
     public studies: IdName[];
-    public subjects: SubjectWithSubjectStudy[];
+    public subjects: Subject[];
     files: File[] = [];
     public inImport: boolean;
     public readonly ImagesUrlUtil = ImagesUrlUtil;

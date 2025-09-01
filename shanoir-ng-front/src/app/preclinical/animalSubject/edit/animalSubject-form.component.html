@@ -36,6 +36,43 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </ng-template>
             </span>
             
+			<fieldset formGroupName="subject">
+                <legend>Study</legend>
+                <ol>
+					<li>
+                        <label>Study</label>
+                        <span class="right-col">
+							{{preclinicalSubject?.subject?.study?.name}}
+                        </span>
+                    </li>
+				</ol>
+				<ol *ngIf="preclinicalSubject.subject.identifier != null">
+					<li>
+						<label>Subject identifier for this study</label>
+						<span class="right-col">
+							{{ preclinicalSubject.subject.identifier }}
+						</span>
+					</li>
+				</ol>
+				<ol>
+					<li>
+						<label>Tags</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color"
+									*ngFor="let tag of preclinicalSubject.subject.tags">
+									{{tag.name}}
+								</span>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<tag-list
+									[availableTags]="preclinicalSubject.subject.study?.tags" formControlName="tags"></tag-list>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+
             <!-- Subject properties group -->
             <fieldset formGroupName="subject">
                 <legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>

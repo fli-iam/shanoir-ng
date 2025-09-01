@@ -5,10 +5,10 @@ DROP TABLE group_of_subjects;
 CREATE TABLE subject_tag (
     subject_id bigint(20) NOT NULL,
     tag_id bigint(20) DEFAULT NULL,
-    KEY FKcc51xo4yrp74v2yp7df540a04 (tag_id),
     KEY FKe638djnyhwckgsob7qxnvcbyd (subject_id),
-    CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id),
-    CONSTRAINT FKe638djnyhwckgsob7qxnvcbyd FOREIGN KEY (subject_id) REFERENCES subject (id)
+    KEY FKcc51xo4yrp74v2yp7df540a04 (tag_id),
+    CONSTRAINT FKe638djnyhwckgsob7qxnvcbyd FOREIGN KEY (subject_id) REFERENCES subject (id),
+    CONSTRAINT FKcc51xo4yrp74v2yp7df540a04 FOREIGN KEY (tag_id) REFERENCES tag (id)
 );
 
 # Remove unique constraint on subject name
@@ -129,3 +129,13 @@ JOIN studies.subject old_sub ON e.subject_id = old_sub.id
 JOIN studies.subject new_sub ON old_sub.name = new_sub.name AND e.study_id = new_sub.study_id
     AND old_sub.id <> new_sub.id
 SET e.subject_id = new_sub.id;
+
+# Add new subjects from ms studies to ms datasets
+# tested: all good
+INSERT INTO datasets.subject
+  (id, name)
+SELECT s.id, s.name
+FROM subject s
+  LEFT JOIN datasets.subject ds ON s.id = ds.id
+WHERE ds.id IS NULL;
+

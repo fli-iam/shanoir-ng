@@ -71,6 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
     protected destroy$: Subject<void> = new Subject<void>();
     private form$: SuperPromise<void> = new SuperPromise<void>();
+    protected showTreeByDefault: boolean = true;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -109,6 +110,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
+            let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
+            if (!this.showTreeByDefault
+                && this.treeService.treeOpened
+                && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
+            ) {
+                this.treeService.closeTemporarily();
+            }
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     this.mode = this.activatedRoute.snapshot.data['mode'];

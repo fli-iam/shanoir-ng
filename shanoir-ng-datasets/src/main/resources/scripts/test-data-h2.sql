@@ -85,11 +85,11 @@ VALUES
 	(8,5);
 	
 INSERT INTO subject
-	(id, name)
+	(id, name, study_id)
 VALUES
-	(1, 'Subject One'),
-	(2, 'Subject Two'),
-	(3, 'Subject Three');
+	(1, 'Subject One', 1),
+	(2, 'Subject Two', 1),
+	(3, 'Subject Three', 1);
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)

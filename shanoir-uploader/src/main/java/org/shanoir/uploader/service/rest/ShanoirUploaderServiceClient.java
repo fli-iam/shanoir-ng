@@ -432,7 +432,7 @@ public class ShanoirUploaderServiceClient {
 					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
-					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
 				}
 			}
 		}
@@ -848,34 +848,6 @@ public class ShanoirUploaderServiceClient {
 				} else {
 					logger.error("Error in createSubject: with subject " + subject.getName()
 						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-				}
-			}
-		} catch (JsonProcessingException e) {
-			logger.error(e.getMessage(), e);
-		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
-		}
-		return null;
-	}
-	
-	/**
-	 * This method updates a subject on the server and therefore updates
-	 * the rel_subject_study list too.
-	 * 
-	 * @param subject
-	 * @return
-	 */
-	public Subject createSubjectStudy(
-			final Subject subject) {
-		try {
-			String json = Util.objectWriter.writeValueAsString(subject);
-			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
-				int code = response.getCode();
-				if (code == HttpStatus.SC_NO_CONTENT) {
-					return subject;
-				} else {
-					logger.error("Error in createSubjectStudy: with subject " + subject.getName()
-					+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		} catch (JsonProcessingException e) {

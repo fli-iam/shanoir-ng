@@ -16,7 +16,9 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -25,10 +27,7 @@ import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-
 
 @Component({
     selector: 'user-detail',
@@ -44,6 +43,7 @@ export class UserComponent extends EntityComponent<User> {
     public acceptLoading: boolean = false;
     public studies = [];
     public studyToDelete = [];
+    protected showTreeByDefault: boolean = false;
     public dateDisplay = dateDisplay;
 
     constructor(
