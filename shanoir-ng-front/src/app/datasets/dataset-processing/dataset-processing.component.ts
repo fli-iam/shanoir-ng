@@ -98,14 +98,16 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.studyOptions = [new Option<number>(study.id, study.name)];
         });
         // checking if the datasetProcessing is not execution monitoring
-        this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
-            (executionMonitoring: ExecutionMonitoring) => {
-                this.setExecutionMonitoring(executionMonitoring);
-            }, (error) => {
-                // 404 : if it's not found then it's not execution monitoring !
-                this.resetExecutionMonitoring();
-            }
-        )
+        this.subscriptions.push(
+            this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
+                (executionMonitoring: ExecutionMonitoring) => {
+                    this.setExecutionMonitoring(executionMonitoring);
+                }, (error) => {
+                    // 404 : if it's not found then it's not execution monitoring !
+                    this.resetExecutionMonitoring();
+                }
+            )
+        );
         return Promise.resolve();
     }
 
@@ -271,10 +273,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.subject = this.prefilledSubject;
             this.fetchDatasets();
         }
-    }
-
-    protected mapEntityToForm(): void {
-        super.mapEntityToForm();
     }
 
     public async hasEditRight(): Promise<boolean> {

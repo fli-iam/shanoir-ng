@@ -167,9 +167,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
-        form.get('study').valueChanges.subscribe(value => {
-            this.getSubjects();
-        });
+        this.subscriptions.push(
+            form.get('study').valueChanges.subscribe(value => {
+                this.getSubjects();
+            })
+        );
         return form;
     }
 
@@ -257,10 +259,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             //Create physio data
             if (isUpdate && this.examinationPhysioData && this.examinationPhysioData.id){
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.examinationPhysioData.id, this.physioData)
-                .subscribe(physioData => {
+                .then(physioData => {
                 	if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.subscribe(res => {
+                    	.then(res => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -272,7 +274,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.subscribe(res => {
+                    	.then(res => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -286,10 +288,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             //Create blood gas data
              if (isUpdate && this.examinationBloodGasData && this.examinationBloodGasData.id){
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.examinationBloodGasData.id, this.bloodGasData)
-                	.subscribe(bloodGasData => {
+                	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.subscribe(res => {
+                    		.then(res => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }
@@ -300,7 +302,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.subscribe(res => {
+                    		.then(res => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }

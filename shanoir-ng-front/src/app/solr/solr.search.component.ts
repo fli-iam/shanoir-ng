@@ -235,7 +235,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     updateSelections() {
         this.selections = [];
-        console.log(this.solrRequest.datasetStartDate, this.solrRequest.datasetEndDate)
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),

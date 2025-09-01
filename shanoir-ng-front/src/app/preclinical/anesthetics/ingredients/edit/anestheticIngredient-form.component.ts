@@ -198,11 +198,11 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                 if (reftype == 'ingredient'){
                     this.names.push(entity as Reference);
                     this.entity.name = entity as Reference;
-                }else if (reftype == 'concentration'){
+                } else if (reftype == 'concentration'){
                     this.units.push(entity as Reference);
                     this.entity.concentrationUnit = entity as Reference;
                 }
-        });
+            });
         });
     }
 

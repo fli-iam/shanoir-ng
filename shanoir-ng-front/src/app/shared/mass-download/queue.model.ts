@@ -28,6 +28,7 @@ export class Queue {
         const stop: Subject<void> = new Subject<void>();
         const ticket: number = this._nextTicket++;
         return new Promise((resolve, reject) => {
+            // takeUntil(stop) manages the unsubscription
             const sub: Subscription = this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
                 if (calledTicket == ticket) {
                     stop.next();

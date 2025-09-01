@@ -193,13 +193,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     initCreate(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            this.loadData();
+        return this.loadData().then(() => {
             this.preclinicalSubject = new PreclinicalSubject();
             this.preclinicalSubject.animalSubject = new AnimalSubject();
             this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
-            resolve();
         });
     }
 
@@ -268,83 +266,71 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     buildForm(): UntypedFormGroup {
         let animal: boolean = this.animalSelected();
-        let subjectForm = this.formBuilder.group({
-            'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
-            'isAlreadyAnonymized': [],
-            'name': [this.preclinicalSubject.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
-            'specie': [this.preclinicalSubject.animalSubject.specie, animal ? [Validators.required] : []],
-            'strain': [this.preclinicalSubject.animalSubject.strain, animal ? [Validators.required] : []],
-            'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
-            'provider': [this.preclinicalSubject.animalSubject.provider, animal ? [Validators.required] : []],
-            'stabulation': [this.preclinicalSubject.animalSubject.stabulation, animal ? [Validators.required] : []],
-            'sex': [this.preclinicalSubject.subject.sex, animal ? [Validators.required] : []],
-            'therapies': [this.preclinicalSubject.therapies],
-            'pathologies': [this.preclinicalSubject.pathologies],
-            'subjectStudyList': []
+        // Sub-group for subject properties
+        const subjectGroup = this.formBuilder.group({
+            'imagedObjectCategory': [this.preclinicalSubject.subject?.imagedObjectCategory, [Validators.required]],
+            'isAlreadyAnonymized': [this.preclinicalSubject.subject?.isAlreadyAnonymized],
+            'name': [this.preclinicalSubject.subject?.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'subject.name')])],
+            'sex': [this.preclinicalSubject.subject?.sex, animal ? [Validators.required] : []],
+            'subjectStudyList': [this.preclinicalSubject.subject?.subjectStudyList, [Validators.required, Validators.minLength(1)]]
         });
+        // Sub-group for animal subject properties
+        const animalSubjectGroup = this.formBuilder.group({
+            'specie': [this.preclinicalSubject.animalSubject?.specie, animal ? [Validators.required] : []],
+            'strain': [this.preclinicalSubject.animalSubject?.strain, animal ? [Validators.required] : []],
+            'biotype': [this.preclinicalSubject.animalSubject?.biotype, animal ? [Validators.required] : []],
+            'provider': [this.preclinicalSubject.animalSubject?.provider, animal ? [Validators.required] : []],
+            'stabulation': [this.preclinicalSubject.animalSubject?.stabulation, animal ? [Validators.required] : []]
+        });
+        // Main form with sub-groups
+        let subjectForm = this.formBuilder.group({
+            'subject': subjectGroup,
+            'animalSubject': animalSubjectGroup,
+            'therapies': [this.preclinicalSubject.therapies],
+            'pathologies': [this.preclinicalSubject.pathologies]
+        });
+        // Subscribe to category changes to update validators
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            subjectGroup.get('imagedObjectCategory').valueChanges.subscribe(val => {
                 this.onChangeImagedObjectCategory(subjectForm);
             })
         );
         return subjectForm;
     }
-
-    protected mapFormToEntity(): void {
-        this.preclinicalSubject.subject.imagedObjectCategory = this.form.get('imagedObjectCategory').value;
-        this.preclinicalSubject.subject.isAlreadyAnonymized = this.form.get('isAlreadyAnonymized').value;
-        this.preclinicalSubject.subject.name = this.form.get('name').value;
-        this.preclinicalSubject.animalSubject.specie = this.form.get('specie').value;
-        this.preclinicalSubject.animalSubject.strain = this.form.get('strain').value;
-        this.preclinicalSubject.animalSubject.biotype = this.form.get('biotype').value;
-        this.preclinicalSubject.animalSubject.provider = this.form.get('provider').value;
-        this.preclinicalSubject.animalSubject.stabulation = this.form.get('stabulation').value;
-        this.preclinicalSubject.animalSubject.sex = this.form.get('sex').value;
-        this.preclinicalSubject.therapies = this.form.get('therapies').value;
-        this.preclinicalSubject.pathologies = this.form.get('pathologies').value;
-        this.preclinicalSubject.subject.subjectStudyList = this.form.get('subjectStudyList').value;
-    }
-
-    protected mapEntityToForm(): void {
-        if (this.form) {
-            this.form.get('imagedObjectCategory').setValue(this.preclinicalSubject.subject.imagedObjectCategory);
-            this.form.get('isAlreadyAnonymized').setValue(this.preclinicalSubject.subject.isAlreadyAnonymized);
-            this.form.get('name').setValue(this.preclinicalSubject.subject.name);
-            this.form.get('specie').setValue(this.preclinicalSubject.animalSubject.specie);
-            this.form.get('strain').setValue(this.preclinicalSubject.animalSubject.strain);
-            this.form.get('biotype').setValue(this.preclinicalSubject.animalSubject.biotype);
-            this.form.get('provider').setValue(this.preclinicalSubject.animalSubject.provider);
-            this.form.get('stabulation').setValue(this.preclinicalSubject.animalSubject.stabulation);
-            this.form.get('sex').setValue(this.preclinicalSubject.animalSubject.sex);
-            this.form.get('therapies').setValue(this.preclinicalSubject.therapies);
-            this.form.get('pathologies').setValue(this.preclinicalSubject.pathologies);
-            this.form.get('subjectStudyList').setValue(this.preclinicalSubject.subject.subjectStudyList);
-        }
-    }
-
+    
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
-        let newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
+        const subjectGroup = formGroup.get('subject') as UntypedFormGroup;
+        const animalSubjectGroup = formGroup.get('animalSubject') as UntypedFormGroup;
+        
+        let newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
+        
+        // Update validators based on category selection
         if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
-            formGroup.get('specie').setValidators([Validators.required]);
-            formGroup.get('strain').setValidators([Validators.required]);
-            formGroup.get('biotype').setValidators([Validators.required]);
-            formGroup.get('provider').setValidators([Validators.required]);
-            formGroup.get('stabulation').setValidators([Validators.required]);
-            formGroup.get('sex').setValidators([Validators.required]);
+            // Animal categories require all animal fields
+            animalSubjectGroup.get('specie').setValidators([Validators.required]);
+            animalSubjectGroup.get('strain').setValidators([Validators.required]);
+            animalSubjectGroup.get('biotype').setValidators([Validators.required]);
+            animalSubjectGroup.get('provider').setValidators([Validators.required]);
+            animalSubjectGroup.get('stabulation').setValidators([Validators.required]);
+            subjectGroup.get('sex').setValidators([Validators.required]);
         } else {
-            formGroup.get('specie').setValidators([]);
-            formGroup.get('strain').setValidators([]);
-            formGroup.get('biotype').setValidators([]);
-            formGroup.get('provider').setValidators([]);
-            formGroup.get('stabulation').setValidators([]);
-            formGroup.get('sex').setValidators([]);
+            // Non-animal categories don't require animal fields
+            animalSubjectGroup.get('specie').setValidators([]);
+            animalSubjectGroup.get('strain').setValidators([]);
+            animalSubjectGroup.get('biotype').setValidators([]);
+            animalSubjectGroup.get('provider').setValidators([]);
+            animalSubjectGroup.get('stabulation').setValidators([]);
+            subjectGroup.get('sex').setValidators([]);
         }
-        formGroup.get('specie').updateValueAndValidity();
-        formGroup.get('strain').updateValueAndValidity();
-        formGroup.get('biotype').updateValueAndValidity();
-        formGroup.get('provider').updateValueAndValidity();
-        formGroup.get('stabulation').updateValueAndValidity();
-        formGroup.get('sex').updateValueAndValidity();
+        
+        // Update validity for all modified controls
+        animalSubjectGroup.get('specie').updateValueAndValidity();
+        animalSubjectGroup.get('strain').updateValueAndValidity();
+        animalSubjectGroup.get('biotype').updateValueAndValidity();
+        animalSubjectGroup.get('provider').updateValueAndValidity();
+        animalSubjectGroup.get('stabulation').updateValueAndValidity();
+        subjectGroup.get('sex').updateValueAndValidity();
+        
         this.reloadRequiredStyles();
     }
 
@@ -575,6 +561,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     public validateForm(eventName: string) {
         if (["create", "delete"].indexOf(eventName) != -1) {
+           // Validate therapy and pathology collections
            this.form.get("therapies").updateValueAndValidity({onlySelf: false, emitEvent: true});
            this.form.get("pathologies").updateValueAndValidity({onlySelf: false, emitEvent: true});
            this.footerState.valid = this.form.valid;

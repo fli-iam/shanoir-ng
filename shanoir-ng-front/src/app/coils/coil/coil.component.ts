@@ -94,16 +94,18 @@ export class CoilComponent extends EntityComponent<Coil> {
             'numberOfChannels': [this.coil.numberOfChannels],
             'serialNumber': [this.coil.serialNumber]
         });
-        form.valueChanges.subscribe((newValue: Coil) => {
-            if (newValue.center) {
-                this.form.get('manufacturerModel').enable({onlySelf: true, emitEvent:false});
-            }else {
-                this.form.get('manufacturerModel').disable({onlySelf: true, emitEvent:false});
-            }
-        });
-        form.get('center').valueChanges.subscribe((center: Center) => {
-            this.updateManufList(center);
-        });
+        this.subscriptions.push(
+            form.valueChanges.subscribe((newValue: Coil) => {
+                if (newValue.center) {
+                    this.form.get('manufacturerModel').enable({onlySelf: true, emitEvent:false});
+                }else {
+                    this.form.get('manufacturerModel').disable({onlySelf: true, emitEvent:false});
+                }
+            }),
+            form.get('center').valueChanges.subscribe((center: Center) => {
+                this.updateManufList(center);
+            })
+        );
         return form;
     }
 

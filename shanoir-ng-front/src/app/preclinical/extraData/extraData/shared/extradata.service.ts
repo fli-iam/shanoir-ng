@@ -14,7 +14,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -56,12 +56,11 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
         
         
-    postFile(fileToUpload: File,  extraData: ExtraData): Observable<any> {
+    postFile(fileToUpload: File,  extraData: ExtraData): Promise<any> {
         const endpoint = this.getUploadUrl(extraData);
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
-        return this.http
-            .post(endpoint, formData);
+        return firstValueFrom(this.http.post(endpoint, formData));
     }
     	
     getUploadUrl(extraData: ExtraData): string {
@@ -80,16 +79,17 @@ export class ExtraDataService extends EntityService<ExtraData>{
             .toPromise();
     }
     
-    download(extradata:ExtraData): Observable<any>{
+    download(extradata:ExtraData): Promise<any>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
-        return this.http.get<ExtraData>(url);
+        return firstValueFrom(this.http.get<ExtraData>(url));
     }
     
         
-    updateExtradata(datatype :string, id: number,extradata : ExtraData): Observable<ExtraData> {
+    updateExtradata(datatype :string, id: number,extradata : ExtraData): Promise<ExtraData> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/`+datatype+`/`+id;
-        return this.http
-        .put<ExtraData>(url, JSON.stringify(extradata));
+        return firstValueFrom(
+            this.http.put<ExtraData>(url, JSON.stringify(extradata)).pipe()
+        ); 
     }
     
 }

@@ -70,6 +70,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     static ActivateTreeOnThisPage: boolean = true;
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
     protected destroy$: Subject<void> = new Subject<void>();
+    private form$: SuperPromise<void> = new SuperPromise<void>();
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -134,37 +135,53 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     public set entity(entity: T) {
-        if (!EntityComponent.isProxy(entity)) {
-            this._entity = EntityComponent.wrapAsProxy(entity, this.form);
+        if (!entity) {
+            this._entity = null;
+            if (this.form) this.form.reset();
+            this.entityPromise.resolve(null);
+        } else {
+            if (!EntityComponent.isProxy(entity)) {
+                if (this.form) {
+                    this._entity = EntityComponent.wrapAsProxy(entity, this.form);
+                    EntityComponent.mapEntityToForm(entity, this.form);
+                } else {
+                    this._entity = entity;
+                    this.form$.then(() => {
+                        this._entity = EntityComponent.wrapAsProxy(entity, this.form);
+                        EntityComponent.mapEntityToForm(entity, this.form);
+                    })
+                }
+            }
+            this.entityPromise.resolve(entity);
         }
-        this.mapEntityToForm();
-        if (entity) this.entityPromise.resolve(entity);
     }
 
     private static wrapAsProxy<T extends Object>(object: T, form: FormGroup): T {
         return new Proxy(object, {
             get: (target, prop, receiver) => {
                 if (prop === 'IS_PROXY') return true;
+                if (prop === 'GET_TARGET') return target;
                 return Reflect.get(target, prop, receiver);
             },
             set: (target, prop, value, receiver) => {
                 const oldValue = Reflect.get(target, prop, receiver);
                 let isEqual = this.deepEquals(oldValue, value);
-                // Deal with non primitives properties
-                if (!isEqual
-                        && value && typeof value === 'object'
-                        && Object.prototype.hasOwnProperty.call(value, 'id')
-                        && oldValue && typeof oldValue === 'object') {
-                    const oldId = (oldValue as any)['id'];
-                    const newId = (value as any)['id'];
-                    isEqual = oldId === newId;
-                }
-                const ok = Reflect.set(target, prop, value, receiver);
-                if (!ok) return false;
-                // Sync form
-                if (!isEqual && form) {
-                    const ctrl = form.get(String(prop));
-                    if (ctrl) {
+                const ctrl = form.get(String(prop));
+                // If the new value is an entity and a sub formgroup is set, we have to wrap it as proxy too
+                if (ctrl && ctrl instanceof FormGroup) {
+                    if (value instanceof Entity) {
+                        let wrapedValue = this.wrapAsProxy(value, form);
+                        const ok = Reflect.set(target, prop, wrapedValue, receiver); // set the value in the entity
+                        if (!ok) return false;
+                        EntityComponent.mapEntityToForm(value, ctrl); // map all sub properties
+                    } else if (!value) {
+                        ctrl.reset({}, {emitEvent: true});
+                    }
+                } else {
+                    const ok = Reflect.set(target, prop, value, receiver); // set the value in the entity
+                    if (!ok) return false;
+                    // Sync form
+                    if (!isEqual && ctrl) {
                         ctrl.setValue(value, {emitEvent: true});
                     }
                 }
@@ -212,7 +229,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             }
         }
         return promise.then(entity => {
-            this.entity = entity;
+            this._entity = entity;
             return entity;
         });
     }
@@ -251,6 +268,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     this.prefillProperties();
                 }
             }
+            this.entity = this._entity; // to wrap it as proxy after form is set
         });
 
         // load called tab
@@ -281,6 +299,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     private manageFormSubscriptions() {
         this.form = this.buildForm();
+        this.form$.resolve();
         if (this.form) {
             this.subscriptions.push(
                 this.form.statusChanges.subscribe(status => {
@@ -295,19 +314,23 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    private subscribeEntityPropsUpdatesFromForm() {
-        Object.keys(this.form.controls).forEach(key => {
-            const control = this.form.get(key);
-            let sub: Subscription = control.valueChanges.subscribe(value => {
-                const declaredFields: string[] = getDeclaredFields(this.entity);
-                if (this.entity
-                        && declaredFields.indexOf(key) >= 0
-                        && this.entity[key] !== value 
-                        && !Entity.equals(this.entity?.[key], value)) {
-                    this.entity[key] = value;
-                }
-            });
-            this.subscriptions.push(sub);
+    private subscribeEntityPropsUpdatesFromForm(formGroup: FormGroup = this.form, entity: T = this.entity) {
+        Object.keys(formGroup.controls).forEach(key => {
+            const control = formGroup.get(key);
+            if (control instanceof FormGroup) {
+                this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
+            } else { 
+                let sub: Subscription = control.valueChanges.subscribe(value => {
+                    const declaredFields: string[] = getDeclaredFields(entity);
+                    if (entity
+                            && declaredFields.indexOf(key) >= 0
+                            && entity[key] !== value 
+                            && !Entity.equals(entity?.[key], value)) {
+                        entity[key] = value;
+                    }
+                });
+                this.subscriptions.push(sub);
+            }
         });
     }
 
@@ -429,7 +452,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     save(afterSave?: () => Promise<void>): Promise<T> {
         this.footerState.loading = true;
-        this.mapFormToEntity();
+        EntityComponent.mapFormToEntity(this._entity, this.form);
         return this.modeSpecificSave(afterSave)
             .then(entity => {
                 this.footerState.loading = false;
@@ -448,12 +471,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Maps the form values to the entity properties.
      * This method should be called after the form is built and before saving the entity.
      */
-    protected mapFormToEntity() {
-        Object.keys(this.form.controls).forEach((control) => {
+    protected static mapFormToEntity<T extends Object>(entity: T, form: FormGroup) {
+        Object.keys(form.controls).forEach((control) => {
             const name = control as keyof T;
-            const declaredFields: string[] = getDeclaredFields(this.entity);
+            const declaredFields: string[] = getDeclaredFields(entity);
             if (declaredFields.indexOf(name as string) >= 0) {
-                this._entity[name] = this.form.get(control).value;
+                if (form.get(control) instanceof FormGroup && entity[name] instanceof Object) {
+                    EntityComponent.mapFormToEntity(entity[name], form.get(control) as FormGroup);
+                } else {
+                    entity[name] = form.get(control).value;
+                }
             }
         });
     };
@@ -462,16 +489,20 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Maps the current entity properties to the form values.
      * Used to sync the form when the entity is updated outside of the form.
      */
-    protected mapEntityToForm() {
-        if (this.form && this.entity) {
-            const declaredFields: string[] = getDeclaredFields(this.entity);
-            Object.keys(this.form.controls).forEach((control) => {
-                if (this.form.get(control).value instanceof FormArray) return; // not supported yet
+    protected static mapEntityToForm<T extends Object>(entity: T, form: FormGroup) {
+        if (form && entity) {
+            const declaredFields: string[] = getDeclaredFields(entity);
+            Object.keys(form.controls).forEach(control => {
+                if (form.get(control).value instanceof FormArray) return; // not supported yet
                 const name = control as keyof T;
-                if (this.entity[name] !== undefined) {
-                    this.form.get(control).setValue(this.entity[name], {emitEvent: false});
+                if (entity[name] !== undefined) {
+                    if (form.get(control) instanceof FormGroup && entity[name] instanceof Object) {
+                        EntityComponent.mapEntityToForm(entity[name], form.get(control) as FormGroup);
+                    } else if (!!form.get(control)) {
+                        form.get(control).setValue(entity[name], {emitEvent: false});
+                    }
                 } else if (declaredFields.indexOf(name as string) !== -1) {
-                    const ctrl = this.form.get(control);
+                    const ctrl = form.get(control);
                     if (ctrl instanceof FormArray) {
                         ctrl.clear({ emitEvent: false }); // vide le tableau
                     } else if (ctrl instanceof FormGroup) {
@@ -501,9 +532,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
-            for (let managedField of this.onSubmitValidatedFields) {
-                let fieldControl: AbstractControl = this.form.get(managedField);
-                if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+            for (let rawFieldName of this.onSubmitValidatedFields) {
+                const fieldPath: string[] = rawFieldName.split('.');
+                let fieldControl: AbstractControl = this.form;
+                fieldPath.forEach(pathPart => {
+                    if (fieldControl) {
+                        fieldControl = fieldControl.get(pathPart);
+                    }
+                });
+                if (!fieldControl) throw new Error(rawFieldName + ' is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
                 fieldControl.updateValueAndValidity({emitEvent: false});
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }

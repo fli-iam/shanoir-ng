@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
@@ -20,6 +20,7 @@ import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds } from '../mass-download.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'download-setup-alt',
@@ -28,7 +29,7 @@ import { DownloadInputIds } from '../mass-download.service';
     standalone: false
 })
 
-export class DownloadSetupAltComponent implements OnInit {
+export class DownloadSetupAltComponent implements OnInit, OnDestroy {
 
     @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
@@ -40,6 +41,7 @@ export class DownloadSetupAltComponent implements OnInit {
     converter: number;
     datasets: Dataset[] | DatasetLight[];
     hasDicom: boolean = false;
+    private subscriptions: Subscription[] = [];
 
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null),
@@ -59,10 +61,16 @@ export class DownloadSetupAltComponent implements OnInit {
     constructor(private formBuilder: UntypedFormBuilder,
                 globalService: GlobalService,
                 private datasetService: DatasetService) {
-        globalService.onNavigate.subscribe(() => {
-            this.cancel();
-        });
+        this.subscriptions.push(
+            globalService.onNavigate.subscribe(() => {
+                this.cancel();
+            })
+        );
         this.form = this.buildForm();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 
     ngOnInit(): void {

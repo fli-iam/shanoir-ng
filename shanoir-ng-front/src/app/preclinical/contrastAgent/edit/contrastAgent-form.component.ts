@@ -114,9 +114,11 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
             'injectionSite': [this.agent.injectionSite],
             'injectionType': [this.agent.injectionType],
         });
-        form.valueChanges.subscribe(() => {
-            this.onAgentChange     
-        });
+        this.subscriptions.push(
+            form.valueChanges.subscribe(() => {
+                this.onAgentChange     
+            })
+        );
         return form;
     }
 
