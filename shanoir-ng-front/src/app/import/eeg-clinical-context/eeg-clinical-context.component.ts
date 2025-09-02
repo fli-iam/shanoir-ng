@@ -65,6 +65,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 this.hasPosition = true;
             }
         }
+        this.modality = 'EEG';
         this.findEegDate();
     }
 
@@ -127,7 +128,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getContext(): EegContextData {
-        return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
+        return new EegContextData(this.study, null, this.useStudyCard, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.coordsystem, null, null, null, null, null, null);
     }
 
@@ -138,7 +139,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
-            && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
             && (!!context.coordinatesSystem || !this.hasPosition)
         );
@@ -177,9 +177,10 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateSubjectStep(step: Step) {
-        step.entity = this.getPrefilledSubject();
-        step.data.forceStudy = this.study;
-        step.data.subjectNamePrefix = this.subjectNamePrefix;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
     }
 
     protected getPrefilledSubject(): Subject {
@@ -187,13 +188,14 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
-        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.subjectStudyList = [];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        newSubject.study = this.study;
         return newSubject;
     }
 
     protected fillCreateExaminationStep(step: Step) {
-        step.entity = this.getPrefilledExam();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {
@@ -204,7 +206,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
@@ -214,7 +215,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected fillCreateAcqEqStep(step: Step) {
-        step.entity = this.getPrefilledAcqEqt();
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledAcqEqt());
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {

@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<ng-template [ngSwitchCase]="'view'">
 						<div class="header command-zone" i18n="View pathology|Title">View pathology details</div>
 					</ng-template>
-					<ng-template ngSwitchDefault> 
+					<ng-template ngSwitchDefault>
 						<div *ngIf="!createSPMode" class="header command-zone" i18n="Edit pathology|Title">Edit pathology</div>
 						<div *ngIf="createSPMode"  class="header command-zone" i18n="Create pathology|Title">Add pathology</div>
 					</ng-template>
@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="required">
 							<label i18n="Edit subPatho|Pathology label">Pathology</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectPathology?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -50,9 +50,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit subPatho|PathologyModel label">Model</label> 
+							<label i18n="Edit subPatho|PathologyModel label">Model</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectPathology?.pathologyModel?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -70,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="required">
 							<label i18n="Edit subPatho|Location label">Location</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectPathology?.location?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -88,32 +88,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label i18n="Edit subjectTherapy|startDate label">Start date</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectPathology?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<datepicker id="startDate"  [(ngModel)]="subjectPathology.startDate" formControlName="startDate" ></datepicker>
-									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
 						</li>
 						<li>
 							<label i18n="Edit subjectTherapy|endDate label">End date</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectPathology?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<datepicker id="endDate"  [(ngModel)]="subjectPathology.endDate" formControlName="endDate" ></datepicker>
-									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">End Date should be valid ! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">End Date should be valid ! Date format: {{ dateDisplay }}</label>
 								</ng-template>
 							</span>
 						</li>
 					</ol>
 					</fieldset>
-				</td>				
+				</td>
 			</tr>
-			
+
 			<tr><td colspan="2"><div class="footer command-zone">
 				<button type="button" i18n="Edit pathology|CancelButton label" class="Button" (click)="cancelPathology()">Cancel</button>
 				<button type="button" *ngIf="canUpdatePathology()" (click)="updatePathology()" i18n="Edit pathology|SaveButton label" class="Button" [disabled]="!form.valid">Update</button>

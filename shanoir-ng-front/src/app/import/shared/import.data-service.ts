@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,7 +17,6 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Center } from '../../centers/shared/center.model';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { Study } from '../../studies/shared/study.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ImportJob, PatientDicom } from './dicom-data.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { EegImportJob } from './eeg-data.model';
@@ -25,16 +24,17 @@ import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import {Subject} from "../../subjects/shared/subject.model";
 
 export class ContextData {
-    
+
     constructor (
         public study: Study,
         public studyCard: StudyCard,
         public useStudyCard: boolean,
-        public center: Center, 
+        public center: Center,
         public acquisitionEquipment: AcquisitionEquipment,
-        public subject: SubjectWithSubjectStudy,
+        public subject: Subject,
         public examination: SubjectExamination,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,
@@ -46,14 +46,14 @@ export class ContextData {
 }
 
 export class EegContextData  {
-    
+
     constructor (
         public study: Study,
         public studyCard: StudyCard,
         public useStudyCard: boolean,
-        public center: Center, 
+        public center: Center,
         public acquisitionEquipment: AcquisitionEquipment,
-        public subject: SubjectWithSubjectStudy,
+        public subject: Subject,
         public examination: SubjectExamination,
         public coordinatesSystem: string,
         public datasetType: DatasetType,
@@ -68,7 +68,7 @@ export class EegContextData  {
 export class ProcessedContextData {
     constructor (
         public study: Study,
-        public subject: SubjectWithSubjectStudy,
+        public subject: Subject,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,
         public processedDatasetType: ProcessedDatasetType,
@@ -84,7 +84,7 @@ export class ProcessedContextData {
 @Injectable()
 export class ImportDataService {
 
-    private _archiveUploaded: ImportJob;  // 1. upload    
+    private _archiveUploaded: ImportJob;  // 1. upload
     private _patientList: ImportJob;   // 1. upload or pacs
     private _eegImportJob: EegImportJob;   // 1. upload
     private _processedDatasetImportJob: ProcessedDatasetImportJob;   // 1. upload
@@ -112,7 +112,7 @@ export class ImportDataService {
         if (!this._contextBackup) this._contextBackup = {};
         return this._contextBackup[stepId];
     }
-    
+
     public get archiveUploaded(): ImportJob {
         return this._archiveUploaded;
     }
@@ -163,4 +163,4 @@ export class ImportDataService {
     public set contextData(context: ContextData) {
         this._contextData = context;
     }
-}  
+}

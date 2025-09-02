@@ -25,4 +25,5 @@ public class TagDecorator implements TagMapper {
 		}
 		return tagDTOs;
 	}
+
 }

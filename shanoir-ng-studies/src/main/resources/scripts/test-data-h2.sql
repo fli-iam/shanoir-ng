@@ -74,12 +74,12 @@ VALUES
 	(3, 2, 1, 2, 'coil 3', 4, '234567891');
 
 INSERT INTO subject
-	(id, name, identifier, birth_date )
+	(id, name, identifier, birth_date, study_id, physically_involved)
 VALUES
-	(1,'subject1', 'sub1', parsedatetime('2013/01/01', 'yyyy/MM/dd')),
-	(2,'subject2', 'sub2', parsedatetime('2001/02/01', 'yyyy/MM/dd')),
-	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd')),
-	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'));
+	(1,'subject1', 'sub1', parsedatetime('2013/01/01', 'yyyy/MM/dd'), 1, 0),
+	(2,'subject2', 'sub2', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 1, 0),
+	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0),
+	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0);
 
 INSERT INTO subject_study
 	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)

@@ -264,8 +264,13 @@ public class DatasetApiController implements DatasetApi {
 	}
 
   	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
-		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
+		List<Dataset> datasets;
+		if(output){
+			datasets = datasetService.findDatasetAndOutputByExaminationId(examinationId);
+		} else {
+			datasets = datasetService.findByExaminationId(examinationId);
+		}
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -296,7 +301,6 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-	
 		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

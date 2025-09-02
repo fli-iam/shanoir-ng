@@ -28,6 +28,7 @@ import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyCardPolicy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
@@ -46,8 +47,7 @@ public interface StudyMapper {
 	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
 	@Named("study.simple")
-	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
-		@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+	@Mappings({ @Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
 		@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
 		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
 		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
@@ -92,5 +92,10 @@ public interface StudyMapper {
 		@Mapping(target = "subjectPreclinical", source = "subject.preclinical")
 	})
 	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
+
+	default Integer map(StudyCardPolicy policy) {
+        if (policy == null) return null;
+        return policy.getId();
+    }
 
 }

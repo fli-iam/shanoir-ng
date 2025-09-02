@@ -170,8 +170,24 @@ public class Patient {
 
 	@Override
 	public String toString() {
-		return "Patient [patientID=" + Utils.sha256(patientID) + ", patientName=" + Utils.sha256(patientName) + ", patientBirthName="
-				+ Utils.sha256(patientBirthName) + ", patientBirthDate=" + Utils.sha256(patientBirthDate.toString()) + "]";
+		StringBuilder sb = new StringBuilder("Patient [");
+		if (patientID != null) {
+			sb.append("patientID=").append(Utils.sha256(patientID)).append(", ");
+		}
+		if (patientName != null) {
+			sb.append("patientName=").append(Utils.sha256(patientName)).append(", ");
+		}
+		if (patientBirthName != null) {
+			sb.append("patientBirthName=").append(Utils.sha256(patientBirthName)).append(", ");
+		}
+		if (patientBirthDate != null) {
+			sb.append("patientBirthDate=").append(Utils.sha256(patientBirthDate.toString())).append(", ");
+		}
+		if (sb.lastIndexOf(", ") == sb.length() - 2) {
+			sb.delete(sb.length() - 2, sb.length());
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 	public String toTreeString() {

@@ -185,7 +185,7 @@ public class CenterServiceImpl implements CenterService {
 
 	@Override
 	public Optional<Center> findByName(String name) {
-		return centerRepository.findByName(name);
+		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
 	
 	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{

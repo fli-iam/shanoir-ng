@@ -25,7 +25,7 @@ import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -94,9 +94,9 @@ public class QualityExaminationRule extends AbstractEntity {
 	
 	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
 	    ExaminationData examData = new ExaminationData(examination);
-	    if (examData.getSubjectStudy() == null) {
+	    if (examData.getSubjectId() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
-	        log.warn("No subject study in exam " + examination.getId());
+	        log.warn("No subject in exam " + examination.getId());
 	    } else {
 	        apply(examData, examinationDicomAttributes, result, downloader);	        
 	    }
@@ -109,13 +109,13 @@ public class QualityExaminationRule extends AbstractEntity {
             resultEntry.setTagSet(getQualityTag());
             resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
             result.add(resultEntry);
-            result.addUpdatedSubjectStudy( 
-                    setTagToSubjectStudy(examination.getSubjectStudy()));
+            result.addUpdatedSubject( 
+                    setTagToSubject(examination.getSubjectId()));
         } else {
             ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
             if (conditionResult.isFulfilled()) {
-                result.addUpdatedSubjectStudy( 
-                        setTagToSubjectStudy(examination.getSubjectStudy()));
+                result.addUpdatedSubject( 
+                        setTagToSubject(examination.getSubjectId()));
             }          
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
@@ -141,13 +141,12 @@ public class QualityExaminationRule extends AbstractEntity {
      * @param subjectStudies
      * @return list of updated subject studies
      */
-    private SubjectStudy setTagToSubjectStudy(SubjectStudy subjectStudy) {
+    private Subject setTagToSubject(Long subjectId) {
         // don't touch subjectStudy as we later will compare the original with the updated
-        SubjectStudy subjectStudyCopy = new SubjectStudy();
-        subjectStudyCopy.setId(subjectStudy.getId());
-        subjectStudyCopy.setQualityTag(getQualityTag());
-        subjectStudyCopy.setStudy(subjectStudy.getStudy());
-        return subjectStudyCopy;
+        Subject subjectCopy = new Subject();
+        subjectCopy.setId(subjectId);
+        subjectCopy.setQualityTag(getQualityTag());
+        return subjectCopy;
     }
 
     /**

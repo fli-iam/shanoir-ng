@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
 									(onChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
-									[disabled]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId()"
+									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId())"
 								></checkbox>
 							</span>
 						</li>

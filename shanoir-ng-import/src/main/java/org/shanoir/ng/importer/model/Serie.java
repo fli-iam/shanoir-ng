@@ -135,6 +135,7 @@ public class Serie implements Cloneable {
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),
+				modality,
 				attributes.getString(Tag.DeviceSerialNumber),
 				attributes.getString(Tag.StationName),
 				attributes.getString(Tag.MagneticFieldStrength));

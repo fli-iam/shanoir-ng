@@ -34,9 +34,9 @@ VALUES
 
 
 INSERT INTO subject
-	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)
+	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id, study_id)
 VALUES
-	(1,'DemoSubject', 'sub1', '2013/01/01', 2, 1, 1, 2, NULL);
+	(1,'DemoSubject', 'sub1', '2013/01/01', 2, 1, 1, 2, NULL, 1);
 
 
 INSERT INTO subject_study

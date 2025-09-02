@@ -43,8 +43,8 @@ export class AccountRequestComponent {
     studyName: string; // optional : study display name
     invitationIssuer: string; // optional : issuer of the invitation (from the study details)
     function: string; // optional : operator/researcher
-
     language: 'english' | 'french' = 'english';
+    loading: boolean = false;
 
     constructor(
             private fb: UntypedFormBuilder,
@@ -90,6 +90,7 @@ export class AccountRequestComponent {
         if (this.studyName) this.user.accountRequestInfo.studyName = this.studyName;
         if (this.invitationIssuer) this.user.accountRequestInfo.contact = this.invitationIssuer;
         if (this.function) this.user.accountRequestInfo.function = this.function;
+        this.loading = true;
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;
@@ -99,6 +100,8 @@ export class AccountRequestComponent {
                 } else {
                     throw err;
                 }
+            }).finally(() => {
+                this.loading = false;
             });
     }
 

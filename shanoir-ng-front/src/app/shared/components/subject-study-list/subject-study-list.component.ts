@@ -144,7 +144,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             );
         }
         this.columnDefs.push(
-            { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
+            { headerName: 'Subject id for this study', field: 'studyIdentifier', editable: true },
             { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true }
         );
         if (this.displaySubjectType) {

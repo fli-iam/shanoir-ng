@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
@@ -146,43 +147,11 @@ public class RabbitMQSubjectService {
 
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
-	@Transactional
 	public Long createOrUpdateSubject(String subjectAsString) {
-		// create a subject
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
 			Subject subject = mapper.readValue(subjectAsString, Subject.class);
-
-			Long studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
-			
-			Study study = studyRepository.findById(studyId).get();
-
-			// Check subject existence by name
-			Subject existingSubject = this.subjectRepository.findByName(subject.getName());
-
-			// If it exists, update subject study list
-			if (existingSubject != null) {
-				if(existingSubject.getSubjectStudyList() == null) {
-					existingSubject.setSubjectStudyList(new ArrayList<>());
-				}
-				if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
-					SubjectStudy subjectStudy = new SubjectStudy();
-					subjectStudy.setSubject(existingSubject);
-					subjectStudy.setStudy(study);
-					existingSubject.getSubjectStudyList().add(subjectStudy);
-				}
-				subject = existingSubject;
-			} else {
-				for (SubjectStudy sustu : subject.getSubjectStudyList()) {
-					sustu.setSubject(subject);
-				}
-			}
-
-			// Then create/update the subject
-			subject = subjectService.create(subject);
-
-			// Return subject ID
+			subject = manageSubject(subject);
 			return subject.getId();
 		} catch (Exception e) {
 			LOG.error("Error while creating the new subject: ", e);
@@ -190,14 +159,22 @@ public class RabbitMQSubjectService {
 		}
 	}
 
-
-	private boolean studyListContains(List<SubjectStudy> subjectStudyList, Long studyId) {
-		for (SubjectStudy sustu : subjectStudyList) {
-			if (sustu.getStudy().getId().equals(studyId)) {
-				return true;
-			}
+	@Transactional
+	private Subject manageSubject(Subject subject) throws ShanoirException {
+		Long studyId = null;
+		if (subject.getStudy() != null) {
+			studyId = subject.getStudy().getId();
 		}
-		return false;
+		// @todo: to be removed later
+		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
+			studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
+		}
+		Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
+		if (subjectOld == null) {
+			return subjectService.create(subject);
+		} else {
+			return subjectOld;
+		}
 	}
 
 }

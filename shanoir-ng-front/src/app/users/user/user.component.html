@@ -109,11 +109,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
                 <span class="right-col">
                     <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
-                        {{user.expirationDate | date: 'dd/MM/yyyy'}}
+                        {{user.expirationDate | localDateFormatPipe}}
                     </ng-container>
                     <ng-container *ngIf="mode != 'view' && isUserAdmin()">
                         <datepicker formControlName="expirationDate" [(ngModel)]="user.expirationDate"></datepicker>
-                        <label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+                        <label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
                         <label *ngIf="hasError('expirationDate', ['future'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateFutureError">This date should be in the future!</label>
                     </ng-container>
                 </span>
