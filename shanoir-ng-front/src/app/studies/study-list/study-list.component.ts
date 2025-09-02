@@ -41,6 +41,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
+    private studyIdsForCurrentUser: number[];
 
     constructor(
         private studyService: StudyService,
@@ -48,6 +49,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         private userService: UserService) {
 
         super('study');
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Study> {
@@ -208,10 +210,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     canEdit(study: Study): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            study.studyUserList &&
-            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(study.id);
     }
 
     private fetchStudyUsers(study: any): Promise<StudyUser[]> {
