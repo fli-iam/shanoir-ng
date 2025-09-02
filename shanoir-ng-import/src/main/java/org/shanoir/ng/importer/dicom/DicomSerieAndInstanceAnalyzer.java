@@ -1,5 +1,7 @@
 package org.shanoir.ng.importer.dicom;
 
+import java.util.Set;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
@@ -20,6 +22,8 @@ public class DicomSerieAndInstanceAnalyzer {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
+    private static final String DICOMDIR_BASIC_DIRECTORY_IOD = "1.2.840.10008.1.3.10";
+
     private static final String RTPLAN = "RTPLAN";
 
     private static final String RTDOSE = "RTDOSE";
@@ -34,36 +38,43 @@ public class DicomSerieAndInstanceAnalyzer {
 
     private static final String isSpectroscopy = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
 
+    private static final Set<String> SOP_CLASS_UIDS_IGNORED = Set.of(
+            UID.RawDataStorage,
+            UID.SpatialRegistrationStorage,
+            UID.SpatialFiducialsStorage,
+            UID.DeformableSpatialRegistrationStorage,
+            UID.SegmentationStorage,
+            UID.SurfaceSegmentationStorage,
+            DICOMDIR_BASIC_DIRECTORY_IOD
+    );
+
     /**
      * By default raw data storage and sub-types are ignored.
+     * 
+     * We ignore (even if very rare) DICOMDIR instances, as they
+     * are not images.
      *
      * @param attributes
      * @return
      */
     public static boolean checkInstanceIsIgnored(Attributes attributes) {
-        final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (UID.RawDataStorage.equals(sopClassUID)
-                || UID.SpatialRegistrationStorage.equals(sopClassUID)
-                || UID.SpatialFiducialsStorage.equals(sopClassUID)
-                || UID.DeformableSpatialRegistrationStorage.equals(sopClassUID)
-                || UID.SegmentationStorage.equals(sopClassUID)
-                || UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
-            LOG.warn("Instance (image) ignored, because of SOPClassUID: " + sopClassUID);
+        if (isIgnoredUID(attributes.getString(Tag.SOPClassUID), "SOPClassUID")) {
             return true;
         }
-        final String referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-        if (UID.RawDataStorage.equals(referencedSOPClassUIDInFile)
-                || UID.SpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
-                || UID.SpatialFiducialsStorage.equals(referencedSOPClassUIDInFile)
-                || UID.DeformableSpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
-                || UID.SegmentationStorage.equals(referencedSOPClassUIDInFile)
-                || UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
-            LOG.warn("Instance (image) ignored, because of ReferencedSOPClassUIDInFile: " + referencedSOPClassUIDInFile);
+        if (isIgnoredUID(attributes.getString(Tag.ReferencedSOPClassUIDInFile), "ReferencedSOPClassUIDInFile")) {
             return true;
         }
         final String burnedInAnnotation = attributes.getString(Tag.BurnedInAnnotation);
         if (DICOM_VR_CODE_STRING_YES.equals(burnedInAnnotation)) {
-            LOG.warn("Instance (image) ignored, because of burnedInAnnotation: " + burnedInAnnotation);
+            LOG.warn("Instance (image) ignored, because of burnedInAnnotation: {}", burnedInAnnotation);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isIgnoredUID(String sopClassUID, String source) {
+        if (sopClassUID != null && SOP_CLASS_UIDS_IGNORED.contains(sopClassUID)) {
+            LOG.warn("Instance (image) ignored, because of {}: {}", source, sopClassUID);
             return true;
         }
         return false;

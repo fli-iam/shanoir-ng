@@ -79,17 +79,6 @@ public class ImportUtils {
 			.registerModule(new Jdk8Module())
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
-	
-	public static boolean addStudyToSubject(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
-		subject.setStudy(new IdName(study.getId(), study.getName()));
-		if (!StringUtils.isEmpty(studyIdentifier)) {
-			subject.setStudyIdentifier(studyIdentifier);
-		}
-		subject.setSubjectType(subjectType);
-		subject.setPhysicallyInvolved(physicallyInvolved);
-		subject.setTags(new ArrayList<>());
-		return true;
-	}
 
 	/**
 	 * Create upload folder from parent folder and dicom information
@@ -354,19 +343,17 @@ public class ImportUtils {
 	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
 		if (subjectREST == null) {
 			try {
-				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
+				subjectREST = fillSubjectREST(study, subject, subjectName, category, languageHemDom, manualHemDom, studyIdentifier, subjectType, isPhysicallyInvolved);
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);
 				return null;
 			}
-			if(addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
-				Long centerId = equipment.getCenter().getId();
-				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
-				if (subjectREST == null) {
-					return null;
-				} else {
-					logger.info("Subject created on server: " + subjectREST.toString());
-				}
+			Long centerId = equipment.getCenter().getId();
+			subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
+			if (subjectREST == null) {
+				return null;
+			} else {
+				logger.info("Subject created on server: " + subjectREST.toString());
 			}
 		} else {
 			logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
@@ -374,8 +361,10 @@ public class ImportUtils {
 		return subjectREST;
 	}
 	
-	public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
+	public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(final Study study, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom,
+			String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) throws ParseException {
 		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
+		subjectREST.setStudy(new IdName(study.getId(), study.getName()));
 		subjectREST.setIdentifier(subject.getIdentifier());
 		subjectREST.setBirthDate(subject.getBirthDate());
 		if (Sex.F.name().equals(subject.getSex())) {
@@ -391,6 +380,9 @@ public class ImportUtils {
 		if (ShUpConfig.isModeSubjectNameManual()) {
 			subjectREST.setName(subjectName);
 		}
+		if (!StringUtils.isEmpty(studyIdentifier)) {
+			subjectREST.setStudyIdentifier(studyIdentifier);
+		}
 		subjectREST.setImagedObjectCategory(category);
 		if (HemisphericDominance.Left.getName().compareTo(languageHemDom) == 0) {
 			subjectREST.setLanguageHemisphericDominance(HemisphericDominance.Left);
@@ -402,6 +394,9 @@ public class ImportUtils {
 		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
 			subjectREST.setManualHemisphericDominance(HemisphericDominance.Right);
 		}
+		subjectREST.setSubjectType(subjectType);
+		subjectREST.setPhysicallyInvolved(physicallyInvolved);
+		subjectREST.setTags(new ArrayList<>());
 		return subjectREST;
 	}
 
@@ -570,6 +565,11 @@ public class ImportUtils {
 	}
 
 	public static Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+		// E.g. phantom images: set to 01.01.this-year
+		if (patient.getPatientBirthDate() == null) {
+			LocalDate firstDayOfOngoingYear = LocalDate.of(LocalDate.now().getYear(), 1, 1);
+			patient.setPatientBirthDate(firstDayOfOngoingYear);
+		} // if present: we need to use original patient birth date for hash calculation
 		Subject subject = new Subject();
 		String identifier;
 		// OFSEP mode
