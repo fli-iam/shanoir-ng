@@ -119,7 +119,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
     }
 
-    protected fillCreateAcqEqStep() { 
+    protected fillCreateAcqEqStep() {
         return;
     }
 
@@ -134,7 +134,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [];
         const newPreclinicalSubject = new PreclinicalSubject();
         const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;

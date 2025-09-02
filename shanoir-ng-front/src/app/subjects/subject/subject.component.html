@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<form-footer
 				[state]="footerState"
-				(save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
+				(save)="save()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
 				(dismiss)="goToView()"
