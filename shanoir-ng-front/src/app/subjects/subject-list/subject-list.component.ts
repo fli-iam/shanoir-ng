@@ -41,7 +41,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    private studies: IdName[];
+    private studiesICanAdmin: number[];
     private studyIdsForCurrentUser: number[];
 
     constructor(
