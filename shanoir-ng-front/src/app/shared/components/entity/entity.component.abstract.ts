@@ -82,7 +82,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     abstract buildForm(): UntypedFormGroup;
     protected getTreeSelection: () => Selection; //optional
     protected fetchEntity: () => Promise<any>; // optional
-    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: Entity): string;
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -105,7 +105,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             const userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
             if (!this.showTreeByDefault
                 && this.treeService.treeOpened
-                && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
+                && (!this.treeService.memberStudyOpenedAndTreeActive(userId))
             ) {
                 this.treeService.closeTemporarily();
             }
@@ -420,22 +420,15 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        let promise: Promise<string>;
-        if (this.getOnDeleteConfirmMessage) {
-            promise = this.getOnDeleteConfirmMessage(entity);
-        } else {
-            promise = Promise.resolve('');
-        }
-        promise.then(studyListStr => {
-            this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
-                if (deleted) {
-                    if (this.treeService.treeOpened && this.treeService.treeAvailable) {
-                        this.goToParent();
-                    } else {
-                        this.goBack();
-                    }
+        let studyListStr = this.getOnDeleteConfirmMessage(entity);
+        this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
+            if (deleted) {
+                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                    this.goToParent();
+                } else {
+                    this.goBack();
                 }
-            });
+            }
         });
     }
 

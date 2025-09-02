@@ -103,7 +103,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
         this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
         this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
     }
 
@@ -118,7 +117,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
         return newSubject;
