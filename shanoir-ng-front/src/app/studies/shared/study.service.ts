@@ -320,4 +320,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise()
             .then(dtos => dtos?.map(dto => StudyDTOService.tagDTOToTag(dto)));
     }
+
+    getStudiesByRight(right: StudyUserRight): Promise<number[]> {
+        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right)
+            .toPromise();
+    }
 }
