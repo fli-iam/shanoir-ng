@@ -28,7 +28,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
 
     abstract API_URL: string;
     abstract getEntityInstance(entity?: T): T;
-    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: Entity): string;
     protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     protected subscriptions: Subscription[] = [];

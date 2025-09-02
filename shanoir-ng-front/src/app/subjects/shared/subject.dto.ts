@@ -74,11 +74,6 @@ export class SubjectDTOService {
         entity.manualHemisphericDominance = dto.manualHemisphericDominance;
         entity.imagedObjectCategory = dto.imagedObjectCategory;
         entity.sex = dto.sex;
-        if (dto.subjectStudyList) {
-            entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => StudyDTOService.dtoToSubjectStudy(subjectStudyDto, null, entity));
-        } else {
-            entity.subjectStudyList = [];
-        }
         entity.studyIdentifier = dto.studyIdentifier;
         entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
         entity.subjectType = dto.subjectType;
@@ -111,7 +106,6 @@ export class SubjectDTO {
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
-    subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
     studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
@@ -134,11 +128,6 @@ export class SubjectDTO {
         this.sex = subject.sex;
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
-        this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
-            dto.subject = null;
-            return dto;
-        }) : null;
         this.studyIdentifier = subject.studyIdentifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;

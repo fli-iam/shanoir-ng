@@ -29,7 +29,7 @@ import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 
 export abstract class ShanoirNode {
-    
+
     abstract title: string;
     private _opened: boolean = false;
     private openPromise: Promise<void>;
@@ -527,7 +527,7 @@ export class ReverseSubjectNode extends ShanoirNode {
         public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public studies: ReverseStudyNode[] | UNLOADED
+        public studies: ReverseStudyNode | UNLOADED
     ) {
         super(parent, id, label);
     }

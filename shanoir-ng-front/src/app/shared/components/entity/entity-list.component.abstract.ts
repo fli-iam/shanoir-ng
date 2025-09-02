@@ -56,7 +56,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private showId: boolean = true;
 
     abstract getService(): EntityService<T>;
-    getOnDeleteConfirmMessage?(entity: T): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: T): string;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
@@ -121,46 +121,38 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         let dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
             + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
 
-        let promise: Promise<string>;
-        if (this.getOnDeleteConfirmMessage) {
-            promise = this.getOnDeleteConfirmMessage(entity);
-        } else {
-            promise = Promise.resolve('');
-        }
-        promise.then(studyListStr => {
-            this.confirmDialogService
-                .confirm(
-                    dialogTitle,
-                    dialogMsg + studyListStr
-                ).then(res => {
-                if (res) {
-                    this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next({entity: entity});
-                        this.table.refresh().then(() => {
-                            if (this.ROUTING_NAME == 'examination') {
-                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
-                            } else {
-                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
-                            }
-                        });
-                        this.treeService.updateTree();
-                    }).catch(reason => {
-                        if (!reason){
-                            return;
+        let studyListStr = this.getOnDeleteConfirmMessage(entity);
+        this.confirmDialogService
+            .confirm(
+                dialogTitle,
+                dialogMsg + studyListStr
+            ).then(res => {
+            if (res) {
+                this.getService().delete(entity.id).then(() => {
+                    this.onDelete.next({entity: entity});
+                    this.table.refresh().then(() => {
+                        if (this.ROUTING_NAME == 'examination') {
+                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                        } else {
+                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
                         }
-                        if (reason instanceof ShanoirError && reason.code == 422) {
-                            this.dealWithDeleteError(reason, entity);
-                            return;
-                        } else if (reason.error){
-                            this.dealWithDeleteError(new ShanoirError(reason), entity);
-                            return;
-                        }
-                        throw Error(reason);
                     });
-                }
-            })
-        });
-
+                    this.treeService.updateTree();
+                }).catch(reason => {
+                    if (!reason){
+                        return;
+                    }
+                    if (reason instanceof ShanoirError && reason.code == 422) {
+                        this.dealWithDeleteError(reason, entity);
+                        return;
+                    } else if (reason.error){
+                        this.dealWithDeleteError(new ShanoirError(reason), entity);
+                        return;
+                    }
+                    throw Error(reason);
+                });
+            }
+        })
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {

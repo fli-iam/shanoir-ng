@@ -133,7 +133,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [];
         let newPreclinicalSubject = new PreclinicalSubject();
         let newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;

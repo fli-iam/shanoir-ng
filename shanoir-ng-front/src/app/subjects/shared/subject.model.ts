@@ -34,7 +34,6 @@ export class Subject extends Entity {
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
-    subjectStudyList: SubjectStudy[] = [];
     studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
     subjectType: SubjectType;
@@ -58,14 +57,12 @@ export class SimpleSubject {
     id: number;
     name: string;
     identifier: string;
-    subjectStudyList: SubjectStudy[];
     study: SimpleStudy;
 
     constructor(subject: Subject) {
         this.id = subject.id ? subject.id : null;
         this.name = subject.name;
         this.identifier = subject.studyIdentifier;
-        this.subjectStudyList = null;
         this.study = subject.study;
     }
 }

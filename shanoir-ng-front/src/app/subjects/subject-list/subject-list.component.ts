@@ -22,6 +22,7 @@ import { SubjectService } from '../shared/subject.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
 import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
+import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
 
 
 @Component({
@@ -39,12 +40,14 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
 
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private subjectService: SubjectService,
             private studyService: StudyService) {
         super('subject');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Subject> {
@@ -86,19 +89,12 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     canDelete(subject: Subject): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            subject.subjectStudyList &&
-            subject.subjectStudyList.filter(ss => this.studiesICanAdmin?.includes(ss.study.id)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.study.id);
     }
 
-    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
-        return this.subjectService.get(entity.id).then(res => {
-            const studiesNames = res.subjectStudyList.map(study => study.study.name).join('\n- ');
-            studyListStr += studiesNames;
-            studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
-            return studyListStr;
-        });
+    getOnDeleteConfirmMessage(entity: Subject): string {
+        let studyListStr : string = "\n\nThis subject belongs to the study " + entity.study.name;
+        studyListStr += "\n\nAttention: this action deletes all datasets from that study.";
+        return studyListStr;
     }
 }
