@@ -338,7 +338,7 @@ public class DatasetDownloaderServiceImpl {
 
 	protected String getDatasetFilepath(Dataset dataset, String studyName, String subjectName, Boolean withShanoirId) {
 		Examination exam = datasetService.getExamination(dataset);
-
+    
 		String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + (withShanoirId ? "_shanoirId-" + dataset.getId() : "");
 		if (exam.getComment() != null) {
 			datasetFilePath += "-" + exam.getComment();
