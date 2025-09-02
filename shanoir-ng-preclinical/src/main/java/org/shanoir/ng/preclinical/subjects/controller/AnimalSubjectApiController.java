@@ -85,25 +85,16 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	public ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
 			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
-
 		try {
-
 			SubjectDto createdSubjectDto = this.createSubject(dto.getSubject());
-
 			AnimalSubject animalSubject = dtoService.getAnimalSubjectFromPreclinicalDto(dto);
 			animalSubject.setSubjectId(createdSubjectDto.getId());
-
 			this.validateAnimalSubjectCreation(animalSubject, result);
-
 			final AnimalSubject createdAnimal = subjectService.save(animalSubject);
-
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdAnimal.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-
 			PreclinicalSubjectDto preclinicalDto = dtoService.getPreclinicalDtoFromAnimalSubject(createdAnimal);
 			preclinicalDto.setSubject(createdSubjectDto);
-
 			return new ResponseEntity<>(preclinicalDto, HttpStatus.OK);
-
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
@@ -111,8 +102,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
-
-		if(subjectService.isSubjectNameAlreadyUsed(dto.getName())){
+		if(subjectService.isSubjectNameAlreadyUsedInStudy(dto.getName(), dto.getStudy().getId())){
 			FieldErrorMap errorMap = new FieldErrorMap();
 			List<FieldError> errors = new ArrayList();
 			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
@@ -120,9 +110,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
 		}
-
 		dto.setPreclinical(true);
-
 		Long subjectId;
 		try {
 			subjectId = subjectService.createSubject(dto);
@@ -132,7 +120,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			throw new ShanoirException(msg, ex);
 		}
 		dto.setId(subjectId);
-
 		return dto;
 	}
 

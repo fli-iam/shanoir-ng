@@ -17,11 +17,13 @@ package org.shanoir.ng.subject.dto.mapper;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
@@ -38,14 +40,20 @@ import org.springframework.data.domain.Page;
 public interface SubjectMapper {
 
 	@Named("subjectWithStudyList")
+	@Mappings({ @Mapping(target = "studyId", source = "study.id")})
 	SubjectDTO subjectToSubjectDTO(Subject subject);
 
 	@Named("subjectWithoutStudyList")
-	@Mappings({ @Mapping(target = "subjectStudyList", ignore = true) })
+	@Mappings({ @Mapping(target = "studyId", source = "study.id"),
+		@Mapping(target = "subjectStudyList", ignore = true) })
 	SubjectDTO subjectToSubjectDTONoStudies(Subject subject);
 
+	@IterableMapping(qualifiedByName = "subjectWithStudyList")
 	List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
 
-	PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page);
+	default PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page) {
+		List<SubjectDTO> dtos = subjectsToSubjectDTOs(page.getContent());
+		return new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
+	}
 
 }

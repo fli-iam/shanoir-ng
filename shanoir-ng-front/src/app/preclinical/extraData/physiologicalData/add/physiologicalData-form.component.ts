@@ -33,7 +33,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'physiological-data-upload-form',
     templateUrl: 'physiologicalData-form.component.html',
-    providers: [ExtraDataService],
     animations: [slideDown],
     standalone: false
 })

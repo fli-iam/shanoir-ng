@@ -41,10 +41,10 @@ public class Instance {
     public Instance() {}
     
     public Instance(Attributes attributes) {
-    		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-    		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
-    		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-    		this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
+		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
+		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+		this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
     }
 
 	public String getInstanceNumber() {

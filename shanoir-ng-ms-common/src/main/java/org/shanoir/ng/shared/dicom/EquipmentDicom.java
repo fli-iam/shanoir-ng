@@ -24,14 +24,18 @@ public class EquipmentDicom {
 	private String stationName;
 	
 	@JsonProperty("magneticFieldStrength")
-	private String magneticFieldStrength;	
+	private String magneticFieldStrength;
+
+	@JsonProperty("modality")
+	private String modality;
 	
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public EquipmentDicom() {}
 
-	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
+	public EquipmentDicom(String manufacturer, String manufacturerModelName, String modality, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
 		this.manufacturer = manufacturer;
 		this.manufacturerModelName = manufacturerModelName;
+		this.modality = modality;
 		this.deviceSerialNumber = deviceSerialNumber;
 		this.stationName = stationName;
 		this.magneticFieldStrength = magneticFieldStrength;
@@ -77,17 +81,27 @@ public class EquipmentDicom {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
+	public String getModality() {
+		return modality;
+	}
+
+	public void setModality(String modality) {
+		this.modality = modality;
+	}
+
 	@JsonIgnore
 	public boolean isComplete() {
 		return StringUtils.isNotEmpty(this.manufacturer)
 			&& StringUtils.isNotEmpty(this.manufacturerModelName)
-			&& StringUtils.isNotEmpty(this.deviceSerialNumber);
+			&& StringUtils.isNotEmpty(this.deviceSerialNumber)
+			&& StringUtils.isNotEmpty(this.modality);
 	}
 
 	@Override
 	public String toString() {
 		return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelName=" + manufacturerModelName
 				+ ", deviceSerialNumber=" + deviceSerialNumber + ", stationName=" + stationName
+				+ ", modality=" + modality
 				+ ", magneticFieldStrength=" + magneticFieldStrength + "]";
 	}
 

@@ -46,7 +46,7 @@ import jakarta.validation.constraints.NotNull;
 @SqlResultSetMapping(name="ManufacturerModelNameResult", classes = {
 	    @ConstructorResult(targetClass = IdName.class, 
 	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
-	})
+})
 @ManufacturerModelTypeCheck
 public class ManufacturerModel extends HalEntity {
 

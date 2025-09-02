@@ -181,7 +181,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                     + "] failed on dataset " + dicomAttributes.getString(Tag.SeriesDescription) + " with DICOM seriesNumber " + dicomAttributes.getString(Tag.SeriesNumber)
                     + " because the operation " + this.getOperation() + " is not compatible with dicom tag " 
                     + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
-                return false;
+            return false;
         }
 
         if (Operation.PRESENT.equals(getOperation())) {
@@ -317,20 +317,20 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
             return attributes;
         } catch (PacsException e) {
             if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() 
-                + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");
+                    + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");
             LOG.warn("The condition [" + toString() 
-                + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs, reason : " + e.getMessage());
+                    + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs, reason : " + e.getMessage());
             return null;
         }
     }
 
     private void writeConditionsReport(StringBuffer errorMsg, boolean complies, int nbOk, int nbUnknown, int total) {
-         if (!complies) {
-             switch (getCardinality()) {
-                 case -1 -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
-                 case 0 -> errorMsg.append("\nThe condition [" + toString() + "] failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
-                 default -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
-             }
+        if (!complies) {
+            switch (getCardinality()) {
+                case -1 -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                case 0 -> errorMsg.append("\nThe condition [" + toString() + "] failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                default -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            }
         } else {
             errorMsg.append("\nThe condition [" + toString() + "] succeed because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
         }

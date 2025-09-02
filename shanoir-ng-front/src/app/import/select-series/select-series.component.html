@@ -14,8 +14,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">2. Select series</div>
 <fieldset class="step">
-    <p *ngIf="patients.length > 0">Please select only the series useful for your study, to save precious disk space.</p>
-    <p *ngIf="patients.length == 0">No series found with chosen filters.</p>
+    <p *ngIf="patients?.length > 0">Please select only the series useful for your study, to save precious disk space.</p>
+    <p *ngIf="patients?.length == 0">No series found with chosen filters.</p>
     <div class="tree">
         <node
             *ngFor="let patient of patients"
@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <node
                             *ngFor="let serie of study.series"
                             label="{{serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber}}
-                            	{{serie.seriesDate | date: 'dd/MM/yyyy'}}
+                            	{{serie.seriesDate | localDateFormatPipe}}
                             	{{serie.modality}}
                             	{{serie.isEnhanced ? 'E' : ''}}
                             	{{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Birth date</td>
-                <td class="value">{{$any(detailedPatient)?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientBirthDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Identity removed</td>
@@ -101,7 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Date</td>
-                <td class="value">{{$any(detailedStudy)?.studyDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{$any(detailedStudy)?.studyDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>
@@ -112,11 +112,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
-        <div *ngIf="!papayaError && detailedSerie.modality != 'Ct' && !detailedSerie.isSpectroscopy">
-            <papaya [params]="papayaParams"></papaya>
-        </div>
-        <div *ngIf="papayaError" class="error">
-            Sorry, there was an error with the papaya viewer.
+        <div *ngIf="detailedSerie.modality != 'Ct' && !detailedSerie.isSpectroscopy">
+            <papaya [loadingCallback]="papayaLoadingCallback"></papaya>
         </div>
         <table>
             <tr class="item">
@@ -137,7 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
-                <td class="value">{{$any(detailedSerie)?.seriesDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series number</td>

@@ -22,6 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
+				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
 			</form-footer>
 
 			<span [ngSwitch]="mode">
@@ -110,11 +111,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
 						<span class="right-col">
 							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.startDate | date: 'dd/MM/yyyy'}}
+								{{study.startDate | localDateFormatPipe}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
 								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
-								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 							</ng-container>
 						</span>
 					</li>
@@ -122,11 +123,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{study.endDate | date: 'dd/MM/yyyy'}}
+								{{study.endDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
 						</span>
@@ -180,7 +181,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         {{ item.key }}
                                     </td>
                                     <td>
-                                        {{ storageVolumePrettyPrint(item.value) }}
+                                        {{ item.value | size }}
                                     </td>
                                 </tr>
                                 <tr *ngIf="study.totalSize > 0">
@@ -188,7 +189,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         Total
                                     </td>
                                     <td class="volume-storage-total" >
-                                        {{ storageVolumePrettyPrint(study.totalSize) }}
+                                        {{ study.totalSize | size }}
                                     </td>
                                 </tr>
                                 <tr *ngIf="!study.totalSize || study.totalSize == 0" >
@@ -283,7 +284,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-                <subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                 <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>

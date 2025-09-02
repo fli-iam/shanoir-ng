@@ -14,9 +14,15 @@
 
 package org.shanoir.ng.configuration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -34,11 +40,15 @@ import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.*;
-import org.shanoir.ng.shared.repository.*;
+import org.shanoir.ng.shared.model.AcquisitionEquipment;
+import org.shanoir.ng.shared.model.Center;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
+import org.shanoir.ng.shared.repository.CenterRepository;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
-import org.shanoir.ng.shared.subjectstudy.SubjectStudyDTO;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -48,8 +58,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
@@ -58,8 +71,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.EntityManager;
 
 /**
  * RabbitMQ configuration.
@@ -112,9 +128,6 @@ public class RabbitMQDatasetsService {
 	private StudyCardRepository studyCardRepository;
 
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-
-	@Autowired
 	private BIDSService bidsService;
 
 	@Autowired
@@ -135,34 +148,6 @@ public class RabbitMQDatasetsService {
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
-	}
-
-	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_STUDY_QUEUE)
-	@RabbitHandler
-	public void receiveSubjectStudies(String commandArrStr) {
-		try {
-			SubjectStudyDTO[] dtos = objectMapper.readValue(commandArrStr, SubjectStudyDTO[].class);
-			List<SubjectStudy> subjectStudies = new ArrayList<>();
-			for (int i = 0; i < dtos.length ; i++) {
-				subjectStudies.add(dtoToSubjectStudy(dtos[i]));
-			}			
-			subjectStudyRepository.saveAll(subjectStudies);
-		} catch (Exception e) {
-			LOG.error("Error during copy of dataset : ", e);
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
-		}
-	}
-
-	private SubjectStudy dtoToSubjectStudy(SubjectStudyDTO dto) {
-		SubjectStudy subjectStudy = new SubjectStudy();
-		subjectStudy.setId(dto.getId());
-		subjectStudy.setStudy(new Study());
-		subjectStudy.getStudy().setId(dto.getStudyId());
-		subjectStudy.setSubject(new Subject());
-		subjectStudy.getSubject().setId(dto.getSubjectId());
-		subjectStudy.setSubjectType(SubjectType.getType(dto.getSubjectType()));
-		return subjectStudy;
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
@@ -198,52 +183,45 @@ public class RabbitMQDatasetsService {
 		return "";
 	}
 
-	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
-		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
+	public boolean receiveSubjectUpdate(final String subjectStr) {		
 		try {
-			if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
-			Subject received = objectMapper.readValue(subjectStr, Subject.class);
-	
-			// SUBJECT_STUDY
-			if (su.getSubjectStudyList() != null) {
-				su.getSubjectStudyList().clear();
-			} else {
-				su.setSubjectStudyList(new ArrayList<>());
-			}
-			if (received.getSubjectStudyList() != null) {
-				su.getSubjectStudyList().addAll(received.getSubjectStudyList());
-			}
-			for (SubjectStudy sustu : su.getSubjectStudyList()) {
-				sustu.setSubject(su);
-			}
-			if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
-			subjectRepository.save(su);
-			
-			// Update BIDS
-			Set<Long> studyIds = new HashSet<>();
-
-			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
-				studyIds.add(exam.getStudyId());
-			}
-			for (Study stud : studyRepository.findAllById(studyIds)) {
-				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-			}
-
-			// Update solr references
-			List<Long> subjectIdList = new ArrayList<Long>();
-			subjectIdList.add(su.getId());
-			try {
-				solrService.updateSubjectsAsync(subjectIdList);
-			}catch (Exception e){
-				LOG.error("Solr update failed for subjects {}", subjectIdList, e);
-			}
-
+			manageSubjectUpdate(subjectStr);
 			return true;
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
+	/**
+	 * MK: to avoid endless loops rabbitmq re-sending the same message,
+	 * we separate the @Transactional and @RabbitListener in two methods,
+	 * the the Amqp exception correctly arrives back to rabbitmq.
+	 * 
+	 * @param subjectStr
+	 * @throws JsonProcessingException
+	 * @throws JsonMappingException
+	 */
+	@Transactional
+	private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+		Subject received = objectMapper.readValue(subjectStr, Subject.class);
+		received = subjectRepository.save(received);
+		// Update BIDS
+		Set<Long> studyIds = new HashSet<>();
+		for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+			studyIds.add(exam.getStudyId());
+		}
+		for (Study stud : studyRepository.findAllById(studyIds)) {
+			bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+		}
+		// Update solr references
+		List<Long> subjectIdList = new ArrayList<Long>();
+		subjectIdList.add(received.getId());
+		try {
+			solrService.updateSubjectsAsync(subjectIdList);
+		}catch (Exception e){
+			LOG.error("Solr update failed for subjects {}", subjectIdList, e);
 		}
 	}
 
@@ -317,7 +295,6 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
-
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a subject deletion
@@ -518,4 +495,5 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}
 	}
+
 }

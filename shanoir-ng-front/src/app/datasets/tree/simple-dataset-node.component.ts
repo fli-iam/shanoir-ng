@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { TaskState } from "../../async-tasks/task.model";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
@@ -87,7 +87,19 @@ export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<Datase
             });
         })
     }
+
     onProcessingDelete(index: number) {
         (this.node.processings as ProcessingNode[]).splice(index, 1) ;
+    }
+
+    loadProcessings() {
+        if (this.node.processings == UNLOADED) {
+            this.loading = true;
+            this.datasetService.get(this.node.id).then(dataset => {
+                this.node.processings = dataset.processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+            });
+        }
     }
 }

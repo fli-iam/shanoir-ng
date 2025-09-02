@@ -85,9 +85,6 @@ public class RabbitMQConfiguration {
 	/** Update / create a study user to users MS. */
 	public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
-	/** Queue to notify when a subject / study is updated / deleted. */
-	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
-
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
@@ -98,7 +95,7 @@ public class RabbitMQConfiguration {
 	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
 	/** Subject name updated => notify dataset MS to change database. */
-	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
+	public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 	
 	/** Center name updated => notify dataset MS to change database. */
 	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
@@ -228,7 +225,7 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
-    		return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
+		return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
     }
 
     @Bean
@@ -302,11 +299,6 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
 	}
-
-	@Bean
-	public static Queue subjectStudyQueue() {
-		return new Queue(SUBJECT_STUDY_QUEUE, true);
-	}
 	
 	@Bean
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {
@@ -349,7 +341,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
-		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
+		return new Queue(SUBJECT_UPDATE_QUEUE, true);
 	}
 
 	@Bean

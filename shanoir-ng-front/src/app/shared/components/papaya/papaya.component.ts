@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, SimpleChange, Input, HostBinding, OnDestroy } from "@angular/core";
+import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy } from "@angular/core";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -26,51 +26,66 @@ declare var papayaContainers: any[];
 export class PapayaComponent implements OnInit, OnDestroy {
     @Input() params: any[];
     @Input() autoLoading: boolean = false;
-    @HostBinding('class.expanded') loaded: boolean = false;
-    private static loading: boolean = false;
+    @Input() loadingCallback: () => Promise<any[]>;
+    @HostBinding('class.expanded') downloaded: boolean = false;
+    private loading: boolean = false;
+    protected error: boolean = false;
 
-    constructor() {}
+    constructor() { }
 
     ngOnInit() {
         papayaContainers = [];
         papaya.Container.startPapaya();
     }
 
-    ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
-        for (let propName in changes) {
-            if (!changes[propName].isFirstChange()) {
-                if (propName == "params") {
-                    this.setDefaultParams();
-                    if (this.autoLoading) {
-                        this.load();
-                    } else {
-                        this.loaded = false;
-                    }
-                }
+    ngOnChanges(changes: SimpleChanges ) {
+        if ((changes.params?.currentValue)
+                || (changes.loadingCallback?.currentValue)) {
+            this.setDefaultParams();
+            if (this.autoLoading) {
+                queueMicrotask(() => {
+                    this.load();
+                });
+            } else {
+                this.downloaded = false;
             }
-        }
+        } 
     }
 
     ngOnDestroy(): void {
         papayaContainers[0].collapseViewer();
     }
 
-    load() {
-        if (!PapayaComponent.loading) {
-            this.loaded = true; 
-            PapayaComponent.loading = true;
-            this.params["loadingComplete"] = () => { PapayaComponent.loading = false; };
-            papaya.Container.resetViewer(0, this.params);
+    protected load() {
+        if (this.loadingCallback) {
+            this.loadIntoPapaya(this.loadingCallback);
+        } else {
+            this.loadIntoPapaya(() => Promise.resolve(this.params));
+        }
+    }
+
+    private loadIntoPapaya(loadingCallback: () => Promise<any[]>) {
+        if (!this.loading) {
+            this.loading = true;
+            loadingCallback()?.then(params => {
+                this.downloaded = true; 
+                params["loadingComplete"] = () => { this.loading = false; };
+                papaya.Container.resetViewer(0, params);
+            }).catch(reason => {
+                this.error = true;
+                console.error(reason);
+            });
         } else {
             throw new Error("Don't try to load an image in papaya before the previous loading is finished");
         }
     }
 
     public isLoading(): boolean {
-        return PapayaComponent.loading;
+        return this.loading;
     }
 
     private setDefaultParams() {
+        if (!this.params) this.params = [];
         this.params["allowScroll"] = false;
         this.params["ignoreNiftiTransforms"] =  true;
         this.params['expandable'] = true;

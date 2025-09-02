@@ -13,7 +13,7 @@
 
 ################ base debian image #########################################
 
-FROM debian:bookworm as base-debian
+FROM debian:bookworm AS base-debian
 
 # - disable the automatic "apt-get clean" command (because we mount
 #   /var/cache/apt from an external volume to speed-up the build)
@@ -30,13 +30,13 @@ RUN rm /etc/apt/apt.conf.d/docker-clean \
 #   (rather that temurin's default /etc/ssl/certs/adoptium/cacerts)
 #   to keep the location independent of the implementation (in case users need
 #   to mount it from an external volume)
-FROM base-debian as adoptium-key
+FROM base-debian AS adoptium-key
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy wget gnupg
 RUN wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public \
     | gpg --dearmor > /adoptium.gpg
 
-FROM base-debian as base-debian-with-adoptium
+FROM base-debian AS base-debian-with-adoptium
 COPY --link --from=adoptium-key /adoptium.gpg /etc/apt/keyrings/
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt install -qqy apt-transport-https ca-certificates \
@@ -45,11 +45,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
             "$(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" \
     | tee /etc/apt/sources.list.d/adoptium.list
 
-FROM base-debian-with-adoptium as jdk
+FROM base-debian-with-adoptium AS jdk
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy temurin-21-jdk maven bzip2 git
 
-FROM base-debian-with-adoptium as base-microservice
+FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
     && apt-get install -qqy temurin-21-jre ca-certificates-java \
@@ -69,7 +69,7 @@ ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", 
 
 ################ datasets ##################################################
 
-FROM alpine as datasets-download
+FROM alpine AS datasets-download
 
 # Installation of dcm4che into /opt/dcm4che to manage the store-scu into the
 # PACS dcm4che3, used last version 5.21.0 as available on the 2020-02-14
@@ -80,7 +80,7 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
-FROM base-microservice as datasets
+FROM base-microservice AS datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
@@ -91,10 +91,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     locales-all
 
 # take care of path
-ENV PATH /opt/dcm4che/bin:$PATH
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
+ENV PATH=/opt/dcm4che/bin:$PATH
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
@@ -112,7 +112,7 @@ CMD ["-jar", "/shanoir-ng-datasets.jar"]
 
 ################ import ####################################################
 
-FROM base-microservice as import
+FROM base-microservice AS import
 
 COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
@@ -125,7 +125,7 @@ CMD ["-jar", "/shanoir-ng-import.jar"]
 
 ################ nifti-conversion ##########################################
 
-FROM base-debian as nifti-conversion-conda
+FROM base-debian AS nifti-conversion-conda
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-conda \
     apt-get -qqy update \
@@ -142,7 +142,7 @@ RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
     /opt/miniconda3/bin/conda install -c conda-forge dicomifier -y
 
 
-FROM base-debian as nifti-conversion-builder
+FROM base-debian AS nifti-conversion-builder
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-builder \
     apt-get -qqy update \
@@ -169,7 +169,7 @@ RUN mkdir -p /target/opt/nifti-converters/mriconverter \
     && chmod 0777 . MRIFileManager/MRIManager.jar
 
 
-FROM base-microservice as nifti-conversion
+FROM base-microservice AS nifti-conversion
 
 # xvfb+gtk2 needed by mri_conv (headless mode not supported by DicomToNifti)
 # see: https://populse.github.io/mri_conv/Installation/installation.html#scriptwithoutGUI
@@ -208,9 +208,9 @@ RUN ldconfig
 COPY --link nifti-conversion/nifti-conversion.jar nifti-conversion.jar
 COPY --link nifti-conversion/entrypoint /usr/bin/
 
-ENV LC_ALL fr_FR.UTF-8
-ENV LANG fr_FR.UTF-8
-ENV LANGUAGE fr_FR.UTF-8
+ENV LC_ALL=fr_FR.UTF-8
+ENV LANG=fr_FR.UTF-8
+ENV LANGUAGE=fr_FR.UTF-8
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 
 CMD ["-jar", "/nifti-conversion.jar"]
@@ -219,7 +219,7 @@ CMD ["-jar", "/nifti-conversion.jar"]
 
 ################ preclinical ###############################################
 
-FROM base-microservice as preclinical
+FROM base-microservice AS preclinical
 
 COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
@@ -232,7 +232,7 @@ CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 ################ studies ###################################################
 
-FROM base-microservice as studies
+FROM base-microservice AS studies
 
 COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
@@ -245,7 +245,7 @@ CMD ["-jar", "/shanoir-ng-studies.jar"]
 
 ################ users #####################################################
 
-FROM base-microservice as users
+FROM base-microservice AS users
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy openssl
@@ -266,7 +266,7 @@ CMD ["-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:25.0.4 as keycloak-base
+FROM quay.io/keycloak/keycloak:26.2.1 AS keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -285,7 +285,7 @@ ENV KC_DB="mysql" \
 #
 # Use builder to integrate custom provider
 #
-FROM keycloak-base as keycloak-builder
+FROM keycloak-base AS keycloak-builder
 
 COPY keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
 
@@ -314,7 +314,7 @@ CMD []
 
 FROM ohif/app:v3.9.0-beta.76 AS nginx-viewer
 
-FROM nginx as nginx
+FROM nginx AS nginx
 
 COPY --link \
     nginx/http.conf \
@@ -343,7 +343,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ################ front-dev #################################################
 
-FROM node:lts-alpine3.21 as front-dev
+FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
@@ -353,7 +353,7 @@ RUN npm install -g @angular/cli@19.0.1
 
 ################ database ##################################################
 
-FROM mysql/mysql-server:5.7 as database
+FROM mysql/mysql-server:5.7 AS database
 
 COPY --link --chmod=0755 database/shanoir-entrypoint.sh /
 ENTRYPOINT ["/shanoir-entrypoint.sh"]
@@ -372,7 +372,7 @@ COPY --link database/db-changes /opt/db-changes
 
 ################ keycloak-database ##################################################
 
-FROM mysql/mysql-server:5.7 as keycloak-database
+FROM mysql/mysql-server:5.7 AS keycloak-database
 
 COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-initdb.d/
 
@@ -380,7 +380,7 @@ COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-in
 
 ################ solr ###############################################################
 
-FROM solr:8.1 as solr
+FROM solr:8.1 AS solr
 
 USER root
 RUN mkdir -p /etc/shanoir-core-template \

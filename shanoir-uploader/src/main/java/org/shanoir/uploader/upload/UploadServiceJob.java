@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -21,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,10 +35,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * @author mkain
  * 
  */
-@Component
+@Service
 public class UploadServiceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
+
+	public static final ReentrantLock LOCK = new ReentrantLock();
 
 	@Autowired
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
@@ -46,15 +50,16 @@ public class UploadServiceJob {
 
 	private String uploadPercentage = "";
 
-	private boolean uploading;
-
 	@Scheduled(fixedRate = 5000)
-	public void execute() throws IOException {
-		logger.debug("UploadServiceJob started...");
-		uploading = false;
-		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-		processWorkFolder(workFolder, currentNominativeDataController);
-		logger.debug("UploadServiceJob ended...");
+	public void execute() throws Exception {
+		if (!LOCK.isLocked()) {
+			logger.debug("UploadServiceJob started...");
+			LOCK.lock();
+			File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
+			processWorkFolder(workFolder, currentNominativeDataController);
+			LOCK.unlock();
+			logger.debug("UploadServiceJob ended...");
+		}
 	}
 
 	/**
@@ -84,7 +89,7 @@ public class UploadServiceJob {
 					processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
 				}
 			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
+				logger.warn("Folder found in workFolder without import-job.json.");
 			}
 		}
 	}
@@ -96,7 +101,6 @@ public class UploadServiceJob {
 	 */
 	private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
 			final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
-		// NominativeDataImportJobManager nominativeDataImportJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
 		/**
 		 * Get all files from uploadFolder (importJob) and send them.
@@ -107,20 +111,9 @@ public class UploadServiceJob {
 		final Collection<File> files = Util.listFiles(folder, null, true);
 		for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
-			// do not transfer nominativeDataImportJob as only for display in ShUp
-			// if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
-			// 	nominativeDataImportJobManager = new NominativeDataImportJobManager(file);
-		    // remove upload-job.xml from the list of files to transfer, to guarantee later
-			// that this file is for sure transferred as the last file to avoid sync problems
-			// on the server, when auto-import starts with still missing files
-			// } else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-			// 		|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
-			// 	// do not add to list
-		    // } else {
 		    if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
 				filesToTransfer.add(file);
 			}
-			// }
 		}
 		if (importJobManager != null) {
 			final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
@@ -132,7 +125,7 @@ public class UploadServiceJob {
 				logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
 			}
 		} else {
-			
+			logger.error("importJobManager is null.");
 		}
 	}
 
@@ -147,7 +140,6 @@ public class UploadServiceJob {
 			final ImportJob importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
-			uploading = true;
 			String tempDirId = shanoirUploaderServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			/**
@@ -179,22 +171,13 @@ public class UploadServiceJob {
 			importJob.setTimestamp(System.currentTimeMillis());
 			nominativeDataImportJobManager.writeImportJob(importJob);
 
-			//List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);
-			
-			// Clean all DICOM files after successful import to server
-			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
-				File file = (File) iterator.next();
-				// from-disk: delete files directly
-				if (file.getParentFile().equals(folder)) {
-					FileUtils.deleteQuietly(file);
-				// from-pacs: delete serieUID folder as well
-				} else {
-					FileUtils.deleteQuietly(file.getParentFile());
-				}
+			// Delete DICOM files, if check.on.server is false
+	        String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+			boolean checkOnServer = Boolean.parseBoolean(value);
+			if (!checkOnServer) {
+				// Clean all DICOM files after successful import to server
+				deleteAllDicomFiles(folder, allFiles);
 			}
-			logger.info("All DICOM files deleted after successful upload to server.");
-
-			uploading = false;
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, org.shanoir.ng.importer.model.UploadState.ERROR.toString());
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
@@ -204,15 +187,6 @@ public class UploadServiceJob {
 		}
 	}
 
-	/**
-	 * @param tempDirId
-	 * @param importJobJsonFile
-	 * @throws IOException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JsonProcessingException
-	 * @throws Exception
-	 */
 	private void setTempDirIdAndStartImport(String tempDirId, ImportJob importJob)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
 		importJob.setWorkFolder(tempDirId);
@@ -220,12 +194,18 @@ public class UploadServiceJob {
 		shanoirUploaderServiceClient.startImportJob(importJobJson);
 	}
 
-    public boolean isUploading() {
-		return uploading;
-	}
-
-	public void setUploading(boolean uploading) {
-		this.uploading = uploading;
-	}
+	private void deleteAllDicomFiles(File importJobFolder, List<File> files) {
+        for (Iterator<File> iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            // from-disk: delete files directly
+            if (file.getParentFile().equals(importJobFolder)) {
+                FileUtils.deleteQuietly(file);
+            // from-pacs: delete serieUID folder as well
+            } else {
+                FileUtils.deleteQuietly(file.getParentFile());
+            }
+        }
+        logger.info("All DICOM files deleted after successful upload to server.");
+    }
 
 }

@@ -37,7 +37,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -88,8 +88,8 @@ public class CenterApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+	@MockBean(name = "controllerSecurityService")
+	private ControllerSecurityService controllerSecurityService;
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
@@ -106,7 +106,7 @@ public class CenterApiControllerTest {
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
+		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
 	}
 
 	@Test

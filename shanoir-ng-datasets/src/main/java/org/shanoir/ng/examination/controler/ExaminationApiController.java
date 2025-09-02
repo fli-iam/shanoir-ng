@@ -14,14 +14,15 @@
 
 package org.shanoir.ng.examination.controler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import org.apache.commons.io.FileUtils;
-import org.apache.solr.client.solrj.SolrServerException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -33,7 +34,11 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -52,14 +57,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -154,9 +158,6 @@ public class ExaminationApiController implements ExaminationApi {
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-		for (Examination exam : examinations) {
-			orderDatasetAcquisitions(exam);
-		}
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -244,7 +245,7 @@ public class ExaminationApiController implements ExaminationApi {
 		examination.setComment(file.getOriginalFilename());
 		examination.setCenterId(centerId);
 		examination.setSubject(subject);
-		examination.setStudy(subject.getSubjectStudyList().get(0).getStudy());
+		examination.setStudy(subject.getStudy());
 		examination.setExaminationDate(LocalDate.now());
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());
