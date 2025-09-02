@@ -20,6 +20,8 @@ public class DicomSerieAndInstanceAnalyzer {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
+    private static final String DICOMDIR_BASIC_DIRECTORY_IOD = "1.2.840.10008.1.3.10";
+
     private static final String RTPLAN = "RTPLAN";
 
     private static final String RTDOSE = "RTDOSE";
@@ -36,6 +38,9 @@ public class DicomSerieAndInstanceAnalyzer {
 
     /**
      * By default raw data storage and sub-types are ignored.
+     * 
+     * We ignore (even if very rare) DICOMDIR instances, as they
+     * are not images.
      *
      * @param attributes
      * @return
@@ -47,7 +52,8 @@ public class DicomSerieAndInstanceAnalyzer {
                 || UID.SpatialFiducialsStorage.equals(sopClassUID)
                 || UID.DeformableSpatialRegistrationStorage.equals(sopClassUID)
                 || UID.SegmentationStorage.equals(sopClassUID)
-                || UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
+                || UID.SurfaceSegmentationStorage.equals(sopClassUID)
+                || DICOMDIR_BASIC_DIRECTORY_IOD.equals(sopClassUID)) {
             LOG.warn("Instance (image) ignored, because of SOPClassUID: " + sopClassUID);
             return true;
         }
@@ -57,7 +63,8 @@ public class DicomSerieAndInstanceAnalyzer {
                 || UID.SpatialFiducialsStorage.equals(referencedSOPClassUIDInFile)
                 || UID.DeformableSpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
                 || UID.SegmentationStorage.equals(referencedSOPClassUIDInFile)
-                || UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
+                || UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)
+                || DICOMDIR_BASIC_DIRECTORY_IOD.equals(referencedSOPClassUIDInFile)) {
             LOG.warn("Instance (image) ignored, because of ReferencedSOPClassUIDInFile: " + referencedSOPClassUIDInFile);
             return true;
         }
