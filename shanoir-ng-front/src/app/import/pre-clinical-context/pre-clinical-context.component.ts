@@ -40,7 +40,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     private animalSubject: AnimalSubject = new AnimalSubject();
     private animalSubjectService: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
     patient: PatientDicom;
-    editSubjectStudy: boolean = false;
 
     postConstructor() {
         this.patient = this.importDataService.patients[0];
@@ -53,7 +52,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getSubjectList(studyId: number): Promise<Subject[]> {
-        this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
         } else {
