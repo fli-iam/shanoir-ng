@@ -23,7 +23,6 @@ import { SubjectType } from './subject.types';
 
 export class SubjectStudyDTO {
     id: number;
-    // examinations: number[];
     subject: IdName;
     subjectPreclinical: boolean;
     study: SimpleStudyDTO;
@@ -36,7 +35,6 @@ export class SubjectStudyDTO {
 
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
-        // this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
         if(subjectStudy.subject != null){
             this.subject = new IdName(subjectStudy.subject.id, subjectStudy.subject.name);
             this.subjectPreclinical = subjectStudy.subject.preclinical;

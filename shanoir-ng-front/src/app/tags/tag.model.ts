@@ -45,11 +45,3 @@ export class SubjectStudyTagDTO {
         public tag: Tag
     ) {}
 }
-
-export class StudyTagDTO {
-
-  constructor(
-    public subjectStudy: Id,
-    public tag: Tag
-  ) {}
-}
