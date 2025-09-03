@@ -124,9 +124,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
@@ -140,6 +137,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newSubject.name = this.patient.patientName;
         newSubject.preclinical = true;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;

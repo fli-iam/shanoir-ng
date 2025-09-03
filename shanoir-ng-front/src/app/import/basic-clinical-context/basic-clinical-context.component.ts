@@ -107,9 +107,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     private getPrefilledSubject(): Subject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient?.patientSex) {
@@ -119,6 +116,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         }
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         return newSubject;
     }
 
