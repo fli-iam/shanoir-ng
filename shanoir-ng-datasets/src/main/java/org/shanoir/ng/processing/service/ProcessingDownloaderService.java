@@ -1,6 +1,8 @@
 package org.shanoir.ng.processing.service;
 
 import java.util.List;
+import java.util.zip.ZipOutputStream;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -29,11 +31,10 @@ public interface ProcessingDownloaderService {
      * Download processing data according to a json parameter file
      *
      * @param jsonRequest the json parameter file
-     * @param response the HTTP in which create the download zip stream
      *
      * @throws RestServiceException
      */
-    void complexMassiveDownload(@Valid JsonNode jsonRequest, HttpServletResponse response) throws Exception;
+    void complexMassiveDownload(@Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) throws Exception;
 
     /**
      * Download outputs (+ inputs if needed) of an examination list

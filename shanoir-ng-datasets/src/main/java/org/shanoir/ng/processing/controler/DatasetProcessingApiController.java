@@ -31,29 +31,48 @@ import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetProcessingApiController.class);
-
+	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
 	@Autowired
 	private DatasetMapper datasetMapper;
@@ -225,13 +244,78 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			@Parameter(description = "parameters for download", required = true)
 			@Valid @RequestBody JsonNode jsonRequest,
 			HttpServletResponse response) throws Exception {
-		try {
+		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+		File zipFile = new File(userDir + File.separator + "processingOutputsExtraction.zip");
+		if(zipFile.exists()) {
+			zipFile.delete();
+		}
+		zipFile.createNewFile();
+
+		try (FileOutputStream fos = new FileOutputStream(zipFile);
+			 	ZipOutputStream zos = new ZipOutputStream(fos)) {
 			LOG.info("Starting complex download for process data.");
-			processingDownloaderService.complexMassiveDownload(jsonRequest, response);
+			processingDownloaderService.complexMassiveDownload(jsonRequest, zos);
 			LOG.info("Complex download completed.");
 		}catch (Exception e) {
-			response.setContentType(null);
 			LOG.error("Error while downloading processing data.", e);
+		}
+	}
+
+	public ResponseEntity<Resource> downloadProcessingsOutputs() {
+		try {
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+			File zipFile = new File(userDir, "processingOutputsExtraction.zip");
+
+			if (!zipFile.exists()) {
+				LOG.error("Processing output file not found: {}", zipFile.getAbsolutePath());
+				return ResponseEntity.notFound().build();
+			}
+
+			InputStreamResource resource = new InputStreamResource(Files.newInputStream(zipFile.toPath()));
+
+			return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION,
+							"attachment; filename=\"" + zipFile.getName() + "\"")
+					.contentType(MediaType.APPLICATION_OCTET_STREAM)  // use octet-stream for downloads
+					.contentLength(zipFile.length())
+					.body(resource);
+
+		} catch (Exception e) {
+			LOG.error("Error during download of processing outputs");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+
+
+
+	@Scheduled(cron = "0 0 * * * *", zone="Europe/Paris")
+	public void deleteProcessingOutputsArchive() {
+		try {
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+			Path directoryPath = Paths.get(userDir.getPath());
+
+			long currentTime = System.currentTimeMillis();
+			long sixHoursInMillis = TimeUnit.HOURS.toMillis(6);
+			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath);
+
+			for (Path filePath : directoryStream) {
+				if (filePath.getFileName().toString().startsWith("processingOutputsExtraction")) {
+					BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
+					FileTime creationTime = attrs.creationTime();
+					long creationTimeMillis = creationTime.toMillis();
+
+					if ((currentTime - creationTimeMillis) > sixHoursInMillis) {
+						Files.delete(filePath);
+						LOG.error("Processing outputs file deleted after 6 hours : " + filePath.getFileName());
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
