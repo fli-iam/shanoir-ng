@@ -15,7 +15,6 @@
 package org.shanoir.ng.processing.controler;
 
 import java.io.IOException;
-import java.lang.reflect.Executable;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +24,7 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -186,4 +186,16 @@ public interface DatasetProcessingApi {
             @Parameter(description = "parameters for download", required = true)
             @Valid @RequestBody JsonNode request,
             HttpServletResponse response) throws Exception;
+
+    @Operation(summary = "downloadOutputsFromEvent", description = "Download statistics for event")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "download ok"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "event not found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/downloadOutputsFromEvent", produces = { "application/zip" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<Resource> downloadProcessingsOutputs()
+            throws RestServiceException, IOException;
 }
