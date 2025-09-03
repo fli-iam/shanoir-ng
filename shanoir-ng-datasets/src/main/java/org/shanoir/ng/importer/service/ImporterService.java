@@ -16,6 +16,8 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,12 +50,15 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.executionTemplate.service.ExecutionTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -63,8 +68,6 @@ public class ImporterService {
     private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 
     private static final String UPLOAD_EXTENSION = ".upload";
-
-    private static int instancesCreated = 0;
 
     @Autowired
     private ExaminationService examinationService;
@@ -95,6 +98,17 @@ public class ImporterService {
 
     @Autowired
     private QualityService qualityService;
+
+    @Autowired
+    private ExecutionTemplateService templateService;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
+    private static final String SUBJECT_PREFIX = "sub-";
+    
+    private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
+
+    private static int instancesCreated = 0;
 
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
@@ -179,6 +193,16 @@ public class ImporterService {
                     +" Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
+
+            if(Objects.nonNull(templateService)){ //For maven test
+                final List<DatasetAcquisition> acquisitionsSnapshot = new ArrayList<>(generatedAcquisitions);
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        templateService.createExecutionsFromExecutionTemplates(acquisitionsSnapshot.stream().toList()); //performed after the new acquisitions are commited to DB
+                    }
+                });
+            }
 
             // Manage archive
             if (importJob.getArchive() != null) {

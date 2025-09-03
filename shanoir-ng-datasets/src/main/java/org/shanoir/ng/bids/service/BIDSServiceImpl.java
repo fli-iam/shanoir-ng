@@ -61,6 +61,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -130,6 +131,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private String bidsStorageDir;
 
 	@Autowired
+	@Lazy
 	private ExaminationService examService;
 
 	@Autowired
