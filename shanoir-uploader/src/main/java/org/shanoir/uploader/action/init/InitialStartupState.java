@@ -186,9 +186,6 @@ public class InitialStartupState implements State {
 				// copy for each profile "profile.properties"
 				File profilePropertiesFile = new File(profileDir, ShUpConfig.PROFILE_PROPERTIES);
 				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.PROFILE_PROPERTIES, profilePropertiesFile);
-				// copy pseudonymus key, if existing
-				File keyFile = new File(profileDir, ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE);
-				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyFile);
 				// copy keycloak.json, if existing
 				File keycloakFile = new File(profileDir, ShUpConfig.KEYCLOAK_JSON);
 				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.KEYCLOAK_JSON, keycloakFile);			

@@ -57,14 +57,6 @@ public abstract class AbstractTest {
 		PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
 		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
 		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
-		if (ShUpConfig.isModePseudonymus()) {
-			File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-			try {
-				pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
-			} catch (PseudonymusException e) {
-				logger.error(e.getMessage(), e);
-			}	
-		}
 		identifierCalculator = new IdentifierCalculator();
 		shUpClient = new ShanoirUploaderServiceClient();
 		shUpClient.configure();
@@ -79,6 +71,16 @@ public abstract class AbstractTest {
 			} else {
 				logger.error("ERROR: login not successful.");
 	            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
+			}
+			if (ShUpConfig.isModePseudonymus()) {
+				File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+				String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+				try {
+					pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
+				} catch (PseudonymusException e) {
+					logger.error(e.getMessage(), e);
+					System.exit(0);
+				}	
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
