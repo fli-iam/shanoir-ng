@@ -63,4 +63,17 @@ export class TaskService extends EntityService<Task> {
                 }
             });
     }
+
+    public downloadProcessingOutputs(item: Task) {
+        let endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + item.route;
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
+            .toPromise()
+            .then((response: HttpResponse<Blob>) => {
+                if (response.status == 200 || response.status == 204) {
+                    AppUtils.browserDownloadFileFromResponse(response);
+                } else {
+                    this.consoleService.log('error', 'Output archive not found or deleted (after 6 hours).');
+                }
+            });
+    }
 }

@@ -82,10 +82,20 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    public void complexMassiveDownload(@Valid JsonNode jsonRequest, HttpServletResponse response) throws Exception{
+    public void complexMassiveDownload(@Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) throws Exception{
         Map<Integer, List<Long>> datasetIdsPerExtraction = new HashMap<>();
         Map<Integer, Boolean> inputPerExtraction = new HashMap<>();
         List<Integer> extractionIdList = new ArrayList<>();
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
+                null,
+                KeycloakUtil.getTokenUserId(),
+                "Fetching VIP outputs...",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                null);
+
+        eventService.publishEvent(event);
 
         if(!jsonRequest.has("data_to_extract")){
             throw new Exception("There are no extraction defined.");
@@ -101,14 +111,18 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             extractionIdList.add(extractionId);
             inputPerExtraction.put(extractionId, extraction.get("input").asBoolean(false));
             datasetIdsPerExtraction.put(extractionId, getDatasetIdsFromJsonFilters(extraction));
-            LOG.info("Results for extraction {} query are :{}", extractionId, datasetIdsPerExtraction.get(extractionId));
+            LOG.info("Results for extraction {} query are :{}", extractionId, datasetIdsPerExtraction.get(extractionId).size() > 255 ? datasetIdsPerExtraction.get(extractionId).subList(0,255) : datasetIdsPerExtraction.get(extractionId));
         }
 
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            downloadDatasetsWithJsonSorting(datasetIdsPerExtraction, inputPerExtraction, extractionIdList, jsonRequest, zipOutputStream);
+        try {
+            event.setMessage("Preparing zip archive...");
+            eventService.publishEvent(event);
+            downloadDatasetsWithJsonSorting(datasetIdsPerExtraction, inputPerExtraction, extractionIdList, jsonRequest, zipOutputStream, event);
         } catch (Exception e) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Error during zip archive building.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
             LOG.error("An error occured while generating the zip.", e);
         }
     }
@@ -207,7 +221,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return path;
     }
 
-    protected void downloadDatasetsWithJsonSorting(Map<Integer, List<Long>> datasetIdsPerExtraction, Map<Integer, Boolean> inputPerExtraction, List<Integer> extractionIdList, @Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) {
+    protected void downloadDatasetsWithJsonSorting(Map<Integer, List<Long>> datasetIdsPerExtraction, Map<Integer, Boolean> inputPerExtraction, List<Integer> extractionIdList, @Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream, ShanoirEvent event) {
         List<String> sortingType = StreamSupport.stream(jsonRequest.get("sorting").spliterator(), false).map(JsonNode::asText).toList();
         List<Long> processingWithInputsAlreadyDownloaded = new ArrayList<>();
         Map<Long, DatasetDownloadError> downloadErrors = new HashMap<Long, DatasetDownloadError>();
@@ -217,11 +231,14 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             converterId = NiftiConverter.getId(jsonRequest.get("converter").asText());
         }
 
+        Map<Long, String> datasetDownloadName = getDatasetDownloadNameFromIds(datasetIdsPerExtraction.values().stream().flatMap(List::stream).toList());
+
         for(Integer extractionId : extractionIdList){
             List<Long> datasetIds = datasetIdsPerExtraction.get(extractionId);
+            LOG.error(datasetIds.toString());
 
             for (Long datasetId : datasetIds){
-                prepareZipBuilding(datasetId, inputPerExtraction.get(extractionId), zipOutputStream, sortingType, converterId, processingWithInputsAlreadyDownloaded, downloadErrors);
+                prepareZipBuilding(datasetId, inputPerExtraction.get(extractionId), zipOutputStream, sortingType, converterId, processingWithInputsAlreadyDownloaded, downloadErrors, datasetDownloadName.get(datasetId));
             }
         }
 
@@ -236,23 +253,29 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 LOG.error("Errors happened while computing complex download, but they could not be noted into the zip archive.");
             }
         }
+
+        event.setObjectId(String.valueOf(event.getId()));
+        event.setProgress(1f);
+        event.setMessage("Zip archive for massive output download built\nDownload available for 6 hours");
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
     }
 
-    protected void prepareZipBuilding(Long datasetId, Boolean withInput, ZipOutputStream zipOutputStream, List<String> sortingType, Integer convertedId, List<Long> processingWithInputsAlreadyDownloaded, Map<Long, DatasetDownloadError> downloadErrors) {
+    protected void prepareZipBuilding(Long datasetId, Boolean withInput, ZipOutputStream zipOutputStream, List<String> sortingType, Integer convertedId, List<Long> processingWithInputsAlreadyDownloaded, Map<Long, DatasetDownloadError> downloadErrors, String datasetDownloadName) {
         Dataset dataset = datasetRepository.findById(datasetId).get();
         DatasetProcessing processing = datasetProcessingRepository.findById(dataset.getDatasetProcessing().getId()).get();
         String datasetPath = getDatasetFilepath(dataset, sortingType, ((ExecutionMonitoring) processing.getParent()).getName());
 
-        zipDataset(dataset, false, zipOutputStream, convertedId, datasetPath, downloadErrors);
+        zipDataset(dataset, false, zipOutputStream, convertedId, datasetPath, downloadErrors, datasetDownloadName);
         if(withInput && !processingWithInputsAlreadyDownloaded.contains(processing.getId())) {
             for(Dataset input : processing.getInputDatasets()){
-                zipDataset(input, true, zipOutputStream, convertedId, datasetPath, downloadErrors);
+                zipDataset(input, true, zipOutputStream, convertedId, datasetPath, downloadErrors, datasetDownloadName);
             }
             processingWithInputsAlreadyDownloaded.add(processing.getId());
         }
     }
 
-    protected void zipDataset(Dataset dataset, Boolean isInput, ZipOutputStream zipOutputStream, Integer converterId, String filePath, Map<Long, DatasetDownloadError> downloadErrors) {
+    protected void zipDataset(Dataset dataset, Boolean isInput, ZipOutputStream zipOutputStream, Integer converterId, String filePath, Map<Long, DatasetDownloadError> downloadErrors, String datasetDownloadName) {
         DatasetDownloadError downloadError = new DatasetDownloadError();
         downloadErrors.put(dataset.getId(), downloadError);
         List<URL> pathURLs = new ArrayList<>();
@@ -260,7 +283,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         try{
             if (!isInput) {
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadError);
-                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, "", true, filePath, null);
+                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, "", true, filePath, datasetDownloadName);
             } else if (Objects.equals(converterId, 0)) {
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadError);
                 downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, "", dataset, filePath, downloadError);
@@ -278,10 +301,10 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         Examination examination = dataset.getDatasetProcessing().getInputDatasets().getFirst().getDatasetAcquisition().getExamination();
 
         String filePath = "";
-        if(sortingType.contains("study")) {
+        if(sortingType.contains("study") && Objects.nonNull(examination.getStudyId())) {
             filePath = filePath.concat(examination.getStudy().getName() + "/");
         }
-        if(sortingType.contains("subject")) {
+        if(sortingType.contains("subject") && Objects.nonNull(examination.getSubject())) {
             filePath = filePath.concat(examination.getSubject().getName() + "/");
         }
         if(sortingType.contains("examination")) {
@@ -308,7 +331,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
 
         List<String> queryFilters = new ArrayList<>();
-        String query = "SELECT dataset.id FROM dataset dataset " +
+        String query = "SELECT DISTINCT dataset.id FROM dataset dataset " +
                 "JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id " +
                 "JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id " +
                 "JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id " +

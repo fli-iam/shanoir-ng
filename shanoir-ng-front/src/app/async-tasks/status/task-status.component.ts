@@ -108,4 +108,9 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         event.preventDefault();
         this.taskService.downloadStats(this.task);
     }
+
+    downloadProcessingOutputs(event: MouseEvent) {
+        event.preventDefault();
+        this.taskService.downloadProcessingOutputs(this.task);
+    }
 }
