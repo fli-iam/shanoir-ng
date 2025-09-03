@@ -31,7 +31,6 @@ import { Option } from '../../../shared/select/select.component';
 import { Study} from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { ReverseSubjectNode } from '../../../tree/tree.model';
@@ -221,20 +220,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 // TODO: display error
                 console.error("error getting study list!");
         });
-    }
-
-
-    copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
-    	const fixedSubjectStudy = new SubjectStudy();
-    	fixedSubjectStudy.id = subjectStudy.id;
-    	fixedSubjectStudy.studyIdentifier = subjectStudy.studyIdentifier;
-    	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
-    	fixedSubjectStudy.subject = this.copySubject(subjectStudy.subject);
-    	fixedSubjectStudy.study = subjectStudy.study;
-    	fixedSubjectStudy.subjectId = subjectStudy.subject.id;
-    	fixedSubjectStudy.studyId = subjectStudy.study.id;
-        fixedSubjectStudy.tags = subjectStudy.tags;
-    	return fixedSubjectStudy;
     }
 
     getStudyById(id: number): Study{
