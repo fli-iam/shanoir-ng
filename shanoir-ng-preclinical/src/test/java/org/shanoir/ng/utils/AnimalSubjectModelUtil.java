@@ -19,6 +19,7 @@ import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Utility class for test. Generates subject.
@@ -83,6 +84,7 @@ public final class AnimalSubjectModelUtil {
 		final PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setSubject(new SubjectDto());
 		dto.getSubject().setName(SUBJECT_NAME);
+		dto.getSubject().setStudy(new IdName(1L, "testStudy"));
 		dto.setAnimalSubject(createAnimalSubjectDto());
 		dto.setId(SUBJECT_ID);
 		return dto;

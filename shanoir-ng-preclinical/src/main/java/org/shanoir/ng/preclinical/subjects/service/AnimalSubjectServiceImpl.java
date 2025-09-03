@@ -118,7 +118,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public boolean isSubjectNameAlreadyUsed(String name){
+	public boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId) {
 		return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, name);
 	}
 

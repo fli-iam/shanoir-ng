@@ -25,6 +25,7 @@ import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
 import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
 import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import {SimpleStudy} from "../../studies/shared/study.model";
 
 
 @Component({
@@ -61,13 +62,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         let importJob = new ImportJob();
         let context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
-        let simpleSubject: SimpleSubject = {
-            id: context.subject.id,
-            name: context.subject.name,
-            identifier: context.subject.identifier,
-            subjectStudyList: [context.subject.subjectStudy]
-        };
-        this.patient.subject = simpleSubject;
+
+        this.patient.subject = new SimpleSubject(context.subject);
         let filteredPatient: PatientDicom = this.patient;
         filteredPatient.studies = this.patient.studies.map(study => {
             study.series = study.series.filter(serie => serie.selected);
@@ -124,8 +120,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        newSubject.study = this.study;
         return newSubject;
     }
 
@@ -143,7 +140,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;

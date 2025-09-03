@@ -43,7 +43,7 @@ public interface CenterRepository extends CrudRepository<Center, Long> {
 	Optional<Center> findById(Long id);
 	
 	@EntityGraph(attributePaths = "studyCenterList.study.name")
-	Optional<Center> findByName(String name);
+	Optional<Center> findFirstByNameContainingOrderByIdAsc(String name);
 	
 	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c")
 	List<IdName> findIdsAndNames();
