@@ -33,10 +33,9 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import {Tag} from "../../tags/tag.model";
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {isDarkColor} from "../../utils/app.utils";
-import {SubjectDTO} from "../shared/subject.dto";
+import { Tag} from "../../tags/tag.model";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { isDarkColor } from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',

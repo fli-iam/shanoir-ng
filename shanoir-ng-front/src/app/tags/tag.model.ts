@@ -19,7 +19,7 @@ export class Tag extends Entity {
     id: number;
     color: string;
     name: string;
-    
+
     public equals(tag: Tag): boolean {
         if (!tag) return false;
         else if (this.id && tag.id) {
