@@ -14,7 +14,6 @@
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudy } from './subject-study.model';
 import {Sex, SubjectType} from './subject.types';
 import {Tag} from "../../tags/tag.model";
 import {QualityTag} from "../../study-cards/shared/quality-card.model";

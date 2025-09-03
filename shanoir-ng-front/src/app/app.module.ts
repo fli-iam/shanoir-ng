@@ -148,14 +148,12 @@ import { SubjectListComponent } from './subjects/subject-list/subject-list.compo
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
-// import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
-// import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { StudyRightsService } from './studies/shared/study-rights.service';
 import { RouterModule } from '@angular/router';
 import { LoaderComponent } from './shared/loader/loader.component';

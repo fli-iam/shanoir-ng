@@ -15,10 +15,8 @@ import { Injectable } from '@angular/core';
 
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
-import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import {Sex, SubjectType} from './subject.types';
 import {formatDate} from "@angular/common";
