@@ -146,13 +146,11 @@ public class ExaminationsConsistencyChecker {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
 				File parent = datasetsLogFile.getParentFile();
-				boolean newCSVFileCreated = false;
 				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC_CSV);
-				if (!csvFile.exists()) {
-					newCSVFileCreated = csvFile.createNewFile();
-				}
+				boolean newCSVFileCreated = csvFile.createNewFile();
 				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
 					if (newCSVFileCreated) {
+						LOG.info("File ecc.csv created and header added.");
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
 						writer.writeNext(header);
 					}
@@ -162,11 +160,11 @@ public class ExaminationsConsistencyChecker {
 						examinationLastChecked = checkExamination(examinationLastChecked,
 							examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
 					}
-					// One insert is sufficient, only write at the end where it stopped
-					examinationLastCheckedRepository.save(examinationLastChecked);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
+				// One insert is sufficient, only write at the end where it stopped
+				examinationLastCheckedRepository.save(examinationLastChecked);
 			} else {
 				LOG.error("Log file of datasets not found.");
 			}
