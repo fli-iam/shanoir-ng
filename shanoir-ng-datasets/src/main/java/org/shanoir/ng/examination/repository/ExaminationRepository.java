@@ -64,7 +64,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	Page<Examination> findByIdGreaterThan(long examinationId, Pageable pageable);
+	List<Examination> findTop1000ByIdGreaterThanOrderByIdAsc(long examinationId);
 	
 	/**
 	 * Get a paginated list of examinations

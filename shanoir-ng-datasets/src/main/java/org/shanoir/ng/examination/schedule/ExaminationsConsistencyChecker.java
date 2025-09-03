@@ -102,25 +102,26 @@ public class ExaminationsConsistencyChecker {
 				} else {
 					LOG.info("Last checked examination has ID: " + lastExamination.getId());
 				}
+			} else {
+				examinationLastChecked = new ExaminationLastChecked();
 			}
 
 			Map<Long, String> examinationIDToStudyInstanceUID = new LinkedHashMap<Long, String>();
 			List<Long> emptyExaminations = new ArrayList<Long>();
-			int pageNumber = 0;
 			int totalExaminationsChecked = 0;
 			List<Examination> examinationsToCheck;
-			if (lastExamination != null) {
-				examinationsToCheck = examinationRepository.findByIdGreaterThan(lastExamination.getId(), PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
-			} else {
+			if (lastExamination == null) {
 				LOG.info("First run of ECC, start with first examination (or last checked deleted).");
-				examinationsToCheck = examinationRepository.findAll(PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
+				examinationsToCheck = examinationRepository.findTop1000ByIdGreaterThanOrderByIdAsc(0L);
+			} else {
+				examinationsToCheck = examinationRepository.findTop1000ByIdGreaterThanOrderByIdAsc(lastExamination.getId());
 			}
 			if (!examinationsToCheck.isEmpty()) {
 				checkExaminations(examinationsToCheck, examinationLastChecked, examinationIDToStudyInstanceUID, emptyExaminations);
 				totalExaminationsChecked += examinationsToCheck.size();
-				lastExamination = examinationsToCheck.get(examinationsToCheck.size() - 1);
-				pageNumber++;
-			}				
+				// One insert is sufficient, only write at the end where it stopped
+				examinationLastCheckedRepository.save(examinationLastChecked);
+			}
 			
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
@@ -157,14 +158,11 @@ public class ExaminationsConsistencyChecker {
 					LOG.info("Checking examinations in range [{}-{}]",
 							examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
-						examinationLastChecked = checkExamination(examinationLastChecked,
-							examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
+						checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
 					}
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
-				// One insert is sufficient, only write at the end where it stopped
-				examinationLastCheckedRepository.save(examinationLastChecked);
 			} else {
 				LOG.error("Log file of datasets not found.");
 			}
@@ -173,7 +171,7 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 
-	private ExaminationLastChecked checkExamination(ExaminationLastChecked examinationLastChecked,
+	private void checkExamination(ExaminationLastChecked examinationLastChecked,
 			Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
 		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
@@ -188,19 +186,15 @@ public class ExaminationsConsistencyChecker {
 			if (!filesInPACS.isEmpty()) {
 				checkStudyInstanceUIDs(examination, filesInPACS, line, examinationIDToStudyInstanceUID, emptyExaminations);
 			}
-			if (examinationLastChecked == null) {
-				examinationLastChecked = new ExaminationLastChecked();
-			}
-			examinationLastChecked.setExaminationId(examination.getId());
 		} else {
 			line[3] = "1";
 		}
+		examinationLastChecked.setExaminationId(examination.getId());
 		line[4] = Integer.toString(filesInPACS.size());
 		writer.writeNext(line);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         LOG.debug("Time required for examination check: " + duration + " milliseconds.");
-		return examinationLastChecked;
 	}
 
 	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS, String[] line,
