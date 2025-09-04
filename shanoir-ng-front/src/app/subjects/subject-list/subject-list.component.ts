@@ -23,7 +23,8 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
-
+import { IdName } from "../../shared/models/id-name.model";
+import { SubjectDTO } from "../shared/subject.dto";
 
 @Component({
     selector: 'subject-list',
@@ -39,14 +40,14 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    private studiesICanAdmin: number[];
+    private studies: IdName[];
     private studyIdsForCurrentUser: number[];
 
     constructor(
             private subjectService: SubjectService,
             private studyService: StudyService) {
         super('subject');
-        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.findStudyIdNamesIcanAdmin().then(ids => this.studies = ids);
         this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
@@ -93,7 +94,8 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     getOnDeleteConfirmMessage(entity: Subject): string {
-        let studyListStr : string = "\n\nThis subject belongs to the study " + entity.study.name;
+        let subjectDTO = (entity as SubjectDTO);
+        let studyListStr : string = "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subjectDTO.studyId).name;
         studyListStr += "\n\nAttention: this action deletes all datasets from that study.";
         return studyListStr;
     }
