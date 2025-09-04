@@ -263,6 +263,9 @@ public class ExaminationsConsistencyChecker {
 			}
 		} else {
 			line[3] = "1";
+			line[5] = "1";
+			line[6] = "1";
+			line[7] = "1";
 			emptyExaminations.add(examination.getId());
 			LOG.warn("Examination {}: no acquisitions.", examination.getId());
 			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
