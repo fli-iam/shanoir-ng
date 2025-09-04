@@ -21,6 +21,8 @@ import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -141,5 +143,8 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	@EntityGraph(attributePaths = {"datasetAcquisitions"})
 	@Query("SELECT e FROM Examination e WHERE e.id = :id")
 	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
+
+	@Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
+	int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
 
 }

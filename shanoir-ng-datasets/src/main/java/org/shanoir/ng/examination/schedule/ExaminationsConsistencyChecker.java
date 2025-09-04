@@ -233,7 +233,7 @@ public class ExaminationsConsistencyChecker {
 		String studyInstanceUID = studyInstanceUIDs.iterator().next();
 		if(examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
 			examination.setStudyInstanceUID(studyInstanceUID);
-			examinationRepository.save(examination);
+			examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUID);
 			LOG.debug("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
 		} else {
 			if (studyInstanceUID.equals(examination.getStudyInstanceUID())) {
