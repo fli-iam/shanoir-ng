@@ -26,7 +26,6 @@ import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { IdName } from "../../shared/models/id-name.model";
 import { SubjectDTO } from "../shared/subject.dto";
 
-
 @Component({
     selector: 'subject-list',
     templateUrl: 'subject-list.component.html',
@@ -41,7 +40,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    private studiesICanAdmin: number[];
+    private studies: IdName[];
     private studyIdsForCurrentUser: number[];
 
     constructor(
