@@ -96,7 +96,7 @@ export class SubjectDTO {
     examinations: Id[];
     name: string;
     identifier: string;
-    birthDate: string;
+    birthDate: Date;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
@@ -117,7 +117,7 @@ export class SubjectDTO {
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        if (subject.birthDate && !isNaN(subject.birthDate.getTime())) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
+        this.birthDate = subject.birthDate;
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;

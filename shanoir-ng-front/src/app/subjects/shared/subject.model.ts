@@ -40,6 +40,7 @@ export class Subject extends Entity {
     tags: Tag[];
     qualityTag: QualityTag;
     study: Study;
+    studyId: number;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
         const subject = new Subject();
