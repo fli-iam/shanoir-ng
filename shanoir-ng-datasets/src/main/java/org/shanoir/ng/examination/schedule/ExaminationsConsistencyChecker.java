@@ -160,7 +160,7 @@ public class ExaminationsConsistencyChecker {
 					for (Examination examination : examinationsToCheck) {
 						checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 				}
 			} else {
