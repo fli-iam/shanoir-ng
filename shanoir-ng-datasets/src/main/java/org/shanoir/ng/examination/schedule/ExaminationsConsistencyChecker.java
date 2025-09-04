@@ -155,7 +155,7 @@ public class ExaminationsConsistencyChecker {
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
 						writer.writeNext(header);
 					}
-					LOG.info("Checking examinations in range [{}-{}]",
+					LOG.info("Checking 1000 examinations in range [{}-{}]",
 							examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
 						checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
@@ -181,16 +181,19 @@ public class ExaminationsConsistencyChecker {
 		List<String> filesInPACS = new ArrayList<String>();
 		boolean checked = checkExamination(examination, line, filesInPACS, emptyExaminations);
 		if (checked) {
-			line[3] = "0";
+			line[2] = "0";
+			line[4] = Integer.toString(filesInPACS.size());
 			LOG.debug("Examination {}: references {} files in PACS.", examination.getId(), filesInPACS.size());
 			if (!filesInPACS.isEmpty()) {
 				checkStudyInstanceUIDs(examination, filesInPACS, line, examinationIDToStudyInstanceUID, emptyExaminations);
 			}
 		} else {
-			line[3] = "1";
+			line[2] = "1";
+			line[4] = "1";
+			line[6] = "1";
+			line[7] = "1";
 		}
 		examinationLastChecked.setExaminationId(examination.getId());
-		line[4] = Integer.toString(filesInPACS.size());
 		writer.writeNext(line);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
@@ -241,7 +244,7 @@ public class ExaminationsConsistencyChecker {
 	private boolean checkExamination(Examination examination, String[] line, List<String> filesInPACS, List<Long> emptyExaminations) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		if (acquisitions != null && !acquisitions.isEmpty()) {
-			line[2] = "0";
+			line[3] = "0";
 			/**
 			 * Ongoing imports can create empty examinations and fill them up later.
 			 * To avoid confusion on this, we only check data from yesterday or older.
@@ -259,7 +262,7 @@ public class ExaminationsConsistencyChecker {
 				return false;
 			}
 		} else {
-			line[2] = "1";
+			line[3] = "1";
 			emptyExaminations.add(examination.getId());
 			LOG.warn("Examination {}: no acquisitions.", examination.getId());
 			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
