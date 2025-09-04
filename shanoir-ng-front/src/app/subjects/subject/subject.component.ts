@@ -35,6 +35,7 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
 import {Tag} from "../../tags/tag.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 import {isDarkColor} from "../../utils/app.utils";
+import {SubjectDTO} from "../shared/subject.dto";
 
 @Component({
     selector: 'subject-detail',
@@ -305,7 +306,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     getOnDeleteConfirmMessage(entity: Subject): string {
         let studyListStr : string = "";
-        studyListStr = "\n\nThis subject belongs to the study " + entity.study.name;
+        studyListStr = "\n\nThis subject belongs to the study " +  this.studies.find(st => st.id === entity.study.id).name;
         studyListStr += '\n\nWarning: this action deletes ALL datasets from this subject.';
         return studyListStr;
     }
