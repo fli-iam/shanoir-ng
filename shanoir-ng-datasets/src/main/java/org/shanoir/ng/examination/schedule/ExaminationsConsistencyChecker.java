@@ -149,7 +149,7 @@ public class ExaminationsConsistencyChecker {
 				File parent = datasetsLogFile.getParentFile();
 				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC_CSV);
 				boolean newCSVFileCreated = csvFile.createNewFile();
-				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
+				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, true))) {
 					if (newCSVFileCreated) {
 						LOG.info("File ecc.csv created and header added.");
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
