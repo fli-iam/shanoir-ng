@@ -151,14 +151,15 @@ public class ExaminationsConsistencyChecker {
 				boolean newCSVFileCreated = csvFile.createNewFile();
 				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, true))) {
 					if (newCSVFileCreated) {
-						LOG.info("File ecc.csv created and header added.");
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
 						writer.writeNext(header);
 					}
 					LOG.info("Checking 1000 examinations in range [{}-{}]",
 							examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
-						checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
+						boolean checked = checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
+						// In case exam is from today: stop
+						if(!checked) return;
 					}
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
@@ -171,7 +172,7 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 
-	private void checkExamination(ExaminationLastChecked examinationLastChecked,
+	private boolean checkExamination(ExaminationLastChecked examinationLastChecked,
 			Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
 		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
@@ -187,17 +188,18 @@ public class ExaminationsConsistencyChecker {
 			if (!filesInPACS.isEmpty()) {
 				checkStudyInstanceUIDs(examination, filesInPACS, line, examinationIDToStudyInstanceUID, emptyExaminations);
 			}
+			examinationLastChecked.setExaminationId(examination.getId());
 		} else {
 			line[2] = "1";
 			line[4] = "1";
 			line[6] = "1";
 			line[7] = "1";
 		}
-		examinationLastChecked.setExaminationId(examination.getId());
 		writer.writeNext(line);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         LOG.debug("Time required for examination check: " + duration + " milliseconds.");
+		return checked;
 	}
 
 	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS, String[] line,
