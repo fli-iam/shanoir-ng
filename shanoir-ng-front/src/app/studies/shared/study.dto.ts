@@ -29,6 +29,7 @@ import { Study } from './study.model';
 import {Profile} from '../../shared/models/profile.model';
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 import {SubjectDTO} from "../../subjects/shared/subject.dto";
+import {Examination} from "../../examinations/shared/examination.model";
 
 @Injectable()
 export class StudyDTOService {
@@ -109,6 +110,11 @@ export class StudyDTOService {
             entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => this.dtoToSubjectStudy(subjectStudyDto, entity));
         } else {
             entity.subjectStudyList = [];
+        }
+        if (dto.subjects) {
+            entity.subjects = dto.subjects.map(subjectDto => this.dtoToSubject(subjectDto));
+        } else {
+            entity.subjects = [];
         }
         if (dto.studyUserList) {
             entity.studyUserList = dto.studyUserList.map(studyUserDto => {
@@ -228,6 +234,29 @@ export class StudyDTOService {
         return subjectStudy;
     }
 
+    static dtoToSubject(dtoSubject: SubjectDTO): Subject {
+        let subject: Subject = new Subject();
+        subject.name = dtoSubject.name;
+        subject.imagedObjectCategory = dtoSubject.imagedObjectCategory;
+        subject.birthDate = dtoSubject.birthDate;
+        subject.id = dtoSubject.id;
+        subject.subjectType = dtoSubject.subjectType;
+        subject.physicallyInvolved = dtoSubject.physicallyInvolved;
+        subject.isAlreadyAnonymized = dtoSubject.isAlreadyAnonymized;
+        subject.studyIdentifier = dtoSubject.studyIdentifier;
+        subject.tags = dtoSubject.tags;
+        subject.qualityTag = dtoSubject.qualityTag;
+        subject.studyId = dtoSubject.studyId;
+        subject.languageHemisphericDominance = dtoSubject.languageHemisphericDominance;
+        subject.manualHemisphericDominance = dtoSubject.manualHemisphericDominance;
+        subject.identifier = dtoSubject.identifier;
+        subject.preclinical = dtoSubject.preclinical;
+        subject.sex = dtoSubject.sex;
+        subject.selected = dtoSubject.selected;
+
+        return subject;
+    }
+
     static dtoToStudyCenter(dtoStudyCenter: StudyCenterDTO): StudyCenter {
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.id = dtoStudyCenter.id;
@@ -282,6 +311,7 @@ export class StudyDTO {
     studyType: StudyType;
     studyUserList: StudyUserDTO[];
     subjectStudyList: SubjectStudyDTO[] = [];
+    subjects: SubjectDTO[] = [];
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
@@ -319,6 +349,11 @@ export class StudyDTO {
         }) : null;
         this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
             let dto = new SubjectStudyDTO(ss);
+            dto.study = null;
+            return dto;
+        }) : null;
+        this.subjects = study.subjects ? study.subjects.map(su => {
+            let dto = new SubjectDTO(su);
             dto.study = null;
             return dto;
         }) : null;
