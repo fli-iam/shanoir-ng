@@ -150,12 +150,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         } else {
             if (!EntityComponent.isProxy(entity)) {
                 if (this.form) {
-                    this._entity = EntityComponent.wrapAsProxy(entity, this.form);
+                    this._entity = this.wrapAsProxy(entity, this.form);
                     EntityComponent.mapEntityToForm(entity, this.form);
                 } else {
                     this._entity = entity;
                     this.form$.then(() => {
-                        this._entity = EntityComponent.wrapAsProxy(entity, this.form);
+                        this._entity = this.wrapAsProxy(entity, this.form);
                         EntityComponent.mapEntityToForm(entity, this.form);
                     })
                 }
@@ -164,7 +164,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    private static wrapAsProxy<T extends Object>(object: T, form: FormGroup): T {
+    private wrapAsProxy<T extends Object>(object: T, form: FormGroup): T {
         return new Proxy(object, {
             get: (target, prop, receiver) => {
                 if (prop === 'IS_PROXY') return true;
@@ -173,7 +173,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             },
             set: (target, prop, value, receiver) => {
                 const oldValue = Reflect.get(target, prop, receiver);
-                let isEqual = this.deepEquals(oldValue, value);
+                let isEqual = EntityComponent.deepEquals(oldValue, value);
                 const ctrl = form.get(String(prop));
                 // If the new value is an entity and a sub formgroup is set, we have to wrap it as proxy too
                 if (ctrl && ctrl instanceof FormGroup) {
@@ -182,6 +182,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         const ok = Reflect.set(target, prop, wrapedValue, receiver); // set the value in the entity
                         if (!ok) return false;
                         EntityComponent.mapEntityToForm(value, ctrl); // map all sub properties
+                        this.subscribeEntityPropsUpdatesFromForm(ctrl, value);
                     } else if (!value) {
                         ctrl.reset({}, {emitEvent: true});
                     }
@@ -269,6 +270,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if ((this.mode == 'create' || this.mode == 'edit')) {
                 if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
+                        console.log(res?.['animalSubject']?.strain)
                         this.mapEntityToEntity(res)
                         this.prefillProperties();
                     });
@@ -315,29 +317,36 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     this.footerState.dirty = this.form.dirty;
                 }),
             );
-            this.subscribeEntityPropsUpdatesFromForm();
+            this.subscribeEntityPropsUpdatesFromForm(this.form, this.entity);
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
             this.footerState.valid = false;
         }
     }
 
-    private subscribeEntityPropsUpdatesFromForm(formGroup: FormGroup = this.form, entity: T = this.entity) {
+    private subscribeEntityPropsUpdatesFromForm<T extends Entity>(formGroup: FormGroup, entity: T) {
+        console.log('subscribeEntityPropsUpdatesFromForm', formGroup, entity);
         Object.keys(formGroup.controls).forEach(key => {
+            console.log('key', key);
             const control = formGroup.get(key);
             if (control instanceof FormGroup) {
                 this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
             } else { 
+                console.log('do subscribe for', key);
                 let sub: Subscription = control.valueChanges.subscribe(value => {
                     const declaredFields: string[] = getDeclaredFields(entity);
+                    console.log('set property', key, 'to value', value);
                     if (entity
                             && declaredFields.indexOf(key) >= 0
                             && entity[key] !== value 
                             && !Entity.equals(entity?.[key], value)) {
+                        console.log('actually set property', key, 'to value', value);
                         entity[key] = value;
+                        console.log('new value is', entity[key]);
+                        console.log('entity is now', entity);
                     }
                 });
-                this.subscriptions.push(sub);
+                this.subscriptions.push(sub); // TODO
             }
         });
     }
@@ -708,6 +717,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         this.destroy$?.next();
         this.destroy$?.complete();
+    }
+
+    public isUserAdmin(): boolean {
+        return this.keycloakService.isUserAdmin();
     }
 
     /**

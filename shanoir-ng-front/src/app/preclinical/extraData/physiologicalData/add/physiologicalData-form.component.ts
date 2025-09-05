@@ -23,8 +23,6 @@ import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model'
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Mode } from "../../../shared/mode/mode.model";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
@@ -36,7 +34,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
 
     @Input() examinationId:number;

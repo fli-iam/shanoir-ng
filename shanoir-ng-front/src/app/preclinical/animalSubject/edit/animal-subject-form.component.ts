@@ -11,62 +11,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
+import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { TableComponent } from '../../../shared/components/table/table.component';
 import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
-import {SimpleStudy, Study} from '../../../studies/shared/study.model';
+import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { ReverseSubjectNode } from '../../../tree/tree.model';
-import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
-import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
+import { isDarkColor } from "../../../utils/app.utils";
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
 import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';
 import { Reference } from '../../reference/shared/reference.model';
 import { ReferenceService } from '../../reference/shared/reference.service';
-import { ModesAware } from '../../shared/mode/mode.decorator';
-import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import {isDarkColor} from "../../../utils/app.utils";
 
 
 @Component({
-    selector: 'animalSubject-form',
-    templateUrl: 'animalSubject-form.component.html',
-    styleUrls: ['../../../subjects/subject/subject.component.css', 'animalSubject-form.component.css'],
+    selector: 'animal-subject-form',
+    templateUrl: 'animal-subject-form.component.html',
+    styleUrls: ['../../../subjects/subject/subject.component.css', 'animal-subject-form.component.css'],
     animations: [slideDown, preventInitialChildAnimations],
     standalone: false
 })
 
-@ModesAware
 export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {
-
-    @ViewChild('subjectPathologiesTable', { static: false }) tablePathology: TableComponent;
 
     public readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    public studies: IdName[];
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
     species: Reference[] = [];
     strains: Reference[] = [];
@@ -78,12 +68,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     downloadState: TaskState = new TaskState();
 
     @Input() displayPathologyTherapy: boolean = true;
-    @ViewChild('therapiesComponent', { static: false }) therapiesComponent: SubjectTherapiesListComponent;
-    @ViewChild('pathologiesComponent', { static: false }) pathologiesComponent: SubjectPathologiesListComponent;
-    private subjectStudyList: SubjectStudy[] = [];
-    private therapies: SubjectTherapy[] = [];
-    private pathologies: SubjectPathology[] = [];
-    selectedStudy : IdName;
     differ: KeyValueDiffer<string, any>;
 
     catOptions: Option<ImagedObjectCategory>[] = [
@@ -120,8 +104,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     }
 
-    public GetModes(): any { return (<any>this).Modes; }
-
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
 
@@ -142,30 +124,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 ]).then(([animalSubject, subject]) => {
                     ps.animalSubject = animalSubject;
                     ps.subject = subject;
-                    // subjectStudy
-                    if (ps.subject.subjectStudyList && ps.subject.subjectStudyList.length > 0){
-                        this.subjectStudyList = [];
-                        for (let ss of ps.subject.subjectStudyList) {
-                            let newSubjectStudy: SubjectStudy = this.copySubjectStudy(ss);
-                            this.subjectStudyList.push(newSubjectStudy);
-                        }
-                        ps.subject.subjectStudyList = this.subjectStudyList;
-                    }
                     return ps;
                 });
             });
         });
     }
 
-    init() {
-        super.init();
-        if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);
-        }
-
-    }
     initView(): Promise<void> {
-        this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
             return;
@@ -176,8 +141,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 });
             });
         }
-
-
         return this.loadData().then(() => {
             this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
                 this.preclinicalSubject.therapies = st;
@@ -214,48 +177,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.references = references;
                 this.sortReferences();
             }),
-            this.loadAllStudies()
         ]).then();
-    }
-
-    loadAllStudies(): void {
-        this.studyService.getStudiesNames()
-            .then(studies => {
-                this.studies = studies;
-                // this.updateStudiesList();
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.error("error getting study list!");
-        });
-    }
-
-
-    copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
-    	let fixedSubjectStudy = new SubjectStudy();
-    	fixedSubjectStudy.id = subjectStudy.id;
-    	fixedSubjectStudy.studyIdentifier = subjectStudy.studyIdentifier;
-    	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
-    	fixedSubjectStudy.subject = this.copySubject(subjectStudy.subject);
-    	fixedSubjectStudy.study = subjectStudy.study;
-    	fixedSubjectStudy.subjectId = subjectStudy.subject.id;
-    	fixedSubjectStudy.studyId = subjectStudy.study.id;
-        fixedSubjectStudy.tags = subjectStudy.tags;
-    	return fixedSubjectStudy;
-    }
-
-    getStudyById(id: number): Study{
-    	if (this.studies && this.studies.length > 0){
-    		for (let s of this.studies){
-    			if (s.id === id){
-    				let study: Study = new Study();
-    				study.id = s.id;
-    				study.name = s.name;
-    				return study;
-    			}
-    		}
-    	}
-    	return null;
     }
 
 	copySubject(s: Subject): Subject{
@@ -308,40 +230,70 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         );
         return subjectForm;
     }
+
+    protected prefillProperties(): void {
+        super.prefillProperties();
+        this.breadcrumbsService.currentStep.getPrefilledValue('newSubjectPathology').then((newSubjectPathology: SubjectPathology) => {
+            this.breadcrumbsService.currentStep.removePrefilled('newSubjectPathology');
+            if (newSubjectPathology) {
+                if (!this.preclinicalSubject.pathologies) {
+                    this.preclinicalSubject.pathologies = [newSubjectPathology];
+                } else {
+                    this.preclinicalSubject.pathologies.push(newSubjectPathology);
+                }
+            }
+        });
+        this.breadcrumbsService.currentStep.getPrefilledValue('newSubjectTherapy').then((newSubjectTherapy: SubjectTherapy) => {
+            this.breadcrumbsService.currentStep.removePrefilled('newSubjectTherapy');
+            if (newSubjectTherapy) {
+                if (!this.preclinicalSubject.therapies) {
+                    this.preclinicalSubject.therapies = [newSubjectTherapy];
+                } else {
+                    this.preclinicalSubject.therapies.push(newSubjectTherapy);
+                }
+            }
+        });
+        this.breadcrumbsService.currentStep.getPrefilledValue('forceStudy').then((forceStudy: Study) => {
+            if (forceStudy) {
+                this.preclinicalSubject.subject.study = forceStudy;
+            }
+        });
+    }
     
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
         const subjectGroup = formGroup.get('subject') as UntypedFormGroup;
         const animalSubjectGroup = formGroup.get('animalSubject') as UntypedFormGroup;
         
         let newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
+        const animalSubjectRequiredProperties: string[] = ['specie', 'strain', 'biotype', 'provider', 'stabulation'];
+        const subjectRequiredProperties: string[] = ['sex'];
         
         // Update validators based on category selection
         if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             // Animal categories require all animal fields
-            animalSubjectGroup.get('specie').setValidators([Validators.required]);
-            animalSubjectGroup.get('strain').setValidators([Validators.required]);
-            animalSubjectGroup.get('biotype').setValidators([Validators.required]);
-            animalSubjectGroup.get('provider').setValidators([Validators.required]);
-            animalSubjectGroup.get('stabulation').setValidators([Validators.required]);
-            subjectGroup.get('sex').setValidators([Validators.required]);
+            animalSubjectRequiredProperties.forEach(prop => {
+                animalSubjectGroup.get(prop).setValidators([Validators.required]);
+            });
+            subjectRequiredProperties.forEach(prop => {
+                subjectGroup.get(prop).setValidators([Validators.required]);
+            });
         } else {
             // Non-animal categories don't require animal fields
-            animalSubjectGroup.get('specie').setValidators([]);
-            animalSubjectGroup.get('strain').setValidators([]);
-            animalSubjectGroup.get('biotype').setValidators([]);
-            animalSubjectGroup.get('provider').setValidators([]);
-            animalSubjectGroup.get('stabulation').setValidators([]);
-            subjectGroup.get('sex').setValidators([]);
+            animalSubjectRequiredProperties.forEach(prop => {
+                animalSubjectGroup.get(prop).clearValidators();
+                animalSubjectGroup.get(prop).setValue(null);
+            });
+            subjectRequiredProperties.forEach(prop => {
+                subjectGroup.get(prop).clearValidators();
+                subjectGroup.get(prop).setValue(null);
+            });
         }
-        
-        // Update validity for all modified controls
-        animalSubjectGroup.get('specie').updateValueAndValidity();
-        animalSubjectGroup.get('strain').updateValueAndValidity();
-        animalSubjectGroup.get('biotype').updateValueAndValidity();
-        animalSubjectGroup.get('provider').updateValueAndValidity();
-        animalSubjectGroup.get('stabulation').updateValueAndValidity();
-        subjectGroup.get('sex').updateValueAndValidity();
-        
+        animalSubjectRequiredProperties.forEach(prop => {
+            animalSubjectGroup.get(prop).updateValueAndValidity();
+        });
+        subjectRequiredProperties.forEach(prop => {
+            subjectGroup.get(prop).updateValueAndValidity();
+        });
         this.reloadRequiredStyles();
     }
 
@@ -393,128 +345,63 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (!this.preclinicalSubject ) {
             return Promise.resolve(null);
         }
-
         this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
-
         return this.animalSubjectService.createPreclinicalSubject(this.preclinicalSubject).then((preclinicalSubject) => {
             this.preclinicalSubject.id = preclinicalSubject.id;
             this.preclinicalSubject.animalSubject = preclinicalSubject.animalSubject;
             this.preclinicalSubject.subject = preclinicalSubject.subject;
-            //Then add pathologies
-            // Create therapies and pathologies from breadcrumb cache
-            let entity: any;
-            this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-            if (entity) {
-                for (let therapy of entity) {
-                    this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
-                }
-            } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
-                for (let therapy of this.preclinicalSubject.therapies) {
-                    this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
-                }
-            }
-            this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-            if (entity) {
-                for (let pathology of entity) {
-                    this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
-                }
-            } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                for (let pathology of this.preclinicalSubject.pathologies) {
-                    this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
-                }
-            }
             return this.preclinicalSubject;
         }, this.catchSavingErrors);
     }
 
     updateSubject(): Promise<AnimalSubject> {
-
         if (!(this.preclinicalSubject && this.preclinicalSubject.subject)) {
             return;
         }
-
-        this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
             .then(subject => {
                 let entity:any;
                 if (this.preclinicalSubject.animalSubject) {
                     this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
                 }
-                // Create, Update, Delete therapies and pathologies from breadcrumb cache
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToCreate")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-                    for (let therapy of entity) {
-                        this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
-                    }
-                }
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToUpdate")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
-                    for (let therapy of entity) {
-                        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, therapy);
-                    }
-                }
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToDelete")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
-                    for (let therapy of entity) {
-                        this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, therapy);
-                    }
-                }
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToCreate")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-                    for (let pathology of entity) {
-                        this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
-                    }
-                }
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
-                    for (let pathology of entity) {
-                        this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, pathology);
-                    }
-                }
-                if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToDelete")) {
-                    this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
-                    for (let pathology of entity) {
-                        this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
-                    }
-                }
                 return this.preclinicalSubject.animalSubject;
             }).catch(this.catchSavingErrors);
     }
 
     sortReferences() {
-    if (this.references){
-        let speciesToSet: Reference[] = [];
-        let biotypesToSet: Reference[] = [];
-        let strainsToSet: Reference[] = [];
-        let providersToSet: Reference[] = [];
-        let stabulationsToSet: Reference[] = [];
+        if (this.references){
+            let speciesToSet: Reference[] = [];
+            let biotypesToSet: Reference[] = [];
+            let strainsToSet: Reference[] = [];
+            let providersToSet: Reference[] = [];
+            let stabulationsToSet: Reference[] = [];
 
-        for (let ref of this.references) {
-            switch (ref.reftype) {
-                case PreclinicalUtils.PRECLINICAL_SUBJECT_SPECIE:
-                    speciesToSet.push(ref);
-                    break;
-                case PreclinicalUtils.PRECLINICAL_SUBJECT_BIOTYPE:
-                    biotypesToSet.push(ref);
-                    break;
-                case PreclinicalUtils.PRECLINICAL_SUBJECT_STRAIN:
-                    strainsToSet.push(ref);
-                    break;
-                case PreclinicalUtils.PRECLINICAL_SUBJECT_PROVIDER:
-                    providersToSet.push(ref);
-                    break;
-                case PreclinicalUtils.PRECLINICAL_SUBJECT_STABULATION:
-                    stabulationsToSet.push(ref);
-                    break;
-                default:
-                    break;
+            for (let ref of this.references) {
+                switch (ref.reftype) {
+                    case PreclinicalUtils.PRECLINICAL_SUBJECT_SPECIE:
+                        speciesToSet.push(ref);
+                        break;
+                    case PreclinicalUtils.PRECLINICAL_SUBJECT_BIOTYPE:
+                        biotypesToSet.push(ref);
+                        break;
+                    case PreclinicalUtils.PRECLINICAL_SUBJECT_STRAIN:
+                        strainsToSet.push(ref);
+                        break;
+                    case PreclinicalUtils.PRECLINICAL_SUBJECT_PROVIDER:
+                        providersToSet.push(ref);
+                        break;
+                    case PreclinicalUtils.PRECLINICAL_SUBJECT_STABULATION:
+                        stabulationsToSet.push(ref);
+                        break;
+                    default:
+                        break;
+                }
             }
-        }
-        this.species = speciesToSet;
-        this.biotypes = biotypesToSet;
-        this.strains = strainsToSet;
-        this.providers = providersToSet;
-        this.stabulations = stabulationsToSet;
+            this.species = speciesToSet;
+            this.biotypes = biotypesToSet;
+            this.strains = strainsToSet;
+            this.providers = providersToSet;
+            this.stabulations = stabulationsToSet;
         }
     }
 
@@ -543,15 +430,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return hex;
     }
 
-    public validateForm(eventName: string) {
-        if (["create", "delete"].indexOf(eventName) != -1) {
-           // Validate therapy and pathology collections
-           this.form.get("therapies").updateValueAndValidity({onlySelf: false, emitEvent: true});
-           this.form.get("pathologies").updateValueAndValidity({onlySelf: false, emitEvent: true});
-           this.footerState.valid = this.form.valid;
-        }
-    }
-
     onSubjectNodeInit(node: ReverseSubjectNode) {
         this.breadcrumbsService.currentStep.data.subjectNode = node;
     }
@@ -565,7 +443,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     download() {
-        // TODO : select study
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.preclinicalSubject.subject.id, this.downloadState);
     }
 

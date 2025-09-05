@@ -20,7 +20,6 @@ import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model
 
 export class SubjectPathology  extends Entity{
     @Field() id: number;
-    @Field() pathology: Pathology;
     @Field() pathologyModel: PathologyModel;
     @Field() location: Reference;
     @Field() startDate: Date;

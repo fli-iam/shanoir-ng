@@ -21,7 +21,6 @@ import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
 import { PathologyService } from '../../pathology/shared/pathology.service';
 import { slideDown } from '../../../../shared/animations/animations';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -33,7 +32,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{
 
     pathologies: Pathology[];

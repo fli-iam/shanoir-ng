@@ -383,6 +383,16 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
+@Pipe({
+    name: 'camel',
+    standalone: false
+})
+export class CamelPipe implements PipeTransform {
+    transform(value: string): any {
+        return capitalsAndUnderscoresToDisplayable(value);
+    }
+}
+
 export function camelToSpaces(str: string): string {
     return str
         // insert a space before all caps

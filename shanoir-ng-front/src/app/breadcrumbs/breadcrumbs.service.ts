@@ -185,7 +185,6 @@ export class BreadcrumbsService implements OnDestroy {
 }
 
 export class Step {
-
     constructor(
         public label: string,
         public route: string,
@@ -242,6 +241,8 @@ export class Step {
     }
 
     public addPrefilled(field: string, value: any, readOnly: boolean = false) {
+        console.log('addPrefilled', field, value, readOnly);
+        console.log('strain inside add prefilled ?', value?.['animalSubject']?.strain)
         const found = this.prefilled.find(obj => obj.field === field);
         if (found) {
             this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
@@ -266,6 +267,15 @@ export class Step {
             return superPro;
         }
     }
+
+    public removePrefilled(field: string) {
+        const found = this.prefilled.find(obj => obj.field === field);
+        if (found) {
+            this.prefilled = this.prefilled.filter(obj => obj.field !== field);
+            delete this.resolvedPrefilledData[field];
+        }
+    }
+
 
     public getPrefilledKeys(): string[] {
         return Object.entries(this.resolvedPrefilledData).map(([key, value]) => key);

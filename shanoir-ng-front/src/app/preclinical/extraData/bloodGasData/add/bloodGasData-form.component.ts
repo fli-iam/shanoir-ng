@@ -23,7 +23,6 @@ import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
 
@@ -34,7 +33,6 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
     @Input() examinationId:number;

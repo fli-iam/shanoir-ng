@@ -23,11 +23,10 @@ import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Enum } from "../../../../shared/utils/enum";
-import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ConsoleService } from '../../../../shared/console/console.service';
+import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
+import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
+import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
@@ -35,7 +34,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     templateUrl: 'examinationAnesthetic-form.component.html',
     standalone: false
 })
-@ModesAware
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
 
     @Input() isStandalone: boolean = false;
@@ -43,9 +41,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     @Output() examAnestheticChange = new EventEmitter();
     //examinationAnesthetic : ExaminationAnesthetic;
     anesthetics: Anesthetic[] = [];
-    sites: Enum[] = [];
-    intervals: Enum[] = [];
-    injtypes: Enum[] = [];
+    sites: InjectionSite[] = [];
+    intervals: InjectionInterval[] = [];
+    injtypes: InjectionType[] = [];
     units: Reference[] = [];
     references: Reference[] = [];
     selectedStartDate: string = null;
@@ -55,8 +53,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private route: ActivatedRoute,
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
-        private anestheticService: AnestheticService,
-        public enumUtils: EnumUtils) 
+        private anestheticService: AnestheticService) 
     {
         super(route, 'preclinical-examination-anesthetics');
     }
@@ -144,9 +141,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     getEnums(): void {
-        this.intervals = this.enumUtils.getEnumArrayFor('InjectionInterval');
-        this.sites = this.enumUtils.getEnumArrayFor('InjectionSite');
-        this.injtypes = this.enumUtils.getEnumArrayFor('InjectionType');
+        this.intervals = InjectionInterval.all();
+        this.sites = InjectionSite.all();
+        this.injtypes = InjectionType.all();
     }
     
 

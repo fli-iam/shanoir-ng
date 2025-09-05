@@ -23,7 +23,7 @@ export class BrowserPaging<T> {
     constructor(
             public items: T[],
             public columnDefs: ColumnDefinition[]) {
-        if (!this.items) this.items = [];
+        if (!this.items) throw Error('items cannot be null !');
     }
 
     public setItems(items: T[]) {

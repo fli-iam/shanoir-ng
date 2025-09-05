@@ -12,21 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { UntypedFormGroup,  Validators } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { ContrastAgent }    from '../shared/contrastAgent.model';
-import { ContrastAgentService } from '../shared/contrastAgent.service';
-import { Reference }   from '../../reference/shared/reference.model';
-import { ReferenceService } from '../../reference/shared/reference.service';
-import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { Enum } from "../../../shared/utils/enum";
-import { EnumUtils } from "../../shared/enum/enumUtils";
-import { slideDown } from '../../../shared/animations/animations';
-import { ModesAware } from "../../shared/mode/mode.decorator";
-import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { slideDown } from '../../../shared/animations/animations';
+import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
+import { Reference } from '../../reference/shared/reference.model';
+import { ReferenceService } from '../../reference/shared/reference.service';
+import { InjectionInterval } from '../../shared/enum/injectionInterval';
+import { InjectionSite } from '../../shared/enum/injectionSite';
+import { InjectionType } from '../../shared/enum/injectionType';
+import * as PreclinicalUtils from '../../utils/preclinical.utils';
+import { ContrastAgent } from '../shared/contrastAgent.model';
+import { ContrastAgentService } from '../shared/contrastAgent.service';
 
 @Component({
     selector: 'contrast-agent-form',
@@ -35,7 +35,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 
     @Input() protocol_id: number;
@@ -44,9 +43,9 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     @Input() canModify: Boolean = false;
     @Input() isStandalone: boolean = true;
     agentNames: Reference[] = [];
-    sites: Enum[] = [];
-    intervals: Enum[] = [];
-    injtypes: Enum[] = [];
+    sites: InjectionSite[] = [];
+    intervals: InjectionInterval[] = [];
+    injtypes: InjectionType[] = [];
     doseUnits: Reference[] = [];
     concentration_units: Reference[] = [];
     references: Reference[] = [];
@@ -54,8 +53,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     constructor(
         private route: ActivatedRoute,
         private contrastAgentsService: ContrastAgentService,
-        private referenceService: ReferenceService, 
-        public enumUtils: EnumUtils) {
+        private referenceService: ReferenceService) {
 
         super(route, 'preclinical-contrast-agent');
     }
@@ -148,9 +146,9 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     getEnums(): void {
-        this.intervals = this.enumUtils.getEnumArrayFor('InjectionInterval');
-        this.sites = this.enumUtils.getEnumArrayFor('InjectionSite');
-        this.injtypes = this.enumUtils.getEnumArrayFor('InjectionType');
+        this.intervals = InjectionInterval.all();
+        this.sites = InjectionSite.all();
+        this.injtypes = InjectionType.all();
     }
 
 

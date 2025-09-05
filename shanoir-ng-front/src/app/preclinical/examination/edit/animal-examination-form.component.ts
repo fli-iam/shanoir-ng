@@ -33,7 +33,6 @@ import { IdName } from '../../../shared/models/id-name.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
-import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
@@ -53,7 +52,6 @@ import {Subject} from "../../../subjects/shared/subject.model";
     styleUrls: ['animal-examination.component.css'],
     standalone: false
 })
-@ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
     @ViewChild('input', { static: false }) private fileInput: ElementRef;

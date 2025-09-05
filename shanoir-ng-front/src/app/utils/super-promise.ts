@@ -13,50 +13,67 @@
  */
 
 export class SuperPromise<T> implements Promise<T> {
+    private current: {
+        promise: Promise<T>,
+        resolve: (value: T | PromiseLike<T>) => void,
+        reject: (reason?: any) => void
+    };
 
-    private _resolve: (value: T | PromiseLike<T>) => void;
-    private _reject: (reason?: any) => void;
-    private promise: Promise<T> = new Promise<T>((resolve, reject) => { 
-        this._resolve = resolve;
-        this._reject = reject
-    });
-    private isCancelled: boolean = false;
+    private isCancelled = false;
 
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined): Promise<TResult1 | TResult2> {
-        return this.promise.then(onfulfilled, onrejected);
+    constructor() {
+        this.current = this.makeNewPromise();
     }
 
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined): Promise<T | TResult> {
-        return this.promise.catch(onrejected);
+    private makeNewPromise() {
+        let resolve, reject;
+        const promise = new Promise<T>((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
+        return { promise, resolve, reject };
     }
 
-    finally(onfinally?: (() => void) | null | undefined): Promise<T> {
-        return this.promise.finally(onfinally);
+    resolve(value: T) {
+        if (this.isCancelled) return;
+        this.current.resolve(value);
+        this.current = this.makeNewPromise();
     }
 
-    resolve(value?: T | PromiseLike<T>): void {
+    reject(reason?: any) {
+        if (this.isCancelled) return;
+        this.current.reject(reason);
+        this.current = this.makeNewPromise(); 
+    }
+
+    cancel() {
         if (!this.isCancelled) {
-            this._resolve(value);
-        }
-    }
-
-    reject(reason?: any): void {
-        if (!this.isCancelled) {
-            this._reject(reason);
-        }
-    }
-
-    cancel(): void {
-        if(!this.isCancelled) {
             this.isCancelled = true;
-            const err = new Error('Promise cancelled');
-            err.name = 'AbortError';
-            this.reject(err);
-        }   
+            const err = new Error("Promise cancelled");
+            err.name = "AbortError";
+            this.current.reject(err);
+        }
     }
 
-    get [Symbol.toStringTag](): string {
-        return this.promise[Symbol.toStringTag];
+    then<TResult1 = T, TResult2 = never>(
+        onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
+        onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+    ): Promise<TResult1 | TResult2> {
+        return this.current.promise.then(onfulfilled, onrejected);
+    }
+
+    catch<TResult = never>(
+        onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null
+    ): Promise<T | TResult> {
+        return this.current.promise.catch(onrejected);
+    }
+
+    finally(onfinally?: (() => void) | null): Promise<T> {
+        return this.current.promise.finally(onfinally);
+    }
+
+    get [Symbol.toStringTag]() {
+        return this.current.promise[Symbol.toStringTag];
     }
 
     public static timeoutPromise(milliseconds?: number): Promise<void> {

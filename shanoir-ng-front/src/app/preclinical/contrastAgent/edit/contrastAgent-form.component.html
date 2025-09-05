@@ -121,7 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
-										{{enumUtils.getEnumValue(intervals,agent.injectionInterval)}}
+										{{agent.injectionInterval.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="injectionInterval" formControlName="injectionInterval">
@@ -134,7 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
-										{{enumUtils.getEnumValue(sites,agent.injectionSite)}}
+										{{agent.injectionSite.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="injectionSite" formControlName="injectionSite">
@@ -147,7 +147,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit contrastagent|InjectionType label">Injection type</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
-										{{enumUtils.getEnumValue(injtypes,agent.injectionType)}}
+										{{agent.injectionType.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="injectionType" formControlName="injectionType">

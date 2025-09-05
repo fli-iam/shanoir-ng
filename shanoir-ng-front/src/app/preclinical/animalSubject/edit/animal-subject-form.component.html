@@ -36,43 +36,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </ng-template>
             </span>
             
-			<fieldset formGroupName="subject">
-                <legend>Study</legend>
-                <ol>
-					<li>
-                        <label>Study</label>
-                        <span class="right-col">
-							{{preclinicalSubject?.subject?.study?.name}}
-                        </span>
-                    </li>
-				</ol>
-				<ol *ngIf="preclinicalSubject.subject.identifier != null">
-					<li>
-						<label>Subject identifier for this study</label>
-						<span class="right-col">
-							{{ preclinicalSubject.subject.identifier }}
-						</span>
-					</li>
-				</ol>
-				<ol>
-					<li>
-						<label>Tags</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color"
-									*ngFor="let tag of preclinicalSubject.subject.tags">
-									{{tag.name}}
-								</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<tag-list
-									[availableTags]="preclinicalSubject.subject.study?.tags" formControlName="tags"></tag-list>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-
             <!-- Subject properties group -->
             <fieldset formGroupName="subject">
                 <legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
@@ -195,22 +158,56 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </ol>
             </fieldset>
 
-            <!-- Subject study list -->
-            <fieldset *ngIf="mode !== 'view'" formGroupName="subject">
-                <subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-            </fieldset>
+			<!-- Study -->
+			<fieldset formGroupName="subject">
+                <legend>Study</legend>
+                <ol>
+					<li>
+                        <label>Study</label>
+                        <span class="right-col">
+							{{preclinicalSubject?.subject?.study?.name}}
+                        </span>
+                    </li>
+				</ol>
+				<ol *ngIf="preclinicalSubject.subject.identifier != null">
+					<li>
+						<label>Subject identifier for this study</label>
+						<span class="right-col">
+							{{ preclinicalSubject.subject.identifier }}
+						</span>
+					</li>
+				</ol>
+				<ol>
+					<li>
+						<label>Tags</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color"
+									*ngFor="let tag of preclinicalSubject.subject.tags">
+									{{tag.name}}
+								</span>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<tag-list
+									[availableTags]="preclinicalSubject.subject.study?.tags" formControlName="tags"></tag-list>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
             
             <!-- Pathologies and therapies sections -->
-            <div *ngIf="displayPathologyTherapy">
-                <fieldset>
-                    <legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
-                </fieldset>
-                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject" [embedded]="true"></subject-pathology-list>
-                <fieldset>
-                    <legend i18n="AnimalSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
-                </fieldset>
-                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject" [embedded]="true"></subject-therapy-list>
-            </div>
         </div>
+		<div *ngIf="displayPathologyTherapy">
+			<fieldset>
+				<legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
+                <subject-pathology-list [mode]="mode" formControlName="pathologies"></subject-pathology-list>
+			</fieldset>
+
+			<fieldset>
+				<legend i18n="AnimalSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
+                <subject-therapy-list [mode]="mode" formControlName="therapies"></subject-therapy-list>
+			</fieldset>
+		</div>
     </form>
 </div>

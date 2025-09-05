@@ -27,7 +27,6 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 import { slideDown } from '../../../../shared/animations/animations';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -38,7 +37,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
 
     @Input() anesthetic: Anesthetic;
