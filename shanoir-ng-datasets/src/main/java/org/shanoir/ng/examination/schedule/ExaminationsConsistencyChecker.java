@@ -226,6 +226,7 @@ public class ExaminationsConsistencyChecker {
 		examinationIDToStudyInstanceUID.put(examination.getId(), examination.getStudyInstanceUID());
 	}
 
+	@Transactional(value = TxType.REQUIRES_NEW)
 	private void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
 		String studyInstanceUID = studyInstanceUIDs.iterator().next();
 		if(examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
