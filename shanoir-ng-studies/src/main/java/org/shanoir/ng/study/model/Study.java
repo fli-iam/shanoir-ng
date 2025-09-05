@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
@@ -150,7 +151,10 @@ public class Study extends HalEntity {
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
-	
+
+	@OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Subject> subjects;
+
 	@Transient
 	private int nbSubjects;
 
@@ -439,6 +443,14 @@ public class Study extends HalEntity {
 	 */
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
+	}
+
+	public List<Subject> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(List<Subject> subjects) {
+		this.subjects = subjects;
 	}
 
 	/**
