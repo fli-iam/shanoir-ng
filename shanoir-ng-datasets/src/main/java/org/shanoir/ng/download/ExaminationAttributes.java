@@ -37,10 +37,13 @@ public class ExaminationAttributes<T> {
 
 	private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
 
+    private Set<Integer> tagsInUse;
+
 	private WADOURLHandler wadoURLHandler;
 	
-    public ExaminationAttributes(WADOURLHandler wadoURLHandler) {
+    public ExaminationAttributes(WADOURLHandler wadoURLHandler, Set<Integer> tagsInUse) {
     	this.wadoURLHandler = wadoURLHandler;
+        this.tagsInUse = tagsInUse;
     }
 
     public AcquisitionAttributes<T> getAcquisitionAttributes(T id) {
@@ -71,7 +74,7 @@ public class ExaminationAttributes<T> {
 
 	public void addDatasetAttributes(T acquisitionId, T datasetId, Attributes attributes) {
 		if (!acquisitionMap.containsKey(acquisitionId)) {
-            acquisitionMap.put(acquisitionId, Optional.of(new AcquisitionAttributes<T>()));
+            acquisitionMap.put(acquisitionId, Optional.of(new AcquisitionAttributes<T>(tagsInUse)));
         }
         acquisitionMap.get(acquisitionId).get().addDatasetAttributes(datasetId, attributes);
 	}
@@ -124,6 +127,10 @@ public class ExaminationAttributes<T> {
         } else {
             acquisitionMap.put(acquisitionId, Optional.ofNullable(dicomAcquisitionAttributes));
         }
+    }
+
+    public void addAcquisitionAttributes(T acquisitionId) {
+        addAcquisitionAttributes(acquisitionId, new AcquisitionAttributes<>(tagsInUse));
     }
 
     public boolean has(T acqId) {
