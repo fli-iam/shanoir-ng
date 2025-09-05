@@ -117,9 +117,8 @@ public class ExaminationsConsistencyChecker {
 			}
 			if (!examinationsToCheck.isEmpty()) {
 				checkExaminations(examinationsToCheck, examinationLastChecked, examinationIDToStudyInstanceUID, emptyExaminations);
-				totalExaminationsChecked += examinationsToCheck.size();
-				// One insert is sufficient, only write at the end where it stopped
 				examinationLastCheckedRepository.save(examinationLastChecked);
+				totalExaminationsChecked += examinationsToCheck.size();
 			}
 			
 			long endTime = System.currentTimeMillis();
@@ -141,7 +140,7 @@ public class ExaminationsConsistencyChecker {
 	}
 
 	private void checkExaminations(List<Examination> examinationsToCheck,
-			ExaminationLastChecked examinationLastChecked, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) throws IOException {
+			ExaminationLastChecked examinationLastChecked, Map<Long, String> examinationIDToStudyInstanceUID, List<Long> emptyExaminations) throws IOException {
 		if (!examinationsToCheck.isEmpty()) {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
@@ -156,7 +155,8 @@ public class ExaminationsConsistencyChecker {
 					LOG.info("Checking 1000 examinations in range [{}-{}]",
 							examinationsToCheck.getFirst().getId(), examinationsToCheck.getLast().getId());
 					for (Examination examination : examinationsToCheck) {
-						boolean checked = checkExamination(examinationLastChecked, examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
+						examinationLastChecked.setExaminationId(examination.getId());
+						boolean checked = checkExamination(examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
 						// In case exam is from today: stop
 						if(!checked) return;
 					}
@@ -171,8 +171,7 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 
-	private boolean checkExamination(ExaminationLastChecked examinationLastChecked,
-			Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
+	private boolean checkExamination(Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
 		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
 		String[] line = new String[8];
@@ -187,7 +186,6 @@ public class ExaminationsConsistencyChecker {
 			if (!filesInPACS.isEmpty()) {
 				checkStudyInstanceUIDs(examination, filesInPACS, line, examinationIDToStudyInstanceUID, emptyExaminations);
 			}
-			examinationLastChecked.setExaminationId(examination.getId());
 		} else {
 			line[2] = "1";
 			line[4] = "1";
