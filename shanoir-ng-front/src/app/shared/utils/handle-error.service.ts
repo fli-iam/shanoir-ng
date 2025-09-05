@@ -26,6 +26,7 @@ export class HandleErrorService implements ErrorHandler {
     constructor (private consoleService: ConsoleService) { }
 
     public handleError(error: any) {
+        console.log(error)
         try {
             if (error instanceof HttpErrorResponse) {
                 this.handleHttpError(error);

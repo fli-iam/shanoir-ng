@@ -17,6 +17,7 @@ package org.shanoir.ng.study.service;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -60,7 +61,7 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
-
+	
 	
 	/**
 	 * Get all the studies
@@ -70,6 +71,11 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Study> findAll();
+
+
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	@PostFilter("@studySecurityService.filterStudyIdNameDTOsHasRight(filterObject, 'CAN_SEE_ALL')")
+	List<IdName> findAllNames();
 	
 
 	/**

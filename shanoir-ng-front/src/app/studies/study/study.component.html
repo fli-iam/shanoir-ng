@@ -251,6 +251,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</tool-tip>
 				</legend>
 				<ol>
+					<li *ngIf="mode != 'create'"><button class="left-icon normal" [routerLink]="'/dua/create/' + study.id"><i class="fa-solid fa-wand-magic-sparkles"></i>Open DUA assistant</button></li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
 						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
