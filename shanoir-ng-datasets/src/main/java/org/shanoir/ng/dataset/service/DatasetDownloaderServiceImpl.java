@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -25,6 +26,7 @@ import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -55,6 +57,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -89,6 +92,9 @@ public class DatasetDownloaderServiceImpl {
 
 	@Autowired
 	protected SubjectRepository subjectRepository;
+
+	@Autowired
+	protected DatasetRepository datasetRepository;
 
 	@Autowired
 	protected StudyRepository studyRepository;
@@ -184,6 +190,28 @@ public class DatasetDownloaderServiceImpl {
 				datasetDownloadName.put(dataset.getId(), dataset.getName());
 			}
 		}
+		return datasetDownloadName;
+	}
+
+	protected Map<Long, String> getDatasetDownloadNameFromIds(List<Long> datasetIds) {
+		HashMap<Long, String> datasetDownloadName = new HashMap<>();
+		int count = 0;
+		List<Dataset> datasets = StreamSupport.stream(datasetRepository.findAllById(datasetIds).spliterator(), false).toList();
+
+		for (Dataset dataset : datasets) {
+			String datasetName = dataset.getName();
+			if(datasetDownloadName.containsValue(datasetName)) {
+				if (datasetName.contains(".")) {
+					datasetDownloadName.put(dataset.getId(), datasetName.replaceFirst("\\.", "_" + count + "."));
+				} else {
+					datasetDownloadName.put(dataset.getId(), datasetName + "_" + count);
+				}
+				count++;
+			}else {
+				datasetDownloadName.put(dataset.getId(), dataset.getName());
+			}
+		}
+
 		return datasetDownloadName;
 	}
 

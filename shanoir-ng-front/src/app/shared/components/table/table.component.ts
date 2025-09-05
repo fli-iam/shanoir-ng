@@ -58,6 +58,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
+    @Output() downloadProcessingOutputsEvent: EventEmitter<any> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -192,6 +193,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     downloadStats(item) {
         this.downloadStatsEvent.emit(item);
+    }
+
+    downloadProcessingOutputs(item) {
+        this.downloadProcessingOutputsEvent.emit(item);
     }
 
     public static getCellValue(item: Object, col: ColumnDefinition): any {

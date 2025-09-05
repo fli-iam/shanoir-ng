@@ -17,12 +17,14 @@ package org.shanoir.ng.processing.controler;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -172,4 +174,28 @@ public interface DatasetProcessingApi {
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
+    @Operation(summary = "complexMassiveDownload", description = "Returns a zip file of the inputs/outputs according to the json params file in the HTTP request body. Datas are in the http response body, it must be written in a zip file.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "zip file"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/complexMassiveDownload")
+    void complexMassiveDownload(
+            @Parameter(description = "parameters for download", required = true)
+            @Valid @RequestBody JsonNode request,
+            HttpServletResponse response) throws Exception;
+
+    @Operation(summary = "downloadOutputsFromEvent", description = "Download statistics for event")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "download ok"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "event not found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/downloadOutputsFromEvent", produces = { "application/zip" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<Resource> downloadProcessingsOutputs()
+            throws RestServiceException, IOException;
 }
