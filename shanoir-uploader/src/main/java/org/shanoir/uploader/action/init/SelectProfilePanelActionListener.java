@@ -70,21 +70,6 @@ public class SelectProfilePanelActionListener implements ActionListener {
 			if (!pseudonymusFolder.exists()) {
 				logger.error(pseudonymusFolder.getAbsolutePath() + " folder missing for mode pseudonymus! Please copy manually.");
 			}
-			// then check for the key in the .jar file
-			Properties keyProperties = new Properties();
-			InputStream in = getClass().getResourceAsStream("/profile." + selectedProfile + "/" + ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE);
-			if (in != null) {
-				try {
-					keyProperties.load(in);
-					in.close();
-				} catch (IOException ex) {
-					logger.error(ex.getMessage(), ex);
-				}
-				ShUpConfig.basicProperties.put(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyProperties.get(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE));				
-			} else {
-				logger.error("Missing pseudonymus key file.");
-				return;
-			}
 		}
 	}
 

@@ -15,7 +15,8 @@
 package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
-import java.util.List;
+
+import org.shanoir.ng.shared.core.model.IdName;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,6 +33,9 @@ public class Subject {
 	@JsonProperty("name")
 	private String name;
 
+	@JsonProperty("study")
+	private IdName study;
+
 	@JsonProperty("identifier")
 	private String identifier;
 
@@ -44,9 +48,7 @@ public class Subject {
 	@JsonProperty("imagedObjectCategory")
 	private Integer imagedObjectCategory;
 
-	@JsonProperty("subjectStudyList")
-	private List<SubjectStudy> subjectStudyList;
-
+	// Not used by MS Import, but by ShanoirUploader via Maven reference
 	private PseudonymusHashValues pseudonymusHashValues;
 	
 	public Long getId() {
@@ -101,14 +103,6 @@ public class Subject {
 		this.imagedObjectCategory = imagedObjectCategory;
 	}
 
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
-
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
-
 	public String getIdentifier() {
 		return identifier;
 	}
@@ -123,6 +117,14 @@ public class Subject {
 
 	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
 		this.pseudonymusHashValues = pseudonymusHashValues;
+	}
+
+	public IdName getStudy() {
+		return study;
+	}
+
+	public void setStudy(IdName study) {
+		this.study = study;
 	}
 
 }

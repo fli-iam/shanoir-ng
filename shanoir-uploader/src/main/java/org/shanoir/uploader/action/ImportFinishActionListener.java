@@ -26,7 +26,6 @@ import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -185,13 +184,12 @@ public class ImportFinishActionListener implements ActionListener {
 			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
 			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
 			String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
-			SubjectStudy subjectStudy = importStudyAndStudyCardCBILNG.getSubjectStudy();
 			String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
 			SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
 			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
-				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+				subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
 				study, equipment);
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -244,7 +242,7 @@ public class ImportFinishActionListener implements ActionListener {
 				logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
 			} else {
 				// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
-				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
+				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjects().isEmpty()) {
 					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
 						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
@@ -254,7 +252,7 @@ public class ImportFinishActionListener implements ActionListener {
 					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
 					if (!qualityControlResult.hasFailedValid()) {
 						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+						importJob.setQualityTag(qualityControlResult.getUpdatedSubjects().get(0).getQualityTag());
 					}
 				}				
 			}

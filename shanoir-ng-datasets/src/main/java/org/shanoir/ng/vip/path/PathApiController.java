@@ -51,7 +51,7 @@ public class PathApiController implements PathApi {
                         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                     }
 
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId);
+                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true);
                     return new ResponseEntity<Void>(HttpStatus.OK);
             }
         } catch (Exception e) {

@@ -904,4 +904,10 @@ public class StudyServiceImpl implements StudyService {
 	public List<Tag> getTagsFromStudy(Long studyId) {
 		return tagRepository.findByStudyId(studyId);
 	}
+
+	@Override
+	@Transactional
+	public List<Long> queryStudiesByRight(StudyUserRight right) {
+		return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
+	}
 }
