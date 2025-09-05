@@ -412,6 +412,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Call to refresh from outside
      */
     public refresh(page?: number): Promise<Page<any>> {
+        if (page < 1) throw new Error('page must be >= 1');
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {

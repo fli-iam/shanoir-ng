@@ -13,12 +13,13 @@
  */
 import { Entity } from '../shared/components/entity/entity.abstract';
 import { Id } from '../shared/models/id.model';
+import { Field } from '../shared/reflect/field.decorator';
 
 export class Tag extends Entity {
 
-    id: number;
-    color: string;
-    name: string;
+    @Field() id: number;
+    @Field() color: string;
+    @Field() name: string;
 
     public static makeTag(id: number, name: string, color: string, studyId: number): Tag {
         let tag = new Tag();

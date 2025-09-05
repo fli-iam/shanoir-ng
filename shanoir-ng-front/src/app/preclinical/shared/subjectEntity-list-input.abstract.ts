@@ -15,7 +15,6 @@
 import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core';
 
 import { PreclinicalSubject } from '../animalSubject/shared/preclinicalSubject.model';
-import { ModesAware } from "../shared/mode/mode.decorator";
 import { TableComponent } from '../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -27,7 +26,6 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
     standalone: false
 })
 
-@ModesAware
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
     @Input() canModify: Boolean = false;

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
@@ -19,6 +19,7 @@ import { Option } from '../../shared/select/select.component';
 import { Location } from '@angular/common';
 import { AccountRequestInfo } from './account-request-info.model';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component ({
     selector: 'account-request-info',
@@ -42,13 +43,15 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     onTouch = () => {};
     public studyOptions:  Option<number>[];
     studyName: string;
-    presetStudyId: boolean
+    presetStudyId: boolean;
 
     constructor(private formBuilder: UntypedFormBuilder,
                 private studyService: StudyService,
                 private activatedRoute: ActivatedRoute,
                 private location: Location,
-                private confirmDialogService: ConfirmDialogService) {
+                private confirmDialogService: ConfirmDialogService,
+                private destroyRef: DestroyRef
+            ) {
     }
 
     setDisabledState?(isDisabled: boolean): void {
@@ -92,7 +95,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
             'studyId': [this.info.studyId, [Validators.required]],
             'studyName': [this.info.studyName]
         });
-        this.form.valueChanges.subscribe(() => {
+        this.form.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
             this.valid.emit(this.form.valid);
         });
     }

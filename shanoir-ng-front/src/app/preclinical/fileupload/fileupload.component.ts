@@ -16,7 +16,7 @@ import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, Injectab
 import { HttpClient } from '@angular/common/http';
 
 import { FileUploadReady } from './fileUploadReady.model';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 
 @Component({
     selector: 'file-upload',
@@ -68,9 +68,9 @@ export class FileUploadComponent {
             
         }
         this.fileUploadReady.formData = formData;
-        if(this.url && this.auto == true){
-            this.uploadRequest(this.url).subscribe();
-        }else{
+        if (this.url && this.auto == true){
+            lastValueFrom(this.uploadRequest(this.url));
+        } else{
             this.selectedFile.emit(this.fileUploadReady);
         }
         

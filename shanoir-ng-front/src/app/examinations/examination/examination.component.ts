@@ -108,9 +108,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     init() {
         super.init();
-        if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.examination = res);
-        }
     }
 
     initView(): Promise<void> {
@@ -147,8 +144,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
-
         return Promise.resolve();
     }
 
@@ -262,15 +257,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
-    ngOnDestroy() {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
-
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
-        }
-    }
-
+    
     downloadFile(file) {
         this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }

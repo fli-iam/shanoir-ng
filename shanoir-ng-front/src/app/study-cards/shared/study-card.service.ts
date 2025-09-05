@@ -29,7 +29,7 @@ export class StudyCardService extends EntityService<StudyCard> {
     private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
 
     constructor(protected http: HttpClient) {
-        super(http)
+        super(http);
     }
 
     getEntityInstance() { return new StudyCard(); }

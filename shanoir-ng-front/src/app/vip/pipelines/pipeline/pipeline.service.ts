@@ -14,7 +14,7 @@
 
 import {Injectable} from "@angular/core";
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {firstValueFrom, Observable} from "rxjs";
 import * as AppUtils from "../../../utils/app.utils";
 import {Pipeline} from "../../models/pipeline";
 
@@ -31,12 +31,12 @@ export class PipelineService {
      *
      * @param pipelineIdentifier
      */
-    public getPipeline(pipelineIdentifier: string): Observable<Pipeline> {
+    public getPipeline(pipelineIdentifier: string): Promise<Pipeline> {
 
         if (pipelineIdentifier === null || pipelineIdentifier === undefined) {
             throw new Error('Required parameter pipelineIdentifier was null or undefined when calling getPipeline.');
         }
-        return this.httpClient.get<Pipeline>(`${this.pipelineUrl}/${pipelineIdentifier}`);
+        return firstValueFrom(this.httpClient.get<Pipeline>(`${this.pipelineUrl}/${pipelineIdentifier}`));
     }
 
     /**
@@ -46,7 +46,7 @@ export class PipelineService {
      * @param property A pipeline property to filter the returned pipelines. It must listed in the \&quot;supportedPipelineProperties\&quot; of the getPlatformProperties method. All the returned pipelines must have this property set. Use also the \&quot;propertyValue\&quot; to filter on this property value.
      * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
      */
-    public listPipelines(): Observable<Array<Pipeline>> {
-        return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
+    public listPipelines(): Promise<Array<Pipeline>> {
+        return firstValueFrom(this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`));
     }
 }

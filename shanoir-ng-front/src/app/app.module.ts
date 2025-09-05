@@ -153,7 +153,7 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { GetValuesPipe, TimesPipe } from './utils/app.utils';
+import { CamelPipe, GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
 // import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { StudyRightsService } from './studies/shared/study-rights.service';
@@ -177,7 +177,7 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
 import { ReplaceSpacePipe } from './utils/pipes';
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
-import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animalSubject-form.component';
+import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animal-subject-form.component';
 import { ReferencesListComponent }   from './preclinical/reference/list/reference-list.component';
 import { ReferenceService }   from './preclinical/reference/shared/reference.service';
 import { ReferenceFormComponent }   from './preclinical/reference/edit/reference-form.component';
@@ -187,15 +187,14 @@ import { PathologyFormComponent }   from './preclinical/pathologies/pathology/ed
 import { PathologyModelsListComponent }   from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
 import { PathologyModelService }   from './preclinical/pathologies/pathologyModel/shared/pathologyModel.service';
 import { PathologyModelFormComponent }   from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
-import { SubjectPathologiesListComponent }   from './preclinical/pathologies/subjectPathology/list/subjectPathology-list.component';
+import { SubjectPathologiesListComponent }   from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
 import { SubjectPathologyService }   from './preclinical/pathologies/subjectPathology/shared/subjectPathology.service';
-import { SubjectPathologyFormComponent }   from './preclinical/pathologies/subjectPathology/edit/subjectPathology-form.component';
+import { SubjectPathologyComponent }   from './preclinical/pathologies/subjectPathology/edit/subject-pathology.component';
 import { TherapiesListComponent }   from './preclinical/therapies/therapy/list/therapy-list.component';
 import { TherapyService }   from './preclinical/therapies/therapy/shared/therapy.service';
 import { TherapyFormComponent }   from './preclinical/therapies/therapy/edit/therapy-form.component';
-import { SubjectTherapiesListComponent }   from './preclinical/therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { SubjectTherapyService }   from './preclinical/therapies/subjectTherapy/shared/subjectTherapy.service';
-import { SubjectTherapyFormComponent }   from './preclinical/therapies/subjectTherapy/edit/subjectTherapy-form.component';
+import { SubjectTherapyComponent }   from './preclinical/therapies/subjectTherapy/edit/subject-therapy.component';
 import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
 import { AnestheticFormComponent }      from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
 import { AnestheticService }      from './preclinical/anesthetics/anesthetic/shared/anesthetic.service';
@@ -212,10 +211,7 @@ import { AnimalExaminationFormComponent }      from './preclinical/examination/e
 import { AnimalExaminationListComponent }      from './preclinical/examination/list/animal-examination-list.component';
 import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
-import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
-// import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-// import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
@@ -280,6 +276,7 @@ import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-proto
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
 import {LocalDateFormatPipe} from "./shared/localLanguage/localDateFormat.pipe";
+import { SubjectTherapyListComponent } from './preclinical/therapies/subjectTherapy/list/subject-therapy-list.component';
 
 @NgModule({
     declarations: [
@@ -371,6 +368,7 @@ import {LocalDateFormatPipe} from "./shared/localLanguage/localDateFormat.pipe";
         StudyCardConditionComponent,
         StudyCardActionComponent,
         GetValuesPipe,
+        CamelPipe,
         DatasetAcquisitionListComponent,
         DatasetAcquisitionComponent,
         MrProtocolComponent,
@@ -390,11 +388,11 @@ import {LocalDateFormatPipe} from "./shared/localLanguage/localDateFormat.pipe";
         PathologyModelsListComponent,
         PathologyModelFormComponent,
         SubjectPathologiesListComponent,
-        SubjectPathologyFormComponent,
+        SubjectPathologyComponent,
         TherapiesListComponent,
         TherapyFormComponent,
-        SubjectTherapiesListComponent,
-        SubjectTherapyFormComponent,
+        SubjectTherapyListComponent,
+        SubjectTherapyComponent,
         AnestheticsListComponent,
         AnestheticFormComponent,
         AnestheticIngredientsListComponent,
@@ -522,7 +520,6 @@ import {LocalDateFormatPipe} from "./shared/localLanguage/localDateFormat.pipe";
         AnimalExaminationService,
         AnestheticService,
         ImportBrukerService,
-        EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         GlobalService,

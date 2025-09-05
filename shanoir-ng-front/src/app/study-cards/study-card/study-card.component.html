@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button"
 						class="Button right-icon show-errors"
 						(click)="onShowErrors()"
-						[disabled]="footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
+						[disabled]="!footerState.dirty || footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
 					Show all errors<i class="fas fa-bug"></i>
 				</button>
 				<button *ngIf="selectMode"
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="name" [(ngModel)]="studyCard.name" />
+								<input type="text" formControlName="name"/>
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength'])" class="form-validation-alert">Too short!</label>
 								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert">Name should be unique!</label>
@@ -77,7 +77,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['study']" [(ngModel)]="studyCard.study" [optionArr]="studies" [disabled]="lockStudy">
+								<select-box [formControl]="form.controls['study']" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
 						</span>
@@ -105,7 +105,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box [formControl]="form.controls['acquisitionEquipment']"
-										[(ngModel)]="studyCard.acquisitionEquipment"
 										(userChange)="onChangeAcqEq()"
 										[options]="acquisitionEquipments"
 										(onNewClick)="createAcqEq()">
@@ -136,7 +135,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="studycard"
 					formControlName="rules"
-					[(ngModel)]="studyCard.rules"
 					[mode]="selectMode ? 'select' : mode"
 					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
 					[allCoils]="allCoils"

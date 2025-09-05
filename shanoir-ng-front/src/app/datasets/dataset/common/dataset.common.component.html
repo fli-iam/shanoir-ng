@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span [ngSwitch]="mode" class="right-col">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | localDateFormatPipe}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<datepicker [(ngModel)]="dataset.creationDate" formControlName="creationDate"></datepicker>
+					<datepicker formControlName="creationDate"></datepicker>
 				</ng-template>
 			</span>
 		</li>

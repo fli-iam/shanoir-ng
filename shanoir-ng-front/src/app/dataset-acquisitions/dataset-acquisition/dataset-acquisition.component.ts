@@ -108,12 +108,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
-            'study-card': [this.datasetAcquisition.studyCard],
-            'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
+            'studyCard': [this.datasetAcquisition.studyCard],
+            'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
-            'startTime': [this.datasetAcquisition.acquisitionStartTime],
-            'software-release': [this.datasetAcquisition.softwareRelease],
-            'sorting-index': [this.datasetAcquisition.sortingIndex],
+            'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
+            'softwareRelease': [this.datasetAcquisition.softwareRelease],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex],
             'protocol': [this.datasetAcquisition.protocol]
         });
     }

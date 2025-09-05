@@ -79,7 +79,7 @@ export class SubjectDTOService {
         } else {
             entity.subjectStudyList = [];
         }
-        entity.studyIdentifier = dto.studyIdentifier;
+        entity.identifier = dto.studyIdentifier;
         entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
         entity.subjectType = dto.subjectType;
         entity.physicallyInvolved = dto.physicallyInvolved;
@@ -139,7 +139,7 @@ export class SubjectDTO {
             dto.subject = null;
             return dto;
         }) : null;
-        this.studyIdentifier = subject.studyIdentifier;
+        this.studyIdentifier = subject.identifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;
         this.physicallyInvolved = subject.physicallyInvolved;
