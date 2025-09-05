@@ -144,6 +144,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	@Query("SELECT e FROM Examination e WHERE e.id = :id")
 	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
 
+	@Modifying
 	@Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
 	int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
 
