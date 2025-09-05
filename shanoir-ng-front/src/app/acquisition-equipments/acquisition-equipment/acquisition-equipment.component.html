@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['center']" [(ngModel)]="acqEquip.center" [viewRoute]="'/center/details/' + acqEquip?.center?.id" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
+								<select-box [formControl]="form.controls['center']" [(ngModel)]="acqEquip.center" [viewRoute]="'/center/details/' + acqEquip?.center?.id" [viewDisabled]="!acqEquip.center" [optionArr]="centers" (userChange)="onCenterChange()">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{acqEquip.serialNumber}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
+								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber" (change)="onSerialNumberChange()"/>
 								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
 								<label *ngIf="hasError('serialNumber', ['spaces'])" class="form-validation-alert">There can't be spaces at the beginning neither at the end of the serial number !</label>
 							</ng-template>
