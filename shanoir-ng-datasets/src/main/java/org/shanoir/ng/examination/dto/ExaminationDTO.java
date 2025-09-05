@@ -59,6 +59,8 @@ public class ExaminationDTO {
 
 	private List<Long> copies;
 
+	private String studyInstanceUID;
+
 	/**
 	 * @return the id
 	 */
@@ -209,4 +211,13 @@ public class ExaminationDTO {
 	public void setCopies(List<Long> copies) {
 		this.copies = copies;
 	}
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
 }
