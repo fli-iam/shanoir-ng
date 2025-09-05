@@ -217,6 +217,18 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     viewCenter(center: Center) {
         this.router.navigate(['center/details/' + center.id]);
     }
+
+    onCenterChange() {
+        console.log("center change");
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+
+    onSerialNumberChange() {
+        console.log("serial number change");
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
 }
 
 export class ManufacturerAndSerial {
