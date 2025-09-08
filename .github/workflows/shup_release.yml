@@ -137,6 +137,7 @@ jobs:
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
+            --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 `
             --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
