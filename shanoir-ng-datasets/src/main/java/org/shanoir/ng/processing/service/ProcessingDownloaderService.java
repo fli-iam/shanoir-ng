@@ -34,7 +34,7 @@ public interface ProcessingDownloaderService {
      *
      * @throws RestServiceException
      */
-    void complexMassiveDownload(@Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) throws Exception;
+    void complexMassiveDownload(@Valid JsonNode jsonRequest) throws Exception;
 
     /**
      * Download outputs (+ inputs if needed) of an examination list
