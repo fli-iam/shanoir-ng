@@ -184,8 +184,7 @@ public interface DatasetProcessingApi {
     @PostMapping(value = "/complexMassiveDownload")
     void complexMassiveDownload(
             @Parameter(description = "parameters for download", required = true)
-            @Valid @RequestBody JsonNode request,
-            HttpServletResponse response) throws Exception;
+            @Valid @RequestBody JsonNode request);
 
     @Operation(summary = "downloadOutputsFromEvent", description = "Download statistics for event")
     @ApiResponses(value = {

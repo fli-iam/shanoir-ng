@@ -240,22 +240,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm" , response, false, null);
 	}
 
-	public void complexMassiveDownload(
-			@Parameter(description = "parameters for download", required = true)
-			@Valid @RequestBody JsonNode jsonRequest,
-			HttpServletResponse response) throws Exception {
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-		File zipFile = new File(userDir + File.separator + "processingOutputsExtraction.zip");
-		if(zipFile.exists()) {
-			zipFile.delete();
-		}
-		zipFile.createNewFile();
-
-		try (FileOutputStream fos = new FileOutputStream(zipFile);
-			 	ZipOutputStream zos = new ZipOutputStream(fos)) {
+	public void complexMassiveDownload(JsonNode jsonRequest) {
+		try {
 			LOG.info("Starting complex download for process data.");
-			processingDownloaderService.complexMassiveDownload(jsonRequest, zos);
+			processingDownloaderService.complexMassiveDownload(jsonRequest);
 			LOG.info("Complex download completed.");
 		}catch (Exception e) {
 			LOG.error("Error while downloading processing data.", e);

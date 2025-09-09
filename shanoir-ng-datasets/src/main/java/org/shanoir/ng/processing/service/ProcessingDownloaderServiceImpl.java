@@ -1,6 +1,7 @@
 package org.shanoir.ng.processing.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
@@ -82,7 +83,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    public void complexMassiveDownload(@Valid JsonNode jsonRequest, ZipOutputStream zipOutputStream) throws Exception{
+    public void complexMassiveDownload(@Valid JsonNode jsonRequest) throws Exception{
         Map<Integer, List<Long>> datasetIdsPerExtraction = new HashMap<>();
         Map<Integer, Boolean> inputPerExtraction = new HashMap<>();
         List<Integer> extractionIdList = new ArrayList<>();
@@ -103,28 +104,13 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         JsonNode extractions = jsonRequest.get("data_to_extract");
 
         for (JsonNode extraction : extractions) {
-            if(!extraction.has("extraction_identifier")){
-                throw new Exception("An extraction definition is missing an extraction identifier.");
-            }
-
-            Integer extractionId = extraction.get("extraction_identifier").asInt();
-            extractionIdList.add(extractionId);
-            inputPerExtraction.put(extractionId, extraction.get("input").asBoolean(false));
-            datasetIdsPerExtraction.put(extractionId, getDatasetIdsFromJsonFilters(extraction));
-            LOG.info("Results for extraction {} query are :{}", extractionId, datasetIdsPerExtraction.get(extractionId).size() > 255 ? datasetIdsPerExtraction.get(extractionId).subList(0,255) : datasetIdsPerExtraction.get(extractionId));
+            event.setMessage((Objects.isNull(event.getMessage()) ? "" : event.getMessage() + ",") + getDatasetIdsFromJsonFilters(extraction).stream().map(String::valueOf).collect(Collectors.joining(",")));
         }
 
-        try {
-            event.setMessage("Preparing zip archive...");
-            eventService.publishEvent(event);
-            downloadDatasetsWithJsonSorting(datasetIdsPerExtraction, inputPerExtraction, extractionIdList, jsonRequest, zipOutputStream, event);
-        } catch (Exception e) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Error during zip archive building.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            LOG.error("An error occured while generating the zip.", e);
-        }
+        event.setObjectId(String.valueOf(event.getId()));
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
     }
 
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
@@ -352,7 +338,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             } else {
                 String valueStr = value.asText();
                 if(queryFilter.endsWith("date")) {
-                    queryFilter += "'" + valueStr + "'";
+                    queryFilter += " " + valueStr + " ";
                 } else if(valueStr.replaceAll(",","").trim().matches("\\d+")){
                     queryFilter += " IN (" + valueStr + ")";
                 } else {
