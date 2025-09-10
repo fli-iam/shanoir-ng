@@ -119,6 +119,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                     .orElse(null);
             if (!Objects.isNull(exam)){
                 return exam.getSubject().getName();
+                LOG.error("eheh");
             }
         }
         return "noSubject";
