@@ -21,7 +21,6 @@ import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.slf4j.Logger;
@@ -38,8 +37,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private EquipmentDicom equipmentDicom;
 
 	private Subject subject;
-	
-	private SubjectStudy subjectStudy;
 
 	private List<Examination> examinationsOfSubject;
 	
@@ -80,7 +77,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					// for OFSEP this is done in ImportDialogOpener as subject found before, if
 					updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
 				}
-				updateSubjectStudy(study, subject);
+				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
@@ -101,7 +98,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
 				this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
 				updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
-				updateSubjectStudy(study, subject);
 				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);			
 			}		
@@ -176,6 +172,26 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			// not used anymore on server: remove later
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
+			importDialog.subjectStudyIdentifierTF.setText(subject.getStudyIdentifier());
+			importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+			importDialog.subjectStudyIdentifierTF.setEnabled(false);
+			importDialog.subjectStudyIdentifierTF.setEditable(false);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+			importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
+			importDialog.subjectTypeCB.setEnabled(false);
+		} else {
+			// subject is new, enable editing and display defaults
+			if (ShUpConfig.isModeSubjectStudyIdentifier()) {
+				importDialog.subjectStudyIdentifierTF.setEnabled(true);
+				importDialog.subjectStudyIdentifierTF.setEditable(true);
+				importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
+			}
+			importDialog.subjectStudyIdentifierTF.setText("");
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+			importDialog.subjectTypeCB.setEnabled(true);
+			importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
 		}
 	}
 
@@ -252,75 +268,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				this.importStudyCardDocumentListener.addDefaultStudyCard(studyCard);
 			}
 		}
-	}
-
-	private void updateSubjectStudy(Study study, Subject subject) {
-		// Check if RelSubjectStudy exists for selected study
-		if (subject != null) {
-			// Profile Neurinfo: findSubjectsByStudyId returns single subject-study
-			if (ShUpConfig.isModeSubjectNameManual()) {
-				SubjectStudy subjectStudy = subject.getSubjectStudy();
-				if (subjectStudy != null) {
-					logger.info("Existing subjectStudy found with ID: " + subjectStudy.getId());
-					updateSubjectStudyInImportDialog(subjectStudy, mainWindow.importDialog);
-					this.subjectStudy = subjectStudy;
-					return;
-				} else {
-					logger.error("subjectStudy empty for existing subject in study.");
-				}
-			// Profile OFSEP: findByIdentifier returns list of subject-study
-			} else {
-				List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-				if (subjectStudyList != null) {
-					for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-						SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
-						// subject is already in study: display values in GUI and stop editing
-						if (subjectStudy.getStudy().getId().equals(study.getId())) {
-							logger.info("Existing subjectStudy found with ID: " + subjectStudy.getId());
-							updateSubjectStudyInImportDialog(subjectStudy, mainWindow.importDialog);
-							this.subjectStudy = subjectStudy;
-							return;
-						}
-					}
-				} else {
-					logger.error("subjectStudy list empty for existing subject in study.");
-				}
-			}
-		}
-		this.subjectStudy = null;
-	}
-
-	public static void updateSubjectStudyInImportDialog(SubjectStudy subjectStudy, ImportDialog importDialog) {
-		if (subjectStudy != null) {
-			importDialog.subjectStudyIdentifierTF.setText(subjectStudy.getSubjectStudyIdentifier());
-			importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
-			importDialog.subjectStudyIdentifierTF.setEnabled(false);
-			importDialog.subjectStudyIdentifierTF.setEditable(false);
-			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
-			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-			importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
-			importDialog.subjectTypeCB.setEnabled(false);	
-		} else {
-			// subject is not in study, enable editing and display defaults
-			if (ShUpConfig.isModeSubjectStudyIdentifier()) {
-				importDialog.subjectStudyIdentifierTF.setEnabled(true);
-				importDialog.subjectStudyIdentifierTF.setEditable(true);
-				importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
-			}
-			importDialog.subjectStudyIdentifierTF.setText("");
-			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
-			importDialog.subjectTypeCB.setEnabled(true);
-			importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
-		}
-	}
-
-	public SubjectStudy getSubjectStudy() {
-		return subjectStudy;
-	}
-
-	public void setSubjectStudy(SubjectStudy subjectStudy) {
-		this.subjectStudy = subjectStudy;
 	}
 
 }

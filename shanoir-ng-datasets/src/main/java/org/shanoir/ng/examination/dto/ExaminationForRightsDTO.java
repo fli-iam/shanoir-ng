@@ -12,29 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.quality;
+package org.shanoir.ng.examination.dto;
 
 
-public class SubjectStudyQualityTagDTO {
+public interface ExaminationForRightsDTO {
 
-    private Long subjectStudyId;
+	public Long getId();
 
-    private QualityTag tag;
-    
+    public Long getCenterId();
 
-    public Long getSubjectStudyId() {
-        return subjectStudyId;
-    }
+    public Long getStudyId();
 
-    public void setSubjectStudyId(Long subjectStudyId) {
-        this.subjectStudyId = subjectStudyId;
-    }
-
-    public QualityTag getTag() {
-        return tag;
-    }
-
-    public void setTag(QualityTag tag) {
-        this.tag = tag;
-    }
 }

@@ -32,7 +32,6 @@ import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.mode
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 
-
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',

@@ -1,6 +1,15 @@
 package org.shanoir.ng.exporter.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +27,9 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,15 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.BDDMockito.given;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test class for BIDS service class.
@@ -52,7 +53,7 @@ public class BidsServiceTest {
 	private ExaminationService examService;
 
 	@Mock
-	private SubjectStudyRepository subjectStudyRepository;
+	private SubjectRepository subjectRepository;
 
 	@Mock
 	DatasetSecurityService datasetSecurityService;
@@ -119,11 +120,11 @@ public class BidsServiceTest {
 		//GIVEN a study full of data
 
 		// Mock on rest template to get the list of subjects
-		List<SubjectStudy> subjectStudies = new ArrayList<>();
-		SubjectStudy susu = new SubjectStudy();
-		susu.setSubject(this.subject);
-		subjectStudies.add(	susu);
-		given(subjectStudyRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjectStudies);
+		List<Subject> subjects = new ArrayList<>();
+		Study study = new Study();
+		this.subject.setStudy(study);
+		subjects.add(this.subject);
+		given(subjectRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjects);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
