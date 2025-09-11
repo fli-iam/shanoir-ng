@@ -119,7 +119,7 @@ export class SubjectDTO {
     physicallyInvolved: boolean;
     tags: Tag[];
     qualityTag: QualityTag;
-    study: SimpleStudy;
+    study: {id: number};
     studyId: number;
 
     constructor(subject: Subject) {
@@ -134,17 +134,12 @@ export class SubjectDTO {
         this.sex = subject.sex;
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
-        this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
-            dto.subject = null;
-            return dto;
-        }) : null;
         this.studyIdentifier = subject.identifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;
         this.physicallyInvolved = subject.physicallyInvolved;
         this.tags = subject.tags;
         this.qualityTag = subject.qualityTag;
-        this.study = new SimpleStudy(subject.study);
+        this.study = {id: subject.study.id};
     }
 }

@@ -30,7 +30,7 @@ export class BreadcrumbsService implements OnDestroy {
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
     onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE' | 'FOCUS'}> = new BehaviorSubject({steps: this.steps});
-    private nextPrefill: { field: string; value: any; readOnly: boolean; };
+    private nextPrefill: { field: string; value: any; readOnly: boolean; }[] = [];
 
     constructor(
         private router: Router,
@@ -75,8 +75,10 @@ export class BreadcrumbsService implements OnDestroy {
                 }
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                this.currentStep.addPrefilled(this.nextPrefill?.field, this.nextPrefill?.value, this.nextPrefill?.readOnly);
-                this.nextPrefill = null;
+                this.nextPrefill.forEach(prefill => {
+                    this.currentStep.addPrefilled(prefill.field, prefill.value, prefill.readOnly);
+                });
+                this.nextPrefill = [];
             }
         }));
     }
@@ -179,7 +181,7 @@ export class BreadcrumbsService implements OnDestroy {
     }
 
     public addNextStepPrefilled(field: string, value: any, readOnly: boolean = false) {
-        this.nextPrefill = { field, value, readOnly };
+        this.nextPrefill.push({ field, value, readOnly });
     }
 
 }
@@ -241,8 +243,6 @@ export class Step {
     }
 
     public addPrefilled(field: string, value: any, readOnly: boolean = false) {
-        console.log('addPrefilled', field, value, readOnly);
-        console.log('strain inside add prefilled ?', value?.['animalSubject']?.strain)
         const found = this.prefilled.find(obj => obj.field === field);
         if (found) {
             this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};

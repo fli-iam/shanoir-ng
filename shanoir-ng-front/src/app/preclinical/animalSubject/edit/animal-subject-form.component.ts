@@ -201,7 +201,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'isAlreadyAnonymized': [this.preclinicalSubject.subject?.isAlreadyAnonymized],
             'name': [this.preclinicalSubject.subject?.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'subject.name')])],
             'sex': [this.preclinicalSubject.subject?.sex, animal ? [Validators.required] : []],
-            'subjectStudyList': [this.preclinicalSubject.subject?.subjectStudyList, [Validators.required, Validators.minLength(1)]],
             'studyIdentifier': [this.preclinicalSubject.subject.identifier],
             'physicallyInvolved': [this.preclinicalSubject.subject.physicallyInvolved],
             'tags': [this.preclinicalSubject.subject.tags],
@@ -240,6 +239,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.preclinicalSubject.pathologies = [newSubjectPathology];
                 } else {
                     this.preclinicalSubject.pathologies.push(newSubjectPathology);
+                    this.preclinicalSubject.pathologies = this.preclinicalSubject.pathologies.slice(); // Force array update
                 }
             }
         });
@@ -250,6 +250,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.preclinicalSubject.therapies = [newSubjectTherapy];
                 } else {
                     this.preclinicalSubject.therapies.push(newSubjectTherapy);
+                    this.preclinicalSubject.therapies = this.preclinicalSubject.therapies.slice(); // Force array update
                 }
             }
         });
@@ -297,14 +298,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.reloadRequiredStyles();
     }
 
-    //params should be category and then reftype
-    goToRefPage(...params: string[]): void {
-        let category;
-        let reftype;
-        if (params && params[0]) category = params[0];
-        if (params && params[1]) reftype = params[1];
-        if (category && !reftype) this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category } });
-        if (category && reftype) this.router.navigate(['/preclinical-reference/create'], { queryParams: {category: category, reftype: reftype } });
+    goToRefPage(category: string, reftype: string): void {
+        this.navigateToAttributeCreateStep('/preclinical-reference/create', 'animalSubject.' + reftype, null, { queryParams: {category: category, reftype: reftype} });
     }
 
     goToEdit(id?: number): void {
@@ -350,6 +345,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             this.preclinicalSubject.id = preclinicalSubject.id;
             this.preclinicalSubject.animalSubject = preclinicalSubject.animalSubject;
             this.preclinicalSubject.subject = preclinicalSubject.subject;
+            this.preclinicalSubject.subject.id = preclinicalSubject.subject.id;
             return this.preclinicalSubject;
         }, this.catchSavingErrors);
     }

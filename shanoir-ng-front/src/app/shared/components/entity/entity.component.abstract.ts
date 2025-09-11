@@ -26,8 +26,8 @@ import {
     SimpleChanges,
     ViewChild
 } from '@angular/core';
-import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { AbstractControl, Form, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute, NavigationExtras } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
 import { Router } from '@angular/router';
@@ -43,6 +43,7 @@ import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 import { getDeclaredFields } from '../../reflect/field.decorator';
+import { Examination } from 'src/app/examinations/shared/examination.model';
 
 
 export type Mode = "view" | "edit" | "create";
@@ -270,7 +271,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if ((this.mode == 'create' || this.mode == 'edit')) {
                 if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
-                        console.log(res?.['animalSubject']?.strain)
                         this.mapEntityToEntity(res)
                         this.prefillProperties();
                     });
@@ -325,28 +325,21 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     private subscribeEntityPropsUpdatesFromForm<T extends Entity>(formGroup: FormGroup, entity: T) {
-        console.log('subscribeEntityPropsUpdatesFromForm', formGroup, entity);
         Object.keys(formGroup.controls).forEach(key => {
-            console.log('key', key);
             const control = formGroup.get(key);
             if (control instanceof FormGroup) {
                 this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
             } else { 
-                console.log('do subscribe for', key);
                 let sub: Subscription = control.valueChanges.subscribe(value => {
                     const declaredFields: string[] = getDeclaredFields(entity);
-                    console.log('set property', key, 'to value', value);
                     if (entity
                             && declaredFields.indexOf(key) >= 0
                             && entity[key] !== value 
                             && !Entity.equals(entity?.[key], value)) {
-                        console.log('actually set property', key, 'to value', value);
                         entity[key] = value;
-                        console.log('new value is', entity[key]);
-                        console.log('entity is now', entity);
                     }
                 });
-                this.subscriptions.push(sub); // TODO
+                this.subscriptions.push(sub);
             }
         });
     }
@@ -601,7 +594,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Navigate to a create step for an attribute of the current entity.
      * This method will wait for the step to be saved and return the created entity.
      */
-    navigateToAttributeCreateStep(route: string, attributeName: string, prefills?: {propName: string, value: any}[]): Promise<void> {
+    navigateToAttributeCreateStep(route: string, attributeName: string, prefills?: {propName: string, value: any}[], extras?: NavigationExtras): Promise<void> {
         if (prefills) {
             // Add read only properties to the intermediate step
             prefills.forEach(readOnlyProp => {
@@ -609,7 +602,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             });
         } 
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        return this.router.navigate([route]).then(success => {
+        return this.router.navigate([route], extras).then(success => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
                 currentStep.addPrefilled('entity.' + attributeName, savedDependency);
                 // Then it will be used to automatically prefill the entity when going back to the current step.
@@ -630,10 +623,19 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 const propKey = key.substring(7); // remove 'entity.' prefix
                 const propValue = this.breadcrumbsService.currentStep.getPrefilled(key).then(res => {
                     if (res?.value === undefined || res?.value === null) return;
-                    this.entity[propKey] = res.value;
-                    if (res.readonly) this.form.get(propKey).disable({emitEvent: false});
+                    let propKeyParts: string[] = propKey.split('.');
+                    let currentObj = this.entity;
+                    let currentFormObj: FormGroup = this.form; 
+                    const lastPart = propKeyParts.pop();
+                    propKeyParts.forEach(part => {
+                        currentObj = currentObj[part];
+                        currentFormObj = currentFormObj.get(part) as FormGroup;
+                    });
+                    currentObj[lastPart] = res.value;
+                    currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
+                    if (res.readonly) currentFormObj.get(lastPart)?.disable({emitEvent: false});
                 });
-            } 
+            }
         });
     }
 
@@ -744,9 +746,19 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('entity', this.entity);
-            console.log('form controls:', Object.entries(this.form.controls).map(([k, c]) => ({k, valid: c.valid, errors: c.errors, value: c.value})), 
+            console.log('form controls:', this.mapFormControls(this.form), 
                 this.form.status, this.form.dirty, this.form.touched);
             console.log('footer state', this.footerState);
         }
+    }
+
+    private mapFormControls(controls: FormGroup): any[] {
+        return Object.entries(controls.controls).map(([k, c]) => {
+            if (c instanceof FormGroup) {
+                return {k, controls: this.mapFormControls(c)};
+            } else {
+                return {k, valid: c.valid, errors: c.errors, value: c.value};
+            }
+        });
     }
 }

@@ -106,7 +106,9 @@ export class SubjectPathologiesListComponent implements ControlValueAccessor {
 
     protected removeItem(item: SubjectPathology) {
         this.paging.setItems(this.paging.items.filter(p => p !== item));
-        this.refreshTable.then(refresh => refresh());
+        this.refreshTable.then(refresh => {
+            refresh();
+        });
         this.propagateChange(this.paging.items);
         this.propagateTouched();
     }

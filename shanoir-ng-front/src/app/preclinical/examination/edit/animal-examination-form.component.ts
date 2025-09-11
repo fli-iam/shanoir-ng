@@ -106,15 +106,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return Selection.fromExamination(this.examination);
     }
 
-    init() {
-        super.init();
-    }
-
     initView(): Promise<void> {
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.updateExam();
+        if (!this.examination.subject) {
+            this.examination.subject = new Subject();
+        }
         //this.loadExaminationAnesthetic();
         if(this.examination && this.examination.subject && this.examination.subject.id ){
             this.animalSubjectService
@@ -132,7 +130,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.updateExam();
+        if (!this.examination.subject) {
+            this.examination.subject = new Subject();
+        }
         //this.loadExaminationAnesthetic(this.id);
         if(this.examination && this.examination.subject && this.examination.subject.id){
             this.animalSubjectService
@@ -171,17 +171,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             })
         );
         return form;
-    }
-
-    public instAssessment() {
-    }
-
-    private updateExam(): void{
-        this.examination.subject = new Subject();
-        if (this.examination.subject){
-            this.examination.subject.id = this.examination.subject.id;
-            this.examination.subject.name = this.examination.subject.name;
-        }
     }
 
     private getCenters(): void {

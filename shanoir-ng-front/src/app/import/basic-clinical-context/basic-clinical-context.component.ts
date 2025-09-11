@@ -96,23 +96,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return eq1 && eq2 && eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
-    protected fillCreateSubjectStep(step: Step) {
-        let s: Subject = this.getPrefilledSubject();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", s);
-        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
-        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
-        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
-        this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
-        this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
-    }
-
-    private getPrefilledSubject(): Subject {
-        let subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
+    protected prefillSubject() {
         let newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
@@ -123,16 +107,18 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
-        return newSubject;
+        this.breadcrumbsService.addNextStepPrefilled('entity', newSubject);
+        this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
+        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
+        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
+        this.breadcrumbsService.addNextStepPrefilled('subjectStudyList', newSubject.subjectStudyList);
+        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
-    protected fillCreateExaminationStep(step: Step) {
-        let exam: Examination = this.getPrefilledExam();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
-        this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
-    }
-
-    private getPrefilledExam(): Examination {
+    protected getPrefilledExamination(): Examination {
         let newExam = new Examination();
         newExam.preclinical = false;
         newExam.hasStudyCenterData = true;
@@ -149,12 +135,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return newExam;
     }
 
-    protected fillCreateAcqEqStep(step: Step) {
-        let acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
-    }
-
-    private getPrefilledAcqEqt(): AcquisitionEquipment {
+    protected getPrefilledAcquisitionEquipment(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;

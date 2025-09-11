@@ -488,9 +488,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     public openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.breadcrumbsService.addNextStepPrefilled("entity", this.getPrefilledCenter());
         this.router.navigate(['/center/create']).then(success => {
-
-            this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledCenter());
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).center = this.updateStudyCenter(entity as Center);
@@ -521,11 +520,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledAcquisitionEquipment());
         this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(success => {
-
-            this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
-
-            this.fillCreateAcqEqStep(this.breadcrumbsService.currentStep);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).acquisitionEquipment = (entity as AcquisitionEquipment);
@@ -534,11 +530,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    protected fillCreateSubjectStep(step: Step) {}
+    protected getPrefilledSubject() {}
 
-    protected fillCreateExaminationStep(step: Step) {}
+    protected getPrefilledExamination() {}
 
-    protected fillCreateAcqEqStep(step: Step) {}
+    protected getPrefilledAcquisitionEquipment() {}
 
     protected getCreateSubjectRoute(): string {
         return '/subject/create';
@@ -551,11 +547,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createSubjectRoute: string = this.getCreateSubjectRoute();
+        this.prefillSubject();
         this.router.navigate([createSubjectRoute]).then(success => {
-            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
                     let sub: Subject;
                     if (entity instanceof Subject) {
                         sub = entity;
@@ -568,11 +563,15 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         })
     }
 
+    protected prefillSubject() {
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledSubject());
+    }
+
     public openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         let createExamRoute: string = this.getCreateExamRoute();
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledExamination());
         this.router.navigate([createExamRoute]).then(success => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
