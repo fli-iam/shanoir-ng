@@ -56,7 +56,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
+@Table(indexes = @Index(name = "subject_name_study_id_idx", columnList = "name, study_id", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
 	"userPersonalCommentList" })
@@ -71,6 +71,7 @@ public class Subject extends HalEntity {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
+	@NotNull
 	private String name;
 
 	private Integer sex;
