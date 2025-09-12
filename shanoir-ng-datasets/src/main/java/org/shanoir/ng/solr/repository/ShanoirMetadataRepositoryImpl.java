@@ -51,7 +51,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -70,9 +70,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
+			+ " , dataset_metadata dm, mr_dataset md"
 			+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
 			+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
 	public static final String PET_QUERY = "SELECT d.id as datasetId, " +
@@ -85,7 +85,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, e.study_id as studyId, c.name as centerName, " +
 			"c.id as centerId, null as sliceThickness, " +
@@ -100,9 +100,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
+			+ " , pet_dataset pd, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id";
 	public static final String CT_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -114,7 +114,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -131,9 +131,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
+			+ " , ct_dataset cd, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
 	public static final String GENERIC_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -145,7 +145,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -163,9 +163,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, generic_dataset cd, dataset_metadata dm"
+			+ " , generic_dataset cd, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
 	public static final String EEG_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -177,7 +177,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -194,9 +194,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
+			+ " , eeg_dataset ed, dataset_metadata dm"
 			+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id";
 	public static final String BIDS_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -208,7 +208,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -226,9 +226,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, bids_dataset ed, dataset_metadata dm"
+			+ " , bids_dataset ed, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id";
 	public static final String PROCESSED_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -240,7 +240,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as examinationDate, " +
 			"null as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"proc.study_id as studyId, " +
@@ -256,8 +256,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
 			+ " LEFT JOIN study st ON st.id = proc.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = proc.study_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = proc.study_id"
+			+ " , dataset_metadata dm"
 			+ " WHERE d.origin_metadata_id = dm.id"
 			+ " AND d.dataset_processing_id IS NOT NULL";
 	public static final String MEASUREMENT_QUERY = "SELECT d.id as datasetId, " +
@@ -270,7 +270,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName,"
 			+ "su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -289,9 +289,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, measurement_dataset md, dataset_metadata dm"
+			+ " , measurement_dataset md, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
 	public static final String SEGMENTATION_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -303,7 +303,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName,"
 			+ "su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -322,9 +322,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, segmentation_dataset sd, dataset_metadata dm"
+			+ " , segmentation_dataset sd, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND sd.id = d.id";
 	public static final String XA_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
@@ -336,7 +336,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"e.examination_date as examinationDate, " +
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
-			"sust.subject_type as subjectType, " +
+			"su.subject_type as subjectType, " +
 			"su.id as subjectId, " +
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
@@ -354,17 +354,16 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
 			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
 			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
 			+ " LEFT JOIN center c ON c.id = e.center_id"
-			+ " LEFT JOIN subject su ON su.id = d.subject_id, xa_dataset cd, dataset_metadata dm"
+			+ " , xa_dataset cd, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
 	public static final String RESULTSET_MAPPING = "SolrResult";
 
 	public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d" +
-			" INNER JOIN subject_study substu ON d.subject_id = substu.subject_id" +
-			" INNER JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
-			" INNER JOIN tag ON substutag.tags_id = tag.id";
+			" INNER JOIN subject_tag subtag ON d.subject_id = subtag.subject_id" +
+			" INNER JOIN tag ON subtag.tag_id = tag.id";
 
 	public static final String STUDY_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d " +

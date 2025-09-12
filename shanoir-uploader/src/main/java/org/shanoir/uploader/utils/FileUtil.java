@@ -148,9 +148,9 @@ public class FileUtil {
 						}
 					}
 				}
+				serie.setInstances(instances);
 				if (!instances.isEmpty()) {
 					instances.sort(new InstanceNumberSorter());
-					serie.setInstances(instances);
 					logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
 				} else {
 					logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
