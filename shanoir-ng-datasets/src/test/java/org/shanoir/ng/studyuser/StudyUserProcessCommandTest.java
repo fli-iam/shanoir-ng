@@ -46,6 +46,7 @@ public class StudyUserProcessCommandTest {
 
 	@MockBean
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 	@Test
     public void processCommandsTest() {
 		given(studyUserRepository.findAllById(Mockito.anyList())).willReturn(new ArrayList<>());
