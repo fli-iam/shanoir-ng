@@ -356,8 +356,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     private styleRequiredLabels() {
         if (this.formContainerElement && this.form?.controls) {
-            for (const field in this.form.controls) {
-                const control = this.form.get(field);
+            this.styleRequiredLabelsFromForm(this.form);
+        }
+    }
+
+    private styleRequiredLabelsFromForm(formGroup: FormGroup) {
+        Object.keys(formGroup.controls).forEach(field => {
+            const control: AbstractControl = formGroup.get(field);
+            if (control instanceof FormGroup) {
+                this.styleRequiredLabelsFromForm(control);
+            } else {
                 if (this.hasRequiredField(control)) {
                     const input = this.formContainerElement.nativeElement.querySelector('li [formControlName="' + field + '"]');
                     if (input) {
@@ -376,8 +384,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     }
                 }
             }
-        }
-    }
+        });
+    }    
 
     private clearRequiredStyles() {
         if (this.formContainerElement) {

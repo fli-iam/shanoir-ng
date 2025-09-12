@@ -77,7 +77,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['study']" [optionArr]="studies" [disabled]="lockStudy">
+								<select-box formControlName="study" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
 						</span>
@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['acquisitionEquipment']"
+								<select-box formControlName="acquisitionEquipment"
 										(userChange)="onChangeAcqEq()"
 										[options]="acquisitionEquipments"
 										(onNewClick)="createAcqEq()">

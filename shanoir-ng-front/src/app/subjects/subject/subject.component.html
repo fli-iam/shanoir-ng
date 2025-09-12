@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.sex}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box [formControl]="form.controls['sex']" [options]="genderOptions">
+									<select-box formControlName="sex" [options]="genderOptions">
 									</select-box>
 								</ng-template>
 							</span>
@@ -187,7 +187,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </ng-template>
                                 <ng-template ngSwitchDefault>
                                     <select-box formControlName="subjectType"
-                                                [(ngModel)]="subject.subjectType"
                                                 [options]="subjectTypes">
                                     </select-box>
                                 </ng-template>
@@ -201,7 +200,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<checkbox formControlName="physicallyInvolved" [(ngModel)]="subject.physicallyInvolved"></checkbox>
+									<checkbox formControlName="physicallyInvolved"></checkbox>
 								</ng-template>
 							</span>
                         </li>
@@ -258,7 +257,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     </span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<tag-list [(ngModel)]="subject.tags" [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
+								<tag-list [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
 							</ng-template>
 						</span>
                     </li>

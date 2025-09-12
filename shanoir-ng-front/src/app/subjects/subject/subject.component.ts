@@ -110,8 +110,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     init() {
         super.init();
         if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => {
+                this.firstName = res;
+                this.form.get('firstName').setValue(this.firstName);
+            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => {
+                this.lastName = res;
+                this.form.get('lastName').setValue(this.lastName);
+            });
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = []);

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -97,18 +97,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         return Selection.fromExamination(this.examination);
     }
 
-    set entity(exam: Examination) {
-        super.entity = exam;
-        this.getSubjects();
-    }
-
-    get entity(): Examination {
-        return super.entity;
-    }
-
-    init() {
-        super.init();
-    }
 
     initView(): Promise<void> {
         if(!this.examination.weightUnitOfMeasure){
@@ -129,18 +117,14 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     initEdit(): Promise<void> {
-        this.getCenters();
         this.getStudies();
-
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.getSubjects();
         return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
-        this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
@@ -148,16 +132,38 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        let form: FormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
-            'subject': [{value: this.examination.subject, disabled: this.inImport}, Validators.required],
-            'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
-            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
+            'subject': [{value: this.examination.subject, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+        const examinationDateCtrl: AbstractControl = form.get('examinationDate');
+        this.subscriptions.push(
+           examinationDateCtrl.valueChanges.subscribe(value => {
+                if (value && this.inImport && examinationDateCtrl.enabled) examinationDateCtrl.disable();
+            }),
+            form.get('study').valueChanges.subscribe(value => {
+                this.examination.subject = null;
+                this.examination.center = null;
+                if (value?.id) {
+                    this.getSubjects(value.id);
+                    this.getCenters(value.id);
+                    if (form.get('subject').disabled) form.get('subject').enable();
+                    if (form.get('center').disabled) form.get('center').enable();
+                } else {
+                    this.centers = [];
+                    this.subjects = [];
+                    if (form.get('subject').enabled) form.get('subject').disable();
+                    if (form.get('center').enabled) form.get('center').disable();
+                }
+            })
+        );
+        return form;
     }
 
     downloadAll() {
@@ -172,9 +178,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    getCenters(): void {
+    getCenters(studyId: number): void {
         this.centerService
-            .getCentersNames()
+            .getCentersNamesByStudyId(studyId)
             .then(centers => {
                 this.centers = centers;
             });
@@ -188,10 +194,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             });
     }
 
-    getSubjects(): void {
-        if (!this.examination || !this.examination.study) return;
+    getSubjects(studyId: number): void {
         this.studyService
-            .findSubjectsByStudyId(this.examination.study.id)
+            .findSubjectsByStudyId(studyId)
             .then(subjects => this.subjects = subjects);
     }
 
@@ -201,10 +206,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         } else {
             return '/subject/details/'+ this.examination.subject?.id;
         }
-    }
-
-    onStudyChange() {
-        this.getSubjects();
     }
 
     public async hasEditRight(): Promise<boolean> {

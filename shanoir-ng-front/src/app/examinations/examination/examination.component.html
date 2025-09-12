@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-								<select-box [formControl]="form.controls['study']" (userChange)="onStudyChange()" [optionArr]="studies">
+								<select-box formControlName="study" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -89,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </a>
                             </ng-template>
                             <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-                                <select-box [formControl]="form.controls['center']" [optionArr]="centers">
+                                <select-box formControlName="center" [optionArr]="centers">
                                 </select-box>
                                 <label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
                             </ng-template>
@@ -102,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{examination?.examinationDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<datepicker [disabled]="inImport && examination.examinationDate" formControlName="examinationDate" required></datepicker>
+								<datepicker formControlName="examinationDate" required></datepicker>
 								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 							</ng-template>
