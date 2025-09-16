@@ -11,8 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AbstractControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -23,6 +23,7 @@ import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
@@ -30,10 +31,9 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
+import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {Subject} from "../../subjects/shared/subject.model";
 
 @Component({
     selector: 'examination-detail',
@@ -148,6 +148,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
                 if (value && this.inImport && examinationDateCtrl.enabled) examinationDateCtrl.disable();
             }),
             form.get('study').valueChanges.subscribe(value => {
+                if (this.inImport) {
+                    this.fillSubjectsAndCentersWithPrefilled();
+                    return;
+                }
                 this.examination.subject = null;
                 this.examination.center = null;
                 if (value?.id) {
@@ -164,6 +168,22 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             })
         );
         return form;
+    }
+
+    private fillSubjectsAndCentersWithPrefilled() {
+        if (!(this.subjects?.length > 0) && this.entity?.subject) {
+            if (this.entity.subject instanceof Subject) {
+                this.subjects = [this.entity.subject];
+            } else {
+                let sub = new Subject();
+                sub.id = this.entity.subject.id;
+                sub.name = this.entity.subject.name;
+                this.subjects = [sub];
+            }
+        }
+        if (!(this.centers?.length > 0) && this.entity?.center) {
+            this.centers = [{id: this.entity.center.id, name: this.entity.center.name} as IdName];
+        }
     }
 
     downloadAll() {

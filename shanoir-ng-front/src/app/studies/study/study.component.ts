@@ -70,7 +70,6 @@ export class StudyComponent extends EntityComponent<Study> {
     protected dateDisplay = dateDisplay;
 
     subjects: IdName[];
-    selectedCenter: IdName;
     users: User[] = [];
     uploading: boolean = false;
     protected protocolFiles: File[];
@@ -214,7 +213,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         this.getCenters().then(centers => {
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
-            if (option) this.selectedCenter = option.value;
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         });
         return Promise.resolve();
@@ -225,7 +223,6 @@ export class StudyComponent extends EntityComponent<Study> {
         this.isStudyAdmin = true;
         this.getCenters();
         this.getProfiles();
-        this.selectedCenter = null;
         this.protocolFiles = [];
         this.dataUserAgreement = null;
         this.getAllSubjects();
@@ -259,7 +256,6 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'selectedCenter': [this.selectedCenter, [Validators.required]],
             'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
@@ -376,12 +372,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.router.navigate(['/center/details/' + id]);
     }
 
-    onCenterAdd(): void {
-        if (this.selectedCenter) {
+    onCenterAdd(selectedCenter: Center): void {
+        if (selectedCenter) {
             let studyCenter: StudyCenter = new StudyCenter();
             studyCenter.center = new Center();
-            studyCenter.center.id = this.selectedCenter.id;
-            studyCenter.center.name = this.selectedCenter.name;
+            studyCenter.center.id = selectedCenter.id;
+            studyCenter.center.name = selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
             this.study.studyCenterList = [...this.study.studyCenterList];
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
@@ -485,6 +481,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];
         this.protocolFiles.push(fileToAdd);
+        if (!this.study.protocolFilePaths) this.study.protocolFilePaths = [];
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();

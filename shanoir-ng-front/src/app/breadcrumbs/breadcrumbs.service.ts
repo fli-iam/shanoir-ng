@@ -34,7 +34,7 @@ export class BreadcrumbsService implements OnDestroy {
 
     constructor(
         private router: Router,
-        private locationStrategy: LocationStrategy,
+        locationStrategy: LocationStrategy,
         private titleService: Title) {
 
         locationStrategy.onPopState((event: PopStateEvent) => {
@@ -45,7 +45,6 @@ export class BreadcrumbsService implements OnDestroy {
                     break;
                 }
             }
-            // this.saveSession();
         });
 
         this.subscriptions.push(router.events.subscribe(event => {

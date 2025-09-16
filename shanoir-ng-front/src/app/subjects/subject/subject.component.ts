@@ -326,14 +326,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     ngOnDestroy() {
+        super.ngOnDestroy();
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
-
-        for (let subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     getFontColor(colorInp: string): boolean {

@@ -131,6 +131,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     initView(): Promise<void> {
+        this.studyService.get(this.preclinicalSubject.subject?.study?.id).then(study => {
+            this.preclinicalSubject.subject.study = study;
+        });
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
             return;
@@ -153,6 +156,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     initEdit(): Promise<void> {
+        this.studyService.get(this.preclinicalSubject.subject?.study?.id).then(study => {
+            this.preclinicalSubject.subject.study = study;
+        });
         return this.loadData().then(() => {
             this.preclinicalSubject.animalSubject.specie = this.getReferenceById(this.preclinicalSubject.animalSubject.specie);
             this.preclinicalSubject.animalSubject.strain = this.getReferenceById(this.preclinicalSubject.animalSubject.strain);

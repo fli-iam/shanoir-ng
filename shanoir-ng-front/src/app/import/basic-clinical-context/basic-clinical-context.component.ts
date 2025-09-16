@@ -11,21 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, OnDestroy} from '@angular/core';
+import { Component } from '@angular/core';
 
-import {AcquisitionEquipment} from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import {Step} from '../../breadcrumbs/breadcrumbs.service';
-import {Center} from '../../centers/shared/center.model';
-import {Examination} from '../../examinations/shared/examination.model';
-import {preventInitialChildAnimations, slideDown} from '../../shared/animations/animations';
-import {IdName} from '../../shared/models/id-name.model';
-import {ImagedObjectCategory} from '../../subjects/shared/imaged-object-category.enum';
-import {SubjectStudy} from '../../subjects/shared/subject-study.model';
-import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
-import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
-import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
-import {SimpleStudy} from "../../studies/shared/study.model";
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Center } from '../../centers/shared/center.model';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { Examination } from '../../examinations/shared/examination.model';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { IdName } from '../../shared/models/id-name.model';
+import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
+import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
+import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 
 
 @Component({
@@ -35,7 +32,7 @@ import {SimpleStudy} from "../../studies/shared/study.model";
     animations: [slideDown, preventInitialChildAnimations],
     standalone: false
 })
-export class BasicClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
+export class BasicClinicalContextComponent extends AbstractClinicalContextComponent {
 
     patient: PatientDicom;
 

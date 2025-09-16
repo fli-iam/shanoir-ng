@@ -94,7 +94,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() newRoute: string;
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
-    @Output() onAddClick = new EventEmitter();
+    @Output() onAddClick: EventEmitter<any> = new EventEmitter();
     @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
     readonly LIST_LENGTH: number = 16;
