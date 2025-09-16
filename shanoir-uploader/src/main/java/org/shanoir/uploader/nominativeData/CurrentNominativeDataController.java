@@ -108,27 +108,29 @@ public class CurrentNominativeDataController {
 		cuw.table.addMouseListener(new MouseAdapter() {
             @Override
 			public void mouseClicked(MouseEvent e) {
-				int row = cuw.table.getSelectedRow();
+				// Get the selected row from the model and not the view (sorted) row
+				int viewRow = cuw.table.getSelectedRow();
+				int modelRow = cuw.table.convertRowIndexToModel(viewRow);
 				int col = header.columnAtPoint(e.getPoint());
 				// delete one import: ready (to gain disk space) or finished
 				if (col == cuw.deleteColumn) {
-					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					String uploadState = (String) cuw.table.getModel().getValueAt(modelRow, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.checkOKUploadState)
 							|| uploadState.equals(cuw.checkKOUploadState)
 							|| uploadState.equals(cuw.readyUploadState)
 							|| uploadState.equals(cuw.errorUploadState)) {
 						try {
-							showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
+							showDeleteConfirmationDialog(workFolderFilePath, cuw, modelRow);
 						} catch (IOException eIO) {
 							logger.error(eIO.getMessage(), eIO);
 						}				
 					}
 				// start the import or try reimporting an exam with status "ERROR"
 				} else if (col == cuw.importColumn) {
-					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					String uploadState = (String) cuw.table.getModel().getValueAt(modelRow, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
-						String importJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
+						String importJobFilePath = (String) cuw.table.getModel().getValueAt(modelRow, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
 						File importJobFile = new File(importJobFilePath);
 						importJobManager = new NominativeDataImportJobManager(importJobFile);
 						ImportJob importJob = importJobManager.readImportJob();
