@@ -582,4 +582,20 @@ public class StudyApiController implements StudyApi {
 		}
 	}
 
+	@Override
+	public ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
+			@Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException {
+		try {
+			List<Long> studies = studyService.queryStudiesByRight(right);
+
+			return new ResponseEntity<>(studies, HttpStatus.OK);
+
+		} catch (jakarta.persistence.NoResultException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
+		} catch (Exception e) {
+			LOG.error("Error while executing the request.", e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+		}
+	}
 }
