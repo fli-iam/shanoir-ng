@@ -50,6 +50,7 @@ public class StudyCardRepositoryTest {
 
 	@MockBean
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+	
 	@Test
 	public void findAllTest() throws Exception {
 		Iterable<StudyCard> studyCardDb = studyCardRepository.findAll();

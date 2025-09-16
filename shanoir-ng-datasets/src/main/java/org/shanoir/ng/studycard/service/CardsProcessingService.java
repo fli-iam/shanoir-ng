@@ -27,7 +27,6 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -36,9 +35,9 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.StreamExceptionWrapper;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.service.StudyService;
-import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -59,9 +58,6 @@ public class CardsProcessingService {
 	@Autowired
 	private StudyService studyService;
 
-    @Autowired
-    private ExaminationService examinationService;
-
 	@Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
@@ -69,7 +65,7 @@ public class CardsProcessingService {
     private WADODownloaderService downloader;
 
 	@Autowired
-	private SubjectStudyService subjectStudyService;
+	private SubjectService subjectService;
 
     @Autowired
     private ShanoirEventService eventService;
@@ -110,10 +106,10 @@ public class CardsProcessingService {
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
 		    QualityCardResult result = new QualityCardResult();
             if (updateTags) {
-                List<SubjectStudy> subjectsStudies = subjectStudyService.get(examination.getSubject().getId(), examination.getStudy().getId());
-                resetSubjectStudies(subjectsStudies);
+                List<Subject> subjects = subjectService.get(examination.getStudy().getId());
+                resetSubjects(subjects);
                 try {
-                    subjectStudyService.update(subjectsStudies);
+                    subjectService.update(subjects);
                 } catch (EntityNotFoundException e) {} // too bad
             }
             List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
@@ -128,7 +124,7 @@ public class CardsProcessingService {
             }
 			if (updateTags) {
 			    try {
-			        subjectStudyService.update(result.getUpdatedSubjectStudies());
+			        subjectService.update(result.getUpdatedSubjects());
 			    } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
 			    }
@@ -158,9 +154,9 @@ public class CardsProcessingService {
             if (updateTags) { // first reset subject studies
                 event.setMessage("resetting quality subject tags");
                 eventService.publishEvent(event);
-                resetSubjectStudies(study.getSubjectStudyList());
+                resetSubjects(study.getSubjectList());
                 try {
-                    subjectStudyService.update(study.getSubjectStudyList());
+                    subjectService.update(study.getSubjectList());
                 } catch (EntityNotFoundException e) {} // too bad
             }
             QualityCardResult result = new QualityCardResult();
@@ -196,7 +192,7 @@ public class CardsProcessingService {
 			    try {
                     event.setMessage("setting quality subject tags");
                     eventService.publishEvent(event);
-			        subjectStudyService.update(result.getUpdatedSubjectStudies());
+			        subjectService.update(result.getUpdatedSubjects());
 			    } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
 			    }	    
@@ -224,7 +220,7 @@ public class CardsProcessingService {
                 event.setProgress(i * 0.4f / examinations.size());
                 eventService.publishEvent(event);
                 if (examination.getSubject() != null) {
-                    Hibernate.initialize(examination.getSubject().getSubjectStudyList());
+                    Hibernate.initialize(examination.getSubject().getStudy());
                 }
                 if (examination.getDatasetAcquisitions() != null) {
                     for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
@@ -279,11 +275,12 @@ public class CardsProcessingService {
         return applyQualityCardOnStudy(qualityCard, false, start, stop);
 	}
 
-    private void resetSubjectStudies(List<SubjectStudy> subjectStudies) {
-        if (subjectStudies != null) {
-            for (SubjectStudy subjectStudy : subjectStudies) {
-                subjectStudy.setQualityTag(null);
+    private void resetSubjects(List<Subject> subjects) {
+        if (subjects != null) {
+            for (Subject subject : subjects) {
+                subject.setQualityTag(null);
             }
         }
     }
+
 }

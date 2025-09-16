@@ -15,19 +15,18 @@
 package org.shanoir.ng.shared.quality;
 
 
-public class SubjectStudyQualityTagDTO {
+public class SubjectQualityTagDTO {
 
-    private Long subjectStudyId;
+    private Long subjectId;
 
     private QualityTag tag;
-    
 
-    public Long getSubjectStudyId() {
-        return subjectStudyId;
+    public Long getSubjectId() {
+        return subjectId;
     }
 
-    public void setSubjectStudyId(Long subjectStudyId) {
-        this.subjectStudyId = subjectStudyId;
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
     }
 
     public QualityTag getTag() {
@@ -37,4 +36,5 @@ public class SubjectStudyQualityTagDTO {
     public void setTag(QualityTag tag) {
         this.tag = tag;
     }
+
 }
