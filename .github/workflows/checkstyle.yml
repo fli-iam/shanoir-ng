@@ -60,3 +60,20 @@ jobs:
 
           exit $EXIT
         working-directory: ./shanoir-ng-back/
+
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install dependencies
+        working-directory: ./shanoir-ng-front/
+        run: npm ci
+      - name: Run ESLint
+        working-directory: ./shanoir-ng-front/
+        run: npm run lint
