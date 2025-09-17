@@ -46,7 +46,6 @@ public class UpdateCheckerService {
         }
     }
 
-    // Comparaison simple de versions (type "v1.2.3")
     private static boolean isNewerVersion(String latest, String current) {
         latest = latest.replace("v", "");
         current = current.replace("v", "");

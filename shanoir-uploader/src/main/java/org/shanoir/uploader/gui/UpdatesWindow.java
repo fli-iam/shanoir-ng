@@ -126,7 +126,7 @@ public class UpdatesWindow extends JFrame {
 	}
 
 	private void checkUpdates(String currentVersion) {
-        String latest = UpdateCheckerService.getLatestVersionFromGithub("MyOrg/MyRepo");
+        String latest = UpdateCheckerService.getLatestVersionFromGithub(releasesUrl + "/latest");
         if (UpdateCheckerService.isNewerVersion(latest, currentVersion)) {
             JOptionPane.showMessageDialog(this,
                 "Nouvelle version dispo : " + latest,
