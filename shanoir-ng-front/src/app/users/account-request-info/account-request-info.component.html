@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box 
                     formControlName="studyId"
                     [options]="studyOptions"
-                    (change)="onStudyIdChange($event)">
+                    (change)="onStudyChange($event)">
                 </select-box>
                 <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
             </ng-container>
@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label> 
         <span class="right-col">
             <ng-container *ngIf="editMode">
-                <input type="text" formControlName="institution" (change)="onInfoChange()"/>
+                <input type="text" formControlName="institution" (change)="onInstitutionChange($event.target.value)"/>
                 <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
                 <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
             </ng-container>

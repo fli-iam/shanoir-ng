@@ -33,7 +33,6 @@ import { UserService } from '../shared/user.service';
 
 export class AccountRequestComponent {
 
-    public user: User;
     public form: UntypedFormGroup;
 
     public requestSent: boolean = false;
@@ -59,18 +58,16 @@ export class AccountRequestComponent {
             }
 
     ngOnInit(): void {
-        this.user = new User();
-        this.user.accountRequestInfo = new AccountRequestInfo();
         this.buildForm();
     }
 
     buildForm(): void {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
         this.form = this.fb.group({
-            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': [this.user.accountRequestInfo, [this.validateARInfo]]
+            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
+            'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
     }
 
@@ -87,11 +84,17 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
-        if (this.studyName) this.user.accountRequestInfo.studyName = this.studyName;
-        if (this.invitationIssuer) this.user.accountRequestInfo.contact = this.invitationIssuer;
-        if (this.function) this.user.accountRequestInfo.function = this.function;
+        let user: User = new User();
+        user.accountRequestInfo = new AccountRequestInfo();
+        user.firstName = this.form.value.firstName;
+        user.lastName = this.form.value.lastName;
+        user.email = this.form.value.email;
+        user.accountRequestInfo = this.form.value.accountRequestInfo;
+        if (this.studyName) user.accountRequestInfo.studyName = this.studyName;
+        if (this.invitationIssuer) user.accountRequestInfo.contact = this.invitationIssuer;
+        if (this.function) user.accountRequestInfo.function = this.function;
         this.loading = true;
-        this.userService.requestAccount(this.user)
+        this.userService.requestAccount(user)
             .then((res) => {
                  this.requestSent = true;
             }, (err) => {

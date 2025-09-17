@@ -51,11 +51,10 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private location: Location,
                 private confirmDialogService: ConfirmDialogService,
                 private destroyRef: DestroyRef
-            ) {
-    }
+            ) { }
 
-    setDisabledState?(isDisabled: boolean): void {
-    }
+    setDisabledState?(isDisabled: boolean): void { }
+
     writeValue(obj: any): void {
         this.info = obj;
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
@@ -103,11 +102,24 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     onInfoChange() {
+        let info: AccountRequestInfo = new AccountRequestInfo();
+        info.contact = this.form.value.contact;
+        info.function = this.form.value.function;
+        info.institution = this.form.value.institution;
+        info.studyId = this.form.value.studyId;
+        info.studyName = this.form.value.studyName;
+        this.info = info;
         this.onChange(this.info);
     }
 
-    onStudyIdChange(event) {
-        this.info.studyName = event.name;
+    onInstitutionChange(institution: string) {
+        this.info.institution = institution;
+        this.onInfoChange();
+    }
+
+    onStudyChange(option: Option<number>) {
+        this.info.studyName = option.label;
+        this.onInfoChange();
     }
 
     formErrors(field: string): any {
