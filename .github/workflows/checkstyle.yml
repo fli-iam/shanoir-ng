@@ -1,4 +1,4 @@
-name: Checkstyle Java Code
+name: Check code style
 
 on:
   push:
@@ -71,6 +71,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          working-directory: ./shanoir-ng-front/
       - name: Install dependencies
         working-directory: ./shanoir-ng-front/
         run: npm ci
