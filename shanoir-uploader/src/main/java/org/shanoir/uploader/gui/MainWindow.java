@@ -285,6 +285,15 @@ public class MainWindow extends JFrame {
 			}
 		});
 
+		JMenuItem mntmCheckUpdates = new JMenuItem(resourceBundle.getString("shanoir.uploader.helpMenu.checkUpdates"));
+		mnHelp.add(mntmCheckUpdates);
+		mntmCheckUpdates.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				UpdatesWindow updatesW = new UpdatesWindow(resourceBundle, ShUpConfig.SHANOIR_UPLOADER_VERSION);
+			}
+		});
+
 		JMenu profileSelected = new JMenu("<html>"
 			+ "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
 			+ " "
