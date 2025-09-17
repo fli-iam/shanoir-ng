@@ -336,7 +336,7 @@
 		</repository>
 		<repository>
 			<id>mvn-repo-master</id>
-			<url>https://raw.github.com/nroduit/mvn-repo/master/</url>
+			<url>https://raw.githubusercontent.com/nroduit/mvn-repo/master/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
