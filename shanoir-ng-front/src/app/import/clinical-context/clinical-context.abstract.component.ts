@@ -573,7 +573,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         this.router.navigate([createExamRoute]).then(success => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    console.log('created exam', entity);
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
                 })
             );
@@ -707,7 +706,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
 
     ngOnDestroy() {
-        this.onContextChange(); // to save context one last time
+        this.onContextChange();
         for(let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }

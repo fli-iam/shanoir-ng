@@ -15,8 +15,8 @@
 import { allOfEnum } from "src/app/utils/app.utils";
 
 export enum InjectionType {
-    BOLUS = <any> "Bolus",
-    INFUSION = <any> "Infusion"
+    BOLUS = "Bolus",
+    INFUSION = "Infusion"
 }
 export namespace InjectionType {
     export function all(): Array<InjectionType> {

@@ -54,10 +54,6 @@ export class CenterComponent extends EntityComponent<Center> {
         return Selection.fromCenter(this.center);
     }
 
-    init() {
-        super.init();
-    }
-
     initView(): Promise<void> {
         return Promise.resolve();
     }

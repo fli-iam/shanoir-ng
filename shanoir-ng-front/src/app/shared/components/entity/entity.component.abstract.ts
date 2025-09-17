@@ -317,7 +317,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     this.footerState.dirty = this.form.dirty;
                 }),
             );
-            this.subscribeEntityPropsUpdatesFromForm(this.form, this.entity);
+            this.subscribeEntityPropsUpdatesFromForm(this.form, this._entity);
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
             this.footerState.valid = false;
