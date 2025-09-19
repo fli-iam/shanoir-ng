@@ -13,21 +13,16 @@
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { ConsoleService } from '../../shared/console/console.service';
 
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { environment } from '../../../environments/environment';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 @Component({
     selector: 'examination-node',
@@ -38,7 +33,7 @@ import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-n
 export class ExaminationNodeComponent extends TreeNodeAbstractComponent<ExaminationNode> implements OnChanges {
 
     @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode, hasDeleteRights: boolean, hasDownloadRights: boolean};
-    @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
+    @Output() examinationDelete: EventEmitter<void> = new EventEmitter();
 
     loading: boolean = false;
     @Input() hasBox: boolean = true;
@@ -153,7 +148,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
         this.examinationService.get(this.node.id).then(entity => {
             this.examinationService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onExaminationDelete.emit();
+                    this.examinationDelete.emit();
                 }
             });
         })

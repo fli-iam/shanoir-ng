@@ -44,9 +44,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     @Input() canModify: Boolean = false;
     @Input() toggleForm: boolean;
     @Input() subjectpathoSelected: SubjectPathology;
-    @Output() onEvent = new EventEmitter();
-    @Output() onCreated = new EventEmitter();
-    @Output() onCancel = new EventEmitter();
+    @Output() event = new EventEmitter();
+    @Output() created = new EventEmitter();
+    @Output() canceled = new EventEmitter();
     @Input() createSPMode: boolean;
     pathologies: Pathology[] = [];
     models: PathologyModel[] = [];
@@ -129,10 +129,10 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             this.toggleForm = true;
         } else if (this.toggleForm == true) {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         } else {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         }
         this.createSPMode = creation;
     }
@@ -241,8 +241,8 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if(this.preclinicalSubject.pathologies === undefined){
             this.preclinicalSubject.pathologies = [];
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectPathology, true]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectPathology, true]);
         }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
@@ -252,8 +252,8 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if (!this.subjectPathology) {
             return;
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectPathology, false]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectPathology, false]);
         }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();

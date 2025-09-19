@@ -13,15 +13,13 @@
  */
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { ServiceLocator } from '../../../../utils/locator.service';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ModesAware } from '../../../shared/mode/mode.decorator';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
@@ -48,8 +46,8 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     public toggleFormAI: boolean = false;
     public createAIMode: boolean = false;
     public ingredientSelected : AnestheticIngredient;
-    @Output() onIngredientAdded = new EventEmitter();
-    @Output() onIngredientDeleted = new EventEmitter();
+    @Output() ingredientAdded = new EventEmitter();
+    @Output() ingredientDeleted = new EventEmitter();
     @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
 
     
@@ -100,7 +98,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     }            
                 }
             }
-            this.onIngredientAdded.emit(this.anesthetic.ingredients);
+            this.ingredientAdded.emit(this.anesthetic.ingredients);
             
         }
     }
@@ -146,7 +144,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     }
 
     getAnestheticIngredient(ingredient: AnestheticIngredient): void {
-    	this.onIngredientDeleted.emit(ingredient);
+    	this.ingredientDeleted.emit(ingredient);
       	this.generateAnestheticName();
     }
     

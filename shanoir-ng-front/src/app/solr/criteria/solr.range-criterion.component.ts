@@ -29,7 +29,7 @@ export class SolrRangeCriterionComponent {
     @Input() range: Range = new Range(null, null);
     @Input() label: string = "";
     @Input() awesome: string;
-    @Output() onChange: EventEmitter<Range> = new EventEmitter();
+    @Output() userChange: EventEmitter<Range> = new EventEmitter();
 
     private tiemout: number;
     private changing: boolean = false;
@@ -47,7 +47,7 @@ export class SolrRangeCriterionComponent {
                 if (this.tiemout < 0) {
                     clearInterval(interval);
                     this.changing = false;
-                    this.onChange.emit(this.range);
+                    this.userChange.emit(this.range);
                 }
             }, 400);
         }

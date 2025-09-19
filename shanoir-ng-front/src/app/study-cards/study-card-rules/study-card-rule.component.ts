@@ -48,7 +48,7 @@ export class StudyCardRuleComponent implements OnChanges {
     @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
-    @Output() onCopy: EventEmitter<void> = new EventEmitter();
+    @Output() copy: EventEmitter<void> = new EventEmitter();
     @Output() delete: EventEmitter<void> = new EventEmitter();
     @Input() showErrors: boolean = false;
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;

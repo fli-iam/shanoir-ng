@@ -46,9 +46,9 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     @Input() canModify: Boolean = false;
     @Input() toggleForm: boolean;
     @Input() subTherapySelected: SubjectTherapy;
-    @Output() onEvent = new EventEmitter();
-    @Output() onCreated = new EventEmitter();
-    @Output() onCancel = new EventEmitter();
+    @Output() event = new EventEmitter();
+    @Output() created = new EventEmitter();
+    @Output() canceled = new EventEmitter();
     @Input() createSTMode: boolean;
     therapies: Therapy[];
     units: Reference[];
@@ -131,10 +131,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             this.toggleForm = true;
         } else if (this.toggleForm == true) {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         } else {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         }
         this.createSTMode = creation;
     }
@@ -212,8 +212,8 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if(this.preclinicalSubject.therapies === undefined){
             this.preclinicalSubject.therapies = [];
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectTherapy, true]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectTherapy, true]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
@@ -223,8 +223,8 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if (!this.subjectTherapy) {
             return;
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectTherapy, false]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectTherapy, false]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();

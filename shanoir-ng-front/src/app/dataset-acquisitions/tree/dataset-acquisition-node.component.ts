@@ -14,8 +14,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 
-import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
 import { ConsoleService } from "../../shared/console/console.service";
@@ -23,7 +23,6 @@ import { MassDownloadService } from "../../shared/mass-download/mass-download.se
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 @Component({
     selector: 'dataset-acquisition-node',
@@ -37,7 +36,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
     @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode, studyRights: StudyUserRight[]} ;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/dataset-acquisition/details/';
-    @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
+    @Output() acquisitionDelete: EventEmitter<void> = new EventEmitter();
     datasetIds: number[] = [];
     hasEEG: boolean = false;
     hasDicom: boolean = false;
@@ -118,7 +117,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
         this.datasetAcquisitionService.get(this.node.id).then(entity => {
             this.datasetAcquisitionService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onAcquisitionDelete.emit();
+                    this.acquisitionDelete.emit();
                 }
             });
         })

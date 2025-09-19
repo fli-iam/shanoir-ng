@@ -39,7 +39,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
     @ViewChild('input', { static: false }) input: any;
     @Input() tagsInUse: Tag[];
     @Input() mode: Mode;
-    @Output() onChange: EventEmitter<any> = new EventEmitter();
+    @Output() userChange: EventEmitter<any> = new EventEmitter();
     selectedColor: string;
     text: string = null;
     addTagVisible: boolean = false;
@@ -70,7 +70,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
                 this.addTagVisible = false;
                 this.displayedTags.add({tag: newTag, darkFont: isDarkColor(newTag.color)});
                 this.propagateChange(this.model);
-                this.onChange.emit(this.model);
+                this.userChange.emit(this.model);
             }
         }
     }
@@ -83,7 +83,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
             this.model.splice(this.model.indexOf(tag.tag), 1);
             this.displayedTags.delete(tag)
             this.propagateChange(this.model);
-            this.onChange.emit(this.model);
+            this.userChange.emit(this.model);
         }
     }
 

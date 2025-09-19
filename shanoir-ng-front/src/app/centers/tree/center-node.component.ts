@@ -33,7 +33,7 @@ import { CenterService } from '../shared/center.service';
 export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> implements OnChanges {
 
     @Input() input: CenterNode | Center;
-    @Output() onEquipementNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() equipementNodeSelect: EventEmitter<number> = new EventEmitter();
     detailsPath: string = '/center/details/';
 
     constructor(

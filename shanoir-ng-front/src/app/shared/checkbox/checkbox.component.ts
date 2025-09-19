@@ -32,7 +32,7 @@ import { Mode } from '../components/entity/entity.component.abstract';
 export class CheckboxComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') model: boolean | 'indeterminate' = false;
-    @Output() onChange = new EventEmitter();
+    @Output() userChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -63,7 +63,7 @@ export class CheckboxComponent implements ControlValueAccessor {
             this.model = true;
         }
         this.onChangeCallback(this.model);
-        this.onChange.emit(this.model);
+        this.userChange.emit(this.model);
         this.onTouchedCallback();
     }
     
