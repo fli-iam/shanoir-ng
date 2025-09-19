@@ -8,7 +8,7 @@
     "test": "ng test",
     "e2e": "ng e2e",
     "prebuild": "node src/version.ts",
-    "lint": "eslint . --ext .ts,.html"
+    "lint": "eslint . --ext .ts,.html --config eslint.config.js"
   },
   "private": true,
   "dependencies": {
