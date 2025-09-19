@@ -64,6 +64,7 @@ module.exports = tseslint.config(
       
       // Angular ESLint rules - turn off common errors
       "@angular-eslint/use-lifecycle-interface": "off",
+      "@angular-eslint/no-output-on-prefix": "off",
       "@angular-eslint/prefer-inject": "off",
       "@angular-eslint/prefer-standalone": "off",
       "@angular-eslint/no-output-native": "off",
