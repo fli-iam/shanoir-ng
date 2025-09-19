@@ -93,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{preclinicalSubject?.animalSubject?.specie?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box (onNewClick)="goToRefPage('subject','specie')" [formControl]="form.controls['specie']" [(ngModel)]="preclinicalSubject.animalSubject.specie" [optionArr]="species">
+								<select-box (newClick)="goToRefPage('subject','specie')" [formControl]="form.controls['specie']" [(ngModel)]="preclinicalSubject.animalSubject.specie" [optionArr]="species">
 								</select-box>
 								<label *ngIf="hasError('specie', ['required'])" [@slideDown]="hasError('specie', ['required'])" class="form-validation-alert" i18n="Edit subjectSpecie|Specie required error@@animalSubjectDetailSpecieRequiredError">Species is required!</label>
 							</ng-template>
@@ -106,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{preclinicalSubject?.animalSubject?.strain?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box (onNewClick)="goToRefPage('subject','strain')" [formControl]="form.controls['strain']" [(ngModel)]="preclinicalSubject.animalSubject.strain" [optionArr]="strains">
+								<select-box (newClick)="goToRefPage('subject','strain')" [formControl]="form.controls['strain']" [(ngModel)]="preclinicalSubject.animalSubject.strain" [optionArr]="strains">
 								</select-box>
 								<label *ngIf="hasError('strain', ['required'])" [@slideDown]="hasError('strain', ['required'])" class="form-validation-alert" i18n="Edit subjectStrain|Strain required error@@animalSubjectDetailStrainRequiredError">Strain is required!</label>
 							</ng-template>
@@ -119,7 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{preclinicalSubject?.animalSubject?.biotype?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box (onNewClick)="goToRefPage('subject','biotype')" [formControl]="form.controls['biotype']" [(ngModel)]="preclinicalSubject.animalSubject.biotype" [optionArr]="biotypes">
+								<select-box (newClick)="goToRefPage('subject','biotype')" [formControl]="form.controls['biotype']" [(ngModel)]="preclinicalSubject.animalSubject.biotype" [optionArr]="biotypes">
 								</select-box>
 								<label *ngIf="hasError('biotype', ['required'])" [@slideDown]="hasError('biotype', ['required'])" class="form-validation-alert" i18n="Edit subjectBiotype|Biotype required error@@animalSubjectDetailBiotypeRequiredError">Biological type is required!</label>
 							</ng-template>
@@ -132,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{preclinicalSubject?.animalSubject?.provider?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box (onNewClick)="goToRefPage('subject','provider')" [formControl]="form.controls['provider']" [(ngModel)]="preclinicalSubject.animalSubject.provider" [optionArr]="providers">
+								<select-box (newClick)="goToRefPage('subject','provider')" [formControl]="form.controls['provider']" [(ngModel)]="preclinicalSubject.animalSubject.provider" [optionArr]="providers">
 								</select-box>
 								<label *ngIf="hasError('provider', ['required'])" [@slideDown]="hasError('provider', ['required'])" class="form-validation-alert" i18n="Edit subjectProvider|Provider required error@@animalSubjectDetailProviderRequiredError">Provider is required!</label>
 							</ng-template>
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{preclinicalSubject?.animalSubject?.stabulation?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box (onNewClick)="goToRefPage('subject','stabulation')" [formControl]="form.controls['stabulation']" [(ngModel)]="preclinicalSubject.animalSubject.stabulation" [optionArr]="stabulations">
+								<select-box (newClick)="goToRefPage('subject','stabulation')" [formControl]="form.controls['stabulation']" [(ngModel)]="preclinicalSubject.animalSubject.stabulation" [optionArr]="stabulations">
 								</select-box>
 								<label *ngIf="hasError('stabulation', ['required'])" [@slideDown]="hasError('stabulation', ['required'])" class="form-validation-alert" i18n="Edit subjectStabulation|Stabulation required error@@animalSubjectDetailStabulationRequiredError">Stabulation is required!</label>
 							</ng-template>
@@ -222,11 +222,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<fieldset>
 					<legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
 				</fieldset>
-                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
+                <subject-pathology-list #pathologiesComponent [mode]="mode" (event)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
     			<fieldset>
     				<legend i18n="AnimalSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
     			</fieldset>
-                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
+                <subject-therapy-list #therapiesComponent [mode]="mode" (event)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
             </div>
 		</div>
     </form>

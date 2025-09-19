@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['manufacturer']" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
+								<select-box [formControl]="form.controls['manufacturer']" [(ngModel)]="manufModel.manufacturer" (newClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>

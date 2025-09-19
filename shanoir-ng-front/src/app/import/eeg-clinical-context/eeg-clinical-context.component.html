@@ -44,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
+                        (newClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
 
@@ -70,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
+                        (newClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
 

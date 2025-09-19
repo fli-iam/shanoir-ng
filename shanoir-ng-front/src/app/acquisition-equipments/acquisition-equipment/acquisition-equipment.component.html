@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['manufacturerModel']" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
+								<select-box [formControl]="form.controls['manufacturerModel']" [(ngModel)]="acqEquip.manufacturerModel" (newClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
 								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
