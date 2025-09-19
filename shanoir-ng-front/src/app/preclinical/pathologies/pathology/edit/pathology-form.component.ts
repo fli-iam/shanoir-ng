@@ -41,7 +41,7 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
     }
 
     get pathology(): Pathology { return this.entity; }
-    set pathology(pathology: Pathology) { this.entity = pathology; }
+    set pathology(pathology: Pathology) { this.entity = pathology; }
 
     getService(): EntityService<Pathology> {
         return this.pathologyService;
