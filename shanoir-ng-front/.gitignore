@@ -45,6 +45,3 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-
-# ESLint config file
-!shanoir-ng-front/eslint.config.js
