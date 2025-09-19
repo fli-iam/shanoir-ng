@@ -63,7 +63,6 @@ module.exports = tseslint.config(
       "@typescript-eslint/class-literal-property-style": "off",
       
       // Angular ESLint rules - turn off common errors
-      "@angular-eslint/no-empty-lifecycle-method": "off",
       "@angular-eslint/use-lifecycle-interface": "off",
       "@angular-eslint/no-input-rename": "off",
       "@angular-eslint/no-output-on-prefix": "off",
