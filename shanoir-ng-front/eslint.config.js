@@ -36,10 +36,7 @@ module.exports = tseslint.config(
       "no-useless-escape": "off",
       "no-empty": "off",
       "no-self-assign": "off",
-      "no-inner-declarations": "off",
       "no-extra-boolean-cast": "off",
-      "no-control-regex": "off",
-      "no-misleading-character-class": "off",
       "no-var": "off",
       "prefer-const": "off",
       "no-empty-pattern": "off",
@@ -50,14 +47,7 @@ module.exports = tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-inferrable-types": "off",
-      "@typescript-eslint/ban-types": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/no-empty-interface": "off",
-      "@typescript-eslint/prefer-const": "off",
-      "@typescript-eslint/no-this-alias": "off",
-      "@typescript-eslint/no-namespace": "off",
-      "@typescript-eslint/no-var-requires": "off",
-      "@typescript-eslint/no-unsafe-declaration-merging": "off",
+      "@typescript-eslint/no-namespace": "off", // ?
       "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/ban-ts-comment": "off",
@@ -75,26 +65,25 @@ module.exports = tseslint.config(
       "@angular-eslint/no-empty-lifecycle-method": "off",
       "@angular-eslint/use-lifecycle-interface": "off",
       "@angular-eslint/no-input-rename": "off",
-      "@angular-eslint/no-output-rename": "off",
-      "@angular-eslint/no-host-metadata-property": "off",
-      "@angular-eslint/prefer-on-push-component-change-detection": "off",
-      "@angular-eslint/component-class-suffix": "off",
-      "@angular-eslint/directive-class-suffix": "off",
-      "@angular-eslint/no-conflicting-lifecycle": "off",
       "@angular-eslint/no-output-on-prefix": "off",
-      "@angular-eslint/contextual-lifecycle": "off",
       "@angular-eslint/prefer-inject": "off",
-      "@angular-eslint/array-type": "off",
       "@angular-eslint/prefer-standalone": "off",
       "@angular-eslint/no-output-native": "off",
     },
   },
-  // {
-  //   files: ["**/*.html"],
-  //   extends: [
-  //     ...angular.configs.templateRecommended,
-  //     ...angular.configs.templateAccessibility,
-  //   ],
-  //   rules: {},
-  // }
+  {
+    files: ["**/*.html"],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility,
+    ],
+    rules: {
+      "@angular-eslint/template/eqeqeq": "off",
+      "@angular-eslint/template/label-has-associated-control": "off",
+      "@angular-eslint/template/click-events-have-key-events": "off",
+      "@angular-eslint/template/interactive-supports-focus": "off",
+      "@angular-eslint/template/mouse-events-have-key-events": "off",
+      "@angular-eslint/template/alt-text": "off"
+    },
+  }
 );
