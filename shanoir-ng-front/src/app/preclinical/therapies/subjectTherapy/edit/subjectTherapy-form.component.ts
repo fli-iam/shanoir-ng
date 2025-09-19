@@ -44,7 +44,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
 
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() canModify: Boolean = false;
-    @Input('toggleForm') toggleForm: boolean;
+    @Input() toggleForm: boolean;
     @Input() subTherapySelected: SubjectTherapy;
     @Output() onEvent = new EventEmitter();
     @Output() onCreated = new EventEmitter();

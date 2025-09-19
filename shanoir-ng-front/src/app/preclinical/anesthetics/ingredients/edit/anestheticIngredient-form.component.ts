@@ -42,7 +42,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
 
     @Input() anesthetic: Anesthetic;
-    @Input('toggleForm') toggleForm: boolean = true;
+    @Input() toggleForm: boolean = true;
     @Input() ingredientSelected: AnestheticIngredient;
     @Output() onEvent = new EventEmitter();
     @Input() createAIMode: boolean;
