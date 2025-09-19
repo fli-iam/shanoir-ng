@@ -6,9 +6,9 @@
     "start": "ng serve",
     "build": "ng build --configuration production --source-map",
     "test": "ng test",
+    "lint": "ng lint",
     "e2e": "ng e2e",
-    "prebuild": "node src/version.ts",
-    "lint": "eslint . --ext .ts,.html --config eslint.config.js"
+    "prebuild": "node src/version.ts"
   },
   "private": true,
   "dependencies": {
