@@ -36,11 +36,13 @@ export abstract class Dataset extends Entity {
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
     processings: DatasetProcessing[] = [];
+    parentProcessing: number;
     inPacs: boolean;
     tags: Tag[];
     copies: number[];
     source: number;
     private _hasProcessing: boolean;
+    downloadPath: string;
 
     get hasProcessings(): boolean {
         return this.processings?.length > 0;

@@ -32,6 +32,7 @@ import { SessionService } from '../services/session.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import {DatasetProcessingService} from "../../datasets/shared/dataset-processing.service";
 
 declare var JSZip: any;
 
@@ -83,6 +84,7 @@ export class MassDownloadService {
 
     constructor(
         private datasetService: DatasetService,
+        private datasetProcessingService: DatasetProcessingService,
         private notificationService: NotificationsService,
         private consoleService: ConsoleService,
         private dialogService: ConfirmDialogService,
@@ -283,99 +285,100 @@ export class MassDownloadService {
         });
     }
 
-    private saveDataset(id: number, setup: DownloadSetup, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
-        const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
-        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, setup.format, setup.converter);
-        return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
+    private async saveDataset(
+        id: number,
+        setup: DownloadSetup,
+        userFolderHandle: FileSystemDirectoryHandle,
+        report: Report,
+        task: Task,
+        dataset?: Dataset
+    ): Promise<void> {
+        try {
+            // Get metadata
+            const resolvedDataset = (dataset?.id === id && dataset.datasetAcquisition?.examination?.subject)
+                ? dataset
+                : await this.datasetService.get(id, 'lazy');
+
+            // Download the blob
+            const httpResponse = await this.datasetService.downloadToBlob(id, setup.format, setup.converter);
             const blob: Blob = httpResponse.body;
             report.list[id].zipSize = getSizeStr(blob?.size);
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            // Check ERRORS file in zip
-            let zip: any = new JSZip();
-            const unzipPromise: Promise<any> = zip.loadAsync(blob).then(dataFiles => {
-                if (dataFiles.files['ERRORS.json']) {
-                    return dataFiles.files['ERRORS.json'].async('string').then(content => {
-                        const errorsJson: any = JSON.parse(content);
-                        report.list[id].status = 'ERROR';
-                        report.list[id].error = errorsJson;
-                        report.list[id].errorTime = Date.now();
-                        task.lastUpdate = new Date();
-                        task.status = 5;
-                    });
-                } else {
-                    report.list[id].status = 'SUCCESS';
-                    delete report.list[id].error;
-                    delete report.list[id].errorTime;
-                    return dataFiles;
-                }
-            });
+
+            // Load ZIP
+            const zip = new JSZip();
+            const dataFiles = await zip.loadAsync(blob);
+            if (dataFiles.files['ERRORS.json']) {
+                const content = await dataFiles.files['ERRORS.json'].async('string');
+                const errorsJson: any = JSON.parse(content);
+                report.list[id].status = 'ERROR';
+                report.list[id].error = errorsJson;
+                report.list[id].errorTime = Date.now();
+                task.lastUpdate = new Date();
+                task.status = 5;
+                return;
+            } else {
+                report.list[id].status = 'SUCCESS';
+                delete report.list[id].error;
+                delete report.list[id].errorTime;
+            }
+
+            // Determine path
+            let path: string;
+            if (setup.shortPath) {
+                path = this.buildShortFoldersPath(resolvedDataset, setup) + resolvedDataset.id + '.' + filename.split('.').pop();
+            } else {
+                path = resolvedDataset.parentProcessing
+                    ? resolvedDataset.downloadPath + filename
+                    : this.buildFoldersPath(resolvedDataset, setup) + filename;
+            }
+
+            task.message = 'saving dataset n°' + id;
+            this.notificationService.pushLocalTask(task);
 
             if (setup.unzip) {
-                return unzipPromise.then(data => {
-                    let finalPromise: Promise<void> = Promise.resolve(); // write them sequentially, not in parallel like with promise.all
-                    if (data) {
-                        let index: number = 0;
-                        Object.entries(data.files)?.map(([name, file]) => {
-                            finalPromise = finalPromise.then(() => {
-                                index++;
-                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
-                                this.notificationService.pushLocalTask(task);
-                                let type: string;
-                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
-                                else type = 'blob';
-                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
-                                    task.message = 'saving file ' + name + ' from dataset n°' + id;
-                                    this.notificationService.pushLocalTask(task);
-                                    let path: string;
-                                    if (setup.shortPath) {
-                                        path = this.buildShortExtractedFilePath(dataset, index, name, setup);
-                                    } else {
-                                        path = this.buildExtractedFilePath(dataset, filename, name, setup);
-                                    }
-                                    return this.writeMyFile(path, blob, userFolderHandle);
-                                });
-                            });
-                        })
-                    }
-                    return finalPromise;
-                });
-            } else {
-                let path: string;
-                if (setup.shortPath) {
-                    path = this.buildShortFoldersPath(dataset, setup) + dataset.id + '.' + filename.split('.').pop();
-                } else {
-                    path = this.buildFoldersPath(dataset, setup) + filename;
+                // handle unzip files sequentially if needed
+                let finalPromise: Promise<void> = Promise.resolve();
+                for (const [name, file] of Object.entries(dataFiles.files)) {
+                    finalPromise = finalPromise.then(async () => {
+                        task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                        this.notificationService.pushLocalTask(task);
+
+                        const type = name.endsWith('.json') || name.endsWith('.txt') ? 'string' : 'blob';
+                        const fileBlob = await (file as any).async(type);
+                        task.message = 'saving file ' + name + ' from dataset n°' + id;
+                        this.notificationService.pushLocalTask(task);
+
+                        const filePath = setup.shortPath
+                            ? this.buildShortExtractedFilePath(resolvedDataset, 0, name, setup)
+                            : this.buildExtractedFilePath(resolvedDataset, filename, name, setup);
+
+                        await this.writeMyFile(filePath, fileBlob, userFolderHandle);
+                    });
                 }
-                task.message = 'saving dataset n°' + id;
-                this.notificationService.pushLocalTask(task);
-                return unzipPromise.then(() => this.writeMyFile(path, blob, userFolderHandle)).then(() => null);
+                await finalPromise;
+            } else {
+                await this.writeMyFile(path, blob, userFolderHandle);
             }
-        }).catch(reason => {
+
+            // Update report
+            task.lastUpdate = new Date();
+            task.progress = (report.nbSuccess + report.nbError) / Object.keys(report.list).length;
+            this.notificationService.pushLocalTask(task);
+        } catch (reason) {
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
             report.list[id].errorTime = Date.now();
             task.lastUpdate = new Date();
             task.message = 'saving dataset n°' + id + ' failed';
             task.status = 5;
-        }).finally(() => {
-            if (report.list[id].status == 'SUCCESS') {
-                task.lastUpdate = new Date();
-                task.message = '(' + report.nbSuccess + '/' + Object.keys(report.list).length + ') dataset n°' + id + ' successfully saved';
-                report.nbSuccess++;
-            } else if (report.list[id].status == 'ERROR') {
-                task.message = 'saving dataset n°' + id + ' failed';
-                report.nbError++;
-            }
+        } finally {
             task.report = JSON.stringify(report, null, 4);
-            this.writeMyFile(this.REPORT_FILENAME, task.report, userFolderHandle);
-            task.lastUpdate = new Date();
-            task.progress = (report.nbSuccess + report.nbError) / Object.keys(report.list).length;
-            this.notificationService.pushLocalTask(task);
-        });
+        }
     }
 
     private buildExtractedFilePath(dataset: Dataset, zipName: string, fileName: string, setup: DownloadSetup): string {
-        return this.buildFoldersPath(dataset, setup)
+        return (dataset.parentProcessing ? dataset.downloadPath : this.buildFoldersPath(dataset, setup))
             + (setup.datasetFolders ? zipName.replace('.zip', '') + '/' : '')
             + fileName;
     }
@@ -391,20 +394,16 @@ export class MassDownloadService {
     private buildFoldersPath(dataset: Dataset, setup: DownloadSetup): string {
         let str: string = '/';
         if (setup.subjectFolders) {
-            str += 'Subject-' + (
-                dataset.hasProcessing
-                    ? dataset.subject?.name + '_' + dataset.subject?.id
-                    : dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id
-            ) + '/';
+            str += 'Subject-' + dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id + '/';
         }
-        if (setup.examinationFolders && !dataset.hasProcessing) { // for processed datasets, skip the exam folder
+        if (setup.examinationFolders) {
             str += dataset.datasetAcquisition?.examination?.comment
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
-            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
-                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+        if (setup.acquisitionFolders) {
+            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name
                 || dataset.datasetAcquisition.type + '_acquisition';
             str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
             + '_' + dataset.datasetAcquisition.id
@@ -637,7 +636,7 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
-    }  
+    }
 }
 
 export class DownloadSetup {

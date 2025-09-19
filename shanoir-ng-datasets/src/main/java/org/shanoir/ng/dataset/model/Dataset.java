@@ -158,6 +158,10 @@ public abstract class Dataset extends AbstractEntity {
 	/** Can we download the subject */
 	private boolean downloadable = true;
 
+	/** Downlaod path */
+	@Transient
+	private String downloadPath;
+
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
@@ -532,4 +536,11 @@ public abstract class Dataset extends AbstractEntity {
         this.relatedStudies = relatedStudies;
     }
 
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        this.downloadPath = downloadPath;
+    }
 }

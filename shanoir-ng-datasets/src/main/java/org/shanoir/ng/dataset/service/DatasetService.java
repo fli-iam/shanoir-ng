@@ -166,4 +166,7 @@ public interface DatasetService {
 	DatasetAcquisition getAcquisition(Dataset dataset);
 
 	void deleteNiftis(Long studyId);
+
+	String shapeDownloadPath(Dataset dataset);
+
 }

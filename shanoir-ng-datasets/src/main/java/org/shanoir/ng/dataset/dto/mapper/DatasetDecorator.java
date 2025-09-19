@@ -27,8 +27,12 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.StudyTagDTOLight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
@@ -49,6 +53,12 @@ public abstract class DatasetDecorator implements DatasetMapper {
 
 	@Autowired
 	protected EegDatasetMapper eegMapper;
+
+	@Autowired
+	protected DatasetMetadataMapper datasetMetadataMapper;
+
+	@Autowired
+	protected DatasetAcquisitionMapper acquisitionMapper;
 
 	@Override
 	public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
@@ -85,10 +95,38 @@ public abstract class DatasetDecorator implements DatasetMapper {
 	@Override
 	public DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset) {
 		final DatasetWithDependenciesDTO datasetDTO = defaultMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset);
+		datasetDTO.setDownloadPath(dataset.getDownloadPath());
 		Hibernate.initialize(dataset.getCopies());
 		datasetDTO.setCopies(dataset.getCopies().stream()
 				.map(Dataset::getId)
 				.collect(Collectors.toList()));
 		return datasetDTO;
+	}
+
+	protected List<StudyTagDTOLight> studyTagListToStudyTagDTOLightList(List<StudyTag> list) {
+		if ( list == null ) {
+			return null;
+		}
+
+		List<StudyTagDTOLight> list1 = new ArrayList<StudyTagDTOLight>( list.size() );
+		for ( StudyTag studyTag : list ) {
+			list1.add( studyTagToStudyTagDTOLight( studyTag ) );
+		}
+
+		return list1;
+	}
+
+	protected StudyTagDTOLight studyTagToStudyTagDTOLight(StudyTag studyTag) {
+		if ( studyTag == null ) {
+			return null;
+		}
+
+		StudyTagDTOLight studyTagDTOLight = new StudyTagDTOLight();
+
+		studyTagDTOLight.setId( studyTag.getId() );
+		studyTagDTOLight.setName( studyTag.getName() );
+		studyTagDTOLight.setColor( studyTag.getColor() );
+
+		return studyTagDTOLight;
 	}
 }

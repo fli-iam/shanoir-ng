@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +51,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -61,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -125,6 +129,10 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceRepository processingResourceRepository;
+	
+	@Autowired
+	@Lazy
+	private SubjectRepository subjectRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -220,7 +228,11 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset findById(final Long id) {
-		return repository.findById(id).orElse(null);
+		Dataset dataset = repository.findById(id).orElse(null);
+		if(Objects.nonNull(dataset)){
+			dataset.setDownloadPath(shapeDownloadPath(dataset));
+		}
+		return dataset;
 	}
 
 	@Override
@@ -419,6 +431,37 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Dataset> datasets = this.findByStudyId(studyId);
 		for (Dataset dataset : datasets) {
 			deleteNifti(dataset);
+		}
+	}
+
+	@Override
+	public String shapeDownloadPath(Dataset dataset) {
+		String path = "";
+		if(Objects.nonNull(dataset.getDatasetProcessing())){
+			Dataset realInput = getFirstRealInput(dataset);
+
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmmss");
+			
+			path += "Subject_" + realInput.getSubjectId() + "/";
+			path += "Examination_" + realInput.getDatasetAcquisition().getExamination().getId() + "/";
+			path += "Acquisition_" + realInput.getDatasetAcquisition().getId();
+			LocalDateTime acqDateTime = realInput.getDatasetAcquisition().getAcquisitionStartTime();
+			if(Objects.nonNull(acqDateTime)){
+				path += "_DateTime_" + acqDateTime.format(dateFormatter)
+						+ "_" + acqDateTime.format(timeFormatter);
+			}
+			path += "/Processing_input_ids_" + dataset.getDatasetProcessing().getInputDatasets().stream().map(d -> d.getId().toString()).collect(Collectors.joining("_")) + "/";
+
+		}
+		return "/" + path;
+	}
+
+	private Dataset getFirstRealInput(Dataset dataset) {
+		if(Objects.nonNull(dataset.getDatasetProcessing())){
+			return getFirstRealInput(dataset.getDatasetProcessing().getInputDatasets().getFirst());
+		} else {
+			return dataset;
 		}
 	}
 

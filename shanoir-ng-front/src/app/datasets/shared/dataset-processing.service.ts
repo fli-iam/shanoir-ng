@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,7 +26,7 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_PROCESSING_URL;
 
-    constructor(protected http: HttpClient, 
+    constructor(protected http: HttpClient,
         private datasetDTOService: DatasetDTOService,
         private datasetProcessingDTOService: DatasetProcessingDTOService) {
         super(http)
@@ -69,11 +69,20 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         if (result == undefined) result = [];
         return this.datasetProcessingDTOService.toEntityList(dtos, result);
     }
-    
+
     public stringify(entity: DatasetProcessing) {
         let dto = new DatasetProcessingOutDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
+        });
+    }
+
+    public findFirstRealInputFromOutput(entity: Dataset): Promise<Dataset> {
+        return this.getInputDatasets(entity.parentProcessing).then(results => {
+            for (let input of results) {
+                if (!input.parentProcessing) {return input}
+            }
+            return this.findFirstRealInputFromOutput(results.at(0))
         });
     }
 }

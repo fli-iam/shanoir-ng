@@ -25,10 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -256,11 +253,12 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<List<DatasetLight>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
-		List<DatasetLight> datasets = datasetService.findLightByIdIn(datasetIds);
-		if (datasets.isEmpty()) {
+		List<DatasetLight> lights = datasetService.findLightByIdIn(datasetIds);
+
+		if (lights.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(datasets, HttpStatus.OK);
+		return new ResponseEntity<>(lights, HttpStatus.OK);
 	}
 
   	@Override

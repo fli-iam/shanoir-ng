@@ -31,13 +31,17 @@ public class DatasetLight {
 
 	private Long studyId;
 
+	private Long parentProcessing;
 
-    public DatasetLight(Long id, String name, Class<? extends Dataset> type, Long studyId, boolean hasProcessings) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+	private String downloadPath;
+
+    public DatasetLight(Long id, String name, Class<? extends Dataset> type, Long studyId, boolean hasProcessings, Long parentProcessing) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         this.hasProcessings = hasProcessings;
         this.id = id;
         this.name = name;
         this.type = type.getDeclaredConstructor().newInstance().getType().name();
 		this.studyId = studyId;
+		this.parentProcessing = parentProcessing;
     }
 
 	public Long getId() {
@@ -79,4 +83,12 @@ public class DatasetLight {
     public void setStudyId(Long studyId) {
         this.studyId = studyId;
     }
+
+    public Long getParentProcessing() {return parentProcessing;}
+
+    public void setParentProcessing(Long parentProcessing) {this.parentProcessing = parentProcessing;}
+
+    public String getDownloadPath() {return downloadPath;}
+
+    public void setDownloadPath(String downloadPath) {this.downloadPath = downloadPath;}
 }

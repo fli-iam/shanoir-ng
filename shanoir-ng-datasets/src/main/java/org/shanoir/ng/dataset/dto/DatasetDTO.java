@@ -17,6 +17,8 @@ package org.shanoir.ng.dataset.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTagDTOLight;
 
@@ -57,6 +59,8 @@ public class DatasetDTO {
 	private Long source;
 
 	private List<Long> copies;
+
+	private String downloadPath;
 
 
 	/**
@@ -219,4 +223,12 @@ public class DatasetDTO {
 	public void setCopies(List<Long> copies) {
 		this.copies = copies;
 	}
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        this.downloadPath = downloadPath;
+    }
 }

@@ -84,9 +84,6 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     }
 
     public void complexMassiveDownload(@Valid JsonNode jsonRequest) throws Exception{
-        Map<Integer, List<Long>> datasetIdsPerExtraction = new HashMap<>();
-        Map<Integer, Boolean> inputPerExtraction = new HashMap<>();
-        List<Integer> extractionIdList = new ArrayList<>();
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
                 null,
@@ -104,7 +101,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         JsonNode extractions = jsonRequest.get("data_to_extract");
 
         for (JsonNode extraction : extractions) {
-            event.setMessage((Objects.isNull(event.getMessage()) ? "" : event.getMessage() + ",") + getDatasetIdsFromJsonFilters(extraction).stream().map(String::valueOf).collect(Collectors.joining(",")));
+            event.setMessage((Objects.isNull(event.getMessage()) || Objects.equals("Fetching VIP outputs...", event.getMessage())? "" : event.getMessage() + ",") + getDatasetIdsFromJsonFilters(extraction).stream().map(String::valueOf).collect(Collectors.joining(",")));
         }
 
         event.setObjectId(String.valueOf(event.getId()));
@@ -284,7 +281,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     }
 
     protected String getDatasetFilepath(Dataset dataset, List<String> sortingType, String processingName) {
-        Examination examination = dataset.getDatasetProcessing().getInputDatasets().getFirst().getDatasetAcquisition().getExamination();
+        Examination examination = dataset.getDatasetProcessing().getInputDatasets().stream().filter(input -> Objects.nonNull(input.getDatasetAcquisition().getExamination())).toList().getFirst().getDatasetAcquisition().getExamination();
 
         String filePath = "";
         if(sortingType.contains("study") && Objects.nonNull(examination.getStudyId())) {
@@ -320,7 +317,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         String query = "SELECT DISTINCT dataset.id FROM dataset dataset " +
                 "JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id " +
                 "JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id " +
-                "JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id " +
+                "LEFT JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id " +
                 "JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id " +
                 "JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id " +
                 "JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id " +
@@ -363,7 +360,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         String field = type.split("\\.")[1];
         return switch (table) {
             case "dataset" -> Lists.list("name", "pipeline_identifier").contains(field) ? "metadata." + field : type;
-            case "processing" -> Lists.list("name", "comment").contains(field) ? "monitoring." + field : type;
+            case "processing" -> Lists.list("name", "comment","status").contains(field) ? "monitoring." + field : type;
             default -> type;
         };
     }

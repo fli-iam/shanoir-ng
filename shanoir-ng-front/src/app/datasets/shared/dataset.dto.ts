@@ -124,9 +124,10 @@ export class DatasetDTOService {
             if (!entity.subject) entity.subject = new Subject();
             entity.subject.name = dto.subjectName;
         }
-        if (dto.datasetAcquisition) {
-            let dsAcq = DatasetAcquisitionUtils.getNewDAInstance(dto.datasetAcquisition.type);
-            DatasetAcquisitionDTOService.mapSyncFields(dto.datasetAcquisition, dsAcq);
+
+        if (dto.datasetAcquisitionDTO) {
+            let dsAcq = DatasetAcquisitionUtils.getNewDAInstance(dto.datasetAcquisitionDTO.type);
+            DatasetAcquisitionDTOService.mapSyncFields(dto.datasetAcquisitionDTO, dsAcq);
             entity.datasetAcquisition = dsAcq;
         }
         if (entity.type == 'Mr') {
@@ -146,8 +147,11 @@ export class DatasetDTOService {
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
             entity.hasProcessing = !!entity.datasetProcessing;
+            entity.parentProcessing = dto.datasetProcessing.id;
+            entity.downloadPath = dto.downloadPath;
 		} else {
             entity.hasProcessing = dto.hasProcessing;
+            entity.parentProcessing = dto.parentProcessing;
         }
         entity.tags = dto.tags ? dto.tags : [];
         return entity;
@@ -195,8 +199,10 @@ export class DatasetDTO {
     processings: DatasetProcessingInDTO[] | DatasetProcessingOutDTO[];
 	datasetProcessing: DatasetProcessingInDTO | DatasetProcessingOutDTO;
     hasProcessing: boolean;
+    parentProcessing: number;
+    downloadPath: string;
     datasetParent: number;
-    datasetAcquisition: DatasetAcquisitionDTO;
+    datasetAcquisitionDTO: DatasetAcquisitionDTO;
     inPacs: boolean;
     tags: Tag[];
     copies: number[];
@@ -217,9 +223,11 @@ export class DatasetDTO {
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingOutDTO(p)} );
             if(dataset.datasetAcquisition) {
-                this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
+                this.datasetAcquisitionDTO = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
             }
             this.tags = dataset.tags;
+            this.downloadPath = dataset.downloadPath;
+            this.parentProcessing = dataset.parentProcessing
         }
     }
 }
