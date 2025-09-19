@@ -423,7 +423,6 @@ export class StudyComponent extends EntityComponent<Study> {
         studyUser.studyUserRights = rights;
         studyUser.user = selectedUser;
         this.study.studyUserList.unshift(studyUser);
-        this.study.studyUserList = this.study.studyUserList;
     }
 
     studyStatusStr(studyStatus: string) {
