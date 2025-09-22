@@ -48,6 +48,7 @@ export class DUAAssistantComponent implements OnDestroy {
     protected loadedImage: File | null = null;
     protected converting: boolean = false;
     protected showPage: boolean = true;
+    private studyName: string;
 
     @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
     readonly shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
@@ -83,6 +84,7 @@ export class DUAAssistantComponent implements OnDestroy {
             this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
                 let study = studies.find(s => s.id == studyId);
                 this.dua.studyId = studyId;
+                this.studyName = study.name;
                 this.dua.studyName = study.name;
             });
             this.buildForm();
@@ -113,6 +115,7 @@ export class DUAAssistantComponent implements OnDestroy {
     protected onSubmit() {
         let dua: DuaDocument = DuaDocument.buildInstance(
             this.studyId,
+            this.studyName,
             this.form.get('url')?.value,
             this.form.get('funding')?.value,
             this.form.get('thanks')?.value,

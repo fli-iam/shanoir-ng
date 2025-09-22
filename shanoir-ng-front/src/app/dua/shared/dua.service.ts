@@ -32,12 +32,8 @@ export class DuaService {
     }
 
     create(entity: DuaDocument, email: string): Promise<string> {
-        return this.studyService.getStudiesNames().then(idNames => {
-            let studyName: string = idNames?.find(idName => idName.id == entity?.studyId)?.[0]?.name;
-            entity.studyName = studyName;
-            let arg: any = {duaDraft: entity, email: email};
-            return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
-        });
+        let arg: any = {duaDraft: entity, email: email};
+        return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
     }
 
     update(entity: DuaDocument): Promise<void> {

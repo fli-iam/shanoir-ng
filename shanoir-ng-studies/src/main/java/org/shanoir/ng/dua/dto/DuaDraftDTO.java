@@ -18,13 +18,15 @@ public class DuaDraftDTO {
 
     private String id;
 
-    String url;
-    
-    String funding;
+    private String studyName;
 
-    String thanks;
+    private String url;
     
-    String papers;
+    private String funding;
+
+    private String thanks;
+    
+    private String papers;
 
 
     public String getId() {
@@ -33,6 +35,14 @@ public class DuaDraftDTO {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getStudyName() {
+        return studyName;
+    }
+
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
     }
 
     public String getUrl() {
