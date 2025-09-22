@@ -23,6 +23,7 @@ import { ConfirmDialogService } from '../shared/components/confirm-dialog/confir
 import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
+import { StudyService } from '../studies/shared/study.service';
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
 
@@ -57,7 +58,8 @@ export class DUAAssistantComponent implements OnDestroy {
             private route: ActivatedRoute,
             private router: Router,
             protected duaService: DuaService,
-            private location: Location) {
+            private location: Location,
+            private studyService: StudyService) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
                 let studyIdStr: string = params['studyId'];
@@ -77,6 +79,12 @@ export class DUAAssistantComponent implements OnDestroy {
         this.studyId = studyId;
         this.id = id;
         if (this.mode == 'create') {
+            this.dua = new DuaDocument();
+            this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
+                let study = studies.find(s => s.id == studyId);
+                this.dua.studyId = studyId;
+                this.dua.studyName = study.name;
+            });
             this.buildForm();
         } else if (this.mode == 'edit') {
             this.duaService.get(id).then(dua => {
