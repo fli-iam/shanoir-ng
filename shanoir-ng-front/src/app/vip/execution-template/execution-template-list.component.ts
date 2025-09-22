@@ -47,8 +47,13 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
         return [
             {headerName: "Template name", field: "name", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
             {headerName: "Pipeline name", field: "pipelineName", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
-            {headerName: "Priority", field: "priority", type: "number", width: "10px", defaultSortCol: true, defaultAsc: true},
+            {headerName: "Priority", field: "priority", type: "number", width: "30px", defaultSortCol: true, defaultAsc: true},
         ];
+    }
+
+    protected completeColDefs(): void {
+        this.columnDefs.push({ headerName: "Edit", type: "button", width: "10px", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
+        this.columnDefs.push({ headerName: "Delete", type: "button", width: "10px", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
     }
 
     getCustomActionsDefs(): any[] {

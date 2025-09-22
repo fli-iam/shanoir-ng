@@ -35,16 +35,17 @@ export class ExecutionTemplateFilterService extends EntityService<ExecutionTempl
         return this.httpClient.get<ExecutionTemplateFilter[]>(this.API_URL + "/byExecutionTemplate/" + execution_template_id).toPromise();
     }
 
-    getStudyName(filter: ExecutionTemplateFilterComponent) {
+    getTemplateName(filter: ExecutionTemplateFilterComponent) {
         this.templateService.get(filter.entity.executionTemplateId).then(template => {filter.templateName = template.name})
     }
 
-    uniqueInTemplateControl(existingIdentifiers: number[] = []): ValidatorFn {
+    uniqueInTemplateControl(filter: ExecutionTemplateFilterComponent): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             const identifier = control.value
             if (identifier !== undefined &&
                 Number.isInteger(identifier) &&
-                existingIdentifiers.includes(identifier)) {
+                filter.existingIdentifiers &&
+                filter.existingIdentifiers.includes(identifier)) {
                 return {uniqueInTemplateControl: true}
             }
             return null

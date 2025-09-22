@@ -19,10 +19,10 @@ public class ExecutionTemplate extends HalEntity {
     private String filterCombination;
     private int priority;
 
-    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExecutionTemplateFilter> filters;
 
-    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExecutionTemplateParameter> parameters;
 
     @ManyToOne(fetch = FetchType.LAZY)

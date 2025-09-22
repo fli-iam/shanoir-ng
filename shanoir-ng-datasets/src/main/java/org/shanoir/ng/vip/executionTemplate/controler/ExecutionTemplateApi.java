@@ -50,8 +50,8 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "404", description = "not found"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
-    @DeleteMapping(value = "/{executionId}", produces = {"application/json"})
-    ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionId") Long executionId);
+    @DeleteMapping(value = "/{executionTemplateId}", produces = {"application/json"})
+    ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId);
 
     @Operation(summary = "Get an ExecutionTemplate entity by Id", description = "Returns a execution template by its ID", tags = {})
     @ApiResponses(value = {
@@ -60,9 +60,9 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "404", description = "not found"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
-    @GetMapping(value = "/{executionId}", produces = "application/json")
+    @GetMapping(value = "/{executionTemplateId}", produces = "application/json")
     @PostAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL'))")
-    ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionId") Long executionId);
+    ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId);
 
     @Operation(summary = "Update an ExecutionTemplate entity by Id", description = "Updates the existing execution template by its Id", tags={  })
     @ApiResponses(value = {

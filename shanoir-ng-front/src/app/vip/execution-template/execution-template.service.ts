@@ -238,13 +238,14 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
         }
     }
 
-    uniqueInStudyControl(existingPriorities: number[] = []): ValidatorFn {
+    uniqueInStudyControl(template: ExecutionTemplateComponent): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             const priority = control.value
             if (
                 priority !== undefined &&
                 Number.isInteger(priority) &&
-                existingPriorities.includes(priority)) {
+                template.existingPriorities &&
+                template.existingPriorities.includes(priority)) {
                     return { uniqueInStudyControl: true}
                 }
             return null
@@ -253,7 +254,7 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
 
     getExistingPriorities(template: ExecutionTemplateComponent) {
         if(template.existingPriorities === undefined) template.existingPriorities = []
-        this.getExecutionTemplatesByStudy(template.entity.studyId).then(templates => {
+        this.getExecutionTemplatesByStudy(template.studyId).then(templates => {
             for(let templateEntity of templates) {
                 template.existingPriorities.push(templateEntity.priority)
             }

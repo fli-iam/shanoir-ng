@@ -27,10 +27,17 @@ export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionT
         private route: ActivatedRoute,
         private filterService: ExecutionTemplateFilterService) {
         super(route, 'execution-template-filter')
-        if ( this.breadcrumbsService.currentStep ) {
-            localStorage.setItem('templateId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("templateId")))
-            this.breadcrumbsService.currentStep.getPrefilledValue("templateName").then(templateName => this.templateName = templateName)
-            localStorage.setItem('templateName', this.templateName)
+        if (this.breadcrumbsService.currentStep && this.mode == "create") {
+            Promise.all([
+                this.breadcrumbsService.currentStep.getPrefilledValue("templateId"),
+                this.breadcrumbsService.currentStep.getPrefilledValue("templateName")
+            ]).then(([templateId, templateName]) => {
+                this.entity.executionTemplateId = templateId;
+                this.templateId = templateId;
+                this.templateName = templateName;
+
+                this.filterService.getExistingIdentifiers(this)
+            });
         }
     }
 
@@ -39,10 +46,10 @@ export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionT
 
     buildForm(): FormGroup {
         this.executionFilterForm = this.formBuilder.group({
-            'fieldName': [this.executionTemplateFilter.fieldName, [Validators.required, this.filterService.fieldNameFormatControl()]],
-            'comparedRegex': [this.executionTemplateFilter.comparedRegex, [Validators.required, this.filterService.comparedRegexFormatControl()]],
-            'identifier': [this.executionTemplateFilter.identifier, [Validators.required, this.filterService.uniqueInTemplateControl(this.existingIdentifiers)]],
-            'excluded': [this.executionTemplateFilter.excluded]
+            'fieldName': [this.entity.fieldName, [Validators.required, this.filterService.fieldNameFormatControl()]],
+            'comparedRegex': [this.entity.comparedRegex, [Validators.required, this.filterService.comparedRegexFormatControl()]],
+            'identifier': [this.entity.identifier, [Validators.required, this.filterService.uniqueInTemplateControl(this)]],
+            'excluded': [this.entity.excluded]
         })
         return this.executionFilterForm
     }
@@ -53,20 +60,17 @@ export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionT
 
     initCreate(): Promise<void> {
         this.entity = new ExecutionTemplateFilter()
-        this.entity.executionTemplateId = Number(localStorage.getItem('templateId'))
-
-        this.templateName = localStorage.getItem('templateName')
-        this.filterService.getExistingIdentifiers(this)
         return Promise.resolve()
     }
 
     initEdit(): Promise<void> {
-        this.filterService.getStudyName(this)
+        this.templateId = this.entity.executionTemplateId
+        this.filterService.getTemplateName(this)
         this.filterService.getExistingIdentifiers(this)
         return Promise.resolve()}
 
     initView(): Promise<void> {
-        this.filterService.getStudyName(this)
+        this.filterService.getTemplateName(this)
         return Promise.resolve()
     }
 

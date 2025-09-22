@@ -33,16 +33,16 @@ public class ExecutionTemplateApiController implements ExecutionTemplateApi {
     }
 
     public ResponseEntity<ExecutionTemplateDTO> saveNewExecutionTemplate(@Parameter(description = "The execution template to create", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO) {
-        return new ResponseEntity<ExecutionTemplateDTO>(mapper.ExecutionTemplateToDTO(repository.save(mapper.ExecutionTemplateDTOToEntity(executionTemplateDTO))), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.ExecutionTemplateToDTO(repository.save(mapper.ExecutionTemplateDTOToEntity(executionTemplateDTO))), HttpStatus.OK);
     }
 
-    public ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionId") Long executionId) {
-        repository.findById(executionId).ifPresent(repository::delete);
+    public ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId) {
+        repository.findById(executionTemplateId).ifPresent(repository::delete);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    public ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionId") Long executionId) {
-        return new ResponseEntity<>(mapper.ExecutionTemplateToDTO(repository.findById(executionId).orElse(null)), HttpStatus.OK);
+    public ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId) {
+        return new ResponseEntity<>(mapper.ExecutionTemplateToDTO(repository.findById(executionTemplateId).orElse(null)), HttpStatus.OK);
     }
 
     public ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(@Parameter(description = "The execution template updated", required = true) ExecutionTemplateDTO executionTemplateDTO,

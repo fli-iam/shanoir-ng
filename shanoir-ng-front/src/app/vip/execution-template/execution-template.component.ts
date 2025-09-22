@@ -48,10 +48,19 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
         protected templateService: ExecutionTemplateService,
         public cdr: ChangeDetectorRef) {
         super(route, 'execution-template')
-        if ( this.breadcrumbsService.currentStep ) {
-            localStorage.setItem('studyId', JSON.stringify(this.breadcrumbsService.currentStep.getPrefilledValue("studyId")))
-            this.breadcrumbsService.currentStep.getPrefilledValue("studyName").then(studyName => this.studyName = studyName)
-            localStorage.setItem('studyName', this.studyName)
+        if (this.breadcrumbsService.currentStep && this.mode == "create") {
+            Promise.all([
+                this.breadcrumbsService.currentStep.getPrefilledValue("studyId"),
+                this.breadcrumbsService.currentStep.getPrefilledValue("studyName")
+            ]).then(([studyId, studyName]) => {
+                this.entity.studyId = studyId;
+                this.studyId = studyId;
+                this.studyName = studyName;
+
+                this.templateService.getExistingPriorities(this);
+                this.templateService.getPipelinesFromVIP(this);
+                this.templateService.initParameters(this);
+            });
         }
     }
 
@@ -64,8 +73,7 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
             'name': [this.entity.name, [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.registerOnSubmitValidator('unique', 'name')]],
             'pipelineName': [this.entity.pipelineName, [Validators.required]],
             'filterCombination': [this.entity.filterCombination, [this.templateService.filterCombinationControl()]],
-            'priority': [this.entity.priority, [Validators.required, this.templateService.uniqueInStudyControl(this.existingPriorities)]],
-            'group': ["examination", [Validators.required]],
+            'priority': [this.entity.priority, [Validators.required, this.templateService.uniqueInStudyControl(this)]],
             'processing_type': [this.pipelineParameters['processing_type'], [Validators.required]],
             'export_format': [this.pipelineParameters['export_format'], [Validators.required]],
             'execution_name': [this.pipelineParameters['execution_name'], [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -87,22 +95,16 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
 
     initCreate(): Promise<void> {
         this.entity = new ExecutionTemplate()
-        this.entity.studyId = Number(localStorage.getItem('studyId'))
-
-        this.studyName = localStorage.getItem('studyName')
-        this.templateService.getPipelinesFromVIP(this)
-        this.templateService.initParameters(this)
-        this.templateService.getExistingPriorities(this)
         return Promise.resolve()
     }
 
     initEdit(): Promise<void> {
+        this.studyId = this.entity.studyId
+        this.templateService.getExistingPriorities(this);
+        this.templateService.getPipelinesFromVIP(this);
         this.templateService.onPipelineLoading(this, this.formBuilder)
         this.templateService.getStudyName(this)
         this.templateService.getParameters(this)
-
-        this.templateService.getPipelinesFromVIP(this)
-        this.templateService.getExistingPriorities(this)
         this.cdr.detectChanges()
 
         return Promise.resolve()

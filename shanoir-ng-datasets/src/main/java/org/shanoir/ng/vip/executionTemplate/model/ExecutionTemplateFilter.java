@@ -2,9 +2,10 @@ package org.shanoir.ng.vip.executionTemplate.model;
 
 import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.hateoas.HalEntity;
 
 @Entity
-public class ExecutionTemplateFilter extends AbstractEntity {
+public class ExecutionTemplateFilter extends HalEntity {
 
     private String fieldName;
     private String comparedRegex;

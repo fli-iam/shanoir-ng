@@ -10,6 +10,6 @@ public interface ExecutionTemplateFilterRepository extends CrudRepository<Execut
 
     List<ExecutionTemplateFilter> findByExecutionTemplate_Id(Long executionTemplateId);
 
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplate.getStudy(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplateFilter.executionTemplate.getStudy(), 'CAN_ADMINISTRATE'))")
     void delete(ExecutionTemplateFilter executionTemplateFilter);
 }

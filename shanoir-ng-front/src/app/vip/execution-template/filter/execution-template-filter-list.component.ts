@@ -64,4 +64,8 @@ export class ExecutionTemplateFilterListComponent extends BrowserPaginEntityList
         };
     }
 
+    protected completeColDefs(): void {
+        this.columnDefs.push({ headerName: "Edit", type: "button", width: "10px", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
+        this.columnDefs.push({ headerName: "Delete", type: "button", width: "10px", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
+    }
 }
