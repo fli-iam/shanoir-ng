@@ -2,7 +2,6 @@ package org.shanoir.ng.dicom.web.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,6 +9,7 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.FileBody;
 import org.apache.hc.client5.http.entity.mime.InputStreamBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.entity.mime.MultipartPart;
@@ -34,10 +34,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.annotation.PostConstruct;
 
@@ -292,15 +288,15 @@ public class DICOMWebService {
 	}
 
 	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
-		try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
-			ContentBody contentBody = new InputStreamBody(
-					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
-			// build MultipartPart
-			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-			partBuilder.setBody(contentBody);
-			MultipartPart multipartPart = partBuilder.build();
-			multipartEntityBuilder.addPart(multipartPart);
+		try {
+			FileBody fileBody = new FileBody(
+                dicomFile,
+                ContentType.create(CONTENT_TYPE_DICOM)
+            );
+            MultipartPartBuilder partBuilder = MultipartPartBuilder.create()
+                .addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
+                .setBody(fileBody);
+            multipartEntityBuilder.addPart(partBuilder.build());
 		} catch(Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
