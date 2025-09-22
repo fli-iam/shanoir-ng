@@ -290,12 +290,12 @@ public class DICOMWebService {
 	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
 		try {
 			FileBody fileBody = new FileBody(
-                dicomFile,
-                ContentType.create(CONTENT_TYPE_DICOM)
+                	dicomFile,
+                	ContentType.create(CONTENT_TYPE_DICOM)
             );
             MultipartPartBuilder partBuilder = MultipartPartBuilder.create()
-                .addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
-                .setBody(fileBody);
+                	.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
+                	.setBody(fileBody);
             multipartEntityBuilder.addPart(partBuilder.build());
 		} catch(Exception e) {
 			LOG.error(e.getMessage(), e);
