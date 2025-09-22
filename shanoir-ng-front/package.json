@@ -29,7 +29,7 @@
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",
     "http-status-codes": "^2.1.4",
-    "jspdf": "^3.0.1",
+    "jspdf": "^3.0.3",
     "keycloak-js": "^26.1.5",
     "ng-event-source": "^1.0.14",
     "ngx-json-viewer": "3.2.1",
