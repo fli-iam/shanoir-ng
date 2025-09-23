@@ -14,22 +14,22 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
-      // "@angular-eslint/directive-selector": [
-      //   "error",
-      //   {
-      //     type: "attribute",
-      //     prefix: "app",
-      //     style: "camelCase",
-      //   },
-      // ],
-      // "@angular-eslint/component-selector": [
-      //   "error",
-      //   {
-      //     type: "element",
-      //     prefix: "app",
-      //     style: "kebab-case",
-      //   },
-      // ],
+      "@angular-eslint/directive-selector": [
+        "error",
+        {
+          type: "attribute",
+          //prefix: "app",
+          style: "camelCase",
+        },
+      ],
+      "@angular-eslint/component-selector": [
+        "error",
+        {
+          type: "element",
+          //prefix: "app",
+          style: "kebab-case",
+        },
+      ],
 
       // Core ESLint rules - turn off common errors
       "no-prototype-builtins": "off",
@@ -51,7 +51,6 @@ module.exports = tseslint.config(
       "@typescript-eslint/no-namespace": "off", // ?
       "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-duplicate-enum-values": "off",
       "@typescript-eslint/no-unsafe-function-type": "off",
       "@typescript-eslint/prefer-as-const": "off",
