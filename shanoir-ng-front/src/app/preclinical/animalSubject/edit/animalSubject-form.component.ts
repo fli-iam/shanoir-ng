@@ -121,7 +121,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     }
 
-    public GetModes(): any { return (<any>this).Modes; }
+    public GetModes(): any { return (this as any).Modes; }
 
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }

@@ -81,7 +81,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     	for (let ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype != "Physiological data"){
-    			return <BloodGasData>ex;
+    			return ex as BloodGasData;
     		}
     	}
         return new BloodGasData();

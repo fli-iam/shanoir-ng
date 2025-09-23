@@ -31,7 +31,7 @@ import Keycloak from "keycloak-js";
 //   checks the session cookie, generates the token and redirects to us.
 //   It is reliable but slower (because of the two redirections the
 //   authentication is performed twice and the SPA is loaded twice).
-const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
+const USE_LOGIN_REQUIRED = (window as any).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
 
 @Injectable()
 export class KeycloakService {
@@ -105,7 +105,7 @@ export class KeycloakService {
                 if (KeycloakService.auth?.authz?.token) {
                     KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
-                        resolve(<string>KeycloakService.auth.authz.token);
+                        resolve(KeycloakService.auth.authz.token as string);
                     }).catch(() => {
                         reject();
                     });
@@ -118,7 +118,7 @@ export class KeycloakService {
     getRefreshToken(): Promise<string> {
         this.tokenPromise = new Promise<string>((resolve, reject) => {
             if (KeycloakService.auth.authz.token) {
-                resolve(<string>KeycloakService.auth.authz.refreshToken);
+                resolve(KeycloakService.auth.authz.refreshToken as string);
             } else {
                 reject();
             }
