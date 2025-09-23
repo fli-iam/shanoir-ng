@@ -25,8 +25,6 @@ import { Tag } from '../../tags/tag.model';
 import {Profile} from '../../shared/models/profile.model';
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 import {SubjectDTO} from "../../subjects/shared/subject.dto";
-import {Examination} from "../../examinations/shared/examination.model";
-
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
@@ -104,11 +102,6 @@ export class StudyDTOService {
         }
         entity.studyStatus = dto.studyStatus;
         entity.studyType = dto.studyType;
-        if (dto.subjectStudyList) {
-            entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => this.dtoToSubjectStudy(subjectStudyDto, entity));
-        } else {
-            entity.subjectStudyList = [];
-        }
         if (dto.subjects) {
             entity.subjects = dto.subjects.map(subjectDto => this.dtoToSubject(subjectDto));
         } else {
@@ -308,7 +301,6 @@ export class StudyDTO {
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
     studyType: StudyType;
     studyUserList: StudyUserDTO[];
-    subjectStudyList: SubjectStudyDTO[] = [];
     subjects: SubjectDTO[] = [];
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
@@ -342,11 +334,6 @@ export class StudyDTO {
         this.studyType = study.studyType;
         this.studyUserList = study.studyUserList ? study.studyUserList.map(su => {
             const dto = new StudyUserDTO(su);
-            dto.study = null;
-            return dto;
-        }) : null;
-        this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
-            const dto = new SubjectStudyDTO(ss);
             dto.study = null;
             return dto;
         }) : null;

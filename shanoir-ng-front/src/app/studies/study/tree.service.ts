@@ -604,17 +604,17 @@ export class TreeService {
             rights
         );
 
-        const subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
-            if(subjectStudy.subject.preclinical){
-                return PreclinicalSubjectNode.fromSubjectStudy(
-                    subjectStudy,
+        const subjects: SubjectNode[] = study.subjects.map(subject => {
+            if(subject.preclinical){
+                return PreclinicalSubjectNode.fromSubject(
+                    subject,
                     studyNode,
                     this.canAdminStudy,
                     this.canDownloadStudy
                 );
             } else {
-                return ClinicalSubjectNode.fromSubjectStudy(
-                    subjectStudy,
+                return ClinicalSubjectNode.fromSubject(
+                    subject,
                     studyNode,
                     this.canAdminStudy,
                     this.canDownloadStudy

@@ -44,7 +44,6 @@ export class Study extends Entity {
     detailedSizes: Map<string, number> = null;
     totalSize: number;
     studyType: StudyType;
-    subjectStudyList: SubjectStudy[] = [];
     subjects: Subject[] = [];
     studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];

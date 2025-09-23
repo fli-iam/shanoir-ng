@@ -26,6 +26,7 @@ import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { SubjectStudyPipe } from "../subjects/shared/subject-study.pipe";
 import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
+import {Subject} from "../subjects/shared/subject.model";
 
 export abstract class ShanoirNode {
 
@@ -234,14 +235,14 @@ export class ClinicalSubjectNode extends SubjectNode {
     public awesome = "fas fa-user-injured";
     qualityTag: QualityTag;
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
         return new ClinicalSubjectNode(
             parent,
-            subjectStudy.subject.id,
-            new SubjectStudyPipe().transform(subjectStudy),
-            subjectStudy.tags,
+            subject.id,
+            subject.name,
+            subject.tags,
             UNLOADED,
-            subjectStudy.qualityTag,
+            subject.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -253,14 +254,14 @@ export class PreclinicalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
         return new PreclinicalSubjectNode(
             parent,
-            subjectStudy.subject.id,
-            new SubjectStudyPipe().transform(subjectStudy),
-            subjectStudy.tags,
+            subject.id,
+            subject.name,
+            subject.tags,
             UNLOADED,
-            subjectStudy.qualityTag,
+            subject.qualityTag,
             canDeleteChildren,
             canDownload);
     }
