@@ -240,6 +240,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     public stringify(entity: Study) {
+        console.log("stringify study : ", entity);
         let dto = new StudyDTO(entity);
         let test = JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);

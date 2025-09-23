@@ -604,6 +604,7 @@ export class TreeService {
             rights
         );
 
+        console.log("study.subjects : ", study.subjects);
         let subjects: SubjectNode[] = study.subjects.map(subject => {
             if(subject.preclinical){
                 return PreclinicalSubjectNode.fromSubject(

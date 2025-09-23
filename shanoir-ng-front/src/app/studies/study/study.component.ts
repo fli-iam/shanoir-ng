@@ -37,7 +37,6 @@ import { Profile } from "../../shared/models/profile.model";
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
@@ -522,7 +521,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        let newStudy: boolean = !this.study?.id; 
+        let newStudy: boolean = !this.study?.id;
         return super.save(() => {
             let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
