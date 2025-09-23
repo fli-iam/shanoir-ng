@@ -23,7 +23,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ActivatedRoute } from '@angular/router';
 import { AccessRequestService } from './access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
-import { Study } from 'src/app/studies/shared/study.model';
 
 @Component({
     selector: 'access-request',

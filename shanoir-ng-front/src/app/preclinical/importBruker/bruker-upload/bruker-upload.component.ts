@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { slideDown } from '../../../shared/animations/animations';

@@ -26,7 +26,6 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import {TaskService} from "../../../async-tasks/task.service";
-import {Task} from "../../../async-tasks/task.model";
 
 @Component({
     selector: 'shanoir-table',

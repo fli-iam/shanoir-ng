@@ -20,7 +20,6 @@ import * as AppUtils from '../../../utils/app.utils';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from './animalSubject.model';
 import { PreclinicalSubject, PreclinicalSubjectDTO } from './preclinicalSubject.model';
-import {PRECLINICAL_API_SUBJECT_FIND_URL} from "../../utils/preclinical.utils";
 
 
 @Injectable()

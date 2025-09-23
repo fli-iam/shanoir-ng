@@ -13,7 +13,6 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
-import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyService } from '../../studies/shared/study.service';

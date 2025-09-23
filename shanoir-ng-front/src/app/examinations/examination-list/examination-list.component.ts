@@ -21,7 +21,6 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {Study} from "../../studies/shared/study.model";
 
 
 @Component({

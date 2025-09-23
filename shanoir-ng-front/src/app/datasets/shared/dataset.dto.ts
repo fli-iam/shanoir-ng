@@ -16,7 +16,6 @@ import { Injectable, Injector } from '@angular/core';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
-import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';

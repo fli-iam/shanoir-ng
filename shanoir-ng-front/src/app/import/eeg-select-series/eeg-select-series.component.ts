@@ -11,12 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener, ViewChild} from '@angular/core';
+import { Component, ViewChild} from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import * as AppUtils from '../../utils/app.utils';
-import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';

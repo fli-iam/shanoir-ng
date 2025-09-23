@@ -15,7 +15,7 @@ import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { DatasetNode, MetadataNode } from '../../tree/tree.model';
+import { MetadataNode } from '../../tree/tree.model';
 
 
 @Component({

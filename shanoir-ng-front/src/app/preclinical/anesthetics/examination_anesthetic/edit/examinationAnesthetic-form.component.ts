@@ -13,7 +13,7 @@
  */
 
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
-import {  ActivatedRoute, ResolveEnd} from '@angular/router';
+import {  ActivatedRoute} from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
@@ -27,7 +27,6 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({

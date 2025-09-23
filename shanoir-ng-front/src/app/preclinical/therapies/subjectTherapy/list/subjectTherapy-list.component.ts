@@ -23,7 +23,6 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
-import {SubjectPathology} from "../../../pathologies/subjectPathology/shared/subjectPathology.model";
 
 @Component({
     selector: 'subject-therapy-list',

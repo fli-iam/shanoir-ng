@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, Injectable } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { FileUploadReady } from './fileUploadReady.model';

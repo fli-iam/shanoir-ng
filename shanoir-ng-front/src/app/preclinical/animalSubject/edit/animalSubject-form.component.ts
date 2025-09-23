@@ -21,14 +21,13 @@ import { EntityComponent } from '../../../shared/components/entity/entity.compon
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
-import {SimpleStudy, Study} from '../../../studies/shared/study.model';
+import { Study} from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { ReverseSubjectNode } from '../../../tree/tree.model';
-import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
 import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';

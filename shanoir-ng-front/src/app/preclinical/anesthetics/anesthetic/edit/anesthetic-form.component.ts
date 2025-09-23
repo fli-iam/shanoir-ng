@@ -25,7 +25,6 @@ import { AnestheticType } from "../../../shared/enum/anestheticType";
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
 import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { Enum } from "../../../../shared/utils/enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
@@ -33,9 +32,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Option } from '../../../../shared/select/select.component';
 
 @Component({
     selector: 'anesthetic-form',

@@ -17,7 +17,7 @@ import { Center } from '../../centers/shared/center.model';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';

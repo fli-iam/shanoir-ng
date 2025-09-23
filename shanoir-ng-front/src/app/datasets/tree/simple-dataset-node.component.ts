@@ -14,8 +14,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { TaskState } from "../../async-tasks/task.model";
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';

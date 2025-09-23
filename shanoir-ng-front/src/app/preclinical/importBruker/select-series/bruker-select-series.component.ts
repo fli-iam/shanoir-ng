@@ -16,7 +16,7 @@ import { Component } from '@angular/core';
 
 
 import { ImportDataService } from '../../../import/shared/import.data-service';
-import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '@angular/router';
 import { slideDown } from '../../../shared/animations/animations';
 import * as AppUtils from '../../../utils/app.utils';

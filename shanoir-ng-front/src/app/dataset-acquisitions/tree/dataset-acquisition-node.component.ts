@@ -14,7 +14,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 
-import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';

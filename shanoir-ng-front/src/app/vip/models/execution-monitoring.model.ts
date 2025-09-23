@@ -14,7 +14,6 @@
 
 import { DatasetProcessing } from "src/app/datasets/shared/dataset-processing.model";
 import { StatusEnum } from "./execution";
-import {DatasetParameterDTO} from "./dataset-parameter.dto";
 
 
 export class ExecutionMonitoring extends DatasetProcessing {

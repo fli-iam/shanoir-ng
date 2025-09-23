@@ -12,13 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyLight } from '../studies/shared/study.dto';

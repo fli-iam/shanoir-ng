@@ -6,7 +6,6 @@ import {Study} from "../shared/study.model";
 import {Page, Pageable} from "../../shared/components/table/pageable.model";
 import {TableComponent} from "../../shared/components/table/table.component";
 import {StudyUser} from "../shared/study-user.model";
-import {Examination} from "../../examinations/shared/examination.model";
 
 @Component({
     selector: 'study-history',

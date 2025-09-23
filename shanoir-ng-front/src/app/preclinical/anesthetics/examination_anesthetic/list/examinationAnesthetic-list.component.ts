@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, Input, ViewChild, ViewContainerRef} from '@angular/core'
+import {Component, ViewChild} from '@angular/core'
 
 import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';

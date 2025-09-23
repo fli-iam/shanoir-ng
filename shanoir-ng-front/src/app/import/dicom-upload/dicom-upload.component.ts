@@ -12,14 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import {Component, HostListener, ViewChild} from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import {Component, HostListener} from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
 import { Study } from '../../studies/shared/study.model';
@@ -30,7 +29,6 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyLight } from 'src/app/studies/shared/study.dto';
 import {CenterService} from "../../centers/shared/center.service";
 import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisition-equipment.model";
 import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";

@@ -20,7 +20,6 @@ import { User } from './user.model';
 import { HttpClient } from '@angular/common/http';
 import { AccessRequest } from '../../users/access-request/access-request.model'
 import { Subject } from 'rxjs';
-import { BACKEND_API_STUDY_DELETE_USER } from "../../utils/app.utils";
 
 
 @Injectable()

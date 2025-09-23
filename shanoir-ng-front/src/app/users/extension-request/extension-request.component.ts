@@ -13,12 +13,10 @@
  */
 
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { Subscription } from 'rxjs';
 import * as AppUtils from '../../utils/app.utils';

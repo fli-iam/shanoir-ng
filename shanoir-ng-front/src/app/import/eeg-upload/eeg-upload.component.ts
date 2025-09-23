@@ -12,14 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, ViewChild} from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { Component} from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { TaskState } from 'src/app/async-tasks/task.model';
 

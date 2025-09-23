@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../instrument-assessment/instrument.model'
 
 @Component({

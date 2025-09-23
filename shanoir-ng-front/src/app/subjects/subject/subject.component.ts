@@ -32,11 +32,8 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
-import {StudyLight} from "../../studies/shared/study.dto";
 import {Tag} from "../../tags/tag.model";
-import {SubjectStudy} from "../shared/subject-study.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {SubjectType} from "../shared/subject.types";
 import {isDarkColor} from "../../utils/app.utils";
 
 @Component({

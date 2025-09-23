@@ -14,7 +14,7 @@
 
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
-import { APP_BASE_HREF, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';

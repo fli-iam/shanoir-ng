@@ -13,9 +13,7 @@
  */
 import { Component } from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';

@@ -17,7 +17,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {ShanoirError} from "../../shared/models/error.model";
 import {StudyCard} from "../../study-cards/shared/study-card.model";
 import {ManufacturerModel} from "./manufacturer-model.model";

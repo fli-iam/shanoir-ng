@@ -1,21 +1,16 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {
-    AbstractControl,
     UntypedFormControl,
     UntypedFormGroup,
-    FormGroup,
-    FormControl,
     ValidatorFn,
     Validators
 } from '@angular/forms';
 import {Router} from '@angular/router';
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
-import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
 import {Execution} from 'src/app/vip/models/execution';
 import {ParameterType} from 'src/app/vip/models/parameterType';
 import {Pipeline} from 'src/app/vip/models/pipeline';
 import {ExecutionService} from 'src/app/vip/execution/execution.service';
-import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import {DatasetLight, DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
 import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';

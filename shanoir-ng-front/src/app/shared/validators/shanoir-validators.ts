@@ -3,7 +3,6 @@ import {
     ValidationErrors,
     ValidatorFn,
     Validators as NgValidators,
-    FormGroup,
 } from '@angular/forms';
 
 export class ShanoirValidators {

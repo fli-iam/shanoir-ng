@@ -22,8 +22,6 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {ShanoirError} from "../../shared/models/error.model";
-import {Center} from "../../centers/shared/center.model";
 
 @Component({
     selector: 'acquisition-equipment-list',

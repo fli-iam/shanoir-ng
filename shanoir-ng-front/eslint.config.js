@@ -2,10 +2,14 @@
 const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
+const unusedImports = require("eslint-plugin-unused-imports");
 
 module.exports = tseslint.config(
   {
     files: ["**/*.ts"],
+    plugins: {
+      "unused-imports": unusedImports,
+    },
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -43,6 +47,7 @@ module.exports = tseslint.config(
       "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors
+      "unused-imports/no-unused-imports": "error",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-function": "off",

@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';

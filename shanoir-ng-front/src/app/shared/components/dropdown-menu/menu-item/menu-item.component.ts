@@ -13,7 +13,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, EventEmitter, forwardRef, HostListener, Input, Output, QueryList } from '@angular/core';
+import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList } from '@angular/core';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 
 @Component({

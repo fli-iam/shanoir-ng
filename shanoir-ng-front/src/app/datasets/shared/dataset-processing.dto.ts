@@ -17,7 +17,6 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from './dataset-processing.service';
-import { DatasetDTO } from './dataset.dto';
 
 @Injectable()
 export class DatasetProcessingDTOService {

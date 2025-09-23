@@ -11,11 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { slideDown } from '../../shared/animations/animations';
-import {TableComponent} from "../../shared/components/table/table.component";
-import {ToggleSwitchComponent} from "../../shared/switch/switch.component";
 
 
 @Component({

@@ -19,7 +19,6 @@ import { ConfirmDialogService } from "../../shared/components/confirm-dialog/con
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { AccessRequest } from "../../users/access-request/access-request.model";
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';

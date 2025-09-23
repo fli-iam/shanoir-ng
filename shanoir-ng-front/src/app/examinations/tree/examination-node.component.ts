@@ -13,17 +13,12 @@
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { ConsoleService } from '../../shared/console/console.service';
 
 
-import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { environment } from '../../../environments/environment';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
