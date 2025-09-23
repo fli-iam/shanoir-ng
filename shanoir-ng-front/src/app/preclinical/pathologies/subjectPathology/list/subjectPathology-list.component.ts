@@ -14,12 +14,13 @@
 
 import {Component} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectPathology } from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 

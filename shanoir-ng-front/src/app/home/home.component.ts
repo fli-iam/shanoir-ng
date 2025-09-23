@@ -13,9 +13,9 @@
  */
 
 import { Component } from '@angular/core';
+
 import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
-
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';

@@ -14,8 +14,9 @@
  */
 
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { Manufacturer } from './manufacturer.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+
+import { Manufacturer } from './manufacturer.model';
 
 export class ManufacturerModel extends Entity {
     id: number;

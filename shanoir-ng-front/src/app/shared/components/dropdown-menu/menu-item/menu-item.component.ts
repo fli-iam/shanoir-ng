@@ -14,6 +14,7 @@
  */
 
 import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList } from '@angular/core';
+
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 
 @Component({

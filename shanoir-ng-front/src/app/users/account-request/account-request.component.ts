@@ -14,11 +14,12 @@
 
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
-
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
+
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';

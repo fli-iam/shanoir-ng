@@ -14,9 +14,11 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+
 import { QualityCardDTOService } from './quality-card.dto';
 import { QualityCardDTO } from './quality-card.dto.model';
 import { QualityCard } from './quality-card.model';

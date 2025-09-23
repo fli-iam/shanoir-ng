@@ -13,14 +13,15 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
+
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
-import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 
 
 @Component({

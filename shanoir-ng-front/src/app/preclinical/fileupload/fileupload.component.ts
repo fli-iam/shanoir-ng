@@ -14,9 +14,9 @@
 
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { FileUploadReady } from './fileUploadReady.model';
-import { Observable } from 'rxjs';
 
 @Component({
     selector: 'file-upload',

@@ -23,6 +23,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { Tag } from "../../tags/tag.model";
 import { Channel, EegDataset, Event } from '../dataset/eeg/dataset.eeg.model';
 import { EchoTime, FlipAngle, InversionTime, MrDataset, MrDatasetNature, MrQualityProcedureType, RepetitionTime } from '../dataset/mr/dataset.mr.model';
+
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';

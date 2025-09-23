@@ -16,11 +16,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasData } from '../shared/bloodGasData.model';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
-
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ModesAware } from "../../../shared/mode/mode.decorator";

@@ -13,12 +13,14 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyUser } from '../../studies/shared/study-user.model';
 

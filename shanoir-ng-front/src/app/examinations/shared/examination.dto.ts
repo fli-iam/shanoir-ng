@@ -19,9 +19,10 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
-import { Examination } from './examination.model';
 import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+
+import { Examination } from './examination.model';
 
 @Injectable()
 export class ExaminationDTOService {

@@ -18,12 +18,16 @@ import { Observable, Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { Tag } from 'src/app/tags/tag.model';
+
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import * as AppUtils from '../../utils/app.utils';
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
+import {Subject} from "../../subjects/shared/subject.model";
+
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
 import {
@@ -34,8 +38,6 @@ import {
     StudyStorageVolumeDTO
 } from './study.dto';
 import { Study } from './study.model';
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
-import {Subject} from "../../subjects/shared/subject.model";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {

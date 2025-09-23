@@ -19,6 +19,7 @@ import { ConsoleService } from 'src/app/shared/console/console.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';

@@ -15,13 +15,13 @@
 import {Component,ViewChild} from '@angular/core'
 
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
-
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'pathology-list',

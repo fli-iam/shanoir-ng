@@ -1,4 +1,5 @@
 import {Component, Input, ViewChild} from '@angular/core';
+
 import {ColumnDefinition} from "../../shared/components/table/column.definition.type";
 import {ShanoirEvent} from "../../users/shanoir-event/shanoir-event.model";
 import {ShanoirEventService} from "../../users/shanoir-event/shanoir-event.service";

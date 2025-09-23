@@ -14,8 +14,9 @@
 
 import { Pipe, PipeTransform } from "@angular/core";
 
-import { AcquisitionEquipment } from "./acquisition-equipment.model";
 import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
+
+import { AcquisitionEquipment } from "./acquisition-equipment.model";
 import { ManufacturerModel } from './manufacturer-model.model';
 
 @Pipe({

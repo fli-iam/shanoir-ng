@@ -13,11 +13,10 @@
  */
 
 import { Component } from '@angular/core';
-
+import { Router } from '@angular/router';
 
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { Router } from '@angular/router';
 import { slideDown } from '../../../shared/animations/animations';
 import * as AppUtils from '../../../utils/app.utils';
 import { PatientDicom, SerieDicom } from '../../../import/shared/dicom-data.model';

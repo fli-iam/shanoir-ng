@@ -1,7 +1,9 @@
-import { gitDescribeSync } from 'git-describe';
-import { version } from '../package.json';
 import { resolve, relative } from 'path';
+
+import { gitDescribeSync } from 'git-describe';
 import { writeFileSync } from 'fs-extra';
+
+import { version } from '../package.json';
 
 const gitInfo = gitDescribeSync({
     match: 'NG_v[0-9]*',

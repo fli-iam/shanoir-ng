@@ -13,8 +13,8 @@
  */
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
-
 import { Router } from '@angular/router';
+
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { ConsoleComponent } from './shared/console/console.component';

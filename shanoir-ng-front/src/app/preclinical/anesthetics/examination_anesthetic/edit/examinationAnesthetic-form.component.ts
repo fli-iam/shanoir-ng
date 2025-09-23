@@ -16,6 +16,8 @@ import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
 import {  ActivatedRoute} from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
 import { Reference }   from '../../../reference/shared/reference.model';
@@ -27,7 +29,6 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-anesthetic-form',

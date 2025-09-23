@@ -3,12 +3,22 @@ const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 const unusedImports = require("eslint-plugin-unused-imports");
+const importPlugin = require("eslint-plugin-import");
+
 
 module.exports = tseslint.config(
   {
     files: ["**/*.ts"],
     plugins: {
       "unused-imports": unusedImports,
+      "import": importPlugin,
+    },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: "./tsconfig.json",
+        },
+      },
     },
     extends: [
       eslint.configs.recommended,
@@ -47,7 +57,6 @@ module.exports = tseslint.config(
       "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors
-      "unused-imports/no-unused-imports": "error",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-function": "off",
@@ -56,6 +65,20 @@ module.exports = tseslint.config(
       "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
       "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
+
+      // Unused imports plugin
+      "unused-imports/no-unused-imports": "error",
+      
+      // Import plugin
+      "import/no-unresolved": "error",
+      "import/no-duplicates": "error",
+      "import/order": [
+        "warn",
+        {
+          "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always"
+        }
+      ],
       
       // Angular ESLint rules - turn off common errors
       "@angular-eslint/no-empty-lifecycle-method": "off",

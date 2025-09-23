@@ -17,6 +17,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { AbstractInput } from '../shared/form/input.abstract';
 import { isDarkColor } from '../utils/app.utils';
+
 import { Tag } from './tag.model';
 
 

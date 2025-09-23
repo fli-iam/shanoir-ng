@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import Keycloak from "keycloak-js";
 
 import * as AppUtils from '../../utils/app.utils';
-import Keycloak from "keycloak-js";
 
 
 // The keycloak adapter supports two authentication methods : "login-required"

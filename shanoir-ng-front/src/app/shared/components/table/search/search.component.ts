@@ -13,6 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+
 import { ColumnDefinition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
 

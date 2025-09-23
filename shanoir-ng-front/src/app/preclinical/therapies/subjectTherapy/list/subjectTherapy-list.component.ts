@@ -14,6 +14,8 @@
 
 import {Component} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
@@ -21,7 +23,6 @@ import { TherapyType } from "../../../shared/enum/therapyType";
 import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 @Component({

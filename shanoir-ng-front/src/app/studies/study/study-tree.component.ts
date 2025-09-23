@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
-
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { SubjectNodeComponent } from 'src/app/subjects/tree/subject-node.component';
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode } from 'src/app/tree/tree.model';
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
+
 import { environment } from "../../../environments/environment";
+
 import { TreeService } from './tree.service';
 
 

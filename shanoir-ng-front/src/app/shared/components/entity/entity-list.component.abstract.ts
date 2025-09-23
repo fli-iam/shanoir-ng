@@ -15,6 +15,8 @@ import { Directive, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
 import { ServiceLocator } from '../../../utils/locator.service';
@@ -26,9 +28,9 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '..//table/column.definition.type';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
-import { TreeService } from 'src/app/studies/study/tree.service';
 
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {

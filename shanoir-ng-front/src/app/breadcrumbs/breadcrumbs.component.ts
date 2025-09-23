@@ -14,10 +14,12 @@
 
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { BreadcrumbsService, Step } from './breadcrumbs.service';
 import { Subject, Subscription } from 'rxjs';
-import { WaitBurstEnd } from '../utils/wait-burst-end';
 import { take } from 'rxjs/operators';
+
+import { WaitBurstEnd } from '../utils/wait-burst-end';
+
+import { BreadcrumbsService, Step } from './breadcrumbs.service';
 
 @Component({
     selector: 'breadcrumbs',

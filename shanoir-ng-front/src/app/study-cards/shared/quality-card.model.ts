@@ -15,6 +15,7 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Option } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { allOfEnum } from '../../utils/app.utils';
+
 import { StudyCardCondition } from './study-card.model';
 
 

@@ -18,6 +18,7 @@ import { EntityService } from '../../../shared/components/entity/entity.abstract
 import { Subject } from '../../../subjects/shared/subject.model';
 import * as AppUtils from '../../../utils/app.utils';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
+
 import { AnimalSubject } from './animalSubject.model';
 import { PreclinicalSubject, PreclinicalSubjectDTO } from './preclinicalSubject.model';
 

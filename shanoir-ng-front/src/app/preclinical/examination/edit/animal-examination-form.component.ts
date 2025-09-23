@@ -15,6 +15,10 @@
 import { Component, ViewChild, ElementRef} from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
@@ -35,15 +39,12 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
-import { Selection } from 'src/app/studies/study/tree.service';
 import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 import {Subject} from "../../../subjects/shared/subject.model";
 

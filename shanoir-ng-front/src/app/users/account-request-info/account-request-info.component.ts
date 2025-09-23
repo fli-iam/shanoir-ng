@@ -14,11 +14,15 @@
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
-import { Location } from '@angular/common';
+
 import { AccountRequestInfo } from './account-request-info.model';
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 
 @Component ({
     selector: 'account-request-info',

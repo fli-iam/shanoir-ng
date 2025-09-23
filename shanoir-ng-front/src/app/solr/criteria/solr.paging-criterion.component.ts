@@ -13,10 +13,11 @@
  */
 import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { slideDown, slideRight } from '../../shared/animations/animations';
-import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import * as shajs from 'sha.js';
 import { Router } from '@angular/router';
+
+import { slideDown, slideRight } from '../../shared/animations/animations';
+import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 

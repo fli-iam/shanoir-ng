@@ -15,13 +15,15 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
+import { Subscription } from 'rxjs';
+
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'download-setup',

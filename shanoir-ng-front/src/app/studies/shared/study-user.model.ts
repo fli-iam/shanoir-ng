@@ -14,6 +14,7 @@
 import { Center } from '../../centers/shared/center.model';
 import { Id } from '../../shared/models/id.model';
 import { User } from '../../users/shared/user.model';
+
 import { StudyUserRight } from './study-user-right.enum';
 import { Study } from './study.model';
 

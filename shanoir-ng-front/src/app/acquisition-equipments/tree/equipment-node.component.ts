@@ -15,6 +15,7 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleCh
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";

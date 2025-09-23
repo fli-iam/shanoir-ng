@@ -15,11 +15,12 @@
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+
+import { UserService } from '../shared/user.service';
+import * as AppUtils from '../../utils/app.utils';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
-import { UserService } from '../shared/user.service';
-import { Subscription } from 'rxjs';
-import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'extensionRequest',

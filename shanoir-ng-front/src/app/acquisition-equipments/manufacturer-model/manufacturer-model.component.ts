@@ -16,13 +16,14 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Option } from '../../shared/select/select.component';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";

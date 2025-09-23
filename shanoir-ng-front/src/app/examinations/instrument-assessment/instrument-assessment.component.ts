@@ -13,6 +13,7 @@
  */
 
 import { Component, Input } from '@angular/core';
+
 import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../instrument-assessment/instrument.model'
 
 @Component({

@@ -14,6 +14,7 @@
 import { SimpleStudy } from '../../studies/shared/study.model';
 import { QualityTag } from '../../study-cards/shared/quality-card.model';
 import { Tag } from '../../tags/tag.model';
+
 import { Subject } from './subject.model';
 
 

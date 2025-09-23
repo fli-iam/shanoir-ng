@@ -15,6 +15,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
+
 import * as AppUtils from "../../../utils/app.utils";
 import {Pipeline} from "../../models/pipeline";
 

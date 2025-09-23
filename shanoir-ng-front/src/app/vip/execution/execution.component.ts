@@ -6,6 +6,8 @@ import {
     Validators
 } from '@angular/forms';
 import {Router} from '@angular/router';
+import { formatDate } from '@angular/common';
+
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
 import {Execution} from 'src/app/vip/models/execution';
 import {ParameterType} from 'src/app/vip/models/parameterType';
@@ -16,9 +18,9 @@ import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
 import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
 import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
 import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
+
 import {ExecutionDataService} from '../execution.data-service';
 import {Option} from '../../shared/select/select.component';
-import { formatDate } from '@angular/common';
 import {DatasetParameterDTO} from "../models/dataset-parameter.dto";
 import {GroupByEnum} from "../models/groupby.enum";
 import {PipelineParameter} from "../models/pipelineParameter";

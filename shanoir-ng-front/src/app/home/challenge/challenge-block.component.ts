@@ -13,9 +13,11 @@
  */
 
 import { Component, Input } from '@angular/core';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'challenge-block',

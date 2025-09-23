@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+
 import { Entity } from './entity.abstract';
 
 @Injectable()

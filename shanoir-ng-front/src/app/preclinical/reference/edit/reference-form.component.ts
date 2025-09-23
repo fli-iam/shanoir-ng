@@ -16,13 +16,13 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-
 import { slideDown } from '../../../shared/animations/animations';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'reference-form',

@@ -13,6 +13,8 @@
  */
 import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { combineLatest, Subscription , Subject as RxjsSubject} from 'rxjs';
+import { Router } from '@angular/router';
 
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
@@ -25,9 +27,6 @@ import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '../table/column.definition.type';
-import { combineLatest, Subscription } from 'rxjs';
-import { Router } from '@angular/router';
-import { Subject as RxjsSubject} from 'rxjs';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 
 

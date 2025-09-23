@@ -13,6 +13,7 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { FooterState } from './footer-state.model';
 
 @Component({

@@ -12,12 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription , of } from 'rxjs';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
-import { of } from 'rxjs';
 
 
 @Component({

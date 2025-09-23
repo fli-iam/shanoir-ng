@@ -12,17 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-
 
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { environment } from '../../../environments/environment';
 import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+
 
 @Component({
     selector: 'examination-node',

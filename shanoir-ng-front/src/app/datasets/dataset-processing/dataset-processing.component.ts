@@ -15,6 +15,12 @@
 import {Component, ViewChild} from '@angular/core';
 import {UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {formatDate} from "@angular/common";
+
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
+import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import {Option} from '../../shared/select/select.component';
 import {EntityComponent} from '../../shared/components/entity/entity.component.abstract';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
@@ -28,12 +34,8 @@ import {Subject} from '../../subjects/shared/subject.model';
 import {EntityService} from '../../shared/components/entity/entity.abstract.service';
 import {TableComponent} from '../../shared/components/table/table.component';
 import {ColumnDefinition} from '../../shared/components/table/column.definition.type';
-import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
 import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
-import {formatDate} from "@angular/common";
-import { Selection } from 'src/app/studies/study/tree.service';
 import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 
 @Component({

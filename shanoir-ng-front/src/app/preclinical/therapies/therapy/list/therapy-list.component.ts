@@ -14,6 +14,8 @@
 
 import {Component, ViewChild} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
@@ -22,7 +24,6 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 

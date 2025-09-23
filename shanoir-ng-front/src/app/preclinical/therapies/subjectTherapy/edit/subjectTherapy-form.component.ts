@@ -16,6 +16,8 @@ import { Component, Input, Output, EventEmitter} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectTherapy }    from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
 import { TherapyService } from '../../therapy/shared/therapy.service';
@@ -30,7 +32,6 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract";
 
 @Component({

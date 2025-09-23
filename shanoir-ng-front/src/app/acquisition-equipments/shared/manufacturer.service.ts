@@ -13,14 +13,15 @@
  */
 
 import { Injectable } from '@angular/core';
-
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import * as AppUtils from '../../utils/app.utils';
-import { Manufacturer } from './manufacturer.model';
 import { HttpClient } from '@angular/common/http';
+
+import * as AppUtils from '../../utils/app.utils';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
 import {Entity} from "../../shared/components/entity/entity.abstract";
+
+import { Manufacturer } from './manufacturer.model';
 
 @Injectable()
 export class ManufacturerService extends EntityService<Manufacturer> {

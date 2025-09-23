@@ -37,14 +37,15 @@ import { ConfirmDialogService } from '../../shared/components/confirm-dialog/con
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardRule } from '../shared/study-card.model';
-import { ShanoirMetadataField } from './action/action.component';
-import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
+
+import { StudyCardRuleComponent } from './study-card-rule.component';
+import { ShanoirMetadataField } from './action/action.component';
 import { QualityCardRuleComponent } from './quality-card-rule.component';
 
 @Component({

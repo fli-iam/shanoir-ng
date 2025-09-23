@@ -14,30 +14,31 @@
 
 import { Injectable } from "@angular/core";
 import { ActivatedRoute, ActivationStart, Router } from '@angular/router';
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-import { Center } from 'src/app/centers/shared/center.model';
-import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { Examination } from 'src/app/examinations/shared/examination.model';
-import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
-import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
-import { Subject } from "src/app/subjects/shared/subject.model";
-import { User } from 'src/app/users/shared/user.model';
-import { Study } from "../shared/study.model";
-
 import { Subject as RxjsSubject } from 'rxjs';
+
+import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Center } from 'src/app/centers/shared/center.model';
 import { Coil } from "src/app/coils/shared/coil.model";
 import { CoilService } from "src/app/coils/shared/coil.service";
+import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { Examination } from 'src/app/examinations/shared/examination.model';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
+import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
+import { Subject } from "src/app/subjects/shared/subject.model";
+import { User } from 'src/app/users/shared/user.model';
+
+import { SuperPromise } from '../../utils/super-promise';
+import { Study } from "../shared/study.model";
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';

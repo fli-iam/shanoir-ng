@@ -13,6 +13,7 @@
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
 import { arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { BrowserPaging } from '../components/table/browser-paging.model';
 import { ColumnDefinition } from '../components/table/column.definition.type';

@@ -23,13 +23,14 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
+
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
-import { FormGroup } from '@angular/forms';
 
 
 @Component({

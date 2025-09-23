@@ -22,13 +22,14 @@ import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
+import {Profile} from '../../shared/models/profile.model';
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
+
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
-import {Profile} from '../../shared/models/profile.model';
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
 
 @Injectable()
 export class StudyDTOService {

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+
 import { Pipeline } from './models/pipeline';
 
 @Injectable({

@@ -12,8 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable, ComponentRef } from '@angular/core';
-import { ConfirmDialogComponent } from './confirm-dialog.component';
+
 import { ServiceLocator } from '../../../utils/locator.service';
+
+import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 
 @Injectable()

@@ -13,15 +13,16 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'acquisition-equipment-list',

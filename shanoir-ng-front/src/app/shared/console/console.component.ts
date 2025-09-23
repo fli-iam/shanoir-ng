@@ -14,7 +14,9 @@
 
 import { ApplicationRef, Component, HostBinding, Injector, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+
 import { slideDown } from '../animations/animations';
+
 import { ConsoleService, Message } from './console.service';
 
 @Component({
