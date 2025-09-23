@@ -14,7 +14,6 @@
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
 import { Profile } from '../../shared/models/profile.model';

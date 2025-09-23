@@ -17,7 +17,6 @@ import { combineLatest, Subscription , Subject as RxjsSubject} from 'rxjs';
 import { Router } from '@angular/router';
 
 import { Study } from '../../../studies/shared/study.model';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { isDarkColor } from '../../../utils/app.utils';
 import { AbstractInput } from '../../form/input.abstract';
@@ -44,7 +43,7 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
     standalone: false
 })
 
-export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {
+export class SubjectStudyListComponent extends AbstractInput<Subject[]> implements OnChanges, OnDestroy {
 
     @Input() mode: Mode;
     @Input() subject: Subject;
@@ -59,7 +58,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     columnDefs: ColumnDefinition[];
     @ViewChild('table') table: TableComponent;
     private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
-    private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
+    private subjectListObs: RxjsSubject<Subject[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
     private warningDisplayed: boolean = false;
 
@@ -67,7 +66,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         private confirmDialogService: ConfirmDialogService) {
         super();
         this.subscriptions.push(
-            combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
+            combineLatest([this.subjectOrStudyObs, this.subjectListObs]).subscribe(() => {
                 this.processHasTags();
                 this.createColumnDefs();
             })
@@ -85,7 +84,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             if (this.selectableList) {
                 for (const item of this.selectableList) {
                     const option: Option<Subject | Study> = new Option(item, item.name);
-                    if(this.model && this.model.find(subStu => (this.compMode == 'study' ? subStu.subject.id : subStu.study.id) == option.value.id)) {
+                    if(this.model && this.model.find(subject => (this.compMode == 'study' ? subject.id : subject.study.id) == option.value.id)) {
                         option.disabled = true;
                     }
                     this.optionList.push(option);
@@ -103,25 +102,25 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
 
     writeValue(obj: any): void {
         super.writeValue(obj);
-        this.subjectStudyListObs.next(obj);
+        this.subjectListObs.next(obj);
         this.updateDisabled();
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<SubjectStudy>> {
-        return Promise.resolve(new BrowserPaging<SubjectStudy>(this.model, this.columnDefs).getPage(pageable));
+    getPage(pageable: FilterablePageable): Promise<Page<Subject>> {
+        return Promise.resolve(new BrowserPaging<Subject>(this.model, this.columnDefs).getPage(pageable));
     }
 
     private createColumnDefs() {
         if (this.compMode == 'study') {
-            this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
+            this.columnDefs = [{ headerName: 'Subject', field: 'name', defaultSortCol: true }];
         } else if (this.compMode == 'subject') {
             this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
         }
         if (this.hasTags) {
             this.columnDefs.push(
                 { headerName: 'Tags', field: 'tags', editable: true, multi: true,
-                    possibleValues: (subjectStudy: SubjectStudy) => {
-                        return subjectStudy?.study?.tags?.map(tag => {
+                    possibleValues: (subject: Subject) => {
+                        return subject?.study?.tags?.map(tag => {
                             const opt = new Option(tag, tag.name);
                             if (tag.color) {
                                 opt.backgroundColor = tag.color;
@@ -156,7 +155,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         );
         if (this.allowRemove) {
             this.columnDefs.push(
-                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
+                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubject(item) }
             );
         }
     }
@@ -185,11 +184,11 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         if (this.selectableList && this.model) {
             if (this.compMode == 'study') {
                 for (const option of this.optionList) {
-                    if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true;
+                    if(this.model.find(subject => subject.id == option.value.id)) option.disabled = true;
                 }
             } else if (this.compMode == 'subject') {
                 for (const option of this.optionList) {
-                    if(this.model.find(subStu => subStu.study.id == option.value.id)) option.disabled = true;
+                    if(this.model.find(subject => subject.study.id == option.value.id)) option.disabled = true;
                 }
             }
         }
@@ -209,60 +208,60 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             const foundOption = this.optionList.find(option => option.value.id == this.selected.id);
             if (foundOption) foundOption.disabled = true;
         }
-        const newSubjectStudy: SubjectStudy = new SubjectStudy();
-        newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.tags=[];
+        let newSubject: Subject = new Subject();
+        newSubject.physicallyInvolved = false;
+        newSubject.tags=[];
         if (this.compMode == "study") {
             const studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
             studyCopy.tags = this.study.tags;
-            newSubjectStudy.study = studyCopy;
-            newSubjectStudy.subject = this.selected as Subject;
+            newSubject.study = studyCopy;
+            newSubject = this.selected as Subject;
         }
         else if (this.compMode == "subject") {
             const subjectCopy: Subject = new Subject();
             subjectCopy.id = this.subject.id;
-            newSubjectStudy.subject = subjectCopy;
-            newSubjectStudy.study = this.selected as Study;
+            newSubject = subjectCopy;
+            newSubject.study = this.selected as Study;
         }
         this.selected = undefined;
-        this.model.push(newSubjectStudy);
+        this.model.push(newSubject);
         this.processHasTags();
         this.propagateChange(this.model);
         this.table?.refresh();
     }
 
     private processHasTags() {
-        this.hasTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0))
+        this.hasTags = (!!this.model && !!(this.model as Subject[]).find(subject => subject.study && subject.study.tags && subject.study.tags.length > 0))
                 || this.study?.tags?.length > 0;
-        this.hasQualityTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => !!subStu.qualityTag));
+        this.hasQualityTags = (!!this.model && !!(this.model as Subject[]).find(subject => !!subject.qualityTag));
     }
 
-    removeSubjectStudy(subjectStudy: SubjectStudy):void {
+    removeSubject(subject: Subject):void {
         if (!this.warningDisplayed) {
             this.confirmDialogService.confirm('Deleting subject',
             'Warning: If this subject is only linked to this study, it will be completely deleted from the database. This means each examination, acquisition and dataset of this subject will be deleted. Are you sure ?')
             .then(userChoice => {
                 if (userChoice) {
-                    this.removeSubjectStudyOk(subjectStudy);
+                    this.removeSubjectOk(subject);
                     this.warningDisplayed = true;
                 }
             });
         } else {
-            this.removeSubjectStudyOk(subjectStudy);
+            this.removeSubjectOk(subject);
         }
     }
 
-    removeSubjectStudyOk(subjectStudy: SubjectStudy):void {
-        const index: number = this.model.indexOf(subjectStudy);
+    removeSubjectOk(subject: Subject):void {
+        const index: number = this.model.indexOf(subject);
         if (index > -1) {
             this.model.splice(index, 1);
             this.propagateChange(this.model);
             if (this.compMode == 'study') {
-                const option: Option<Subject> = this.optionList.find(opt => opt.value.id == subjectStudy.subject.id) as Option<Subject>;
+                const option: Option<Subject> = this.optionList.find(opt => opt.value.id == subject.id) as Option<Subject>;
                 if (option) option.disabled = false;
             } else if (this.compMode == 'subject') {
-                const option: Option<Study> = this.optionList.find(opt => opt.value.id == subjectStudy.study.id) as Option<Study>;
+                const option: Option<Study> = this.optionList.find(opt => opt.value.id == subject.study.id) as Option<Study>;
                 if (option) option.disabled = false;
             }
         }
