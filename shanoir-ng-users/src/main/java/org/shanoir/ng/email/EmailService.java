@@ -15,6 +15,7 @@
 package org.shanoir.ng.email;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
@@ -143,5 +144,7 @@ public interface EmailService {
 	 * @param accessRequest the access request
 	 */
 	void notifyUserRefusedFromStudy(AccessRequest refusedRequest);
+
+    public void notifyDuaDraftCreation(DuaDraftWrapper mail);
 
 }

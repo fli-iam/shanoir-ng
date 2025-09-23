@@ -174,13 +174,9 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException {
-		List<IdName> studiesDTO = new ArrayList<>();
-		final List<Study> studies = studyService.findAll();
-		if (studies.isEmpty()) {
+		List<IdName> studiesDTO = studyService.findAllNames();
+		if (studiesDTO.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}

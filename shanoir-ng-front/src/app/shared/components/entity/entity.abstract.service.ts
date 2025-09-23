@@ -21,7 +21,6 @@ import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
 import { Entity } from './entity.abstract';
-import {EntityComponent} from "./entity.component.abstract";
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
@@ -32,8 +31,6 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     protected subscriptions: Subscription[] = [];
-
-    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     constructor(
         protected http: HttpClient) {
