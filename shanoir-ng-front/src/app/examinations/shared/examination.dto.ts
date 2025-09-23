@@ -105,7 +105,7 @@ export class ExaminationDTO {
     examinationDate: Date;
     note: string;
     studyId: number;
-    subject: IdName;
+    subject: IdName | Subject;
     subjectWeight: number;
     weightUnitOfMeasure: UnitOfMeasure;
     preclinical: boolean;
@@ -121,7 +121,7 @@ export class ExaminationDTO {
             this.examinationDate = examination.examinationDate;
             this.note = examination.note;
             this.studyId = examination.study ? examination.study.id : null;
-            this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
+            this.subject = examination.subject ? examination.subject : null;
             this.subjectWeight = examination.subjectWeight;
             this.weightUnitOfMeasure = examination.weightUnitOfMeasure;
             this.preclinical = examination.preclinical;
