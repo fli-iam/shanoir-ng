@@ -29,7 +29,7 @@ export class ImportBrukerService {
         const endpoint = PreclinicalUtils.PRECLINICAL_API_BRUKER_UPLOAD;
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
-        const options = {responseType: 'text' as 'text'};
+        const options = {responseType: 'text' as const};
         return this.http
             .post(endpoint, formData, options);
     }

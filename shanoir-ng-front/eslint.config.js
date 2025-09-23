@@ -52,7 +52,6 @@ module.exports = tseslint.config(
       "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-duplicate-enum-values": "off",
-      "@typescript-eslint/prefer-as-const": "off",
       "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
       "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
       
