@@ -22,8 +22,6 @@ import { SubjectExamination } from "../examinations/shared/subject-examination.m
 import { StudyUserRight } from "../studies/shared/study-user-right.enum";
 import { SimpleStudy } from "../studies/shared/study.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
-import { SubjectStudy } from "../subjects/shared/subject-study.model";
-import { SubjectStudyPipe } from "../subjects/shared/subject-study.pipe";
 import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 import {Subject} from "../subjects/shared/subject.model";
@@ -209,7 +207,13 @@ export abstract class SubjectNode extends ShanoirNode {
     ) {
         super(parent, id, label);
         if (!tags) tags = [];
-        else tags = tags.map(t => t.clone());
+        else tags = tags.map(t => {
+            let tag: Tag = new Tag();
+            tag.id = t.id;
+            tag.color = t.color;
+            tag.name = t.name;
+            return tag;
+        });
         if (qualityTag) {
             const tag: Tag = new Tag();
             tag.id = -1;
