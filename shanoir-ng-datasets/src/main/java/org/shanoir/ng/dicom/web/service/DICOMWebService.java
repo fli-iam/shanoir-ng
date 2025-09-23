@@ -35,10 +35,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -294,7 +290,7 @@ public class DICOMWebService {
 	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
 		try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
 			ContentBody contentBody = new InputStreamBody(
-					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
+					fileIS, ContentType.create(CONTENT_TYPE_DICOM), dicomFile.getName());
 			// build MultipartPart
 			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
 			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
