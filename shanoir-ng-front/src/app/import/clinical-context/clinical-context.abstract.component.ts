@@ -376,33 +376,35 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public onSelectStudy(): Promise<void> {
-        this.loading++;
-        this.computeIsAdminOfStudy(this.study?.id);
+        if (this.study) {
+            this.loading++;
+            this.computeIsAdminOfStudy(this.study?.id);
 
-        this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
+            this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
 
-        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-        let studycardsOrCentersPromise: Promise<void>;
-        if (this.useStudyCard && (this.modality == 'MR' || this.modality == 'bruker')) {
-            studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
-                this.studycardOptions = options;
-                return this.selectDefaultStudyCard(options);
+            this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+            let studycardsOrCentersPromise: Promise<void>;
+            if (this.useStudyCard && (this.modality == 'MR' || this.modality == 'bruker')) {
+                studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
+                    this.studycardOptions = options;
+                    return this.selectDefaultStudyCard(options);
+                });
+            } else {
+                studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
+                    this.centerOptions = options;
+                    return this.selectDefaultCenter(options);
+                });
+                this.getEquipmentOptions(this.center);
+            }
+            let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
+                this.subjects = subjects ? subjects : [];
             });
-        } else {
-            studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
-                this.centerOptions = options;
-                return this.selectDefaultCenter(options);
+            let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+                this.study.tags = tags ? tags : [];
             });
-            this.getEquipmentOptions(this.center);
+            return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
+                .then(() => this.onContextChange());
         }
-        let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
-            this.subjects = subjects ? subjects : [];
-        });
-        let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
-            this.study.tags = tags ? tags : [];
-        });
-        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
-            .then(() => this.onContextChange());
     }
 
     public onSelectStudyCard(): Promise<any> {
