@@ -316,7 +316,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             studyListStr += studiesNames;
         }
         studyListStr += '\n\nWarning: this action deletes ALL datasets ';
-        (entity.subjectStudyList.length > 0) ? studyListStr += 'from ALL studies listed above.' : studyListStr += 'from this subject.';
+        if (entity.subjectStudyList.length > 0) {
+            studyListStr += 'from ALL studies listed above.';
+        } else {
+            studyListStr += 'from this subject.';
+        }
         return Promise.resolve(studyListStr);
     }
 

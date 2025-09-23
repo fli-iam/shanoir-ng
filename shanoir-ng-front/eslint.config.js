@@ -43,14 +43,12 @@ module.exports = tseslint.config(
       "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors
-      "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-inferrable-types": "off",
       "@typescript-eslint/no-namespace": "off", // ?
       "@typescript-eslint/no-wrapper-object-types": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
       "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
       

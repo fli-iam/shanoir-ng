@@ -179,11 +179,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             + ('0' + date.getDate()).slice(-2);
     }
 
-    public arrayFrom404(error: HttpErrorResponse) {
-        e => {
-            if (e.status == 404) return [];
-            else throw e;
-        }
+    public arrayFrom404(e: HttpErrorResponse) {
+        if (e.status == 404) return [];
+        else throw e;
     }
 
 }

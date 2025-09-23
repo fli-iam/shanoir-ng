@@ -74,7 +74,11 @@ export abstract class ShanoirNode {
     }
 
     set opened(opened: boolean) {
-        opened ? this.open() : this.close();
+        if (opened) {
+            this.open();
+        } else {
+            this.close();
+        }
     }
 
     get route(): string {

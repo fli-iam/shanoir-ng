@@ -119,7 +119,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     acceptRequest() {
         this.accessRequestService.resolveRequest(this.accessRequest.id, true)
             .then(value => {
-                this.userService.decreaseAccessRequests;
+                this.userService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
             }).then(() => {
                 window.location.hash="members";
@@ -129,7 +129,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     
     refuseRequest() {
         this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => {
-            this.userService.decreaseAccessRequests;
+            this.userService.decreaseAccessRequests();
             this.goBack();
         });
     }
