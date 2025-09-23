@@ -47,7 +47,7 @@ export enum MrSequencePhysics {
 
 } export namespace MrSequencePhysics {
     
-    export function all(): Array<MrSequencePhysics> {
+    export function all(): MrSequencePhysics[] {
         return allOfEnum<MrSequencePhysics>(MrSequencePhysics);
     }
 

@@ -22,7 +22,7 @@ export enum CardinalityOfRelatedSubjects {
 
 } export namespace CardinalityOfRelatedSubjects {
     
-    export function all(): Array<CardinalityOfRelatedSubjects> {
+    export function all(): CardinalityOfRelatedSubjects[] {
         return allOfEnum<CardinalityOfRelatedSubjects>(CardinalityOfRelatedSubjects);
     }
 

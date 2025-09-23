@@ -87,7 +87,7 @@ export enum MrDatasetNature {
 
 } export namespace MrDatasetNature {
 
-    export function all(): Array<MrDatasetNature> {
+    export function all(): MrDatasetNature[] {
         return allOfEnum<MrDatasetNature>(MrDatasetNature);
     }
 
@@ -105,7 +105,7 @@ export enum MrQualityProcedureType {
 
 } export namespace MrQualityProcedureType {
 
-    export function all(): Array<MrQualityProcedureType> {
+    export function all(): MrQualityProcedureType[] {
         return allOfEnum<MrQualityProcedureType>(MrQualityProcedureType);
     }
 

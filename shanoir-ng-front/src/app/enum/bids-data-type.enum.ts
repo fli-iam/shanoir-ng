@@ -26,7 +26,7 @@ export enum BidsDataType {
 
 } export namespace BidsDataType {
 
-    export function all(): Array<BidsDataType> {
+    export function all(): BidsDataType[] {
         return allOfEnum<BidsDataType>(BidsDataType);
     }
 

@@ -32,7 +32,7 @@ export enum ImagedObjectCategory {
         return all(preclinical).map(prop => new Option<ImagedObjectCategory>(prop, getLabel(prop)));
     }
 
-    export function all(preclinical: boolean = false): Array<ImagedObjectCategory> {
+    export function all(preclinical: boolean = false): ImagedObjectCategory[] {
     	let allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
         if (preclinical){
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_ANIMAL);

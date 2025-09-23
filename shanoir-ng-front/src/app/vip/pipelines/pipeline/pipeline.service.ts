@@ -46,7 +46,7 @@ export class PipelineService {
      * @param property A pipeline property to filter the returned pipelines. It must listed in the \&quot;supportedPipelineProperties\&quot; of the getPlatformProperties method. All the returned pipelines must have this property set. Use also the \&quot;propertyValue\&quot; to filter on this property value.
      * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
      */
-    public listPipelines(): Observable<Array<Pipeline>> {
-        return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
+    public listPipelines(): Observable<Pipeline[]> {
+        return this.httpClient.get<Pipeline[]>(`${this.pipelineUrl}`);
     }
 }

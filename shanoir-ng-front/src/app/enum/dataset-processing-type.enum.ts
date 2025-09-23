@@ -102,7 +102,7 @@ export enum DatasetProcessingType {
 
 } export namespace DatasetProcessingType {
 
-    export function all(): Array<DatasetProcessingType> {
+    export function all(): DatasetProcessingType[] {
         return allOfEnum<DatasetProcessingType>(DatasetProcessingType);
     }
 
