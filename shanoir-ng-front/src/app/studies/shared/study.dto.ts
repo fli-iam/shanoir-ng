@@ -18,18 +18,15 @@ import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
-import { Profile } from '../../shared/models/profile.model';
-import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
-import { SubjectDTO } from "../../subjects/shared/subject.dto";
-import { Examination } from "../../examinations/shared/examination.model";
+import {Profile} from '../../shared/models/profile.model';
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
 
 @Injectable()
 export class StudyDTOService {
