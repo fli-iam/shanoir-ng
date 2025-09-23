@@ -233,7 +233,7 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: { field: string, value: SuperPromise<any>}[] = [];
 
-    private resolvedPrefilledValues: { [field: string]: any } = {};
+    private resolvedPrefilledValues: Record<string, any> = {};
 
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();

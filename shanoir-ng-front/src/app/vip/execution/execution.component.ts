@@ -49,8 +49,8 @@ export class ExecutionComponent implements OnInit {
     refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
-    columnDefs: { [key: string]: ColumnDefinition[] } = {};
-    datasetsByParam: { [key: string]: DatasetLight[] } = {};
+    columnDefs: Record<string, ColumnDefinition[]> = {};
+    datasetsByParam: Record<string, DatasetLight[]> = {};
     fileInputs = [];
     execDefaultName= "";
     exportFormat= "nii";

@@ -207,7 +207,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
-        return (c: AbstractControl): { [key: string]: boolean } | null => {
+        return (c: AbstractControl): Record<string, boolean> | null => {
             if (forbiddenValues.indexOf(c.value) !== -1) {
                 return { 'subjectNamePrefix': true };
             }
@@ -216,7 +216,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private notEmptyValidator(): ValidatorFn {
-        return (c: AbstractControl): { [key: string]: boolean } | null => {
+        return (c: AbstractControl): Record<string, boolean> | null => {
             if (!c.value || c.value.trim().length < 2) {
                 return { 'notEmptyValidator': true };
             }

@@ -28,5 +28,5 @@ export interface Pipeline {
     /**
      * the properties (as keys) and their values that describe the pipeline. The properties used must be listed in the \"supportedPipelineProperties\" of the \"getPlatformProperties\" method.
      */
-    properties: { [key: string]: string; };
+    properties: Record<string, string>;
 }

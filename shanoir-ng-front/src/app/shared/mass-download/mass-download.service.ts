@@ -42,14 +42,12 @@ export type Report = {
     studyId?: number,
     status?: 'QUEUED' | 'ERROR' | 'SUCCESS',
     startTime: number,
-    list?: {
-        [key: number]: {
+    list?: Record<number, {
             status: 'QUEUED' | 'ERROR' | 'SUCCESS',
             error?: any,
             errorTime?: number
             zipSize?: string,
-        }
-    }
+        }>
     nbSuccess?: number;
     nbError?: number;
     duration?: number;
