@@ -17,14 +17,16 @@ import { ActivatedRoute } from '@angular/router';
 
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Tag } from 'src/app/tags/tag.model';
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -48,8 +50,6 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
-import { Tag } from 'src/app/tags/tag.model';
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'study-detail',
@@ -522,6 +522,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
+        let newStudy: boolean = !this.study?.id; 
         return super.save(() => {
             let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
@@ -547,15 +548,25 @@ export class StudyComponent extends EntityComponent<Study> {
             if (study.studyCardPolicy == 'MANDATORY') {
                 this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                     if (!studyCards || studyCards.length == 0) {
-                        this.confirmDialogService.confirm('Create a Study Card',
+                        this.confirmDialogService.choose('Create a Study Card',
                             'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                             .then(userChoice => {
-                                if (userChoice) {
-                                    this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                                if (userChoice == 'yes') {
+                                    this.router.navigate(['/study-card/create', {studyId: study.id}]).then(() => {
+                                        setTimeout(() => {
+                                            if (newStudy) this.breadcrumbsService.currentStep.data.goDUA = study.id;
+                                        });
+                                    });
+                                } else if (newStudy) { // cancel
+                                    DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
                                 }
                             });
+                    } else if (newStudy) {
+                        DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
                     }
                 })
+            } else if (newStudy) {
+                DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
             return study;
         });
