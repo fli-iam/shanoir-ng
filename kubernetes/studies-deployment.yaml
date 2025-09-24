@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: studies
+  name: studies
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: studies
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: studies
+    spec:
+      containers:
+        - image: ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.5.1
+          name: studies
+          ports:
+            - containerPort: 9902
+              protocol: TCP
+            - containerPort: 9912
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/log/shanoir-ng-logs
+              name: logs
+            - mountPath: /etc/ssl/certs/java
+              name: certificate-share-data
+              readOnly: true
+            - mountPath: /var/studies-data
+              name: studies-data
+            - mountPath: /tmp
+              name: tmp
+      restartPolicy: Always
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs
+        - name: certificate-share-data
+          persistentVolumeClaim:
+            claimName: certificate-share-data
+            readOnly: true
+        - name: studies-data
+          persistentVolumeClaim:
+            claimName: studies-data
+        - name: tmp
+          persistentVolumeClaim:
+            claimName: tmp
