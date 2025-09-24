@@ -40,7 +40,7 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges{
 
     @Input() anesthetic: Anesthetic;
-    @Input('toggleForm') toggleForm: boolean = true;
+    @Input() toggleForm: boolean = true;
     @Input() ingredientSelected: AnestheticIngredient;
     @Output() onEvent = new EventEmitter();
     @Input() createAIMode: boolean;

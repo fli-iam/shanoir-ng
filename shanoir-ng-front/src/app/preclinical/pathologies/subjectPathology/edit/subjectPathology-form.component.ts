@@ -44,7 +44,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
 
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() canModify: boolean = false;
-    @Input('toggleForm') toggleForm: boolean;
+    @Input() toggleForm: boolean;
     @Input() subjectpathoSelected: SubjectPathology;
     @Output() onEvent = new EventEmitter();
     @Output() onCreated = new EventEmitter();
