@@ -61,8 +61,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     filterTimeout: number = 0;
     private hash: string;
 
-    protected propagateChange: (any) => void = () => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     constructor(private router: Router) {}
 

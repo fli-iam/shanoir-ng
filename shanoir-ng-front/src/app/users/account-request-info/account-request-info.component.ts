@@ -42,8 +42,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
     form: UntypedFormGroup;
-    onChange: (any) => void = () => {};
-    onTouch: () => void = () => {};
+    onChange: (any) => void = () => { return; };
+    onTouch: () => void = () => { return; };
     public studyOptions:  Option<number>[];
     studyName: string;
     presetStudyId: boolean
@@ -53,9 +53,6 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private activatedRoute: ActivatedRoute,
                 private location: Location,
                 private confirmDialogService: ConfirmDialogService) {
-    }
-
-    setDisabledState?(): void {
     }
     
     writeValue(obj: any): void {

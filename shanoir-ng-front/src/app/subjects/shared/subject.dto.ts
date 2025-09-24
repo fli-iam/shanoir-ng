@@ -30,9 +30,6 @@ import {Sex, SubjectType} from './subject.types';
 @Injectable()
 export class SubjectDTOService {
 
-    constructor(
-    ) {}
-
     /**
      * Convert from DTO to Entity
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead

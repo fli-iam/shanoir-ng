@@ -71,9 +71,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private optionChangeSubscription: Subscription;
     public way: 'up' | 'down' = 'down';
     public hideToComputeHeight: boolean = false;
-    private onTouchedCallback = () => {};
+    private onTouchedCallback = () => { return; };
     @Output() onTouch = new EventEmitter();
-    private onChangeCallback: (any) => void = () => {};
+    private onChangeCallback: (any) => void = () => { return; };
     public inputText: string;
     private _searchText: string = null;
     @Input() disabled: boolean = false;

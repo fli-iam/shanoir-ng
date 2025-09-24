@@ -94,9 +94,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return;
         }
         breadcrumbsService.nameStep('3. Context');
-
-        this.preConstructor();
-        this.postConstructor()
     }
 
     ngOnInit(): void {
@@ -123,10 +120,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     protected exitCondition(): boolean {
         return false;
     }
-
-    public preConstructor() {};
-
-    public postConstructor() {};
 
     protected reloadSavedData(): Promise<void> {
         this.reloading = true;
@@ -522,10 +515,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(() => {
-
             this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
-
-            this.fillCreateAcqEqStep(this.breadcrumbsService.currentStep);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).acquisitionEquipment = (entity as AcquisitionEquipment);
@@ -533,12 +523,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             );
         });
     }
-
-    protected fillCreateSubjectStep(_step: Step) {}
-
-    protected fillCreateExaminationStep(_step: Step) {}
-
-    protected fillCreateAcqEqStep(_step: Step) {}
 
     protected getCreateSubjectRoute(): string {
         return '/subject/create';
@@ -552,7 +536,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createSubjectRoute: string = this.getCreateSubjectRoute();
         this.router.navigate([createSubjectRoute]).then(() => {
-            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
 
@@ -572,7 +555,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let currentStep: Step = this.breadcrumbsService.currentStep;
         let createExamRoute: string = this.getCreateExamRoute();
         this.router.navigate([createExamRoute]).then(() => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);

@@ -42,8 +42,8 @@ export class SolrTextSearchComponent implements ControlValueAccessor {
     @Input() syntaxError: boolean = false;
     @Input() syntaxErrorMsg: string;
     expertMode: boolean = false;
-    protected propagateChange: (any) => void = () => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     inputTextChange() {
         if (this.searchKeyWords.some(word => this.searchText.includes(word))) {

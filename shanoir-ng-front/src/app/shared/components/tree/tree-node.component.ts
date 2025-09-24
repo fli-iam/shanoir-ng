@@ -30,9 +30,6 @@ import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
 
-const noop = () => {
-};
-
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(() => TreeNodeComponent),
@@ -76,8 +73,8 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Output() chkbxChange = new EventEmitter();
     @Output() firstOpen = new EventEmitter();
     @Output() buttonClick = new EventEmitter();
-    private onTouchedCallback: () => void = noop;
-    private onChangeCallback: (_: any) => void = noop;
+    private onTouchedCallback: () => void = () => { return; };
+    private onChangeCallback: (_: any) => void = () => { return; };
 
     constructor(private cdr: ChangeDetectorRef) {
     }

@@ -34,9 +34,6 @@ import { Study } from './study.model';
 @Injectable()
 export class StudyDTOService {
 
-    constructor(
-    ) {}
-
     /**
      * Convert from DTO to Entity
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead

@@ -29,10 +29,6 @@ export class PagerComponent implements OnChanges {
 
     pagerList: number [] = [];
 
-
-    constructor() {
-    }
-
     ngOnChanges(changes: SimpleChanges) {
         if (changes['currentPage'] || changes['nbPages'] && this.currentPage && this.nbPages) {
             this.refreshPagerList();

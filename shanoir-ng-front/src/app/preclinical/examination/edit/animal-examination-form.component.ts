@@ -171,9 +171,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         });
     }
 
-    public instAssessment() {
-    }
-
     private updateExam(): void{
         this.examination.subject = new Subject();
         if (this.examination.subject){

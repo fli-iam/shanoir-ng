@@ -136,9 +136,6 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
         this.router.navigate(['/' + this.node.title + '/details/' + this.node.id]);
     }
 
-    collapseAll() {
-    }
-
     onExaminationDelete(index: number) {
         (this.node.examinations as ExaminationNode[]).splice(index, 1) ;
     }

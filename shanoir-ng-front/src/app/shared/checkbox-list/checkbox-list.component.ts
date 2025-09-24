@@ -32,9 +32,9 @@ import { FacetResultPage } from "../../solr/solr.document.model";
 })
 
 export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
-    onChange: (any) => void = () => {};
+    onChange: (any) => void = () => { return; };
     searchBarContent: string;
-    onTouched = () => {};
+    onTouched = () => { return; };
     @Input() items: FacetResultPage;
     selectedItems: any[] = [];
     selectAll: boolean = true;

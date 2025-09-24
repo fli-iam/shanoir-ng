@@ -123,9 +123,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return Promise.resolve(this.browserPaging.getPage(pageable));
     }
 
-    public onSelectCoord(): void {
-    }
-
     protected getContext(): EegContextData {
         return new EegContextData(this.study, null, this.useStudyCard, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.coordsystem, null, null, null, null, null, null);

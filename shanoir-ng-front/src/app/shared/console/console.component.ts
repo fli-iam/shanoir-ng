@@ -33,7 +33,7 @@ export class ConsoleComponent implements OnDestroy {
     contentOpen: boolean = this._open;
     messages: Message[] = [];
     private closeTimeout: any;
-    private appRef: Promise<ApplicationRef> = new Promise(() => {});
+    private appRef: Promise<ApplicationRef> = new Promise(() => { return});
     private subscription: Subscription;
 
     constructor(public consoleService: ConsoleService, private injector: Injector) {

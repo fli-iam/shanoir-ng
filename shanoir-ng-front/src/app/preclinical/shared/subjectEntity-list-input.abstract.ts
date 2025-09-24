@@ -34,8 +34,8 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
     @Output() onEvent = new EventEmitter();
-    protected propagateChange: (any) => void = () => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
     public toggleForm: boolean = false;
     public createMode: boolean = false;
     public selectedEntity: T;

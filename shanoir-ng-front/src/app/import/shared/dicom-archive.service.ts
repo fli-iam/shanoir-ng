@@ -22,8 +22,6 @@ export class DicomArchiveService {
 
 	private fileReader: FileReader = new FileReader();
 
-	constructor() {}
-
 	importFromZip(blob: Blob): Promise<any> {
 		this.fileReader.readAsArrayBuffer(blob);
 		return new Promise((resolve, reject) => {

@@ -71,8 +71,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     invitationFunction: string;
     newUser: User[] = [];
 
-    private onTouchedCallback = () => {};
-    private onChangeCallback: (any) => void = () => {};
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
 
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {

@@ -11,9 +11,6 @@ export class ExecutionDataService {
     public selectedDatasets: Set<number>;
     public selectedPipeline: Pipeline;
 
-    constructor() {
-    }
-
     public setDatasets(datasetsIds: Set<number>) {
         this.selectedDatasets = datasetsIds;
     }

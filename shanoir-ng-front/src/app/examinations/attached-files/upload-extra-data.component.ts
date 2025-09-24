@@ -99,21 +99,4 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
             this.location.back();
         }
     }
-
-    create(): void {
-        
-    }
-
-    add(): void {
-      
-    }
-
-    edit(): void {
-        
-    }
-
-    update(): void {
-
-    }
-
 }

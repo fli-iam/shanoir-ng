@@ -37,8 +37,8 @@ export class MrProtocolComponent implements ControlValueAccessor {
     public protocol: MrProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
-    protected propagateChange: (any) => void = () => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     writeValue(obj: any): void {
         this.protocol = obj;

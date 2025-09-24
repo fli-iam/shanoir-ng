@@ -14,8 +14,6 @@ export class PipelineComponent implements OnInit {
   @Input() pipeline:Pipeline;
   readonly ImagesUrlUtil = ImagesUrlUtil;
 
-  constructor() { }
-
   ngOnInit(): void {
     console.log(this.pipeline);
   }

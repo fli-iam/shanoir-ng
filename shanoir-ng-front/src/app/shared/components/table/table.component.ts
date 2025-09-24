@@ -518,9 +518,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    unSelectAll() {
-    }
-
     clearSelection() {
         this.selection = new Set();
         this.emitSelectionChange();

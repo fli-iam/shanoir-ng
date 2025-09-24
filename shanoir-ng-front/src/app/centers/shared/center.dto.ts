@@ -22,7 +22,6 @@ import { Center } from './center.model';
 @Injectable()
 export class CenterDTOService {
 
-    constructor() {}
 
     /**
      * Convert from DTO to Entity
