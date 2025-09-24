@@ -25,7 +25,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -345,7 +345,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/download/event/{eventId}", produces = { "application/zip" })
 	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(
+	ResponseEntity<InputStreamResource> downloadStatisticsByEventId(
 			@Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
 			throws RestServiceException, IOException;
 

@@ -16,6 +16,7 @@
 package org.shanoir.ng.dataset.controler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -74,6 +75,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -584,20 +586,25 @@ public class DatasetApiController implements DatasetApi {
 
 
 	@Override
-	public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
+	public ResponseEntity<InputStreamResource> downloadStatisticsByEventId(String eventId) throws IOException {
 		try {
 			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 			File zipFile = new File(userDir + File.separator + "shanoirExportStatistics_" + eventId + ZIP);
 
-			byte[] data = Files.readAllBytes(zipFile.toPath());
-			ByteArrayResource resource = new ByteArrayResource(data);
+			if (!zipFile.exists()) {
+            	LOG.warn("File not found for eventId = " + eventId);
+            	return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        	}
+
+        	InputStreamResource resource = new InputStreamResource(new FileInputStream(zipFile));
 
 			return ResponseEntity.ok()
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
-					.contentType(MediaType.MULTIPART_FORM_DATA)
-					.contentLength(data.length)
+					.contentType(MediaType.APPLICATION_OCTET_STREAM)
+					.contentLength(zipFile.length())
 					.body(resource);
+					
 		} catch (Exception e) {
 			LOG.error("Error during download of statistics for event with id = " + eventId + ".");
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
