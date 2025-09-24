@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -157,7 +154,7 @@ public class DatasetFileUtils {
 	}
 
 	public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index, String datasetDownloadName) {
-		if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+		if ((Objects.nonNull(dataset.getDatasetProcessing()) || Objects.isNull(dataset.getDatasetAcquisition())) && Objects.nonNull(datasetDownloadName)) {
 			return datasetDownloadName;
 		}
 		if (keepName ){

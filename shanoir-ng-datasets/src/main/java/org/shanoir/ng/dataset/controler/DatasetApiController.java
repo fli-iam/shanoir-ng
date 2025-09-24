@@ -581,8 +581,6 @@ public class DatasetApiController implements DatasetApi {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-
-
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
 		try {
@@ -604,7 +602,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 0 * * * *", zone="Europe/Paris")
 	public void deleteStats() {
 		try {
 			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);

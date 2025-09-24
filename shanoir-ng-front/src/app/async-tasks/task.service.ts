@@ -12,12 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable, Injector} from '@angular/core';
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
-import { Task } from './task.model';
+import {Task, TaskState} from './task.model';
+import {BACKEND_API_URL} from "../utils/app.utils";
+import {MassDownloadService} from "../shared/mass-download/mass-download.service";
 
 @Injectable()
 export class TaskService extends EntityService<Task> {
@@ -25,7 +27,8 @@ export class TaskService extends EntityService<Task> {
     API_URL = AppUtils.BACKEND_API_TASKS_URL;
 
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient,
+                protected injector: Injector) {
         super(http);
     }
 
@@ -62,5 +65,10 @@ export class TaskService extends EntityService<Task> {
                     this.consoleService.log('error', 'Statistics file not found or deleted (after 6 hours).');
                 }
             });
+    }
+
+    public downloadProcessingOutputs(item: Task) {
+        const downloadService = this.injector.get(MassDownloadService);
+        downloadService.downloadByIds(item.message.split(",").map(Number), new TaskState());
     }
 }
