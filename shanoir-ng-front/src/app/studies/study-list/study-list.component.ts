@@ -56,7 +56,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
-    getEntities(): Promise<Study[]> {
+    getEntities(eager: boolean = false): Promise<Study[]> {
         let earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData()
@@ -84,7 +84,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 }));
             return studies;
         })
-        Promise.all([
+        let allPromise: Promise<Study[]> = Promise.all([
             earlyResult,
             this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
@@ -95,8 +95,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            return studies;
         });
-        return earlyResult;
+        if (eager) {
+            return allPromise;
+        } else {
+            return earlyResult;
+        }
     }
 
     private fetchStorageVolumesByChunk(studies) {

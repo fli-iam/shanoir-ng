@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (click)="close('yes')">{{buttons?.yes || 'Yes'}}</button>
             <button type="button" *ngIf="mode == 'choose'"
                 (click)="close('no')">{{buttons?.no || 'No'}}</button>
-            <button type="button" *ngIf="mode == 'confirm' || mode == 'choose'"
+            <button type="button" *ngIf="mode == 'confirm' || (mode == 'choose' && buttons?.cancel)"
                 (click)="close(false)">{{buttons && buttons.cancel ? buttons.cancel : 'Cancel'}}</button>
         </div>
     </div>

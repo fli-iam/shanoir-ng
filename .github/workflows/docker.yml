@@ -47,6 +47,8 @@ jobs:
     permissions:
       packages: write
       contents: read
+    # mitigation for the random freezes when pushing images (see #2992)
+    timeout-minutes: 15
     steps:
 
       - name: Check out the repo
