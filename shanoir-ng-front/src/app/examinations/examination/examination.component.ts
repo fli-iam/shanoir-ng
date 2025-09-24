@@ -59,7 +59,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     pattern: string = '[^:|<>&\/]+';
     downloadState: TaskState = new TaskState();
     dateDisplay = dateDisplay;
-    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    datasetIds: Promise<number[]> = new Promise(() => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;

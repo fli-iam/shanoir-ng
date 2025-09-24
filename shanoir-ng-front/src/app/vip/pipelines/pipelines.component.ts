@@ -55,13 +55,13 @@ export class PipelinesComponent implements OnInit {
 
   choosePipeLine(){
     this.processingService.setPipeline(this.selectedPipeline);
-    let filesParam = 0;
-    // Here we are going to calculate the number of possible executions in parallel
-    this.selectedPipeline.parameters?.forEach(parameter => {
-        if (parameter.type == 'File') {
-            filesParam += 1;
-        }
-    })
+    // let filesParam = 0;
+    // // Here we are going to calculate the number of possible executions in parallel
+    // this.selectedPipeline.parameters?.forEach(parameter => {
+    //     if (parameter.type == 'File') {
+    //         filesParam += 1;
+    //     }
+    // })
     this.router.navigate(['execution']);
   }
 

@@ -55,7 +55,7 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = setTimeout(() => {
+        setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;

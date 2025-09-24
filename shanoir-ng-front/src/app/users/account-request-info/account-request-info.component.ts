@@ -42,8 +42,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
     form: UntypedFormGroup;
-    onChange = (_: any) => {};
-    onTouch = () => {};
+    onChange: (any) => void = () => {};
+    onTouch: () => void = () => {};
     public studyOptions:  Option<number>[];
     studyName: string;
     presetStudyId: boolean
@@ -55,8 +55,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private confirmDialogService: ConfirmDialogService) {
     }
 
-    setDisabledState?(isDisabled: boolean): void {
+    setDisabledState?(): void {
     }
+    
     writeValue(obj: any): void {
         this.info = obj;
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
@@ -85,7 +86,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 } else {
                     this.studyOptions = [];
                     this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
-                    .then(result => this.location.back());
+                    .then(() => this.location.back());
                 }
             });
         }

@@ -101,7 +101,7 @@ export class BrukerUploadComponent {
             	});
 
                 },
-                (err: String) => {
+                () => {
                     this.archive = '';
                     this.uploadProgress = 2;
                 	this.setArchiveStatus('error');

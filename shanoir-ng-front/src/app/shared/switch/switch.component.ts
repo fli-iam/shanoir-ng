@@ -35,7 +35,7 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
     @HostBinding('class.on') toggle: boolean = null;
     @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onChangeCallback: (any) => void = () => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() reverse: boolean = false;
     @Input() mode: 'on-off' | undefined;

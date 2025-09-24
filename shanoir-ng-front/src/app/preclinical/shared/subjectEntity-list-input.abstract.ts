@@ -34,7 +34,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
     @Output() onEvent = new EventEmitter();
-    protected propagateChange = (_: any) => {};
+    protected propagateChange: (any) => void = () => {};
     protected propagateTouched = () => {};
     public toggleForm: boolean = false;
     public createMode: boolean = false;
@@ -146,7 +146,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         }
     }
 
-    public onRowClick(entity: T) {
+    public onRowClick() {
         // do nothing to avoid wrong route
     }
 }

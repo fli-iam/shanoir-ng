@@ -133,7 +133,7 @@ export class UserComponent extends EntityComponent<User> {
     deny(): void {
         this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
-            .then((user) => {
+            .then(() => {
                 this.consoleService.log('info', 'The request for user "' + this.user.username + '" has been denied !');
                 this.goBack();
                 this.denyLoading = false;

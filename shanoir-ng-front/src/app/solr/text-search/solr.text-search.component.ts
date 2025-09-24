@@ -42,7 +42,7 @@ export class SolrTextSearchComponent implements ControlValueAccessor {
     @Input() syntaxError: boolean = false;
     @Input() syntaxErrorMsg: string;
     expertMode: boolean = false;
-    protected propagateChange = (_: any) => {};
+    protected propagateChange: (any) => void = () => {};
     protected propagateTouched = () => {};
 
     inputTextChange() {

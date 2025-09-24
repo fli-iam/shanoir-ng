@@ -82,7 +82,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     public openCreateDatasetProcessing() {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createDatasetProcessingRoute: string = '/dataset-processing/create';
-        this.router.navigate([createDatasetProcessingRoute]).then(success => {
+        this.router.navigate([createDatasetProcessingRoute]).then(() => {
 	        this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
             this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
             this.subscriptions.push(

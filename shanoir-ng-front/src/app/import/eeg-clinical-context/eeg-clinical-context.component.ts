@@ -14,16 +14,16 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Event } from '../../datasets/dataset/eeg/dataset.eeg.model';
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { CoordSystems } from '../../enum/coord-system.enum';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
@@ -32,7 +32,6 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -176,7 +175,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return this.importService.startEegImportJob(importJob);
     }
 
-    protected fillCreateSubjectStep(step: Step) {
+    protected fillCreateSubjectStep() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
@@ -194,7 +193,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return newSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step) {
+    protected fillCreateExaminationStep() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
@@ -214,7 +213,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return newExam;
     }
 
-    protected fillCreateAcqEqStep(step: Step) {
+    protected fillCreateAcqEqStep() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledAcqEqt());
     }
 

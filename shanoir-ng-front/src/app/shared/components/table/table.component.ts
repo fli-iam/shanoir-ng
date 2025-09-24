@@ -116,7 +116,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
-        this.subscriptions.push(fromEvent(window, 'resize').subscribe( evt => {
+        this.subscriptions.push(fromEvent(window, 'resize').subscribe(() => {
             this.checkCompactMode();
         }));
         this.checkCompactMode();

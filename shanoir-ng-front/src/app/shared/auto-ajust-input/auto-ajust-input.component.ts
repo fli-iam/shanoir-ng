@@ -36,7 +36,7 @@ export class AutoAdjustInputComponent implements ControlValueAccessor {
     @Input() placeholder: string;
     @Output() change: EventEmitter<string> = new EventEmitter();
     onTouch = () => {};
-    onChange = (_: any) => {};
+    onChange: (any) => void = () => {};
 
     
     writeValue(obj: any): void {

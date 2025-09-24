@@ -67,11 +67,11 @@ export class ExaminationService extends EntityService<Examination> {
         .then(this.mapPage);
     }
 
-    protected mapEntity = (entity: ExaminationDTO, result?: Examination): Promise<Examination> => {
+    protected mapEntity = (entity: ExaminationDTO): Promise<Examination> => {
         return this.examinationDtoService.toEntity(entity);
     }
 
-    protected mapEntityList = (entities: any[], result?: Examination[]): Promise<Examination[]> => {
+    protected mapEntityList = (entities: any[]): Promise<Examination[]> => {
         if (!entities) entities = [];
         return this.examinationDtoService.toEntityList(entities);
     }

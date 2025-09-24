@@ -250,7 +250,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         this.conditionChange.emit(this.condition);
     }
 
-    onConditionValueChange(value: any, index: number) {
+    onConditionValueChange() {
         this.onConditionChange();
         this.cdr.detectChanges();
     }
@@ -300,7 +300,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         (this.form.get('values') as FormArray).clear();
     }
 
-    onFieldChange(field: string) {
+    onFieldChange() {
         this.computeConditionOptions();
         this.filterOperations();
         this.resetValues();
@@ -475,7 +475,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         return !(this.condition.cardinality && this.condition.cardinality > -1) && this.showErrors;
     }
 
-    trackByFn(index, item) {
+    trackByFn(index) {
         return index;  
     }
 }

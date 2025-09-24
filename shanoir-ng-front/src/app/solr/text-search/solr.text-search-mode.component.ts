@@ -36,7 +36,7 @@ export class SolrTextSearchModeComponent implements ControlValueAccessor {
     showInfo: boolean = false;
     @Output() onChange: EventEmitter<boolean> = new EventEmitter();
     expertMode: boolean = false;
-    protected propagateChange = (_: any) => {};
+    protected propagateChange: (any) => void = () => {};
     protected propagateTouched = () => {};
 
     ngOnChanges(changes: SimpleChanges): void {

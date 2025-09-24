@@ -113,7 +113,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = []);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( () => this.subject.subjectStudyList = []);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
@@ -178,13 +178,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         });
         this.updateFormControl(subjectForm);
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(() => {
                 this.subject.isAlreadyAnonymized = false;
                 this.updateFormControl(subjectForm);
             })
         );
         this.subscriptions.push(
-            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
+            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(() => {
                 this.updateFormControl(subjectForm);
             })
         );

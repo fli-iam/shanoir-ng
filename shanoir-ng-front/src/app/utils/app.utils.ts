@@ -234,13 +234,17 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state?: 
     });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
-            state = s
+            if (state) {
+                state.errors = s.errors;
+                state.progress = s.progress;
+                state.status = s.status;
+            }
             return s;
         });
     }));
 }
 
-export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
+export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     let obs: Observable<HttpEvent<Blob>> = http.post(
         url,
@@ -256,7 +260,11 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
     });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
-            state = s
+            if (state) {
+                state.errors = s.errors;
+                state.progress = s.progress;
+                state.status = s.status;
+            }
             return s;
         });
     }));

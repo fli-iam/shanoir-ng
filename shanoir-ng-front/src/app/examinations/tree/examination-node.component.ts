@@ -109,7 +109,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false;
-        }).catch((reason) => {
+        }).catch(() => {
             this.loading = false;
         });
     }

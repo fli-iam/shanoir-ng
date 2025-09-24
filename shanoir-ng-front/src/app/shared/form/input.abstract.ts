@@ -23,7 +23,7 @@ export abstract class AbstractInput<T> implements ControlValueAccessor {
     @Input() mode: Mode;
     model: T;
     disabled: boolean = false;
-    propagateChange = (_: any) => {};
+    propagateChange: (any) => void = () => {};
     protected propagateTouched = () => {};
     
     constructor() {}

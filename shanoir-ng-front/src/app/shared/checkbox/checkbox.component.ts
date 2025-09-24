@@ -33,7 +33,7 @@ export class CheckboxComponent implements ControlValueAccessor {
     @HostBinding('class.on') model: boolean | 'indeterminate' = false;
     @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onChangeCallback: (any) => void = () => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() inverse: boolean = false;
     @Input() mode: "edit" | "view";

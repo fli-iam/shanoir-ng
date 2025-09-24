@@ -230,12 +230,12 @@ export class DicomUploadComponent implements OnDestroy {
     private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
         return center?.acquisitionEquipments?.map(acqEq => {
             let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-            option.compatible = this.acqEqCompatible(acqEq);
+            option.compatible = this.acqEqCompatible();
             return option;
         });
     }
 
-    acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
+    acqEqCompatible(): boolean | undefined {
         return undefined;
     }
 

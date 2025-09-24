@@ -72,7 +72,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     newUser: User[] = [];
 
     private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onChangeCallback: (any) => void = () => {};
 
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
@@ -276,7 +276,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             } else {
                 this.addUser(request.user);
             }
-        }).catch(exception =>  {
+        }).catch(() =>  {
             this.consoleService.log('error', "No user found with such login, please check the user information or use its email.");
         });
     }

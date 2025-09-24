@@ -29,7 +29,7 @@ export class MsgBoxService {
     private opened: boolean = false;
     private messages: Message[] = [];
     //private appRef: ApplicationRef;
-    private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
+    private appRef: Promise<ApplicationRef> = new Promise(() => {});
     private openingTimeout;
 
     constructor(private injector: Injector) {

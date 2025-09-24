@@ -139,7 +139,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         this.extradataService.getExtraDatas(examinationId).then(extradatas => {
             if(extradatas && extradatas.length > 0){
             	for (let data of extradatas) {
-            		this.extradataService.deleteExtradata(data).then((res) => {});
+            		this.extradataService.deleteExtradata(data).then(() => {});
             	}
             }
         });

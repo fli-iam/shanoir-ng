@@ -11,10 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { KeyValue } from "@angular/common";
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
@@ -214,7 +214,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.accessRequests = accessReqs;
             });
         }
-        this.getCenters().then(centers => {
+        this.getCenters().then(() => {
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
             if (option) this.selectedCenter = option.value;
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
@@ -300,7 +300,7 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
+    private dateOrdervalidator = (): ValidationErrors | null => {
         if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
             return { order: true}
         }
@@ -397,7 +397,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private validateCenter = (control: AbstractControl): ValidationErrors | null => {
+    private validateCenter = (): ValidationErrors | null => {
         if (!Array.isArray(this.study.studyCenterList) || this.study.studyCenterList.length == 0) {
             return { noCenter: true}
         }
@@ -535,7 +535,7 @@ export class StudyComponent extends EntityComponent<Study> {
             }
             if (this.dataUserAgreement) {
                 uploads.push(this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
-                    .catch(error => {
+                    .catch(() => {
                         this.dataUserAgreement = null;
                     }));
             }

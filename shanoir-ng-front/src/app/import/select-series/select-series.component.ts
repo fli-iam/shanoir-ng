@@ -88,14 +88,14 @@ export class SelectSeriesComponent {
         }
     }
 
-    onStudyCheckChange(checked: boolean, study: StudyDicom, patient: PatientDicom) {
+    onStudyCheckChange(checked: boolean, study: StudyDicom) {
         study.selected = checked;
         if (study.series) study.series.forEach(serie => serie.selected = checked)
 
         this.onPatientUpdate();
     }
 
-    onSerieCheckChange(study: StudyDicom, patient: PatientDicom) {
+    onSerieCheckChange(study: StudyDicom) {
         if (study.series) {
             let nbChecked: number = 0;
             study.series.forEach(serie => {

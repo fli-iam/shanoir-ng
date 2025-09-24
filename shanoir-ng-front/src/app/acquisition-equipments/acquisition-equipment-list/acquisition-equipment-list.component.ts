@@ -112,7 +112,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     openCreateCoil(acqEquip: AcquisitionEquipment) {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/coil/create'], ).then(success => {
+        this.router.navigate(['/coil/create'], ).then(() => {
             this.breadcrumbsService.currentStep.addPrefilled('center', acqEquip.center);
             this.breadcrumbsService.currentStep.addPrefilled('manufacturerModel', acqEquip.manufacturerModel);
             currentStep.waitFor(this.breadcrumbsService.currentStep);

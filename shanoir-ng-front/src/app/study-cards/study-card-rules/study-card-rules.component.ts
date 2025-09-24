@@ -68,7 +68,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     rules: (StudyCardRule | QualityCardRule)[];
     @ViewChildren('studyCardRule,qualityCardRule') ruleElements: QueryList<StudyCardRuleComponent | QualityCardRuleComponent>;
     private onTouchedCallback = () => {};
-    onChangeCallback = (_: any) => {};
+    onChangeCallback: (any) => void = () => {};
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
     @Input() studyId: number;
@@ -177,7 +177,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         this.onTouchedCallback = fn;
     }
 
-    setDisabledState?(isDisabled: boolean): void {
+    setDisabledState?(): void {
         
     }
 

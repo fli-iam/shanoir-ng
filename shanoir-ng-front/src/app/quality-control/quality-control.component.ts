@@ -86,7 +86,7 @@ export class QualityControlComponent implements OnChanges {
         });
     }
 
-    onMouseOverNbRules(qualityCard: QualityCard, event: any) {
+    onMouseOverNbRules(qualityCard: QualityCard) {
         if (qualityCard.id != this.timeoutId) {
             this.timeoutId = qualityCard.id;
             clearTimeout(this.overTimeout);

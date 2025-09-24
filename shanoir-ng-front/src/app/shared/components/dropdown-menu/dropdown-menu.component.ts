@@ -78,7 +78,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
         });
     }
 
-    public open(event: Event) {
+    public open() {
         this.openAction();
     }
 

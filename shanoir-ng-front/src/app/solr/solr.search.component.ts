@@ -11,20 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { formatDate } from '@angular/common';
-import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren , AfterViewChecked } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { formatDate } from '@angular/common';
+import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService } from '../datasets/shared/dataset.service';
-import { slideDown } from '../shared/animations/animations';
-import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { environment } from "../../environments/environment";
+import { TaskState } from '../async-tasks/task.model';
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { ExecutionDataService } from '../vip/execution.data-service';
+import { DatasetService } from '../datasets/shared/dataset.service';
+import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
+import { slideDown } from '../shared/animations/animations';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -35,19 +37,16 @@ import { MassDownloadService } from '../shared/mass-download/mass-download.servi
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import {StudyService} from "../studies/shared/study.service";
-import {Study} from "../studies/shared/study.model";
-import {ServiceLocator} from "../utils/locator.service";
-import { TaskState } from '../async-tasks/task.model';
-import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
-import {dateDisplay} from "../shared/./localLanguage/localDate.abstract";
+import { Study } from "../studies/shared/study.model";
+import { StudyService } from "../studies/shared/study.service";
+import { ServiceLocator } from "../utils/locator.service";
+import { ExecutionDataService } from '../vip/execution.data-service';
 
-import { SolrService } from "./solr.service";
-import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { SolrService } from "./solr.service";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
-const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -160,7 +159,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -196,7 +194,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         return false;
     }
 
-    dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
+    dateOrderValidator = (): ValidationErrors | null => {
         this.solrRequest.datasetStartDate = this.form?.get('startDate')?.value;
         this.solrRequest.datasetEndDate = this.form?.get('endDate')?.value;
         this.solrRequest.importStartDate = this.form?.get('importStartDate')?.value;
@@ -401,7 +399,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then((deleted) => {
+                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -437,12 +435,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
                         + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
                 } else {
-                    this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                    this.router.navigate(['study-card/apply-on-datasets']).then(() => {
                         this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
                     });
                 }
             } else {
-                this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                this.router.navigate(['study-card/apply-on-datasets']).then(() => {
                     this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
                 });
             }

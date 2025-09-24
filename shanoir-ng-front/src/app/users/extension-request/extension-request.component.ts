@@ -55,7 +55,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     extensionRequest(): void {
         this.submit();
         this.userService.requestExtension(this.extensionRequestInfo)
-            .then((res) => {
+            .then(() => {
                 this.requestSent = true;
                 this.errorMessage = null;
             }).catch(exception => {
@@ -91,11 +91,11 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
             });
 
         this.infoSubscription = this.extensionRequestForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
+            .subscribe(() => this.onValueChanged());
         this.onValueChanged(); // (re)set validation messages now
     }
 
-    onValueChanged(data?: any) {
+    onValueChanged() {
         if (!this.extensionRequestForm) { return; }
         const form = this.extensionRequestForm;
         for (const field in this.formErrors) {
