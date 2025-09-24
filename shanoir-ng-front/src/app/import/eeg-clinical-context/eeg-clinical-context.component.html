@@ -143,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box
                     [(ngModel)]="coordsystem"
-                    (userChange)="onSelectCoord(); onContextChange();"
+                    (userChange)="onContextChange();"
                     [ngModelOptions]="{standalone: true}"
                     [options]="coordSystemOptions">
                 </select-box>
