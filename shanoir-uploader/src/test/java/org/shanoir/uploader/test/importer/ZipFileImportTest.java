@@ -24,6 +24,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -66,9 +67,9 @@ public class ZipFileImportTest extends AbstractTest {
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 		Date studyDateDate = Date.from(studyDateInstant);
 		String examinationComment = dicomStudy.getStudyDescription();
-		Long examinationId = ImportUtils.createExamination(study, subject, studyDateDate,
+		Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
 			examinationComment, study.getStudyCards().get(0).getCenterId());
-		return examinationId;
+		return examination.getId();
 	}
 
 	@Test

@@ -1,21 +1,15 @@
 package org.shanoir.ng.vip.executionMonitoring.service;
 
+import java.util.List;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
-import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.processing.dto.ParameterResourceDTO;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface ExecutionMonitoringService {
 

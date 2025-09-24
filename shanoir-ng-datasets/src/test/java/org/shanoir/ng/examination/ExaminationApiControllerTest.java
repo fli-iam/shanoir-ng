@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -221,6 +222,8 @@ public class ExaminationApiControllerTest {
 		exam.setId(123L);
 		exam.setStudy(new Study());
 		exam.getStudy().setId(3L);
+		exam.setSubject(new Subject(1L, "1"));
+		given(examinationMapperMock.examinationDTOToExamination(Mockito.any())).willReturn(exam);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 
