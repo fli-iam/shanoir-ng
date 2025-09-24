@@ -129,7 +129,7 @@ export class HomeComponent {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    public getStudyName(studyId: number): String {
+    public getStudyName(studyId: number): string {
         if (this.allStudies) {
             return this.allStudies.find(study => study.id == studyId).name;
         }

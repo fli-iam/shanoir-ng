@@ -39,7 +39,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
 
     @Input() examination_id:number;
     @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Output() physioDataReady = new EventEmitter();
   
     urlupload:string;

@@ -93,7 +93,7 @@ export class StudyComponent extends EntityComponent<Study> {
         new Option<string>('FINISHED', 'Finished')
     ];
 
-    valueDescOrder = (a: KeyValue<String, number>, b: KeyValue<String, number>): number => {
+    valueDescOrder = (a: KeyValue<string, number>, b: KeyValue<string, number>): number => {
         return b.value - a.value;
     };
 
@@ -284,7 +284,7 @@ export class StudyComponent extends EntityComponent<Study> {
             return this.studyService.getStudyDetailedStorageVolume(study.id).then(dto => {
                 let datasetSizes = dto;
                 study.totalSize = datasetSizes.total
-                let sizesByLabel = new Map<String, number>()
+                let sizesByLabel = new Map<string, number>()
                 for (let sizeByFormat of datasetSizes.volumeByFormat) {
                     if(sizeByFormat.size > 0){
                         sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);

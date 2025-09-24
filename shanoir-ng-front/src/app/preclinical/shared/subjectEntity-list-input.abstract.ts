@@ -30,7 +30,7 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 @ModesAware
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
     @Output() onEvent = new EventEmitter();

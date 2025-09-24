@@ -37,7 +37,7 @@ import { TherapyService } from '../shared/therapy.service';
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     TherapyType = TherapyType;
-    public isTherapyUnique: Boolean = true;
+    public isTherapyUnique: boolean = true;
 
     constructor(
         private route: ActivatedRoute,

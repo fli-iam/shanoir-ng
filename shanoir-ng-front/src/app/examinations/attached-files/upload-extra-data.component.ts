@@ -38,7 +38,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     @Input() studies:  IdName[];
     public studyOptions: Option<number>[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
-    public canModify: Boolean = false;
+    public canModify: boolean = false;
     examinationStudyId = null;
 
     constructor(

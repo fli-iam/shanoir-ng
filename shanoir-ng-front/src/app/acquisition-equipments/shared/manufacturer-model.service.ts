@@ -47,7 +47,7 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
             .toPromise();
     }
 
-    getCenterManufacturerModelsNames(centerId:Number): Promise<IdName[]> {
+    getCenterManufacturerModelsNames(centerId:number): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
             .toPromise();
     }

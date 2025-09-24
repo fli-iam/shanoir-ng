@@ -42,7 +42,7 @@ export type Mode =  "view" | "edit" | "create";
 export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListComponent<AnestheticIngredient> {
     
     @Input() mode:Mode ;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() anesthetic: Anesthetic;
     public toggleFormAI: boolean = false;
     public createAIMode: boolean = false;

@@ -58,10 +58,9 @@ module.exports = tseslint.config(
 
       // TypeScript ESLint rules - turn off common errors
       "@typescript-eslint/no-explicit-any": "off", // 
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-      "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }], // allow unused function args starting with _
+      "@typescript-eslint/no-inferrable-types": "off", // unjustified imo
       "@typescript-eslint/no-namespace": "off", // useful for enum methods
-      "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
       "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
 

@@ -50,19 +50,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() browserSearch: boolean = true;
     @Input() collapseControls: boolean = false;
     @Input() editMode: boolean = false;
-    @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
-    @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() rowClick: EventEmitter<object> = new EventEmitter<object>();
+    @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
-    page: Page<Object>;
+    page: Page<object>;
     isLoading: boolean = false;
     maxResultsField: number;
     pageNumber: number;
-    lastSortedCol: Object = null;
+    lastSortedCol: object = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
@@ -163,12 +163,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    get items(): Object[] {
+    get items(): object[] {
         return this.page ? this.page.content : [];
     }
 
 
-    sortBy(col: Object): void {
+    sortBy(col: object): void {
         if (col['disableSorting'] || col["type"] == "button") return;
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
@@ -185,7 +185,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
 
-    onRowClick(item: Object) {
+    onRowClick(item: object) {
         if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
@@ -194,7 +194,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.downloadStatsEvent.emit(item);
     }
 
-    public static getCellValue(item: Object, col: ColumnDefinition): any {
+    public static getCellValue(item: object, col: ColumnDefinition): any {
         if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
             params["data"] = item;
@@ -227,7 +227,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return date;
     }
 
-    public static getFieldRawValue(obj: Object, path: string): any {
+    public static getFieldRawValue(obj: object, path: string): any {
         if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
@@ -236,21 +236,21 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    getCellValue(item: Object, col: ColumnDefinition): any {
+    getCellValue(item: object, col: ColumnDefinition): any {
         return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
-    getFieldRawValue(obj: Object, path: string): any {
+    getFieldRawValue(obj: object, path: string): any {
         return TableComponent.getFieldRawValue(obj, path);
     }
 
     /**
      * Set the property value
      */
-    private setFieldRawValue(obj: Object, path: string, value: any) {
+    private setFieldRawValue(obj: object, path: string, value: any) {
         if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
@@ -263,7 +263,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Triggered when a field is edited
      */
-    onFieldEdit(obj: Object, col: Object, value: any) {
+    onFieldEdit(obj: object, col: object, value: any) {
         this.setFieldRawValue(obj, col['field'], value);
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
@@ -272,7 +272,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: ColumnDefinition): any {
+    renderCell(item: object, col: ColumnDefinition): any {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
@@ -542,7 +542,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.selectionChange.emit(this.selection);
     }
 
-    onSelectChange(item: Object, selected: boolean) {
+    onSelectChange(item: object, selected: boolean) {
         if (selected) {
             if (item['id']) this.selection.add(item['id']);
         } else {
@@ -552,7 +552,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.emitSelectionChange();
     }
 
-    isSelected(item: Object): boolean {
+    isSelected(item: object): boolean {
         if (!item['id']) {
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');

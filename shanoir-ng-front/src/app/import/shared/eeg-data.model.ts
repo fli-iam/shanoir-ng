@@ -21,9 +21,9 @@ export class EegImportJob {
     subjectId: number;
     acquisitionEquipmentId: number;
     datasets: EegDatasetDTO[];
-    coordinatesSystem: String;
-    subjectName: String;
-    studyName: String;
+    coordinatesSystem: string;
+    subjectName: string;
+    studyName: string;
     timestamp: number;
 }
 

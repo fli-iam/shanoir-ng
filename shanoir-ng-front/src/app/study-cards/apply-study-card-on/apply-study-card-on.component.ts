@@ -238,7 +238,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
         this.updateOptions();
     }
 
-    isCompatible(equipmentId: number): Boolean {
+    isCompatible(equipmentId: number): boolean {
         if (this.studycard) {
             return this.studycard.acquisitionEquipment?.id == equipmentId;
         } else {
