@@ -13,7 +13,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList } from '@angular/core';
+import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList, AfterViewInit } from '@angular/core';
 
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 
@@ -25,7 +25,7 @@ import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/anima
     standalone: false
 })
 
-export class MenuItemComponent {
+export class MenuItemComponent implements AfterViewInit {
 
     @Input() label: string;
     @Input() boolVar: boolean;

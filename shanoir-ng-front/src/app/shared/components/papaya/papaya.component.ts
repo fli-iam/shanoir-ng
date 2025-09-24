@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy } from "@angular/core";
+import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy, OnChanges } from "@angular/core";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -23,7 +23,7 @@ declare var papayaContainers: any[];
     styleUrls: ["papaya.component.css"],
     standalone: false
 })
-export class PapayaComponent implements OnInit, OnDestroy {
+export class PapayaComponent implements OnInit, OnDestroy, OnChanges {
     @Input() params: any[];
     @Input() autoLoading: boolean = false;
     @Input() loadingCallback: () => Promise<any[]>;

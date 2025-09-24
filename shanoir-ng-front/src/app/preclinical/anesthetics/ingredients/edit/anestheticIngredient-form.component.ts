@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -37,7 +37,7 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
     standalone: false
 })
 @ModesAware
-export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
+export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges{
 
     @Input() anesthetic: Anesthetic;
     @Input('toggleForm') toggleForm: boolean = true;

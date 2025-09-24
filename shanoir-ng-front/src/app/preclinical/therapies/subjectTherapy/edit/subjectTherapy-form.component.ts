@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
@@ -41,7 +41,7 @@ import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract
     standalone: false
 })
 @ModesAware
-export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>{
+export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy> implements OnChanges{
 
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() canModify: boolean = false;

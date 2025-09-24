@@ -20,7 +20,7 @@ import {
     OnChanges,
     Output,
     SimpleChanges,
-    ViewChild,
+    ViewChild, AfterViewInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -44,7 +44,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     standalone: false
 })
 
-export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
+export class TreeNodeComponent implements ControlValueAccessor, OnChanges, AfterViewInit {
 
     @Input() label: string;
     @Input() pictoUrl: string;

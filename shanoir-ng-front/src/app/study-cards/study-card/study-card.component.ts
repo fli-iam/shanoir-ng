@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -47,7 +47,7 @@ import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.co
     animations: [slideDown],
     standalone: false
 })
-export class StudyCardComponent extends EntityComponent<StudyCard> {
+export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
 
     centers: IdName[] = [];
     public studies: IdName[] = [];

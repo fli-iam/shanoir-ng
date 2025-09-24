@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, ViewChild} from '@angular/core';
+import {Component, ViewChild, OnInit} from '@angular/core';
 import {UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {formatDate} from "@angular/common";
@@ -45,7 +45,7 @@ import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
     standalone: false
 })
 
-export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
+export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> implements OnInit {
 
     @ViewChild('inputDatasetsTable', {static: false}) inputDatasetsTable: TableComponent;
     @ViewChild('outputDatasetsTable', {static: false}) outputDatasetsTable: TableComponent;
