@@ -94,7 +94,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     get studyCard(): StudyCard { return this.entity; }
-    set studyCard(coil: StudyCard) { this.entity = coil; }
+    set studyCard(coil: StudyCard) { this.entity = coil; }
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy();
