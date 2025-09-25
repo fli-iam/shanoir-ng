@@ -6,6 +6,7 @@ import org.shanoir.ng.vip.executionTemplate.dto.ExecutionTemplateDTO;
 import org.shanoir.ng.vip.executionTemplate.dto.mapper.ExecutionTemplateMapper;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import org.shanoir.ng.vip.executionTemplate.repository.ExecutionTemplateRepository;
+import org.shanoir.ng.vip.executionTemplate.service.ExecutionTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class ExecutionTemplateApiController implements ExecutionTemplateApi {
     @Autowired
     ExecutionTemplateMapper mapper;
 
+    @Autowired
+    ExecutionTemplateService service;
+
     public ResponseEntity<List<ExecutionTemplateDTO>> getExecutionTemplatesByStudyId(@Parameter(description = "The study Id", required = true) @PathVariable("studyId") Long studyId) {
         List<ExecutionTemplate> executions = repository.findByStudyId(studyId);
         return new ResponseEntity<>(mapper.ExecutionTemplatesToDTOs(executions), HttpStatus.OK);
@@ -47,6 +51,6 @@ public class ExecutionTemplateApiController implements ExecutionTemplateApi {
 
     public ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(@Parameter(description = "The execution template updated", required = true) ExecutionTemplateDTO executionTemplateDTO,
                                                                         @Parameter(description = "The execution template Id", required = true) @PathVariable("parameterId") Long parameterId) {
-        return new ResponseEntity<>(mapper.ExecutionTemplateToDTO(repository.save(mapper.ExecutionTemplateDTOToEntity(executionTemplateDTO))), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.ExecutionTemplateToDTO(repository.save(service.update(mapper.ExecutionTemplateDTOToEntity(executionTemplateDTO)))), HttpStatus.OK);
     }
 }

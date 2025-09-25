@@ -14,4 +14,13 @@ public interface ExecutionTemplateService {
      */
     @Async
     void createExecutionsFromExecutionTemplates(List<DatasetAcquisition> createdAcquisitions);
+
+
+    /**
+     * This method allows the template filters management while updating template
+     * @param executionTemplate the newly created template without filters
+     *
+     * @return the newly created template with its filters
+     */
+    ExecutionTemplate update(ExecutionTemplate executionTemplate);
 }

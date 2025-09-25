@@ -55,6 +55,12 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
         }
     }
 
+    public ExecutionTemplate update(ExecutionTemplate executionTemplate) {
+        ExecutionTemplate oldEntity = repository.findById(executionTemplate.getId()).get();
+        executionTemplate.setFilters(oldEntity.getFilters());
+        return executionTemplate;
+    }
+
     /**
      * This method filters the execution templates available for the given acquisition
      */
@@ -112,6 +118,10 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
      * This method fill the filter combination with the results of each filters, resulting in a combination of boolean values
      */
     private String fillCombinationWithComparisonResults(String filterCombination, Map<Integer, Boolean> fieldPositionAndComparisonResults) {
+        if (Objects.equals(filterCombination, "") || Objects.isNull(filterCombination)){
+            filterCombination = "and";
+        }
+
         if (Objects.equals(filterCombination, "and") || Objects.equals(filterCombination, "or")) {
             filterCombination = fieldPositionAndComparisonResults.values().stream()
                     .map(String::valueOf)

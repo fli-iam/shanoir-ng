@@ -30,7 +30,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
-	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
+	@Query(value = "SELECT COUNT(*) FROM dataset as ds " +
 			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
 			"INNER JOIN examination as ex ON acq.examination_id=ex.id " +
 			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
@@ -55,14 +55,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
-	
+
 	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
 
 	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
-	@Query(value="SELECT ds.id FROM dataset ds " +
+	@Query(value = "SELECT ds.id FROM dataset ds " +
 			"LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
 			"LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id " +
 			"LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id " +
@@ -82,17 +82,18 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
 	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
-    List<Dataset> deleteByDatasetProcessingId(Long id);
+	List<Dataset> deleteByDatasetProcessingId(Long id);
 
 	boolean existsByTagsContains(StudyTag tag);
 
-	@Query(value="SELECT ds.id FROM dataset as ds " +
+	@Query(value = "SELECT ds.id FROM dataset as ds " +
 			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
 			"WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
 	List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
 
 	@Query("""
-		SELECT DISTINCT
+
+			SELECT DISTINCT
 			ds.id                      AS id,
 			ex.study.id                AS studyId,
 			ex.centerId                AS centerId,
@@ -158,4 +159,10 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
 
 	List<Dataset> findByIdIn(List<Long> ids);
+
+
+	@Query(value = "SELECT dataset.id FROM dataset " +
+			"JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id " +
+			"WHERE acq.examination_id = ?1", nativeQuery = true)
+	List<Long> findIdsByExaminationId(Long examinationId);
 }
