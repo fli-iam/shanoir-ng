@@ -35,10 +35,10 @@ export class QualityCardRuleComponent implements OnChanges {
     @Input() rule: QualityCardRule;
     private rulePromise: SuperPromise<QualityCardRule> = new SuperPromise(); 
     @Input() conditionFields: ShanoirMetadataField[];
-    @Output() change: EventEmitter<QualityCardRule> = new EventEmitter();
+    @Output() userChange: EventEmitter<QualityCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
-    @Output() copy: EventEmitter<void> = new EventEmitter();
+    @Output() copyRule: EventEmitter<void> = new EventEmitter();
     @Output() delete: EventEmitter<void> = new EventEmitter();
     @Input() showErrors: boolean = false;
     touched: boolean = false;
@@ -70,12 +70,12 @@ export class QualityCardRuleComponent implements OnChanges {
         let cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     deleteCondition(index: number) {
         this.rule.conditions.splice(index, 1);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     @HostListener('document:click', ['$event.target'])

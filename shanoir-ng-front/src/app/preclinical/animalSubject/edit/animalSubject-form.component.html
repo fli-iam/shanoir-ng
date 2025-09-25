@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(save)="save()"
 					(edit)="goToEdit()"
 					(delete) = "deleteBySubject(entity.subject)"
-					(cancel)="goToView(entity.animalSubject.id)"
+					(dismiss)="goToView(entity.animalSubject.id)"
 					(back)="goBack()">
 			<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="download()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
 			</form-footer>

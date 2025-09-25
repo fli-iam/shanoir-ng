@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.error]="valueError"
             [(ngModel)]="assignment.value" 
             placeholder="enter value" 
-            (change)="onChangeValue()"
+            (userChange)="onChangeValue()"
             (focusout)="valueTouched = true"
             [disabled]="!assignment.field">
     </auto-ajust-input>

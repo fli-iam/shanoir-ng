@@ -110,7 +110,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [formControlName]="i"
                             class="value"
                             [(ngModel)]="condition.values[i]"
-                            (change)="onConditionChange()"
+                            (userChange)="onConditionChange()"
                             placeholder="enter value"
                             (focusout)="valueTouched = true">
                     </auto-ajust-input>
