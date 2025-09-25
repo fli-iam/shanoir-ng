@@ -97,5 +97,12 @@ module.exports = tseslint.config(
       "@angular-eslint/template/mouse-events-have-key-events": "off",
       "@angular-eslint/template/alt-text": "off"
     },
-  }
+  },
+  {
+    // Fix false positives in this file for dev env
+    files: ["src/app/shared/side-menu/side-menu.component.ts"],
+    rules: {
+      "import/no-unresolved": "off"
+    }
+  },
 );
