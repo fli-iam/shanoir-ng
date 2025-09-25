@@ -13,18 +13,18 @@
  */
 import { Component } from '@angular/core';
 
+import { VERSION } from '@env/version';
+
 import { SolrService } from '../../solr/solr.service';
 import { disapearUp, slideDown } from '../animations/animations';
-import { KeycloakService } from '../keycloak/keycloak.service';
 import { ConsoleService } from '../console/console.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-// eslint-disable-next-line import/no-unresolved
-import { VERSION } from '../../../environments/version';
-import { StudyService } from '../../studies/shared/study.service';
 import { environment } from '../../../environments/environment';
+import { StudyService } from '../../studies/shared/study.service';
 import { UserService } from '../../users/shared/user.service';
-import {ConfirmDialogService} from "../components/confirm-dialog/confirm-dialog.service";
+import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 
 
 
