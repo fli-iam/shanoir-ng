@@ -49,7 +49,7 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
             { headerName: "Acquisition Center", field: 'acquisitionEquipment.center.name'},
@@ -75,7 +75,7 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
     }
 
     onRowClick(sc: StudyCard) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Import rule';
             this.subscriptions.push(

@@ -38,7 +38,7 @@ export class CoilService extends EntityService<Coil> {
     }
 
     public stringify(entity: Coil) {
-        let dto = new CoilDTO(entity);
+        const dto = new CoilDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

@@ -55,9 +55,9 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
 
     private completeDicomTagNames(result: StudyCard, tags: DicomTag[]) {
         if (result.rules) {
-            for (let rule of result.rules) {
+            for (const rule of result.rules) {
                 if (rule.conditions) {
-                    for (let condition of rule.conditions) {
+                    for (const condition of rule.conditions) {
                         condition.dicomTag = tags.find(tag => !!condition.dicomTag && tag.code == condition.dicomTag.code);
                     }
                 }
@@ -67,9 +67,9 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
 
     private completeCoils(result: StudyCard, coils: Coil[]) {
         if (result.rules) {
-            for (let rule of result.rules) {
+            for (const rule of result.rules) {
                 if (rule.assignments) {
-                    for (let assigment of rule.assignments) {
+                    for (const assigment of rule.assignments) {
                         if (StudyCardDTOService.isCoil(assigment.field)) {
                             if (assigment.value instanceof Coil) assigment.value = coils.find(coil => coil.id == (assigment.value as Coil).id);
                         }
@@ -93,21 +93,21 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new StudyCard();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new StudyCard();
                 StudyCardDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
         }
         return Promise.all([
             this.studyService.getStudiesNames().then(studies => {
-                for (let entity of result) {
+                for (const entity of result) {
                     if (entity.study) 
                         entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.acqEqService.getAll().then(acqs => {
-                for (let entity of result) {
+                for (const entity of result) {
                     if (entity.acquisitionEquipment) 
                         entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
                 }

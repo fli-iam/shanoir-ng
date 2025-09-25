@@ -39,12 +39,12 @@ export abstract class StudyCardDTOServiceAbstract {
         }
         entity.rules = [];
         if (dto.rules) {
-            for (let ruleDTO of dto.rules) {
-                let rule: StudyCardRule = new StudyCardRule(ruleDTO.scope);
+            for (const ruleDTO of dto.rules) {
+                const rule: StudyCardRule = new StudyCardRule(ruleDTO.scope);
                 if (ruleDTO.assignments) {
                     rule.assignments = [];
-                    for (let assigmentDTO of ruleDTO.assignments) {
-                        let assigment: StudyCardAssignment = new StudyCardAssignment('Dataset');
+                    for (const assigmentDTO of ruleDTO.assignments) {
+                        const assigment: StudyCardAssignment = new StudyCardAssignment('Dataset');
                         assigment.field = assigmentDTO.field;
                         if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
                             assigment.value = new Coil();
@@ -57,14 +57,14 @@ export abstract class StudyCardDTOServiceAbstract {
                 }
                 if (ruleDTO.conditions) {
                     rule.conditions = [];
-                    for (let conditionDTO of ruleDTO.conditions) {
-                        let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
+                    for (const conditionDTO of ruleDTO.conditions) {
+                        const condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
                         if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         if (this.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
                             condition.values = [];
                             conditionDTO.values?.forEach(dtoVal => {
-                                let value = new Coil();
+                                const value = new Coil();
                                 value.id = +dtoVal;
                                 condition.values.push(value);
                             });

@@ -65,7 +65,7 @@ export class Study extends Entity {
 
     public static completeMembers(study: Study, users: User[]) {
         if (!study.studyUserList) return;
-        for (let studyUser of study.studyUserList) {
+        for (const studyUser of study.studyUserList) {
             StudyUser.completeMember(studyUser, users);
         }
     }

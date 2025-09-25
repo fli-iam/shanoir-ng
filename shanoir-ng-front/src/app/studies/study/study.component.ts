@@ -164,14 +164,14 @@ export class StudyComponent extends EntityComponent<Study> {
         this.setLabeledSizes(this.study);
 
         if (this.study.profile == null) {
-            let pro = new Profile();
+            const pro = new Profile();
             pro.profileName = "Profile Neurinfo";
             this.study.profile = pro;
         }
         this.study.subjectStudyList = this.study.subjectStudyList.sort(
             function(a: SubjectStudy, b:SubjectStudy) {
-                let aname = a.studyIdentifier ? a.studyIdentifier : a.subject.name;
-                let bname = b.studyIdentifier ? b.studyIdentifier : b.subject.name;
+                const aname = a.studyIdentifier ? a.studyIdentifier : a.subject.name;
+                const bname = b.studyIdentifier ? b.studyIdentifier : b.subject.name;
                 return aname.localeCompare(bname);
             });
 
@@ -195,7 +195,7 @@ export class StudyComponent extends EntityComponent<Study> {
     initEdit(): Promise<void> {
 
         if (this.study.profile == null) {
-            let profile = new Profile();
+            const profile = new Profile();
             profile.profileName = "Profile Neurinfo";
             this.study.profile = profile;
         }
@@ -215,7 +215,7 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         }
         this.getCenters().then(() => {
-            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
+            const option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
             if (option) this.selectedCenter = option.value;
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         });
@@ -234,7 +234,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         this.fetchUsers().then(users => {
             // Add the connected user by default
-            let connectedUser: User = users.find(user => this.isMe(user));
+            const connectedUser: User = users.find(user => this.isMe(user));
             this.addMe(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
         });
         return Promise.resolve();
@@ -248,7 +248,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'startDate': [this.study.startDate, [DatepickerComponent.validator]],
             'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
@@ -275,17 +275,17 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
     private setLabeledSizes(study: Study): Promise<void> {
-        let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
+        const waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
             : Promise.resolve();
 
         this.uploading = true;
         return waitUploads.then(() => {
             return this.studyService.getStudyDetailedStorageVolume(study.id).then(dto => {
-                let datasetSizes = dto;
+                const datasetSizes = dto;
                 study.totalSize = datasetSizes.total
-                let sizesByLabel = new Map<string, number>()
-                for (let sizeByFormat of datasetSizes.volumeByFormat) {
+                const sizesByLabel = new Map<string, number>()
+                for (const sizeByFormat of datasetSizes.volumeByFormat) {
                     if(sizeByFormat.size > 0){
                         sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                     }
@@ -310,7 +310,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public async hasStudyAdminRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study?.studyUserList) return false;
-        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
@@ -322,13 +322,13 @@ export class StudyComponent extends EntityComponent<Study> {
     public async hasDeleteRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
-        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
     private newStudy(): Study {
-        let study: Study = new Study();
+        const study: Study = new Study();
         study.clinical = false;
         study.studyCenterList = [];
         study.tags = [];
@@ -380,7 +380,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     onCenterAdd(): void {
         if (this.selectedCenter) {
-            let studyCenter: StudyCenter = new StudyCenter();
+            const studyCenter: StudyCenter = new StudyCenter();
             studyCenter.center = new Center();
             studyCenter.center.id = this.selectedCenter.id;
             studyCenter.center.name = this.selectedCenter.name;
@@ -417,7 +417,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private addMe(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
-        let studyUser: StudyUser = new StudyUser();
+        const studyUser: StudyUser = new StudyUser();
         studyUser.userId = selectedUser.id;
         studyUser.userName = selectedUser.username;
         studyUser.receiveStudyUserReport = false;
@@ -485,7 +485,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public attachNewFile(event: any) {
-        let fileToAdd = event.target.files[0];
+        const fileToAdd = event.target.files[0];
         this.protocolFiles.push(fileToAdd);
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
@@ -524,12 +524,12 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        let newStudy: boolean = !this.study?.id; 
+        const newStudy: boolean = !this.study?.id; 
         return super.save(() => {
-            let uploads: Promise<void>[] = [];
+            const uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
-                for (let file of this.protocolFiles) {
+                for (const file of this.protocolFiles) {
                     uploads.push(this.studyService.uploadFile(file, this.entity.id, 'protocol-file'));
                 }
             }

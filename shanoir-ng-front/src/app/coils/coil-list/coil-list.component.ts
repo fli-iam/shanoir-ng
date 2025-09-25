@@ -56,7 +56,7 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
 
             { headerName: "Center Equipment Model", field: "manufacturerModel.name",

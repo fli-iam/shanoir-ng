@@ -65,10 +65,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Center equipment", field: "name", cellRenderer: function (params: any) {
-                    let acqEquip: AcquisitionEquipment = params.data;
+                    const acqEquip: AcquisitionEquipment = params.data;
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
@@ -82,7 +82,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
             },
             {
                 headerName: "Modality", field: "manufacturerModel.datasetModalityType", cellRenderer: function (params: any) {
-                    let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
+                    const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
                     if (mod) return DatasetModalityType.getLabel(mod);
                 }
             },
@@ -111,7 +111,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     }
 
     openCreateCoil(acqEquip: AcquisitionEquipment) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/coil/create'], ).then(() => {
             this.breadcrumbsService.currentStep.addPrefilled('center', acqEquip.center);
             this.breadcrumbsService.currentStep.addPrefilled('manufacturerModel', acqEquip.manufacturerModel);

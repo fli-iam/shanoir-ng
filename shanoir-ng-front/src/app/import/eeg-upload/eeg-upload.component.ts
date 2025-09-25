@@ -69,7 +69,7 @@ export class EegUploadComponent {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
         this.modality = null;
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadEegFile(formData)
             .subscribe(

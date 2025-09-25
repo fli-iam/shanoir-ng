@@ -83,7 +83,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.studies && this.studies) {
             this.studyOptions = this.studies.map(study => {
-                let option: Option<Study> = new Option<Study>(study, study.name);
+                const option: Option<Study> = new Option<Study>(study, study.name);
                 option.disabled = !!this.studyUserList?.find(su => su.studyId == study.id || su.study?.id == study.id);
                 return option;
             });
@@ -173,7 +173,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onEditCenter(center: Center, su: StudyUser, selected: boolean) {
         if (!su.centers) su.centers = [];
-        let index: number = su.centers.findIndex(c => c.id == center.id)
+        const index: number = su.centers.findIndex(c => c.id == center.id)
         if (!su.centers.find(c => c.id == center.id) && selected) {
             su.centers.push(center);
         }
@@ -238,15 +238,15 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     addStudy(selectedStudy: Study, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         if (this.studyOptions) {
-            let option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
+            const option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
             if (option) option.disabled = true;
         }
 
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.study = selectedStudy;
             studyUser.receiveStudyUserReport = false;
             studyUser.receiveNewImportReport = false;
@@ -269,7 +269,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        let study = new IdName(this.study.id, this.study.name);
+        const study = new IdName(this.study.id, this.study.name);
         this.accessRequestService.inviteUser(this.invitationMail, this.invitationFunction, study).then(request => {
             if (!request) {
                 this.consoleService.log('info', "No user found with such email, an invitation was sent.");
@@ -292,12 +292,12 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (this.isMe(selectedUser)) {
             this.freshlyAddedMe = true;
         }
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
             this.pannelStudyUser = backedUpStudyUser;
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
             studyUser.userName = selectedUser.username;
             studyUser.receiveStudyUserReport = false;

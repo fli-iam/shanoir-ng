@@ -53,7 +53,7 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Processing", field: "datasetProcessingType" },
             { headerName: "Comment", field: "comment" },

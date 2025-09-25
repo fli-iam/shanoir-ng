@@ -44,7 +44,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
     }
     
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'from': [1],
             'to': [this.nbExaminations > 20 ? 20 : this.nbExaminations],
         });

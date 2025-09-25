@@ -43,7 +43,7 @@ export class SolrRangeCriterionComponent {
         } else {
             this.changing = true;
             this.tiemout = delay;
-            let interval = setInterval(() => {
+            const interval = setInterval(() => {
                 this.tiemout = this.tiemout - 0.4;
                 if (this.tiemout < 0) {
                     clearInterval(interval);

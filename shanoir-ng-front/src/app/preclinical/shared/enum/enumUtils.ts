@@ -29,7 +29,7 @@ export class EnumUtils {
    //  protected static enumUtils : EnumUtils;
   
     getEnumArrayFor(enumName:string): Enum[] {
-        let enumArray:Enum[] = [];
+        const enumArray:Enum[] = [];
         var enumIs = null;
         switch(enumName) { 
            case 'AnestheticType': {
@@ -74,7 +74,7 @@ export class EnumUtils {
     }
     
     getEnumValue(enumArray:Enum[],key:any): string{
-        for(let current of enumArray){
+        for(const current of enumArray){
             if(current.key == key) return current.value;
         }
         return '';

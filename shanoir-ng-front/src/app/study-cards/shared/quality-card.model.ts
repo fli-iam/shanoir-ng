@@ -36,10 +36,10 @@ export class QualityCardRule {
     orConditions: boolean = false;
 
     static copy(rule: QualityCardRule): QualityCardRule {
-        let copy: QualityCardRule = new QualityCardRule();
+        const copy: QualityCardRule = new QualityCardRule();
         copy.tag = rule.tag;
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            const conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
             conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];

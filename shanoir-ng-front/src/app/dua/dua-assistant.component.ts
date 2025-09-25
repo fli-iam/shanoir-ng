@@ -65,10 +65,10 @@ export class DUAAssistantComponent implements OnDestroy {
             private studyService: StudyService) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
-                let studyIdStr: string = params['studyId'];
-                let studyId: number = studyIdStr ? parseInt(studyIdStr) : null;
-                let duaId: string = params['id'];
-                let mode: Mode = this.route.snapshot.data['mode'];
+                const studyIdStr: string = params['studyId'];
+                const studyId: number = studyIdStr ? parseInt(studyIdStr) : null;
+                const duaId: string = params['id'];
+                const mode: Mode = this.route.snapshot.data['mode'];
                 this.init(mode, duaId, studyId);
             })
         );
@@ -84,7 +84,7 @@ export class DUAAssistantComponent implements OnDestroy {
         if (this.mode == 'create') {
             this.dua = new DuaDocument();
             this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
-                let study = studies.find(s => s.id == studyId);
+                const study = studies.find(s => s.id == studyId);
                 this.dua.studyId = studyId;
                 this.studyName = study.name;
                 this.dua.studyName = study.name;
@@ -102,7 +102,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     protected buildForm(dua?: DuaDocument) {
-        let controls: any = {
+        const controls: any = {
             'url': [dua?.url, [Validators.required]],
             'funding': [dua?.funding, [Validators.required]],
             'thanks': [dua?.thanks, [Validators.required]],
@@ -115,7 +115,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     protected onSubmit() {
-        let dua: DuaDocument = DuaDocument.buildInstance(
+        const dua: DuaDocument = DuaDocument.buildInstance(
             this.studyId,
             this.studyName,
             this.form.get('url')?.value,
@@ -159,10 +159,10 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     hasError(fieldName: string, errors?: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
             if (errors) {
-                for (let errorName of errors) {
+                for (const errorName of errors) {
                     if (formError[errorName]) return true;
                 }
             } else {
@@ -287,7 +287,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

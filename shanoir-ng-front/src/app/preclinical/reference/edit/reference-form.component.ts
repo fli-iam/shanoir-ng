@@ -94,8 +94,8 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     }
 
     loadSmth() {
-        let category = this.route.snapshot.queryParams['category'];
-        let reftype = this.route.snapshot.queryParams['reftype'];
+        const category = this.route.snapshot.queryParams['category'];
+        const reftype = this.route.snapshot.queryParams['reftype'];
         if (category) {
             this.reference.category = category;
             this.isEditableCategory = false;
@@ -128,7 +128,7 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     
 
     isValueInArray(value: string, array: string[]): boolean {
-        for (let search in array) {
+        for (const search in array) {
             if (search == value) return true;
         }
         return false;

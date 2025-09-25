@@ -160,7 +160,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }

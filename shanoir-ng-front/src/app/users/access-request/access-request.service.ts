@@ -65,7 +65,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(const subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
     }

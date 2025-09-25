@@ -63,7 +63,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.setDatasetIds(this.node.datasets);
                 }
             } else {
-                let label: string = 'Dataset Acquisition n°' + this.input.datasetAcquisition.id;
+                const label: string = 'Dataset Acquisition n°' + this.input.datasetAcquisition.id;
                 this.node = new DatasetAcquisitionNode(
                     this.input.parentNode,
                     this.input.datasetAcquisition.id,

@@ -38,7 +38,7 @@ export class SuperPromise<T> implements Promise<T> {
     }
 
     public static timeoutPromise(milliseconds?: number): Promise<void> {
-        let superPromise: SuperPromise<void> = new SuperPromise();
+        const superPromise: SuperPromise<void> = new SuperPromise();
         setTimeout(() => {
             superPromise.resolve();
         }, milliseconds);

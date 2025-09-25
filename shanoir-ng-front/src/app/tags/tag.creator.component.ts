@@ -59,7 +59,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
     }
     public addTag() {
         if (this.text != null && this.selectedColor != null) {
-            let newTag = new Tag();
+            const newTag = new Tag();
             newTag.color = this.selectedColor;
             newTag.name = this.text;
             if (this.model.find(tag => (tag as Tag).equals(newTag))) {

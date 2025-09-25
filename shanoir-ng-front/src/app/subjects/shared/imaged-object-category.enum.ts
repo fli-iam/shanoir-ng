@@ -33,7 +33,7 @@ export enum ImagedObjectCategory {
     }
 
     export function all(preclinical: boolean = false): ImagedObjectCategory[] {
-    	let allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
+    	const allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
         if (preclinical){
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_ANIMAL);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANIMAL_CADAVER);

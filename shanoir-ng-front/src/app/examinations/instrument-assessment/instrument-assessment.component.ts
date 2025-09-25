@@ -26,8 +26,8 @@ export class InstrumentAssessmentComponent {
     @Input() instrumentBasedAssesment: InstrumentBasedAssessment;
 
     getInstrumentVarName(varAssess: VariableAssessment, instrument: Instrument): string {
-        for (let varia of instrument.instrumentVariables) {
-            for (let ass of varia.variableAssessmentList) {
+        for (const varia of instrument.instrumentVariables) {
+            for (const ass of varia.variableAssessmentList) {
                 if (ass.id == varAssess.id) {
                     return varia.name;
                 }

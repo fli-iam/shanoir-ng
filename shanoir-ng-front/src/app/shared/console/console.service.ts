@@ -43,7 +43,7 @@ export class ConsoleService {
     constructor(private msgBoxService: MsgBoxService) {}
 
     public log(type: MsgType, txt: string, details?: string[]) {
-        let dateStr: string = formatDate(new Date(), 'HH:mm', 'en');
+        const dateStr: string = formatDate(new Date(), 'HH:mm', 'en');
         const message: Message = new Message(type, dateStr + ' - ' + txt, details); 
         this.messages.unshift(message);
         this.messageObserver.next(message);

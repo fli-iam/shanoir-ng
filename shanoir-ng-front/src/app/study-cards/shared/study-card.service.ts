@@ -53,7 +53,7 @@ export class StudyCardService extends EntityService<StudyCard> {
     }
 
     public stringify(entity: StudyCard) {
-        let dto = new StudyCardDTO(entity);
+        const dto = new StudyCardDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

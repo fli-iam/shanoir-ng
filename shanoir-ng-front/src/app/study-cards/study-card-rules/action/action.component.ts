@@ -62,13 +62,13 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.assignmentChangeSubscription.unsubscribe();
                 this.assignmentChangeSubscription = null;
             }
-            let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+            const assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
                 this.fieldLabel = assignmentField?.label;
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
-                            let valueOption: Option<any> = opts.find(opt => {
+                            const valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
@@ -89,7 +89,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
                         if (opts && opts.length > 0) {
-                            let valueOption: Option<any> = opts.find(opt => {
+                            const valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
@@ -114,7 +114,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             this.computeAssignmentOptionsSubscription.unsubscribe();
             this.computeAssignmentOptionsSubscription = null;
         }
-        let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+        const assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
         if (assignmentField && assignmentField.options) {
             this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
                 this.assigmentOptions = opts;

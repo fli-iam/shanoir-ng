@@ -83,7 +83,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }

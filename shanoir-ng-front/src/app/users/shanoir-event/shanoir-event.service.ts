@@ -18,7 +18,7 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
     }
 
     getPage(pageable : Pageable, studyId: number, searchStr : string, searchField : string): Promise<Page<ShanoirEvent>> {
-        let params = { 'params': pageable.toParams() };
+        const params = { 'params': pageable.toParams() };
         params['params']['searchStr'] = searchStr;
         params['params']['searchField'] = searchField;
         return this.http.get<Page<ShanoirEvent>>(this.API_URL + '/' + studyId, params)

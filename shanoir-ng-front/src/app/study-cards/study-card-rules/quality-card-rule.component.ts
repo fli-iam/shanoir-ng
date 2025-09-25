@@ -67,7 +67,7 @@ export class QualityCardRuleComponent implements OnChanges {
     }
 
     addNewCondition() {
-        let cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
+        const cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.userChange.emit(this.rule);

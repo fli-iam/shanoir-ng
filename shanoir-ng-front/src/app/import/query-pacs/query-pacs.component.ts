@@ -105,9 +105,9 @@ export class QueryPacsComponent{
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

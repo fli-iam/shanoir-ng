@@ -32,8 +32,8 @@ export class StudyHistoryComponent implements OnInit {
             }
         },
         {headerName: 'ObjectId', field: 'objectId', route: function(params:ShanoirEvent) {
-                let event = params.eventType;
-                let id = params.objectId;
+                const event = params.eventType;
+                const id = params.objectId;
                 if (event.includes("create")) {
                     if (event.includes("Dataset") && !event.includes("Acquisition")) { return "/dataset/details/" + id; }
                     else if (event.includes("Examination")) { return "/examination/details/" + id; }
@@ -66,8 +66,7 @@ export class StudyHistoryComponent implements OnInit {
         return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             page.content.forEach(item => {
                 if (this.users.get(item.userId) == undefined) {
-                    let studyUser : StudyUser;
-                    studyUser = this.study.studyUserList.find(user => user.userId == item.userId);
+                    const studyUser : StudyUser = this.study.studyUserList.find(user => user.userId == item.userId);
                     if (studyUser) {
                         this.users.set(item.userId, studyUser.userName);
                         item.username = studyUser.userName;

@@ -111,7 +111,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     initEdit(): Promise<void> {
         this.fetchStudies().then(() => {
             this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
-            let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
+            const subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
             this.fetchSubjects().then(() => {
                 this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
             }).then(() => {
@@ -193,7 +193,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         if (!this.study?.id) return Promise.resolve();
         return this.studyService.findSubjectsByStudyId(this.study.id).then(subjects => {
             this.subjectOptions = subjects?.map(sub => {
-                let subject: Subject = new Subject();
+                const subject: Subject = new Subject();
                 subject.id = sub.id;
                 subject.name = sub.name;
                 subject.identifier = sub.identifier;
@@ -205,7 +205,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     fetchDatasets(): Promise<void> {
         if (!this.study?.id || !this.subject?.id) return Promise.resolve();
         return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
-            for (let dataset of datasets) {
+            for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
@@ -213,7 +213,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     buildForm(): UntypedFormGroup {
-        let formGroup: UntypedFormGroup = this.formBuilder.group({
+        const formGroup: UntypedFormGroup = this.formBuilder.group({
             'study': [{value: this.study?.id, disabled: !!this.prefilledStudy}, Validators.required],
             'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.study)}, Validators.required],
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
@@ -263,7 +263,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stdout.log";
+        const filename = this.executionMonitoring.name + ".stdout.log";
 
         this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -276,7 +276,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stderr.log";
+        const filename = this.executionMonitoring.name + ".stderr.log";
 
         this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -284,7 +284,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private downloadLogIntoBrowser(response: string, filename: string){
-        let blob = new Blob([response], {
+        const blob = new Blob([response], {
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
@@ -296,23 +296,23 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public getDuration(){
 
-        let start = this.executionMonitoring?.startDate;
-        let end = this.executionMonitoring?.endDate;
+        const start = this.executionMonitoring?.startDate;
+        const end = this.executionMonitoring?.endDate;
 
         if(!start || !end){
             return "";
         }
 
-        let duration = end - start;
+        const duration = end - start;
 
         if(duration <= 0){
             return "";
         }
 
-        let milliseconds = Math.floor((duration % 1000));
-        let seconds = Math.floor((duration / 1000) % 60);
-        let minutes = Math.floor((duration / (1000 * 60)) % 60);
-        let hours = Math.floor((duration / (1000 * 60 * 60)));
+        const milliseconds = Math.floor((duration % 1000));
+        const seconds = Math.floor((duration / 1000) % 60);
+        const minutes = Math.floor((duration / (1000 * 60)) % 60);
+        const hours = Math.floor((duration / (1000 * 60 * 60)));
 
         return String(hours).padStart(2, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +

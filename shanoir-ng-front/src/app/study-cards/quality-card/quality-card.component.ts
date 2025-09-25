@@ -144,7 +144,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'name': [this.qualityCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.qualityCard.study, [Validators.required]],
             'toCheckAtImport': [this.qualityCard.toCheckAtImport, [Validators.required]],
@@ -243,14 +243,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
-        let modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
         modalRef.instance.nbExaminations = nbExaminations;
         return this.waitForEnd(modalRef);
     }
 
     private waitForEnd(modalRef: ComponentRef<{ test: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<Interval | 'cancel'> {
-        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
-        let result: Observable<any> = race([
+        const resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        const result: Observable<any> = race([
             modalRef.instance.test, 
             modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
@@ -279,7 +279,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         if (!report) return;
         let csvStr: string = '';
         csvStr += report.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of report.items) {
+        for (const entry of report.items) {
             csvStr += '\n' + report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {

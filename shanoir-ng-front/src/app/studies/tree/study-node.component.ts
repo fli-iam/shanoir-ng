@@ -88,7 +88,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
+            const id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
                 this.node = this.input;

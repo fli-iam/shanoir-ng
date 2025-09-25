@@ -88,7 +88,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
             let generatedName = '';
             if(this.anesthetic.anestheticType) generatedName = generatedName.concat(AnestheticType[this.anesthetic.anestheticType]).concat(' ');
             if(this.anesthetic.ingredients){
-                for(let ingredient of this.anesthetic.ingredients){
+                for(const ingredient of this.anesthetic.ingredients){
                     let strIngredient = '';
                     strIngredient = strIngredient.concat(ingredient.name.value.substring(0,3)).concat('. ');
                     if(ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
@@ -122,7 +122,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                         this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then(() => {
                             this.getAnestheticIngredient(selectedIngredient)
                             this.onDelete.next({entity: selectedIngredient});
-                            let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
+                            const index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
                             this.anesthetic.ingredients.splice(index, 1);
                             this.table.refresh();
                             this.consoleService.log('info', 'The preclinical-anesthetic-ingredient n° ' + entity.id + ' sucessfully deleted');

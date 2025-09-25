@@ -37,7 +37,7 @@ export class DatasetProcessingDTOService {
     public toEntity(dto: DatasetProcessingInDTO, result?: DatasetProcessing): Promise<DatasetProcessing> {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         return Promise.all(promises).then(([]) => {
             return result;
         });
@@ -49,10 +49,10 @@ export class DatasetProcessingDTOService {
      */
     public toEntityList(dtos: DatasetProcessingInDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]>{
         if (!result) result = [];
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new DatasetProcessing();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new DatasetProcessing();
                 DatasetProcessingDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -68,14 +68,14 @@ export class DatasetProcessingDTOService {
         entity.datasetProcessingType = dto.datasetProcessingType;
         if(dto.inputDatasets) {
             entity.inputDatasets = dto.inputDatasets.map(id => { 
-                let dataset = new MrDataset();
+                const dataset = new MrDataset();
                 dataset.id = id;
                 return dataset;
             })
         }
         if(dto.outputDatasets) {
             entity.outputDatasets = dto.outputDatasets.map(id => {
-                let dataset = new MrDataset();
+                const dataset = new MrDataset();
                 dataset.id = id;
                 return dataset;
             })

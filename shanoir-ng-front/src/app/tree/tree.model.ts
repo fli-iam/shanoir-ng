@@ -210,7 +210,7 @@ export abstract class SubjectNode extends ShanoirNode {
         if (!tags) tags = [];
         else tags = tags.map(t => t.clone());
         if (qualityTag) {
-            let tag: Tag = new Tag();
+            const tag: Tag = new Tag();
             tag.id = -1;
             if (qualityTag == QualityTag.VALID) {
                 tag.name = 'Valid';
@@ -290,7 +290,7 @@ export class ExaminationNode extends ShanoirNode {
     protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';
 
     public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ExaminationNode {
-        let node: ExaminationNode = new ExaminationNode(
+        const node: ExaminationNode = new ExaminationNode(
             parent,
             exam.id,
             new ExaminationPipe().transform(exam),
@@ -325,7 +325,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
     protected readonly routeBase = '/dataset-acquisition/details/';
 
     public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetAcquisitionNode {
-        let node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
+        const node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
             parent,
             dsAcq.id,
             dsAcq.name,
@@ -369,7 +369,7 @@ export class DatasetNode extends ShanoirNode {
     protected readonly routeBase = '/dataset/details/';
 
     public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetNode {
-        let node: DatasetNode = new DatasetNode(
+        const node: DatasetNode = new DatasetNode(
             parent,
             dataset.id,
             dataset.name,
@@ -384,7 +384,7 @@ export class DatasetNode extends ShanoirNode {
         );
         node.processings = UNLOADED;
         //dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
-        let metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
+        const metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
         node.metadata = metadataNode;
         return node;
     }
@@ -408,7 +408,7 @@ export class ProcessingNode extends ShanoirNode {
     protected readonly routeBase = '/dataset-processing/details/';
 
     public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ProcessingNode {
-        let node: ProcessingNode = new ProcessingNode(
+        const node: ProcessingNode = new ProcessingNode(
             parent,
             processing.id,
             processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),

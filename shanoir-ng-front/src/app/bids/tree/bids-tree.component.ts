@@ -105,7 +105,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
                 }
             });
             // Then sort all sub elements folders
-            for (let elem of element.elements) {
+            for (const elem of element.elements) {
                 this.sort(elem);
             }
         }
@@ -152,7 +152,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
 
     public download(item: BidsElement): void {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
-        let params = new HttpParams().set("filePath", item.path);
+        const params = new HttpParams().set("filePath", item.path);
 
         this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).toPromise().then(response => {
             if (response.status == 200) {
@@ -163,7 +163,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
 
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        const contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 

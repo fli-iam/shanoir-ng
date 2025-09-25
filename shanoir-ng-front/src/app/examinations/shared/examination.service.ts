@@ -41,7 +41,7 @@ export class ExaminationService extends EntityService<Examination> {
     getEntityInstance() { return new Examination(); }
 
     findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
-        let url = AppUtils.BACKEND_API_EXAMINATION_URL
+        const url = AppUtils.BACKEND_API_EXAMINATION_URL
             + '/subject/' + subjectId
             + '/study/' + studyId;
         return this.http.get<SubjectExamination[]>(url)
@@ -49,14 +49,14 @@ export class ExaminationService extends EntityService<Examination> {
     }
 
     findExaminationIdsByStudy(studyId: number): Promise<number[]> {
-        let url = AppUtils.BACKEND_API_EXAMINATION_URL
+        const url = AppUtils.BACKEND_API_EXAMINATION_URL
             + '/study/' + studyId;
         return this.http.get<number[]>(url)
             .toPromise();
     }
 
     getPage(pageable: Pageable, preclinical: boolean = false, searchStr : string, searchField : string): Promise<Page<Examination>> {
-        let params = { 'params': pageable.toParams() };
+        const params = { 'params': pageable.toParams() };
         params['params']['searchStr'] = searchStr;
         params['params']['searchField'] = searchField;
         return this.http.get<Page<Examination>>(
@@ -89,7 +89,7 @@ export class ExaminationService extends EntityService<Examination> {
     }
 
     public stringify(entity: Examination) {
-        let dto = new ExaminationDTO(entity);
+        const dto = new ExaminationDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

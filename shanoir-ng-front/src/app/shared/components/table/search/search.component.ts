@@ -39,8 +39,8 @@ export class TableSearchComponent implements OnChanges {
 
     private computeSearchableColumns(): any[] {
         if (!this.columnDefs) return [];
-        let cols: any[] = [];
-        for (let col of this.columnDefs) {
+        const cols: any[] = [];
+        for (const col of this.columnDefs) {
             if (col.type != "boolean" && col.type != "button" && !col.disableSearch) {
                 cols.push(col);
             }

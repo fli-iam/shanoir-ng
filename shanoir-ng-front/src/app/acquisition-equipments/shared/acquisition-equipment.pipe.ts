@@ -27,7 +27,7 @@ export class AcquisitionEquipmentPipe implements PipeTransform {
 
     transform(acqEqpt: AcquisitionEquipment): string {
         if (acqEqpt) {
-            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            const manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             if (manufModel && acqEqpt.center) {
                 return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                     + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;

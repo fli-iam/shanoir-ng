@@ -233,7 +233,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
         this.form.markAsDirty();
@@ -242,9 +242,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public save(): Promise<Examination> {
         return super.save( () => {
-            let uploads: Promise<void>[] = [];
+            const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
             return Promise.all(uploads).then(() => null);
@@ -267,7 +267,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     ngOnDestroy() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
 
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }
