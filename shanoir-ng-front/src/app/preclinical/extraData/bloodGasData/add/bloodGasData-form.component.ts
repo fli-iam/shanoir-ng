@@ -52,7 +52,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     get bloodGasData(): BloodGasData { return this.entity; }
-    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
+    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
     
     getService(): EntityService<BloodGasData> {
         return this.extradatasService;

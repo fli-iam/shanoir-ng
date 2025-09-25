@@ -54,7 +54,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         }
 
     get model(): PathologyModel { return this.entity; }
-    set model(model: PathologyModel) { this.entity = model; }
+    set model(model: PathologyModel) { this.entity = model; }
 
     getService(): EntityService<PathologyModel> {
         return this.modelService;
