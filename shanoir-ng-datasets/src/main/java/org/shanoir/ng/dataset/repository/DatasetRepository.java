@@ -158,4 +158,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
 
 	List<Dataset> findByIdIn(List<Long> ids);
+
+	List<Long> findIdsByDatasetAcquisitionExaminationId(Long examinationId);
 }

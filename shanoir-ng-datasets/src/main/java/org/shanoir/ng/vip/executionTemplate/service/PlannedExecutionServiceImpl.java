@@ -1,20 +1,14 @@
 package org.shanoir.ng.vip.executionTemplate.service;
 
+import com.fasterxml.jackson.core.ObjectCodec;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.processing.dto.GroupByEnum;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
-import org.shanoir.ng.vip.execution.service.ExecutionService;
-import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
-import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
+import org.shanoir.ng.vip.executionTemplate.model.ExecutionInQueue;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateParameter;
 import org.shanoir.ng.vip.executionTemplate.model.PlannedExecution;
@@ -24,42 +18,21 @@ import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Service
 public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlannedExecutionServiceImpl.class);
-
-    private int MAX_STATUS_RETRIES = 3;
-    private long STATUS_SLEEP_SECONDS = 20;
-    private int MAX_THREADS = 3;
-
-    @Value("${server.shanoir-hours.shutdown}")
-    private int SHUTDOWN_HOUR;
-
-    @Value("${server.shanoir-hours.continuance}")
-    private int CONTINUANCE_HOUR;
-
-    @Autowired
-    private ExecutionService executionService;
-
-    @Autowired
-    private ExecutionMonitoringService executionMonitoringService;
 
     @Autowired
     private PlannedExecutionRepository plannedExecutionRepository;
@@ -76,35 +49,39 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     @Autowired
     private TransactionRunner transactionRunner;
 
+    @Autowired
+    @Lazy
+    private PlannedExecutionRunner plannedExecutionRunner;
+    @Autowired
+    private ObjectCodec objectCodec;
+
+    //A call is corresponding to all or a part of an examination acquisitions. If various examination imported, then multiple calls will be done
     public void applyExecution(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
         LOG.info("Auto executions for newly imported DICOM started.");
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
 
-        for (Long templateId : createdAcquisitionsPerTemplateId.keySet()) {
+        //Executions have to be processed according to priority order
+        LinkedHashMap<Long, List<Long>> createdAcquisitionsPerTemplateIdOrderedPerPrio = sortingPerPrio(createdAcquisitionsPerTemplateId);
+
+        for (Long templateId : createdAcquisitionsPerTemplateIdOrderedPerPrio.keySet()) {
             ExecutionTemplate template = executionTemplateRepository.findById(templateId).orElse(null);
+
             if(Objects.isNull(template)) {
+                //If the template has been removed for some reason
                 createdAcquisitionsPerTemplateId.get(templateId).forEach(acqId -> plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(templateId, acqId));
             }  else {
+                //Manage the executions according to the group scale
+                // (one exec per examination, one per acquisition or one per dataset)
                 String executionLevel = getExecutionLevel(template);
-
                 switch (executionLevel) {
                     case "examination" ->
-                            transactionRunner.runInTransaction(em -> createExecutionAtExaminationLevel(template, createdAcquisitionsPerTemplateId.get(templateId), executor));
+                            transactionRunner.runInTransaction(em -> createExecutionAtExaminationLevel(template, createdAcquisitionsPerTemplateId.get(templateId)));
                     case "acquisition" ->
-                            transactionRunner.runInTransaction(em -> createExecutionsAtAcquisitionLevel(template, createdAcquisitionsPerTemplateId.get(templateId), executor));
+                            transactionRunner.runInTransaction(em -> createExecutionsAtAcquisitionLevel(template, createdAcquisitionsPerTemplateId.get(templateId)));
                     case "dataset" ->
-                            transactionRunner.runInTransaction(em -> createExecutionsAtDatasetLevel(template, createdAcquisitionsPerTemplateId.get(templateId), executor));
+                            transactionRunner.runInTransaction(em -> createExecutionsAtDatasetLevel(template, createdAcquisitionsPerTemplateId.get(templateId)));
                 }
             }
         }
-
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        LOG.info("Auto executions for newly imported DICOM ended.");
     }
 
     @Transactional
@@ -120,49 +97,9 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     }
 
     /**
-     * Thread the creation of monitoring and start of execution for the given template id and acquisition id
-     */
-    private void threadExecution(ExecutionTemplate template, Long objectId, String executionLevel, Long acquisitionId) {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
-        try {
-            ExecutionCandidateDTO candidate = prepareExecutionCandidate(template, executionLevel, objectId);
-
-            if(Objects.nonNull(candidate)) {
-                IdName monitoringIdName = executionService.createExecution(candidate, datasetRepository.findByIdIn(candidate.getDatasetParameters().stream().map(DatasetParameterDTO::getDatasetIds).flatMap(List::stream).collect(Collectors.toList())));
-                String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
-
-                ExecutionStatus status = ExecutionStatus.RUNNING;
-
-                while (Objects.equals(status, ExecutionStatus.RUNNING)) {
-                    TimeUnit.SECONDS.sleep(STATUS_SLEEP_SECONDS);
-
-                    for (int attempt = 1; attempt <= MAX_STATUS_RETRIES; attempt++) {
-                        try {
-                            status = executionService.getExecutionStatusFromVipIdentifier(vipIdentifier);
-                            break;
-                        } catch (Exception e) {
-                            if (attempt == MAX_STATUS_RETRIES){
-                                break;
-                            }
-                            TimeUnit.SECONDS.sleep(1);
-                        }
-                    }
-
-                    plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
-                }
-            }
-        } catch (RestServiceException | SecurityException | EntityNotFoundException | InterruptedException e) {
-            LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, e);
-        }
-    }
-
-    /**
      * Create execution when it's one execution for all the newly imported data
      */
-    public void createExecutionAtExaminationLevel(ExecutionTemplate template, List<Long> acquisitionIds, ExecutorService executor) {
-        pauseIfInSleepWindow();
-
+    private void createExecutionAtExaminationLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
         int attempt = 0;
         DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
         while(Objects.isNull(acquisition) && attempt < 5) {
@@ -178,18 +115,18 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
         } else {
             Long examinationId = acquisition.getExamination().getId();
             DatasetAcquisition finalAcquisition = acquisition;
-            executor.submit(() -> transactionRunner.runInTransaction(em -> threadExecution(template, examinationId, "examination", finalAcquisition.getId())));
+
+            plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, examinationId, "examination", acquisitionIds));
         }
     }
 
     /**
      * Create executions when it's one execution per newly acquisition
      */
-    public void createExecutionsAtAcquisitionLevel(ExecutionTemplate template, List<Long> acquisitionIds, ExecutorService executor) {
+    private void createExecutionsAtAcquisitionLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
         for (Long acquisitionId : acquisitionIds) {
-            pauseIfInSleepWindow();
 
-            executor.submit(() -> transactionRunner.runInTransaction(em -> threadExecution(template, acquisitionId, "acquisition",  acquisitionId)));
+            plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, acquisitionId, "acquisition", List.of(acquisitionId)));
             try {
                 Thread.sleep(1000); // Delay between submissions, VIP needs it
             } catch (InterruptedException e) {
@@ -202,7 +139,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     /**
      * Create executions when it's one execution per newly dataset
      */
-    public void createExecutionsAtDatasetLevel(ExecutionTemplate template, List<Long> acquisitionIds, ExecutorService executor) {
+    private void createExecutionsAtDatasetLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
         int attempt = 0;
         List<Long> datasetIds = datasetRepository.findFilteredIdsByDatasetAcquisitionIdIn(acquisitionIds, "%");
         while(datasetIds.isEmpty() && attempt < 5) {
@@ -224,10 +161,19 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
             }
 
             if(Objects.nonNull(acquisition)){
-                for(Dataset dataset : acquisition.getDatasets()) {
-                    pauseIfInSleepWindow();
+                List<Dataset> datasetList = acquisition.getDatasets();
+                for (int i = 0; i < datasetList.size(); i++) {
+                    Dataset dataset = datasetList.get(i);
 
-                    executor.submit(() -> transactionRunner.runInTransaction(em -> threadExecution(template, dataset.getId(), "dataset", acquisitionId)));
+                    //For the execution submission, the list needs to be final, so the plannedExecutionToRemove list has to be managed that way.
+                    List<Long> plannedExecutionToRemove;
+                    if(Objects.equals(i, datasetList.size() - 1)){
+                        plannedExecutionToRemove = List.of(acquisitionId);
+                    } else {
+                        plannedExecutionToRemove = List.of(acquisitionId);
+                    }
+
+                    plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
                     try {
                         Thread.sleep(1000); // Delay between submissions, VIP needs it
                     } catch (InterruptedException e) {
@@ -244,7 +190,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     /**
      * Prepare the execution candidate DTO relatively to the given templateId and acquisitionId
      */
-    private ExecutionCandidateDTO prepareExecutionCandidate(ExecutionTemplate template, String executionLevel, Long objectId) {
+    public ExecutionCandidateDTO prepareExecutionCandidate(ExecutionTemplate template, String executionLevel, Long objectId) {
         Long studyId = template.getStudy().getId();
         Long examId = null;
         switch (executionLevel) {
@@ -276,7 +222,16 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
         candidate.setDatasetParameters(prepareDatasetParameters(template, objectId));
         return Objects.isNull(candidate.getDatasetParameters()) ? null : candidate;
     }
-    
+
+    public List<Long> getInvolvedData(ExecutionInQueue execution) {
+        switch (execution.getType()) {
+            case "dataset" -> { return List.of(execution.getObjectId()); }
+            case "acquisition" -> { return datasetRepository.findFilteredIdsByDatasetAcquisitionId(execution.getObjectId(), ""); }
+            case "examination" -> { return datasetRepository.findIdsByDatasetAcquisitionExaminationId(execution.getObjectId()); }
+            default -> { return null;}
+        }
+    }
+
     /**
      * Prepare the execution candidate DTO dataset parameters
      */
@@ -327,25 +282,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     }
 
     /**
-     * Stop the threading for avoiding side effect at instance shutdown
-     */
-    private void pauseIfInSleepWindow() {
-        LocalTime now = LocalTime.now();
-        LocalTime start = LocalTime.of(SHUTDOWN_HOUR, 0);
-        LocalTime end = LocalTime.of(CONTINUANCE_HOUR, 0);
-
-        if (!now.isBefore(start) && now.isBefore(end)) {
-            Duration pause = Duration.between(now, end);
-            LOG.info("Execution paused until {} AM.", CONTINUANCE_HOUR);
-            try {
-                Thread.sleep(pause.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    /**
      * Get the lower level of group for specific parameters. It will decide if it's one exec per (new) exam / per new acquisition / per new dataset
      */
     private String getExecutionLevel(ExecutionTemplate template) {
@@ -354,5 +290,21 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                 .filter(distinctsGroup::contains)
                 .findFirst()
                 .orElse("examination");
+    }
+
+    private LinkedHashMap<Long, List<Long>> sortingPerPrio(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
+        LinkedHashMap<Long, List<Long>> sortedAcquisitionsPerTemplateId = new LinkedHashMap<>();
+        List<ExecutionTemplate> involvedTemplates = StreamSupport.stream(executionTemplateRepository.findAllById(createdAcquisitionsPerTemplateId.keySet()).spliterator(), false).toList();
+
+        involvedTemplates.stream()
+                .sorted(Comparator.comparingInt(ExecutionTemplate::getPriority))
+                .forEach(template -> {
+                    Long templateId = template.getId();
+                    if (createdAcquisitionsPerTemplateId.containsKey(templateId)) {
+                        sortedAcquisitionsPerTemplateId.put(templateId, createdAcquisitionsPerTemplateId.get(templateId));
+                    }
+                });
+
+        return sortedAcquisitionsPerTemplateId;
     }
 }
