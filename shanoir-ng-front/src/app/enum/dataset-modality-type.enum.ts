@@ -37,5 +37,5 @@ export enum DatasetModalityType {
         return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
     }
 
-    export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
+    export const options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
 }

@@ -218,7 +218,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     private array_move(arr, old_index, new_index) {
         if (new_index >= arr.length) {
-            var k = new_index - arr.length + 1;
+            let k = new_index - arr.length + 1;
             while (k--) {
                 arr.push(undefined);
             }

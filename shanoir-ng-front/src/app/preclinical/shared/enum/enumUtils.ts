@@ -30,7 +30,7 @@ export class EnumUtils {
   
     getEnumArrayFor(enumName:string): Enum[] {
         const enumArray:Enum[] = [];
-        var enumIs = null;
+        let enumIs = null;
         switch(enumName) { 
            case 'AnestheticType': {
               enumIs = AnestheticType;
@@ -62,9 +62,9 @@ export class EnumUtils {
            } 
         }
         if(enumIs){
-            var keys = Object.keys(enumIs);
-            for (var i = 0; i < keys.length; i = i+2) {
-                var enumVar: Enum = new Enum();
+            const keys = Object.keys(enumIs);
+            for (let i = 0; i < keys.length; i = i+2) {
+                const enumVar: Enum = new Enum();
                 enumVar.key = keys[i];
                 enumVar.value = enumIs[keys[i]];
                 enumArray.push(enumVar);

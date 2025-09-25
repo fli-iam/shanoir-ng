@@ -44,5 +44,5 @@ export enum DatasetType {
       return capitalsAndUnderscoresToDisplayable(type);
   }
 
-  export var options: Option<DatasetType>[] = all().map(prop => new Option<DatasetType>(prop, getLabel(prop)));
+  export const options: Option<DatasetType>[] = all().map(prop => new Option<DatasetType>(prop, getLabel(prop)));
 }

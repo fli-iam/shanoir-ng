@@ -62,5 +62,5 @@ export enum QualityTag {
         return allOfEnum<QualityTag>(QualityTag);
     }
 
-    export var options: Option<QualityTag>[] = all().map(prop => new Option<QualityTag>(prop, prop.toString()));
+    export const options: Option<QualityTag>[] = all().map(prop => new Option<QualityTag>(prop, prop.toString()));
 }

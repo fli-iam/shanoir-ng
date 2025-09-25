@@ -52,7 +52,6 @@ module.exports = tseslint.config(
       "no-irregular-whitespace": "off",
       "no-self-assign": "off",
       "no-extra-boolean-cast": "off",
-      "no-var": "off",
       "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors

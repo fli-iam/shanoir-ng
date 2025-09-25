@@ -100,7 +100,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         let isLinkedWithEqpts: boolean = false;
         let isLinkedWithStudies: boolean = false;
         const errDetails = response.error.details?.fieldErrors["delete"];
-        for (var errKey in errDetails) {
+        for (const errKey in errDetails) {
             if (errDetails[errKey]["givenValue"] == "acquisitionEquipments") {
                 isLinkedWithEqpts = true;
             }

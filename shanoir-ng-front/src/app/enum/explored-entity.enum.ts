@@ -33,5 +33,5 @@ export enum ExploredEntity {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<ExploredEntity>[] = all().map(prop => new Option<ExploredEntity>(prop, getLabel(prop)));
+    export const options: Option<ExploredEntity>[] = all().map(prop => new Option<ExploredEntity>(prop, getLabel(prop)));
 }

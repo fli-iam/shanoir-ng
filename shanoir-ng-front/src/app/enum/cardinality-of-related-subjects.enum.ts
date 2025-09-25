@@ -30,5 +30,5 @@ export enum CardinalityOfRelatedSubjects {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<CardinalityOfRelatedSubjects>[] = all().map(prop => new Option<CardinalityOfRelatedSubjects>(prop, getLabel(prop)));
+    export const options: Option<CardinalityOfRelatedSubjects>[] = all().map(prop => new Option<CardinalityOfRelatedSubjects>(prop, getLabel(prop)));
 }

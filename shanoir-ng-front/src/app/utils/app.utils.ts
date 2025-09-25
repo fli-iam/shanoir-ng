@@ -158,7 +158,7 @@ export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipelin
 
 export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -180,10 +180,10 @@ export function browserDownloadFile(blob: Blob, filename: string) {
         // IE 10+
         window.navigator.msSaveBlob(blob, filename);
     } else {
-        var link = document.createElement('a');
+        const link = document.createElement('a');
         // Browsers that support HTML5 download attribute
         if (link.download !== undefined) {
-            var url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
             link.style.visibility = 'hidden';
@@ -454,9 +454,9 @@ export function arraysEqual(array1: any[], array2: any[]) {
 
 export function isDarkColor(colorInp: string): boolean {
     colorInp = colorInp?.replace('#', '');
-    var r = parseInt(colorInp.substring(0, 2), 16); // hexToR
-    var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
-    var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
+    const r = parseInt(colorInp.substring(0, 2), 16); // hexToR
+    const g = parseInt(colorInp.substring(2, 4), 16); // hexToG
+    const b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
 }
 

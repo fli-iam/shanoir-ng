@@ -36,7 +36,7 @@ import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-a
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 export type Report = {
     taskId: number,

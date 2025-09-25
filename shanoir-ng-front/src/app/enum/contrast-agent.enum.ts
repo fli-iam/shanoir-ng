@@ -34,5 +34,5 @@ export enum ContrastAgent {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<ContrastAgent>[] = all().map(prop => new Option<ContrastAgent>(prop, getLabel(prop)));
+    export const options: Option<ContrastAgent>[] = all().map(prop => new Option<ContrastAgent>(prop, getLabel(prop)));
 }

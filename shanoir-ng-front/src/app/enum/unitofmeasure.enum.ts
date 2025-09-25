@@ -115,5 +115,5 @@ export enum UnitOfMeasure {
         }
     }
 
-    export var options: Option<UnitOfMeasure>[] = all().map(prop => new Option<UnitOfMeasure>(prop, getLabel(prop)));
+    export const options: Option<UnitOfMeasure>[] = all().map(prop => new Option<UnitOfMeasure>(prop, getLabel(prop)));
 }
