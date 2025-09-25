@@ -12,14 +12,20 @@
 * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 */
 import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    UntypedFormControl,
+    UntypedFormGroup,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
 import { Selection } from 'src/app/studies/study/tree.service';
-
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -145,9 +151,9 @@ export class UserComponent extends EntityComponent<User> {
 
     buildForm(): UntypedFormGroup {
         const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        const userForm = this.formBuilder.group({
-            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+        let userForm = this.formBuilder.group({
+            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.usualCharsValidator()]],
+            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.usualCharsValidator()]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
             'expirationDate': [this.user.expirationDate],
             'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
@@ -207,5 +213,14 @@ export class UserComponent extends EntityComponent<User> {
             "&response_type=code" +
             "&scope=openid" +
             "&kc_action=UPDATE_PASSWORD", "_self");
+    }
+
+    private usualCharsValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if(control.value != undefined){
+                return /^[a-zA-Z\s-]+$/.test(control.value) ? null : { invalidName: true };
+            }
+            return null;
+        };
     }
 }
