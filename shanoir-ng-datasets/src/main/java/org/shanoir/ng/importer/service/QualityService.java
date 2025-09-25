@@ -1,7 +1,9 @@
 package org.shanoir.ng.importer.service;
 
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.ExaminationAttributes;
@@ -48,7 +50,11 @@ public class QualityService {
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
         }
-        ExaminationAttributes<String> dicomAttributes = DicomProcessing.getDicomExaminationAttributes(firstStudy);
+        Set<Integer> tagsInUse = new HashSet<>();
+        for (QualityCard qualityCard : qualityCards) {
+            tagsInUse.addAll(qualityCard.getDicomTagsInUse());
+        }
+        ExaminationAttributes<String> dicomAttributes = DicomProcessing.getDicomExaminationAttributes(firstStudy, tagsInUse);
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
             // In case multiple quality cards are used with different roles, we check them all

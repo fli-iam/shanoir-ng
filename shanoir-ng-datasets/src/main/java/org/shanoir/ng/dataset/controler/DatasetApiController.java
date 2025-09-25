@@ -361,16 +361,13 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<String> getDicomMetadataByDatasetId(
-			Long datasetId) throws IOException, MessagingException {
+	public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);
-		DatasetDownloadError result = new DatasetDownloadError();
-		List<URL> pathURLs = new ArrayList<>();
-		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
-		if (pathURLs.isEmpty()) {
+		URL firstUrl = DatasetFileUtils.getDatasetFirstFilePathURLs(dataset, DatasetExpressionFormat.DICOM);
+		if (firstUrl == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(firstUrl), HttpStatus.OK);			
 		}
 	}
 	

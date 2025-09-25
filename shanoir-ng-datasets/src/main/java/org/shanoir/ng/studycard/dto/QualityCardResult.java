@@ -40,10 +40,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author mkain
  *
  */
-public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEntry> {
-    
+public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
+
     private List<Subject> updatedSubjects = new CopyOnWriteArrayList<>();
-    
+
     public List<Subject> getUpdatedSubjects() {
         return updatedSubjects;
     }
@@ -51,12 +51,14 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
     private void setUpdatedSubjects(List<Subject> updatedSubjects) {
         this.updatedSubjects = updatedSubjects;
     }
-    
+
     public void addUpdatedSubject(Subject subject) {
-        if (getUpdatedSubjects() == null) setUpdatedSubjects(new ArrayList<>());
-        if (subject == null || subject.getId() == null) return;
+        if (getUpdatedSubjects() == null)
+            setUpdatedSubjects(new ArrayList<>());
+        if (subject == null || subject.getId() == null)
+            return;
         for (Subject presentSub : getUpdatedSubjects()) {
-            if (subject.getId().equals(presentSub.getId()) 
+            if (subject.getId().equals(presentSub.getId())
                     && presentSub.getQualityTag().getId() >= subject.getQualityTag().getId()) {
                 return;
             }
@@ -65,17 +67,17 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
     }
 
     /***
-     * Remove unchanged subject-studies 
+     * Remove unchanged subject-studies
+     * 
      * @param study the study containing the original subject-studies
      */
     public void removeUnchanged(Study study) {
-        if (getUpdatedSubjects() == null) return;
+        if (getUpdatedSubjects() == null)
+            return;
         for (Subject original : study.getSubjectList()) {
-            getUpdatedSubjects().removeIf(updated -> 
-                    updated.getId().equals(original.getId()) 
+            getUpdatedSubjects().removeIf(updated -> updated.getId().equals(original.getId())
                     && updated.getQualityTag() != null
-                    && updated.getQualityTag().equals(original.getQualityTag())
-            );
+                    && updated.getQualityTag().equals(original.getQualityTag()));
         }
     }
 
@@ -114,7 +116,7 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         }
         return false;
     }
-    
+
     @Override
     public String toString() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -125,5 +127,5 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
             return "json error";
         }
     }
-    
+
 }

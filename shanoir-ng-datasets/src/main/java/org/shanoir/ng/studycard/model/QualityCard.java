@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -108,7 +110,7 @@ public class QualityCard extends HalEntity implements Card {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
+                rule.apply(examination, dicomAttributes, result, downloader, getDicomTagsInUse());
             }
         }
         return result;
@@ -124,7 +126,7 @@ public class QualityCard extends HalEntity implements Card {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
+                rule.apply(examination, dicomAttributes, result, downloader, getDicomTagsInUse());
             }
         }
         return result;
@@ -139,7 +141,7 @@ public class QualityCard extends HalEntity implements Card {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
+                rule.apply(examination, result, downloader, getDicomTagsInUse());
             }
         }
         return result;
@@ -154,7 +156,7 @@ public class QualityCard extends HalEntity implements Card {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
+                rule.apply(examination, result, downloader, getDicomTagsInUse());
             }
         }
         return result;
@@ -177,5 +179,13 @@ public class QualityCard extends HalEntity implements Card {
 			}
 		}
         return false;
+    }
+
+    public Set<Integer> getDicomTagsInUse() {
+        Set<Integer> tagsInUse = new HashSet<>();
+        for (QualityExaminationRule rule : getRules()) {
+            tagsInUse.addAll(rule.getConditionsDICOMtags());
+        }
+        return tagsInUse;
     }
 }

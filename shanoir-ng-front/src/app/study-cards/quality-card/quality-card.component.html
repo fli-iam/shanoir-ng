@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button"
 						class="right-icon apply test"
 						(click)="test()"
-						[disabled]="true || applying || testing"
+						[disabled]="applying || testing"
                         title="Coming soon">
 					Test
                     <i *ngIf="!testing" class="fa-solid fa-play"></i>
@@ -44,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button"
 						class="alt right-icon apply"
 						(click)="apply()"
-						[disabled]="true || applying || testing"
+						[disabled]="applying || testing"
                         title="Coming soon">
 					Apply now
 					<i *ngIf="!applying" class="fa-solid fa-play"></i>

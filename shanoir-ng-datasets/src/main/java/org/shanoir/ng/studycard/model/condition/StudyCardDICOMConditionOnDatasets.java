@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -108,7 +109,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
         int nbOk = 0; int total = 0; int nbUnknown = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (!examinationAttributesCache.has(acquisition.getId())) {
-                examinationAttributesCache.addAcquisitionAttributes(acquisition.getId(), new AcquisitionAttributes<Long>());
+                examinationAttributesCache.addAcquisitionAttributes(acquisition.getId());
             }
             AcquisitionAttributes<Long> acqAttributes = examinationAttributesCache.getAcquisitionAttributes(acquisition.getId());
             for (Dataset dataset : acquisition.getDatasets()) {

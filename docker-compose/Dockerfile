@@ -64,7 +64,9 @@ COPY --link \
 
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", \
     "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
-    "-Djavax.net.ssl.trustStorePassword=changeit"]
+    "-Djavax.net.ssl.trustStorePassword=changeit", \
+    "-XX:+HeapDumpOnOutOfMemoryError", \
+    "-XX:HeapDumpPath=/tmp/heapdumps"]
 
 
 ################ datasets ##################################################

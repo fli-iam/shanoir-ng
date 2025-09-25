@@ -438,7 +438,7 @@ public class DatasetServiceImpl implements DatasetService {
 				DatasetFile file = iter.next();
 				URL url = null;
 				try {
-					url = new URL(file.getPath().replaceAll("%20", " "));
+					url = new URL(file.getPath().replace("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
 					if (srcFile.exists()) {
 						LOG.error("Deleting: " + srcFile.getAbsolutePath());
