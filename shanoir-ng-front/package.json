@@ -43,8 +43,11 @@
     "@angular/compiler-cli": "^19.2.10",
     "@types/jasmine": "~5.1.4",
     "@types/jasminewd2": "~2.0.13",
+    "angular-eslint": "20.3.0",
+    "eslint": "^9.35.0",
     "jasmine-spec-reporter": "~7.0.0",
     "ts-node": "~7.0.0",
-    "typescript": "~5.5.4"
+    "typescript": "~5.5.4",
+    "typescript-eslint": "8.40.0"
   }
 }
