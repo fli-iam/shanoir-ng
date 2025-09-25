@@ -42,7 +42,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     @Input() anesthetic: Anesthetic;
     @Input() toggleForm: boolean = true;
     @Input() ingredientSelected: AnestheticIngredient;
-    @Output() onEvent = new EventEmitter();
+    @Output() event = new EventEmitter();
     @Input() createAIMode: boolean;
     names: Reference[];
     units: Reference[];
@@ -104,10 +104,10 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.toggleForm = true;
         }else if(this.toggleForm==true){
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }else{
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }
         this.createAIMode = creation;
     }
@@ -157,8 +157,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.anesthetic.ingredients = [];
         }
         this.anesthetic.ingredients.push(this.ingredient);
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.ingredient);
+        if (this.event.observers.length > 0) {
+            this.event.emit(this.ingredient);
         }
         this.toggleForm = false;
         this.ingredient = new AnestheticIngredient();
@@ -167,8 +167,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
             .subscribe(() =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.ingredient);
+                if (this.event.observers.length > 0) {
+                    this.event.emit(this.ingredient);
                 }
             });
         this.toggleForm = false;

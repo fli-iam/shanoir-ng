@@ -31,7 +31,7 @@ import { DatasetProcessingService } from "../shared/dataset-processing.service";
 export class ProcessingNodeComponent extends TreeNodeAbstractComponent<ProcessingNode> implements OnChanges {
 
     @Input() input: ProcessingNode | DatasetProcessing;
-    @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
+    @Output() processingDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
             private router: Router,
@@ -75,7 +75,7 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
         this.processingService.get(this.node.id).then(entity => {
             this.processingService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onProcessingDelete.emit();
+                    this.processingDelete.emit();
                 }
             });
         })

@@ -23,7 +23,7 @@ export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterCo
 
     @Output() nodeInit: EventEmitter<T> = new EventEmitter();
     @Output() selectedChange: EventEmitter<T> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() nodeSelect: EventEmitter<number> = new EventEmitter();
     protected node: T;
     loading: boolean = false;
     menuOpened: boolean = false;

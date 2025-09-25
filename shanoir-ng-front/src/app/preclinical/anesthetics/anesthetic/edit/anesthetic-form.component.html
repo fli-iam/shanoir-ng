@@ -90,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</div>
 							<div>
 								<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"
-											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (event)="refreshDisplay($event)"></anesthetic-ingredient-form>
 							</div>
 							<shanoir-table #ingredientsTable
 								[getPage]="getPage.bind(this)"

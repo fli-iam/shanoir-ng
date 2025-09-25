@@ -42,7 +42,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     tagOptions: Option<Tag>[] = [];
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
-    @Output() onChange: EventEmitter<Tag[]> = new EventEmitter<Tag[]>();
+    @Output() userChange: EventEmitter<Tag[]> = new EventEmitter<Tag[]>();
 
     writeValue(obj: any): void {
         this.tags = obj || [];
@@ -74,7 +74,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
             this.tags.push(tag);
             this.updateOptions();
             this.onChangeCallback(this.tags);
-            this.onChange.emit(this.tags);
+            this.userChange.emit(this.tags);
             this.onTouchedCallback();
         }
     }
@@ -83,7 +83,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
         this.tags.splice(this.tags.indexOf(tag), 1);
         this.updateOptions();
         this.onChangeCallback(this.tags);
-        this.onChange.emit(this.tags);
+        this.userChange.emit(this.tags);
         this.onTouchedCallback();
     }
 

@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box
-										(onNewClick)="openNewCenter()"
+										(newClick)="openNewCenter()"
 										[newDisabled]="prefilledCenter"
                                         [formControl]="form.controls['center']"
 										[(ngModel)]="coil.center"
@@ -114,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<select-box
 										formControlName="acquiEquipModel"
 										[(ngModel)]="coil.manufacturerModel"
-										(onNewClick)="openNewManufModel()"
+										(newClick)="openNewManufModel()"
 										[newDisabled]="!coil.center || prefilledManuf"
 										[optionArr]="manufModels"
 										[pipe]="manufModelPipe">

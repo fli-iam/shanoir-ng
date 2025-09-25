@@ -54,7 +54,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
-    @Output() onUserClear = new EventEmitter();
+    @Output() userClear = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -72,7 +72,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public way: 'up' | 'down' = 'down';
     public hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => { return; };
-    @Output() onTouch = new EventEmitter();
+    @Output() touch = new EventEmitter();
     private onChangeCallback: (any) => void = () => { return; };
     public inputText: string;
     private _searchText: string = null;
@@ -93,9 +93,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() addHidden: boolean;
     @Input() viewRoute: string;
     @Input() newRoute: string;
-    @Output() onViewClick = new EventEmitter();
-    @Output() onNewClick = new EventEmitter();
-    @Output() onAddClick = new EventEmitter();
+    @Output() viewClick = new EventEmitter();
+    @Output() newClick = new EventEmitter();
+    @Output() addClick = new EventEmitter();
     @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
     readonly LIST_LENGTH: number = 16;
@@ -569,7 +569,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     onClear() {
-        this.onUserClear.emit(this.selectedOption);
+        this.userClear.emit(this.selectedOption);
         this.onTypeText(null);
     }
 
@@ -599,7 +599,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (!this.element.nativeElement.contains(event.relatedTarget) && !this.dragging) {
             this.close();
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         } 
     }
 
@@ -609,15 +609,15 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     } 
 
     clickView(): void {
-        if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
+        if(!this.viewDisabled && this.selectedOption) this.viewClick.emit(this.selectedOption.value);
     }
 
     clickNew(): void {
-        if(!this.newDisabled) this.onNewClick.emit();
+        if(!this.newDisabled) this.newClick.emit();
     }
 
     clickAdd(): void {
-        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.onAddClick.emit(this.selectedOption.value);
+        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.addClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {

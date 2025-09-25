@@ -33,7 +33,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 export class ToggleSwitchComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') toggle: boolean = null;
-    @Output() onChange = new EventEmitter();
+    @Output() userChange = new EventEmitter();
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -46,7 +46,7 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
         if (this.disabled) return; 
         this.toggle = !this.toggle;
         this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);    
+        this.userChange.emit(this.toggle);    
     }
 
     @HostListener('keydown', ['$event']) 
@@ -55,19 +55,19 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
         if (' ' == event.key) {
             this.toggle = !this.toggle;
             this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);
+        this.userChange.emit(this.toggle);
             event.preventDefault();
         } else if ('ArrowLeft' == event.key) {
             if (this.toggle) {
                 this.toggle = false;
                 this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);
+        this.userChange.emit(this.toggle);
             }
         } else if ('ArrowRight' == event.key) {
             if (!this.toggle) {
                 this.toggle = true;
                 this.onChangeCallback(this.toggle);
-                this.onChange.emit(this.toggle);
+                this.userChange.emit(this.toggle);
             }
         }
     }

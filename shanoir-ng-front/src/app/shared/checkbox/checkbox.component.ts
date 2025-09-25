@@ -31,7 +31,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 export class CheckboxComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') model: boolean | 'indeterminate' = false;
-    @Output() onChange = new EventEmitter();
+    @Output() userChange = new EventEmitter();
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -60,7 +60,7 @@ export class CheckboxComponent implements ControlValueAccessor {
             this.model = true;
         }
         this.onChangeCallback(this.model);
-        this.onChange.emit(this.model);
+        this.userChange.emit(this.model);
         this.onTouchedCallback();
     }
     

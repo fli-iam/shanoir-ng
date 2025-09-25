@@ -34,7 +34,7 @@ import { slideDown } from '../../shared/animations/animations';
 export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChanges {
 
     showInfo: boolean = false;
-    @Output() onChange: EventEmitter<boolean> = new EventEmitter();
+    @Output() userChange: EventEmitter<boolean> = new EventEmitter();
     expertMode: boolean = false;
     protected propagateChange: (any) => void = () => { return; };
     protected propagateTouched = () => { return; };
@@ -53,7 +53,7 @@ export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChan
 
     onExpertModeUserChange() {
         this.onExpertModeChange();
-        this.onChange.emit(this.expertMode);
+        this.userChange.emit(this.expertMode);
     }
 
     writeValue(value: boolean): void {

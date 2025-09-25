@@ -32,7 +32,7 @@ import { StudyCardService } from "../shared/study-card.service";
 export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> implements OnChanges {
 
     @Input() input: CardNode | StudyCard | QualityCard;
-    @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
+    @Output() cardDelete: EventEmitter<void> = new EventEmitter();
     @Input() detailsPath: string;
 
     constructor(
@@ -59,7 +59,7 @@ export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> 
         service.get(this.node.id).then(entity => {
             service.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onCardDelete.emit();
+                    this.cardDelete.emit();
                 }
             });
         })

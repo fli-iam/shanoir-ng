@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <div>
     <subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createMode"
-                [toggleForm]="toggleForm" [subjectpathoSelected]="selectedEntity" (onEvent)="refreshDisplayEntity($event[0], $event[1])" (onCancel)="toggleForm = false">
+                [toggleForm]="toggleForm" [subjectpathoSelected]="selectedEntity" (event)="refreshDisplayEntity($event[0], $event[1])" (cancel)="toggleForm = false">
     </subject-pathology-form>
 </div>
 
