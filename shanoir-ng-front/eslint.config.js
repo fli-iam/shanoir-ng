@@ -47,7 +47,6 @@ module.exports = tseslint.config(
 
       // Core ESLint rules - turn off common errors
       "no-extra-boolean-cast": "off",
-      "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors
       "@typescript-eslint/no-explicit-any": "off", // 

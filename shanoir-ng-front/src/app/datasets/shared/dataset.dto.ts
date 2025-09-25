@@ -50,7 +50,7 @@ export class DatasetDTOService {
         if (mode == 'eager') {
             if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
             if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
-            return Promise.all(promises).then(([]) => {
+            return Promise.all(promises).then(() => {
                 return result;
             });
         } else if (mode == 'lazy') {
