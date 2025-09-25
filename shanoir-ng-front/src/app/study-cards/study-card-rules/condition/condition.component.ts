@@ -94,7 +94,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (['Integer', 'Long'].includes(type)) {
             validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals 
         } else if (type == 'String') {
-            validators.push(Validators.pattern('^[^\"]*$')); // exclude "
+            validators.push(Validators.pattern(/^[^"]*$/)); // exclude "
         } else if (type == 'Date') {
             validators.push(Validators.pattern((/^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/))); // yyyyMMdd
         } else if (type == 'FloatArray') {
