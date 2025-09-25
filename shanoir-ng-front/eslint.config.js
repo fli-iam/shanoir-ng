@@ -46,7 +46,6 @@ module.exports = tseslint.config(
       ],
 
       // Core ESLint rules - turn off common errors
-      "no-prototype-builtins": "off",
       "no-useless-escape": "off",
       "no-empty": "off",
       "no-irregular-whitespace": "off",

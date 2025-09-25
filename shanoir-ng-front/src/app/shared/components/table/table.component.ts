@@ -195,7 +195,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public static getCellValue(item: any, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellRenderer")) {
+        if (Object.prototype.hasOwnProperty.call(col, "cellRenderer")) {
             const params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
@@ -300,7 +300,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getCellGraphics(item: any, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellGraphics")) {
+        if (Object.prototype.hasOwnProperty.call(col, "cellGraphics")) {
             return col["cellGraphics"](item);
         } else return null;
     }

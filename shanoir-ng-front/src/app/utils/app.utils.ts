@@ -416,10 +416,10 @@ function deepEquals(x, y) {
         return false;
     } else {
         for (const p in x) {
-            if (!x.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(x, p)) {
                 continue; // other properties were tested using x.constructor === y.constructor
             }
-            if (!y.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(y, p)) {
                 return false; // allows to compare x[ p ] and y[ p ] when set to undefined
             }
             if (x[p] === y[p]) {
@@ -433,7 +433,7 @@ function deepEquals(x, y) {
             }
         }
         for (const p in y) {
-            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+            if (Object.prototype.hasOwnProperty.call(y, p) && !Object.prototype.hasOwnProperty.call(x, p)) {
                 return false;
             }
         }
