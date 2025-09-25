@@ -78,7 +78,7 @@ module.exports = tseslint.config(
         }
       ],
       
-      // Angular ESLint rules - turn off common errors
+      // Angular ESLint rules
       "@angular-eslint/prefer-inject": "off", // heavy migration & not sure that is relevant
       "@angular-eslint/prefer-standalone": "off", // should it be done later? Standalone is meant to be the standard. Heavy migration.
     },
@@ -97,5 +97,12 @@ module.exports = tseslint.config(
       "@angular-eslint/template/mouse-events-have-key-events": "off",
       "@angular-eslint/template/alt-text": "off"
     },
-  }
+  },
+  {
+    // Fix false positives in this file for dev env
+    files: ["src/app/shared/side-menu/side-menu.component.ts"],
+    rules: {
+      "import/no-unresolved": "off"
+    }
+  },
 );
