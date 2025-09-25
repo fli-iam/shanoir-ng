@@ -46,7 +46,6 @@ module.exports = tseslint.config(
       ],
 
       // Core ESLint rules - turn off common errors
-      "no-self-assign": "off",
       "no-extra-boolean-cast": "off",
       "no-empty-pattern": "off",
 
