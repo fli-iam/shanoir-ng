@@ -274,7 +274,7 @@ export class TreeService {
             node = this.selectCoil(selection.entity as Coil);
         } else node = Promise.resolve(null);
         node.then(n => {
-            if(!!n) n.fake = false;
+            if(n) n.fake = false;
         });
         return node;
     }
