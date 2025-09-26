@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.model.DatasetPropertyDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;

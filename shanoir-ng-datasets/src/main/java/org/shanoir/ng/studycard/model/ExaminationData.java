@@ -20,7 +20,6 @@ import java.util.List;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.Subject;
 
 public class ExaminationData {
     

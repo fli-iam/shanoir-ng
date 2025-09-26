@@ -16,7 +16,6 @@ package org.shanoir.ng.examination.service;
 import java.io.File;
 import java.util.Optional;
 
-import org.hibernate.SessionFactory;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;

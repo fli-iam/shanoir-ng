@@ -37,8 +37,6 @@ import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Manufacturer model service test.

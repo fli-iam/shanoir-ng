@@ -19,12 +19,9 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.aspectj.lang.annotation.Before;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Custom repository for entities.

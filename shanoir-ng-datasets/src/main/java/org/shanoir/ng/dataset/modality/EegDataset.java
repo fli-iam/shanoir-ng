@@ -23,7 +23,6 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
-import org.shanoir.ng.shared.model.InversionTime;
 
 import java.util.ArrayList;
 import java.util.List;

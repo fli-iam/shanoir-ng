@@ -2,7 +2,6 @@ package org.shanoir.ng.datasetacquisition.model.bids;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
-import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
 @Entity

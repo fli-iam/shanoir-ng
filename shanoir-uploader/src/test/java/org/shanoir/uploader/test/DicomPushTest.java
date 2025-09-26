@@ -2,7 +2,6 @@ package org.shanoir.uploader.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Properties;

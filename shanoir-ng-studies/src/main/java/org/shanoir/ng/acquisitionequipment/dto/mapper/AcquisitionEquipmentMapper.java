@@ -21,7 +21,6 @@ import org.mapstruct.Mapping;
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
-import org.shanoir.ng.acquisitionequipment.dto.mapper.EquipmentCenterMapper;
 
 /**
  * Mapper for acquisition equipments.

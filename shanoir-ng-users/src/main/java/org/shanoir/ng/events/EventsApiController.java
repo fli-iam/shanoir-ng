@@ -1,6 +1,5 @@
 package org.shanoir.ng.events;
 
-import org.shanoir.ng.ShanoirUsersManagement;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
 
 @Controller
 public class EventsApiController implements EventsApi {

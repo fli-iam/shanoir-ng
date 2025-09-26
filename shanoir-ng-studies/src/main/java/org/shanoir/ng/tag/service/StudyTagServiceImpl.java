@@ -1,9 +1,7 @@
 package org.shanoir.ng.tag.service;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.security.StudySecurityService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.repository.StudyTagRepository;

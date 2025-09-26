@@ -1,6 +1,5 @@
 package org.shanoir.uploader.service.rest;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

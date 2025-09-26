@@ -16,7 +16,6 @@ package org.shanoir.ng.shared.validation;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 public interface UniqueConstraintManager<T extends AbstractEntity> {
 
