@@ -40,6 +40,8 @@ shanoir-ng-front/.angular
 *.project
 **/webapp
 *.js
+# ESLint config file
+!shanoir-ng-front/eslint.config.js
 .attach_pid*
 .env.bak
 /docker-compose/nginx/webapp/

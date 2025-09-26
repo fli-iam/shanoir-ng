@@ -29,23 +29,23 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.loadEntities();
     }
     
-    private loadEntities(): Promise<void> {
-        this.entitiesPromise = this.getEntities().then((entities) => {
+    private loadEntities(eager: boolean = false): Promise<void> {
+        this.entitiesPromise = this.getEntities(eager).then((entities) => {
             this.browserPaging = new BrowserPaging(entities, this.columnDefs)
         });
         return this.entitiesPromise;
     }
 
-    getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
+    getPage(pageable: FilterablePageable, forceRefresh: boolean = false, eager: boolean = false): Promise<Page<T>> {
         return this.entitiesPromise.then(() => {
             if (forceRefresh) {
-                return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
+                return this.loadEntities(eager).then(() => this.browserPaging.getPage(pageable));
             } else {
                 return this.browserPaging.getPage(pageable);
             }
         });
     }
 
-    abstract getEntities(): Promise<T[]>;
+    abstract getEntities(eager?: boolean): Promise<T[]>;
 
 }

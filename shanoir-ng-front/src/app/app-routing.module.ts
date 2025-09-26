@@ -33,6 +33,7 @@ import { DatasetProcessingComponent } from './datasets/dataset-processing/datase
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { DUAComponent } from './dua/dua.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
@@ -844,6 +845,20 @@ let routes: Routes = [
         component: AccessRequestListComponent
     },
     {
+        path: 'dua/create/:studyId',
+        component: DUAAssistantComponent,
+        data: { mode: 'create' }
+    },
+    {
+        path: 'dua/edit/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'edit' }
+    },
+    {
+        path: 'dua/view/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'view' }
+    },{
         path: 'dev',
         component: TestComponent
     }
