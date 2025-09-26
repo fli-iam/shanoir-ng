@@ -32,6 +32,12 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import {StudyLight} from "../../studies/shared/study.dto";
+import {Tag} from "../../tags/tag.model";
+import {SubjectStudy} from "../shared/subject-study.model";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
+import {SubjectType} from "../shared/subject.types";
+import {isDarkColor} from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',
@@ -46,6 +52,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
+    selectedStudy: IdName;
     //isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
@@ -58,6 +65,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     hasDownloadRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
+    tags: Tag[] = [];
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -70,6 +78,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         new Option<string>('F', 'Female'),
         new Option<string>('M', 'Male'),
         new Option<string>('O', 'Other'),
+    ];
+
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
     ];
 
     constructor(private route: ActivatedRoute,
@@ -101,7 +115,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( res => this.subject.subjectStudyList = []);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
@@ -155,9 +169,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [this.subject.subjectStudyList, this.mode == 'create' ? [Validators.required] : [] ],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
+            'studyIdentifier': [this.subject.studyIdentifier],
+            'physicallyInvolved': [this.subject.physicallyInvolved],
+            'tags': [this.subject.tags],
+            'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
+            'subjectType': [this.subject.subjectType, Validators.required],
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
@@ -177,6 +195,15 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         }
 
         return subjectForm;
+    }
+
+    public onSelectStudy() {
+        this.studyService.get(this.selectedStudy?.id).then( study => {
+            this.subject.study = study;
+            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
+                this.subject.study.tags = tags ? tags : [];
+            })
+        });
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
@@ -221,6 +248,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
         }
+        this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
+        this.subject.subjectStudyList = null;
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
@@ -297,8 +326,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
 
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
     }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
+    }
+
+    protected readonly dateDisplay = dateDisplay;
 }

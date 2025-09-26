@@ -118,11 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
 							<span [ngSwitch]="mode" class="right-col">
 								<ng-template [ngSwitchCase]="'view'">
-									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+									{{subject.birthDate | localDateFormatPipe}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="'create'">
 									<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 								</ng-template>
 							</span>
@@ -143,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
-							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
+							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual hemispheric dominance</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
 									{{subject.manualHemisphericDominance}}
@@ -155,7 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
-							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
+							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language hemispheric dominance</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
 									{{subject.languageHemisphericDominance}}
@@ -173,22 +173,96 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<span class="right-col">
 							<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 						</span>
 					</li>
 				</ol>
+				<ol class="subject-study">
+					<div>
+                        <li>
+                            <label>Subject type</label>
+                            <span class="right-col" [ngSwitch]="mode">
+                                <ng-template [ngSwitchCase]="'view'">
+                                    {{subject.subjectType}}
+                                </ng-template>
+                                <ng-template ngSwitchDefault>
+                                    <select-box formControlName="subjectType"
+                                                [(ngModel)]="subject.subjectType"
+                                                [options]="subjectTypes">
+                                    </select-box>
+                                </ng-template>
+						    </span>
+                        </li>
+                        <li>
+                            <label>Physically involved</label>
+                            <span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									<span *ngIf="subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
+									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<checkbox formControlName="physicallyInvolved" [(ngModel)]="subject.physicallyInvolved"></checkbox>
+								</ng-template>
+							</span>
+                        </li>
+					</div>
+				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && !forceStudy">
-				<subject-study-list
-                    [allowRemove]="true" [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-                <label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
+			<fieldset *ngIf="!forceStudy">
+                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
+				<ol>
+					<li>
+						<label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'create'">
+								<select-box
+                                    formControlName="study"
+                                    [(ngModel)]="selectedStudy"
+                                    [optionArr]="studies"
+                                    (userChange)="onSelectStudy()">
+                                </select-box>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+                                {{studies[0]?.name}}
+								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && forceStudy">
+			<fieldset *ngIf="forceStudy">
+                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
 						<label>Study</label>
 						<span class="right-col">{{forceStudy.name}}</span>
 					</li>
+				</ol>
+			</fieldset>
+            <fieldset>
+                <ol *ngIf="subject.studyIdentifier != null">
+                    <li>
+                        <label>Subject identifier for this study</label>
+                        <span class="right-col">
+                            {{subject.studyIdentifier}}
+                        </span>
+                    </li>
+                </ol>
+				<ol>
+					<li>
+						<label>Tags</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								    <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
+                                        {{tag.name}}
+                                    </span>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<tag-list [(ngModel)]="subject.tags" [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
+							</ng-template>
+						</span>
+                    </li>
 				</ol>
 			</fieldset>
 		</div>

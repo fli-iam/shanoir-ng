@@ -22,7 +22,7 @@ jobs:
       - name: Get latest NG tag and generate SHUP release tag
         id: get_tag
         run: |
-          latest_tag=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \ | jq -r '[.[] | select(.tag_name | test("^NG_v"))] | sort_by(.created_at) | last.tag_name')
+          latest_tag=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \ | jq -r '[.[] | select(.tag_name | test("^NG_v"))] | sort_by(.published_at) | last.tag_name')
           echo "Latest_tag: $latest_tag"
           if [[ "$latest_tag" =~ NG_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             major="${BASH_REMATCH[1]}"
@@ -53,7 +53,14 @@ jobs:
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
 
-      - name: Build
+      - name: Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Maven Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
       - name: Create custom runtime with jlink
@@ -111,7 +118,14 @@ jobs:
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set "-DnewVersion=${{ needs.setup-version.outputs.version_part }}"
 
-      - name: Build
+      - name: Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Maven Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
       - name: Create custom runtime with jlink
@@ -137,6 +151,7 @@ jobs:
             --copyright "© 2025 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
+            --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 `
             --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar `
             --main-class org.shanoir.uploader.ShanoirUploader `
             --runtime-image target/custom-runtime `
@@ -166,6 +181,13 @@ jobs:
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
       - name: Build
         run: cd shanoir-ng-parent && mvn clean package -DskipTests

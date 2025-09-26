@@ -111,7 +111,7 @@ public interface CenterService {
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Center update(Center center) throws EntityNotFoundException;
 
 	/**

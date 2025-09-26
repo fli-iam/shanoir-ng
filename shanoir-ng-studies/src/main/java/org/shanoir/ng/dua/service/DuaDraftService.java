@@ -12,29 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.quality;
+package org.shanoir.ng.dua.service;
 
+import java.util.Optional;
 
-public class SubjectStudyQualityTagDTO {
+import org.shanoir.ng.dua.model.DuaDraft;
+import org.shanoir.ng.shared.exception.EntityFoundException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.stereotype.Service;
 
-    private Long subjectStudyId;
+@Service
+public interface DuaDraftService {
 
-    private QualityTag tag;
-    
+	Optional<DuaDraft> findById(final String id);
 
-    public Long getSubjectStudyId() {
-        return subjectStudyId;
-    }
+	DuaDraft create(final DuaDraft dua) throws EntityFoundException;
 
-    public void setSubjectStudyId(Long subjectStudyId) {
-        this.subjectStudyId = subjectStudyId;
-    }
-
-    public QualityTag getTag() {
-        return tag;
-    }
-
-    public void setTag(QualityTag tag) {
-        this.tag = tag;
-    }
+	DuaDraft update(final DuaDraft dua) throws EntityNotFoundException;
 }

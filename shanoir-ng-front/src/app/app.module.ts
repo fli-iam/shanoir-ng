@@ -274,13 +274,15 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
-import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model';
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { SizePipe } from './shared/utils/size.pipe';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { DuaService } from './dua/shared/dua.service';
+import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe";
 
-@NgModule({ 
+@NgModule({
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -460,9 +462,10 @@ import { SizePipe } from './shared/utils/size.pipe';
         CoilNodeComponent,
         DoubleAwesomeComponent,
         MetadataNodeComponent,
-        SizePipe
+        SizePipe,
+        DUAAssistantComponent
     ],
-    bootstrap: [AppComponent], 
+    bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
@@ -473,8 +476,9 @@ import { SizePipe } from './shared/utils/size.pipe';
         AppRoutingModule,
         PreclinicalRoutingModule,
         RouterModule,
-        ClipboardModule
-    ], 
+        ClipboardModule,
+        LocalDateFormatPipe
+    ],
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -562,9 +566,10 @@ import { SizePipe } from './shared/utils/size.pipe';
         SessionService,
         ShanoirEventService,
         TreeService,
+        DuaService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
-    ] 
+    ]
 })
 export class AppModule {
 
