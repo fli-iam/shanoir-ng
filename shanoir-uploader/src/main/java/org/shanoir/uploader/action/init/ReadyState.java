@@ -147,7 +147,7 @@ public class ReadyState implements State {
 					uploadPercentage = "0 %";
 				logger.debug(" upload percentage initialized to "
 						+ uploadPercentage);
-						importJob.setUploadPercentage(uploadPercentage);
+				importJob.setUploadPercentage(uploadPercentage);
 				dataJobManager.writeImportJob(importJob);
 			} else {
 				logger.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());

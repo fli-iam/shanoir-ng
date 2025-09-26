@@ -38,6 +38,13 @@ import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
 import org.shanoir.uploader.action.ImportSubjectNameDocumentFilter;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
+import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectType;
 
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination
@@ -59,9 +66,9 @@ public class ImportDialog extends JDialog {
 
 	// Study / StudyCard
 	public JLabel studyLabel;
-	public JComboBoxMandatory studyCB;
+	public JComboBoxMandatory<Study> studyCB;
 	public JLabel studyCardLabel;
-	public JComboBoxMandatory studyCardCB;
+	public JComboBoxMandatory<StudyCard> studyCardCB;
 	public JLabel studyCardFilterLabel;
 	public JTextField studyCardFilterTextField;
 	
@@ -69,32 +76,32 @@ public class ImportDialog extends JDialog {
 	public JLabel subjectLabel;
 	public JTextFieldMandatory subjectTextField;
 	public JLabel existingSubjectsLabel;
-	public JComboBox existingSubjectsCB;
+	public JComboBox<Subject> existingSubjectsCB;
 	public JLabel subjectImageObjectCategoryLabel;
-	public JComboBoxMandatory subjectImageObjectCategoryCB;
+	public JComboBoxMandatory<ImagedObjectCategory> subjectImageObjectCategoryCB;
 	public JLabel subjectStudyIdentifierLabel;
 	public JTextField subjectStudyIdentifierTF;
 	public JLabel subjectIsPhysicallyInvolvedLabel;
 	public JCheckBox subjectIsPhysicallyInvolvedCB;
 	public JLabel subjectTypeLabel;
-	public JComboBoxMandatory subjectTypeCB;
+	public JComboBoxMandatory<SubjectType> subjectTypeCB;
 	public JLabel subjectLanguageHemisphericDominanceLabel;
-	public JComboBox subjectLanguageHemisphericDominanceCB;
+	public JComboBox<String> subjectLanguageHemisphericDominanceCB;
 	public JLabel subjectManualHemisphericDominanceLabel;
-	public JComboBox subjectManualHemisphericDominanceCB;
+	public JComboBox<String> subjectManualHemisphericDominanceCB;
 	public JLabel subjectPersonalCommentLabel;
 	public JTextArea subjectPersonalCommentTextArea;
 	public JTextArea subjectTextArea;
 
 	// MR Examination
 	public JLabel mrExaminationExistingExamLabel;
-	public JComboBoxMandatory mrExaminationExistingExamCB;
+	public JComboBoxMandatory<Examination> mrExaminationExistingExamCB;
 	public JLabel mrExaminationNewExamLabel;
 	public JCheckBox mrExaminationNewExamCB;
 	public JLabel mrExaminationCenterLabel;
-	public JComboBoxMandatory mrExaminationCenterCB;
+	public JComboBoxMandatory<Center> mrExaminationCenterCB;
 	public JLabel mrExaminationExamExecutiveLabel;
-	public JComboBoxMandatory mrExaminationExamExecutiveCB;
+	public JComboBoxMandatory<Examination> mrExaminationExamExecutiveCB;
 	public JDatePanelImpl datePanel;
 	public JLabel mrExaminationDateLabel;
 	public JDatePicker mrExaminationDateDP;
@@ -310,7 +317,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyLabel, importDialogGBC);
 
-		studyCB = new JComboBoxMandatory();
+		studyCB = new JComboBoxMandatory<>();
 		studyCB.setBackground(Color.WHITE);
 		studyCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
@@ -335,7 +342,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyCardLabel, importDialogGBC);
 
-		studyCardCB = new JComboBoxMandatory();
+		studyCardCB = new JComboBoxMandatory<>();
 		studyCardCB.setBackground(Color.WHITE);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -431,7 +438,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(existingSubjectsLabel, importDialogGBC);
 
-		existingSubjectsCB = new JComboBox();
+		existingSubjectsCB = new JComboBox<>();
 		existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
 		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
@@ -455,7 +462,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectImageObjectCategoryLabel, importDialogGBC);
 
-		subjectImageObjectCategoryCB = new JComboBoxMandatory();
+		subjectImageObjectCategoryCB = new JComboBoxMandatory<>();
 		subjectImageObjectCategoryCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -476,7 +483,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectLanguageHemisphericDominanceLabel, importDialogGBC);
 
-		subjectLanguageHemisphericDominanceCB = new JComboBox();
+		subjectLanguageHemisphericDominanceCB = new JComboBox<>();
 		subjectLanguageHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -497,7 +504,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectManualHemisphericDominanceLabel, importDialogGBC);
 
-		subjectManualHemisphericDominanceCB = new JComboBox();
+		subjectManualHemisphericDominanceCB = new JComboBox<>();
 		subjectManualHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -581,7 +588,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectTypeLabel, importDialogGBC);
 
-		subjectTypeCB = new JComboBoxMandatory();
+		subjectTypeCB = new JComboBoxMandatory<>();
 		subjectTypeCB.setBackground(Color.LIGHT_GRAY);
 		subjectTypeCB.setEditable(false);
 		importDialogGBC.weightx = 0.7;
@@ -627,7 +634,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationExistingExamLabel, importDialogGBC);
 
-		mrExaminationExistingExamCB = new JComboBoxMandatory();
+		mrExaminationExistingExamCB = new JComboBoxMandatory<>();
 		mrExaminationExistingExamCB.setBackground(Color.WHITE);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -670,7 +677,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationCenterLabel, importDialogGBC);
 
-		mrExaminationCenterCB = new JComboBoxMandatory();
+		mrExaminationCenterCB = new JComboBoxMandatory<>();
 		mrExaminationCenterCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -691,7 +698,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationExamExecutiveLabel, importDialogGBC);
 
-		mrExaminationExamExecutiveCB = new JComboBoxMandatory();
+		mrExaminationExamExecutiveCB = new JComboBoxMandatory<>();
 		mrExaminationExamExecutiveCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;

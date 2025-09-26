@@ -46,8 +46,7 @@ public class NominativeDataImportJobManager {
 			importFolderPath
 			+ File.separatorChar
 			+ ShUpConfig.IMPORT_JOB_JSON);
-		logger.debug("ImportJobManager initialized with file: "
-			+ this.nominativeDataJobFile.getAbsolutePath());
+		logger.debug("ImportJobManager initialized with file: " + this.nominativeDataJobFile.getAbsolutePath());
 	}
 	
 	/**
@@ -56,8 +55,7 @@ public class NominativeDataImportJobManager {
 	 */
 	public NominativeDataImportJobManager(final File importJobFile) {
 		this.nominativeDataJobFile = importJobFile;
-		logger.debug("ImportJobManager initialized with file: "
-			+ this.nominativeDataJobFile.getAbsolutePath());
+		logger.debug("ImportJobManager initialized with file: " + this.nominativeDataJobFile.getAbsolutePath());
 	}
 
 	private ReentrantLock getLock() {

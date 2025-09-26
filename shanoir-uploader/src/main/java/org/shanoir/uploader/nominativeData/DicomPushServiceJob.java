@@ -138,12 +138,12 @@ public class DicomPushServiceJob {
 
 						// We create a new Serie from the first dicom file
 						if (seriesUID == null) {
-						seriesUID = currentSeriesUID;
-						Serie serie = new Serie(dicomAttributes);
-						//We set the Institution attributes
-						dicomFileAnalyzer.addSeriesCenter(serie, dicomAttributes);
-						incomingSeries.add(serie);
-						// if we have multiple series in the same folder (is it possible ?), 
+							seriesUID = currentSeriesUID;
+							Serie serie = new Serie(dicomAttributes);
+							//We set the Institution attributes
+							dicomFileAnalyzer.addSeriesCenter(serie, dicomAttributes);
+							incomingSeries.add(serie);
+							// if we have multiple series in the same folder (is it possible ?), 
 						} else if (!seriesUID.equals(currentSeriesUID)) {
 							logger.info("Warning: DICOM files from different series found in the same folder.");
 							return false;
@@ -180,7 +180,7 @@ public class DicomPushServiceJob {
 
 					// For safety : in some cases values are not retrieved from dicomdir (could use splitPatientName also)
 					if ((patient.getPatientBirthDate() == null || patient.getPatientSex() == null)
-					 && dicomAttributes.getString(Tag.PatientID).equals(patient.getPatientID())) {
+					 		&& dicomAttributes.getString(Tag.PatientID).equals(patient.getPatientID())) {
 						patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(dicomAttributes.getDate(Tag.PatientBirthDate)));
 						patient.setPatientSex(dicomAttributes.getString(Tag.PatientSex));
 					}
@@ -217,16 +217,16 @@ public class DicomPushServiceJob {
 		ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
 		try {
 			importJob.setSubject(ImportUtils.createSubjectFromPatient(patient, dOCAL.pseudonymizer, dOCAL.identifierCalculator));
-			} catch (PseudonymusException e) {
-				logger.error(e.getMessage(), e);
-				return;
-			} catch (UnsupportedEncodingException e) {
-				logger.error(e.getMessage(), e);
-				return;
-			} catch (NoSuchAlgorithmException e) {
-				logger.error(e.getMessage(), e);
-				return;
-				}
+		} catch (PseudonymusException e) {
+			logger.error(e.getMessage(), e);
+			return;
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e.getMessage(), e);
+			return;
+		} catch (NoSuchAlgorithmException e) {
+			logger.error(e.getMessage(), e);
+			return;
+		}
 
 		File uploadFolder = ImportUtils.createUploadFolder(workFolder, importJob.getSubject().getIdentifier());
 		importJob.setWorkFolder(uploadFolder.getAbsolutePath());
