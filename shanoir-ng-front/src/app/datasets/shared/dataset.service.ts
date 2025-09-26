@@ -107,10 +107,17 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getByIds(ids: Set<number>): Promise<DatasetLight[]> {
+    getLigthByIds(ids: Set<number>): Promise<DatasetLight[]> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
-        return this.http.post<DatasetLight[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
+        return this.http.post<DatasetLight[]>(AppUtils.BACKEND_API_DATASET_URL + '/allLightById', formData)
+            .toPromise();
+    }
+
+    getByIds(ids: Set<number>): Promise<Dataset[]> {
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', Array.from(ids).join(","));
+        return this.http.post<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
             .toPromise();
     }
 

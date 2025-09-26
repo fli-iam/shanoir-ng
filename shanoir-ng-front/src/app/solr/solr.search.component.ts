@@ -622,7 +622,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     initExecutionMode() {
-        this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
+        this.datasetService.getLigthByIds(this.selectedDatasetIds).then(datasets => {
             let studyId = datasets[0]?.studyId;
 
             if (!this.hasAdminRight(studyId)) {

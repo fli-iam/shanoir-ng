@@ -46,22 +46,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </li>
 				<li>
 					<label>Study</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-                            <a [routerLink]="['/study/details/', study?.id]">
-                                {{study?.name}}
-                            </a>
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select-box formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()"></select-box>
-						</ng-template>
+					<span class="right-col" *ngIf="mode == 'view'">
+                        <a [routerLink]="['/study/details/', study?.id]">
+                            {{study?.name}}
+                        </a>
+					</span>
+                    <span class="right-col" *ngIf="mode != 'view'">
+                        {{study?.name}}
 					</span>
 				</li>
-				<li *ngIf="mode != 'view'">
+				<li>
 					<label>Subject</label>
-					<span class="right-col">
-						<select-box formControlName="subject" [(ngModel)]="subject" [options]="subjectOptions" (userChange)="onSubjectChange()"></select-box>
-					</span>
+                    <span class="right-col" *ngIf="mode == 'view'">
+                        <a [routerLink]="['/subject/details/', subject?.id]">
+                            {{subject?.name}}
+                        </a>
+                    </span>
+                    <span class="right-col" *ngIf="mode != 'view'">
+                        {{subject?.name}}
+                    </span>
 				</li>
 				<li>
 					<label i18n="Processing detail|Processing type label@@processingDetailProcessingType">Processing type</label>
@@ -78,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 				<li>
 					<label i18n="Processing detail|Processing date label@@processingDetailProcessingDate">Processing date</label>
-											<span class="right-col" [ngSwitch]="mode">
+                    <span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{datasetProcessing.processingDate | localDateFormatPipe }}
 						</ng-template>
@@ -170,19 +173,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[columnDefs]="inputDatasetsColumnDefs"
 						[readOnly]="mode == 'view'">
 				</multi-select-table>
-                <li *ngIf="!isExecutionMonitoring">
-                    <legend>
-                        Output datasets
-                        <tool-tip>Datasets resulting from this dataset processing.</tool-tip>
-                    </legend>
-                    <multi-select-table
-                            formControlName="outputDatasetList"
-                            [(ngModel)]="datasetProcessing.outputDatasets"
-                            [options]="outputDatasetOptions"
-                            [columnDefs]="outputDatasetsColumnDefs"
-                            [readOnly]="mode == 'view'">
-                    </multi-select-table>
-                </li>
 			</ol>
 		</fieldset>
 	</form>

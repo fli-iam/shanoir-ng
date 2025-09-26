@@ -87,6 +87,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected fetchEntity: () => Promise<any>; // optional
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
+
     constructor(
         protected activatedRoute: ActivatedRoute,
         private readonly ROUTING_NAME: string) {

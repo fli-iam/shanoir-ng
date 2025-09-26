@@ -402,9 +402,9 @@ export class MassDownloadService {
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
         }
-        if (setup.acquisitionFolders && !dataset.hasProcessing) { 
-            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
-                || dataset.datasetAcquisition.protocol?.originMetadata?.name 
+        if (setup.acquisitionFolders && !dataset.hasProcessing) {
+            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name
+                || dataset.datasetAcquisition.protocol?.originMetadata?.name
                 || dataset.datasetAcquisition.type + '_acquisition';
             str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
             + '_' + dataset.datasetAcquisition.id
@@ -603,7 +603,7 @@ export class MassDownloadService {
                                     task.sessionId = this.sessionService.sessionId;
                                     this.notificationService.pushLocalTask(task);
 
-                                    this.datasetService.getByIds(new Set(noSuccessIds)).then(datasets =>{
+                                    this.datasetService.getLigthByIds(new Set(noSuccessIds)).then(datasets =>{
                                         let setup: DownloadSetup = new DownloadSetup(report.format);
                                         setup.nbQueues = report.nbQueues;
                                         setup.converter = report.converter;
@@ -637,7 +637,7 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
-    }  
+    }
 }
 
 export class DownloadSetup {
