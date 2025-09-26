@@ -224,8 +224,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.form.updateValueAndValidity();
     }
 
-    onSerialNumberChange() {
-        console.log("serial number change");
+    onSerialNumberInput(event: Event) {
+        const value = (event.target as HTMLInputElement).value;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }

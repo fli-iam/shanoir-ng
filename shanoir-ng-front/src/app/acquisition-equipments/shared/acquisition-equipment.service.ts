@@ -65,9 +65,10 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
             equipments => {
-                for (let equipment of equipments) {
-                    if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
-                }
+                const hasDuplicate = equipments.some((eq, i, arr) =>
+                    arr.findIndex(e => e.serialNumber === eq.serialNumber && e.manufacturerModel.id === eq.manufacturerModel.id) !== i
+                );
+                return hasDuplicate;
             }
         );
     }
