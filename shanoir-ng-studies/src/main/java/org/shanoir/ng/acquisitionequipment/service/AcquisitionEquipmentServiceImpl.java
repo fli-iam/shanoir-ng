@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
@@ -184,7 +183,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
 	private AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom) {
 		Optional<ManufacturerModel> manufacturerModelOpt = 
-	        	manufacturerModelRepository.findByNameIgnoreCase(equipmentDicom.getManufacturerModelName());
+	        	manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
 		ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
 			Manufacturer manufacturer = manufacturerRepository
 					.findByNameIgnoreCase(equipmentDicom.getManufacturer())
@@ -217,17 +216,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
 			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
 			if (manufacturerModel != null) {
-				if (equipmentDicom.getManufacturerModelName().contains(manufacturerModel.getName())) {
-					Manufacturer manufacturer = manufacturerModel.getManufacturer();
-					if (manufacturer != null) {
-						if (equipmentDicom.getManufacturer().contains(manufacturer.getName())) {
-							// keep in list, as matching equipment found with high probability
-						} else {
-							iterator.remove();
-						}
-					} else {
-						iterator.remove();
-					}
+				if (equipmentDicom.getManufacturerModelName().toLowerCase().contains(manufacturerModel.getName().toLowerCase())) {
+					// Issue #3012: we ignore the manufacturer name here
 				} else {
 					iterator.remove();
 				}

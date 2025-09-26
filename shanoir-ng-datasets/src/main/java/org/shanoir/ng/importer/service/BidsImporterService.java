@@ -2,7 +2,6 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
 import org.shanoir.ng.dataset.modality.BidsDataType;

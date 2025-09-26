@@ -38,13 +38,14 @@ import { EntityComponent } from '../../../shared/components/entity/entity.compon
 import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
 import { Selection } from 'src/app/studies/study/tree.service';
+import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
+import {Subject} from "../../../subjects/shared/subject.model";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -70,12 +71,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     examinationExtradatas: ExtraData[] = [];
     centers: IdName[] = [];
     studies: IdName[] = [];
-    public subjects: SubjectWithSubjectStudy[];
+    public subjects: Subject[];
     animalSubjectId: number;
     private inImport: boolean;
     private files: File[] = [];
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    dateDisplay = dateDisplay;
 
     constructor(
         private route: ActivatedRoute,
@@ -175,10 +177,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     private updateExam(): void{
-        this.examination.subjectStudy = new SubjectWithSubjectStudy();
+        this.examination.subject = new Subject();
         if (this.examination.subject){
-            this.examination.subjectStudy.id = this.examination.subject.id;
-            this.examination.subjectStudy.name = this.examination.subject.name;
+            this.examination.subject.id = this.examination.subject.id;
+            this.examination.subject.name = this.examination.subject.name;
         }
     }
 
@@ -398,5 +400,4 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
 }

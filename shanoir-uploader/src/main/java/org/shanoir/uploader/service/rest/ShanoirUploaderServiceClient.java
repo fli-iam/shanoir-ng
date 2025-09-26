@@ -1,6 +1,5 @@
 package org.shanoir.uploader.service.rest;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -100,6 +99,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
+
+	private static final String SERVICE_KEYS_FIND_VALUE = "service.keys.find.value";
 	
 	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
 	
@@ -144,6 +145,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLManufacturers;
 	
 	private String serviceURLSubjectsCreate;
+
+	private String serviceURLKeysFindValue;
 
 	private String serviceURLSubjectsFindByIdentifier;
 
@@ -213,6 +216,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
 		this.serviceURLSubjectsCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+		this.serviceURLKeysFindValue = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_KEYS_FIND_VALUE);
 		this.serviceURLExaminationsCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		this.serviceURLImporterCreateTempDir = this.serverURL
@@ -432,7 +437,7 @@ public class ShanoirUploaderServiceClient {
 					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
-					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
 				}
 			}
 		}
@@ -858,34 +863,18 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 	
-	/**
-	 * This method updates a subject on the server and therefore updates
-	 * the rel_subject_study list too.
-	 * 
-	 * @param subject
-	 * @return
-	 */
-	public Subject createSubjectStudy(
-			final Subject subject) {
-		try {
-			String json = Util.objectWriter.writeValueAsString(subject);
-			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
-				int code = response.getCode();
-				if (code == HttpStatus.SC_NO_CONTENT) {
-					return subject;
-				} else {
-					logger.error("Error in createSubjectStudy: with subject " + subject.getName()
-					+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-				}
+	public String findValueByKey(String key) throws Exception {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLKeysFindValue + key)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				return EntityUtils.toString(response.getEntity());
+			} else {
+				logger.error("Could not get value from server (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
 			}
-		} catch (JsonProcessingException e) {
-			logger.error(e.getMessage(), e);
-		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
 		}
-		return null;
 	}
-	
+
 	/**
 	 * This method creates an examination on the server.
 	 * 

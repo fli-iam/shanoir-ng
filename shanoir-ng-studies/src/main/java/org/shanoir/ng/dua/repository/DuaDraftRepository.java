@@ -12,12 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SubjectStudy } from "./subject-study.model";
+package org.shanoir.ng.dua.repository;
 
-export class SubjectWithSubjectStudy {
-    id: number;
-    name: string;
-    identifier: string;
-    subjectStudy: SubjectStudy;
-    birthDate: Date;
+import org.shanoir.ng.dua.model.DuaDraft;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DuaDraftRepository extends CrudRepository<DuaDraft, String> {
+	
 }
