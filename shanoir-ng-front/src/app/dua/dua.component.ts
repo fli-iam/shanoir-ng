@@ -15,8 +15,6 @@
 import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { StudyService } from '../studies/shared/study.service';
 import { DataUserAgreement } from './shared/dua.model';
 

@@ -31,7 +31,7 @@ export class ConfirmDialogService {
         });
     }
 
-    public choose(title: string, message?: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
+    public choose(title: string, message?: string, buttons?: {yes: string, no: string, cancel?: string}): Promise<'yes' | 'no' | false> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
         let dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openChoose(title, message, buttons).then(answer => {
