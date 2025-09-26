@@ -2,7 +2,6 @@ package org.shanoir.ng.dicom.web.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.mapstruct.Mapper;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
@@ -13,9 +12,6 @@ import org.shanoir.ng.dicom.web.dto.MetadataDTO;
 import org.shanoir.ng.dicom.web.dto.SerieDTO;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class maps the Examination objects from the Shanoir-NG database
