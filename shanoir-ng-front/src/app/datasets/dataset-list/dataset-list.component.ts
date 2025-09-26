@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,21 +37,23 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
     private studies: Study[] = [];
     @ViewChild('table', { static: false }) table: TableComponent;
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private datasetService: DatasetService,
             private studyService: StudyService,
             private subjectService: SubjectService) {
-                
+
         super('dataset');
         this.fetchStudies();
         this.fetchSubjects();
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Dataset> {
         return this.datasetService;
     }
-    
+
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
         return this.datasetService.getPage(pageable);
     }
@@ -80,7 +82,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             this.subjects = subjects;
         });
     }
-    
+
     private fetchStudies() {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
@@ -94,18 +96,14 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     getOptions() {
         return {
             new: false,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
 
     canEdit(ds: Dataset): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            ds.study &&
-            ds.study.studyUserList && 
-            ds.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(ds.study.id);
     }
 
     canDelete(ds: Dataset): boolean {

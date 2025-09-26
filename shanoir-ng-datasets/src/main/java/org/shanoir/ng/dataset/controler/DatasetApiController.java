@@ -43,7 +43,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -301,7 +300,6 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
 			Long studyId) {
-	
 		List<DatasetLight> datasets = datasetService.findLightByStudyId(studyId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

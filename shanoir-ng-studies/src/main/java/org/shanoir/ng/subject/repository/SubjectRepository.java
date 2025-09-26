@@ -47,14 +47,9 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.studyUserList"})
 	Iterable<Subject> findAllById(Iterable<Long> ids);
 	
-	/**
-	 * Find subject by name.
-	 *
-	 * @param name
-	 *            
-	 * @return a Subject.
-	 */
-	Subject findByName(String name);
+	List<Subject> findByName(String name);
+
+	Subject findByStudyIdAndName(Long studyId, String name);
 
 	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
 	Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
@@ -64,6 +59,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	
 	Page<Subject> findByNameContaining(String name, Pageable pageable);
 	
+	@EntityGraph(attributePaths = {"tags"})
 	Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 	
 	/**
@@ -79,5 +75,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
     List<Subject> findByPreclinical(boolean preclinical);
 
 	boolean existsByName(String name);
+
+	boolean existsByStudyIdAndName(Long studyId, String name);
 
 }

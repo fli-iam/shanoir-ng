@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -127,11 +128,11 @@ public interface SubjectApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@Parameter(description = "subject to create", required = true) @RequestBody Subject subject,
 			@Parameter(description = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
-			final BindingResult result) throws RestServiceException;
+			final BindingResult result) throws ShanoirException, RestServiceException;
 	
 	// Attention: this method is used by ShanoirUploader!!!
 	@Operation(summary = "", description = "Updates a subject")
@@ -142,7 +143,7 @@ public interface SubjectApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subjectId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateSubject(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(description = "subject to update", required = true) @RequestBody Subject subject,

@@ -1,11 +1,6 @@
 package org.shanoir.uploader.model;
 
-import org.shanoir.ng.importer.vip.model.Path;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ExaminationImport {
 

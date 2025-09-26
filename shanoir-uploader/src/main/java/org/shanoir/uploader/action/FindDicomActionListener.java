@@ -22,6 +22,7 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.UniquePatientTreeSelectionModel;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -199,6 +200,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		}
 		// set values for display in the GUI tree
 		mainWindow.dicomTree = new DicomTree(media);
+		// set custom selection model to avoid multiple patients selection
+		mainWindow.dicomTree.setSelectionModel(new UniquePatientTreeSelectionModel(mainWindow.dicomTree));		
 		// expand entire JTree after creation
 		for (int i = 0; i < mainWindow.dicomTree.getRowCount(); i++) {
 			mainWindow.dicomTree.expandRow(i);

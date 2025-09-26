@@ -21,6 +21,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {Study} from "../../studies/shared/study.model";
 
 
 @Component({
@@ -33,6 +34,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private examinationService: ExaminationService,
@@ -40,6 +42,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Examination> {
@@ -88,13 +91,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     canEdit(ex: Examination): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            ex.subjectStudy &&
-			ex.subjectStudy.subjectStudy &&
-			ex.subjectStudy.subjectStudy.study &&
-            ex.subjectStudy.subjectStudy.study.studyUserList &&
-            ex.subjectStudy.subjectStudy.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(ex.study.id);
     }
 
     canDelete(exam: Examination): boolean {

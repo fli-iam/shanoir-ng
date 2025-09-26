@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.dcm4che3.data.Attributes;
@@ -148,9 +147,9 @@ public class FileUtil {
 						}
 					}
 				}
+				serie.setInstances(instances);
 				if (!instances.isEmpty()) {
 					instances.sort(new InstanceNumberSorter());
-					serie.setInstances(instances);
 					logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
 				} else {
 					logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());

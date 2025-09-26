@@ -108,7 +108,7 @@ public class AnimalSubjectApiControllerTest {
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
 		given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(new AnimalSubject());
 		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(AnimalSubjectModelUtil.ID);
-		given(subjectsServiceMock.isSubjectNameAlreadyUsed(AnimalSubjectModelUtil.SUBJECT_NAME)).willReturn(false);
+		given(subjectsServiceMock.isSubjectNameAlreadyUsedInStudy(AnimalSubjectModelUtil.SUBJECT_NAME, 1L)).willReturn(false);
 		given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(new AnimalSubject());
 		PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setAnimalSubject(new AnimalSubjectDto());

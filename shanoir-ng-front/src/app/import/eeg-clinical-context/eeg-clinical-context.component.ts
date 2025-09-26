@@ -139,7 +139,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
-            && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
             && (!!context.coordinatesSystem || !this.hasPosition)
         );
@@ -189,8 +188,9 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
-        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.subjectStudyList = [];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        newSubject.study = this.study;
         return newSubject;
     }
 
@@ -206,7 +206,6 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
