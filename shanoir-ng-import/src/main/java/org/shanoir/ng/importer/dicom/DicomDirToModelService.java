@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
 import org.dcm4che3.media.DicomDirReader;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
