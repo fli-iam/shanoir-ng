@@ -79,6 +79,7 @@ module.exports = tseslint.config(
       ...angular.configs.templateAccessibility,
     ],
     rules: {
+      /* TODO */
       "@angular-eslint/template/eqeqeq": "off",
       "@angular-eslint/template/label-has-associated-control": "off",
       "@angular-eslint/template/click-events-have-key-events": "off",
