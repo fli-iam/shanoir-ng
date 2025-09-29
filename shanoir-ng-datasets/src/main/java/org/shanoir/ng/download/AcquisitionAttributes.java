@@ -55,7 +55,7 @@ public class AcquisitionAttributes<T> {
         for (T dsId : datasetMap.keySet()) {
             sb.append("dataset ").append(dsId).append("\n");
 			if (datasetMap.get(dsId).isPresent()) {
-				for(String line : datasetMap.get(dsId).get().toString(1000, 1000).split("\n")) {
+				for (String line : datasetMap.get(dsId).get().toString(1000, 1000).split("\n")) {
 					sb.append("\t").append(line).append("\n");
 				}
 			} else {
@@ -91,7 +91,7 @@ public class AcquisitionAttributes<T> {
 		try {
 			@SuppressWarnings("unchecked")
 			AcquisitionAttributes<T> other = (AcquisitionAttributes<T>) obj;
-			for(T id : datasetMap.keySet()) {
+			for (T id : datasetMap.keySet()) {
 				Attributes attributes = datasetMap.get(id).orElse(null);
 				Attributes otherAttributes = other.getDatasetAttributes(id);
 				if (otherAttributes == null || !otherAttributes.equals(attributes)) {

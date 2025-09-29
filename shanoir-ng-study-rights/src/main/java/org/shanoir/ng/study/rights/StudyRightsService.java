@@ -64,7 +64,7 @@ public class StudyRightsService {
 		return
 				founded != null
 				&& 
-				( founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId) );
+				(founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId));
     }
 
     /*

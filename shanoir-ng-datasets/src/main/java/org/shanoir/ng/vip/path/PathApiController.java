@@ -35,7 +35,7 @@ public class PathApiController implements PathApi {
             throws IOException, RestServiceException, EntityNotFoundException {
         LOG.debug("completePath: {}, action: {}, format: {}, converterId: {}, response: {}", completePath, action, format, converterId, response);
         // TODO implement those actions
-        try{
+        try {
             switch (action) {
                 case "exists":
                 case "list":

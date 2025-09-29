@@ -23,8 +23,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RefsRepositoryImpl implements RefsRepositoryCustom{
-
+public class RefsRepositoryImpl implements RefsRepositoryCustom {
 	private static final String CATEGORY2 = "category";
 	private static final String REFTYPE2 = "reftype";
 	@PersistenceContext
@@ -41,7 +40,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Reference> findByCategoryAndType(String category,String reftype) {
+	public List<Reference> findByCategoryAndType(String category, String reftype) {
 		return em.createQuery(
 				"SELECT r FROM Reference r WHERE r.category LIKE :category AND r.reftype LIKE :reftype")
 				.setParameter(CATEGORY2, category)

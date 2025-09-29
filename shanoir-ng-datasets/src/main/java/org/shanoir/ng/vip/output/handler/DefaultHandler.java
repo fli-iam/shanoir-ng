@@ -78,7 +78,7 @@ public class DefaultHandler extends OutputHandler {
         try {
             List<File> outputFiles = new ArrayList<>();
             File resultJson = null;
-            for(File file : resultFiles){
+            for (File file : resultFiles) {
                 if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
                 } else {
@@ -90,10 +90,10 @@ public class DefaultHandler extends OutputHandler {
 
             List<Dataset> inputDatasets = monitoring.getInputDatasets();
 
-            if(inputDatasets.isEmpty()) {
+            if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
-            if(outputFiles.isEmpty()){
+            if (outputFiles.isEmpty()) {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
             DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
@@ -150,7 +150,7 @@ public class DefaultHandler extends OutputHandler {
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
      */
-    private List<Dataset> getDatasetFromFilename(String name){
+    private List<Dataset> getDatasetFromFilename(String name) {
         Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
         if (matcher.matches()) {
             return processingResourceRepository.findDatasetsByResourceId(matcher.group(1));
@@ -179,7 +179,7 @@ public class DefaultHandler extends OutputHandler {
             }
             processedDataset.setProcessedDatasetName(datasetName);
 
-            if(!inputDatasets.isEmpty()) {
+            if (!inputDatasets.isEmpty()) {
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));

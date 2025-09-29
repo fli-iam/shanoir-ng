@@ -108,7 +108,7 @@ public class ListDependencyUpdate {
 		if (oldValues == newValues) throw new IllegalStateException("those cannot be the same object");
 		
 		// remove deleted entities
-		//oldValues.removeIf(oldEntity -> !updatedIds.contains(oldEntity.getId()));
+		//oldValues.removeif(oldEntity -> !updatedIds.contains(oldEntity.getId()));
 		
 		// Index old values by their ids in a map
 		Map<Long, T> oldValuesMap = new HashMap<>();

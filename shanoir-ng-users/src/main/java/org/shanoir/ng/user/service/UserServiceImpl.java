@@ -290,14 +290,14 @@ public class UserServiceImpl implements UserService {
 		AccessRequest accessRequest = new AccessRequest();
 		accessRequest.setStatus(AccessRequest.ON_DEMAND);
 		accessRequest.setStudyId(user.getAccountRequestInfo().getStudyId());
-		if (user.getAccountRequestInfo().getStudyName() == null ) {
+		if (user.getAccountRequestInfo().getStudyName() == null) {
 			String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, accessRequest.getStudyId());
 			accessRequest.setStudyName(studyName);
 		} else {
 			accessRequest.setStudyName(user.getAccountRequestInfo().getStudyName());
 		}
 		accessRequest.setUser(savedUser);
-		accessRequest.setMotivation("User " + user.getFirstName() + " " +user.getLastName() 
+		accessRequest.setMotivation("User " + user.getFirstName() + " " + user.getLastName() 
 				+ " created an account to join your study"
 				+ (accessRequest.getMotivation() != null ? " with motivation text: " + accessRequest.getMotivation() : "")
 				+ ". Associated email: " + user.getEmail());

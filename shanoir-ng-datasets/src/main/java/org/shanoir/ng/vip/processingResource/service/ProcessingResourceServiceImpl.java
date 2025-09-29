@@ -27,7 +27,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
     public String create(ExecutionMonitoring processing, List<Dataset> datasets) {
         List<ProcessingResource> processingResources = new ArrayList<>();
         String resourceId = UUID.randomUUID().toString();
-        for(Dataset dataset : datasets){
+        for (Dataset dataset : datasets) {
             processingResources.add(new ProcessingResource(processing, dataset, resourceId));
         }
         repository.saveAll(processingResources);
@@ -36,7 +36,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
 
     public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) throws EntityNotFoundException {
 
-        if(datasetParameters ==  null || datasetParameters.isEmpty()){
+        if (datasetParameters ==  null || datasetParameters.isEmpty()) {
             return new ArrayList<>();
         }
 
@@ -87,7 +87,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
                 datasetsByEntityId.get(entityId).add(ds);
             }
 
-            for(Map.Entry<Long, List<Dataset>> entry : datasetsByEntityId.entrySet()) {
+            for (Map.Entry<Long, List<Dataset>> entry : datasetsByEntityId.entrySet()) {
                 String resourceId = create(processing, entry.getValue());
                 resourceDTO.getResourceIds().add(resourceId);
             }

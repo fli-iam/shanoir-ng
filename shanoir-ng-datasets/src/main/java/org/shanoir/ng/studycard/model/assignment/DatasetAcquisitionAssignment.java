@@ -39,7 +39,7 @@ public class DatasetAcquisitionAssignment extends StudyCardAssignment<DatasetAcq
         else return DatasetAcquisitionMetadataField.getEnum(field.intValue());
     }
 
-    @JsonDeserialize(as=DatasetAcquisitionMetadataField.class)
+    @JsonDeserialize(as = DatasetAcquisitionMetadataField.class)
     @Override // Don't know why eclipse can't take DatasetAcquisitionMetadataField as input type
     public void setField(MetadataFieldInterface<DatasetAcquisition> field) {
         this.field = Long.valueOf(field.getId());

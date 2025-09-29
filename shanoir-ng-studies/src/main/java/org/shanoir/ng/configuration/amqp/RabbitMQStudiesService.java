@@ -65,7 +65,7 @@ public class RabbitMQStudiesService {
 			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
+			autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 			)
 	@RabbitHandler
 	@Transactional
@@ -192,7 +192,7 @@ public class RabbitMQStudiesService {
 		try {
 		    LOG.info(messageStr);
 			List<SubjectQualityTagDTO> subjectStudyCardTagList =
-					objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>(){});
+					objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
 			// build a id -> dto map
 			Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
 			for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {

@@ -141,7 +141,7 @@ public class CenterApiController implements CenterApi {
 					break;
 				}
 			}
-			if(!centerInStudy) {
+			if (!centerInStudy) {
 				StudyCenter studyCenter = new StudyCenter();
 				Study study = studyService.findById(studyId);
 				studyCenter.setStudy(study);
@@ -173,7 +173,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	@Transactional
-	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
+	public ResponseEntity<List<CenterDTO>> findCentersByStudy(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Center> centers = centerService.findByStudy(studyId);
 		if (centers.isEmpty()) {

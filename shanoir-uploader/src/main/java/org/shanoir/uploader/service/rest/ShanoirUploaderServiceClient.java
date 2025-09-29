@@ -266,11 +266,11 @@ public class ShanoirUploaderServiceClient {
 			final StringBuilder postBody = new StringBuilder();
 			postBody.append("client_id=shanoir-uploader");
 			postBody.append("&grant_type=password");
-			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
+			postBody.append("&username = ").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
 			postBody.append("&scope=offline_access");
 			try (CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);) {
-				if(response == null) {
+				if (response == null) {
 					logger.error("Error while asking authentification token from: " + keycloakURL);
 					return null;
 				}
@@ -453,9 +453,9 @@ public class ShanoirUploaderServiceClient {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
 					List<Subject> subjects = Util.getMappedList(response, Subject.class);
-					for(Subject subject : subjects) {
+					for (Subject subject : subjects) {
 						List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
-						if(ids != null) {
+						if (ids != null) {
 							datasetIds.addAll(ids);
 						}
 					}
@@ -559,7 +559,7 @@ public class ShanoirUploaderServiceClient {
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
-		} catch(JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		}
 		return null;

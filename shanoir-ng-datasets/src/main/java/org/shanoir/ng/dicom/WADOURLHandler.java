@@ -65,7 +65,7 @@ public class WADOURLHandler {
 		if (studyInstanceUID == null || seriesInstanceUID == null || sopInstanceUID == null)
 			throw new IllegalArgumentException(String.format("DICOM UIDs can not be null: %s, %s, %s", studyInstanceUID,
 					seriesInstanceUID, sopInstanceUID));
-		String[] uids = new String[] { studyInstanceUID, seriesInstanceUID, sopInstanceUID };
+		String[] uids = new String[] {studyInstanceUID, seriesInstanceUID, sopInstanceUID};
 		return uids;
 	}
 

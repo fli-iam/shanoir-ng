@@ -33,7 +33,7 @@ public class StudyTagServiceImpl implements StudyTagService {
     }
 
     @Override
-    public void delete(Long id){
+    public void delete(Long id) {
         repository.deleteById(id);
     }
 

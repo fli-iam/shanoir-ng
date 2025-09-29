@@ -45,7 +45,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 				}
 				queryStr += "da." + order.getProperty();
 				queryStr += " " + order.getDirection() + " ";
-				isort ++;
+				isort++;
 			}
 		}
 		

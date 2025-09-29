@@ -64,7 +64,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
             }
         } catch (InterruptedException ignored) {
             LOG.info("Solr index not checked (thread interrupted)");
-        } catch (SolrServerException|IOException e) {
+        } catch (SolrServerException | IOException e) {
             LOG.error("Failed to check the Solr index", e);
         }
     }

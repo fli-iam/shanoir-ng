@@ -98,7 +98,7 @@ public class StudySecurityService {
 	 * @return true or false
 	 */
     public boolean hasAnyRightOnStudy(Long studyId, List<String> rightStrs) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
     	if (studyId == null || rightStrs == null) {
@@ -116,8 +116,8 @@ public class StudySecurityService {
 		StudyTag tag = studyTagRepository.findById(id)
 				.orElseThrow(() ->
 						new EntityNotFoundException("Cannot find study tag with id [" + id + "]"));
-		return this.hasRightOnStudy(tag.getStudy().getId(), rightStr) &&
-				this.studyUsersMatchStudy(tag.getStudy());
+		return this.hasRightOnStudy(tag.getStudy().getId(), rightStr)
+				&& this.studyUsersMatchStudy(tag.getStudy());
 
 	}
 
@@ -385,8 +385,8 @@ public class StudySecurityService {
 				}
 			}
 			ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
-			while(iter.hasNext()){
-				if(toRemove.contains(iter.next().getId())) {
+			while (iter.hasNext()) {
+				if (toRemove.contains(iter.next().getId())) {
 					iter.remove();
 				}
 			}
@@ -634,7 +634,7 @@ public class StudySecurityService {
 			return true;
 		}
 		// Filter only allowed centers.
-		centers.removeIf(center -> !su.getCenterIds().contains(center.getId()));
+		centers.removeif(center -> !su.getCenterIds().contains(center.getId()));
 		return true;
 	}
 

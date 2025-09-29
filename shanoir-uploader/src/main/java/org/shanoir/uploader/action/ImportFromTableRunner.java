@@ -137,7 +137,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.info("\r\n------------------------------------------------------\r\n"
 						+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
 						+ "------------------------------------------------------");
-			} catch(Exception exception) {
+			} catch (Exception exception) {
 				logger.error(exception.getMessage(), exception);
 			}
 			i++;
@@ -595,15 +595,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private boolean filterWildCard(String searchedElement, String filter) {
 		// Set all to uppercase
 		searchedElement = searchedElement.toUpperCase();
-		if(filter.endsWith(WILDCARD)) {
-			if(filter.startsWith(WILDCARD)) {
+		if (filter.endsWith(WILDCARD)) {
+			if (filter.startsWith(WILDCARD)) {
 				// *filter*
 				return searchedElement.contains(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 			}
 			// filter*
 			return searchedElement.startsWith(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 		}
-		if(filter.startsWith(WILDCARD)) {
+		if (filter.startsWith(WILDCARD)) {
 			// *filter
 			return searchedElement.endsWith(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 		}

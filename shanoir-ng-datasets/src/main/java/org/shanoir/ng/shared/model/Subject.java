@@ -65,13 +65,13 @@ public class Subject extends IdName {
 
 	private Integer subjectType;
 
-	public Subject() {}
+	public Subject() { }
 	
 	/**
 	 * @param id
 	 * @param name
 	 */
-	public Subject (Long id, String name) {
+	public Subject(Long id, String name) {
 		this.setId(id);
 		this.setName(name);
 	}

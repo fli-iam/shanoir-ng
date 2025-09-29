@@ -343,7 +343,7 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
+	public ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException {
 		try {
 			List<EegDataset> datasets = new ArrayList<>();
 
@@ -441,7 +441,7 @@ public class ImporterApiController implements ImporterApi {
 			//    - Save files
 			File destinationImageFile = new File(userImportDir.getAbsolutePath(), imageFileName);
 			imageFile.transferTo(destinationImageFile);
-			if(headerFile != null) {
+			if (headerFile != null) {
 				File destinationHeaderFile = new File(userImportDir.getAbsolutePath(), headerFileName);
 				headerFile.transferTo(destinationHeaderFile);
 
@@ -667,7 +667,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws RestServiceException
 	 */
 	@Override
-	public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true)  @RequestParam(value = "path", required = true) String path)
+	public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
 			throws RestServiceException, IOException {
 
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
@@ -743,7 +743,7 @@ public class ImporterApiController implements ImporterApi {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"The main subject folder should only contain sub-folders and not single/data files.", null));
 				}
-				File zippedExamFolder = new File (examFolder.getAbsolutePath() + ".zip");
+				File zippedExamFolder = new File(examFolder.getAbsolutePath() + ".zip");
 				zippedExamFolder.createNewFile();
 				Utils.zip(examFolder.getAbsolutePath(), zippedExamFolder.getAbsolutePath());
 				MockMultipartFile mockedFile = new MockMultipartFile(examFolder.getName(), zippedExamFolder.getName(), APPLICATION_ZIP, new FileInputStream(zippedExamFolder));
@@ -819,7 +819,7 @@ public class ImporterApiController implements ImporterApi {
 				}
 
 				// STEP 4.4 Select all series
-				for(Study study : job.getPatients().get(0).getStudies()) {
+				for (Study study : job.getPatients().get(0).getStudies()) {
 					for (Serie serie : study.getSeries()) {
 						serie.setSelected(true);
 					}

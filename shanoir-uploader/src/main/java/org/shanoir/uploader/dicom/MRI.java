@@ -76,9 +76,9 @@ public class MRI {
 
 	@Override
 	public String toString() {
-		return "MRI [manufacturer=" + manufacturer + ", stationName=" + stationName + ", magneticFieldStrength="
-				+ magneticFieldStrength + ", deviceSerialNumber=" + deviceSerialNumber + ", manufacturersModelName="
-				+ manufacturersModelName + ", institutionName=" + institutionName + ", institutionAddress="
+		return "MRI [manufacturer=" + manufacturer + ", stationname = " + stationName + ", magneticFieldStrength="
+				+ magneticFieldStrength + ", deviceSerialNumber=" + deviceSerialNumber + ", manufacturersModelname = "
+				+ manufacturersModelName + ", institutionname = " + institutionName + ", institutionAddress="
 				+ institutionAddress + "]";
 	}
 

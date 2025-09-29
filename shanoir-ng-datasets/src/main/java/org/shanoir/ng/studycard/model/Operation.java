@@ -58,7 +58,7 @@ public enum Operation {
 		DicomTagType.Long}),
 	DOES_NOT_END_WITH(10, new DicomTagType[] {
 		DicomTagType.String}),
-	PRESENT(11, new DicomTagType[] {		
+	PRESENT(11, new DicomTagType[] {
 		DicomTagType.String, 
 		DicomTagType.Date, 
 		DicomTagType.Double,

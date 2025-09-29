@@ -27,7 +27,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
-    public enum execStatus {VALID, SENT}
+    public enum execStatus { VALID, SENT }
 
     public void updateTrackingFile(ExecutionMonitoring executionMonitoring, execStatus execStatus) {
         try {
@@ -53,7 +53,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             for (String line : lastLines) {
                 List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
                     lineParts.set(1, newProcessing.getId().toString());
                     lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
                     lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
@@ -77,7 +77,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Create a new line for the execution input
      */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile, true));) {
 
             String newLine;
 
@@ -87,7 +87,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             newLine += executionMonitoring.getInputDatasets().getFirst().getDatasetAcquisition().getExamination().getId() + ",";
             newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
             String names = executionMonitoring.getInputDatasets().stream().filter(dataset -> Objects.nonNull(dataset.getOriginMetadata())).map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("");
-            newLine += (names.length() > 66 ? names.substring(0, 66) : names ) + ",,,";
+            newLine += (names.length() > 66 ? names.substring(0, 66) : names) + ",,,";
 
             writer.write(newLine);
         } catch (IOException e) {
@@ -160,7 +160,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
             updatedLines.addAll(lastLines);
 
-            for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
+            for (String line : updatedLines.subList(0, updatedLines.size() - 1)) {
                 writer.write(line);
                 writer.newLine();
             }
@@ -183,7 +183,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      */
     private void createTrackingFile(File trackingFile) throws IOException {
         new File(trackingFilePrefixe).mkdirs();
-        if(trackingFile.createNewFile()) {
+        if (trackingFile.createNewFile()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
                 String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
                 writer.write(headers);

@@ -43,7 +43,7 @@ public class Channel extends HalEntity {
 		}
 
 		@Override
-		public String toString(){
+		public String toString() {
 			return name;
 		}
 	}

@@ -69,7 +69,7 @@ public class EegImporterService {
 
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
-        if(Objects.isNull(importJob.getShanoirEvent())){
+        if (Objects.isNull(importJob.getShanoirEvent())) {
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         } else {
             event = importJob.getShanoirEvent();
@@ -180,7 +180,7 @@ public class EegImporterService {
                 }
 
                 // Fill dataset with informations
-                datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+                datasetToCreate.setChannelCount(datasetDto.getChannels() != null ? datasetDto.getChannels().size() : 0);
                 datasetToCreate.setChannels(datasetDto.getChannels());
                 datasetToCreate.setEvents(datasetDto.getEvents());
                 datasetToCreate.setCreationDate(LocalDate.now());
@@ -201,7 +201,7 @@ public class EegImporterService {
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 

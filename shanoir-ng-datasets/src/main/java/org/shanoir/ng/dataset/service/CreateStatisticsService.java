@@ -40,7 +40,7 @@ public class CreateStatisticsService {
 
     private File recreateFile(final String fileName) throws IOException {
         File file = new File(fileName);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
         }
         file.createNewFile();

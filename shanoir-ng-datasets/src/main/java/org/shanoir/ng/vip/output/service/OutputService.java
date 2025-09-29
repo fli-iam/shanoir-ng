@@ -124,7 +124,7 @@ public class OutputService {
             throw new ResultHandlerException("I/O error while extracting files from result archive [" + archive.getAbsolutePath() + "]", e);
         }
 
-        if(outputFiles.isEmpty()) {
+        if (outputFiles.isEmpty()) {
             throw new ResultHandlerException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
         }
         return outputFiles;

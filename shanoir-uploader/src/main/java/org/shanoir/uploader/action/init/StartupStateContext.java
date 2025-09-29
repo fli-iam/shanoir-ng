@@ -44,7 +44,7 @@ public class StartupStateContext {
 		this.state = state;
 	}
 	
-	public void nextState(){
+	public void nextState() {
 		try {
 			getState().load(this);
 		} catch (Exception e) {

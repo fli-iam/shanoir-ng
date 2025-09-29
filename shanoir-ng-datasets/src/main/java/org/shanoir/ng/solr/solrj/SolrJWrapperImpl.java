@@ -127,12 +127,12 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	@Autowired
 	private SolrClient solrClient;
 	
-	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+	public void addToIndex(final ShanoirSolrDocument document) throws SolrServerException, IOException {
 		solrClient.addBean(document);
 		solrClient.commit();
 	}
 
-	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+	public void addAllToIndex(final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
 		solrClient.addBeans(documents);
 		solrClient.commit();
 	}
@@ -469,7 +469,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			try {
 				originalValues.clear();
 				originalValues.addAll(renamedAndFilteredValues);
-			} catch (RuntimeException ignored) {}
+			} catch (RuntimeException ignored) { }
 
 			filteredFacetPaging.put(facetName, pageableFacet);
 		}
@@ -509,7 +509,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		SolrDocumentList documents = response.getResults();
 		if (documents == null) documents = new SolrDocumentList();
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
-		for(SolrDocument document : documents) {
+		for (SolrDocument document : documents) {
 			ShanoirSolrDocument solrDoc = new ShanoirSolrDocument();
 			solrDoc.setId((String) document.getFirstValue("id"));
 			solrDoc.setDatasetId((Long) document.getFirstValue("datasetId"));
@@ -523,7 +523,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setAcquisitionEquipmentName((String) document.getFirstValue("acquisitionEquipmentName"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
 			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
-			solrDoc.setSortingIndex( (Integer) document.getFirstValue("sortingIndex"));
+			solrDoc.setSortingIndex((Integer) document.getFirstValue("sortingIndex"));
 			if (document.getFieldValues("tags") != null) {
 				solrDoc.setTags(document.getFieldValues("tags").stream()
 						.map(object -> Objects.toString(object, null))

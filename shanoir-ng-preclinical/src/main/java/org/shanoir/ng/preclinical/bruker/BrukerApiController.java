@@ -215,7 +215,7 @@ public class BrukerApiController implements BrukerApi {
 	 * @throws IOException
 	 */
 	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		try(BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+		try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
 			byte[] bytesIn = new byte[BUFFER_SIZE];
 			int read = 0;
 			while ((read = zipIn.read(bytesIn)) != -1) {

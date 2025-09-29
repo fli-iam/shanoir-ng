@@ -100,7 +100,7 @@ public class CardsProcessingService {
 	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
+		if (examination == null) throw new IllegalArgumentException("examination can't be null");
         LOG.debug("Quality check for examination " + examination.getId() + " started");
 		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
@@ -110,7 +110,7 @@ public class CardsProcessingService {
                 resetSubjects(subjects);
                 try {
                     subjectService.update(subjects);
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
             if (acquisitions != null && !acquisitions.isEmpty()) {
@@ -145,10 +145,10 @@ public class CardsProcessingService {
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
         Study study = studyService.findById(qualityCard.getStudyId());
-        if (study == null ) throw new IllegalArgumentException("study can't be null");
+        if (study == null) throw new IllegalArgumentException("study can't be null");
         if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
         if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
             if (updateTags) { // first reset subject studies
@@ -157,7 +157,7 @@ public class CardsProcessingService {
                 resetSubjects(study.getSubjectList());
                 try {
                     subjectService.update(study.getSubjectList());
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             QualityCardResult result = new QualityCardResult();
             AtomicInteger i = new AtomicInteger(0);
@@ -186,7 +186,7 @@ public class CardsProcessingService {
                     i.incrementAndGet();
                 });
             } catch (StreamExceptionWrapper e) {
-                throw (MicroServiceCommunicationException)(e.getCause());
+                throw (MicroServiceCommunicationException) (e.getCause());
             }
             if (updateTags) { // update subject studies
 			    try {
@@ -223,7 +223,7 @@ public class CardsProcessingService {
                     Hibernate.initialize(examination.getSubject().getStudy());
                 }
                 if (examination.getDatasetAcquisitions() != null) {
-                    for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                    for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
                         if (acquisition.getDatasets() != null) {
                             for (Dataset dataset : acquisition.getDatasets()) {
                                 if (dataset.getDatasetExpressions() != null) {

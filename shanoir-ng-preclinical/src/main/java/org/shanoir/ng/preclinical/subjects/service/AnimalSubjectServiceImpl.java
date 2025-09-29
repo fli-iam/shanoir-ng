@@ -126,7 +126,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
 		Long subjectId;
 		subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
-		if(subjectId == null){
+		if (subjectId == null) {
 			throw new ShanoirException("Created subject id is null.");
 		}
 		return subjectId;

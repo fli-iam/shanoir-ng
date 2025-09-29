@@ -232,8 +232,8 @@ public class EDFAnnotationFileHeaderBuilder {
 		header.numberOfRecords = numberOfRecords != null ? numberOfRecords : 1;
 		header.durationOfRecords = durationOfRecord;
 		header.numberOfChannels = numberOfChannels != null ? numberOfChannels : 1;
-		header.bytesInHeader = EDFConstants.HEADER_SIZE_RECORDING_INFO +
-				header.numberOfChannels * EDFConstants.HEADER_SIZE_PER_CHANNEL;
+		header.bytesInHeader = EDFConstants.HEADER_SIZE_RECORDING_INFO
+				+ header.numberOfChannels * EDFConstants.HEADER_SIZE_PER_CHANNEL;
 
 		header.channelLabels = channelLabels;
 		header.transducerTypes = transducerTypes;
@@ -265,7 +265,7 @@ public class EDFAnnotationFileHeaderBuilder {
 	}
 
 	private String buildRecordingString() {
-		return "Startdate" + " " + recordingStartDate + " " + recordingHospital + " " + recordingTechnician +
-				" " + recordingEquipment;
+		return "Startdate" + " " + recordingStartDate + " " + recordingHospital + " " + recordingTechnician
+				+ " " + recordingEquipment;
 	}
 }

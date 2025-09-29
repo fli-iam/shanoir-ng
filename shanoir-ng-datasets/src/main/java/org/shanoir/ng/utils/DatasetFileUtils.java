@@ -140,14 +140,14 @@ public class DatasetFileUtils {
 		for (Map.Entry<Long, List<String>> entry : filesByAcquisitionId.entrySet()) {
 			InputDTO.InputSerieDTO serie = new InputDTO.InputSerieDTO();
 			serie.setId(entry.getKey());
-			for(String file : entry.getValue()){
+			for (String file : entry.getValue()) {
 				serie.getFiles().add(file);
 			}
 			input.getSeries().add(serie);
 		}
 
 		JsonFactory jsonFactory = new JsonFactory();
-		jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
+		jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
 		ZipEntry zipEntry = new ZipEntry(INPUT);
 		zipEntry.setTime(System.currentTimeMillis());
@@ -160,7 +160,7 @@ public class DatasetFileUtils {
 		if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
 			return datasetDownloadName;
 		}
-		if (keepName ){
+		if (keepName) {
 			return srcFile.getName();
 		}
 

@@ -53,7 +53,7 @@ public class RoleServiceTest {
 	}
 
     @Test
-    public void findAllTest(){
+    public void findAllTest() {
         final List<Role> roles = roleService.findAll();
         Assert.assertNotNull(roles);
         Assert.assertTrue(roles.size() == 1);

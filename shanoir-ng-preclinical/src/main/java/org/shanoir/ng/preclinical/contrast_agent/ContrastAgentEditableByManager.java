@@ -4,6 +4,6 @@ import org.shanoir.ng.shared.security.FieldEditionSecurityManagerImpl;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ContrastAgentEditableByManager extends FieldEditionSecurityManagerImpl<ContrastAgent>{
+public class ContrastAgentEditableByManager extends FieldEditionSecurityManagerImpl<ContrastAgent> {
 
 }

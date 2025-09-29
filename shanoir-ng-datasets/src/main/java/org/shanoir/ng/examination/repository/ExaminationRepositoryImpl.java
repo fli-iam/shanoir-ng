@@ -129,7 +129,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 				}
 				queryStr += "ex." + order.getProperty();
 				queryStr += " " + order.getDirection() + " ";
-				isort ++;
+				isort++;
 			}
 		}
 

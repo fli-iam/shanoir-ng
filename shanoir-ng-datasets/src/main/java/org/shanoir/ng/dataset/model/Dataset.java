@@ -70,7 +70,7 @@ import jakarta.persistence.Transient;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type", defaultImpl=GenericDataset.class, visible=true)
+@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type", defaultImpl = GenericDataset.class, visible = true)
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = CalibrationDataset.class, name = DatasetType.Names.Calibration),
 		@JsonSubTypes.Type(value = CtDataset.class, name = DatasetType.Names.Ct),

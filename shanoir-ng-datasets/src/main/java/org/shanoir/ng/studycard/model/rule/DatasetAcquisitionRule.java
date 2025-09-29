@@ -64,10 +64,10 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
         for (StudyCardAssignment<?> assignment : getAssignments()) {
             if (assignment instanceof DatasetAssignment) {
                 for (Dataset dataset : acquisition.getDatasets()) {
-                    ((DatasetAssignment)assignment).apply(dataset);               
+                    ((DatasetAssignment) assignment).apply(dataset);               
                 }
             } else if (assignment instanceof DatasetAcquisitionAssignment) {
-                ((DatasetAcquisitionAssignment)assignment).apply(acquisition);               
+                ((DatasetAcquisitionAssignment) assignment).apply(acquisition);               
             } else throw new IllegalArgumentException("Unimplemented assignment type");
         }
     }

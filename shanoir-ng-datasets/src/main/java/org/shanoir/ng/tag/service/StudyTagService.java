@@ -29,7 +29,7 @@ public class StudyTagService {
     @Autowired
     private SolrService solrService;
 
-    public List<StudyTag> findByIds(List<Long> ids){
+    public List<StudyTag> findByIds(List<Long> ids) {
         return IterableUtils.toList(repository.findAllById(ids));
     }
 

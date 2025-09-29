@@ -15,12 +15,12 @@ public abstract class DatasetProcessingDecorator implements DatasetProcessingMap
     @Override
     public DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing) {
 
-        if ( processing == null ) {
+        if (processing == null) {
             return null;
         }
 
         DatasetProcessingDTO dto = delegate.datasetProcessingToDatasetProcessingDTO(processing);
-        if(processing.getParent() != null){
+        if (processing.getParent() != null) {
             dto.setParentId(processing.getParent().getId());
         }
         return dto;

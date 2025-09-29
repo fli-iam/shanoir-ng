@@ -25,7 +25,7 @@ public enum DicomTagType {
 	String, Long, Float, Double, Integer, Binary, Date, FloatArray, IntArray;
 	
 	public static DicomTagType valueOf(VR vr, VM vm) {
-		if (	   vr.equals(VR.AE)
+		if (vr.equals(VR.AE)
 				|| vr.equals(VR.AS) // Age special format
 				|| vr.equals(VR.CS)
 				|| vr.equals(VR.LO)

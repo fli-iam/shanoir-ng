@@ -11,7 +11,7 @@ public class SubjectTagPrimaryKey implements Serializable {
 
 	private Tag tag;
 
-    public SubjectTagPrimaryKey() {} 
+    public SubjectTagPrimaryKey() { } 
 
     public SubjectTagPrimaryKey(Subject subject, Tag tag) {
 		super();
@@ -28,8 +28,8 @@ public class SubjectTagPrimaryKey implements Serializable {
 			return false;
 		}
 		SubjectTagPrimaryKey primaryKey = (SubjectTagPrimaryKey) o;
-		return Objects.equals(subject, primaryKey.subject) &&
-			Objects.equals(tag, primaryKey.tag);
+		return Objects.equals(subject, primaryKey.subject)
+			&& Objects.equals(tag, primaryKey.tag);
 	}
 
 	@Override
