@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
@@ -202,7 +203,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteNiftisFromStudy(long studyId) {
-		this.datasetService.deleteNiftis(studyId);
+		datasetService.deleteNiftis(studyId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -369,7 +370,7 @@ public class DatasetApiController implements DatasetApi {
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
 		}
 	}
 	
