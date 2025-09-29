@@ -785,7 +785,7 @@ public class DatasetSecurityService {
 				}
 			}
 		}
-    	list.removeif(a -> dsRemove.contains(a.getId()));
+    	list.removeIf(a -> dsRemove.contains(a.getId()));
     	return true;
     }
     
@@ -861,7 +861,7 @@ public class DatasetSecurityService {
 				examsToRemove.add(exam.getId());
 			}
 		}
-    	list.removeif(e -> examsToRemove.contains(e.getId()));
+    	list.removeIf(e -> examsToRemove.contains(e.getId()));
     	return true;
 	}
 
@@ -926,7 +926,7 @@ public class DatasetSecurityService {
             studyIds.add(sc.getStudyId());
         });
         Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-        list.removeif((Card sc) -> !checkedIds.contains(sc.getStudyId()));
+        list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
         
         return true;
     }

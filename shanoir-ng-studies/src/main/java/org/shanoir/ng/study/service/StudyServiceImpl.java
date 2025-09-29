@@ -396,11 +396,11 @@ public class StudyServiceImpl implements StudyService {
 
 
 		if (studyDb.getTags() != null) {
-			studyDb.getTags().removeif(tag -> tagsToDelete.contains(tag.getId()));
+			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
 		}
 		if (studyDb.getStudyTags() != null) {
-			studyDb.getStudyTags().removeif(tag -> studyTagsToDelete.contains(tag.getId()));
+			studyDb.getStudyTags().removeIf(tag -> studyTagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
 		}
 

@@ -139,7 +139,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         List<DatasetProcessing> toDelete = new ArrayList<>();
 
         for (DatasetProcessing processing : processings) {
-            processing.getInputDatasets().removeif(ds -> ds.getId().equals(datasetId));
+            processing.getInputDatasets().removeIf(ds -> ds.getId().equals(datasetId));
             if (processing.getInputDatasets().isEmpty()) {
                 // If processing is no more linked to a dataset, delete it
                 toDelete.add(processing);

@@ -369,7 +369,7 @@ public class SubjectServiceImpl implements SubjectService {
 				: sSNew.getSubjectStudyTags().stream()
 					.map(sst -> sst.getTag().getId())
 					.collect(Collectors.toSet());
-		subjectStudyTagsOld.removeif(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
+		subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
 		if (sSNew.getSubjectStudyTags() != null) {
 			for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
 				boolean alreadyExists = subjectStudyTagsOld.stream()
