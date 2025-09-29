@@ -6,14 +6,12 @@ import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepo
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 import org.shanoir.ng.vip.executionMonitoring.dto.mapper.ExecutionMonitoringMapper;
-import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionTrackingServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 
 import java.util.List;
 import java.util.Optional;

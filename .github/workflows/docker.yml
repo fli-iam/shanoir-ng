@@ -47,6 +47,8 @@ jobs:
     permissions:
       packages: write
       contents: read
+    # mitigation for the random freezes when pushing images (see #2992)
+    timeout-minutes: 15
     steps:
 
       - name: Check out the repo
@@ -151,4 +153,5 @@ jobs:
           files: |
             docker-compose-dev.yml
             docker-bake.json
+          provenance: mode=min  # production builds fail in the default mode (max)
           push: true
