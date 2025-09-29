@@ -24,8 +24,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class PathologyModelRepositoryImpl implements PathologyModelRepositoryCustom{
-
+public class PathologyModelRepositoryImpl implements PathologyModelRepositoryCustom {
 	@PersistenceContext
     private EntityManager em;
 	

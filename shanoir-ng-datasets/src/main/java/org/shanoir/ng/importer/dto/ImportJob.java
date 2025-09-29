@@ -246,7 +246,7 @@ public class ImportJob implements Serializable {
     }
 
     public Serie getFirstSerie() {
-        if ( getPatients() == null || getPatients().size() == 0
+        if (getPatients() == null || getPatients().size() == 0
                 || getPatients().get(0) == null
                 || getPatients().get(0).getStudies() == null || getPatients().get(0).getStudies().size() == 0
                 || getPatients().get(0).getStudies().get(0) == null
@@ -258,7 +258,7 @@ public class ImportJob implements Serializable {
     }
 
     public Study getFirstStudy() {
-        if ( getPatients() == null
+        if (getPatients() == null
                 || getPatients().get(0) == null
                 || getPatients().get(0).getStudies() == null) {
             return null;        

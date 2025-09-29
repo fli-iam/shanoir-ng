@@ -137,7 +137,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
 			
 			initKeycloakAdminClient();
-			if(!StringUtils.isBlank(vipSrvEmail)){
+			if (!StringUtils.isBlank(vipSrvEmail)) {
 				this.setVIPServiceAccountEmail();
 			}
 
@@ -163,7 +163,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	private void initKeycloakAdminClient() {
 
-		if(this.keycloak != null){
+		if (this.keycloak != null) {
 			return;
 		}
 
@@ -230,14 +230,14 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	 *
 	 * See service-account.user.* application properties
 	 */
-	private void setVIPServiceAccountEmail(){
+	private void setVIPServiceAccountEmail() {
 
 		final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
 		if (userRepresentationList == null || userRepresentationList.isEmpty()) {
 			LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
 			return;
 		}
-		if(userRepresentationList.size() > 1){
+		if (userRepresentationList.size() > 1) {
 			LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
 			return;
 		}

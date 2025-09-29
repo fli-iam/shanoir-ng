@@ -45,7 +45,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
-    @Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
     public void clearAcquisitionIdToSeriesInstanceUIDCache() {
         acquisitionUIDToSeriesInstanceUIDCache.clear();
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");

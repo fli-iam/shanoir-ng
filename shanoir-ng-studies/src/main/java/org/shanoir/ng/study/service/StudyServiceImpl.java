@@ -351,7 +351,7 @@ public class StudyServiceImpl implements StudyService {
 			List<Subject> removed = new ArrayList<Subject>();
 
 			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
-				if(!updatedIds.contains(subjectStudyDb.getId())) {
+				if (!updatedIds.contains(subjectStudyDb.getId())) {
 					Subject sub = subjectStudyDb.getSubject();
 					removed.add(sub);
 
@@ -396,11 +396,11 @@ public class StudyServiceImpl implements StudyService {
 
 
 		if (studyDb.getTags() != null) {
-			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
+			studyDb.getTags().removeif(tag -> tagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
 		}
 		if (studyDb.getStudyTags() != null) {
-			studyDb.getStudyTags().removeIf(tag -> studyTagsToDelete.contains(tag.getId()));
+			studyDb.getStudyTags().removeif(tag -> studyTagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
 		}
 
@@ -607,7 +607,7 @@ public class StudyServiceImpl implements StudyService {
 						dataUserAgreementService.update(duaSigning);
 					}
 					this.archiveDuaFile(studyDb);
-				} else if (deleteDua){
+				} else if (deleteDua) {
 					// existing DUA removed from study
 					this.archiveDuaFile(studyDb);
 
@@ -821,13 +821,13 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId){
+	public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId) {
 		StudyStorageVolumeDTO dto;
 		try {
 			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
-			if(dtoAsString != null && !dtoAsString.isEmpty()){
+			if (dtoAsString != null && !dtoAsString.isEmpty()) {
 				dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
-			}else{
+			} else {
 				dto = new StudyStorageVolumeDTO();
 			}
 		} catch (AmqpException | JsonProcessingException e) {
@@ -846,9 +846,9 @@ public class StudyServiceImpl implements StudyService {
 		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
 		try {
 			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
-			if(resultAsString != null && !resultAsString.isEmpty()){
-				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() {});
-			}else{
+			if (resultAsString != null && !resultAsString.isEmpty()) {
+				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() { });
+			} else {
 				return new HashMap<>();
 			}
 		} catch (AmqpException | JsonProcessingException e) {
@@ -856,8 +856,8 @@ public class StudyServiceImpl implements StudyService {
 			return null;
 		}
 
-		this.studyRepository.findAllById(studyIds).forEach( study -> {
-			if(!detailedStorageVolumes.containsKey(study.getId())) {
+		this.studyRepository.findAllById(studyIds).forEach(study -> {
+			if (!detailedStorageVolumes.containsKey(study.getId())) {
 				return;
 			}
 			Long filesSize = this.getStudyFilesSize(study);
@@ -870,13 +870,13 @@ public class StudyServiceImpl implements StudyService {
 		return detailedStorageVolumes;
 	}
 
-	private long getStudyFilesSize(Long studyId){
+	private long getStudyFilesSize(Long studyId) {
 		Optional<Study> study = this.studyRepository.findById(studyId);
 		return study.map(this::getStudyFilesSize).orElse(0L);
 
 	}
 
-	private long getStudyFilesSize(Study study){
+	private long getStudyFilesSize(Study study) {
 
 		List<String> paths = Stream.of(study.getDataUserAgreementPaths(), study.getProtocolFilePaths())
 				.flatMap(Collection::stream)
@@ -886,7 +886,7 @@ public class StudyServiceImpl implements StudyService {
 
 		for (String path : paths) {
 			File f = new File(this.getStudyFilePath(study.getId(), path));
-			if(f.exists()){
+			if (f.exists()) {
 				size += f.length();
 			}
 		}

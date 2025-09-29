@@ -73,13 +73,13 @@ public class QualityService {
     }
 
     public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
-        if(importJob.getQualityTag() == null) {
+        if (importJob.getQualityTag() == null) {
             return new QualityCardResult();
         }
         QualityCardResult qualityCardResult = new QualityCardResult();
         QualityCardResultEntry qualityCardResultEntry = new QualityCardResultEntry();
         qualityCardResultEntry.setTagSet(importJob.getQualityTag());
-        qualityCardResultEntry.setMessage("Tag "+ importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
+        qualityCardResultEntry.setMessage("Tag " + importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
         qualityCardResult.add(qualityCardResultEntry);
         return qualityCardResult;
     }

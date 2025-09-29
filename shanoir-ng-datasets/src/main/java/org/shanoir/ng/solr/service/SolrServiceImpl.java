@@ -86,11 +86,11 @@ public class SolrServiceImpl implements SolrService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SolrServiceImpl.class);
 
-	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+	public void addToIndex(final ShanoirSolrDocument document) throws SolrServerException, IOException {
 		solrJWrapper.addToIndex(document);
 	}
 
-	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+	public void addAllToIndex(final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
 		solrJWrapper.addAllToIndex(documents);
 	}
 
@@ -147,7 +147,7 @@ public class SolrServiceImpl implements SolrService {
     }
 
 	@Transactional
-	public void indexDatasets(List<Long> datasetIds){
+	public void indexDatasets(List<Long> datasetIds) {
 		try {
 			List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
 			Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(datasetIds);
@@ -158,7 +158,7 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-	public void indexDataset(Long datasetId){
+	public void indexDataset(Long datasetId) {
 		try {
 			ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 			if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
@@ -246,7 +246,7 @@ public class SolrServiceImpl implements SolrService {
 		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
 		Map<Long, List<String>> studiesCenter = new HashMap<>();
 		List<Center> centers = Utils.toList(centerRepository.findAll());
-		for(StudyUser su : studyUsers) {
+		for (StudyUser su : studyUsers) {
 			if (su.isConfirmed()) {
 				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
 			}
@@ -318,7 +318,7 @@ public class SolrServiceImpl implements SolrService {
 	 */
 	private void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
 		indexDocumentsInSolr(documents, tags);
-		if(Objects.equals(1f, event.getProgress())){
+		if (Objects.equals(1f, event.getProgress())) {
 			eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
 		} else {
 			eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
@@ -337,7 +337,7 @@ public class SolrServiceImpl implements SolrService {
 			eventService.publishEvent(event, "Fetching data to index...", 0.2f);
 			tags.putAll(shanoirMetadataRepository.findAllTags(null));
 			eventService.publishEvent(event, "Fetching data to index...", 0.3f);
-		} catch(Exception e){
+		} catch (Exception e) {
 			LOG.error("Error while fetching data to index.", e);
 			eventService.publishErrorEvent(event, "Error while fetching data to index : " + e.getMessage());
 			throw e;
@@ -374,7 +374,7 @@ public class SolrServiceImpl implements SolrService {
 			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
 			solrDocuments.add(doc);
 		}
-		if(!solrDocuments.isEmpty()){
+		if (!solrDocuments.isEmpty()) {
 			solrJWrapper.addAllToIndex(solrDocuments);
 		}
 	}

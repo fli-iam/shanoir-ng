@@ -68,7 +68,7 @@ public class StudyCard extends HalEntity implements Card {
     private Long studyId;
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="study_card_id")
+    @JoinColumn(name = "study_card_id")
     private List<StudyCardRule<?>> rules;
     
     private Long lastEditTimestamp;
@@ -156,9 +156,9 @@ public class StudyCard extends HalEntity implements Card {
                         Attributes attributes;
                         if (String.class.equals(dicomAttributes.getParametrizedType())) {
                             // @SuppressWarnings("unchecked") doesn't work ...
-                            attributes = ((AcquisitionAttributes<String>)dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                            attributes = ((AcquisitionAttributes<String>) dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
                         } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
-                            attributes = ((AcquisitionAttributes<Long>)dicomAttributes).getDatasetAttributes(dataset.getId());
+                            attributes = ((AcquisitionAttributes<Long>) dicomAttributes).getDatasetAttributes(dataset.getId());
                         } else {
                             throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
                         }

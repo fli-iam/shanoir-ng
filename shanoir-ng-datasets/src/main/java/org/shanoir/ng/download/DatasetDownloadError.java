@@ -22,11 +22,11 @@ public class DatasetDownloadError {
     public static final String PARTIAL_FAILURE = "PARTIAL_FAILURE";
     public static final String ERROR = "ERROR";
 
-    private List<String> messages= new ArrayList<>();
+    private List<String> messages = new ArrayList<>();
 
     private String status;
 
-    public DatasetDownloadError(){
+    public DatasetDownloadError() {
     }
 
     public DatasetDownloadError(String message, String status) {

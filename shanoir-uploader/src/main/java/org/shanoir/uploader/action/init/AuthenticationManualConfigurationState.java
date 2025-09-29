@@ -23,7 +23,7 @@ public class AuthenticationManualConfigurationState implements State {
 	public LoginConfigurationPanel loginPanel;
 
 	public void load(StartupStateContext context) {
-		if(ShUpConfig.username == null) {
+		if (ShUpConfig.username == null) {
 			ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
 			shUpStartupDialog.showLoginForm();
 			context.setState(authenticationConfigurationState);

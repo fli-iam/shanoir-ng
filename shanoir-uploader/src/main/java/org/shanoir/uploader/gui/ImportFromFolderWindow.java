@@ -218,7 +218,7 @@ public class ImportFromFolderWindow extends JFrame {
         uploadButton.addActionListener(importListener);
 
         // center the frame
-        // frame.setLocationRelativeTo( null );
+        // frame.setLocationRelativeTo(null );
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
         int windowWidth = 1600;
         int windowHeight = 700;

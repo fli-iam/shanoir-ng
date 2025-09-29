@@ -101,7 +101,7 @@ public class SubjectApiController implements SubjectApi {
 	@Transactional
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
 		List<Subject> subjects = new ArrayList<>();
-		if(preclinical && clinical){
+		if (preclinical && clinical) {
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
 			subjects = subjectService.findByPreclinical(true);
@@ -176,7 +176,7 @@ public class SubjectApiController implements SubjectApi {
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+			@Parameter(description = "preclinical", required = false) @RequestParam(value = "preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);

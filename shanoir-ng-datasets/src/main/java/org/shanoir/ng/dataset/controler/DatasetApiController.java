@@ -181,7 +181,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
-			@Parameter(description = "ids of the datasets", required=true) @Valid
+			@Parameter(description = "ids of the datasets", required = true) @Valid
 			@RequestBody List<Long> datasetIds)
 			throws RestServiceException {
 		try {
@@ -265,7 +265,7 @@ public class DatasetApiController implements DatasetApi {
   	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
 		List<Dataset> datasets;
-		if(output){
+		if (output) {
 			datasets = datasetService.findDatasetAndOutputByExaminationId(examinationId);
 		} else {
 			datasets = datasetService.findByExaminationId(examinationId);
@@ -334,10 +334,10 @@ public class DatasetApiController implements DatasetApi {
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 
 		List<Dataset> datasets = new ArrayList<>();
-		for(Examination examination : examinations) {
+		for (Examination examination : examinations) {
 			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-				for(Dataset dataset : datasetAcquisition.getDatasets()) {
+			for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
 					datasets.add(dataset);
 				}
 			}
@@ -373,7 +373,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
-	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
+	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create", required = true)  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
 		processedDatasetImporterService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
@@ -382,10 +382,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByDatasetIds(
-			@Parameter(description = "ids of the datasets", required=true) @Valid
+			@Parameter(description = "ids of the datasets", required = true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue=DCM) String format,
+			@RequestParam(value = "format", required = false, defaultValue = DCM) String format,
 			@Parameter(description = "If nifti, decide converter to use") @Valid
 			@RequestParam(value = "converterId", required = false) Long converterId,
 			HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
@@ -409,10 +409,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByStudyId(
-			@Parameter(description = "id of the study", required=true) @Valid
+			@Parameter(description = "id of the study", required = true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue = DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
 			throw new RestServiceException(
@@ -424,7 +424,7 @@ public class DatasetApiController implements DatasetApi {
 
 		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets." ));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
 		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
@@ -432,10 +432,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByExaminationId(
-			@Parameter(description = "id of the examination", required=true) @Valid
+			@Parameter(description = "id of the examination", required = true) @Valid
 			@RequestParam(value = "examinationId", required = true) Long examinationId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue = DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (examinationId == null) {
 			throw new RestServiceException(
@@ -456,10 +456,10 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
 	public void massiveDownloadByAcquisitionId(
-			@Parameter(description = "id of the acquisition", required=true) @Valid
+			@Parameter(description = "id of the acquisition", required = true) @Valid
 			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue = "dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		
 		// STEP 0: Check data integrity
 		if (acquisitionId == null) {
@@ -548,13 +548,13 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> downloadStatistics(
-			@Parameter(description = "Study name including regular expression", required=false) @Valid
+			@Parameter(description = "Study name including regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
-			@Parameter(description = "Study name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Study name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
-			@Parameter(description = "Subject name including regular expression", required=false) @Valid
+			@Parameter(description = "Subject name including regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
-			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Subject name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws IOException {
 
 		String params = "";
@@ -593,7 +593,7 @@ public class DatasetApiController implements DatasetApi {
 			ByteArrayResource resource = new ByteArrayResource(data);
 
 			return ResponseEntity.ok()
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename = " + zipFile.getName())
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.contentLength(data.length)
 					.body(resource);
@@ -603,7 +603,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
 	public void deleteStats() {
 		try {
 			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);

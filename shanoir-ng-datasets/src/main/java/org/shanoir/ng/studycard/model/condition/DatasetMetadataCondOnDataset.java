@@ -32,7 +32,7 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("DatasetMetadataCondOnDataset")
 @JsonTypeName("DatasetMetadataCondOnDataset")
-public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset>{
+public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
 	
@@ -60,7 +60,7 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
             // get all possible values, that can fulfill the condition
             for (String value : this.getValues()) {
                 if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                    LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
+                    LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
                     return true;
                 } 
             }

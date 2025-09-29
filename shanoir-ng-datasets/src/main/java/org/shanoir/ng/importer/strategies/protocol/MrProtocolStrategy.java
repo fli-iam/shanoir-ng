@@ -234,7 +234,7 @@ public class MrProtocolStrategy {
 	    StringBuilder b = new StringBuilder("All About ");
 	    b.append(mrProtocol.getClass().getName());
 	    b.append("\nFields:\n");
-	    for(Field field : fields) {
+	    for (Field field : fields) {
 		    field.setAccessible(true);
 	        b.append(field.getName());
 	        b.append(";");
@@ -421,7 +421,7 @@ public class MrProtocolStrategy {
 
 	/**
 	 * acquisition_resolution_x : Simple copy of the second value (frequency
-	 * columns) or the fourth value (phase columns) ; Siemens, GE : 2nd ; Philips :
+	 * columns) or the fourth value (phase columns); Siemens, GE : 2nd; Philips :
 	 * 4th.
 	 *
 	 * acquisition_resolution_y : Simple copy of the first value (frequency row) or

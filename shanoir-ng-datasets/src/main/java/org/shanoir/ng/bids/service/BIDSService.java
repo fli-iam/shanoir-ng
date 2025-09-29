@@ -22,7 +22,7 @@ public interface BIDSService {
 	 * @param studyName the study name for which we create the BIDS folder
 	 * @return the folder File named [study_id]_[study_name]
 	 */
-	public File exportAsBids(Long studyId, String studyName) throws IOException ;
+	public File exportAsBids(Long studyId, String studyName) throws IOException;
 
 	/**
 	 * Deletes the folder of a given study to update / delete

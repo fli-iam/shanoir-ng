@@ -38,7 +38,7 @@ public class PacsConfigurationState implements State {
 		/**
 		 * Test if shanoir is able to contact the configured pacs in dicom_server.properties
 		 */
-		if (shUpOnloadConfig.getDicomServerClient().echoDicomServer()){
+		if (shUpOnloadConfig.getDicomServerClient().echoDicomServer()) {
 			context.setState(readyState);
 		} else {
 			context.setState(pacsManualConfigurationState);

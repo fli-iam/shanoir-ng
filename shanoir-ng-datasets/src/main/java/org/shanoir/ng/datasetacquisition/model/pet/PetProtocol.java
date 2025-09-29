@@ -150,7 +150,7 @@ public class PetProtocol extends AbstractEntity {
 	@NotNull
 	private Double voxelSizeZ;
 
-	public PetProtocol() {}
+	public PetProtocol() { }
 
 	public PetProtocol(PetProtocol other, PetDatasetAcquisition acq) {
 		this.attenuationCorrectionMethod = other.getAttenuationCorrectionMethod();

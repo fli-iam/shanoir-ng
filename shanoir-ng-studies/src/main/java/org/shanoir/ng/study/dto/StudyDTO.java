@@ -481,7 +481,7 @@ public class StudyDTO {
 	public String toString() {
 		return "StudyDTO [clinical=" + clinical + ", downloadableByDefault=" + downloadableByDefault + ", endDate="
 				+ endDate + ", experimentalGroupsOfSubjects=" + experimentalGroupsOfSubjects + ", id=" + id
-				+ ", name=" + name + ", profile=" + profile + ", nbExaminations="
+				+ ", name = " + name + ", profile=" + profile + ", nbExaminations="
 				+ nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
 				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
 				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList

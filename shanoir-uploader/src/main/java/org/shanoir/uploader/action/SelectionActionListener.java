@@ -168,7 +168,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		LocalDate studyDate = study.getStudyDate();
 		if (studyDate == null) {			
 			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
-			if(mainWindow != null) {
+			if (mainWindow != null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						"Study date could not be used for import: " + study.getStudyDescription(),
 						"Data error",
@@ -180,7 +180,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
 			importJob = ImportUtils.createNewImportJob(patient, study);
-			if(addAllSeries) {
+			if (addAllSeries) {
 				List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
 				for (org.shanoir.ng.importer.model.Study studyOfAllStudies : studies) {
 					// only select concerned study, not all studies
@@ -195,7 +195,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 				}
 				// ignore empty DICOM studies without series
 				// happens when DICOM study with different modality exists in DICOM server
-				if(!importJob.getSelectedSeries().isEmpty()) {
+				if (!importJob.getSelectedSeries().isEmpty()) {
 					importJobs.put(studyInstanceUID, importJob);
 				}
 			} else {

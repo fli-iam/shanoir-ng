@@ -63,7 +63,7 @@ public class QualityCard extends HalEntity implements Card {
 	private boolean toCheckAtImport;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="quality_card_id")
+	@JoinColumn(name = "quality_card_id")
 	private List<QualityExaminationRule> rules;
 
 	/**

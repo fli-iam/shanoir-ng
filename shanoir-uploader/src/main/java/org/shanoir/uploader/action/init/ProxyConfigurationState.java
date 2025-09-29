@@ -42,7 +42,7 @@ public class ProxyConfigurationState implements State {
 			logger.error("Error during proxy test:", e);
 		}
 		logger.info("Proxy test returned following code: " + httpResponseCode);
-		switch (httpResponseCode){
+		switch (httpResponseCode) {
 			case 200 :
 				context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.success"));
 				context.setState(authenticationConfigurationState);

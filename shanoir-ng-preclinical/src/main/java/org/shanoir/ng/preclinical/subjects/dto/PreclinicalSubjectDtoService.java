@@ -57,7 +57,7 @@ public class PreclinicalSubjectDtoService {
     public List<AnimalSubjectDto> getAnimalSubjectDtoListFromAnimalSubjectList(List<AnimalSubject> subjects) {
         List<AnimalSubjectDto> dtos = new ArrayList<>();
 
-        for(AnimalSubject subject : subjects){
+        for (AnimalSubject subject : subjects) {
             dtos.add(this.getAnimalSubjectDtoFromAnimalSubject(subject));
         }
 

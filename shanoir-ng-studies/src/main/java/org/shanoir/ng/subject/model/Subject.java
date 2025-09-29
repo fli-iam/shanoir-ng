@@ -97,7 +97,7 @@ public class Subject extends HalEntity {
 	private Integer manualHemisphericDominance;
 
 	/** Flag to set the subject as pre-clinical subject */
-	@Column(nullable=false)
+	@Column(nullable = false)
 	@ColumnDefault("false")
 	private boolean preclinical;
 	

@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory;
  * @author lvallet
  *
  */
-public class UniquePatientTreeSelectionModel extends DefaultTreeSelectionModel{
-
+public class UniquePatientTreeSelectionModel extends DefaultTreeSelectionModel {
     private static final Logger logger = LoggerFactory.getLogger(UniquePatientTreeSelectionModel.class);
 
     private final JTree tree;

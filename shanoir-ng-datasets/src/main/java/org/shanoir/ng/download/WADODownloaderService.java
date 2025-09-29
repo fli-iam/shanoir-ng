@@ -176,7 +176,7 @@ public class WADODownloaderService {
 		return files;
 	}
 
-	private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID ) {
+	private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
 		String serieDescription = dataset.getUpdatedMetadata().getName();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 		String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
@@ -363,7 +363,7 @@ public class WADODownloaderService {
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		LOG.debug("Download metadata from pacs, url : " + url);
 		ResponseEntity<String> response = restTemplate.exchange(url,
-				HttpMethod.GET, entity,String.class, "1");
+				HttpMethod.GET, entity, String.class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
 			return response.getBody();
 		} else {
@@ -388,7 +388,7 @@ public class WADODownloaderService {
 	 */
 	private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
 			throws IOException, MessagingException {
-		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+		try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
@@ -427,7 +427,7 @@ public class WADODownloaderService {
 	 */
 	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream, boolean isMultipart)
 			throws IOException, MessagingException {
-		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+		try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			// Not multipart
 			if (!isMultipart) {
 				ZipEntry entry = new ZipEntry(name + DCM);

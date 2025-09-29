@@ -30,7 +30,7 @@ public class EquipmentDicom {
 	private String modality;
 	
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public EquipmentDicom() {}
+	public EquipmentDicom() { }
 
 	public EquipmentDicom(String manufacturer, String manufacturerModelName, String modality, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
 		this.manufacturer = manufacturer;
@@ -99,8 +99,8 @@ public class EquipmentDicom {
 
 	@Override
 	public String toString() {
-		return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelName=" + manufacturerModelName
-				+ ", deviceSerialNumber=" + deviceSerialNumber + ", stationName=" + stationName
+		return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelname = " + manufacturerModelName
+				+ ", deviceSerialNumber=" + deviceSerialNumber + ", stationname = " + stationName
 				+ ", modality=" + modality
 				+ ", magneticFieldStrength=" + magneticFieldStrength + "]";
 	}

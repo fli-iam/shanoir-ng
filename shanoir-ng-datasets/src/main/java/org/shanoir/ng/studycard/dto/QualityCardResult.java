@@ -71,7 +71,7 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
     public void removeUnchanged(Study study) {
         if (getUpdatedSubjects() == null) return;
         for (Subject original : study.getSubjectList()) {
-            getUpdatedSubjects().removeIf(updated -> 
+            getUpdatedSubjects().removeif(updated -> 
                     updated.getId().equals(original.getId()) 
                     && updated.getQualityTag() != null
                     && updated.getQualityTag().equals(original.getQualityTag())

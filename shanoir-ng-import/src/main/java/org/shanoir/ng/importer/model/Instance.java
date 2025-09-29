@@ -49,7 +49,7 @@ public class Instance implements Cloneable {
 	@JsonProperty("referencedFileID")
 	private String[] referencedFileID;
 
-	public Instance() {}
+	public Instance() { }
 
 	public Instance(Attributes attributes) {
 		sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);

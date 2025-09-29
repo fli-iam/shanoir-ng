@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> implements Page<T>{
+public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> implements Page<T> {
 
 	private static final long serialVersionUID = 1L;
 

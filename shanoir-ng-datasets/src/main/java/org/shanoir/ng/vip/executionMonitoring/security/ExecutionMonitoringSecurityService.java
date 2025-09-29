@@ -26,7 +26,7 @@ public class ExecutionMonitoringSecurityService {
      * @param rightStr
      * @return boolean
      */
-    public boolean hasRightOnExecutionMonitoringById(Long id, String rightStr){
+    public boolean hasRightOnExecutionMonitoringById(Long id, String rightStr) {
         Optional<ExecutionMonitoring> monitoring = executionMonitoringRepository.findById(id);
         if (monitoring.isPresent()) {
             return hasRightOnExecutionMonitoring(executionMonitoringRepository.findById(id).get(), rightStr);
@@ -42,16 +42,16 @@ public class ExecutionMonitoringSecurityService {
      * @param rightStr
      * @return
      */
-    public List<ExecutionMonitoring> filterExecutionMonitoringList(List<ExecutionMonitoring> executionMonitorings, String rightStr){
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+    public List<ExecutionMonitoring> filterExecutionMonitoringList(List<ExecutionMonitoring> executionMonitorings, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return executionMonitorings;
         } else {
             return executionMonitorings.stream().filter(it -> hasRightOnExecutionMonitoring(it, rightStr)).toList();
         }
     }
 
-    private boolean hasRightOnExecutionMonitoring(ExecutionMonitoring executionMonitoring, String rightStr){
-        if(executionMonitoring.getStudyId() == null){
+    private boolean hasRightOnExecutionMonitoring(ExecutionMonitoring executionMonitoring, String rightStr) {
+        if (executionMonitoring.getStudyId() == null) {
             throw new IllegalArgumentException("Study id cannot be null here.");
         }
         return studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr);

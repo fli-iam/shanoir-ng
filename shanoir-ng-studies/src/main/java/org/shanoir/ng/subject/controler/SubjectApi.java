@@ -160,7 +160,7 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(description = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
+			@Parameter(description = "preclinical", required = false) @RequestParam(value = "preclinical", required = false) String preclinical);
 
 	@Operation(summary = "", description = "If exists, returns the subject corresponding to the given identifier")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),

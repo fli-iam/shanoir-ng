@@ -399,10 +399,10 @@ public class ImportJob implements Serializable {
 				}
 			}
 		}
-		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
-				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
-				",seriesNames=" + seriesNames.toString();
+		return 	"userId=" + userId + ",studyname = " + studyName + ",studyCardId=" + studyCardId + ",type=" + importType
+				+ ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced
+				+ ",subjectname = " + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries
+				+ ",seriesNames=" + seriesNames.toString();
 	}
 
 	@JsonIgnore

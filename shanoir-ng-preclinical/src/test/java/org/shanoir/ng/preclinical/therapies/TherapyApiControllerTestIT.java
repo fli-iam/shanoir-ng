@@ -44,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class TherapyApiControllerTestIT extends KeycloakControllerTestIT {
 	
 	private static final String REQUEST_PATH = "/therapy";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH;
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String REQUEST_PATH_TYPE = "/type/Drug";
 

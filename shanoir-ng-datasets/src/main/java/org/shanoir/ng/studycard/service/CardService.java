@@ -39,6 +39,6 @@ public interface CardService<T extends Card> {
 
 	List<T> search(List<Long> studyIdList);
 	
-	List<T> findByStudy (Long studyId);
+	List<T> findByStudy(Long studyId);
 
 }

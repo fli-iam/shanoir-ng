@@ -8,9 +8,9 @@ import java.util.List;
 @Service
 public class DatasetPropertyMapper {
 
-    public List<DatasetPropertyDTO> datasetPropertiesToDatasetPropertyDTOs(List<DatasetProperty> properties){
+    public List<DatasetPropertyDTO> datasetPropertiesToDatasetPropertyDTOs(List<DatasetProperty> properties) {
         List<DatasetPropertyDTO> dtos = new ArrayList<>();
-        for(DatasetProperty property : properties){
+        for (DatasetProperty property : properties) {
             dtos.add(this.datasetPropertyToDatasetPropertyDTO(property));
         }
         return dtos;

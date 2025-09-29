@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 @ConditionalOnProperty(name = "vip.enabled", havingValue = "true")
-public class VIPUserServiceImpl implements VIPUserService{
+public class VIPUserServiceImpl implements VIPUserService {
     private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
 	/**

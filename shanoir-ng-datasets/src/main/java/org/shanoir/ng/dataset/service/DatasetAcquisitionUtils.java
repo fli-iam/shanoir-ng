@@ -18,7 +18,7 @@ public class DatasetAcquisitionUtils {
 		String type = other.getType();
 		DatasetAcquisition acq = null;
 			
-		switch(type) {
+		switch (type) {
 			case CtDatasetAcquisition.datasetAcquisitionType:
 				acq = new CtDatasetAcquisition(other);
 				break;

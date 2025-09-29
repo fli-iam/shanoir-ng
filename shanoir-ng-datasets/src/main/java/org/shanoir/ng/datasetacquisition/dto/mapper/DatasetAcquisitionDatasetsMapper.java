@@ -37,7 +37,7 @@ import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring", uses = { ExaminationMapper.class, DatasetMapper.class })
 @DecoratedWith(DatasetAcquisitionDatasetsDecorator.class)
-@MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
+@MapperConfig(mappingInheritanceStrategy = MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionDatasetsMapper {
 	
 	List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(

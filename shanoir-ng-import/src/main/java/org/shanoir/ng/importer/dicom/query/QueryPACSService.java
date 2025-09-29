@@ -99,7 +99,7 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
-	public QueryPACSService() {} // for ShUp usage
+	public QueryPACSService() { } // for ShUp usage
 	
 	/**
 	 * Used within microservice MS Import on the server, via PostConstruct.
@@ -363,9 +363,9 @@ public class QueryPACSService {
 		DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
 		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
-		DicomParam[] params = { modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
+		DicomParam[] params = {modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
 			new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate), new DicomParam(Tag.PatientBirthName),
-			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID), patientName, patientID, patientBirthDate };
+			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID), patientName, patientID, patientBirthDate};
 		List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		// list of all corresponding DICOM studies received
 		if (studies != null) {

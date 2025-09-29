@@ -44,7 +44,7 @@ public class FileUtil {
 	public static void dirExistsWithCreate(String dirName) {
 		final File folder = new File(dirName);
 		if (!folder.exists()) {
-			if(!folder.mkdir()) {
+			if (!folder.mkdir()) {
 				logger.error("dirExistsWithCreate: error while creating directory " + dirName);
 			}
 		}
@@ -56,7 +56,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String readableFileSize(long size) {
-	    if(size <= 0) return "0";
+	    if (size <= 0) return "0";
 	    final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
 	    int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
 	    return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];

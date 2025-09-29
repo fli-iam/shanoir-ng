@@ -114,7 +114,7 @@ public class EchoTime extends AbstractEntity {
 		boolean retVal = false;
 		boolean retVal1 = false;
 
-		if (v instanceof EchoTime){
+		if (v instanceof EchoTime) {
 			EchoTime echoTime = (EchoTime) v;
 			retVal = echoTime.getEchoNumber() == this.echoNumber;
 			retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;

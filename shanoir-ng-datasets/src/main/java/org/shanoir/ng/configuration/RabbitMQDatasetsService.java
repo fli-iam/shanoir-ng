@@ -144,7 +144,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(bindings = @QueueBinding(
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+			autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
@@ -163,7 +163,7 @@ public class RabbitMQDatasetsService {
 
 			List<String> errors = studyService.validate(updated, current);
 
-			if(!errors.isEmpty()){
+			if (!errors.isEmpty()) {
 				return errors.get(0);
 			}
 
@@ -171,7 +171,7 @@ public class RabbitMQDatasetsService {
 			
 			try {
 				solrService.updateStudyAsync(current.getId());
-			}catch (Exception e){
+			} catch (Exception e) {
 				LOG.error("Solr update failed for study {}", current.getId(), e);
 			}
 
@@ -220,7 +220,7 @@ public class RabbitMQDatasetsService {
 		subjectIdList.add(received.getId());
 		try {
 			solrService.updateSubjectsAsync(subjectIdList);
-		}catch (Exception e){
+		} catch (Exception e) {
 			LOG.error("Solr update failed for subjects {}", subjectIdList, e);
 		}
 	}
@@ -257,7 +257,7 @@ public class RabbitMQDatasetsService {
 					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + receivedStr + "\"");
 					T entity = repository.save(newOne);
 					return entity;
-				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+				} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
 					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
 				}
 			}
@@ -275,7 +275,7 @@ public class RabbitMQDatasetsService {
 			key = ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
+			autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 			)
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void createDatasetAcquisition(final String studyStr) {
@@ -340,7 +340,7 @@ public class RabbitMQDatasetsService {
 			key = ShanoirEventType.DELETE_STUDY_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+			autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 			)
 	@Transactional
 	public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
@@ -441,7 +441,7 @@ public class RabbitMQDatasetsService {
 					userId,
 					"Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
 					ShanoirEvent.IN_PROGRESS,
-					Float.valueOf(countProgress/countTotal),
+					Float.valueOf(countProgress / countTotal),
 					studyId
 			);
 			event.setReport("");
@@ -474,10 +474,10 @@ public class RabbitMQDatasetsService {
 				}
 			}
 
-			event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n" +
-					countCopy + " were already copied datasets.\n" +
-					countAlreadyExist + " already existed in destination study.\n" +
-					countProcessed + " are processed datasets and cannot be copied.");
+			event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n"
+					+ countCopy + " were already copied datasets.\n"
+					+ countAlreadyExist + " already existed in destination study.\n"
+					+ countProcessed + " are processed datasets and cannot be copied.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);

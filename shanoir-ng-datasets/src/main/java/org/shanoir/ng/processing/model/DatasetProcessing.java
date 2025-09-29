@@ -155,7 +155,7 @@ public class DatasetProcessing extends AbstractEntity {
 	 * @param outputDataset the outputDataset to add
 	 */
 	public void addOutputDataset(Dataset outputDataset) {
-		if(this.outputDatasets == null) {
+		if (this.outputDatasets == null) {
 			this.outputDatasets = new ArrayList<Dataset>();
 		}
 		this.outputDatasets.add(outputDataset);

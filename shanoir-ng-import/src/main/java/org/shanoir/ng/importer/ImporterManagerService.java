@@ -320,7 +320,7 @@ public class ImporterManagerService {
 					queryPACSService.queryCMOVE(studyInstanceUID, serie);
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
-					if(!serieIDFolderDir.exists()) {
+					if (!serieIDFolderDir.exists()) {
 						serieIDFolderDir.mkdirs();
 					} else {
 						throw new ShanoirException("Error while creating serie id folder: folder already exists.");
@@ -385,7 +385,7 @@ public class ImporterManagerService {
 			Image image = imagesIt.next();
 			String path = image.getPath();
 			File file = new File(workFolderPath + File.separator + path);
-			if(file.exists()) {
+			if (file.exists()) {
 				pathsSet.add(file);
 			} else {
 				throw new FileNotFoundException("File not found: " + path);

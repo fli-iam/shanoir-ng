@@ -41,12 +41,12 @@ public class StudyCenter extends AbstractEntity {
 
 	/** Center. */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "center_id", nullable=false)
+	@JoinColumn(name = "center_id", nullable = false)
 	private Center center;
 
 	/** The study. */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "study_id", nullable=false)
+	@JoinColumn(name = "study_id", nullable = false)
 	private Study study;
 	
 	/** The subject name prefix associated to the center. */

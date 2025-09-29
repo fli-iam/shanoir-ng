@@ -78,7 +78,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<String> validate(Study updated, Study current){
+	public List<String> validate(Study updated, Study current) {
 
 		List<String> errors = new ArrayList<>();
 
@@ -86,7 +86,7 @@ public class StudyServiceImpl implements StudyService {
 			return errors;
 		}
 
-		for(StudyTag tag : current.getStudyTags()){
+		for (StudyTag tag : current.getStudyTags()) {
             if (!updated.getStudyTags().contains(tag)
 					&& this.dsRepository.existsByTagsContains(tag)) {
                 errors.add("Study tag [" + tag.getName() + "] can't be removed because it's linked to at least one dataset.");

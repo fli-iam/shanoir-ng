@@ -297,7 +297,7 @@ public class DICOMWebService {
                 	.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
                 	.setBody(fileBody);
             multipartEntityBuilder.addPart(partBuilder.build());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
@@ -322,7 +322,7 @@ public class DICOMWebService {
 			multipartEntityBuilder.addPart(multipartPart);
 			HttpEntity entity = multipartEntityBuilder.build();
 			sendMultipartRequest(entity);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
@@ -331,7 +331,7 @@ public class DICOMWebService {
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
 		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
@@ -390,7 +390,7 @@ public class DICOMWebService {
 		}
 	}
 
-	@Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 */30 * * * *", zone = "Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.info("Scheduled call to delete all rejected instances from pacs.");

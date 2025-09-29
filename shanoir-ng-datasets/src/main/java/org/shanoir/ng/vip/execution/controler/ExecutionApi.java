@@ -38,11 +38,11 @@ import java.io.IOException;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "VIP execution", description="Proxy API for VIP /executions")
+@Tag(name = "VIP execution", description = "Proxy API for VIP /executions")
 @RequestMapping("/vip/execution")
 public interface ExecutionApi {
 
-    @Operation(summary = "Creates an execution inside VIP and return the monitoring id and name", description = "Creates the ressources and path control in shanoir before creating an execution in VIP, then return the running execution monitoring", tags={  })
+    @Operation(summary = "Creates an execution inside VIP and return the monitoring id and name", description = "Creates the ressources and path control in shanoir before creating an execution in VIP, then return the running execution monitoring", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Execution successfully created response."),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -55,7 +55,7 @@ public interface ExecutionApi {
     ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException;
 
-    @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
+    @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -64,9 +64,9 @@ public interface ExecutionApi {
     @RequestMapping(value = "/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
-    @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP execution that has the given identifier in parameter.", tags={  })
+    @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP execution that has the given identifier in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -75,9 +75,9 @@ public interface ExecutionApi {
     @RequestMapping(value = "/{identifier}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getExecutionStderr(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStderr(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
-    @Operation(summary = "Get stdout logs for the given VIP execution identifier", description = "Returns the stdout logs of the VIP execution that has the given identifier in parameter.", tags={  })
+    @Operation(summary = "Get stdout logs for the given VIP execution identifier", description = "Returns the stdout logs of the VIP execution that has the given identifier in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -86,10 +86,10 @@ public interface ExecutionApi {
     @RequestMapping(value = "/{identifier}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getExecutionStdout(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStdout(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
 
-    @Operation(summary = "Get status for the given VIP execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags={  })
+    @Operation(summary = "Get status for the given VIP execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -98,6 +98,6 @@ public interface ExecutionApi {
     @RequestMapping(value = "/{identifier}/status",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
 }

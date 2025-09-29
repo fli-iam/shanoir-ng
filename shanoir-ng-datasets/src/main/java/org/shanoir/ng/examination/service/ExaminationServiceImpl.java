@@ -179,7 +179,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during deletion of examination with id : " + examinationId);
-			LOG.error("Exception e : " , e);
+			LOG.error("Exception e : ", e);
 		}
 	}
 
@@ -293,7 +293,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
 		// Update extra data paths => delete files not present anymore
 		if (examinationDb.getExtraDataFilePathList() != null) {
-			for(String filePath : examinationDb.getExtraDataFilePathList()) {
+			for (String filePath : examinationDb.getExtraDataFilePathList()) {
 				if (!examination.getExtraDataFilePathList().contains(filePath)) {
 					// Delete file
 					String filePathToDelete = getExtraDataFilePath(examinationDb.getId(), filePath);
@@ -335,15 +335,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public Long getExtraDataSizeByStudyId(Long studyId){
+	public Long getExtraDataSizeByStudyId(Long studyId) {
 
 		List<Examination> exams = this.findByStudyId(studyId);
 
 		long size = 0L;
-		for(Examination exam : exams){
-			for(String path : exam.getExtraDataFilePathList()){
+		for (Examination exam : exams) {
+			for (String path : exam.getExtraDataFilePathList()) {
 				File f = new File(this.getExtraDataFilePath(exam.getId(), path));
-				if(f.exists()){
+				if (f.exists()) {
 					size += f.length();
 				}
 			}

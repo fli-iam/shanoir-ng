@@ -41,7 +41,7 @@ public class DatasetsCreatorService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void createDatasets(Patient patient, File importJobDir, ImportJob importJob) throws ShanoirException {
 		File seriesFolderFile = new File(importJobDir.getAbsolutePath() + File.separator + SERIES);
-		if(!seriesFolderFile.exists()) {
+		if (!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
 		} else {
 			throw new ShanoirException("Error while creating series folder: folder already exists.");
@@ -111,7 +111,7 @@ public class DatasetsCreatorService {
 			for (Image image : serie.getImages()) {
 				final int acquisitionNumber = image.getAcquisitionNumber();
 				Set<EchoTime> echoTimes = image.getEchoTimes();
-				double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null : image.getImageOrientationPatient().stream().mapToDouble(i->i).toArray();
+				double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null : image.getImageOrientationPatient().stream().mapToDouble(i -> i).toArray();
 				SerieToDatasetsSeparator seriesToDatasetsSeparator =
 						new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
 				boolean found = false;
@@ -218,7 +218,7 @@ public class DatasetsCreatorService {
 	private File createSerieIDFolderAndMoveFiles(File importJobDir, File seriesFolderFile, Serie serie) throws ShanoirException {
 		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
-		if(!serieIDFolderFile.exists()) {
+		if (!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
 			throw new ShanoirException("Error creating serie: "

@@ -39,7 +39,7 @@ public class ShanoirEventLight {
 
 	/** Creation date, automatically generated **/
 	@CreationTimestamp
-	@Column(updatable=false)
+	@Column(updatable = false)
 	protected Date creationDate;
 
 	/** Last update date, automatically generated **/

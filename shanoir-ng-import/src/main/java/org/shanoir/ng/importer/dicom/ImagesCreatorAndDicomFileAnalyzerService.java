@@ -97,7 +97,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
 					if (!serie.isIgnored()) {
-						if(event != null) {
+						if (event != null) {
 							event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 							eventService.publishEvent(event);
 						}
@@ -133,7 +133,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		serie.setErroneous(true);
 		serie.setErrorMessage(e.getMessage() + ", " + e.toString());
 		serie.setSelected(false);
-		if(event != null){
+		if (event != null) {
 			event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 			eventService.publishEvent(event);
 		}

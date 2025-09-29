@@ -103,7 +103,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setDatasets(genericizedList);
 		
 		// total acquisition time
-		if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
+		if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
 			Double totalAcquisitionTime = null;
 			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
 				Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());

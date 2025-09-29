@@ -369,7 +369,7 @@ public class SubjectServiceImpl implements SubjectService {
 				: sSNew.getSubjectStudyTags().stream()
 					.map(sst -> sst.getTag().getId())
 					.collect(Collectors.toSet());
-		subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
+		subjectStudyTagsOld.removeif(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
 		if (sSNew.getSubjectStudyTags() != null) {
 			for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
 				boolean alreadyExists = subjectStudyTagsOld.stream()
@@ -386,7 +386,7 @@ public class SubjectServiceImpl implements SubjectService {
 		sSOld.setSubjectStudyTags(subjectStudyTagsOld);
 	}
 
-	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException{
+	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.
 					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,

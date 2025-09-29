@@ -58,7 +58,7 @@ public class ShanoirUploader {
 
 	public static void displayAllBeans(ApplicationContext ctx) {
         String[] allBeanNames = ctx.getBeanDefinitionNames();
-        for(String beanName : allBeanNames) {
+        for (String beanName : allBeanNames) {
             System.out.println(beanName);
         }
     }

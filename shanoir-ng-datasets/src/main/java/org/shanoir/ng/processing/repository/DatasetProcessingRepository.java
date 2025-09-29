@@ -51,10 +51,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 * @param examinationIds
 	 * @return
 	 */
-	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
-			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
-			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
-			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
-			"WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
+	@Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+			+ "INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id "
+			+ "INNER JOIN dataset as dataset ON dataset.id=input.dataset_id "
+			+ "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
+			+ "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
 	List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
 }

@@ -88,7 +88,7 @@ public class Study extends IdName {
 		this.relatedDatasets = relatedDatasets;
 	}
 
-	public Study() {}
+	public Study() { }
 
 	/**
 	 * @param id

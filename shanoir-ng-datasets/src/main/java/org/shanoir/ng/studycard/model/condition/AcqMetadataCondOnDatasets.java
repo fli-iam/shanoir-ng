@@ -32,7 +32,7 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("AcqMetadataCondOnDatasets")
 @JsonTypeName("AcqMetadataCondOnDatasets")
-public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset>{
+public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AcqMetadataCondOnDatasets.class);
 	
@@ -62,7 +62,7 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Datase
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {
                     if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                        LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
+                        LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
                         nbOk++;
                         break;
                     } 

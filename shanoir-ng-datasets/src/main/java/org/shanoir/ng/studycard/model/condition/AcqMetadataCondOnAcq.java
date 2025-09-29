@@ -56,7 +56,7 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {
-                    LOG.info("condition fulfilled: acq.name=" + valueFromDb + ", value=" + value);
+                    LOG.info("condition fulfilled: acq.name = " + valueFromDb + ", value=" + value);
                     return true; // as condition values are combined by OR: return if one is true
                 }
             }

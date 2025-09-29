@@ -232,10 +232,10 @@ public class BrainVisionReader {
 					// [<date>]
 					int stringIndex = tmp[0].indexOf('=');
 					String eventType =  tmp[0].substring(stringIndex + 1);
-					String descriptionValue = description? tmp[1] : null;
-					String position = description? tmp[2] : tmp[1];
-					int points = Integer.parseInt(description? tmp[3] : tmp[2]);
-					int chNumber = Integer.parseInt(description? tmp[4] : tmp[3]);
+					String descriptionValue = description ? tmp[1] : null;
+					String position = description ? tmp[2] : tmp[1];
+					int points = Integer.parseInt(description ? tmp[3] : tmp[2]);
+					int chNumber = Integer.parseInt(description ? tmp[4] : tmp[3]);
 					Date date = null;
 					if (description && tmp.length == 6) {
 						date = new SimpleDateFormat("yyyyMMddhhmmssSSSSSS").parse(tmp[5]);
@@ -440,7 +440,7 @@ public class BrainVisionReader {
 					channelToGet.setLowCutoff("DC".equals(tmp[4]) ? 0 : Integer.parseInt(tmp[4]));
 					channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
 					channelToGet.setNotch("Off".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
-					channelIndex ++;
+					channelIndex++;
 				}
 				else if (zeile.startsWith("[Coordinates]")) {
 					hasPosition = true;
