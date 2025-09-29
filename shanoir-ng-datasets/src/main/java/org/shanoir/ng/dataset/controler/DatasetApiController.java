@@ -202,7 +202,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteNiftisFromStudy(long studyId) {
-		this.datasetService.deleteNiftis(studyId);
+		datasetService.deleteNiftis(studyId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -369,7 +369,7 @@ public class DatasetApiController implements DatasetApi {
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
 		}
 	}
 	

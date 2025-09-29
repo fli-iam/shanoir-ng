@@ -25,8 +25,9 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
 
     @Autowired
     private DICOMWebService dicomWebService;
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAsyncService.class);
 

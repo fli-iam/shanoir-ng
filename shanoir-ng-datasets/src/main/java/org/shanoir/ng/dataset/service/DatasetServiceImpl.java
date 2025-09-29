@@ -1,4 +1,4 @@
-/**
+ /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -11,22 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.dataset.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
@@ -34,7 +30,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -51,7 +46,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -62,17 +56,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 
 /**
  * Dataset service implementation.
@@ -92,9 +87,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private ShanoirEventService shanoirEventService;
 
-	@Autowired
-	private SolrService solrService;
-
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
@@ -108,10 +100,11 @@ public class DatasetServiceImpl implements DatasetService {
 	private ObjectMapper objectMapper;
 
 	@Autowired
+	@Lazy
 	private DatasetProcessingService processingService;
 
 	@Autowired
-	private DatasetExpressionRepository datasetExpressionRepository;
+	private DatasetTransactionalServiceImpl datasetTransactionalService;
 
 	@Autowired
 	private DatasetAsyncService datasetAsyncService;
@@ -407,51 +400,46 @@ public class DatasetServiceImpl implements DatasetService {
         return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
 	}
 
-	@Override
+	@Async
 	public void deleteNiftis(Long studyId) {
-		List<Dataset> datasets = this.findByStudyId(studyId);
-		for (Dataset dataset : datasets) {
-			deleteNifti(dataset);
+		List<Long> datasets = repository.findIdsByStudyId(studyId);
+
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_NIFTI_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "Preparing deletion of niftis", ShanoirEvent.IN_PROGRESS, 0, studyId);
+		shanoirEventService.publishEvent(event);
+		try {
+			int total = datasets.size();
+			updateEvent(0f, event, studyId);
+			for (List<Long> partition : ListUtils.partition(datasets, 1000)){
+				datasetTransactionalService.deletePartitionOfNiftis(partition, total, event).get();
+			}
+			updateEvent(1f, event, studyId);
+		} catch (Exception e) {
+			updateEvent(-1f, event, studyId, e);
 		}
 	}
 
-	/**
-	 * Deletes nifti on file server
-	 * @param dataset
-	 */
-	private void deleteNifti(Dataset dataset) {
-		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
+	protected void updateEvent(float progress, ShanoirEvent event) {
+		updateEvent(progress, event, null, null);
+	}
 
-		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
-			DatasetExpression expression = iterex.next();
-			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
-				continue;
-			}
-			for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext(); ) {
-				DatasetFile file = iter.next();
-				URL url = null;
-				try {
-					url = new URL(file.getPath().replaceAll("%20", " "));
-					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
-					if (srcFile.exists()) {
-						LOG.error("Deleting: " + srcFile.getAbsolutePath());
-						FileUtils.delete(srcFile);
-					}
-					// We are forced to detach elements here to be able to delete them from DB
-					file.setDatasetExpression(null);
-					iter.remove();
-				} catch (Exception e) {
-					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
-				}
-			}
-			expression.setDataset(null);
-			iterex.remove();
-			expressionsToDelete.add(expression);
+    protected void updateEvent(float progress, ShanoirEvent event, Long id) {
+		updateEvent(progress, event, id, null);
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void updateEvent(float progress, ShanoirEvent event, Long id, Exception e) {
+		event.setProgress(progress);
+		if (progress == 1f) {
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Deleting nifti for study: " + id + ": Success.");
+		} else if (progress == -1f) {
+			LOG.error("Could not properly delete niftis: ", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Deleting nifti for study: " + id + ": Error. " + e.getMessage());
+		} else if(Objects.nonNull(id)){
+			event.setMessage("Deleting nifti for study: " + id);
 		}
-		if (expressionsToDelete.isEmpty()) {
-			return;
-		}
-		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
+		shanoirEventService.publishEvent(event);
 	}
 
 	/**
