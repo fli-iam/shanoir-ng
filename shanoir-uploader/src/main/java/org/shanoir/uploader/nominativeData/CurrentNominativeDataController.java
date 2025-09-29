@@ -80,8 +80,7 @@ public class CurrentNominativeDataController {
 					for (int i = 0; i < rows; i++) {
 						String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
 						if (uploadState.equals(cuw.finishedUploadState)
-								|| uploadState.equals(cuw.checkOKUploadState)
-								|| uploadState.equals(cuw.errorUploadState)) { // Delete Error uploads as well ?
+								|| uploadState.equals(cuw.checkOKUploadState)) {
 							DeleteDirectory dt = new DeleteDirectory();
 							dt.delete((String) model.getValueAt(i, 0));
 							uploadsToDelete = true;
@@ -119,7 +118,8 @@ public class CurrentNominativeDataController {
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.checkOKUploadState)
 							|| uploadState.equals(cuw.checkKOUploadState)
-							|| uploadState.equals(cuw.readyUploadState)) {
+							|| uploadState.equals(cuw.readyUploadState)
+							|| uploadState.equals(cuw.errorUploadState)) {
 						try {
 							showDeleteConfirmationDialog(workFolderFilePath, cuw, modelRow);
 						} catch (IOException eIO) {

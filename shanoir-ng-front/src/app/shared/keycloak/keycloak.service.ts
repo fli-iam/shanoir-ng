@@ -41,12 +41,7 @@ export class KeycloakService {
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
-    static init(): Promise<any> {
-
-        if (window.location.href.includes('/account-request')) {
-            return Promise.resolve();
-        }
-
+    static init(optionalAuth: boolean = false): Promise<any> {
         const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
@@ -83,8 +78,14 @@ export class KeycloakService {
                         keycloakAuth.onAuthLogout = maybe_redirect_to_login_page;
                         resolve(null);
                     } else {
-                        maybe_redirect_to_login_page();
-                        reject();
+                        if (optionalAuth) {
+                            // some pages can be accessible in a either authenticated or unauthenticated context
+                            KeycloakService.auth.loggedIn = false;
+                            resolve(null);
+                        } else {
+                            maybe_redirect_to_login_page();
+                            reject();
+                        }
                     }
                 })
                 .catch(() => {
