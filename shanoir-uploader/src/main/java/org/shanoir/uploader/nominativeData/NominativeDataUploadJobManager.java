@@ -41,7 +41,7 @@ public class NominativeDataUploadJobManager {
 			+ File.separatorChar
 			+ NOMINATIVE_DATA_JOB_XML);
 		logger.debug("UploadJobManager initialized with file: "
-			+ this.nominativeDataJobFile.getAbsolutePath());
+				+ this.nominativeDataJobFile.getAbsolutePath());
 	}
 	
 	/**
@@ -51,7 +51,7 @@ public class NominativeDataUploadJobManager {
 	public NominativeDataUploadJobManager(final File uploadJobFile) {
 		this.nominativeDataJobFile = uploadJobFile;
 		logger.debug("UploadJobManager initialized with file: "
-			+ this.nominativeDataJobFile.getAbsolutePath());
+				+ this.nominativeDataJobFile.getAbsolutePath());
 	}
 	
 	/* (non-Javadoc)

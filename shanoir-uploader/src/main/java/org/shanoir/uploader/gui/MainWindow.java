@@ -269,7 +269,7 @@ public class MainWindow extends JFrame {
 		});
 
 		JCheckBoxMenuItem pseudonymizeAfterCopyOrDownloadMenuItem = new JCheckBoxMenuItem(
-    		resourceBundle.getString("shanoir.uploader.configurationMenu.pseudonymizeAfterCopyOrDownload"));
+    			resourceBundle.getString("shanoir.uploader.configurationMenu.pseudonymizeAfterCopyOrDownload"));
 		mnConfiguration.add(pseudonymizeAfterCopyOrDownloadMenuItem);
 
 		JMenu mnHelp = new JMenu(resourceBundle.getString("shanoir.uploader.helpMenu"));
@@ -285,9 +285,9 @@ public class MainWindow extends JFrame {
 		});
 
 		JMenu profileSelected = new JMenu("<html>"
-			+ "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
-			+ " "
-			+ "[ " + resourceBundle.getString("shanoir.uploader.accountMenu") + ShUpConfig.username + " ]</html>");
+				+ "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
+				+ " "
+				+ "[ " + resourceBundle.getString("shanoir.uploader.accountMenu") + ShUpConfig.username + " ]</html>");
 		menuBar.add(Box.createRigidArea(new Dimension(200,5)));
 		menuBar.add(profileSelected);
 

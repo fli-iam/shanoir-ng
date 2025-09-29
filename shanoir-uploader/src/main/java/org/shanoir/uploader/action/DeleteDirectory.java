@@ -48,7 +48,7 @@ public class DeleteDirectory {
 			} else {
 
 				// list all the directory contents
-				String files[] = file.list();
+				String[] files = file.list();
 
 				for (String temp : files) {
 					// construct the file structure

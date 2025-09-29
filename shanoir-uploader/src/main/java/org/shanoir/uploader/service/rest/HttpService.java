@@ -199,12 +199,12 @@ public class HttpService {
 		if (url.equals(DEV_LOCAL)) {
 			// Create special SSLContext for local development server
 			sslContextDev = SSLContexts.custom()
-					.loadTrustMaterial(new TrustStrategy() {
-						@Override
-						public boolean isTrusted(final X509Certificate[] chain, final String authType)
-								throws CertificateException {
-							return true;
-						}
+			.loadTrustMaterial(new TrustStrategy() {
+				@Override
+				public boolean isTrusted(final X509Certificate[] chain, final String authType)
+						throws CertificateException {
+					return true;
+				}
 			}).build();
 			logger.info("buildHttpClient: sslContextDev build.");
 		}

@@ -235,8 +235,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		// Exams exist, but maybe not for the study selected
 		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
 			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
-				.filter(e -> e.getStudyId().equals(study.getId()))
-				.collect(Collectors.toList());
+					.filter(e -> e.getStudyId().equals(study.getId()))
+					.collect(Collectors.toList());
 			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 				Examination examination = (Examination) iterator.next();
 				mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination); // I did not achieve to call this from within Lambda

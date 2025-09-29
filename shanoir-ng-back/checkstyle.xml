@@ -179,7 +179,7 @@
     <!-- Checks for common coding problems               -->
     <!-- See https://checkstyle.org/checks/coding/index.html -->
     <!-- <module name="EmptyStatement"/> -->
-    <!-- <module name="EqualsHashCode"/> -->
+    <module name="EqualsHashCode"/>
     <!-- <module name="HiddenField"/> -->
     <!-- <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>

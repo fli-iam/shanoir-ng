@@ -120,7 +120,7 @@ public class ImportDialogOpener {
 								}
 								// If at least one study card is compatible, then study is compatible
 								if (ImportUtils.flagStudyCardCompatible(
-									studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
+										studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
 									compatibleStudyCard = true;
 								}
 							}
@@ -152,15 +152,15 @@ public class ImportDialogOpener {
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
 				if (study.getCompatible() != null
-					&& study.getCompatible()
-					&& !firstCompatibleStudyFound) {
+						&& study.getCompatible()
+						&& !firstCompatibleStudyFound) {
 					importDialog.studyCB.setSelectedItem(study);
 					firstCompatibleStudyFound = true;
 					boolean firstCompatibleStudyCardFound = false;
 					for (StudyCard studyCard : study.getStudyCards()) {
 						if (studyCard.getCompatible() != null
-							&& studyCard.getCompatible()
-							&& !firstCompatibleStudyCardFound) {
+								&& studyCard.getCompatible()
+								&& !firstCompatibleStudyCardFound) {
 							importDialog.studyCardCB.setSelectedItem(studyCard);
 							firstCompatibleStudyCardFound = true;
 						}

@@ -66,9 +66,9 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		for (ImportJob importJob : importJobs.values()) {
 			if (importJob.getSelectedSeries() == null || importJob.getSelectedSeries().isEmpty()) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
-				"No serie selected.",
-				resourceBundle.getString("shanoir.uploader.select.error.title"),
-				JOptionPane.ERROR_MESSAGE);
+						"No serie selected.",
+						resourceBundle.getString("shanoir.uploader.select.error.title"),
+						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}

@@ -102,7 +102,15 @@ public class AcquisitionAttributes<T> {
 		} catch (ClassCastException e) {
 			return false;
 		}
+	}
 
+	public int hashCode() {
+		int hash = 7;
+		for (T id : datasetMap.keySet()) {
+			Attributes attributes = datasetMap.get(id).orElse(null);
+			hash = 31 * hash + (attributes != null ? attributes.hashCode() : 0);
+		}
+		return hash;
 	}
 
 	public Class<?> getParametrizedType() {
