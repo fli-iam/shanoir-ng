@@ -358,8 +358,8 @@ public class DICOMWebService {
 
 	public void rejectDatasetFromPacs(String url) throws ShanoirException {
 		String rejectURL;
-		if (wadoURLHandler.isWADO_URI(url)) {
-			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
+		if (wadoURLHandler.isWadoUri(url)) {
+			rejectURL = wadoURLHandler.convertWadoUriToWadoRs(url) + REJECT_SUFFIX;
 		} else {
 			rejectURL = url + REJECT_SUFFIX;
 		}

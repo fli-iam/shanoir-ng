@@ -31,13 +31,11 @@ import org.shanoir.ng.shared.model.EchoTime;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EchoTimeMapper {
 
-	
-	List<EchoTime> EchoTimeDTOListToEchoTimeList(
+	List<EchoTime> echoTimeDTOListToEchoTimeList(
 			List<org.shanoir.ng.shared.dicom.EchoTime> echoTimeDTOList);
 
-
 	@Mapping(target = "echoTimeValue", source = "echoTime")
-	EchoTime EchoTimeDTOToEchoTime(
+	EchoTime echoTimeDTOToEchoTime(
 			org.shanoir.ng.shared.dicom.EchoTime echoTimes);
 
 }

@@ -18,11 +18,11 @@ public class WADOURLHandler {
 	
 	private static final String CONTENT_TYPE = "&contentType";
 
-	public boolean isWADO_URI(String url) {
+	public boolean isWadoUri(String url) {
 		return url.contains(WADO_URI);
 	}
 	
-	public String convertWADO_URI_TO_WADO_RS(String url) {
+	public String convertWadoUriToWadoRs(String url) {
 		String[] patterns = {
 				"wado\\?requestType=WADO", "rs",
 				"&studyUID=", "/studies/",
@@ -49,7 +49,7 @@ public class WADOURLHandler {
 		String studyInstanceUID = null;
 		String seriesInstanceUID = null;
 		String sopInstanceUID = null;
-		if (isWADO_URI(url)) {
+		if (isWadoUri(url)) {
 			studyInstanceUID = extractUIDPattern(url, "studyUID", "&seriesUID");
 			seriesInstanceUID = extractUIDPattern(url, "seriesUID", "&objectUID");
 			sopInstanceUID = extractUIDPattern(url, "objectUID", url.contains(CONTENT_TYPE) ? CONTENT_TYPE : null);

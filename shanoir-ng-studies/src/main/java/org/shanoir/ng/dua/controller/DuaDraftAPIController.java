@@ -26,7 +26,6 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.exception.EntityFoundException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,13 +57,10 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 	@Autowired
 	private DuaDraftMapper mapper;
 
-	@Autowired
-	private StudyService studyService;
-
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 
-	private static String DUA_VIEW_URL = "/shanoir-ng/dua/view/";
+	private static final String DUA_VIEW_URL = "/shanoir-ng/dua/view/";
 
 
 	@Override
@@ -72,7 +68,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException {
 
-	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
+	    DuaDraft duaEntity = mapper.duaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
 		try {
 			DuaDraft created = duaDraftService.create(duaEntity);
 			if (dua.getEmail() != null) {
@@ -92,7 +88,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 			@Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
 			throws RestServiceException {
 
-		DuaDraft duaEntity = mapper.DuaDraftDTOToDuaDraft(dua);
+		DuaDraft duaEntity = mapper.duaDraftDTOToDuaDraft(dua);
 		duaEntity.setId(duaId);
 		try {
 			duaDraftService.update(duaEntity);

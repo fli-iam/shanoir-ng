@@ -19,22 +19,22 @@ public class DatasetAcquisitionUtils {
 		DatasetAcquisition acq = null;
 			
 		switch (type) {
-			case CtDatasetAcquisition.datasetAcquisitionType:
+			case CtDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new CtDatasetAcquisition(other);
 				break;
-			case MrDatasetAcquisition.datasetAcquisitionType:
+			case MrDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new MrDatasetAcquisition();
 				break;
-			case PetDatasetAcquisition.datasetAcquisitionType:
+			case PetDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new PetDatasetAcquisition(other);
 				break;
-			case EegDatasetAcquisition.datasetAcquisitionType:
+			case EegDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new EegDatasetAcquisition(other);
 				break;
-			case BidsDatasetAcquisition.datasetAcquisitionType:
+			case BidsDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new BidsDatasetAcquisition(other);
 				break;
-			case XaDatasetAcquisition.datasetAcquisitionType:
+			case XaDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new XaDatasetAcquisition(other);
 				break;
 			default:

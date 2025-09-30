@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateTableImportStudyListener implements ItemListener {
 
-    private static Logger logger = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
 
     private final ImportFromTableWindow window;
     

@@ -14,7 +14,7 @@ public interface StudyTagMapper {
 
 	StudyTagDTO studyTagToStudyTagDTO(StudyTag studyTag);
 
-	List<StudyTag> StudyTagDTOListToStudyTagList(List<StudyTagDTO> dtos);
+	List<StudyTag> studyTagDTOListToStudyTagList(List<StudyTagDTO> dtos);
 
-	StudyTag StudyTagDTOToStudyTag(StudyTagDTO dto);
+	StudyTag studyTagDTOToStudyTag(StudyTagDTO dto);
 }

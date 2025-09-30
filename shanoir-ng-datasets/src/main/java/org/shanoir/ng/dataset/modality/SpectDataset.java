@@ -70,7 +70,7 @@ public class SpectDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Spect;
+		return DatasetType.SPECT;
 	}
 
 }

@@ -114,7 +114,7 @@ public class BIDSServiceImpl implements BIDSService {
 			SUBJECT_IDENTIFIER
 	};
 
-	private static final Map<String, String> natureMap;
+	private static final Map<String, String> NATURE_MAP;
 	static {
 		Map<String, String> aMap = new HashMap<>();
 		aMap.put(MrDatasetNature.T1_WEIGHTED_MR_DATASET.name(), "T1w");
@@ -123,7 +123,7 @@ public class BIDSServiceImpl implements BIDSService {
 		aMap.put(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET.name(), "PDw");
 		aMap.put(MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET.name(), "UNIT1");
 		aMap.put(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET.name(), "angio");
-		natureMap = Collections.unmodifiableMap(aMap);
+		NATURE_MAP = Collections.unmodifiableMap(aMap);
 	}
 
 	@Value("${bids-data-folder}")
@@ -486,10 +486,10 @@ public class BIDSServiceImpl implements BIDSService {
 				MrDataset mrDataset = (MrDataset) dataset;
 				if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
 					nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
-					fileName += natureMap.get(nature) + "_";
+					fileName += NATURE_MAP.get(nature) + "_";
 				} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
 					nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
-					fileName += natureMap.get(nature) + "_";
+					fileName += NATURE_MAP.get(nature) + "_";
 				}
 			}
 

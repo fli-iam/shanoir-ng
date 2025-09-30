@@ -84,7 +84,7 @@ public class DatasetRepositoryTest {
 		
 		Dataset result = repository.save(ds); // SAVE AS A DATASET
 		assertTrue(result instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset)result).getMrQualityProcedureType());
+		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) result).getMrQualityProcedureType());
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
@@ -118,17 +118,17 @@ public class DatasetRepositoryTest {
 		Dataset foundedMr1 = all.get(0);
 		assertEquals(mr1Id, foundedMr1.getId());
 		assertTrue(foundedMr1 instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset)foundedMr1).getMrQualityProcedureType());
+		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) foundedMr1).getMrQualityProcedureType());
 		
 		Dataset foundedMr2 = all.get(1);
 		assertEquals(mr2Id, foundedMr2.getId());
 		assertTrue(foundedMr2 instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset)foundedMr2).getMrQualityProcedureType());
+		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset) foundedMr2).getMrQualityProcedureType());
 		
 		Dataset foundedPet1 = all.get(2);
 		assertEquals(pet1Id, foundedPet1.getId());
 		assertTrue(foundedPet1 instanceof PetDataset);
-		assertEquals(DatasetType.Pet, ((PetDataset)foundedPet1).getType());
+		assertEquals(DatasetType.PET, ((PetDataset) foundedPet1).getType());
 	}
 	
 	@Test

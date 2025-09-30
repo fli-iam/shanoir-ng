@@ -68,7 +68,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ImporterManagerService {
 
-	private static Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 	

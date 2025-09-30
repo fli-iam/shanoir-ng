@@ -246,7 +246,7 @@ public class MrDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Mr;
+		return DatasetType.MR;
 	}
 
 	/**

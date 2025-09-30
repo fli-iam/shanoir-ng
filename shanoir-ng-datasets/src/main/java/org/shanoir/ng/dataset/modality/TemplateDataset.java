@@ -70,7 +70,7 @@ public class TemplateDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Template;
+		return DatasetType.TEMPLATE;
 	}
 
 }

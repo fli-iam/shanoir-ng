@@ -54,7 +54,7 @@ public abstract class StudyCardCondition extends AbstractEntity {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 
-    public static String LIST_SEPERATOR = ",";
+    public static final String LIST_SEPERATOR = ",";
 	
 	@ElementCollection 
 	@Column(name = "value")

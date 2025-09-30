@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    private static Logger logger = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
 
     JFileChooser fileChooser;
 

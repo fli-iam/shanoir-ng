@@ -45,7 +45,7 @@ public class EegDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Eeg;
+		return DatasetType.EEG;
 	}
 
 	private float samplingFrequency;

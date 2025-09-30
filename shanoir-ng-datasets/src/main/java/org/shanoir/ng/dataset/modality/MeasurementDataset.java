@@ -18,7 +18,7 @@ public class MeasurementDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Measurement;
+		return DatasetType.MEASUREMENT;
 	}
 
 }

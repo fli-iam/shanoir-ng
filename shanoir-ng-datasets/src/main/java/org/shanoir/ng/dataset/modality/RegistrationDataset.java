@@ -70,7 +70,7 @@ public class RegistrationDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Registration;
+		return DatasetType.REGISTRATION;
 	}
 
 }

@@ -44,55 +44,55 @@ public class DatasetUtils {
 		Dataset dataset = null;
 			
 		switch (type) {
-			case DatasetType.Names.Generic:
+			case DatasetType.Names.GENERIC:
 				dataset = new CalibrationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Ct:
+			case DatasetType.Names.CT:
 				dataset = new CtDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.CT_DATASET);
 				break;
-			case DatasetType.Names.Eeg:
+			case DatasetType.Names.EEG:
 				dataset = new EegDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 				break;
-			case DatasetType.Names.Meg:
+			case DatasetType.Names.MEG:
 				dataset = new MegDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 				break;
-			case DatasetType.Names.Mesh:
+			case DatasetType.Names.MESH:
 				dataset = new MeshDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Mr:
+			case DatasetType.Names.MR:
 				dataset = new MrDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
-			case DatasetType.Names.ParameterQuantification:
+			case DatasetType.Names.PARAMETER_QUANTIFICATION:
 				dataset = new ParameterQuantificationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Pet:
+			case DatasetType.Names.PET:
 				dataset = new PetDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.PET_DATASET);
 				break;
-			case DatasetType.Names.Registration:
+			case DatasetType.Names.REGISTRATION:
 				dataset = new RegistrationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Segmentation:
+			case DatasetType.Names.SEGMENTATION:
 				dataset = new SegmentationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Spect:
+			case DatasetType.Names.SPECT:
 				dataset = new SpectDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.SPECT_DATASET);
 				break;
-			case DatasetType.Names.Statistical:
+			case DatasetType.Names.STATISTICAL:
 				dataset = new StatisticalDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case DatasetType.Names.Template:
+			case DatasetType.Names.TEMPLATE:
 				dataset = new TemplateDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
@@ -100,7 +100,7 @@ public class DatasetUtils {
 				dataset = new BidsDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
-			case DatasetType.Names.Xa:
+			case DatasetType.Names.XA:
 				dataset = new XaDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
 				break;
@@ -117,20 +117,20 @@ public class DatasetUtils {
 		DatasetType type = d.getType();
 	
 		return switch (type) {
-			case Calibration -> new CalibrationDataset(d);
-			case Ct -> new CtDataset(d);
-			case Eeg -> new EegDataset(d);
-			case Meg -> new MegDataset(d);
-			case Mesh -> new MeshDataset(d);
-			case ParameterQuantification -> new ParameterQuantificationDataset(d);
-			case Pet -> new PetDataset(d);
-			case Registration -> new RegistrationDataset(d);
-			case Segmentation -> new SegmentationDataset(d);
-			case Spect -> new SpectDataset(d);
-			case Statistical -> new StatisticalDataset(d);
-			case Template -> new TemplateDataset(d);
+			case CALIBRATION -> new CalibrationDataset(d);
+			case CT -> new CtDataset(d);
+			case EEG -> new EegDataset(d);
+			case MEG -> new MegDataset(d);
+			case MESH -> new MeshDataset(d);
+			case PARAMETER_QUANTIFICATION -> new ParameterQuantificationDataset(d);
+			case PET -> new PetDataset(d);
+			case REGISTRATION -> new RegistrationDataset(d);
+			case SEGMENTATION -> new SegmentationDataset(d);
+			case SPECT -> new SpectDataset(d);
+			case STATISTICAL -> new StatisticalDataset(d);
+			case TEMPLATE -> new TemplateDataset(d);
 			case BIDS -> new BidsDataset(d);
-			case Xa -> new XaDataset(d);
+			case XA -> new XaDataset(d);
 			default -> new GenericDataset(d);
 		};
 	}

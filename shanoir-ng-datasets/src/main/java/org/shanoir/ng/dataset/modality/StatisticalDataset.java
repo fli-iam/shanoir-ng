@@ -41,7 +41,7 @@ public class StatisticalDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Statistical;
+		return DatasetType.STATISTICAL;
 	}
 
 }

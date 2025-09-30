@@ -39,7 +39,7 @@ public class ImportFromFolderWindow extends JFrame {
     public JButton uploadButton;
     public JButton openButton;
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
 
     FolderImport folderImport;
 

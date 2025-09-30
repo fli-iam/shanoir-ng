@@ -23,7 +23,7 @@ public class GenericDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Generic;
+		return DatasetType.GENERIC;
 	}
 
 }

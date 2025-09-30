@@ -21,15 +21,15 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     @Value("${vip-data-folder}")
     private String trackingFilePrefixe;
 
-    private int MAX_LAST_LINES_TO_CHECK = 10;
+    private static final int MAX_LAST_LINES_TO_CHECK = 10;
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTrackingServiceImpl.class);
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
-    public enum execStatus { VALID, SENT }
+    public enum ExecStatus { VALID, SENT }
 
-    public void updateTrackingFile(ExecutionMonitoring executionMonitoring, execStatus execStatus) {
+    public void updateTrackingFile(ExecutionMonitoring executionMonitoring, ExecStatus execStatus) {
         try {
             File trackingFile = new File(getTrackingFilePath(executionMonitoring));
             createTrackingFile(trackingFile);

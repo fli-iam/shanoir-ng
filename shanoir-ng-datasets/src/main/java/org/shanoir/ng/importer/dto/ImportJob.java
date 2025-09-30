@@ -169,8 +169,8 @@ public class ImportJob implements Serializable {
         return studyId;
     }
 
-    public void setStudyId(final Long StudyId) {
-        this.studyId = StudyId;
+    public void setStudyId(final Long studyId) {
+        this.studyId = studyId;
     }
 
     public String getStudyCardName() {
@@ -193,8 +193,8 @@ public class ImportJob implements Serializable {
         return converterId;
     }
 
-    public void setConverterId(Long ConverterId) {
-        this.converterId = ConverterId;
+    public void setConverterId(Long converterId) {
+        this.converterId = converterId;
     }
 
     public String getAnonymisationProfileToUse() {

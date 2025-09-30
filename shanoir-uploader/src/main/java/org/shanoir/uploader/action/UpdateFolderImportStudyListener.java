@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateFolderImportStudyListener implements ItemListener {
 
-    private static Logger logger = LoggerFactory.getLogger(UpdateFolderImportStudyListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpdateFolderImportStudyListener.class);
 
     private final ImportFromFolderWindow window;
     private final ShanoirUploaderServiceClient shanoirUploaderServiceClient;

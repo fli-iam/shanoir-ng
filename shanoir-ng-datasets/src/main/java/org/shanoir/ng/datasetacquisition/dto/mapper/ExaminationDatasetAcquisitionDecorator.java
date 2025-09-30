@@ -81,7 +81,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 			}
 		} else if (datasetAcquisition.getDatasets() != null) {
 			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (!DatasetType.Measurement.equals(dataset.getType())) {
+				if (!DatasetType.MEASUREMENT.equals(dataset.getType())) {
 					final String datasetName = dataset.getName();
 					if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
 						datasetNameSet.add(datasetName);

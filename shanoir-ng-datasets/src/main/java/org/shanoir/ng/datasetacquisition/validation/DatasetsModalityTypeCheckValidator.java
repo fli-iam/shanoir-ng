@@ -43,19 +43,19 @@ public class DatasetsModalityTypeCheckValidator
 		if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Mr))) {
+					if (!(dataset.getType().equals(DatasetType.MR))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof PetDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Pet))) {
+					if (!(dataset.getType().equals(DatasetType.PET))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Ct))) {
+					if (!(dataset.getType().equals(DatasetType.CT))) {
 						return false;
 					}
 				}

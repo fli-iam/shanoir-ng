@@ -27,7 +27,7 @@ public class KeycloakServiceAccountUtils {
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
-    private final String GRANT_TYPE = "client_credentials";
+    private static final String GRANT_TYPE = "client_credentials";
 
     @Value("${service-account.token.uri:'https://shanoir-ng-nginx/auth'}")
     private String serverUrl;

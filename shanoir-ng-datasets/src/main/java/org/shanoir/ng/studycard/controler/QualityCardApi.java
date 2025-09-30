@@ -95,7 +95,7 @@ public interface QualityCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#qualityCard.getStudyId(), 'CAN_ADMINISTRATE'))")
 	ResponseEntity<QualityCard> saveNewQualityCard(
-			@Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard QualityCard,
+			@Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Updates a quality card")

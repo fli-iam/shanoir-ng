@@ -41,7 +41,7 @@ public class MeshDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Mesh;
+		return DatasetType.MESH;
 	}
 
 }

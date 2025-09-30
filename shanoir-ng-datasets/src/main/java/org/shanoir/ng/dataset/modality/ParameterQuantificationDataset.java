@@ -71,7 +71,7 @@ public class ParameterQuantificationDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.ParameterQuantification;
+		return DatasetType.PARAMETER_QUANTIFICATION;
 	}
 
 }

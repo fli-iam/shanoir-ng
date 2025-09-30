@@ -484,11 +484,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		// VR.OD = Other Double String
 	}
 
-	private void anonymizeUID(int tagInt, Attributes attributes, Map<String, String> UIDs) {
+	private void anonymizeUID(int tagInt, Attributes attributes, Map<String, String> uIds) {
 		String value;
-		if (UIDs != null && UIDs.size() != 0
-				&& UIDs.get(attributes.getString(tagInt)) != null) {
-			value = UIDs.get(attributes.getString(tagInt));
+		if (uIds != null && uIds.size() != 0
+				&& uIds.get(attributes.getString(tagInt)) != null) {
+			value = uIds.get(attributes.getString(tagInt));
 			// We log only concerning the studyInstanceUID
 			if (Tag.StudyInstanceUID == tagInt) {
 				LOG.debug("Existing StudyInstanceUID reused: {}", value);
@@ -505,7 +505,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			if (Tag.StudyInstanceUID == tagInt) {
 				LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
 			}
-			UIDs.put(attributes.getString(tagInt), value);
+			uIds.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}

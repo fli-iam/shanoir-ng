@@ -41,7 +41,7 @@ public class SegmentationDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Segmentation;
+		return DatasetType.SEGMENTATION;
 	}
 
 }

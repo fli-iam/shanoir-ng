@@ -94,7 +94,7 @@ public class BrainVisionReader {
 	private int samplingFrequency = 0;
 	private boolean hasPosition;
 
-	private static final List<String> mandatoryFields = getFields();
+	private static final List<String> MANDATORY_FIELDS = getFields();
 
 	private static List<String> getFields() {
 		return ListUtils.unmodifiableList(Arrays.asList("DataFile", "DataFormat", "DataOrientation", "NumberOfChannels", "SamplingInterval", "Channel info", "BinaryFormat"));
@@ -258,7 +258,7 @@ public class BrainVisionReader {
 	private void readHeaderFromVHDR() throws ShanoirImportException {
 		int countChannels = 0;
 		String zeile = null;
-		List<String> entititesInError = new ArrayList<>(mandatoryFields);
+		List<String> entititesInError = new ArrayList<>(MANDATORY_FIELDS);
 
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 			channels = new ArrayList<>();

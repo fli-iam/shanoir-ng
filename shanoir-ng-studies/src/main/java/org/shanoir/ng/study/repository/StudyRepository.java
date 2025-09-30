@@ -53,6 +53,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 		WHERE su.study.id = s.id 
 		AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights) 
 		AND su.confirmed = :confirmed""")
+	
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
 			@Param("userId") Long userId,
 			@Param("studyUserRightId") Integer studyUserRightId,
@@ -75,6 +76,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 
 	List<Study> findByChallengeTrue();
 
+	
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
 
 	@EntityGraph(attributePaths = "tags")

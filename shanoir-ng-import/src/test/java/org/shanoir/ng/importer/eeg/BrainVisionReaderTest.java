@@ -42,14 +42,14 @@ public class BrainVisionReaderTest {
 		assertEquals(1000, channel1.getHighCutoff());
 		assertEquals(0, channel1.getLowCutoff());
 		assertEquals(Float.valueOf(0), Float.valueOf(channel1.getNotch()));
-		assertEquals(Float.valueOf((float)0.5), Float.valueOf(channel1.getResolution()));
+		assertEquals(Float.valueOf((float) 0.5), Float.valueOf(channel1.getResolution()));
 		assertEquals("µV", channel1.getReferenceUnits());
 	
 		// Position parsing
 		// 9.27344073	2.48990783	2.58100338
-		assertEquals(Float.valueOf((float)9.27344073), Float.valueOf(channel1.getX()));
-		assertEquals(Float.valueOf((float)2.48990783), Float.valueOf(channel1.getY()));
-		assertEquals(Float.valueOf((float)2.58100338), Float.valueOf(channel1.getZ()));
+		assertEquals(Float.valueOf((float) 9.27344073), Float.valueOf(channel1.getX()));
+		assertEquals(Float.valueOf((float) 2.48990783), Float.valueOf(channel1.getY()));
+		assertEquals(Float.valueOf((float) 2.58100338), Float.valueOf(channel1.getZ()));
 
 		// Events parsing
 		List<Event> events = reader.getEvents();

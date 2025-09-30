@@ -26,7 +26,7 @@ public class Cardinality {
 
 	boolean isMultiplier; 
 
-	public static Cardinality ONE = new Cardinality(1); 
+	public static final Cardinality ONE = new Cardinality(1); 
 
 	Cardinality(String str) {
 		String strCopy = new String(str);

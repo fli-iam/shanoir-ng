@@ -39,7 +39,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ZipFileImportTest extends AbstractTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ZipFileImportTest.class);
 	
 	private static final String IN_PROGRESS = "IN_PROGRESS";
 
@@ -67,7 +67,7 @@ public class ZipFileImportTest extends AbstractTest {
 		Date studyDateDate = Date.from(studyDateInstant);
 		String examinationComment = dicomStudy.getStudyDescription();
 		Long examinationId = ImportUtils.createExamination(study, subject, studyDateDate,
-			examinationComment, study.getStudyCards().get(0).getCenterId());
+				examinationComment, study.getStudyCards().get(0).getCenterId());
 		return examinationId;
 	}
 
@@ -155,9 +155,9 @@ public class ZipFileImportTest extends AbstractTest {
 		final String randomPatientName = UUID.randomUUID().toString();
 		Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
 		org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
-			null, subject, randomPatientName, ImagedObjectCategory.LIVING_HUMAN_BEING,
-			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
-			SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0).getAcquisitionEquipment());
+				null, subject, randomPatientName, ImagedObjectCategory.LIVING_HUMAN_BEING,
+				HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
+				SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0).getAcquisitionEquipment());
 		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
 		org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
 		subjectForImportJob.setId(subjectREST.getId());
@@ -188,7 +188,7 @@ public class ZipFileImportTest extends AbstractTest {
 		        return shUpClient.uploadDicom(file);
 		    }
 		} catch (Exception e) {
-		    logger.error("Error while reading file: ", e);
+		    LOGGER.error("Error while reading file: ", e);
 		}
 		return null;
 	}

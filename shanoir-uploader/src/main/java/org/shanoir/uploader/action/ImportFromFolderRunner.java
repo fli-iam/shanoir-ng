@@ -41,7 +41,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private static final String DICOMDIR = "DICOMDIR";
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
 
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 

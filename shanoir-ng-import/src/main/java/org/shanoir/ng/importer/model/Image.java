@@ -44,7 +44,7 @@ public class Image {
 	@JsonProperty("imageOrientationPatient")
 	public List<Double> imageOrientationPatient;
 
-	public String SOPInstanceUID;
+	public String sopInstanceUID;
 
 	public String getPath() {
 		return path;
@@ -103,10 +103,10 @@ public class Image {
 	}
 
 	public String getSOPInstanceUID() {
-		return SOPInstanceUID;
+		return sopInstanceUID;
 	}
 
-	public void setSOPInstanceUID(String sOPInstanceUID) {
-		SOPInstanceUID = sOPInstanceUID;
+	public void setSOPInstanceUID(String sopInstanceUID) {
+		this.sopInstanceUID = sopInstanceUID;
 	}
 }

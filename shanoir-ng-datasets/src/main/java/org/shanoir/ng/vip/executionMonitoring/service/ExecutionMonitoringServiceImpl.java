@@ -47,7 +47,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     private long sleepTime;
     private ThreadLocal<Boolean> stop = new ThreadLocal<>();
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringServiceImpl.class);
-    private final String RIGHT_STR = "CAN_SEE_ALL";
+    private static final String RIGHT_STR = "CAN_SEE_ALL";
 
     @Autowired
     private ExecutionMonitoringRepository repository;

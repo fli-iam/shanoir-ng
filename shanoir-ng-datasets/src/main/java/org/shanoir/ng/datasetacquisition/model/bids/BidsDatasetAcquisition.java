@@ -8,7 +8,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("BIDS")
 public class BidsDatasetAcquisition extends DatasetAcquisition {
 
-	public static final String datasetAcquisitionType = "BIDS";
+	public static final String DATASET_ACQUISITION_TYPE = "BIDS";
 	private static final long serialVersionUID = -4654922391836952469L;
 
 	public BidsDatasetAcquisition() {

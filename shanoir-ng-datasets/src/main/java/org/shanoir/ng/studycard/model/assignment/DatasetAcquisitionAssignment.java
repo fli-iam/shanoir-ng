@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @JsonTypeName("DatasetAcquisition")
 public class DatasetAcquisitionAssignment extends StudyCardAssignment<DatasetAcquisition> {
 
-    private static Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionAssignment.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionAssignment.class);
 
     @Override
     public DatasetAcquisitionMetadataField getField() {

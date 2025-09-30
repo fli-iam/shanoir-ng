@@ -197,7 +197,7 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.Generic.name());
+            processedDataset.setDatasetType(DatasetType.GENERIC.name());
             processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());

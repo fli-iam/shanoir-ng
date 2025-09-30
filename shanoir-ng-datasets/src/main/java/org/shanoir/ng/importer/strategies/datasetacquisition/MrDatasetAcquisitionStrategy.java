@@ -65,7 +65,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Autowired
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
-    private static final Map<String, BidsDataType> dataTypeMapping;
+    private static final Map<String, BidsDataType> DATA_TYPE_MAPPING;
     static {
         Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
         aMap.put("ANGIO_TIME", BidsDataType.ANAT);
@@ -78,7 +78,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         aMap.put("T2", BidsDataType.ANAT);
         aMap.put("T2_STAR", BidsDataType.ANAT);
         //TODO: To be completed by an expert
-        dataTypeMapping = Collections.unmodifiableMap(aMap);
+        DATA_TYPE_MAPPING = Collections.unmodifiableMap(aMap);
     }
 	
 	@Override
@@ -120,11 +120,11 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
-		if (imageType != null && dataTypeMapping.get(imageType) != null) {
+		if (imageType != null && DATA_TYPE_MAPPING.get(imageType) != null) {
 			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
 				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
 			}
-			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataTypeMapping.get(imageType));
+			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(DATA_TYPE_MAPPING.get(imageType));
 		}
 		return mrDatasetAcquisition;
 	}

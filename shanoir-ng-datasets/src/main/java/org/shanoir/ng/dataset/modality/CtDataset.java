@@ -50,7 +50,7 @@ public class CtDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Ct;
+		return DatasetType.CT;
 	}
 
 }

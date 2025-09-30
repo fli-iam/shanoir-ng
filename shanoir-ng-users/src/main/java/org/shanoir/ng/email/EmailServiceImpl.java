@@ -113,7 +113,7 @@ public class EmailServiceImpl implements EmailService {
 	@Autowired
 	RabbitTemplate rabbitTemplate;
 
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMM d yyyy");
 
 	@Override
 	public void notifyAccountWillExpire(User user) {
@@ -126,7 +126,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
 			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+			variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
 			final String content = build("notifyAccountWillExpire", variables);
 			messageHelper.setText(content, true);
 		};
@@ -363,7 +363,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
 			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+			variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -380,7 +380,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
 			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+			variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};

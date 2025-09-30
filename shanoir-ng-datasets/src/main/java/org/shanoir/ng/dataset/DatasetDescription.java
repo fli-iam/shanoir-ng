@@ -25,10 +25,10 @@ public class DatasetDescription {
 	private String name;
 	
 	@JsonProperty("BIDSVersion")
-	private String BIDSVersion = "1.6.1";
+	private String bidsVersion = "1.6.1";
 	
 	@JsonProperty("DatasetType")
-	private String DatasetType = "raw";
+	private String datasetType = "raw";
 		
 
 	public String getName() {
@@ -38,7 +38,4 @@ public class DatasetDescription {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
-
 }

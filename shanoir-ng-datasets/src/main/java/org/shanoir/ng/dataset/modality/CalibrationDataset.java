@@ -68,7 +68,7 @@ public class CalibrationDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Calibration;
+		return DatasetType.CALIBRATION;
 	}
 
 }

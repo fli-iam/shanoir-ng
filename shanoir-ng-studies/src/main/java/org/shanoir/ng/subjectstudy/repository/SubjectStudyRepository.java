@@ -38,6 +38,7 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
             + "WHERE ss.study.id = :studyId")
     List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
 
+    
     List<SubjectStudy> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);

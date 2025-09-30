@@ -31,7 +31,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	@Autowired
 	ShanoirEventsService taskService;
 
-    public static final List<UserSseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
+    public static final List<UserSseEmitter> EMITTERS = Collections.synchronizedList(new ArrayList<>());
 
 	@Override
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
@@ -79,8 +79,8 @@ public class AsyncTaskApiController implements AsyncTaskApi {
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
 		long userId = KeycloakUtil.getTokenUserId();
 		UserSseEmitter emitter = new UserSseEmitter(userId);
-		emitters.add(emitter);
-		emitter.onCompletion(() -> emitters.remove(emitter));
+		EMITTERS.add(emitter);
+		emitter.onCompletion(() -> EMITTERS.remove(emitter));
 		return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 }

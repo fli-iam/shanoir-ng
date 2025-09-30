@@ -68,8 +68,8 @@ public class SubjectService {
             }
         }
 		subjectRepository.saveAll(subjectsOld);
-        List<SubjectQualityTagDTO> SubjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectsOld));
-        this.send(SubjectTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
+        List<SubjectQualityTagDTO> subjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectsOld));
+        this.send(subjectTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
 		return Utils.toList(subjectsOld);
 	}
 	
@@ -83,10 +83,10 @@ public class SubjectService {
     private List<SubjectQualityTagDTO> getSubjectTagDTOs(List<Subject> updatedSubjects) {
         List<SubjectQualityTagDTO> dtos = new ArrayList<>();
         if (updatedSubjects != null) {
-            for (Subject Subject : updatedSubjects) {
+            for (Subject subject : updatedSubjects) {
                 SubjectQualityTagDTO dto = new SubjectQualityTagDTO();
-                dto.setSubjectId(Subject.getId());
-                dto.setTag(Subject.getQualityTag());
+                dto.setSubjectId(subject.getId());
+                dto.setTag(subject.getQualityTag());
                 dtos.add(dto);
             }            
         }

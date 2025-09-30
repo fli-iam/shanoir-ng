@@ -43,7 +43,7 @@ public class PetDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Pet;
+		return DatasetType.PET;
 	}
 
 }

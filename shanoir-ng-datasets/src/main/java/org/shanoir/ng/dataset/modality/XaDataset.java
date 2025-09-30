@@ -42,7 +42,7 @@ public class XaDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Xa;
+		return DatasetType.XA;
 	}
 
 }

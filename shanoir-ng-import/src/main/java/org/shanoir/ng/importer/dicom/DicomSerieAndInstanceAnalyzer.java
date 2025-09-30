@@ -32,7 +32,7 @@ public class DicomSerieAndInstanceAnalyzer {
 
     private static final String SEMI_COLON = ";";
 
-    private static final String isSpectroscopy = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
+    private static final String IS_SPECTROSCOPY = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
 
     /**
      * By default raw data storage and sub-types are ignored.
@@ -108,7 +108,7 @@ public class DicomSerieAndInstanceAnalyzer {
             return true;
         }
         if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)) { // before private attribute used by Siemens
-            final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
+            final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = IS_SPECTROSCOPY.split(SEMI_COLON);
             for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
                 final String tag = item.split(DOUBLE_EQUAL)[0];
                 final String value = item.split(DOUBLE_EQUAL)[1];

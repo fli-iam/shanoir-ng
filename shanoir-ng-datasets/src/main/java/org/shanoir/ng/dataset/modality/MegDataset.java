@@ -41,7 +41,7 @@ public class MegDataset extends Dataset {
 
 	@Override
 	public DatasetType getType() {
-		return DatasetType.Meg;
+		return DatasetType.MEG;
 	}
 
 }

@@ -62,7 +62,7 @@ public enum DatasetModalityType {
      */
     XA_DATASET(8);
 
-    private static final String _DATASET = "_DATASET";
+    private static final String DATASET = "_DATASET";
 
     private int id;
 
@@ -102,7 +102,7 @@ public enum DatasetModalityType {
         String cleanedModalityName = modalityName.trim().toUpperCase();
         // Find the matching DatasetModalityType
         for (DatasetModalityType type : DatasetModalityType.values()) {
-            String nameWithoutDataset = type.name().replace(_DATASET, "");
+            String nameWithoutDataset = type.name().replace(DATASET, "");
             if (cleanedModalityName.equals(nameWithoutDataset)) {
                 return type.getId();
             }

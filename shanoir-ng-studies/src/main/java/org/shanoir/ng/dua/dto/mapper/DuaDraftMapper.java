@@ -30,10 +30,10 @@ import org.shanoir.ng.dua.model.DuaDraft;
 public interface DuaDraftMapper {
 
 	@Mapping(target = "id", ignore = true)
-	DuaDraft DuaDraftCreationDTOToDuaDraft(DuaDraftCreationDTO dto);
+	DuaDraft duaDraftCreationDTOToDuaDraft(DuaDraftCreationDTO dto);
 
 	@Mapping(target = "studyId", ignore = true)
-	DuaDraft DuaDraftDTOToDuaDraft(DuaDraftDTO dto);
+	DuaDraft duaDraftDTOToDuaDraft(DuaDraftDTO dto);
 
 	DuaDraftDTO duaDraftToDuaDraftDTO(DuaDraft entity);
 
