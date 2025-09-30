@@ -30,7 +30,6 @@
   Finally, it is worth reading the documentation.
 
 -->
-
 <module name="Checker">
   <!--
       If you set the basedir property below, then all reported file
@@ -95,7 +94,7 @@
   <!--   <property name="headerFile" value="${checkstyle.header.file}"/> -->
   <!--   <property name="fileExtensions" value="java"/> -->
   <!-- </module> -->
-
+  <module name="SuppressWarningsFilter"/>
   <module name="TreeWalker">
 
     <!-- Checks for Javadoc comments.                     -->
@@ -124,17 +123,15 @@
 
     <!-- Checks for Naming Conventions.                  -->
     <!-- See https://checkstyle.org/checks/naming/index.html -->
-    <!-- <module name="ConstantName"/>
+    <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
     <module name="LocalVariableName"/>
     <module name="MemberName"/>
     <module name="MethodName"/>
     <module name="PackageName"/>
-    <module name="MethodName"/>
-    <module name="PackageName"/>
     <module name="ParameterName"/>
     <module name="StaticVariableName"/>
-    <module name="TypeName"/> -->
+    <module name="TypeName"/>
 
     <!-- Checks for imports                              -->
     <!-- See https://checkstyle.org/checks/imports/index.html -->
@@ -211,5 +208,4 @@
     </module>
 
   </module>
-
 </module>
