@@ -4,9 +4,9 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
 /**
- * 
+ *
  * This classed is needed in order to set the proxy.
- * 
+ *
  * @author atouboul
  *
  */

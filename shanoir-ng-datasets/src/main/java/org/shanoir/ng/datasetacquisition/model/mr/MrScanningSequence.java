@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Scanning Sequence.
- * 
+ *
  * @author atouboul
  *
  */
@@ -37,19 +37,19 @@ public enum MrScanningSequence {
 
 	// Echo Planar
 	EP(4),
-	
+
 	// Research Mode
 	RM(5),
 
 	// Spectroscopy
 	S(6),
-	
+
 	// Fast Field Echo (Philips)
 	FFE(7),
-	
+
 	// Could not map correctly
 	UNKNOWN(8);
-	
+
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrScanningSequence.class);
 
@@ -57,7 +57,7 @@ public enum MrScanningSequence {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param id
 	 *            id
 	 */
@@ -67,7 +67,7 @@ public enum MrScanningSequence {
 
 	/**
 	 * Get a Scanning Sequence by its id.
-	 * 
+	 *
 	 * @param id
 	 *            sequence id.
 	 * @return Scanning Sequence.
@@ -83,10 +83,10 @@ public enum MrScanningSequence {
 		}
 		return UNKNOWN;
 	}
-	
+
 	/**
 	 * Get a Scanning Sequence by its name.
-	 * 
+	 *
 	 * @param type
 	 *            sequence id.
 	 * @return Scanning Sequence.
@@ -102,7 +102,7 @@ public enum MrScanningSequence {
 			return UNKNOWN;
 		}
 	}
-	
+
 	/**
 	 * @return the id
 	 */

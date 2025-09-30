@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,30 +18,30 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public class FacetPageableImpl implements FacetPageable {
-	
+
 	private int pageNumber = 1;
-	
+
 	private int pageSize = 20;
 
 	private String filter = null;
-	
+
 	private FacetOrder facetOrder = FacetOrder.COUNT;
-	
-	
+
+
 	public FacetPageableImpl() {
 	}
-	
+
 	public FacetPageableImpl(int pageNumber, int pageSize) {
 		this.pageNumber = pageNumber;
 		this.pageSize = pageSize;
 	}
-	
+
 	public FacetPageableImpl(int pageNumber, int pageSize, String filter, FacetOrder facetOrder) {
 		this.pageNumber = pageNumber;
 		this.pageSize = pageSize;
 		this.filter = filter;
 		this.facetOrder = facetOrder;
-	}	
+	}
 
 	@Override
 	public int getPageNumber() {
@@ -108,11 +108,11 @@ public class FacetPageableImpl implements FacetPageable {
 
 	public void setFacetOrder(FacetOrder facetOrder) {
 		this.facetOrder = facetOrder;
-	}	
-	
+	}
+
 	public void setFacetOrder(String facetOrder) {
 		try {
-			this.facetOrder = FacetOrder.valueOf(facetOrder);			
+			this.facetOrder = FacetOrder.valueOf(facetOrder);
 		} catch (IllegalArgumentException e) { }
 	}
 

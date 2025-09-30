@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,7 +36,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Tests for repository 'dataset'.
- * 
+ *
  * @author msimon
  *
  */
@@ -47,11 +47,11 @@ public class DatasetRepositoryTest {
 
 	@Autowired
 	private DatasetRepository repository;
- 	
+
 	/**
 	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 * 
+	 *
 	 * @throws ShanoirException
 	 */
 	@Test
@@ -63,17 +63,17 @@ public class DatasetRepositoryTest {
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, result.getMrQualityProcedureType());
 		assertNotNull(result.getId());
 		Long id = result.getId();
-		
+
 		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
 	}
-	
+
 	/**
 	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 * 
+	 *
 	 * @throws ShanoirException
 	 */
 	@Test
@@ -81,23 +81,23 @@ public class DatasetRepositoryTest {
 		MrDataset mr = ModelsUtil.createMrDataset();
 		mr.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
 		Dataset ds = mr; // <----------
-		
+
 		Dataset result = repository.save(ds); // SAVE AS A DATASET
 		assertTrue(result instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) result).getMrQualityProcedureType());
 		assertNotNull(result.getId());
 		Long id = result.getId();
-		
+
 		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
 	}
-	
+
 	/**
 	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 * 
+	 *
 	 * @throws ShanoirException
 	 */
 	@Test
@@ -114,27 +114,27 @@ public class DatasetRepositoryTest {
 
 		List<Dataset> all = Utils.toList(repository.findAllById(Arrays.asList(mr1Id, mr2Id, pet1Id)));
 		assertEquals(3, all.size());
-		
+
 		Dataset foundedMr1 = all.get(0);
 		assertEquals(mr1Id, foundedMr1.getId());
 		assertTrue(foundedMr1 instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) foundedMr1).getMrQualityProcedureType());
-		
+
 		Dataset foundedMr2 = all.get(1);
 		assertEquals(mr2Id, foundedMr2.getId());
 		assertTrue(foundedMr2 instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset) foundedMr2).getMrQualityProcedureType());
-		
+
 		Dataset foundedPet1 = all.get(2);
 		assertEquals(pet1Id, foundedPet1.getId());
 		assertTrue(foundedPet1 instanceof PetDataset);
 		assertEquals(DatasetType.PET, ((PetDataset) foundedPet1).getType());
 	}
-	
+
 	@Test
 	public void loadingStrategyTest() throws ShanoirException {
 		assertNotNull(repository.findById(1L).orElse(null).getDatasetAcquisition());
-		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
+		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition());
 	}
-	
+
 }

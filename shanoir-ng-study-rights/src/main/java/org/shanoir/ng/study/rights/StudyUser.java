@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,7 +32,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
 public class StudyUser implements StudyUserInterface {
-	
+
 	@Id
 	private Long id;
 
@@ -41,7 +41,7 @@ public class StudyUser implements StudyUserInterface {
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
-	
+
 	/**
 	 * With the introduction of a Data User Agreement form, a study
 	 * responsible can add an user to a study, but his StudyUser is
@@ -52,14 +52,14 @@ public class StudyUser implements StudyUserInterface {
 
 	/** Study id. */
 	private Long studyId;
-	
+
 	/** User id. */
 	private Long userId;
 
 	/** Type of the relationship. */
 	@ElementCollection
 	private List<Integer> studyUserRights;
-	
+
 	/** User name. Duplicate: master record in ms users. */
 	@NotBlank
 	private String userName;

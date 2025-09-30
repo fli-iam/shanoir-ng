@@ -19,9 +19,9 @@ import java.util.Map;
 /**
  * This implements the DICOMWeb REST-API exposed by Shanoir-NG.
  * For more informations please see:
- * 
+ *
  * https://github.com/fli-iam/shanoir-ng/wiki/DICOMWeb
- * 
+ *
  * @author mkain
  *
  */
@@ -74,7 +74,7 @@ public interface DICOMWebApi {
 	ResponseEntity<String> findSeriesOfStudy(
 			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID, @RequestParam Map<String, String> allParams
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
-	
+
 	@Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found serie/acquisition metadata"),
@@ -102,7 +102,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
 			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Returns a DICOM instance")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instance/dataset"),
@@ -117,7 +117,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
 			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
 		) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Returns a frame of a DICOM instance, of a study and a serie")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
@@ -133,7 +133,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
 			@Parameter(description = "frame", required = true) @PathVariable("frame") String frame
 		) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Returns all DICOM instances/datasets")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
@@ -157,7 +157,7 @@ public interface DICOMWebApi {
 	ResponseEntity<String> findInstancesOfStudy(
 			@Parameter(description = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
 		) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "STOW-RS")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "stored"),

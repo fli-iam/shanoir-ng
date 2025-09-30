@@ -412,35 +412,35 @@ public interface IShanoirConfigBean {
 	 * @return true, if is activated
 	 */
 	boolean isHasTimepointActivated();
-	
+
 	/**
 	 * Check if solr search functionnality is activated or not
 	 *
 	 * @return true or false
 	 * */
 	boolean isHasSolrSearchActivated();
-	
+
 	/**
 	 * Check if IAM Cloud functionnality is activated or not
 	 *
 	 * @return true or false
 	 * */
 	boolean isHasIamCloudActivated();
-	
+
 	/**
 	 * Check if data transfer module is activated or not
 	 *
 	 * @return true or false
 	 * */
 	boolean isHasDataTransferActivated();
-	
+
 	/**
 	 * Check if carmin widget module is activated or not
 	 *
 	 * @return true or false
 	 * */
 	boolean isHasCarminWidgetActivated();
-	
+
 	/**
 	 * Check if is OFSEP or not
 	 *
@@ -454,9 +454,9 @@ public interface IShanoirConfigBean {
 	 * @return true, if is activated
 	 */
 	boolean isWriteDicomStar();
-	
+
 	/**
 	 * @return the sorlUrlForJsConfig
 	 */
-	String getSolrUrlForJsConfig(); 
+	String getSolrUrlForJsConfig();
 }

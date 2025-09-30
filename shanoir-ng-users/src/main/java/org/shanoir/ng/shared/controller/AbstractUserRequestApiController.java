@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,7 +32,7 @@ import org.springframework.validation.BindingResult;
 
 /**
  * Abstract class for users request API controllers.
- * 
+ *
  * @author msimon
  *
  */
@@ -43,13 +43,13 @@ public abstract class AbstractUserRequestApiController {
 
 	@Autowired(required = false)
 	private VIPUserService vipUserService;
-	
+
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
-	
+
 	@Autowired
 	private UserUniqueConstraintManager uniqueConstraintManager;
 
@@ -69,7 +69,7 @@ public abstract class AbstractUserRequestApiController {
 
 	/*
 	 * Generate username of a user from first name and last name.
-	 * 
+	 *
 	 * @param user user.
 	 */
 	protected void generateUsername(final User user) {
@@ -101,7 +101,7 @@ public abstract class AbstractUserRequestApiController {
 
 		user.setUsername(username);
 	}
-	
+
 	protected void validate(User user, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()
 				.add(fieldEditionSecurityManager.validate(user))
@@ -110,9 +110,9 @@ public abstract class AbstractUserRequestApiController {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
-	
+
 	protected void validateIgnoreBlankUsername(User user, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new UsersFieldErrorMap()
 				.checkBindingIgnoreBlankUsername(result)
@@ -121,7 +121,7 @@ public abstract class AbstractUserRequestApiController {
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}	
+		}
 	}
 
 }

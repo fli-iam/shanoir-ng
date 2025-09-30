@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,12 +29,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Decorator for dataset acquisitions mapper.
- * 
+ *
  * @author msimon
  *
  */
 public abstract class ExaminationDatasetAcquisitionDecorator implements ExaminationDatasetAcquisitionMapper {
-	
+
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper delegate;
 
@@ -66,7 +66,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 	 * Get dataset acquisition name. If all the datasets have the same name,
 	 * then return the name of the datasets. Else if all the datasets have the
 	 * same comment, then return the comment of the datasets.
-	 * 
+	 *
 	 * @param datasetAcquisition dataset acquisition.
 	 * @return name.
 	 */
@@ -114,7 +114,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 				result.append(" rank=").append(datasetAcquisition.getRank());
 			}
 		}
-		
+
 		final String type = datasetAcquisition.getType();
 		return result.append(" (").append(type).append(")").toString();
 	}

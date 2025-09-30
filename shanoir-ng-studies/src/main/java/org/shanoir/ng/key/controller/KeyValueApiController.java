@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class KeyValueApiController implements KeyValueApi {
-	
+
     @Autowired
 	private KeyValueService keyValueService;
 

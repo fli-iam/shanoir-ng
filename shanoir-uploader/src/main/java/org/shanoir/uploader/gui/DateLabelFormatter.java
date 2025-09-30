@@ -2,9 +2,9 @@ package org.shanoir.uploader.gui;
 
 /**
  * Date formatter for Birth Date and Examination date fields
- * 
+ *
  * @author ifakhfakh
- * 
+ *
  */
 
 import java.text.ParseException;

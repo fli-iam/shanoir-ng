@@ -14,7 +14,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 public class EegDatasetAcquisition extends DatasetAcquisition {
 
 	public static final String DATASET_ACQUISITION_TYPE = "Eeg";
-	
+
 	public EegDatasetAcquisition() { }
 
 	public EegDatasetAcquisition(DatasetAcquisition other) {
@@ -26,5 +26,5 @@ public class EegDatasetAcquisition extends DatasetAcquisition {
 		return "Eeg";
 	}
 
-	
+
 }

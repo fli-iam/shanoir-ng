@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the examination is already existing in Shanoir, the id is set,
  * if not the id == null. So we have to create a new examination in sh-ng.
- * 
+ *
  * @author mkain
  *
  */
@@ -26,7 +26,7 @@ public class ExExamination {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	/**
 	 * If the id == null a complete examination object as used within MS Studies
 	 * shall be added here. This can be used by an export to write a examination
@@ -36,7 +36,7 @@ public class ExExamination {
 	 */
 //	@JsonProperty("examination")
 //	private Examination examination;
-	
+
 	//todo: complete here later the tree with Acquisition etc. but in another .json
 	// outside to avoid the increase to extreme of the first json.
 

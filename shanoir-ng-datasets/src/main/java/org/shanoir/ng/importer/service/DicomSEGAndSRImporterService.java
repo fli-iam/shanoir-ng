@@ -55,17 +55,17 @@ import org.springframework.transaction.annotation.Transactional;
  * send as DICOM SR Structured Report. It modifies the by the OHIF
  * viewer created DICOM SR to correspond to shanoir needs, creates
  * the dataset in the database and sends the dicom file to the pacs.
- * 
+ *
  * The import only happens in the servers memory, as the structured
  * reports are very small memory footprint objects and as this avoids
  * us any implication of MS Import in this special case.
- * 
+ *
  * @author mkain
  *
  */
 @Service
 public class DicomSEGAndSRImporterService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
@@ -79,31 +79,31 @@ public class DicomSEGAndSRImporterService {
 
 	@Autowired
     private SolrService solrService;
-	
+
 	@Autowired
 	private DatasetService datasetService;
-	
+
 	@Autowired
 	private SubjectRepository subjectRepository;
-	
+
 	@Autowired
 	private DICOMWebService dicomWebService;
-	
+
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
-	
+
 	@Value("${dcm4chee-arc.host}")
 	private String dcm4cheeHost;
 
 	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePortWeb;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
 	@Transactional
 	public boolean importDicomSEGAndSR(InputStream inputStream) {
 		// DicomInputStream consumes the input stream to read the data
@@ -118,7 +118,7 @@ public class DicomSEGAndSRImporterService {
 				Dataset dataset = findDataset(examination, datasetAttributes);
 				if (dataset == null) {
 					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-					return false;	
+					return false;
 				}
 				createDataset(modality, examination, dataset, datasetAttributes);
 				sendToPacs(metaInformationAttributes, datasetAttributes);
@@ -139,13 +139,13 @@ public class DicomSEGAndSRImporterService {
 	 * - use user name as person name, who created the measurement
 	 * - replace with correct study instance UID from pacs for correct storage
 	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
-	 * 
+	 *
 	 * Note: the approach to replace the newly created SeriesInstanceUID
 	 * with the referenced SeriesInstanceUID, available via CurrentRequested-
 	 * ProcedureEvidenceSequence -> ReferencedSeriesSequence -> SeriesInstanceUID
 	 * did not work to get it displayed correctly in the viewer, but lead even to
 	 * an error in the viewer.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 */
 	private Examination modifyDicom(Attributes datasetAttributes) {
@@ -179,7 +179,7 @@ public class DicomSEGAndSRImporterService {
 	 * A measurement dataset is related to the dataset, that has been annotated.
 	 * We use the information in the DICOM SR object to find the correct dataset
 	 * in shanoir database using studyInstanceUID, seriesInstanceUID and SOPInstanceUID.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @return
 	 */
@@ -236,10 +236,10 @@ public class DicomSEGAndSRImporterService {
 		}
 		return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
 	}
-	
+
 	/**
 	 * Find origin dataset using the 3 UIDs in dataset_file.path attribute.
-	 * 
+	 *
 	 * @param examination
 	 * @param studyInstanceUID
 	 * @param seriesInstanceUID
@@ -273,13 +273,13 @@ public class DicomSEGAndSRImporterService {
 				}
 			}
 		}
-		LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");	
+		LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");
 		return null;
 	}
-	
+
 	/**
 	 * Create the dataset in the database.
-	 * 
+	 *
 	 * @param examination
 	 * @param dataset
 	 * @param datasetAttributes
@@ -311,7 +311,7 @@ public class DicomSEGAndSRImporterService {
 	 * e.g. for one study. This code works and has been tested to access the most
 	 * important measurement attributes and was hard to construct. Even if currently
 	 * not used, we keep it for a very high later usage.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param dataset
 	 */
@@ -324,7 +324,7 @@ public class DicomSEGAndSRImporterService {
 			originMetadata.setName(reportName);
 		}
 		originMetadata.setDatasetModalityType(modalityType);
-		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
+		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
 		dataset.setOriginMetadata(originMetadata);
 		dataset.setUpdatedMetadata(originMetadata);
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
@@ -378,7 +378,7 @@ public class DicomSEGAndSRImporterService {
 
 	/**
 	 * Create the necessary dataset expression.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param measurementDataset
 	 * @throws MalformedURLException
@@ -389,7 +389,7 @@ public class DicomSEGAndSRImporterService {
 		expression.setCreationDate(LocalDateTime.now());
 		expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 		expression.setDataset(dataset);
-		dataset.setDatasetExpressions(Collections.singletonList(expression));		
+		dataset.setDatasetExpressions(Collections.singletonList(expression));
 		List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
 		expression.setDatasetFiles(files);
 	}
@@ -397,7 +397,7 @@ public class DicomSEGAndSRImporterService {
 	/**
 	 * Create the dataset files, as WADO-RS links in that case,
 	 * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param expression
 	 * @return
@@ -426,7 +426,7 @@ public class DicomSEGAndSRImporterService {
 	 * This method writes both attributes to an output stream and converts
 	 * this one to an input stream, that can be used to send the manipulated
 	 * file to the backend pacs.
-	 * 
+	 *
 	 * @param metaInformationAttributes
 	 * @param datasetAttributes
 	 * @throws IOException
@@ -443,7 +443,7 @@ public class DicomSEGAndSRImporterService {
 		try (DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
 			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
 			try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
+				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
 			}
 		}
 	}

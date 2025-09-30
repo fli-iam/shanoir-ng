@@ -40,7 +40,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class ZipFileImportTest extends AbstractTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ZipFileImportTest.class);
-	
+
 	private static final String IN_PROGRESS = "IN_PROGRESS";
 
 	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
@@ -83,7 +83,7 @@ public class ZipFileImportTest extends AbstractTest {
 			// }
 		}
 	}
-	
+
 	private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
@@ -122,7 +122,7 @@ public class ZipFileImportTest extends AbstractTest {
 	/**
 	 * Attention: as we simulate for testing reason, the ZIP upload import
 	 * via Web GUI, we add a pseudonymization profile, as the GUI does it.
-	 * 
+	 *
 	 * @param importJob
 	 * @param subjectREST
 	 * @param examination
@@ -179,7 +179,7 @@ public class ZipFileImportTest extends AbstractTest {
 			}
 		}
 	}
-	
+
 	private ImportJob uploadDicomZip(final String fileName) {
 		try {
 		    URL resource = getClass().getClassLoader().getResource(fileName);

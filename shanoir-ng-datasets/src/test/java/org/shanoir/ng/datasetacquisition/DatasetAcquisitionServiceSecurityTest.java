@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,9 +61,9 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -73,28 +73,28 @@ public class DatasetAcquisitionServiceSecurityTest {
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
 	private static final long ENTITY_ID = 1L;
-	
+
 	@Autowired
 	private DatasetAcquisitionService service;
-	
+
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
-	
+
 	@MockBean
 	StudyRightsService rightsService;
-	
+
 	@MockBean
 	private ShanoirEventService shanoirEventService;
 
 	@MockBean
 	private SolrService solrService;
-	
+
 	@MockBean
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
 	@MockBean
 	private ExaminationRepository examinationRepository;
-	
+
 	@MockBean
 	private StudyRepository studyRepository;
 
@@ -119,7 +119,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findByStudyCard, 1L);
 		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
-		
+
 		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
 		assertAccessDenied(service::deleteById, 1L, null);
@@ -131,7 +131,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		setCenterRightsContext();
 		testAll("ROLE_USER");
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
@@ -145,7 +145,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		setCenterRightsContext();
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByStudyCard, 1L);
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));		
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		Page<DatasetAcquisition> page = service.findPage(PageRequest.of(0, 10));
 		assertNotNull(page);
 		assertEquals(4, page.getTotalElements());
@@ -154,25 +154,25 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessAuthorized(service::deleteById, 1L, null);
 	}
 
-	
+
 	private void testAll(String role) throws ShanoirException, RestServiceException {
 		// create(DatasetAcquisition)
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(service::create, mockDsAcq(null, 1L, 1L, 1L));
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		assertAccessAuthorized(service::create, mockDsAcq(null, 1L, 1L, 1L));
-		
+
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L));
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L));
-		
+
 		given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(service::create, mockDsAcq(null, 2L, 2L, 2L));
-		
+
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(service::create, mockDsAcq(null, 4L, 4L, 4L));
-		
+
 		// findByStudyCard(Long)
 		assertAccessAuthorized(service::findByStudyCard, 1L);
 		assertAccessAuthorized(service::findByStudyCard, 2L);
@@ -181,26 +181,26 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertThat(service.findByStudyCard(3L)).isNullOrEmpty();
 		assertAccessAuthorized(service::findByStudyCard, 4L);
 		assertThat(service.findByStudyCard(4L)).isNullOrEmpty();
-		
+
 		// findById(Long)
 		assertAccessAuthorized(service::findById, 1L);
 		assertAccessDenied(service::findById, 2L);
 		assertAccessDenied(service::findById, 3L);
 		assertAccessDenied(service::findById, 4L);
-		
+
 		// findByExamination(Long)
 		assertAccessAuthorized(service::findByExamination, 1L);
 		assertThat(service.findByExamination(2L).isEmpty());
 		assertThat(service.findByExamination(3L).isEmpty());
 		assertThat(service.findByExamination(4L).isEmpty());
-		
+
 		// findPage(Pageable)
 		assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
-		
+
 		// update(DatasetAcquisition)
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));			
+			assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));
@@ -210,7 +210,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessDenied(service::update, mockDsAcq(2L, 2L, 2L, 2L));
 		assertAccessDenied(service::update, mockDsAcq(3L, 3L, 3L, 1L));
 		assertAccessDenied(service::update, mockDsAcq(4L, 4L, 4L, 4L));
-		
+
 		// deleteById(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		if ("ROLE_USER".equals(role)) {
@@ -239,32 +239,32 @@ public class DatasetAcquisitionServiceSecurityTest {
 		dsA.setId(id);
 		return dsA;
 	}
-	
+
 	private DatasetAcquisition mockDsAcq(Long id, Long examId, Long centerId, Long studyId) {
 		DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();
 		dsA.setId(id);
 		dsA.setExamination(mockExam(examId, centerId, studyId));
 		return dsA;
 	}
-	
+
 	private Examination mockExam(Long id, Long centerId, Long studyId) {
 		Examination exam = mockExam(id);
 		exam.setCenterId(centerId);
 		exam.setStudy(mockStudy(studyId));
 		return exam;
 	}
-	
+
 	private Examination mockExam(Long id) {
 		Examination exam = ModelsUtil.createExamination();
 		exam.setId(id);
 		exam.setInstrumentBasedAssessmentList(new ArrayList<>());
 		return exam;
 	}
-	
+
 	private DatasetAcquisition mockDsAcq() {
 		return mockDsAcq(null);
 	}
-	
+
 	private Study mockStudy(Long id) {
 		Study study = new Study();
 		study.setId(id);
@@ -274,11 +274,11 @@ public class DatasetAcquisitionServiceSecurityTest {
 		study.setTags(new ArrayList<>());
 		return study;
 	}
-	
+
 	private void setCenterRightsContext() {
 		/**
 		 * -> study 1 [CAN_SEE_ALL]
-		 *     -> subject 1 
+		 *     -> subject 1
 		 *         -> center 1 [HAS_RIGHTS]
 		 *             -> exam 1
 		 *                 -> ds acq 1 (equipment 1 - studycard 1)
@@ -296,30 +296,30 @@ public class DatasetAcquisitionServiceSecurityTest {
 		 *             -> exam 4
 		 *                 -> ds acq 4 (equipment 4 - studycard 4)
 		 */
-		
+
 		// has right on study 1
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		// has right on [study 1, center 1] 
+		// has right on [study 1, center 1]
 		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
 		Set<Long> studyIds1 = new HashSet<Long>(); studyIds1.add(1L);
 		given(rightsService.hasRightOnCenter(studyIds1, 1L)).willReturn(true);
-		// does not have right on [study 1, center 3] 
+		// does not have right on [study 1, center 3]
 		given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
 		given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
-		
+
 		// has right on study 2
 		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
-		// does not have right on [study 2, center 2] 
+		// does not have right on [study 2, center 2]
 		given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
 		Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
 		given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);
-		
+
 		// does not have right on study 4
 		given(rightsService.hasRightOnStudy(4L, "CAN_SEE_ALL")).willReturn(false);
-		
+
 		// has rights on studies 1 & 2
 		given(rightsService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<>(Arrays.asList(new Long[]{1L, 2L})));
-		
+
 		// exam 1 is in center 1
 		Examination exam1 = mockExam(1L, 1L, 1L);
 		given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
@@ -342,7 +342,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
-		
+
 		// study 1
 		Study study1 = mockStudy(1L);
 		given(studyRepository.findById(1L)).willReturn(Optional.of(study1));
@@ -352,7 +352,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		// study 4
 		Study study4 = mockStudy(4L);
 		given(studyRepository.findById(2L)).willReturn(Optional.of(study4));
-		
+
 		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
 		given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
 		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
@@ -365,7 +365,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
 		given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
 		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
-		
+
 		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
 		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
 		studyCenterIds.add(Pair.of(1L, 1L));
@@ -376,7 +376,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		su1.setStudyId(1L);
 		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
 		given(rightsRepository.findByUserIdAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new StudyUser[]{su1}));
-		
+
 	}
 
 }

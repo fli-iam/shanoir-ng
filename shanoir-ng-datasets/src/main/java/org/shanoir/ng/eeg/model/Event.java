@@ -19,25 +19,25 @@ import java.util.Date;
  */
 @Entity
 public class Event extends HalEntity {
-	
+
 	/** Serial version ID. */
 	private static final long serialVersionUID = 1L;
 
     @JsonProperty("type")
 	private String type;
-    
+
     @JsonProperty("description")
 	private String description;
-    
+
     @JsonProperty("position")
 	private String position;
-    
+
     @JsonProperty("points")
 	private int points;
-    
+
     @JsonProperty("channelNumber")
 	private int channelNumber;
-    
+
     @JsonProperty("date")
 	private Date date;
 
@@ -114,7 +114,7 @@ public class Event extends HalEntity {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 	/**
 	 * @return the dataset
 	 */

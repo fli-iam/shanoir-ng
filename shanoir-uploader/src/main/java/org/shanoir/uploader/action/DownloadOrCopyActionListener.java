@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the download or copy button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class DownloadOrCopyActionListener implements ActionListener {
 
@@ -37,10 +37,10 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	private ResourceBundle resourceBundle;
 	public Pseudonymizer pseudonymizer;
 	public IdentifierCalculator identifierCalculator;
-	
+
 	// Introduced here to inject into DownloadOrCopyRunnable
 	private IDicomServerClient dicomServerClient;
-	
+
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	private final ReentrantLock lock = new ReentrantLock();
@@ -117,7 +117,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 				}
 			}
 		}
-		
+
 		/**
 		 * 3. Download from PACS or copy from CD/DVD and write import-job.json
 		 */
@@ -135,11 +135,11 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		} else {
 			logger.warn("A previous thread is still running. Please wait until it is finished.");
 		}
-		
+
 		// clear previous selection, but keep tree open in the tab
 		mainWindow.isDicomObjectSelected = false;
 		mainWindow.dicomTree.getSelectionModel().clearSelection();
-	
+
 		JOptionPane.showMessageDialog(mainWindow.frame,
 			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
 			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.title"),
@@ -150,7 +150,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 * This method reads the data entered by the user with the GUI
 	 * and puts it into a Patient object to ajdust the already existing
 	 * values coming from the DICOM, when the user clicks on the download or copy button.
-	 * 
+	 *
 	 * @param Patient patient
 	 * @return
 	 */

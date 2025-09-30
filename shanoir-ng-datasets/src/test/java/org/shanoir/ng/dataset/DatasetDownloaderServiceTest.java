@@ -81,13 +81,13 @@ public class DatasetDownloaderServiceTest {
 
 	@MockBean
 	private WADODownloaderService downloader;
-	
+
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
-	
+
 	@MockBean(name = "controllerSecurityService")
 	private ControllerSecurityService controllerSecurityService;
-	
+
     @TempDir
     public File tempDir;
 
@@ -102,13 +102,13 @@ public class DatasetDownloaderServiceTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
-	
+
 	@MockBean
 	private StudyRepository studyRepo;
-	
+
 	@MockBean
 	private ImporterService importerService;
-	
+
 	@MockBean
 	private DicomSEGAndSRImporterService dicomSRImporterService;
 
@@ -242,15 +242,15 @@ public class DatasetDownloaderServiceTest {
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
-	
+
 		HttpServletResponse response =  new MockHttpServletResponse();
 		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
 
 		// THEN all datasets are exported
-		
+
 		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
 		Mockito.verify(eventService, times(1)).publishEvent(eventCatcher.capture());
-		
+
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
 		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());

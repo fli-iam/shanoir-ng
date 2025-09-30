@@ -1,9 +1,9 @@
 package org.shanoir.uploader.model;
 
 public class Investigator implements Comparable<Investigator> {
-	
+
 	private Long id;
-	
+
 	private String name;
 
 	public Investigator(Long id, String name) {
@@ -31,7 +31,7 @@ public class Investigator implements Comparable<Investigator> {
 	public int compareTo(Investigator o) {
 		return Long.compare(this.getId(), o.getId());
 	}
-	
+
 	public String toString() {
 		return this.getName();
 	}

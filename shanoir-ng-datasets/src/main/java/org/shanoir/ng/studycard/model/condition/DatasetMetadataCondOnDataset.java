@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,9 +33,9 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("DatasetMetadataCondOnDataset")
 @JsonTypeName("DatasetMetadataCondOnDataset")
 public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset> {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
-	
+
 	@Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
@@ -45,7 +45,7 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
     public void setShanoirField(MetadataFieldInterface<Dataset>  field) {
         shanoirField = field.getId();
     }
-	
+
     public boolean fulfilled(Dataset dataset) {
         if (dataset == null) throw new IllegalArgumentException("dataset can not be null");
         DatasetMetadataField field = this.getShanoirField();
@@ -62,9 +62,9 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
                 if (textualCompare(this.getOperation(), valueFromDb, value)) {
                     LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
                     return true;
-                } 
+                }
             }
-        }                
+        }
         return false;
-    } 
+    }
 }

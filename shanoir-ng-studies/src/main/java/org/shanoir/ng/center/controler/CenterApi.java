@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ public interface CenterApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CenterDTO> findCenterById(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
-	
+
 	@Operation(summary = "", description = "If exists, returns the center corresponding to the given InstitutionDicom or creates a new center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found center"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -105,7 +105,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findCentersNames();
-	
+
 	@Operation(summary = "", description = "Returns id and name for all the centers")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found centers"),

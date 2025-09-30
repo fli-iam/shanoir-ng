@@ -23,7 +23,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 	@SuppressWarnings("unchecked")
 	public Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
-		
+
 		String queryEndStr = "from DatasetAcquisition as da "
 				+ "join da.examination as ex "
 				+ "where ex.study.id in ?1 ";
@@ -32,10 +32,10 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 			queryEndStr += "or (ex.study.id = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
 			i += 2;
 		}
-		
+
 		String queryStr = "select da " + queryEndStr;
 		String queryCountStr = "select count(da) " + queryEndStr;
-		
+
 		if (pageable.getSort() != null && pageable.getSort().isSorted()) {
 			queryStr += "order by ";
 			int isort = 0;
@@ -48,10 +48,10 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 				isort++;
 			}
 		}
-		
+
 		Query query = entityManager.createQuery(queryStr);
 		Query queryCount = entityManager.createQuery(queryCountStr);
-		
+
 		query.setParameter(1, studyIds);
 		queryCount.setParameter(1, studyIds);
 		i = 2;
@@ -62,7 +62,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 			queryCount.setParameter(i + 1, studyCenter.getSecond());
 			i += 2;
 		}
-	
+
 		Long total = (Long) queryCount.getSingleResult();
 
 		query.setFirstResult(Math.toIntExact(pageable.getPageNumber() * pageable.getPageSize()));
@@ -75,7 +75,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 	@Override
 	public List<DatasetAcquisition> findByStudyCardIdAndStudyCenterOrStudyIdIn(Long studyCardId,
 			Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
-		
+
 		String queryEndStr = "from DatasetAcquisition as da "
 				+ "join da.examination as ex "
 				+ "where (ex.study.id in ?1 ";
@@ -86,11 +86,11 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 		}
 		queryEndStr += ") and da.studyCard.id = ?" + i;
 		i++;
-		
+
 		String queryStr = "select da " + queryEndStr;
-		
+
 		Query query = entityManager.createQuery(queryStr);
-		
+
 		query.setParameter(1, studyIds);
 		i = 2;
 		for (Pair<Long, Long> studyCenter : studyCenterIds) {

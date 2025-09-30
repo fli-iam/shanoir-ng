@@ -17,10 +17,10 @@ import org.springframework.stereotype.Component;
  * As a result, the context will change either to :
  * 		- a manual proxy configuration
  * 		- step into the next state in case of success.
- * 
+ *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 @Component
 public class ProxyConfigurationState implements State {

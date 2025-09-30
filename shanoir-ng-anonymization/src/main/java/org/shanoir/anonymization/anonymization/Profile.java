@@ -6,7 +6,7 @@ import java.util.Map;
 public class Profile {
 
 	private Integer profileColumn;
-	
+
 	private Map<String, String> anonymizationMap;
 
 	public Profile(Integer profileColumn) {

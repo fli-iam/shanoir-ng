@@ -5,7 +5,7 @@ import org.shanoir.uploader.ShUpConfig;
 public class StudyCard {
 
 	private Long id;
-	
+
 	/** The acquisition equipment id. */
 	private Long acquisitionEquipmentId;
 
@@ -28,9 +28,9 @@ public class StudyCard {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
-	
+
 	private Boolean compatible;
-	
+
 	public Boolean getCompatible() {
 		return compatible;
 	}
@@ -94,7 +94,7 @@ public class StudyCard {
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-	
+
 	public String toString() {
 		String displayString = this.getName();
 		if (acquisitionEquipment != null) {

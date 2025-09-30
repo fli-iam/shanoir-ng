@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
  * This class implements the logic when a node is selected in a DicomTree.
  * The SelectionActionListener creates the multi-exam import jobs map, that
  * is used afterwards to know, what studies/series to import.
- * 
+ *
  * The SelectionActionListener is already prepared to allow multi-patient,
  * multi-exam (DICOM study) selections, to be ready for the future and not
  * have to refactor again this component.
- * 
+ *
  * @author yyao
  * @author mkain
  *
@@ -166,7 +166,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		Patient patient = patientTreeNode.getPatient();
 		Study study = studyTreeNode.getStudy();
 		LocalDate studyDate = study.getStudyDate();
-		if (studyDate == null) {			
+		if (studyDate == null) {
 			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
 			if (mainWindow != null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -203,7 +203,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 			}
 		}
 	}
-	
+
 	public Map<String, ImportJob> getImportJobs() {
 		return importJobs;
 	}

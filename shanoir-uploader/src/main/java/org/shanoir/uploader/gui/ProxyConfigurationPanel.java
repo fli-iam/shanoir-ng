@@ -26,10 +26,10 @@ import org.springframework.stereotype.Component;
 /**
  *	This class is the Proxy GUI which allows an user to configure the proxy
  *  in order to access the remote Shanoir server.
- * 
+ *
  * @author arno
  * @author mkain
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Component
@@ -101,7 +101,7 @@ public class ProxyConfigurationPanel extends JPanel {
 			}
 		};
 		enableProxyCB.addActionListener(actionListener);
-		
+
 		secureSslProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.ssl"));
 		secureSslProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		shanoirStartupGBC.weightx = 0.2;

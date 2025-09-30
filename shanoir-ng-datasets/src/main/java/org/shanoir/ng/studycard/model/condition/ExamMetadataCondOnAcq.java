@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,7 +36,7 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("ExamMetadataCondOnAcq")
 @JsonTypeName("ExamMetadataCondOnAcq")
 public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcquisition> {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnAcq.class);
 
 	@Override
@@ -48,11 +48,11 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
     public void setShanoirField(MetadataFieldInterface<DatasetAcquisition>  field) {
         shanoirField = field.getId();
     }
-    
+
     public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
         return fulfilled(acquisitions, null);
     }
-	
+
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetAcquisitionMetadataField field = this.getShanoirField();
@@ -73,9 +73,9 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
                         LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
                         nbOk++;
                         break;
-                    } 
+                    }
                 }
-            }                
+            }
         }
         boolean complies = cardinalityComplies(nbOk, total);
         if (!complies) {
@@ -90,7 +90,7 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
             errorMsg.append("\ncondition [" + toString() + "] succeed");
         }
         return complies;
-    } 
+    }
 
     @Override
     public String toString() {
@@ -107,7 +107,7 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
         sb.append("DatasetAcquisition metadata field '").append(getShanoirField().name())
                 .append("' ").append(getOperation().name())
                 .append(" ")
-                .append(StringUtils.join(getValues(), " or "));        
+                .append(StringUtils.join(getValues(), " or "));
         return sb.toString();
     }
 

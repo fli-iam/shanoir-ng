@@ -40,19 +40,19 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 public class ExtensionRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/extensionrequest";
-	
+
 	private static final String KEYCLOAK_ID = "KEYCLOAK_ID";
 
 	private static final String EMAIL = "test@gmail.com";
-	
+
 	private static final String PASSWORD = "password";
 
 	@Autowired
 	private MockMvc mvc;
-	
+
 	@MockBean
 	private KeycloakClient keycloakClient;
-	
+
 	@MockBean
 	private EmailService emailService;
 
@@ -61,13 +61,13 @@ public class ExtensionRequestApiControllerTest {
 
 	@MockBean
 	private UserRepository userRepository;
-	
+
 	@MockBean
 	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
-	
+
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
-	
+
 
 	@Test
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
@@ -87,7 +87,7 @@ public class ExtensionRequestApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(extensionRequest)))
 				.andExpect(status().isOk());
-	
+
 		// THEN an extension is requested and password is changed
 		Mockito.verify(keycloakClient).resetPassword(mockUser.getKeycloakId());
 		Mockito.verify(emailService).notifyUserResetPassword(Mockito.eq(mockUser), Mockito.anyString());
@@ -99,7 +99,7 @@ public class ExtensionRequestApiControllerTest {
 	public void extensionRequestNoUserTest() throws Exception {
 		// GIVEN a non existing user
 		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.ofNullable(null));
-		
+
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
 		extensionRequest.setEmail(EMAIL);
@@ -107,12 +107,12 @@ public class ExtensionRequestApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(extensionRequest)))
 				.andExpect(status().isBadRequest());
-	
+
 		// THEN a 404 is returned
 		Mockito.verifyNoInteractions(keycloakClient);
 		Mockito.verifyNoInteractions(emailService);
 	}
-	
+
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void extensionRequestUserEnabledTest() throws Exception {
@@ -128,11 +128,11 @@ public class ExtensionRequestApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(extensionRequest)))
 				.andExpect(status().isNotAcceptable());
-	
+
 		// THEN a NOT acceptable error is sent
 		Mockito.verifyNoInteractions(keycloakClient);
 		Mockito.verifyNoInteractions(emailService);	}
-	
+
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void extensionRequestUserAreadyHaveARequestTest() throws Exception {
@@ -149,7 +149,7 @@ public class ExtensionRequestApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(extensionRequest)))
 				.andExpect(status().isNotAcceptable());
-	
+
 		// THEN a NOT acceptable error is sent
 		Mockito.verifyNoInteractions(keycloakClient);
 		Mockito.verifyNoInteractions(emailService);

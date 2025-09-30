@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -72,7 +72,7 @@ public class RabbitMQConfiguration {
 
 	/** Specific queue for import dataset events. */
 	public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir-events-queue-import";
-	
+
 	/** Update / create a study user to dataset MS. */
 	public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
 
@@ -96,10 +96,10 @@ public class RabbitMQConfiguration {
 
 	/** Subject name updated => notify dataset MS to change database. */
 	public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
-	
+
 	/** Center name updated => notify dataset MS to change database. */
 	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
-	
+
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
@@ -112,10 +112,10 @@ public class RabbitMQConfiguration {
 
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
-	
+
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
-	
+
 	/** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
 	public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
@@ -127,10 +127,10 @@ public class RabbitMQConfiguration {
 
 	/** Delete user queue. */
 	public static final String DELETE_USER_QUEUE = "delete-user-queue";
-	
+
 	/** Study deleted => Delete associated datasets. */
 	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
-	
+
 	/** Create DS acquisition => Index datasets in solr. */
 	public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
 
@@ -145,7 +145,7 @@ public class RabbitMQConfiguration {
 
 	/** Queue to send dua draft by mail */
 	public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
-	
+
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
 
@@ -160,7 +160,7 @@ public class RabbitMQConfiguration {
 
 	/** Send a mail from dataset microservice to ms users for import dataset failure*/
 	public static final String IMPORT_DATASET_FAILED_MAIL_QUEUE = "import-dataset-failed-mail-queue";
-	
+
 	/** Send a mail from studies microservice to ms users */
 	public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
@@ -172,7 +172,7 @@ public class RabbitMQConfiguration {
 
 	/** Queue to consume BIDS related events */
 	public static final String RELOAD_BIDS = "reload-bids-queue";
-	
+
 	/** Queue to create examination extra data from import */
 	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
 
@@ -193,16 +193,16 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get the list of studies I can Admin. */
 	public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
-	
+
 	/** Queue used to send invitation email for a given study. */
 	public static final String STUDY_INVITATION_QUEUE = "study-invitation-queue";
-	
+
 	/** Queue used to get the list of study admins. */
 	public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
 
 	/** Queue used to get the name of a study from ID */
 	public static final String STUDY_NAME_QUEUE = "study-name-queue";
-	
+
 	/** Queue used to import eeg data */
 	public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
@@ -302,7 +302,7 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {
 		return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
@@ -312,7 +312,7 @@ public class RabbitMQConfiguration {
 	public static Queue deleteSubjectQueue() {
 		return new Queue(DELETE_SUBJECT_QUEUE, true);
   	}
-	
+
   	@Bean
 	public static Queue deleteAnimalSubjectQueue() {
 		return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
@@ -395,7 +395,7 @@ public class RabbitMQConfiguration {
 	public static Queue niftiConversionQueue() {
 		return new Queue(NIFTI_CONVERSION_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
@@ -420,12 +420,12 @@ public class RabbitMQConfiguration {
 	public static Queue importDatasetFailedMailQueue() {
 		return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue studyUserMailQueue() {
 		return new Queue(STUDY_USER_MAIL_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue importBidsDatasetQueue() {
 		return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
@@ -450,7 +450,7 @@ public class RabbitMQConfiguration {
 	public static Queue studySubscriptionQueue() {
 		return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue studyICanAdminQueue() {
 		return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
@@ -480,7 +480,7 @@ public class RabbitMQConfiguration {
 	public static Queue importEEGQueue() {
 		return new Queue(IMPORT_EEG_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue studyAnonymisationProfileQueue() {
 		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);

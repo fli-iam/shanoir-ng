@@ -43,7 +43,7 @@ public class MrProtocolSCMetadata extends MrProtocolMetadata {
 
 	/**
 	 * Derived from (0018, 0020) Scanning sequence Description of the type of
-	 * data taken and (0018, 0021) Sequence Variant of the scanning sequence. 
+	 * data taken and (0018, 0021) Sequence Variant of the scanning sequence.
 	 */
 	private Integer mrSequencePhysics;
 

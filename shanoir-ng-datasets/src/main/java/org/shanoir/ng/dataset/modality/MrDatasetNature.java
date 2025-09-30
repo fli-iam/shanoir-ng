@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,7 +16,7 @@ package org.shanoir.ng.dataset.modality;
 
 /**
  * MR dataset nature.
- * 
+ *
  * @author msimon
  *
  */
@@ -72,19 +72,19 @@ public enum MrDatasetNature {
 
 	// Apparent diffusion coefficient mr dataset
 	APPARENT_DIFFUSION_COEFFICIENT_MR_DATASET(17),
-	
+
 	// Flair mr dataset
 	FLAIR_MR_DATASET(18),
-	
+
 	// Flair dce mr dataset
 	FLAIR_DCE_MR_DATASET(19),
-	
+
 	// Perfusion weighted mr dataset
 	PERFUSION_WEIGHTED_MR_DATASET(20),
-	
+
 	// Susceptibility weighted angiography mr dataset
 	SUSCEPTIBILITY_WEIGHTED_ANGIOGRAPHY_MR_DATASET(21),
-	
+
 	// Susceptibility weighted mr dataset
 	SUSCEPTIBILITY_WEIGHTED_MR_DATASET(22);
 
@@ -92,7 +92,7 @@ public enum MrDatasetNature {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param id
 	 *            id
 	 */
@@ -102,7 +102,7 @@ public enum MrDatasetNature {
 
 	/**
 	 * Get an MR dataset nature by its id.
-	 * 
+	 *
 	 * @param id
 	 *            MR dataset nature id.
 	 * @return MR dataset nature.

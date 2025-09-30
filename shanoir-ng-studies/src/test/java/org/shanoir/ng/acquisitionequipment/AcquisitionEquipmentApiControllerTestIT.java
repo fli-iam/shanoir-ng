@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -45,7 +45,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerTestIT {
-//	
+//
 //	private static final String REQUEST_PATH = "/acquisitionequipments";
 //	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
@@ -81,7 +81,7 @@
 //				String.class);
 //		assertEquals(HttpStatus.OK, response.getStatusCode());
 //	}
-//	
+//
 //	@Test
 //	public void saveNewAcquisitionEquipmentProtected() {
 //		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new AcquisitionEquipment(), String.class);
@@ -90,7 +90,7 @@
 //
 //	@Test
 //	public void saveNewAcquisitionEquipmentWithLogin() throws ClientProtocolException, IOException {
-//		
+//
 //		final AcquisitionEquipment equipment = createAcquisitionEquipment();
 //		equipment.setSerialNumber("test2");
 //		final HttpEntity<AcquisitionEquipment> entity = new HttpEntity<AcquisitionEquipment>(equipment, getHeadersWithToken(true));
@@ -98,7 +98,7 @@
 //		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 //				String.class);
 //		assertEquals(HttpStatus.OK, response.getStatusCode());
-//		
+//
 //		// Get acquisition equipment id
 //		String equipmentId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
@@ -111,7 +111,7 @@
 //	@Test
 //	public void updateNewAcquisitionEquipmentProtected() {
 //		final HttpEntity<AcquisitionEquipment> entity = new HttpEntity<AcquisitionEquipment>(ModelsUtil.createAcquisitionEquipment());
-//		
+//
 //		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //				String.class);
 //		assertEquals(HttpStatus.FOUND, response.getStatusCode());

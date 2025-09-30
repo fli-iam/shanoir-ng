@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author mkain
  *
  */
@@ -197,7 +197,7 @@ public class ConfigBean {
 		setLocalDicomServerHost(localHost);
 		setLocalDicomServerPort(localPort);
 		setLocalDicomServerAETCalling(localAETCalling);
-		
+
 		logger.info("initWithValues : localHost=" + localHost);
 		logger.info("initWithValues : localPort=" + localPort);
 		logger.info("initWithValues : localAETCalling=" + localAETCalling);

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class EegImportJob extends ImportJob {
 
 	private static final long serialVersionUID = -5482473150099609081L;
-	
+
 	@JsonProperty("datasets")
 	List<EegDataset> datasets;
 

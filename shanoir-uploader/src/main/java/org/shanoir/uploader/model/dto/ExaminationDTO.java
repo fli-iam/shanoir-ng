@@ -43,7 +43,7 @@ public class ExaminationDTO {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 	public String toString() {
 		final String examinationDate = ShUpConfig.formatter.format(Util.toDate(this.getExaminationDate()));
 		return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";

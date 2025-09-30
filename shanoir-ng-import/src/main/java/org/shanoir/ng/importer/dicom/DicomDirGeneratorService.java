@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * This bean generates a DICOMDIR file.
- * 
+ *
  * @author mkain
  *
  */

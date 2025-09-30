@@ -3,12 +3,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -77,19 +77,19 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * DatasetAPI security test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class DatasetApiSecurityTest {
-	
+
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
 	private BindingResult mockBindingResult;
-	
+
 	@Autowired
 	private DatasetApi api;
 
@@ -97,33 +97,33 @@ public class DatasetApiSecurityTest {
 	StudyRightsService rightsService;
 	@MockBean
 	CreateStatisticsService createStatisticsService;
-	
+
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
 
 	MockHttpServletResponse response;
-	
+
 	@MockBean
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
 	@MockBean
 	private ExaminationRepository examinationRepository;
-	
+
 	@MockBean
 	private StudyRepository studyRepository;
-	
+
 	@MockBean
 	private DatasetRepository datasetRepository;
-	
+
 	@MockBean
 	private ShanoirEventService shanoirEventService;
-	
+
 	@MockBean
 	private SolrService solrService;
 
 	@MockBean
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
 	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockDataset(1L), "dataset");
@@ -133,7 +133,7 @@ public class DatasetApiSecurityTest {
 		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
 		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 	}
-	
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
@@ -146,14 +146,14 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(1L), mockBindingResult);
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException, RestServiceException {
 		setCenterRightsContext();
 		testAll("ROLE_USER");
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
@@ -170,16 +170,16 @@ public class DatasetApiSecurityTest {
 		assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
 		assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L), mockBindingResult);
 	}
-	
+
 	private void testAll(String role) throws ShanoirException, RestServiceException {
 		//deleteDataset(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		if ("ROLE_USER".equals(role)) {
 			assertAccessDenied(api::deleteDataset, 1L);
 		} else if ("ROLE_EXPERT".equals(role)) {
-			assertAccessAuthorized(api::deleteDataset, 1L);		
+			assertAccessAuthorized(api::deleteDataset, 1L);
 		}
-		
+
 		//deleteDatasets(List<Long>)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		StudyUser su1 = new StudyUser();
@@ -193,7 +193,7 @@ public class DatasetApiSecurityTest {
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L));
 		}
-		
+
 		//findDatasetById(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
@@ -201,7 +201,7 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::findDatasetById, 2L);
 		assertAccessDenied(api::findDatasetById, 3L);
 		assertAccessDenied(api::findDatasetById, 4L);
-		
+
 		//updateDataset(Long, Dataset, BindingResult)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL));
@@ -209,16 +209,16 @@ public class DatasetApiSecurityTest {
 			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
-			
+
 			Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
 			given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
-			
+
 			assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
 		}
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(2L, 2L, 2L, 2L, 2L), mockBindingResult);
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(3L, 3L, 3L, 3L, 1L), mockBindingResult);
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(4L, 4L, 4L, 4L, 4L), mockBindingResult);
-		
+
 		//findDatasets(Pageable)
 		assertThat(api.findDatasets(PageRequest.of(0, 10)).getBody()).hasSize(1);
 
@@ -228,7 +228,7 @@ public class DatasetApiSecurityTest {
 		assertAccessAuthorized(api::findDatasetByStudyId, 2L);
 		assertThat(api.findDatasetByStudyId(2L).getBody()).isNullOrEmpty();
 		assertAccessDenied(api::findDatasetByStudyId, 3L);
-		
+
 		//findDatasetIdsBySubjectIdStudyId(Long, Long)
 		assertAccessAuthorized(api::findDatasetIdsBySubjectIdStudyId, 1L, 1L);
 		assertThat(api.findDatasetIdsBySubjectIdStudyId(1L, 1L).getBody()).hasSize(1);
@@ -236,7 +236,7 @@ public class DatasetApiSecurityTest {
 		assertThat(api.findDatasetIdsBySubjectIdStudyId(3L, 1L).getBody()).isNullOrEmpty();
 		assertThat(api.findDatasetIdsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
 		assertAccessDenied(api::findDatasetIdsBySubjectIdStudyId, 4L, 4L);
-		
+
 		//findDatasetsBySubjectIdStudyId(Long, Long)
 		assertAccessAuthorized(api::findDatasetsBySubjectIdStudyId, 1L, 1L);
 		assertThat(api.findDatasetsBySubjectIdStudyId(1L, 1L).getBody()).hasSize(1);
@@ -244,13 +244,13 @@ public class DatasetApiSecurityTest {
 		assertThat(api.findDatasetsBySubjectIdStudyId(3L, 1L).getBody()).isNullOrEmpty();
 		assertThat(api.findDatasetsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
 		assertAccessDenied(api::findDatasetsBySubjectIdStudyId, 4L, 4L);
-		
+
 		//downloadDatasetById(Long, Long, String, HttpServletResponse)
 		assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "file", null);
 		assertAccessDenied(api::downloadDatasetById, 2L, 1L, "file", null);
 		assertAccessDenied(api::downloadDatasetById, 3L, 1L, "file", null);
 		assertAccessDenied(api::downloadDatasetById, 4L, 1L, "file", null);
-		
+
 		//createProcessedDataset(ProcessedDatasetImportJob)
 		ProcessedDatasetImportJob job = new ProcessedDatasetImportJob();
 		job.setStudyId(1L);
@@ -263,7 +263,7 @@ public class DatasetApiSecurityTest {
 		assertAccessAuthorized(api::createProcessedDataset, job);
 		job.setSubjectId(3L);
 		assertAccessAuthorized(api::createProcessedDataset, job);
-		
+
 		job.setStudyId(2L);
 		job.setSubjectId(2L);
 		StudyUser su2 = new StudyUser();
@@ -272,17 +272,17 @@ public class DatasetApiSecurityTest {
 		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su2)));
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(true);
 		assertAccessAuthorized(api::createProcessedDataset, job);
-		
+
 		job.setStudyId(4L);
 		job.setSubjectId(4L);
 		su2.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
 		assertAccessDenied(api::createProcessedDataset, job);
-		
+
 		job.setStudyId(2L);
 		job.setSubjectId(1L);
 		assertAccessDenied(api::createProcessedDataset, job);
-		
+
 		//massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
 		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
@@ -292,7 +292,7 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);
 		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", 1L, null);
 		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", 1L, null);
-		
+
 		//massiveDownloadByStudyId(Long, String, HttpServletResponse)
 		assertAccessAuthorized(api::massiveDownloadByStudyId, 1L, "file", null);
 		assertAccessDenied(api::massiveDownloadByStudyId, 2L, "file", null);
@@ -304,17 +304,17 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::massiveDownloadByExaminationId, 2L, "file", null);
 		assertAccessDenied(api::massiveDownloadByExaminationId, 3L, "file", null);
 		assertAccessDenied(api::massiveDownloadByExaminationId, 4L, "file", null);
-		
+
 		//downloadStatistics(String, String, String, String)
 		assertAccessDenied(api::downloadStatistics, "", "", "", "");
 	}
-	
+
 	private MrDataset mockDataset(Long id) {
 		MrDataset ds = ModelsUtil.createMrDataset();
 		ds.setId(id);
 		return ds;
 	}
-	
+
 	private MrDataset mockDataset(Long id, Long dsAcqId, Long examId, Long centerId, Long studyId) {
 		MrDataset ds = ModelsUtil.createMrDataset();
 		ds.setId(id);
@@ -329,21 +329,21 @@ public class DatasetApiSecurityTest {
 		dsA.setExamination(mockExam(examId, centerId, studyId));
 		return dsA;
 	}
-	
+
 	private Examination mockExam(Long id, Long centerId, Long studyId) {
 		Examination exam = mockExam(id);
 		exam.setCenterId(centerId);
 		exam.setStudy(mockStudy(studyId));
 		return exam;
 	}
-	
+
 	private Examination mockExam(Long id) {
 		Examination exam = ModelsUtil.createExamination();
 		exam.setId(id);
 		exam.setInstrumentBasedAssessmentList(new ArrayList<>());
 		return exam;
 	}
-	
+
 	private Study mockStudy(Long id) {
 		Study study = new Study();
 		study.setId(id);
@@ -353,11 +353,11 @@ public class DatasetApiSecurityTest {
 		study.setTags(new ArrayList<>());
 		return study;
 	}
-	
+
 	private void setCenterRightsContext() {
 		/**
 		 * -> study 1 [CAN_SEE_ALL]
-		 *     -> subject 1 
+		 *     -> subject 1
 		 *         -> center 1 [HAS_RIGHTS]
 		 *             -> exam 1
 		 *                 -> dataset acq 1
@@ -379,31 +379,31 @@ public class DatasetApiSecurityTest {
 		 *                 -> dataset acq 4
 		 *                     -> dataset 4
 		 */
-		
+
 		// has right on study 1
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
-		// has right on [study 1, center 1] 
+		// has right on [study 1, center 1]
 		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
 		Set<Long> studyIds1 = new HashSet<Long>(); studyIds1.add(1L);
 		given(rightsService.hasRightOnCenter(studyIds1, 1L)).willReturn(true);
-		// does not have right on [study 1, center 3] 
+		// does not have right on [study 1, center 3]
 		given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
 		given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
-		
+
 		// has right on study 2
 		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
-		// does not have right on [study 2, center 2] 
+		// does not have right on [study 2, center 2]
 		given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
 		Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
 		given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);
-		
+
 		// does not have right on study 4
 		given(rightsService.hasRightOnStudy(4L, "CAN_SEE_ALL")).willReturn(false);
-		
+
 		// has rights on studies 1 & 2
 		given(rightsService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<>(Arrays.asList(new Long[]{1L, 2L})));
-		
+
 		// exam 1 is in center 1
 		Examination exam1 = mockExam(1L, 1L, 1L);
 		given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
@@ -426,11 +426,11 @@ public class DatasetApiSecurityTest {
 		given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Utils.toList(exam1)));
-		
+
 		given(examinationRepository.findByStudy_Id(1L)).willReturn(Utils.toList(exam1, exam3));
 		given(examinationRepository.findByStudy_Id(2L)).willReturn(Utils.toList(exam2));
-		
-		
+
+
 		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
 		given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
 		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
@@ -443,7 +443,7 @@ public class DatasetApiSecurityTest {
 		DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
 		given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
 		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
-		
+
 		// study 1
 		Study study1 = mockStudy(1L);
 		given(studyRepository.findById(1L)).willReturn(Optional.of(study1));
@@ -453,7 +453,7 @@ public class DatasetApiSecurityTest {
 		// study 4
 		Study study4 = mockStudy(4L);
 		given(studyRepository.findById(2L)).willReturn(Optional.of(study4));
-		
+
 		// dataset 1
 		Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
 		given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
@@ -484,11 +484,11 @@ public class DatasetApiSecurityTest {
 			given(datasetRepository.findAllLightByStudyId(1L)).willReturn(Arrays.asList(new DatasetLight[]{datasetLight1, datasetLight3}));
 		} catch (NoSuchMethodException | InstantiationException | IllegalArgumentException | IllegalAccessException | InvocationTargetException ex) {
 			fail("exception raised : ", ex);
-		} 
+		}
 
 		exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
 		dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
-		
+
 		StudyUser su1 = new StudyUser();
 		su1.setStudyId(1L);
 		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
@@ -496,7 +496,7 @@ public class DatasetApiSecurityTest {
 		given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
 		given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
-		
+
 		given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
 		given(datasetRepository.findAllById(Utils.toList(1L, 3L))).willReturn(Utils.toList(dataset1, dataset3));
 		given(datasetRepository.findAllById(Utils.toList(1L, 2L))).willReturn(Utils.toList(dataset1, dataset2));

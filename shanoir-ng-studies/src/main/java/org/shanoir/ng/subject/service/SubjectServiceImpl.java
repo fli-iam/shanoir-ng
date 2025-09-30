@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -83,28 +83,28 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private TagRepository tagRepository;
-	
+
 	@Autowired
 	private StudyRepository studyRepository;
-	
+
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	
+
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
 	@Autowired
 	private SubjectMapper subjectMapper;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
@@ -178,7 +178,7 @@ public class SubjectServiceImpl implements SubjectService {
 	public Subject findByIdWithSubjectStudies(final Long id) {
 		return subjectRepository.findSubjectWithSubjectStudyById(id);
 	}
-	
+
 	@Override
 	@Transactional
 	public Subject create(Subject subject) throws ShanoirException {
@@ -223,7 +223,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 * subject.study_id to subject study, as still required by some code.
 	 * This method will be removed entirely after all clients have been
 	 * migrated and all dependencies on subject_study will be removed.
-	 * 
+	 *
 	 * @param subject
 	 * @return
 	 * @throws ShanoirException
@@ -333,7 +333,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subjectStudyListNew != null) {
 			if (subjectStudyListNew.isEmpty()) {
 				throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());
-			} 
+			}
 			if (subjectStudyListNew.size() > 1) {
 				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
 			}
@@ -421,7 +421,7 @@ public class SubjectServiceImpl implements SubjectService {
 			});
 			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-				if (studyId.equals(rel.getStudy().getId()) 
+				if (studyId.equals(rel.getStudy().getId())
 						&& preclinical == null || (preclinical.equals(rel.getSubject().isPreclinical()))) {
 					Subject sub = rel.getSubject();
 					simpleSubjectDTO.setId(sub.getId());
@@ -437,7 +437,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return simpleSubjectDTOList;
 	}
-	
+
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		return findAllSubjectsOfStudyAndPreclinical(studyId, null);
@@ -481,7 +481,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	/**
 	 * Use this method to avoid two bags violation exception and load subjectStudyTags.
-	 * 
+	 *
 	 * @param subject
 	 */
 	private void loadSubjectStudyTags(Subject subject) {

@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
 /**
- * extension of the DatasetProcessing for VIP execution context 
- * 
+ * extension of the DatasetProcessing for VIP execution context
+ *
  * @author KhalilKes
  */
 
@@ -21,7 +21,7 @@ public class ExecutionMonitoring extends DatasetProcessing {
     private String pipelineIdentifier;
 
     private int timeout;
-    
+
     private String outputProcessing;
 
     private ExecutionStatus status;
@@ -63,7 +63,7 @@ public class ExecutionMonitoring extends DatasetProcessing {
     public void setStatus(ExecutionStatus status) {
         this.status = status;
     }
- 
+
     public String getResultsLocation() {
         return resultsLocation;
     }
@@ -88,5 +88,5 @@ public class ExecutionMonitoring extends DatasetProcessing {
 	public void setOutputProcessing(String outputProcessing) {
 		this.outputProcessing = outputProcessing;
 	}
-    
+
 }

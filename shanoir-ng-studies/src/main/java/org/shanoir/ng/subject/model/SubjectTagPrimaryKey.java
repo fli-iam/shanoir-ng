@@ -11,7 +11,7 @@ public class SubjectTagPrimaryKey implements Serializable {
 
 	private Tag tag;
 
-    public SubjectTagPrimaryKey() { } 
+    public SubjectTagPrimaryKey() { }
 
     public SubjectTagPrimaryKey(Subject subject, Tag tag) {
 		super();

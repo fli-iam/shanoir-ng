@@ -19,9 +19,9 @@ public class IdentifierCalculatorTest {
 	private static final String BIRTH_NAME_HASH1 = "2eff19c7e49eeba688545585315ffabef9c8eac3828da0f5bb36c4f8a457ce0b";
 
 	private static final String BIRTH_DATE_HASH = "472ec426afd816174c494ec568eb31081057a89f24ca9b57f03f9049bf8ed58b";
-	
+
 	private static final String FIRST_NAME = "firstName";
-	
+
 	private static final String LAST_NAME = "lastName";
 
 	@Before
@@ -36,7 +36,7 @@ public class IdentifierCalculatorTest {
 		// Values have been acquired during tests with ShUp v5.2
 		Assert.assertEquals("f618582aad29463cc1f4d4fc09dfdddd00584a654bcc2ae2457c338a21da5cd6", subjectIdentifier);
 	}
-	
+
 	@Test
 	public void testCalculateIdentifier() throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		String subjectIdentifier = identifierCalculator.calculateIdentifier(FIRST_NAME, LAST_NAME, "01/01/2020");

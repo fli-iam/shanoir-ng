@@ -24,11 +24,11 @@ import org.springframework.stereotype.Component;
 public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
-	
+
 	@Autowired
 	private DatasetStrategy<GenericDataset> datasetStrategy;
-	
-	
+
+
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
@@ -37,7 +37,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)),
 													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
 		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
@@ -45,8 +45,8 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 			dataset.setDatasetAcquisition(datasetAcquisition);
 			genericizedList.add(dataset);
 		}
-		datasetAcquisition.setDatasets(genericizedList);		
+		datasetAcquisition.setDatasets(genericizedList);
 		return datasetAcquisition;
 	}
-	
+
 }

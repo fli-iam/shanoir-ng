@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,15 +32,15 @@ import java.util.List;
 /**
  * The DicomPersisterService sends DICOM images to the PACS for their permanent
  * storage in the PACS.
- * 
+ *
  * According to the paper: Comparative performance investigation of DICOM
  * C-STORE and DICOM HTTP-based requests
  * https://www.researchgate.net/publication/270659008_Comparative_performance_investigation_of_DICOM_C-STORE_and_DICOM_HTTP-based_requests
  * the STOW is much more efficient in general than the C-STORE.
- * 
+ *
  * My tests showed, that sending 160 images with stow-rs took 4 seconds and
  * sending the same 160 images with c-store took 3 seconds.
- * 
+ *
  * @author mkain
  *
  */
@@ -60,7 +60,7 @@ public class DicomPersisterService {
 	/**
 	 * This method reads the datasets for each serie from the json (String),
 	 * gets the dicom expression format and sends the images to the PACS.
-	 * 
+	 *
 	 * @param serie
 	 * @throws Exception
 	 */
@@ -97,7 +97,7 @@ public class DicomPersisterService {
 						} else {
 							dimseService.sendDicomFilesToPacs(parentFile);
 						}
-						lastParentFile = parentFile;	
+						lastParentFile = parentFile;
 					}
 				}
 			}

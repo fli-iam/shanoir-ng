@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Api for access request, to make a demand on 
+ * Api for access request, to make a demand on
  * @author jcome
  *
  */
@@ -79,7 +79,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		User user = userService.findById(KeycloakUtil.getTokenUserId());
 		request.setUser(user);
 		request.setStatus(AccessRequest.ON_DEMAND);
-		
+
 		// Sanity check: user already has a pending access request
 		List<AccessRequest> accessRequests = this.accessRequestService.findByUserIdAndStudyId(user.getId(), request.getStudyId());
 		if (!CollectionUtils.isEmpty(accessRequests)) {
@@ -128,7 +128,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
 	}
-	
+
 	@Override
     public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
         // Get all studies I administrate
@@ -204,15 +204,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 	}
 
 	public 	ResponseEntity<AccessRequest> inviteUserToStudy(
-			@Parameter(name = "Study the user is invited in", required = true) 
+			@Parameter(name = "Study the user is invited in", required = true)
 				@RequestParam(value = "studyId", required = true) Long studyId,
-			@Parameter(name = "Study name the user is invited in", required = true) 
+			@Parameter(name = "Study name the user is invited in", required = true)
 				@RequestParam(value = "studyName", required = true) String studyName,
-			@Parameter(name = "Issuer of the invitation", required = true) 
+			@Parameter(name = "Issuer of the invitation", required = true)
 				@RequestParam(value = "issuer", required = false) String issuer,
-			@Parameter(name = "The future function of the user in the study he is invited in", required = true) 
+			@Parameter(name = "The future function of the user in the study he is invited in", required = true)
 				@RequestParam(value = "function", required = false) String function,
-			@Parameter(name = "The email or login of the invited user.") 
+			@Parameter(name = "The email or login of the invited user.")
 				@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
 
 		boolean isEmail = emailOrLogin.contains("@");
@@ -268,7 +268,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 	public ResponseEntity<List<AccessRequest>> findAllByStudyId(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException {
-		
+
 		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
 	}
 }

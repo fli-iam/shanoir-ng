@@ -6,12 +6,12 @@ import java.util.Objects;
 import org.shanoir.ng.tag.model.Tag;
 
 public class SubjectStudyTagPrimaryKey implements Serializable {
-	
+
 	private SubjectStudy subjectStudy;
 
 	private Tag tag;
 
-    public SubjectStudyTagPrimaryKey() { } 
+    public SubjectStudyTagPrimaryKey() { }
 
     public SubjectStudyTagPrimaryKey(SubjectStudy subjectStudy, Tag tag) {
 		super();

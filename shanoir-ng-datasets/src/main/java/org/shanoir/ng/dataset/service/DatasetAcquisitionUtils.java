@@ -17,7 +17,7 @@ public class DatasetAcquisitionUtils {
 
 		String type = other.getType();
 		DatasetAcquisition acq = null;
-			
+
 		switch (type) {
 			case CtDatasetAcquisition.DATASET_ACQUISITION_TYPE:
 				acq = new CtDatasetAcquisition(other);
@@ -43,5 +43,5 @@ public class DatasetAcquisitionUtils {
 		}
 		return acq;
 	}
-	
+
 }

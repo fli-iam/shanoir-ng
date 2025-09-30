@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -44,19 +44,19 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
-	
+
 	@Value("${dcm4chee-arc.host}")
 	private String dcm4cheeHost;
 
 	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePortWeb;
-	
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
-	
+
 	@Value("${dcm4chee-arc.dicom.wado.uri}")
 	private String dicomWADOURI;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 

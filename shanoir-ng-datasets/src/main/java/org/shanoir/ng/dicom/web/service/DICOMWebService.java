@@ -43,7 +43,7 @@ import jakarta.annotation.PostConstruct;
  * as the user will see an empty result list. For all storage calls, that are
  * important to arrive an exception is thrown back to the user to avoid silent
  * none storage.
- * 
+ *
  * @author mkain
  *
  */
@@ -53,7 +53,7 @@ public class DICOMWebService {
 	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
-	
+
 	private static final String RELATED = "related";
 
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -78,19 +78,19 @@ public class DICOMWebService {
 
 	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePort;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
 	private String dicomWebRSUpload;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
 
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
 	private int dicomWebHttpClientMaxPerRoute;
-	
+
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
 
@@ -117,7 +117,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);					
+					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
 				}
 			}
 		} catch (Exception e) {
@@ -148,7 +148,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return  EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
+					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
 				}
 			}
 		} catch (Exception e) {
@@ -160,7 +160,7 @@ public class DICOMWebService {
 	/**
 	 * With DICOMWeb for viewer OHIF, no need to transfer private tags,
 	 * so we exclude it here. Fix for Github issue #2805.
-	 * 
+	 *
 	 * @param studyInstanceUID
 	 * @param serieInstanceUID
 	 * @return
@@ -175,7 +175,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity, "UTF-8");
 				} else {
-					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");				
+					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -188,7 +188,7 @@ public class DICOMWebService {
 	 * This method is used by the viewer OHIF to display the actual images.
 	 * The raw pixel data are searched in dcm4chee arc light behind Shanoir
 	 * and send as byte array to OHIF.
-	 * 
+	 *
 	 * @param studyInstanceUID
 	 * @param serieInstanceUID
 	 * @param sopInstanceUID
@@ -208,10 +208,10 @@ public class DICOMWebService {
 					HttpHeaders responseHeaders = new HttpHeaders();
 					if (!entity.isChunked() && entity.getContentLength() >= 0) {
 						responseHeaders.setContentLength(entity.getContentLength());
-					}					
+					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
-					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				
+					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -219,12 +219,12 @@ public class DICOMWebService {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * This method is used by OHIF viewer, double-click on DICOM SEG.
 	 * ShanoirUploader is calling it to get a DICOM instance,
 	 * when running its job to check examination consistency.
-	 * 
+	 *
 	 * @param studyInstanceUID
 	 * @param serieInstanceUID
 	 * @param sopInstanceUID
@@ -244,7 +244,7 @@ public class DICOMWebService {
 					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
-					LOG.error("DICOMWeb: findInstance: empty response entity.");				
+					LOG.error("DICOMWeb: findInstance: empty response entity.");
 				}
 			}
 		} catch (Exception e) {
@@ -411,5 +411,5 @@ public class DICOMWebService {
 			throw new ShanoirException(e.getMessage());
 		}
 	}
-	
+
 }

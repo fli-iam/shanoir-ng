@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,24 +46,24 @@ import jakarta.mail.internet.MimeMessage;
 
 /**
  * User detail service test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class EmailServiceTest {
 
 	private static final String NEW_PASSWORD = "testPwd";
-	
+
 	@Autowired
 	private EmailService emailService;
-	
+
 	private GreenMail greenMail;
-	
+
 	@MockBean
 	private UserRepository userRepositoryMock;
-	
+
 	@BeforeEach
 	void setup() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
@@ -76,7 +76,7 @@ public class EmailServiceTest {
     void stopMailServer() {
         greenMail.stop();
     }
-	
+
 	@Test
 	public void notifyAccountWillExpireTest() throws Exception {
 		emailService.notifyAccountWillExpire(ModelsUtil.createUser());
@@ -120,7 +120,7 @@ public class EmailServiceTest {
 		emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
 		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
 	}
-	
+
 	@Test
 	public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
 		// GIVEN a list of administrators to contact

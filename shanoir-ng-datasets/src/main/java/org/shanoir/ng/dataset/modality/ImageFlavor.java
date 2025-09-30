@@ -7,58 +7,58 @@ package org.shanoir.ng.dataset.modality;
  * This value 3 is called image flavor. See more information according to:
  * https://www.dicomstandard.org/News-dir/ftsup/docs/sups/sup49.pdf
  * https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image/00080008
- * 
+ *
  * @author mkain
  *
  */
 public enum ImageFlavor {
 
 	ANGIO_TIME,
-	
+
 	METABOLITE_MAP,
-	
+
 	CINE,
-	
+
 	DIFFUSION,
-	
+
 	FLOW_ENCODED,
-	
+
 	FLUID_ATTENUATED,
-	
+
 	FMRI,
-	
+
 	LOCALIZER,
-	
+
 	MAX_IP,
-	
+
 	MIN_IP,
-	
+
 	M_MODE,
-	
+
 	MOTION,
-	
+
 	PERFUSION,
-	
+
 	PROTON_DENSITY,
-	
+
 	REALTIME,
-	
+
 	STIR,
-	
+
 	STRESS,
-	
+
 	TAGGING,
-	
+
 	TEMPERATURE,
-	
+
 	T1,
-	
+
 	T2,
-	
+
 	T2_STAR,
-	
+
 	TOF,
-	
+
 	VELOCITY
 
 }

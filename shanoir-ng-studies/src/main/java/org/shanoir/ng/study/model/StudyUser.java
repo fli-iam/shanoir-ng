@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -59,7 +59,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
-	
+
 	/**
 	 * With the introduction of a Data User Agreement form, a study
 	 * responsible can add an user to a study, but his StudyUser is
@@ -72,7 +72,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@ManyToOne
 	@JsonIgnore
 	private Study study;
-		
+
 	/** User id. */
 	private Long userId;
 
@@ -81,7 +81,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "study_user_study_user_rights", joinColumns = @JoinColumn(name = "study_user_id"))
 	private List<Integer> studyUserRights;
-	
+
 	/** User name. Duplicate: master record in ms users. */
 	@NotBlank
 	private String userName;
@@ -219,7 +219,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	public void setCenters(List<Center> centers) {
 		this.centers = centers;
 	}
-	
+
 	public void setCenterIds(List<Long> ids) {
 		centers = ids.stream().map(id -> {
 			Center center = new Center();

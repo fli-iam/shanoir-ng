@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -35,13 +35,13 @@ public class Study extends IdName {
 
 	@Id
 	protected Long id;
-	
+
 	protected String name;
-	
+
 	@ManyToMany
 	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
 	private List<Dataset> relatedDatasets;
-	
+
 	/**
 	 * Linked tags.
 	 */
@@ -51,14 +51,14 @@ public class Study extends IdName {
 	/** Relations between the subjects and the study. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Subject> subjectList;
-	
+
 	/** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Examination> examinations;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyTag> studyTags;
-	
+
 
 	/**
 	 * @return the tags
@@ -112,7 +112,7 @@ public class Study extends IdName {
 	public void setSubjectStudyList(List<Subject> subjectList) {
 		this.subjectList = subjectList;
 	}
-	
+
 	@Override
 	public Long getId() {
 		return id;

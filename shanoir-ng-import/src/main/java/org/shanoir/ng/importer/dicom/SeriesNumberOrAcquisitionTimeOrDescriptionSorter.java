@@ -9,13 +9,13 @@ import org.shanoir.ng.importer.model.Serie;
 /**
  * Sorts a list of DICOM series according to their seriesNumber
  * or the acquisitionTime or the seriesDescription (in this order).
- * 
+ *
  * In case when the queried PACS does not return, as Telemis,
  * the seriesNumber in the response (is null in every case), we
  * catch the NumberFormatException and we use the seriesDescription
  * to at least establish an alphabetical order in the tree to help
  * the users to find their series.
- * 
+ *
  * @author mkain
  *
  */

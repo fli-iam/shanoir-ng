@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -74,7 +74,7 @@ public class SubjectApiControllerTest {
 
 	@MockBean
 	private SubjectService subjectServiceMock;
-	
+
 	@MockBean
 	private StudyService studyService;
 
@@ -152,11 +152,11 @@ public class SubjectApiControllerTest {
 		subject2.setName("BB");
 		subject2.setId(1L);
 		subject2.setSubjectStudy(new SubjectStudyDTO());
-		
+
 		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
 		list.add(subject2);
 		list.add(subject);
-		
+
 		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
@@ -177,13 +177,13 @@ public class SubjectApiControllerTest {
 		subject2.setId(1L);
 		subject2.setSubjectStudy(new SubjectStudyDTO());
 
-		
+
 		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
 		list.add(subject2);
 		list.add(subject);
-		
+
 		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
-		
+
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
 				.andExpect(status().isOk());

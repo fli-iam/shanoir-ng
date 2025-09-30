@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * center service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -56,21 +56,21 @@ public class CenterServiceImpl implements CenterService {
 
 	@Autowired
 	private CenterRepository centerRepository;
-	
+
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Autowired
 	private StudyUserRepository studyUserRepo;
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
-	
+
 	@Override
 	public void deleteByIdCheckDependencies(final Long id) throws EntityNotFoundException, UndeletableDependenciesException {
 		final Optional<Center> centerOpt = centerRepository.findById(id);
@@ -105,24 +105,24 @@ public class CenterServiceImpl implements CenterService {
 	public List<IdName> findIdsAndNames() {
 		return centerRepository.findIdsAndNames();
 	}
-	
+
 	public Optional<Center> findById(final Long id) {
 		return centerRepository.findById(id);
 	}
-	
+
 	public List<Center> findAll() {
 		List<Center> centers = centerRepository.findAll();
 		return centers;
 	}
-	
+
 	@Override
 	public List<IdName> findIdsAndNames(Long studyId) {
 		List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return centers;
-		
+
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
 		if (studyUser == null) return new ArrayList<>();
-		
+
 		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
@@ -152,9 +152,9 @@ public class CenterServiceImpl implements CenterService {
 		to.setStudyCenterList(from.getStudyCenterList());
 		return to;
 	}
-	
+
 	@Override
-	public Center update(Center center) throws EntityNotFoundException {		
+	public Center update(Center center) throws EntityNotFoundException {
 		final Center centerDb = centerRepository.findById(center.getId()).orElse(null);
 		if (centerDb == null) {
 			throw new EntityNotFoundException(center.getClass(), center.getId());
@@ -187,7 +187,7 @@ public class CenterServiceImpl implements CenterService {
 	public Optional<Center> findByName(String name) {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
-	
+
 	private boolean updateName(IdName idName) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
@@ -197,7 +197,7 @@ public class CenterServiceImpl implements CenterService {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
 		}
 	}
-	
+
 	public void deleteById(final Long id) throws EntityNotFoundException  {
 		final Optional<Center> entity = centerRepository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));

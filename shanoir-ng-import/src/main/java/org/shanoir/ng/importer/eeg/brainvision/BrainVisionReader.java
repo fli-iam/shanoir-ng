@@ -99,7 +99,7 @@ public class BrainVisionReader {
 	private static List<String> getFields() {
 		return ListUtils.unmodifiableList(Arrays.asList("DataFile", "DataFormat", "DataOrientation", "NumberOfChannels", "SamplingInterval", "Channel info", "BinaryFormat"));
 	}
-	
+
 	public BrainVisionReader(final File file) throws ShanoirImportException {
 		this.file = file;
 		hasPosition = false;

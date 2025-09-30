@@ -1,7 +1,7 @@
 package org.shanoir.uploader.model.rest;
 
 public class Tag {
-    
+
     private Long id;
 
     private String name;

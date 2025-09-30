@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -34,7 +34,7 @@ import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**
  * Mapper for studies.
- * 
+ *
  * @author msimon
  *
  */
@@ -52,7 +52,7 @@ public interface StudyMapper {
 		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
 		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
 	StudyDTO studyToStudyDTO(Study study);
-	
+
 	@Named("studies.detailed")
 	@IterableMapping(qualifiedByName = "study.detailed")
 	List<StudyDTO> studiesToStudyDTOsDetailed(List<Study> studies);
@@ -80,9 +80,9 @@ public interface StudyMapper {
 	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
 
 	@Named("study.idname")
-	@Mappings({ 
+	@Mappings({
 		@Mapping(target = "studyCenterList", ignore = true),
-		@Mapping(target = "tags", ignore = true) 
+		@Mapping(target = "tags", ignore = true)
 	})
 	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
 

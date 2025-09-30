@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * This class actually does the import work and introduces the asynchronous
  * aspect into the import, that the ImporterApiController can directly answer.
- * 
+ *
  * @author mkain
  *
  */
@@ -71,7 +71,7 @@ public class ImporterManagerService {
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
 
 	private static final SecureRandom RANDOM = new SecureRandom();
-	
+
 	/**
 	 * For the moment Spring is not used here to autowire, as we try to keep the
 	 * anonymization project as simple as it is, without Spring annotations, to
@@ -79,34 +79,34 @@ public class ImporterManagerService {
 	 * Maybe to change and think about deeper afterwards.
 	 */
 	private static final AnonymizationServiceImpl ANONYMIZER = new AnonymizationServiceImpl();
-	
+
 	@Autowired
 	private QueryPACSService queryPACSService;
-	
+
 	@Autowired
 	private DicomStoreSCPServer dicomStoreSCPServer;
-	
+
 	@Autowired
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
-		
+
 	@Autowired
     private RabbitTemplate rabbitTemplate;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
 	private ShanoirEventService eventService;
-	
+
 	@Autowired
 	private DatasetsCreatorService datasetsCreatorService;
-	
+
 	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;
 
 	@Value("${shanoir.import.directory}")
 	private String importDir;
-	
+
 	@Async
 	public void manageImportJob(final ImportJob importJob) {
 	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
@@ -151,7 +151,7 @@ public class ImporterManagerService {
 			// So two possibilities to remove series: 1. call, via the info from the dicomdir or the info from the pacs
 			// 2. call, via analysis of dicom files itself and their content
 			cleanSeries(importJob);
-						
+
 			event.setProgress(0.25F);
 			eventService.publishEvent(event);
 
@@ -183,7 +183,7 @@ public class ImporterManagerService {
 	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards (startImportJob).
 	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
 	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
-	 * 
+	 *
 	 * @param importJob
 	 */
 	private void cleanSeries(final ImportJob importJob) {
@@ -203,7 +203,7 @@ public class ImporterManagerService {
 			}
 		}
 	}
-	
+
 	private void pseudonymize(final ImportJob importJob, ShanoirEvent event, final File importJobDir, Patient patient)
 			throws FileNotFoundException, ShanoirException {
 		if (importJob.getAnonymisationProfileToUse() == null || !importJob.getAnonymisationProfileToUse().isEmpty()) {
@@ -261,10 +261,10 @@ public class ImporterManagerService {
 			LOG.error("Could not send email for this import. ", e);
 		}
 	}
-	
+
 	/**
 	 * This method creates a random number named work folder to work within during the import.
-	 * 
+	 *
 	 * @return file: work folder
 	 * @throws ShanoirException
 	 */
@@ -278,10 +278,10 @@ public class ImporterManagerService {
 		}
 		return importJobDir;
 	}
-	
+
 	/**
 	 * This method creates a random long number.
-	 * 
+	 *
 	 * @return long: random number
 	 */
 	private long createRandomLong() {
@@ -296,7 +296,7 @@ public class ImporterManagerService {
 
 	/**
 	 * Calls a c-move for each serie involved, files are received via DicomStoreSCPServer.
-	 * 
+	 *
 	 * @param patients
 	 * @throws ShanoirException
 	 */
@@ -348,7 +348,7 @@ public class ImporterManagerService {
 	 * For performance reasons already init with 10000 buckets, assuming,
 	 * that we will normally never have more than 10000 files to process.
 	 * Maybe to be evaluated later with more bigger imports.
-	 * 
+	 *
 	 * @param importJob
 	 * @param patient
 	 * @param workFolderPath
@@ -372,7 +372,7 @@ public class ImporterManagerService {
 	/**
 	 * This method walks trough the images of a serie, gets the path,
 	 * creates a file for it and adds it to pathsSet.
-	 * 
+	 *
 	 * @param workFolderPath
 	 * @param pathsSet
 	 * @param serie
@@ -392,5 +392,5 @@ public class ImporterManagerService {
 			}
 		}
 	}
-	
+
 }

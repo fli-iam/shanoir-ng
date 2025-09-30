@@ -1,9 +1,9 @@
 package org.shanoir.uploader.model.dto;
 
 public class SubjectRemoteResultDTO {
-	
+
 	private SubjectDTO subject;
-	
+
 	private String result;
 
 	public SubjectRemoteResultDTO(SubjectDTO subject, String result) {
@@ -27,7 +27,7 @@ public class SubjectRemoteResultDTO {
 	public void setResult(String result) {
 		this.result = result;
 	}
-	
-	
+
+
 
 }

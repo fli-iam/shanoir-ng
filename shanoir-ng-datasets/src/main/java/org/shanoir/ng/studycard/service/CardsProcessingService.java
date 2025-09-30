@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -52,9 +52,9 @@ import org.springframework.web.client.RestClientException;
 
 @Service
 public class CardsProcessingService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(CardsProcessingService.class);
-	
+
 	@Autowired
 	private StudyService studyService;
 
@@ -73,10 +73,10 @@ public class CardsProcessingService {
 
 	/**
 	 * Apply study card on given acquisitions
-	 * 
+	 *
 	 * @param studyCard
 	 * @param acquisitions
-	 * @throws PacsException 
+	 * @throws PacsException
 	 */
 	public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
         boolean changeInAtLeastOneAcquisition = false;
@@ -89,7 +89,7 @@ public class CardsProcessingService {
         if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
             datasetAcquisitionService.update(acquisitions);
         }
-    }	
+    }
 
     /**
 	 * Study cards for quality control: apply on entire exam.
@@ -138,9 +138,9 @@ public class CardsProcessingService {
 
 	/**
 	 * Study cards for quality control: apply on entire study.
-	 * 
+	 *
 	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
@@ -195,7 +195,7 @@ public class CardsProcessingService {
 			        subjectService.update(result.getUpdatedSubjects());
 			    } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
-			    }	    
+			    }
 			}
             event.setProgress(1f);
             event.setStatus(1);

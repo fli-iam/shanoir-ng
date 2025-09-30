@@ -16,15 +16,15 @@ import org.springframework.stereotype.Component;
  * As a result, the context will change either to :
  * 		- a Manual Pacs Configuration in case of failure
  * 		- step to the READY state in case of success.
- * 
+ *
  * @author atouboul
- * 
+ *
  */
 @Component
 public class PacsConfigurationState implements State {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(PacsConfigurationState.class);
-	
+
 	public ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
 
 	@Autowired
@@ -32,7 +32,7 @@ public class PacsConfigurationState implements State {
 
 	@Autowired
 	private PacsManualConfigurationState pacsManualConfigurationState;
-	
+
 	public void load(StartupStateContext context) {
 		initDicomServerClient();
 		/**

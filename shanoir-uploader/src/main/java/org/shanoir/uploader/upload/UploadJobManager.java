@@ -16,20 +16,20 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class UploadJobManager {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(UploadJobManager.class);
 
 	public static final String UPLOAD_JOB_XML = "upload-job.xml";
-	
+
 	private File uploadJobFile;
-	
+
 	/**
 	 * Initialize UploadJobManager empty and reset uploadJobFile
 	 * with method setUploadJobFile.
 	 */
 	public UploadJobManager() {
 	}
-	
+
 	/**
 	 * Initialize UploadJobManager with current upload folder path.
 	 * @param uploadFolder
@@ -41,7 +41,7 @@ public class UploadJobManager {
 			+ UPLOAD_JOB_XML);
 		logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
 	}
-	
+
 	/**
 	 * Initialize UploadJobManager with UploadJob file.
 	 * @param uploadFolder
@@ -50,7 +50,7 @@ public class UploadJobManager {
 		this.uploadJobFile = uploadJobFile;
 		logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.upload.IUploadJobManager#writeUploadJob(org.shanoir.uploader.upload.UploadJob)
 	 */
@@ -88,5 +88,5 @@ public class UploadJobManager {
 	public void setUploadJobFile(File uploadJobFile) {
 		this.uploadJobFile = uploadJobFile;
 	}
-	
+
 }

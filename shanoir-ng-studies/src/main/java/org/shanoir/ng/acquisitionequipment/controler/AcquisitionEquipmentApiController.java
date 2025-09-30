@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -51,7 +51,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Autowired
 	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
-	
+
 	@Autowired
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
@@ -96,7 +96,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		return new ResponseEntity<>(
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
-	
+
 	@Override
 	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
@@ -107,7 +107,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		return new ResponseEntity<>(
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
-	
+
 	@Override
 	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
@@ -128,12 +128,12 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
-		
+
 		/* Save acquisition equipment in db. */
 		try {
 			AcquisitionEquipment newAcqEquipment = acquisitionEquipmentService.create(acquisitionEquipment);
 			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(newAcqEquipment);
-			
+
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipementCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(equipementCreated, HttpStatus.OK);
 		} catch (DataIntegrityViolationException e) {
@@ -165,7 +165,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			throw e;
 		}
 	}
-	
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
@@ -173,7 +173,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 	}
-	
+
 	private void checkDataIntegrityException(DataIntegrityViolationException e, AcquisitionEquipment acquisitionEquipment) throws RestServiceException {
 		if (e.getRootCause() instanceof SQLIntegrityConstraintViolationException) {
 			SQLIntegrityConstraintViolationException rootEx = (SQLIntegrityConstraintViolationException) e.getRootCause();

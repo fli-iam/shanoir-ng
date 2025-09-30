@@ -1,9 +1,9 @@
 package org.shanoir.uploader.model.dto;
 
 public class InvestigatorDTO {
-	
+
 	private int id;
-	
+
 	private String name;
 
 	public InvestigatorDTO(int id, String name) {
@@ -27,5 +27,5 @@ public class InvestigatorDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 }

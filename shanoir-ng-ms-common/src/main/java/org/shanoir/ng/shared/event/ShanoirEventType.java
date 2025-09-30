@@ -68,11 +68,11 @@ public class ShanoirEventType {
 	public static final String CREATE_PRECLINICAL_REFERENCE_EVENT = "createPreclinicalReference.event";
 	public static final String UPDATE_PRECLINICAL_REFERENCE_EVENT = "updatePreclinicalReference.event";
 	public static final String DELETE_PRECLINICAL_REFERENCE_EVENT = "deletePreclinicalReference.event";
-	
+
 	/** User **/
 	public static final String UPDATE_USER_EVENT = "updateUser.event";
 	public static final String DELETE_USER_EVENT = "deleteUser.event";
-	
+
 	/** Import Dataset **/
 	public static final String IMPORT_DATASET_EVENT = "importDataset.event";
 
@@ -86,7 +86,7 @@ public class ShanoirEventType {
 
 	/** User subscribed to a challenge. */
 	public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
-	
+
 	/** User ask access to a study. */
 	public static final String ACCESS_REQUEST_EVENT = "accessRequest.event";
 

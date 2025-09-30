@@ -14,7 +14,7 @@ public class TagDecorator implements TagMapper {
 	public TagDTO tagToTagDTO(Tag tag) {
 		return delegate.tagToTagDTO(tag);
 	}
-	
+
 	@Override
 	public List<TagDTO> tagListToTagDTOList(List<Tag> tagList) {
 		final List<TagDTO> tagDTOs = new ArrayList<>();

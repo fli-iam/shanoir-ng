@@ -50,7 +50,7 @@ import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
 
 /**
- * 
+ *
  * Service layer for REST services of sh-ng.
  *
  * @author mkain
@@ -60,13 +60,13 @@ import jakarta.mail.util.ByteArrayDataSource;
 public class ShanoirUploaderServiceClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(ShanoirUploaderServiceClient.class);
-	
+
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
-	
+
 	private static final String SERVICE_STUDIES_CREATE = "service.studies.create";
 
 	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
-	
+
 	private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
@@ -74,39 +74,39 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
 
 	private static final String SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID = "service.qualitycards.find.by.study.id";
-	
+
 	private static final String SERVICE_CENTERS_CREATE = "service.centers.create";
 
 	private static final String SERVICE_CENTERS_FIND_OR_CREATE_BY_INSTITUTION_DICOM = "service.centers.find.or.create.by.institution.dicom";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
-	
+
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER = "service.acquisition.equipments.by.serial.number";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_EQUIPMENT_DICOM = "service.acquisition.equipments.find.or.create.by.equipment.dicom";
 
 	private static final String SERVICE_MANUFACTURER_MODELS = "service.manufacturer.models";
-	
+
 	private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
-	
+
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
 	private static final String SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY = "service.subjects.find.by.identifier";
 
 	private static final String SERVICE_DATASETS = "service.datasets";
-	
+
 	private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
-	
+
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 
 	private static final String SERVICE_KEYS_FIND_VALUE = "service.keys.find.value";
-	
+
 	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
-	
+
 	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
-	
+
 	private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
-	
+
 	private static final String SERVICE_IMPORTER_UPLOAD_DICOM = "service.importer.upload.dicom";
 
 	private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
@@ -114,13 +114,13 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_SUBJECTS_BY_STUDY_ID = "service.subjects.by.study.id";
 
 	private HttpService httpService;
-	
+
 	private String serverURL;
 
 	private String serviceURLStudiesCreate;
-	
+
 	private String serviceURLStudiesNamesAndCenters;
-	
+
 	private String serviceURLStudyCardsCreate;
 
 	private String serviceURLStudyCardsByStudyIds;
@@ -128,21 +128,21 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLStudyCardsApplyOnStudy;
 
 	private String serviceURLQualityCardsByStudyId;
-	
+
 	private String serviceURLCentersCreate;
 
 	private String serviceURLCentersFindOrCreateByInstitutionDicom;
 
 	private String serviceURLAcquisitionEquipments;
-	
+
 	private String serviceURLAcquisitionEquipmentsBySerialNumber;
 
 	private String serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom;
-	
+
 	private String serviceURLManufacturerModels;
-	
+
 	private String serviceURLManufacturers;
-	
+
 	private String serviceURLSubjectsCreate;
 
 	private String serviceURLKeysFindValue;
@@ -152,15 +152,15 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLSubjectsFindBySubjectNameAndStudy;
 
 	private String serviceURLDatasets;
-	
+
 	private String serviceURLDatasetsDicomWebStudies;
-	
+
 	private String serviceURLExaminationsCreate;
-	
+
 	private String serviceURLImporterCreateTempDir;
-	
+
 	private String serviceURLImporterStartImportJob;
-	
+
 	private String serviceURLImporterUploadDicom;
 
 	private String serviceURLExaminationsBySubjectId;
@@ -239,7 +239,7 @@ public class ShanoirUploaderServiceClient {
 	 * We use separate HttpService here, as the proxy test comes before the profile
 	 * selection, where we learn later the final address of the Shanoir server to
 	 * communicate with.
-	 * 
+	 *
 	 * @param testURL
 	 * @return
 	 * @throws IOException
@@ -259,7 +259,7 @@ public class ShanoirUploaderServiceClient {
 			return code;
 		}
 	}
-	
+
  	public String loginWithKeycloakForToken(String username, String password) throws Exception {
 		String keycloakURL = this.serverURL + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
@@ -283,17 +283,17 @@ public class ShanoirUploaderServiceClient {
 						String refreshToken = responseEntityJson.getString("refresh_token");
 						refreshToken(keycloakURL, refreshToken);
 						return responseEntityJson.getString("access_token");
-					}				
+					}
 				}
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);				
+				logger.error(e.getMessage(), e);
 			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Start job, that refreshes the access token every 240 seconds.
 	 * The default access token lifetime of Keycloak is 5 min (300 secs),
@@ -330,7 +330,7 @@ public class ShanoirUploaderServiceClient {
 		};
 		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
 	}
-	
+
 	public List<Study> findStudiesNamesAndCenters() throws Exception {
 		long startTime = System.currentTimeMillis();
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters)) {
@@ -409,7 +409,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 	}
-	
+
 	public String createTempDir() throws Exception {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir)) {
 			int code = response.getCode();
@@ -422,7 +422,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 	}
-		
+
 	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
 			long startTime = System.currentTimeMillis();
@@ -436,7 +436,7 @@ public class ShanoirUploaderServiceClient {
 					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
-					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		}
@@ -519,7 +519,7 @@ public class ShanoirUploaderServiceClient {
 		}
 		return null;
 	}
-	
+
 	public List<AcquisitionEquipment> findAcquisitionEquipmentsBySerialNumber(String serialNumber) throws Exception {
 		long startTime = System.currentTimeMillis();
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentsBySerialNumber + serialNumber)) {
@@ -564,7 +564,7 @@ public class ShanoirUploaderServiceClient {
 		}
 		return null;
 	}
-	
+
 	public void uploadFile(String tempDirId, File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId,
 				file)) {
@@ -578,7 +578,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 	}
-	
+
 	public ImportJob uploadDicom(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
 			try (response) {
@@ -592,9 +592,9 @@ public class ShanoirUploaderServiceClient {
 					throw new Exception("Error in uploadDicom");
 				}
 			}
-		}		
+		}
 	}
-	
+
 	public void startImportJob(String importJobJsonStr) throws Exception {
 		try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
 				false)) {
@@ -659,7 +659,7 @@ public class ShanoirUploaderServiceClient {
 		}
 		return null;
 	}
-	
+
 	public Study createStudy(final Study study) {
 		try {
 			String json = Util.objectWriter.writeValueAsString(study);
@@ -676,7 +676,7 @@ public class ShanoirUploaderServiceClient {
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
+			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
 	}
@@ -697,7 +697,7 @@ public class ShanoirUploaderServiceClient {
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
+			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
 	}
@@ -732,7 +732,7 @@ public class ShanoirUploaderServiceClient {
 					Center center = Util.getMappedObject(response, Center.class);
 					return center;
 				} else {
-					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName() 
+					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName()
 							+ " (status code: " + code	+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
@@ -760,7 +760,7 @@ public class ShanoirUploaderServiceClient {
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
+			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
 	}
@@ -776,7 +776,7 @@ public class ShanoirUploaderServiceClient {
 						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);			
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -794,14 +794,14 @@ public class ShanoirUploaderServiceClient {
 							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);			
+				logger.error(e.getMessage(), e);
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
-	
+
 	public ManufacturerModel createManufacturerModel(final ManufacturerModel manufacturerModel) {
 		try {
 			String json = Util.objectWriter.writeValueAsString(manufacturerModel);
@@ -815,17 +815,17 @@ public class ShanoirUploaderServiceClient {
 							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);			
+				logger.error(e.getMessage(), e);
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * This method creates a subject on the server.
-	 * 
+	 *
 	 * @param studyId
 	 * @param studyCardId
 	 * @param modeSubjectCommonName
@@ -857,11 +857,11 @@ public class ShanoirUploaderServiceClient {
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
 		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
+			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
 	}
-	
+
 	public String findValueByKey(String key) throws Exception {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLKeysFindValue + key)) {
 			int code = response.getCode();
@@ -876,7 +876,7 @@ public class ShanoirUploaderServiceClient {
 
 	/**
 	 * This method creates an examination on the server.
-	 * 
+	 *
 	 * @param examinationDTO
 	 * @return
 	 */
@@ -921,7 +921,7 @@ public class ShanoirUploaderServiceClient {
 		logger.info("Retrieving qualitycards for the study : " + studyId);
 		try {
 			String studyIdentifier = URLEncoder.encode(Long.toString(studyId), "UTF-8");
-			long startTime = System.currentTimeMillis(); 
+			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLQualityCardsByStudyId + studyIdentifier)) {
 				long stopTime = System.currentTimeMillis();
 				long elapsedTime = stopTime - startTime;
@@ -950,7 +950,7 @@ public class ShanoirUploaderServiceClient {
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
 				throw new Exception("Error in postDicomSR");
 			}
-		}		
+		}
 	}
 
 	public Attributes getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
@@ -988,7 +988,7 @@ public class ShanoirUploaderServiceClient {
 				throw new Exception("Error in getDicomFile");
 			}
 		}
-		return null;	
+		return null;
 	}
 
 }

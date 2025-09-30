@@ -35,7 +35,7 @@ public class DuaDraftServiceImpl implements DuaDraftService {
 	@Autowired
 	private StudyRepository studyRepository;
 
-	
+
 	@Override
 	public Optional<DuaDraft> findById(final String id) {
 		return duaDraftRepository.findById(id);

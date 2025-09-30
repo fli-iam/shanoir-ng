@@ -12,23 +12,23 @@ public class ErrorDialog extends JDialog {
 	public JLabel errorLabel;
 	public JButton errorButton;
 	public JLabel connexionStatus;
-	ResourceBundle resourceBundle; 
-	
+	ResourceBundle resourceBundle;
+
 	public ErrorDialog(JDialog jdialog, String title, ResourceBundle resourceBundle) {
 		super(jdialog,title,true);
 		errorDialog = new JDialog(this,resourceBundle.getString("shanoir.uploader.systemErrorDialog.title"));
 		errorDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		errorDialog.setSize(400, 150);
 		errorDialog.setLocationRelativeTo(this);
-		
+
 		errorLabel = new JLabel("<html><p>"+resourceBundle.getString("shanoir.uploader.systemErrorDialog.label")+"</p>");
 		errorDialog.add(errorLabel,BorderLayout.NORTH);
-		
+
 		errorButton = new JButton(resourceBundle.getString("shanoir.uploader.systemErrorDialog.button"));
 		errorDialog.add(errorButton,BorderLayout.SOUTH);
-		
+
 	}
-	
-	
+
+
 
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -50,7 +50,7 @@ import org.thymeleaf.context.Context;
 
 /**
  * Implementation of email service.
- * 
+ *
  * @author msimon, mkain
  *
  */
@@ -66,35 +66,35 @@ public class EmailServiceImpl implements EmailService {
 	private static final String LASTNAME = "lastname";
 
 	private static final String FIRSTNAME = "firstname";
-	
+
 	private static final String USERNAME = "username";
 
 	private static final String SERVER_ADDRESS = "serverAddress";
-	
+
 	private static final String SERVER_ADDRESS_PUBLIC = "serverAddressPublic";
 
 	private static final String STUDY_NAME = "studyName";
-	
+
 	private static final String SUBJECT = "subject";
-	
+
 	private static final String EXAMINATION = "examination";
-	
+
 	private static final String FAILURE_MESSAGE = "failureMessage";
-	
+
 	private static final String EXAM_DATE = "exam_date";
 
 	private static final String STUDY_CARD = "study_card";
 
 	private static final String SERIES = "series";
-	
+
 	private static final String MOTIVATION = "motivation";
 
 	private static final String STUDYCARD_URL = "studyCardUrl";
 
 	private static final String LINK = "link";
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
-	
+
 	@Autowired
 	private JavaMailSender mailSender;
 
@@ -394,7 +394,7 @@ public class EmailServiceImpl implements EmailService {
 
 		// Get the list of recipients
 		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-		
+
 		List<DatasetDetail> datasetLinks = new ArrayList<>();
 		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
 			DatasetDetail detail = new DatasetDetail();
@@ -402,7 +402,7 @@ public class EmailServiceImpl implements EmailService {
 			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
 			datasetLinks.add(detail);
 		}
-		
+
 		DatasetDetail examDetail = new DatasetDetail();
 		examDetail.setName(generatedMail.getExaminationId());
 		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
@@ -441,7 +441,7 @@ public class EmailServiceImpl implements EmailService {
 
 		// Get the list of recipients
 		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-		
+
 		DatasetDetail examDetail = new DatasetDetail();
 		examDetail.setName(generatedMail.getExaminationId());
 		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
@@ -484,7 +484,7 @@ public class EmailServiceImpl implements EmailService {
         if (!CollectionUtils.isEmpty(email.getRecipients())) {
 	        // Get the list of recipients
 			List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
-					
+
 			for (User studyAdmin : studyAdmins) {
 				MimeMessagePreparator messagePreparator = mimeMessage -> {
 					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -562,7 +562,7 @@ public class EmailServiceImpl implements EmailService {
 			}
         }
 	}
-	
+
 	/**
 	 * This method allows to get all study admins for a given study
 	 * @param studyId the study id we want the admins of
@@ -579,7 +579,7 @@ public class EmailServiceImpl implements EmailService {
 	/** Invites a user that is not in shanoir yet. */
 	@Override
 	public void inviteToStudy(StudyInvitationEmail email) {
-		
+
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -624,7 +624,7 @@ public class EmailServiceImpl implements EmailService {
 	 */
 	public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
 		User user = refusedRequest.getUser();
-		
+
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);

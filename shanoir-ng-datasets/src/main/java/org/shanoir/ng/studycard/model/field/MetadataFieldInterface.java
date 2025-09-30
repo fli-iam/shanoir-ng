@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,10 +20,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MetadataFieldDeserializer.class)
 public interface MetadataFieldInterface<T> {
-	
+
     /**
      * Update object's metadata field with the updated value.
-     * 
+     *
      * @param object
      * @param updatedValue
 	 * @throws CheckedIllegalClassException if object class is incompatible with this field
@@ -31,18 +31,18 @@ public interface MetadataFieldInterface<T> {
 	void update(T object, String updatedValue) throws CheckedIllegalClassException;
 
 	/**
-	 * Get the object's metadata field value 
-	 * 
+	 * Get the object's metadata field value
+	 *
 	 * @param object
 	 * @return field value
 	 * @throws CheckedIllegalClassException if object class is incompatible with this field
 	 */
 	String get(T object) throws CheckedIllegalClassException;
-	
+
 	/**
 	 * Get the enum object id
-	 * 
+	 *
 	 * @return id
 	 */
-	public int getId();	
+	public int getId();
 }

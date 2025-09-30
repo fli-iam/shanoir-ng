@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,23 +37,23 @@ import java.util.Map;
  *
  */
 public interface SolrJWrapper {
-	
+
 	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
-	
+
 	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
-	
+
 	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 
 	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
-	
+
 	void deleteAll() throws SolrServerException, IOException;
 
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
-	
+
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
-	
+
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studiesCenter, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
 }

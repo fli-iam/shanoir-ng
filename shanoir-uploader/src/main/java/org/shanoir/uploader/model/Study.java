@@ -66,7 +66,7 @@ public class Study implements Comparable<Study> {
 			if (compatible) {
 				return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + this.getName();
 			} else {
-				return this.getName();			
+				return this.getName();
 			}
 		} else {
 			return this.getName() + ", 0 study card.";

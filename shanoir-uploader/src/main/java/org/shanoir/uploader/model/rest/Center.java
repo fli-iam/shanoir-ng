@@ -7,20 +7,20 @@ public class Center implements Comparable<Center> {
 	private String name;
 
 	private String street;
-	
+
 	private String postalCode;
-	
+
 	private String city;
-	
+
 	private String country;
-	
+
 	private String website;
-	
+
 	private String phoneNumber;
 
 	public Center() {
 	}
-	
+
 	public Center(Long id, String name) {
 		this.id = id;
 		this.name = name;

@@ -24,15 +24,15 @@ public class StudyExamination extends AbstractEntity {
 	private static final long serialVersionUID = -6040639164236575228L;
 
 	private Long examinationId;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "study_id")
 	private Study study;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "center_id")
 	private Center center;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "subject_id")
 	private Subject subject;
@@ -104,5 +104,5 @@ public class StudyExamination extends AbstractEntity {
 	public void setSubject(Subject subject) {
 		this.subject = subject;
 	}
-	
+
 }

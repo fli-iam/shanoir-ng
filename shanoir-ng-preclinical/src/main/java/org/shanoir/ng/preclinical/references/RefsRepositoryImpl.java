@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,7 +28,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 	private static final String REFTYPE2 = "reftype";
 	@PersistenceContext
     private EntityManager em;
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Reference> findByCategory(String category) {
@@ -37,7 +37,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 				.setParameter(CATEGORY2, category)
 				.getResultList();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Reference> findByCategoryAndType(String category, String reftype) {
@@ -47,7 +47,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 				.setParameter(REFTYPE2, reftype)
 				.getResultList();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Optional<Reference> findByCategoryTypeAndValue(String category, String reftype, String value) {
@@ -62,9 +62,9 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 	        return Optional.empty();
 	    }
 	    return Optional.of(resultList.get(0));
-		
+
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Optional<Reference> findByTypeAndValue(String reftype, String value) {
@@ -78,9 +78,9 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 	        return Optional.empty();
 	    }
 	    return Optional.of(resultList.get(0));
-		
+
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> findCategories() {
@@ -88,7 +88,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 				"SELECT DISTINCT(r.category) FROM Reference r")
 				.getResultList();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> findTypesByCategory(String category) {
@@ -97,6 +97,6 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom {
 				.setParameter(CATEGORY2, category)
 				.getResultList();
 	}
-	
-	
+
+
 }

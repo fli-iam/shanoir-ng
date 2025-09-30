@@ -11,7 +11,7 @@ import org.shanoir.uploader.test.AbstractTest;
 public class StowDicomSRTest extends AbstractTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(StowDicomSRTest.class);
-	
+
 	public void postDICOMSRToDicomWeb() throws Exception {
 		try {
 			URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");

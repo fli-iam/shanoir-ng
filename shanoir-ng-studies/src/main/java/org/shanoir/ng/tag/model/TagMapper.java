@@ -11,7 +11,7 @@ public interface TagMapper {
 
 	/**
 	 * Map list of @Tag to list of @TagDTO.
-	 * 
+	 *
 	 * @param tagList
 	 *            list of tags
 	 * @return list of DTO.
@@ -20,7 +20,7 @@ public interface TagMapper {
 
 	/**
 	 * Map a @Tag to a @TagDTO.
-	 * 
+	 *
 	 * @param tag
 	 * @return DTO.
 	 */

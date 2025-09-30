@@ -189,7 +189,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         }
 /**
- * 
+ *
         Study study = new Study();
         study.setId(importTodo.getParent().getStudy().getId());
         study.setName(importTodo.getParent().getStudy().getName());

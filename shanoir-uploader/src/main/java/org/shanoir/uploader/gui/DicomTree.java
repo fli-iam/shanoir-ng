@@ -15,7 +15,7 @@ import org.shanoir.uploader.dicom.query.Media;
  *
  */
 public class DicomTree extends JTree {
-	 
+
     public DicomTree(final Media media) {
         super(new DicomTreeModel(media));
         setRootVisible(false);

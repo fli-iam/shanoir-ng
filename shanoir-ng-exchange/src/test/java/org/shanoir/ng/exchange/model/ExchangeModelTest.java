@@ -36,16 +36,16 @@ public class ExchangeModelTest {
 		ArrayList<ExSubject> exSubjects = new ArrayList<>();
 		exSubjects.add(exSubject);
 		exStudy.setExSubjects(exSubjects);
-		
+
 		ExExamination exExamination = new ExExamination();
 		exExamination.setId(new Long(1));
 		ArrayList<ExExamination> exExaminations = new ArrayList<>();
 		exExaminations.add(exExamination);
 		exSubject.setExExaminations(exExaminations);
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonStr = mapper.writeValueAsString(exchange);
 		System.out.println(jsonStr);
 	}
-	
+
 }

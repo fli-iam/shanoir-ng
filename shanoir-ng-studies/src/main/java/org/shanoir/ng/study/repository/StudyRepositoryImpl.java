@@ -25,7 +25,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 
 		//"getStudyStatistics" is the name of the MySQL procedure
-		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStudyStatistics"); 
+		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStudyStatistics");
 
 		//Declare the parameters in the same order
 		query.registerStoredProcedureParameter(1, Long.class, ParameterMode.IN);
@@ -35,7 +35,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
 		//Execute query
 		query.execute();
-		
+
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = query.getResultList();
 

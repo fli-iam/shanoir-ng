@@ -58,7 +58,7 @@ public class CurrentNominativeDataController {
 
 		// Set the action when delete completed uploads button is clicked
 		JButton deleteAllButton = cuw.frame.deleteFinishedUploads;
-		
+
 		deleteAllButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -104,7 +104,7 @@ public class CurrentNominativeDataController {
 		});
 
 		JTableHeader header = cuw.table.getTableHeader();
-		
+
 		cuw.table.addMouseListener(new MouseAdapter() {
             @Override
 			public void mouseClicked(MouseEvent e) {
@@ -124,7 +124,7 @@ public class CurrentNominativeDataController {
 							showDeleteConfirmationDialog(workFolderFilePath, cuw, modelRow);
 						} catch (IOException eIO) {
 							logger.error(eIO.getMessage(), eIO);
-						}				
+						}
 					}
 				// start the import or try reimporting an exam with status "ERROR"
 				} else if (col == cuw.importColumn) {
@@ -143,7 +143,7 @@ public class CurrentNominativeDataController {
 			 * @param workFolderFilePath
 			 * @param cuw
 			 * @param row
-			 * @throws IOException 
+			 * @throws IOException
 			 */
 			private void showDeleteConfirmationDialog(final File workFolderFilePath,
 					final CurrentUploadsWindowTable cuw, int row) throws IOException {
@@ -204,9 +204,9 @@ public class CurrentNominativeDataController {
 
 	/**
 	 * Walk trough all folders within the work folder.
-	 * 
+	 *
 	 * @param workFolder
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void processWorkFolder(File workFolder) throws IOException {
 		List<File> folders = Util.listFolders(workFolder);
@@ -222,7 +222,7 @@ public class CurrentNominativeDataController {
 
 	/**
 	 * Inspects the content of a folder. Get the upload informations from import-job.json
-	 * 
+	 *
 	 * @param folder
 	 */
 	private ImportJob processFolder(final File folder) throws IOException {
@@ -241,7 +241,7 @@ public class CurrentNominativeDataController {
 					// We write the json file so that we can open ImportDialog for this old import
 					importJobManager.writeImportJob(importJob);
 				}
-				// In case of previous version importJobs 
+				// In case of previous version importJobs
 				// (without uploadState) we look for uploadState value from upload-job.xml file
 				if (importJob.getUploadState() == null) {
 					String uploadJobState = ImportUtils.getUploadStateFromUploadJob(folder);
@@ -273,7 +273,7 @@ public class CurrentNominativeDataController {
 	/**
 	 * Initializes an ImportJobManager and puts the other files in the list
 	 * dicomFiles.
-	 * 
+	 *
 	 * @param folder
 	 * @param dicomFiles
 	 */

@@ -9,7 +9,7 @@ import org.shanoir.uploader.test.AbstractTest;
 public class StudyCardTest extends AbstractTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(StudyCardTest.class);
-	
+
 	@Test
 	public void applyStudyCardOnStudy() throws Exception {
 		// @todo here: create SC example, import and verify apply after

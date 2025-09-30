@@ -21,11 +21,11 @@ public class Channel {
 	private float y;
 	@JsonProperty("z")
 	private float z;
-	
+
 	// default constructor for jackson purpose.
 	public Channel() {
 	}
-	
+
 	public Channel(String name, float resolution, String referenceUnit) {
 		super();
 		this.name = name;
@@ -86,5 +86,5 @@ public class Channel {
 	public void setZ(float z) {
 		this.z = z;
 	}
-	
+
 }

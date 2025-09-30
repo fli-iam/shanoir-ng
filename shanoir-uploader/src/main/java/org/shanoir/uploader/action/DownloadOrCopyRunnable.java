@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * ImportJob. This class creates the import-job.json (and upload-job.xml +
  * nominative-upload-job.xml for legacy reasons). The .xmls will be removed
  * later.
- * 
+ *
  * @author mkain
  *
  */

@@ -31,19 +31,19 @@ import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
- * It initializes the ShanoirUploader application by 
+ * It initializes the ShanoirUploader application by
  * - initializing the logger
  * - initializing the .su folder
  * - loading all required property files
  * - setting the language
  * - creating and showing the startup dialog (dependency to language and properties files);
  * the dialog is then set into the context, to be used and influenced by other states after
- * 
+ *
  *  When done the state is changed to ProxyConfigurationState.
- *  
+ *
  *  @author atouboul
  *  @author mkain
- * 
+ *
  */
 @Component
 public class InitialStartupState implements State {
@@ -127,7 +127,7 @@ public class InitialStartupState implements State {
 			// do nothing in case of already existing property file
 			logger.info("Start migrating properties: property not copied, because of existing already in destination folder: " + propertiesDest.getAbsolutePath());
 		} else {
-			Util.copyFileUsingStream(propertiesSrc, propertiesDest);			
+			Util.copyFileUsingStream(propertiesSrc, propertiesDest);
 		}
 	}
 
@@ -173,7 +173,7 @@ public class InitialStartupState implements State {
 			profiles = profilesStr.split(",");
 			logger.info("Profiles migration finished...");
 		}
-		
+
 		for (int i = 0; i < profiles.length; i++) {
 			logger.info("Checking profile folder: " + profiles[i]);
 			File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
@@ -188,7 +188,7 @@ public class InitialStartupState implements State {
 				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.PROFILE_PROPERTIES, profilePropertiesFile);
 				// copy keycloak.json, if existing
 				File keycloakFile = new File(profileDir, ShUpConfig.KEYCLOAK_JSON);
-				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.KEYCLOAK_JSON, keycloakFile);			
+				Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.KEYCLOAK_JSON, keycloakFile);
 			}
 		}
 		ShUpConfig.profiles = profiles;
@@ -199,7 +199,7 @@ public class InitialStartupState implements State {
 		shUpStartupDialog.setVisible(true);
 		context.setShUpStartupDialog(shUpStartupDialog);
 	}
-	
+
 	private void initPropertiesFiles() throws FileNotFoundException, IOException {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
 		logger.info("basic.properties successfully initialized.");
@@ -223,7 +223,7 @@ public class InitialStartupState implements State {
 		initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
 				ShUpConfig.dicomServerProperties);
 		logger.info("dicom_server.properties successfully initialized.");
-		
+
 		initProperties(ShUpConfig.ENDPOINT_PROPERTIES,
 				ShUpConfig.endpointProperties);
 		logger.info("endpoint.properties successfully initialized.");
@@ -245,7 +245,7 @@ public class InitialStartupState implements State {
 			return knum;
 		}
 	}
-	
+
 	/**
 	 * Reads properties from .su folder into memory, or copies property file if not existing.
 	 */
@@ -263,7 +263,7 @@ public class InitialStartupState implements State {
 		}
 		PropertiesUtil.loadPropertiesFromFile(properties, propertiesFile);
 	}
-	
+
 	private void initLanguage() {
 		String language = ShUpConfig.languageProperties.getProperty("shanoir.uploader.language");
 		if (language != null && language.equals(ShUpConfig.FRENCH_LANGUAGE)) {
@@ -274,13 +274,13 @@ public class InitialStartupState implements State {
 	}
 
 	private void initProfile() throws FileNotFoundException, IOException {
-		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution. 
+		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution.
 		String profile = ShUpConfig.basicProperties.getProperty(ShUpConfig.PROFILE);
 		if (profile != null && !profile.isEmpty()) {
 			ShUpConfig.profileSelected = profile;
 		}
 	}
-	
+
 	private void initCredentials() throws FileNotFoundException, IOException {
 		String username = ShUpConfig.basicProperties.getProperty(ShUpConfig.USERNAME);
 		String password = ShUpConfig.basicProperties.getProperty(ShUpConfig.PASSWORD);

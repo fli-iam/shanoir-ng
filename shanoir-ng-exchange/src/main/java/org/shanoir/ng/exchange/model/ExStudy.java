@@ -7,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the study is already existing in Shanoir, the studyName or studyId (or both) is set,
  * if not the studyName == null and the studyId == null. So we have to create a new study in sh-ng.
- * 
+ *
  * @author mkain
  *
  */
 public class ExStudy {
-	
+
 	/**
 	 * If the study name is set, an existing study must be used for data exchange.
 	 * In case of an import, the study with the name must be used.
@@ -21,7 +21,7 @@ public class ExStudy {
 	 */
 	@JsonProperty("studyName")
 	private String studyName;
-	
+
 	/**
 	 * If study id is set, an existing study must be used for data exchange.
 	 * In case of an import, the study with the name must be used.
@@ -29,7 +29,7 @@ public class ExStudy {
 	 */
 	@JsonProperty("studyId")
 	private Long studyId;
-	
+
 	/**
 	 * If the id == null a complete study object as used within MS Studies
 	 * shall be added here. This can be used by an export to write a study
@@ -39,7 +39,7 @@ public class ExStudy {
 	 */
 //	@JsonProperty("study")
 //	private Study study;
-	
+
 	/**
 	 * At least one ExStudyCard needs to be present to exchange data.
 	 * In case of an import, for the moment always the first study card
@@ -47,7 +47,7 @@ public class ExStudy {
 	 */
 	@JsonProperty("exStudyCards")
 	private List<ExStudyCard> exStudyCards;
-	
+
 	/**
 	 * At least one ExSubject needs to be present to exchange data.
 	 */

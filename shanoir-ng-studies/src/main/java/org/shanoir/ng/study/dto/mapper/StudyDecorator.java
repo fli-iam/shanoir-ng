@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Decorator for study.
- * 
+ *
  * @author msimon
  *
  */
@@ -70,7 +70,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	public StudyDTO studyToStudyDTO(final Study study) {
 		return convertStudyToStudyDTO(study, true);
 	}
-	
+
 	@Override
 	public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
@@ -79,7 +79,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
-	
+
 	@Override
 	public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(final List<Study> studies) {
 		List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
@@ -92,11 +92,11 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	/*
 	 * Map a @Study to a @StudyDTO.
-	 * 
+	 *
 	 * @param study study to map.
-	 * 
+	 *
 	 * @param withData study with data?
-	 * 
+	 *
 	 * @return study DTO.
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
@@ -106,7 +106,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		if (withData) {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			if (study.getTags() != null) {
-				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
+				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
 			}
 		}
 		return studyDTO;

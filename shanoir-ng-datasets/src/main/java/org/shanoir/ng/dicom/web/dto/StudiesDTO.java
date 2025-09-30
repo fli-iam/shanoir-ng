@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StudiesDTO {
 
-    @JsonProperty("studies")   
+    @JsonProperty("studies")
 	private List<StudyDTO> studies;
 
 	public List<StudyDTO> getStudies() {
@@ -16,5 +16,5 @@ public class StudiesDTO {
 	public void setStudies(List<StudyDTO> studies) {
 		this.studies = studies;
 	}
-	
+
 }

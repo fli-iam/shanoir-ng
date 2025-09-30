@@ -13,23 +13,23 @@ public class EegDataset {
     /** List of events for the eeg dataset. */
     @JsonProperty("events")
     private List<Event> events;
-    
+
 	/** Name of the file -> name of the dataset created. */
 	@JsonProperty("name")
 	private String name;
 
 	@JsonProperty("files")
 	private List<String> files;
-	
+
 	@JsonProperty("samplingFrequency")
 	private int samplingFrequency;
-	
+
 	@JsonProperty("channelCount")
 	private int channelCount;
-	
+
 	@JsonProperty("coordinatesSystem")
 	private String coordinatesSystem;
-	
+
 	/**
 	 * @return the coordinatesSystem
 	 */
@@ -43,7 +43,7 @@ public class EegDataset {
 	public void setCoordinatesSystem(String coordinatesSystem) {
 		this.coordinatesSystem = coordinatesSystem;
 	}
-	
+
 	public int getChannelCount() {
 		return channelCount;
 	}
@@ -63,15 +63,15 @@ public class EegDataset {
 	public List<Channel> getChannels() {
 		return channels;
 	}
-	
+
 	public void setChannels(List<Channel> channels) {
 		this.channels = channels;
 	}
-	
+
 	public List<Event> getEvents() {
 		return events;
 	}
-	
+
 	public void setEvents(List<Event> events) {
 		this.events = events;
 	}

@@ -39,7 +39,7 @@ public class PatientTreeNode implements DicomTreeNode {
 		this.patient = patient;
 		this.relatedStudies = new ArrayList<DicomTreeNode>();
 	}
-	
+
 
 	/**
 	 * Adds the child.
@@ -83,7 +83,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	public Patient getPatient() {
 		return this.patient;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -188,5 +188,5 @@ public class PatientTreeNode implements DicomTreeNode {
 		StudyTreeNode studyTreeNode = new StudyTreeNode(study);
 		return studyTreeNode;
 	}
-	
+
 }

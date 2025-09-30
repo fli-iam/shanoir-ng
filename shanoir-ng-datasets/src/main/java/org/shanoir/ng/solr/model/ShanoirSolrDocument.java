@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,26 +30,26 @@ import java.util.List;
  *
  */
 public class ShanoirSolrDocument {
-	
+
 	/** An id of type string and distinct from datasetId is preferable for Solr **/
 	@Id
 	@Field
 	private String id;
-	
+
 	@Field
 	private	Long datasetId;
-	
+
 	@Field
 	private	String datasetName;
-	
+
 	// DatasetModalityType: MR, CT, PET etc..
 	@Field
 	private	String datasetType;
-	
+
 	// T1, T2, Diff, etc..
 	@Field
 	private String datasetNature;
-	
+
 	@Field
 	private Date datasetCreationDate;
 
@@ -79,10 +79,10 @@ public class ShanoirSolrDocument {
 
 	@Field
 	private String studyName;
-	
+
 	@Field
 	private Long studyId;
-	
+
 	@Field
 	private String centerName;
 
@@ -91,13 +91,13 @@ public class ShanoirSolrDocument {
 
 	@Field
 	private Double sliceThickness;
-	
+
 	@Field
 	private Double pixelBandwidth;
-	
+
 	@Field
 	private Double magneticFieldStrength;
-	
+
 	@Field
 	private List<String> tags;
 
@@ -112,7 +112,7 @@ public class ShanoirSolrDocument {
 
 	public ShanoirSolrDocument() {
 	}
-	
+
 	public ShanoirSolrDocument(String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
 			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
@@ -146,7 +146,7 @@ public class ShanoirSolrDocument {
 	public String getId() {
 		return this.id;
 	}
-	
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -300,7 +300,7 @@ public class ShanoirSolrDocument {
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
 	}
-	
+
 	/**
 	 * @return the studyId
 	 */
@@ -346,7 +346,7 @@ public class ShanoirSolrDocument {
 	public void setMagneticFieldStrength(Double magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
-	
+
 	public List<String> getTags() {
 		return tags;
 	}

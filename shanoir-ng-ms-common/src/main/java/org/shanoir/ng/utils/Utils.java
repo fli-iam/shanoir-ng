@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author jlouis
  */
 public class Utils {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 	/**
@@ -74,7 +74,7 @@ public class Utils {
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
 	}
-	
+
 
 	/**
 	 * Deletes all files and subdirectories under dir. Returns true if all
@@ -102,14 +102,14 @@ public class Utils {
 		// The directory is now empty so delete it
 		return tempFolder.delete();
 	}
-		
+
 	public static <T> List<T> copyList(List<T> list) {
     	List<T> copy = new ArrayList<T>();
     	for (T item : list) copy.add(item);
     	return copy;
     }
 
-	
+
 	public static void removeIdsFromList(Iterable<Long> ids, List<? extends AbstractEntity> list) {
 		for (Long id : ids) {
 			int deletedIndex = -1;
@@ -124,8 +124,8 @@ public class Utils {
 			if (deletedIndex > -1) list.remove(deletedIndex);
 		}
 	}
-	
-	
+
+
 	public static boolean haveOneInCommon(final Iterable<String> roles, final Iterable<String> authorities) {
 		for (final String role : roles) {
 			for (final String authority : authorities) {
@@ -136,8 +136,8 @@ public class Utils {
 		}
 		return false;
 	}
-	
-	
+
+
 	@SafeVarargs
 	public static <T> List<T> toList(T... items) {
 		List<T> res = new ArrayList<T>();
@@ -198,7 +198,7 @@ public class Utils {
 		}
 		return ret;
 	}
-    
+
 	public static String removeLeadingZeroes(String s) {
 	    StringBuilder sb = new StringBuilder(s);
 	    while (sb.length() > 0 && sb.charAt(0) == '0') {

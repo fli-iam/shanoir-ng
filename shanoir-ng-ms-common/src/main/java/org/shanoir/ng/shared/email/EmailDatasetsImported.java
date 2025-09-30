@@ -4,18 +4,18 @@ import java.util.Map;
 
 /**
  * This class represents an EMAIL to be sent after datasets have been imported.
- * 
+ *
  * @author JCD, mkain
  *
  */
 public class EmailDatasetsImported extends EmailBase {
 
 	private Map<Long, String> datasets;
-    
+
 	private String subjectName;
 
 	private String examinationId;
-    
+
 	private String examDate;
 
 	private String studyCard;
@@ -89,5 +89,5 @@ public class EmailDatasetsImported extends EmailBase {
 	public void setStudyCard(String studyCard) {
 		this.studyCard = studyCard;
 	}
-	
+
 }

@@ -100,7 +100,7 @@ public class DatasetsCreatorService {
 	 * This method extract the dicom files in proper dataset(s) (in a serie).
 	 * It also constructs the associated ExpressionFormat and DatasetFiles
 	 * within the Dataset object.
-	 * 
+	 *
 	 * @param serieIDFolderFile
 	 * @param serie
 	 * @param serieIdentifiedForNotSeparating
@@ -210,7 +210,7 @@ public class DatasetsCreatorService {
 	/**
 	 * This method creates a folder for each serie and moves into it the files,
 	 * coming either from the PACS or from the zip upload directory.
-	 * 
+	 *
 	 * @param seriesFolderFile
 	 * @param serie
 	 * @throws ShanoirException

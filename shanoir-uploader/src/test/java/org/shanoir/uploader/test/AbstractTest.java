@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * This class is the base class for all ShUp test classes, that do
  * integration tests on shanoir servers. It provides the login and
  * the creation of the ShanoirUploaderServiceClient.
- * 
+ *
  * @author mkain
  *
  */
@@ -36,7 +36,7 @@ public abstract class AbstractTest {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
 
 	private static final String TEST_PROPERTIES = "test.properties";
-	
+
 	public static Properties testProperties = new Properties();
 
 	private static final String PROFILE = "profile";
@@ -50,7 +50,7 @@ public abstract class AbstractTest {
 	protected static Pseudonymizer pseudonymizer;
 
 	protected static IdentifierCalculator identifierCalculator;
-	
+
 	@BeforeAll
 	public static void setup() {
 		ShanoirUploader.initShanoirUploaderFolders();
@@ -80,14 +80,14 @@ public abstract class AbstractTest {
 				} catch (PseudonymusException e) {
 					logger.error(e.getMessage(), e);
 					System.exit(0);
-				}	
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
             Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
 		}
 	}
-	
+
 	public static Center createCenter() {
 		Center center = new Center();
 		String centerUUID = UUID.randomUUID().toString();
@@ -101,7 +101,7 @@ public abstract class AbstractTest {
 		Center createdCenter = shUpClient.createCenter(center);
 		return createdCenter;
 	}
-	
+
 	public static AcquisitionEquipment createEquipment(Center createdCenter) {
 		Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());

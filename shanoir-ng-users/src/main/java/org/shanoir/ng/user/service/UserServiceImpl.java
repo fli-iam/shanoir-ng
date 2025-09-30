@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * User service implementation.
- * 
+ *
  * @author msimon
  * @author mkain
  *
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AccessRequestRepository accessRequestRepository;
-	
+
 	@Autowired
     ApplicationEventPublisher publisher;
 
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	AccessRequestService accessRequestService;
-	
+
 	@Override
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
 		final User userDb = userRepository.findById(user.getId()).orElse(null);
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final User user = (User) userRepository.findById(id).orElse(null);
-		
+
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
 		}
@@ -144,7 +144,7 @@ public class UserServiceImpl implements UserService {
 		}
 		userRepository.deleteById(id);
 		publisher.publishEvent(new UserDeleteEvent(id));
-		
+
 		try {
 			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
 			for (AccessRequest request : requests) {
 				this.accessRequestService.deleteById(request.getId());
 			}
-			
+
 			userRepository.deleteById(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
 			// Send emails
@@ -222,7 +222,7 @@ public class UserServiceImpl implements UserService {
 	public Optional<User> findByUsernameForInvitation(final String username) {
 		return userRepository.findByUsername(username);
 	}
-	
+
 	@Override
 	public List<User> getUsersToReceiveFirstExpirationNotification() {
 		final LocalDate expirationDate = LocalDate.now().plusMonths(1);
@@ -263,7 +263,7 @@ public class UserServiceImpl implements UserService {
 		if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
 			throw new PasswordPolicyException();
 		}
-		
+
 		User savedUser = userRepository.save(user);
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
@@ -285,7 +285,7 @@ public class UserServiceImpl implements UserService {
 
 		accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
 		User savedUser = userRepository.save(user);
-		
+
 		// Here, create a new access request
 		AccessRequest accessRequest = new AccessRequest();
 		accessRequest.setStatus(AccessRequest.ON_DEMAND);
@@ -297,13 +297,13 @@ public class UserServiceImpl implements UserService {
 			accessRequest.setStudyName(user.getAccountRequestInfo().getStudyName());
 		}
 		accessRequest.setUser(savedUser);
-		accessRequest.setMotivation("User " + user.getFirstName() + " " + user.getLastName() 
+		accessRequest.setMotivation("User " + user.getFirstName() + " " + user.getLastName()
 				+ " created an account to join your study"
 				+ (accessRequest.getMotivation() != null ? " with motivation text: " + accessRequest.getMotivation() : "")
 				+ ". Associated email: " + user.getEmail());
-		
+
 		accessRequestRepository.save(accessRequest);
-		
+
 		emailService.notifyStudyManagerAccessRequest(accessRequest);
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
@@ -336,7 +336,7 @@ public class UserServiceImpl implements UserService {
 
 		return updateUserOnAllSystems(userDb, user);
 	}
-	
+
 	@Override
 	public void updateExpirationNotification(final User user, final boolean firstNotification) {
 		if (firstNotification) {
@@ -359,13 +359,13 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Update user on all systems: microservice database, Shanoir old and
 	 * Keycloak server
-	 * 
+	 *
 	 * @param userDb user found in database.
-	 * 
+	 *
 	 * @param user user with new values.
-	 * 
+	 *
 	 * @return database user with new values.
-	 * 
+	 *
 	 * @throws ShanoirUsersException
 	 */
 	private User updateUserOnAllSystems(final User userDb, final User user) {
@@ -379,11 +379,11 @@ public class UserServiceImpl implements UserService {
 
 	/*
 	 * Update some values of user to save them in database.
-	 * 
+	 *
 	 * @param userDb user found in database.
-	 * 
+	 *
 	 * @param user user with new values.
-	 * 
+	 *
 	 * @return database user with new values.
 	 */
 	private User updateUserValues(final User userDb, final User user) {

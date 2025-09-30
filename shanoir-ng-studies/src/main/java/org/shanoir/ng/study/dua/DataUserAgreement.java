@@ -31,11 +31,11 @@ public class DataUserAgreement extends AbstractEntity {
 
 	@NotNull
 	private Long userId;
-	
+
 	@CreationTimestamp
 	@Column(updatable = false)
 	private Date timestampOfNew;
-	
+
 	private Date timestampOfAccepted;
 
 	public Study getStudy() {
@@ -69,7 +69,7 @@ public class DataUserAgreement extends AbstractEntity {
 	public void setTimestampOfAccepted(Date timestampOfAccepted) {
 		this.timestampOfAccepted = timestampOfAccepted;
 	}
-	
+
 	@JsonProperty("path")
 	public String getPath() {
 		if (this.study.getDataUserAgreementPaths() != null && !this.study.getDataUserAgreementPaths().isEmpty()) {
@@ -82,7 +82,7 @@ public class DataUserAgreement extends AbstractEntity {
 	public String getStudyName() {
 		return this.study.getName();
 	}
-	
+
 	@JsonProperty("isChallenge")
 	public boolean getIsChallenge() {
 		return this.study.isChallenge();

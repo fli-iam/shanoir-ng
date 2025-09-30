@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -42,10 +42,10 @@ public interface DatasetService {
 
 	/**
 	 * Delete a dataset.
-	 * 
+	 *
 	 * @param id dataset id.
 	 * @throws EntityNotFoundException
-	 * @throws ShanoirException 
+	 * @throws ShanoirException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
@@ -58,7 +58,7 @@ public interface DatasetService {
 
 	/**
 	 * Delete several datasets.
-	 * 
+	 *
 	 * @param ids dataset ids.
 	 * @throws EntityNotFoundException
 	 */
@@ -118,7 +118,7 @@ public interface DatasetService {
 
 	/**
 	 * Fetch the asked page
-	 * 
+	 *
 	 * @return datasets
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -149,7 +149,7 @@ public interface DatasetService {
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
 	List<Dataset> findByAcquisition(Long acquisitionId);
-	
+
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByStudycard(Long studycardId);

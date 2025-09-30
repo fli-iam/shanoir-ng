@@ -27,9 +27,9 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 
 /**
  * The DICOM Server Configuration window of the ShanoirUploader.
- * 
+ *
  * @author ifakhfakh
- * 
+ *
  */
 
 public class DicomServerConfigurationWindow extends JFrame {
@@ -117,7 +117,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 
 		/**
 		 * Local PaCS
-		 * 
+		 *
 		 */
 		JLabel configurationLocalPACSLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.configurationMenu.dicomServer.configurationLocalPACSLabel"));
@@ -170,7 +170,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 				cmoveLabel.getFont().getSize());
 		cmoveLabel.setFont(cmoveLabelFont);
 		addItem(configurationPanel, cmoveLabel, 0, 12, 3, GridBagConstraints.WEST);
-		
+
 		// Size the frame.
 		frame.pack();
 

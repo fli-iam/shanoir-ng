@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -67,7 +67,7 @@ public class ImporterApiControllerTest {
 	private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
 	private static final String GET_DICOM = "/importer/get_dicom/";
-	
+
 	@Autowired
 	private MockMvc mvc;
 
@@ -91,7 +91,7 @@ public class ImporterApiControllerTest {
 
 	@MockBean
 	private DicomDirGeneratorService dicomDirGeneratorService;
-	
+
 	@MockBean
 	private ShanoirEventService shanoirEventService;
 
@@ -143,7 +143,7 @@ public class ImporterApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(importJob)));
-		
+
 		// Just check that the name is well transmitted and that the call is made
 		verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
 
@@ -154,7 +154,7 @@ public class ImporterApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testGetDicomImageNoPath() throws Exception {
-		
+
 		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
 				.param("path", ""))
 		.andExpect(status().is(200));

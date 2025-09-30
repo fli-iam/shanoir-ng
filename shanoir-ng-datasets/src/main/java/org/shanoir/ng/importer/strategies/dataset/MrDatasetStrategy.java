@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,26 +53,26 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 	@Autowired
 	DicomProcessing dicomProcessing;
-	
+
 	@Autowired
 	DatasetExpressionContext datasetExpressionContext;
-	
+
 	@Autowired
 	private EchoTimeMapper echoTimeMapper;
-	
+
 	@Autowired
 	private RepetitionTimeMapper repetitionTimeMapper;
 
 	@Autowired
 	private InversionTimeMapper inversionTimeMapper;
-	
+
 	@Autowired
 	private FlipAngleMapper flipAngleMapper;
-	
+
 	@Override
 	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes<String> serieAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
-		
+
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -153,7 +153,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
 		}
 		mrDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-		
+
 		if (dataset.getEchoTimes() != null) {
 			List<EchoTime> listEchoTime = new ArrayList<>(dataset.getEchoTimes());
 			mrDataset.getEchoTime().addAll(echoTimeMapper.echoTimeDTOListToEchoTimeList(listEchoTime));
@@ -161,7 +161,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 				et.setMrDataset(mrDataset);
 			}
 		}
-		
+
 		if (dataset.getRepetitionTimes() != null) {
 			List<Double> listRepetitionTime = new ArrayList<>(dataset.getRepetitionTimes());
 			mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.repetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
@@ -169,7 +169,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 				rt.setMrDataset(mrDataset);
 			}
 		}
-		
+
 		if (dataset.getInversionTimes() != null) {
 			List<Double> listInversionTime = new ArrayList<>(dataset.getInversionTimes());
 			mrDataset.getInversionTime().addAll(inversionTimeMapper.inversionTimeDTOListToInversionTimeList(listInversionTime));
@@ -177,7 +177,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 				rt.setMrDataset(mrDataset);
 			}
 		}
-		
+
 		if (dataset.getFlipAngles() != null) {
 			List<String> listFlipAngle = new ArrayList<>(dataset.getFlipAngles());
 			mrDataset.getFlipAngle().addAll(flipAngleMapper.flipAngleDTOListToFlipAngleList(listFlipAngle));
@@ -185,7 +185,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 				rt.setMrDataset(mrDataset);
 			}
 		}
-		
+
 		if (serie.getIsSpectroscopy()) {
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
 			int rows = dicomAttributes.getInt(Tag.Rows, 0);
@@ -197,7 +197,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			}
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
 		}
-		
+
 		if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
 			// Tag (0008,0008) ImageType is of Type Required (1) in Enhanced MR Image IOD
@@ -227,7 +227,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 						} else if (imageFlavor.equals(ImageFlavor.VELOCITY.name())) {
 							mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
 						}
-					}	
+					}
 				}
 			}
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
@@ -236,9 +236,9 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
 		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
+		 *
 		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current mrDataset
-		 * 
+		 *
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
@@ -264,12 +264,12 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			datasetExpression.setDataset(mrDataset);
 			mrDataset.getDatasetExpressions().add(datasetExpression);
 		}
-		
+
 		DatasetMetadata originalDM = mrDataset.getOriginMetadata();
 		mrDataset.setUpdatedMetadata(originalDM);
 		MrDatasetMetadata originalMDM = mrDataset.getOriginMrMetadata();
 		mrDataset.setUpdatedMrMetadata(originalMDM);
-		
+
 		return mrDataset;
 	}
 

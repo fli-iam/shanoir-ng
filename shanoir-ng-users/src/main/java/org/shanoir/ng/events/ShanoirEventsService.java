@@ -46,7 +46,7 @@ public class ShanoirEventsService {
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
-		// This is sad but with the @CreationTimestamp the date is not returned by the save method 
+		// This is sad but with the @CreationTimestamp the date is not returned by the save method
 		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
@@ -65,7 +65,7 @@ public class ShanoirEventsService {
 	public List<ShanoirEvent> getEventsByObjectIdAndTypeIn(String objectId, String eventType) {
 		return Utils.toList(repository.findByObjectIdAndEventType(objectId, eventType));
   	}
-    
+
 	/**
 	 * Get events younger than 7 days
 	 */

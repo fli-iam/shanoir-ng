@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class SubjectApiControllerTestIT extends KeycloakControllerTestIT {
-//	
+//
 //	private static final String REQUEST_PATH = "/subject";
 //	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 //	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -99,7 +99,7 @@
 //	@Test
 //	public void updateNewSubjectProtected() {
 //		final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject());
-//		
+//
 //		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //				String.class);
 //		assertEquals(HttpStatus.FOUND, response.getStatusCode());

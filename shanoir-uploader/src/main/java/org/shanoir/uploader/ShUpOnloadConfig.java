@@ -9,12 +9,12 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
 
 /**
- * 
+ *
  * This class contains all dynamic data needed by ShanoirUploader upon startup.
- * 
+ *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 public class ShUpOnloadConfig {
 
@@ -74,7 +74,7 @@ public class ShUpOnloadConfig {
 	public static ShanoirUploaderServiceClient getShanoirUploaderServiceClient() {
 		return shanoirUploaderServiceClient;
 	}
-	
+
 	public static void setShanoirUploaderServiceClient(ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
 		ShUpOnloadConfig.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
 	}
@@ -94,11 +94,11 @@ public class ShUpOnloadConfig {
 	public static void setAutoImportEnabled(boolean autoImportEnabled) {
 		ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
 	}
-	
+
 	public static String getTokenString() throws Exception  {
 		return tokenString;
 	}
-	
+
 	public static void setTokenString(String tokenString) {
 		ShUpOnloadConfig.tokenString = tokenString;
 	}

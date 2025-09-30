@@ -72,7 +72,7 @@ public class AccessRequestApiControllerTest {
 
 	@MockBean
 	VIPUserService vipUserService;
-	
+
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -91,21 +91,21 @@ public class AccessRequestApiControllerTest {
 	@WithMockKeycloakUser(id = 1)
 	public void saveNewAccessRequestWithStudyNameTest() throws JsonProcessingException, Exception {
 		AccessRequest request = createAccessRequest();
-		
+
 		// Access request is saved
 		Mockito.when(accessRequestService.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Collections.emptyList());
 		Mockito.when(accessRequestService.createAllowed(Mockito.any(AccessRequest.class))).thenReturn(request);
-		
+
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(request)))
 				.andExpect(status().isOk());
-		
+
 		// Do not call to get the name
 		Mockito.verifyNoInteractions(this.rabbitTemplate);
-		
+
 		// Event is sent
 		Mockito.verify(eventService).publishEvent(Mockito.any(ShanoirEvent.class));
-		
+
 		// Email is sent
 		Mockito.verify(emailService).notifyStudyManagerAccessRequest(Mockito.any(AccessRequest.class));
 	}
@@ -116,7 +116,7 @@ public class AccessRequestApiControllerTest {
 		AccessRequest request = createAccessRequest();
 		// Only change: the study name is null, we have to load it.
 		request.setStudyName(null);
-		
+
 		Mockito.when(accessRequestService.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Collections.emptyList());
 
 		// Call to get the study name
@@ -127,17 +127,17 @@ public class AccessRequestApiControllerTest {
 		// Access request is saved
 		ArgumentCaptor<AccessRequest> requestCaptor = ArgumentCaptor.forClass(AccessRequest.class);
 		Mockito.when(accessRequestService.createAllowed(requestCaptor.capture())).thenReturn(request);
-		
+
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(request)))
 				.andExpect(status().isOk());
-		
+
 		// Check study name was updated
 		assertEquals("testStudyName", requestCaptor.getValue().getStudyName());
-	
+
 		// Event is sent
 		Mockito.verify(eventService).publishEvent(Mockito.any(ShanoirEvent.class));
-		
+
 		// Email is sent
 		Mockito.verify(emailService).notifyStudyManagerAccessRequest(Mockito.any(AccessRequest.class));
 	}
@@ -149,14 +149,14 @@ public class AccessRequestApiControllerTest {
 		Mockito.when(rabbitTemplate.
 				convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
 		.thenReturn(Collections.singletonList(1L));
-	
+
 		List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
 		listOfRequests.add(createAccessRequest());
 		listOfRequests.add(createAccessRequest());
-		
+
 		// One is already approved, studyName should not appear
 		listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
-		
+
 		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byAdmin").accept(MediaType.APPLICATION_JSON)
@@ -168,20 +168,20 @@ public class AccessRequestApiControllerTest {
 						)
 					);
 	}
-	
+
 	@Test
     @WithMockKeycloakUser(id = 1)
     public void findAllByUserIdTest() throws Exception {
         List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
         listOfRequests.add(createAccessRequest());
         listOfRequests.add(createAccessRequest());
-        
+
         // One is already approved, studyName should not appear
         listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
-        
+
         Mockito.when(this.accessRequestService.findByUserId(Mockito.anyLong()))
             .thenReturn(listOfRequests);
-        
+
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -210,11 +210,11 @@ public class AccessRequestApiControllerTest {
 		request.setUser(user);
 
 		Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
 				.andExpect(status().isOk());
-		
+
 		Mockito.verify(accessRequestService).update(request);
 		Mockito.verify(this.userService).confirmAccountRequest(user);
 		Mockito.verify(this.rabbitTemplate).convertSendAndReceive(
@@ -230,11 +230,11 @@ public class AccessRequestApiControllerTest {
 		request.setUser(user);
 
 		Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
 				.andExpect(status().isOk());
-		
+
 		Mockito.verify(accessRequestService).update(request);
 		Mockito.verifyNoInteractions(this.userService);
 		Mockito.verify(this.rabbitTemplate).convertSendAndReceive(
@@ -249,11 +249,11 @@ public class AccessRequestApiControllerTest {
 		request.setUser(user);
 
 		Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(false)))
 				.andExpect(status().isOk());
-		
+
 		Mockito.verify(accessRequestService).update(request);
 		Mockito.verifyNoInteractions(this.rabbitTemplate);
 		Mockito.verify(this.userService).denyAccountRequest(1L);
@@ -269,27 +269,27 @@ public class AccessRequestApiControllerTest {
 		request.setUser(user);
 
 		Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(false)))
 				.andExpect(status().isOk());
-		
+
 		Mockito.verify(accessRequestService).update(request);
 		Mockito.verifyNoInteractions(this.userService);
 		Mockito.verifyNoInteractions(this.rabbitTemplate);
 		Mockito.verify(emailService).notifyUserRefusedFromStudy(request);
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = 1)
 	public void resolveNewAccessRequestNoRequestTest() throws JsonProcessingException, Exception {
 		// no ogoing request
 		Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.empty());
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
 				.andExpect(status().isNoContent());
-		
+
 		Mockito.verifyNoInteractions(this.userService);
 		Mockito.verifyNoInteractions(this.rabbitTemplate);
 		Mockito.verifyNoInteractions(emailService);
@@ -300,7 +300,7 @@ public class AccessRequestApiControllerTest {
 	public void inviteExistingUserTest() throws Exception {
 		// We invite an user that exists
 		Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.of(user));
-		
+
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
@@ -313,9 +313,9 @@ public class AccessRequestApiControllerTest {
 				.param("email", "mail@mail"))
 				.andExpect(status().isOk())
 				.andReturn();
-		
+
 		AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
-		
+
 		assertEquals(user.getId(), request.getUser().getId());
 		assertEquals("1", ""+request.getStudyId());
 		assertEquals("name", request.getStudyName());
@@ -341,9 +341,9 @@ public class AccessRequestApiControllerTest {
 				.param("email", "login"))
 				.andExpect(status().isOk())
 				.andReturn();
-		
+
 		AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
-		
+
 		assertEquals(user.getId(), request.getUser().getId());
 		assertEquals("1", ""+request.getStudyId());
 		assertEquals("name", request.getStudyName());
@@ -363,22 +363,22 @@ public class AccessRequestApiControllerTest {
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
 		theMap.put("email", "mail@mail");
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
 				.param("email", "mail@mail"))
 				.andExpect(status().isNoContent());
-		
+
 		ArgumentCaptor<StudyInvitationEmail> emailCaptor = ArgumentCaptor.forClass(StudyInvitationEmail.class);
 		Mockito.verify(this.emailService).inviteToStudy(emailCaptor.capture());
-		
+
 		assertEquals("mail@mail", emailCaptor.getValue().getInvitedMail());
 		assertEquals("1", emailCaptor.getValue().getStudyId());
 		assertEquals("name", emailCaptor.getValue().getStudyName());
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = 1)
 	public void inviteNotExistingUserLoginTest() throws JsonProcessingException, Exception {
@@ -390,7 +390,7 @@ public class AccessRequestApiControllerTest {
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
 		theMap.put("email", "login");
-		
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
@@ -419,5 +419,5 @@ public class AccessRequestApiControllerTest {
 		req.setUser(user);
 		return req;
 	}
-	
+
 }

@@ -34,5 +34,5 @@ public class AuthenticationManualConfigurationState implements State {
 			loginPanelActionListener.login(ShUpConfig.username, ShUpConfig.password);
 		}
 	}
-	
+
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -44,24 +44,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 
+ *
  * MR Dataset Acquisition Strategy used to create new Mr Dataset Acquisition.
  * Called by the ImportService. Requires an importJob
- * 
+ *
  * Refer to Interface for more information
- * 
+ *
  * @author atouboul
  *
  */
 @Component
 public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-	
+
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
-	
+
 	@Autowired
 	private MrProtocolStrategy mrProtocolStrategy;
-	
+
 	@Autowired
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
@@ -80,7 +80,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         //TODO: To be completed by an expert
         DATA_TYPE_MAPPING = Collections.unmodifiableMap(aMap);
     }
-	
+
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
@@ -93,7 +93,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
-	
+
 		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -101,7 +101,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			genericizedList.add(dataset);
 		}
 		mrDatasetAcquisition.setDatasets(genericizedList);
-		
+
 		// total acquisition time
 		if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
 			Double totalAcquisitionTime = null;
@@ -114,12 +114,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
 				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
 		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 
 		// Can be overridden by study cards
-		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
+		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);
 		if (imageType != null && DATA_TYPE_MAPPING.get(imageType) != null) {
 			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
 				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());

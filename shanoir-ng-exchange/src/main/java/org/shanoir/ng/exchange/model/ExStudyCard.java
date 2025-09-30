@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the study card is already existing in Shanoir, the name is set,
  * if not the name == null. So we have to create a new study card in sh-ng.
- * 
+ *
  * @author mkain
  *
  */
 public class ExStudyCard {
-	
+
 	/**
 	 * If this name is set, an existing study card shall be used for data exchange.
 	 * This is in case of an import, the study card with the name shall be used.
@@ -36,7 +36,7 @@ public class ExStudyCard {
 	 */
 //	@JsonProperty("studyCard")
 //	private StudyCard studyCard;
-	
+
 	//todo: extend here for depending objects to complete the export/import
 
 }

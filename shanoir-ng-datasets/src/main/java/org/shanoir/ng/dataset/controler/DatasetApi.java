@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -66,7 +66,7 @@ public interface DatasetApi {
 	ResponseEntity<Void> deleteDataset(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
             throws RestServiceException, EntityNotFoundException;
-	
+
 	@Operation(summary = "", description = "Deletes several datasets")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasets deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -116,7 +116,7 @@ public interface DatasetApi {
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@Parameter(description = "dataset to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Returns a datasets page")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
 			@ApiResponse(responseCode = "204", description = "no user found"),
@@ -139,7 +139,7 @@ public interface DatasetApi {
 	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 																 @Parameter(description = "return output datasets too") @RequestParam(value = "output", required = false, defaultValue = "false") Boolean output);
 
-	
+
 	@Operation(summary = "", description = "Returns a dataset list")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
 			@ApiResponse(responseCode = "204", description = "no user found"),
@@ -159,7 +159,7 @@ public interface DatasetApi {
 	@GetMapping(value = "/studycard/{studycardId}", produces = { "application/json" })
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@Parameter(description = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId);
-	
+
 	@Operation(summary = "", description = "Returns the list of dataset id by study id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found datasets"),
@@ -224,7 +224,7 @@ public interface DatasetApi {
     		@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
     		@Parameter(description = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-    		@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format, 
+    		@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format,
     		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException, EntityNotFoundException;
 
 
@@ -253,7 +253,7 @@ public interface DatasetApi {
 			method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create", required = true)  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
-	
+
     @Operation(summary = "massiveDownloadDatasetsByIds", description = "If exists, returns a zip file of the datasets corresponding to the given ids")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "zip file"),

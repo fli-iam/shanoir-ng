@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,7 +40,7 @@ public interface UserService {
 
 	/**
 	 * Confirm an account request and updates user.
-	 * 
+	 *
 	 * @param user the user to update.
 	 * @return the updated user.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
@@ -51,7 +51,7 @@ public interface UserService {
 
 	/**
 	 * Delete a user
-	 * 
+	 *
 	 * @param id the user id.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
@@ -60,7 +60,7 @@ public interface UserService {
 
 	/**
 	 * Deny an account request.
-	 * 
+	 *
 	 * @param userId the user id.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 * @throws AccountNotOnDemandException if this account is not currently on demand.
@@ -70,16 +70,16 @@ public interface UserService {
 
 	/**
 	 * Get all the users
-	 * 
+	 *
 	 * @return a list of users
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
 	List<User> findAll();
-	
+
 	/**
 	 * Get all the users on account request
-	 * 
+	 *
 	 * @return a list of users
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -111,7 +111,7 @@ public interface UserService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
 	Optional<User> findByUsername(String username);
-	
+
 	/**
 	 * Find user by its username.
 	 *
@@ -123,7 +123,7 @@ public interface UserService {
 
 	/**
 	 * Find users that will soon expire and have not yet received the first notification.
-	 * 
+	 *
 	 * @return a list of users.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
@@ -131,7 +131,7 @@ public interface UserService {
 
 	/**
 	 * Find users that will soon expire and have not yet received the second notification.
-	 * 
+	 *
 	 * @return a list of users.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
@@ -139,7 +139,7 @@ public interface UserService {
 
 	/**
 	 * Find users that are now expired.
-	 * 
+	 *
 	 * @return a list of users.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
@@ -147,7 +147,7 @@ public interface UserService {
 
 	/**
 	 * Request a date extension for an user.
-	 * 
+	 *
 	 * @param userId the user id.
 	 * @param requestInfo the request info.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
@@ -165,7 +165,7 @@ public interface UserService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
 	User create(User user) throws PasswordPolicyException, SecurityException;
-	
+
 	/**
 	 * Create a new account request.
 	 *
@@ -180,7 +180,7 @@ public interface UserService {
 
 	/**
 	 * Search users by their id.
-	 * 
+	 *
 	 * @param userIds as list of user ids.
 	 * @return list of users with id and username.
 	 */
@@ -199,7 +199,7 @@ public interface UserService {
 
 	/**
 	 * Update expiration notification for an user.
-	 * 
+	 *
 	 * @param user the user to update.
 	 * @param firstNotification is it first notification?
 	 */
@@ -208,7 +208,7 @@ public interface UserService {
 
 	/**
 	 * Update last login date.
-	 * 
+	 *
 	 * @param username username.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
@@ -216,7 +216,7 @@ public interface UserService {
 
 	/**
 	 * Find a user by it's id
-	 * 
+	 *
 	 * @param id the id
 	 * @return the user
 	 */

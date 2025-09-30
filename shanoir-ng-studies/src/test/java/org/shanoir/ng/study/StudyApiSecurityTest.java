@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -51,9 +51,9 @@ import org.springframework.validation.BindingResult;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest
@@ -63,26 +63,26 @@ public class StudyApiSecurityTest {
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
 	private static final long ENTITY_ID = 1L;
-	
+
 	private Study mockNew;
 	private Study mockExisting;
 	private BindingResult mockBindingResult;
-	
+
 	@Autowired
 	private StudyApi api;
-	
+
 	@MockBean
 	private SubjectRepository subjectRepository;
-	
+
 	@MockBean
 	private StudyRepository repository;
 
 	@MockBean
 	private StudyUserRepository studyUserRepository;
-	
+
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
-	
+
 	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
@@ -90,7 +90,7 @@ public class StudyApiSecurityTest {
 		mockExisting.setId(ENTITY_ID);
 		mockBindingResult = new BeanPropertyBindingResult(mockExisting, "study");
 	}
-	
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
@@ -101,15 +101,15 @@ public class StudyApiSecurityTest {
 		assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
 		assertAccessDenied(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException, RestServiceException {
 		testRead();
-		
+
 		assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
 		assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
-		
+
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
@@ -119,7 +119,7 @@ public class StudyApiSecurityTest {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
@@ -149,7 +149,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
 		assertAccessAuthorized(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
 	}
-	
+
 	private void testRead() throws ShanoirException, RestServiceException {
 		// No rights
 		Study studyMockNoRights = buildStudyMock(1L);
@@ -163,7 +163,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::findStudiesNames);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 1L, false);
-		
+
 		// Wrong Rights
 		Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
@@ -176,12 +176,12 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::findStudiesNames);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 2L, false);
-		
+
 		// Right rights
 		Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findAllIdAndName()).willReturn(Arrays.asList(
-				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()), 
+				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()),
 				new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()),
 				new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
 		given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(

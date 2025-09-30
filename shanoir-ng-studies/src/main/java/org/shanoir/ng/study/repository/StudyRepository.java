@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
-	
+
 	@EntityGraph("Study.All")
 	Optional<Study> findById(Long id);
 
@@ -47,13 +47,13 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	List<IdName> findAllIdAndName();
 
 	@Query("""
-		SELECT s 
-		FROM Study s 
-		JOIN FETCH s.studyUserList su 
-		WHERE su.study.id = s.id 
-		AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights) 
+		SELECT s
+		FROM Study s
+		JOIN FETCH s.studyUserList su
+		WHERE su.study.id = s.id
+		AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights)
 		AND su.confirmed = :confirmed""")
-	
+
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
 			@Param("userId") Long userId,
 			@Param("studyUserRightId") Integer studyUserRightId,
@@ -76,8 +76,8 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 
 	List<Study> findByChallengeTrue();
 
-	
-	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
+
+	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
 
 	@EntityGraph(attributePaths = "tags")
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")

@@ -19,11 +19,11 @@ public class Event {
 	private int channelNumber;
     @JsonProperty("date")
 	private Date date;
-    
+
     // default constructor for jackson purpose
     public Event() {
     }
-	
+
 	public Event(String type, String description, String position, int points, int channelNumber, Date date) {
 		super();
 		this.type = type;

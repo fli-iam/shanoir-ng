@@ -35,10 +35,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This class implements the logic when the open file from CD/DVD menu or the
  * query button is clicked
- * 
+ *
  * @author mkain
  * @author yyao
- * 
+ *
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 
@@ -138,7 +138,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				String lastName = "";
 				String firstName1 = "";
 				String firstName2 = "";
-		
+
 				// Use regular expression to split by either "," or ", "
 				String[] nameParts = patientName.split(",\\s*");
 				if (nameParts.length > 1) {
@@ -201,7 +201,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		// set values for display in the GUI tree
 		mainWindow.dicomTree = new DicomTree(media);
 		// set custom selection model to avoid multiple patients selection
-		mainWindow.dicomTree.setSelectionModel(new UniquePatientTreeSelectionModel(mainWindow.dicomTree));		
+		mainWindow.dicomTree.setSelectionModel(new UniquePatientTreeSelectionModel(mainWindow.dicomTree));
 		// expand entire JTree after creation
 		for (int i = 0; i < mainWindow.dicomTree.getRowCount(); i++) {
 			mainWindow.dicomTree.expandRow(i);

@@ -13,9 +13,9 @@ public class ShanoirEvent {
 	public static final int IN_PROGRESS = 2;
 
 	protected Long id;
-	
+
 	protected String eventType;
-	
+
 	protected String objectId;
 
 	protected Long userId;
@@ -29,14 +29,14 @@ public class ShanoirEvent {
 	protected Float progress;
 
 	protected Long studyId;
-	
+
 	private Long timestamp;
 
 	@Transient
 	@JsonProperty("eventProperties")
 	private Map<String, String> eventProperties;
 
-   
+
 	public ShanoirEvent() {
 	}
 
@@ -194,8 +194,8 @@ public class ShanoirEvent {
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
-	}   
-    
+	}
+
     public Long getTimestamp() {
         return timestamp;
     }

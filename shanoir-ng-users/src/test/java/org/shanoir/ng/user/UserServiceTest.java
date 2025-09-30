@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -59,9 +59,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * User detail service test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -85,7 +85,7 @@ public class UserServiceTest {
 
 	@MockBean
 	private UserRepository userRepository;
-	
+
 	@MockBean
     private ApplicationEventPublisher publisher;
 
@@ -94,7 +94,7 @@ public class UserServiceTest {
 
 	@MockBean
 	private AccessRequestRepository accessRequestRepository;
-	
+
 	@MockBean
 	private AccessRequestService accessRequestService;
 
@@ -190,7 +190,7 @@ public class UserServiceTest {
 	public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
 		assertThrows(AccountNotOnDemandException.class, () -> {
 			given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
-			userService.denyAccountRequest(USER_ID);	
+			userService.denyAccountRequest(USER_ID);
 			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 			Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
 		});

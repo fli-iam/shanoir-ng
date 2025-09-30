@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * to the DICOM standard, containing a DICOM SR modality, == Structured
  * Report. Within the OHIF viewer, the button "save measurements" is used
  * to send the measurements to shanoir backend for storage.
- * 
+ *
  * It might look weird to use a request filter for this purpose and not
  * manage this inside the standard rest controller. After two days of search
  * I seem to have figured out, that the DefaultMultipartResolver of Spring
@@ -36,24 +36,24 @@ import jakarta.servlet.http.HttpServletRequest;
  * fileupload + commons-io (latest versions) and could not get it to work.
  * Everytime my MultipartFile single file or list of files was empty, same
  * using @RequestBody or not.
- * 
+ *
  * Furthermore I tried with using HttpServletRequest directly, but as in any
  * case one of the multipart resolvers kicks in before, the input stream was
  * always already consumed and empty, so I passed to a filter.
- * 
+ *
  * According to my understanding of the spring security config, this filter
  * comes after the Keycloak filter (addFilterAfter), and does therefore not
  * expose any access from outside.
- * 
+ *
  * Instead of writing a multipart/related parser on my own using the below
  * MimeMultipart seems pretty elegant.
- * 
+ *
  * @author mkain
  *
  */
 @Component
 public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(StowRSMultipartRelatedRequestFilter.class);
 
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -62,10 +62,10 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
 
 	@Autowired
 	private DicomSEGAndSRImporterService dicomSRImporterService;
-	
+
     @Override
     public void doFilter(
-			ServletRequest request, 
+			ServletRequest request,
 			ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
     	HttpServletRequest httpRequest = (HttpServletRequest) request;

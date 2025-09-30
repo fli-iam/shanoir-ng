@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -99,7 +99,7 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyUserService studyUserService;
-	
+
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
 
@@ -130,7 +130,7 @@ public class StudyApiController implements StudyApi {
 				// Error => should not be able to do this see #793
 				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 			}
-			
+
 			List<DataUserAgreement> duas = dataUserAgreementService.findDUAByStudyId(studyId);
 			if (!CollectionUtils.isEmpty(duas)) {
 				this.dataUserAgreementService.deleteAll(duas);
@@ -162,7 +162,7 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 	}
-	
+
 	public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
 		List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) {
@@ -326,7 +326,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<Map<Long, List<StudyUserRight>>> rights() throws RestServiceException {
 		Map<Long, List<StudyUserRight>> rights = this.studyUserService.getRights();
@@ -342,7 +342,7 @@ public class StudyApiController implements StudyApi {
 		boolean hasOneStudy = this.studyUserService.hasOneStudyToImport();
 		return new ResponseEntity<>(hasOneStudy, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public void downloadProtocolFile(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -500,12 +500,12 @@ public class StudyApiController implements StudyApi {
 	@Transactional
 	public ResponseEntity<List<IdName>> findPublicStudiesConnected() {
 		List<IdName> studiesDTO = new ArrayList<>();
-		
+
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		
+
 		studies = filterStudies(studies, KeycloakUtil.getTokenUserId());
 
 		for (Study study : studies) {

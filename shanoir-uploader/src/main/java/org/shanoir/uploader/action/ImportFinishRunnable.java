@@ -15,29 +15,29 @@ import org.slf4j.LoggerFactory;
 /**
  * This class prepares the upload to a Shanoir server instance,
  * but does not call the server itself.
- * 
+ *
  * @author mkain
  *
  */
 public class ImportFinishRunnable implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
-	
+
 	private File uploadFolder;
-	
+
 	private ImportJob importJob;
-	
+
 	private String subjectName;
 
 	private Anonymizer anonymizer = new Anonymizer();
-	
+
 	public ImportFinishRunnable(final File uploadFolder, final ImportJob importJob, final String subjectName) {
 		this.uploadFolder = uploadFolder;
 		this.importJob = importJob;
 		this.subjectName = subjectName;
 	}
 
-	public void run() {		
+	public void run() {
 		/**
 		 * Anonymize the DICOM files
 		 */
@@ -60,7 +60,7 @@ public class ImportFinishRunnable implements Runnable {
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}
-			
+
 			/**
 			 * Write the ImportJob and schedule upload
 			 * We keep ImportJob here to start the upload and handle errors without

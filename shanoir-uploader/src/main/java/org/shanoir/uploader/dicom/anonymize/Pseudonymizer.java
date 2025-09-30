@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
  * This class is used for pseudonymization. Pseudonymization is a data management and
  * de-identification procedure by which personally identifiable information fields within
  * a data record are replaced by one or more artificial identifiers, or pseudonyms.
- * 
+ *
  * The pseudonymizer does not access to DICOM files. It retrieves data records in the
  * memory and replaces specific ones with pseudonyms.
- * 
+ *
  * In the Shanoir server the common name is displayed and used as patient ID in the GUI.
  * For Neurinfo during the import users can choose the common name == newPatientID.
  * For the OFSEP server this is predefined during the import, as an incremental counter.
@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory;
  * The subjectIdentifier is an internal hash in the Shanoir database, that is normally
  * not displayed to the user.
  * Example: long hash value
- * 
+ *
  * @author mkain
  *
  */
 public class Pseudonymizer {
-	
+
 	private static final String DEBUG = "DEBUG";
 
 	private static final Logger logger = LoggerFactory.getLogger(Pseudonymizer.class);
@@ -41,7 +41,7 @@ public class Pseudonymizer {
 	private static final String PSEUDONYMUS_SHANOIR_EXE = "PseudonymusShanoir.exe";
 
 	private static final int SHA256_LENGTH = 64;
-	
+
 	private static final String I386 = "i386";
 	private static final String X86 = "x86";
 	private static final String X86_64 = "x86_64";
@@ -96,7 +96,7 @@ public class Pseudonymizer {
 		logger.info("Pseudonymizer: pseudonymus exe path: " + pseudonymusExePath);
 		logger.info("Pseudonymizer: initialization finished.");
 	}
-	
+
 	/**
 	 * UTILISATION DE PSEUDONYMUS Le format des dates est bien celui que tu as
 	 * indiqué : JJ/MM/AAAA. Pour ce qui concerne le lancement de la fonction
@@ -149,7 +149,7 @@ public class Pseudonymizer {
 		pseudonymusHashValues.setFirstNameHash2(firstNameHash2);
 		pseudonymusHashValues.setFirstNameHash3(firstNameHash3);
 		pseudonymusHashValues.setBirthDateHash(birthDateHash);
-		
+
 		/**
 		 * Log all created hash values into su.log file.
 		 */
@@ -178,14 +178,14 @@ public class Pseudonymizer {
 
 	/**
 	 * Exec the Pseudonymus command to hash DICOM values
-	 * 
+	 *
 	 * @param input
 	 *            the DICOM value we want to hash
 	 * @param pseudonymusPath
 	 *            the Pseudonymus path
 	 * @param soundexValue
 	 *            the soundex value
-	 * 
+	 *
 	 * @return the hash
 	 */
 	private String pseudonymusExec(final String input,
@@ -206,7 +206,7 @@ public class Pseudonymizer {
 		logger.debug("pseudonymusExec : End");
 		return result;
 	}
-	
+
 	/**
 	 * Execute the command line given in argument. This method has been duplicated
 	 * here and is not used anymore from shanoir.jar - ShanoirExec, as it added an
@@ -275,5 +275,5 @@ public class Pseudonymizer {
 		logger.debug("exec : return result " + result);
 		return result;
 	}
-	
+
 }

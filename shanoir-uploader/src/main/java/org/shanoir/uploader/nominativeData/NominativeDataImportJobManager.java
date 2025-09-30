@@ -20,7 +20,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  *
  */
 public class NominativeDataImportJobManager {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(NominativeDataImportJobManager.class);
 
 	private File nominativeDataJobFile;
@@ -29,14 +29,14 @@ public class NominativeDataImportJobManager {
 	 * Lock for synchronizing access to the import job file.
 	 */
 	private static final Map<String, ReentrantLock> fileLocks = new ConcurrentHashMap<>();
-	
+
 	/**
 	 * Initialize ImportJobManager empty and reset importJobFile
 	 * with method setImportJobFile.
 	 */
 	public NominativeDataImportJobManager() {
 	}
-	
+
 	/**
 	 * Initialize MoninativeDataImportJobManager with current nominative data folder path.
 	 * @param importFolderPath
@@ -48,7 +48,7 @@ public class NominativeDataImportJobManager {
 			+ ShUpConfig.IMPORT_JOB_JSON);
 		logger.debug("ImportJobManager initialized with file: " + this.nominativeDataJobFile.getAbsolutePath());
 	}
-	
+
 	/**
 	 * Initialize ImportJobManager with ImportJob file.
 	 * @param importJobFile
@@ -82,7 +82,7 @@ public class NominativeDataImportJobManager {
 			return null;
 		} finally {
 			lock.unlock();
-    	}	
+    	}
 	}
 
 	public void writeImportJob(ImportJob importJob) {
@@ -98,5 +98,5 @@ public class NominativeDataImportJobManager {
 			lock.unlock();
 		}
 	}
-	
+
 }

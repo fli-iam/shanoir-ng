@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Anonymization test.
- * 
+ *
  * @author ifakhfakh
- * 
+ *
  */
 public class AnonymizationTest {
 
@@ -46,7 +46,7 @@ public class AnonymizationTest {
 	/**
 	 * Test of readAnonymizationFile function that reads the xml file specifying
 	 * the anonymization profile
-	 * 
+	 *
 	 * @throws ShanoirAnonymizationException
 	 */
 
@@ -57,7 +57,7 @@ public class AnonymizationTest {
 
 	/**
 	 * Test of the anonymization process
-	 * 
+	 *
 	 */
 
 	public static void anonymizationTest() throws Exception {
@@ -70,7 +70,7 @@ public class AnonymizationTest {
 		long temps = chrono2 - chrono;
 		System.out.println("Spended time to anonymize file = " + temps + " ms");
 	}
-	
+
 	private static void printDICOMFile(final File dicomFile) {
 		DicomInputStream din = null;
 		try {
@@ -118,9 +118,9 @@ public class AnonymizationTest {
 	 * Test of the function that sends DICOMs to Pacs. To be used to verify that
 	 * the anonymised files could be stored in DCM4CHEE PACS Please uncomment
 	 * this function after anonymising DICOMS to send them to PACS.
-	 * 
+	 *
 	 * TEMPORARY TEST: used for local test of anonymization process.
-	 * 
+	 *
 	 * @throws ShanoirImportException
 	 */
 	/*

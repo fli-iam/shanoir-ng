@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.subjects.dto;
 public class TagDto {
 
 	private Long id;
-	
+
 	private String name;
 
 	private String color;

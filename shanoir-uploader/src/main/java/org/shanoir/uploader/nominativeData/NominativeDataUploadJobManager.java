@@ -17,20 +17,20 @@ import jakarta.xml.bind.Unmarshaller;
  *
  */
 public class NominativeDataUploadJobManager {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(NominativeDataUploadJobManager.class);
 
 	public static final String NOMINATIVE_DATA_JOB_XML = ShUpConfig.NOMINATIVE_DATA_JOB_XML;
 
-	private File nominativeDataJobFile; 
-	
+	private File nominativeDataJobFile;
+
 	/**
 	 * Initialize UploadJobManager empty and reset uploadJobFile
 	 * with method setUploadJobFile.
 	 */
 	public NominativeDataUploadJobManager() {
 	}
-	
+
 	/**
 	 * Initialize MoninativeDataUploadJobManager with current moninative date folder path.
 	 * @param uploadFolder
@@ -43,7 +43,7 @@ public class NominativeDataUploadJobManager {
 		logger.debug("UploadJobManager initialized with file: "
 				+ this.nominativeDataJobFile.getAbsolutePath());
 	}
-	
+
 	/**
 	 * Initialize UploadJobManager with UploadJob file.
 	 * @param uploadFolder
@@ -53,11 +53,11 @@ public class NominativeDataUploadJobManager {
 		logger.debug("UploadJobManager initialized with file: "
 				+ this.nominativeDataJobFile.getAbsolutePath());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.upload.IUploadJobManager#writeUploadJob(org.shanoir.uploader.upload.UploadJob)
 	 */
-	
+
 	public void writeUploadDataJob(final NominativeDataUploadJob nominativeDataUploadJob) {
 		JAXBContext jaxbContext;
 		try {
@@ -93,5 +93,5 @@ public class NominativeDataUploadJobManager {
 	public void setUploadJobFile(File uploadJobFile) {
 		this.nominativeDataJobFile = uploadJobFile;
 	}
-	
+
 }

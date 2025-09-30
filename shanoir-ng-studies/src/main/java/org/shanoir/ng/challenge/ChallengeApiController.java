@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class ChallengeApiController implements ChallengeApi {
-	
+
 	@Autowired
 	private StudyService studyService;
 

@@ -14,7 +14,7 @@ public class IdName {
 
 	/**
 	 * Constructor with id and name.
-	 * 
+	 *
 	 * @param id
 	 *            object id.
 	 * @param name

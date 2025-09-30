@@ -7,7 +7,7 @@ import org.shanoir.ng.importer.model.Study;
 
 /**
  * Sorts a list of DICOM studies according to their studyDate.
- * 
+ *
  * @author mkain
  *
  */

@@ -42,7 +42,7 @@ public class ReadyState implements State {
 
 	@Autowired
 	private DicomPushServiceJob dicomPushServiceJob;
-	
+
 	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
 		shUpStartupDialog.setVisible(false);
@@ -57,7 +57,7 @@ public class ReadyState implements State {
 				logger.error(e.getMessage(), e);
 				logger.error("Mode pseudonymus requires Pseudonymizer.");
 				System.exit(0);
-			}	
+			}
 		}
 		MainWindow frame = initJFrame();
 		// Init check on server
@@ -79,7 +79,7 @@ public class ReadyState implements State {
 
 	/**
 	 * Set the frame size and location, and make it visible.
-	 * 
+	 *
 	 * @param frame
 	 */
 	private MainWindow initJFrame() {
@@ -111,7 +111,7 @@ public class ReadyState implements State {
 		logger.info("JFrame successfully initialized.");
 		return frame;
 	}
-	
+
 	/**
 	 * Walk trough all folders within the work folder and update the upload
 	 * percentage upload percentage < 100 % must be 0%
@@ -154,5 +154,5 @@ public class ReadyState implements State {
 			}
 		}
 	}
-	
+
 }

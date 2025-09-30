@@ -14,16 +14,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to crypt/uncrypt the user and proxy passwords
- * 
+ *
  * @author ifakhfak
  *
  */
 public class Encryption {
 
 	private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
-	
+
 	private BlowfishAlgorithm blow;
-	
+
 	public Encryption(String key) {
 		this.blow = new BlowfishAlgorithm(key);
 	}

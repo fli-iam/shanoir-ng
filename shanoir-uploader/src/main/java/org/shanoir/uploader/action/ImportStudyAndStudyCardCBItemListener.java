@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
 	private MainWindow mainWindow;
@@ -39,11 +39,11 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private Subject subject;
 
 	private List<Examination> examinationsOfSubject;
-	
+
 	private Date studyDate;
 
 	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
-	
+
 	private ShanoirUploaderServiceClient serviceClient;
 
 	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
@@ -73,7 +73,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				// Profile Neurinfo
 				if (ShUpConfig.isModeSubjectNameManual()) {
 					updateExistingSubjects(study);
-					this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();	
+					this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
 					// for OFSEP this is done in ImportDialogOpener as subject found before, if
 					updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
 				}
@@ -99,8 +99,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
 				updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
 				examinationsOfSubject = updateExaminations(subject);
-				filterExistingExamsForSelectedStudy(study);			
-			}		
+				filterExistingExamsForSelectedStudy(study);
+			}
 		} // ignore otherwise
 	}
 
@@ -163,7 +163,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			} else {
 				importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
 			}
-			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);		
+			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
 			if (subject.getManualHemisphericDominance() != null) {
 				importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
 			} else {
@@ -224,7 +224,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	/**
 	 * Examinations in Shanoir are related to study.
 	 * @param study
-	 * @throws ParseException 
+	 * @throws ParseException
 	 */
 	private void filterExistingExamsForSelectedStudy(Study study) {
 		// manage list of existing exams, and check if study date matches
@@ -256,7 +256,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			} else {
 				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
 			}
-		} 
+		}
 	}
 
 	private void updateStudyCards(Study study) {

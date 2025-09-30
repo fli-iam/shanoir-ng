@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,7 +28,7 @@ import jakarta.transaction.Transactional;
 
 /**
  * center service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -51,11 +51,11 @@ public class CoilServiceImpl implements CoilService {
 	public Optional<Coil> findByName(String name) {
 		return repository.findByName(name);
 	}
-	
+
 	public Optional<Coil> findById(final Long id) {
 		return repository.findById(id);
 	}
-	
+
 	@Transactional
 	public List<Coil> findAll() {
 		List<Coil> coils = repository.findAll();
@@ -67,12 +67,12 @@ public class CoilServiceImpl implements CoilService {
 	public List<Coil> findByCenterId(Long centerId) {
 		return Utils.toList(repository.findByCenterId(centerId));
 	}
-	
+
 	public Coil create(final Coil entity) {
 		Coil savedEntity = repository.save(entity);
 		return savedEntity;
 	}
-	
+
 	public Coil update(final Coil entity) throws EntityNotFoundException {
 		final Optional<Coil> entityDbOpt = repository.findById(entity.getId());
 		final Coil entityDb = entityDbOpt.orElseThrow(

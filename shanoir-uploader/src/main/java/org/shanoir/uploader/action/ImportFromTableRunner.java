@@ -329,7 +329,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				return false;
-			}	
+			}
 		}
 		subjectREST = ImportUtils.manageSubject(subjectREST,
 			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
@@ -401,7 +401,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
 		while (importThread.isAlive()) {
-			// wait for import thread to finish 
+			// wait for import thread to finish
 		}
 		csvWriter.addExaminationLine(true, line);
 		return true;
@@ -424,7 +424,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("Device serial number used from DICOM: " + deviceSerialNumber);
 		return equipmentDicom;
 	}
-	
+
 	private boolean queryPacs(ImportJob importJob) {
 		logger.info("1. Query PACS with DicomQuery: " + importJob.getDicomQuery().toString());
 		List<Patient> patients;
@@ -448,7 +448,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importJob.setPatients(patients);
 		return true;
 	}
-	
+
 	private LocalDate determineMinDate(ImportJob importJob) {
 		LocalDate minDate;
 		if (!StringUtils.isBlank(importJob.getDicomQuery().getMinStudyDateFilter())) {
@@ -466,7 +466,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		return minDate;
 	}
-	
+
 	private boolean selectPatientStudyAndSeries(ImportJob importJob, LocalDate minDate) {
 		logger.info("2. Select patient, study and series");
 		List<Serie> selectedSeries = new ArrayList<>();

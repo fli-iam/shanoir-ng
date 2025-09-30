@@ -5,11 +5,11 @@ import java.util.List;
 public class CenterDTO {
 
 	private Long id;
-	
+
 	private String name;
-	
+
 	private List<InvestigatorDTO> investigators;
-	
+
 	public CenterDTO(Long id, String name, List<InvestigatorDTO> investigators) {
 		super();
 		this.id = id;
@@ -22,7 +22,7 @@ public class CenterDTO {
 		this.id = id;
 		this.name = name;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -46,5 +46,5 @@ public class CenterDTO {
 	public void setInvestigators(List<InvestigatorDTO> investigators) {
 		this.investigators = investigators;
 	}
-	
+
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -39,7 +39,7 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(DatasetAcquisitionDatasetsDecorator.class)
 @MapperConfig(mappingInheritanceStrategy = MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionDatasetsMapper {
-	
+
 	List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
 			List<DatasetAcquisition> datasetAcquisitions);
 
@@ -51,11 +51,11 @@ public interface DatasetAcquisitionDatasetsMapper {
 
 	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	DatasetAcquisition datasetAcquisitionDatasetsDTOToDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto);
-	
+
 	@ObjectFactory
 	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto) {
-		if (dto.getType().equals("Mr")) return new MrDatasetAcquisition(); 
-        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition(); 
+		if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
+        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition();
         else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition();
 		else if (dto.getType().equals("BIDS")) return new BidsDatasetAcquisition();
 		else if (dto.getType().equals("Eeg")) return new EegDatasetAcquisition();
@@ -63,7 +63,7 @@ public interface DatasetAcquisitionDatasetsMapper {
 		else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
 		else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
     }
-	
+
 	@ObjectFactory
 	default Dataset createDataset(DatasetDTO dto) {
 		Dataset ds = DatasetUtils.buildDatasetFromType(dto.getType());

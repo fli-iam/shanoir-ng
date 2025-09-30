@@ -222,7 +222,7 @@ public class ImportFromTableWindow extends JFrame {
 		gBCuploadButton.gridy = 6;
 		uploadButton.setEnabled(false);
 		masterPanel.add(uploadButton, gBCuploadButton);
-		
+
 		progressBar = new JProgressBar(0);
 		GridBagConstraints gBCProgressBar = new GridBagConstraints();
 		gBCProgressBar.anchor = GridBagConstraints.NORTHWEST;
@@ -238,7 +238,7 @@ public class ImportFromTableWindow extends JFrame {
 		gBCDownloadProgressBar.gridy = 8;
 		progressBar.setVisible(false);
 		masterPanel.add(downloadProgressBar, gBCDownloadProgressBar);
-	
+
 		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, pseudonymizer);
 		uploadButton.addActionListener(importListener);
 

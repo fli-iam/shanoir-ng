@@ -16,13 +16,13 @@ import org.shanoir.ng.examination.model.Examination;
 /**
  * This class maps the Examination objects from the Shanoir-NG database
  * to a DICOM-study DTO to implement the DICOMweb protocol.
- * 
+ *
  * @author mkain
  *
  */
 @Mapper(componentModel = "spring")
 public abstract class ExaminationToStudyDTOMapper {
-	
+
 	public StudyDTO examinationToStudyDTO(Examination examination) {
 		StudyDTO studyDTO = new StudyDTO();
 		final String studyInstanceUID = UIDGeneration.ROOT + ".1." + examination.getId();
@@ -41,20 +41,20 @@ public abstract class ExaminationToStudyDTOMapper {
 		studyDTO.setPatientID(subjectName);
 		studyDTO.setPatientBirthDate("01011960"); // @TODO not yet in ms datasets database
 		studyDTO.setPatientSex("F"); // @TODO not yet in ms datasets database
-		
+
 		addSeries(examination, studyDTO);
 		studyDTO.setNumInstances(1);
 		if (studyDTO.getSeries().size() > 0) {
-			studyDTO.setModalities(studyDTO.getSeries().get(0).getModality());			
+			studyDTO.setModalities(studyDTO.getSeries().get(0).getModality());
 		}
-		
+
 		return studyDTO;
 	}
 
 	/**
 	 * This method transforms dataset acquisitions in Shanoir back
 	 * into DICOM series for the purpose of supporting the DICOMWeb protocol.
-	 * 
+	 *
 	 * @param examination
 	 * @param studyDTO
 	 */
@@ -67,7 +67,7 @@ public abstract class ExaminationToStudyDTOMapper {
 			serie.setSerieInstanceUID(serieInstanceUID);
 			serie.setSeriesNumber(datasetAcquisition.getSortingIndex());
 			serie.setModality(datasetAcquisition.getType().toUpperCase());
-			
+
 			List<InstanceDTO> instances = new ArrayList<InstanceDTO>();
 			List<Dataset> datasets = datasetAcquisition.getDatasets();
 			for (Dataset dataset : datasets) {
@@ -91,13 +91,13 @@ public abstract class ExaminationToStudyDTOMapper {
 		}
 		studyDTO.setSeries(series);
 	}
-	
+
 	/**
 	 * Map list of @Examination to list of @StudyDTO.
-	 *  
+	 *
 	 * @param examinations
 	 * @return list of StudyDTO
 	 */
 	public abstract List<StudyDTO> examinationsToStudyDTOs(List<Examination> examinations);
-	
+
 }

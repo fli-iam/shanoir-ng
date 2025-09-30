@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -58,10 +58,10 @@ public class QualityCard extends HalEntity implements Card {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
-	
+
 	@NotNull
 	private boolean toCheckAtImport;
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "quality_card_id")
 	private List<QualityExaminationRule> rules;
@@ -97,7 +97,7 @@ public class QualityCard extends HalEntity implements Card {
 	public void setRules(List<QualityExaminationRule> rules) {
 		this.rules = rules;
 	}
-	
+
 	/**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination

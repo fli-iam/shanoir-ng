@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -82,7 +82,7 @@ import jakarta.persistence.EntityManager;
  */
 @Component
 public class RabbitMQDatasetsService {
-	
+
 	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
 	@Autowired
@@ -123,7 +123,7 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-	
+
 	@Autowired
 	private StudyCardRepository studyCardRepository;
 
@@ -168,7 +168,7 @@ public class RabbitMQDatasetsService {
 			}
 
 			studyService.updateStudy(updated, current);
-			
+
 			try {
 				solrService.updateStudyAsync(current.getId());
 			} catch (Exception e) {
@@ -185,7 +185,7 @@ public class RabbitMQDatasetsService {
 
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public boolean receiveSubjectUpdate(final String subjectStr) {		
+	public boolean receiveSubjectUpdate(final String subjectStr) {
 		try {
 			manageSubjectUpdate(subjectStr);
 			return true;
@@ -198,7 +198,7 @@ public class RabbitMQDatasetsService {
 	 * MK: to avoid endless loops rabbitmq re-sending the same message,
 	 * we separate the @Transactional and @RabbitListener in two methods,
 	 * the the Amqp exception correctly arrives back to rabbitmq.
-	 * 
+	 *
 	 * @param subjectStr
 	 * @throws JsonProcessingException
 	 * @throws JsonMappingException
@@ -238,7 +238,7 @@ public class RabbitMQDatasetsService {
 	public void receiveCenterNameUpdate(final String centerStr) {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
 	}
-	
+
 	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
 		try {
@@ -317,15 +317,15 @@ public class RabbitMQDatasetsService {
 				examinationService.deleteById(exam.getId(), null);
 				studyIds.add(exam.getStudyId());
 			}
-			
+
 			// Update BIDS folder
 			for (Study stud : studyRepository.findAllById(studyIds)) {
 				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
 			}
-			
+
 			// Delete subject from datasets database
 			subjectRepository.deleteById(subjectId);
-			
+
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);

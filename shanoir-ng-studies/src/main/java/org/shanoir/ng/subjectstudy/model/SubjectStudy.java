@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,7 +36,7 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Relation between the subjects and the studies.
- * 
+ *
  * @author msimon
  *
  */
@@ -69,7 +69,7 @@ public class SubjectStudy extends AbstractEntity {
 	/** Tags associated to the subject. */
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
-	
+
 	/** QualityCard tags associated to the subject. */
 	private Integer qualityTag;
 
@@ -80,15 +80,15 @@ public class SubjectStudy extends AbstractEntity {
         if (getSubjectStudyTags() == null) return null;
         return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
     }
-	
+
 	public List<SubjectStudyTag> getSubjectStudyTags() {
 		return subjectStudyTags;
 	}
-	
+
 	public QualityTag getQualityTag() {
 		return QualityTag.get(qualityTag);
 	}
-	
+
 	public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
@@ -96,7 +96,7 @@ public class SubjectStudy extends AbstractEntity {
 	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
 		this.subjectStudyTags = subjectStudyTags;
 	}
-	
+
 	/**
 	 * @return the physicallyInvolved
 	 */

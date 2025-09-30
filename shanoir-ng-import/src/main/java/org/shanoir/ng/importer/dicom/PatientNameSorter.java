@@ -6,7 +6,7 @@ import org.shanoir.ng.importer.model.Patient;
 
 /**
  * Sorts a list of DICOM patients according to their name.
- * 
+ *
  * @author mkain
  *
  */

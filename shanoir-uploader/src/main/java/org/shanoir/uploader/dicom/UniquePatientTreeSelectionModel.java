@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Custom TreeSelectionModel to allow selection of multiple nodes only if they belong to the same patient.
- * 
+ *
  * @author lvallet
  *
  */

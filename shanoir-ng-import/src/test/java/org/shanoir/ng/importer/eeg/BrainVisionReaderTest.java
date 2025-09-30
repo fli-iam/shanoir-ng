@@ -28,12 +28,12 @@ public class BrainVisionReaderTest {
 	public void testReadChannels() throws ShanoirImportException {
 		assertNotNull(vhdrFile);
 		assertTrue(vhdrFile.exists());
-		
+
 		// File reading
 		reader = new BrainVisionReader(vhdrFile);
 		assertNotNull(reader.getEegFile());
 		assertNotNull(reader.getChannels());
-		
+
 		// Channel parsing
 		assertEquals(64, reader.getChannels().size());
 		Channel channel1 = reader.getChannels().get(0);
@@ -44,7 +44,7 @@ public class BrainVisionReaderTest {
 		assertEquals(Float.valueOf(0), Float.valueOf(channel1.getNotch()));
 		assertEquals(Float.valueOf((float) 0.5), Float.valueOf(channel1.getResolution()));
 		assertEquals("µV", channel1.getReferenceUnits());
-	
+
 		// Position parsing
 		// 9.27344073	2.48990783	2.58100338
 		assertEquals(Float.valueOf((float) 9.27344073), Float.valueOf(channel1.getX()));
@@ -55,9 +55,9 @@ public class BrainVisionReaderTest {
 		List<Event> events = reader.getEvents();
 		assertNotNull(events);
 		assertEquals(88, events.size());
-		
+
 		Event event1 = events.get(0);
-		
+
 		assertNotNull(event1);
 		assertEquals(0, event1.getChannelNumber());
 		assertEquals("", event1.getDescription());
@@ -65,9 +65,9 @@ public class BrainVisionReaderTest {
 		assertEquals("1", event1.getPosition());
 		assertEquals("New Segment", event1.getType());
 		assertNotNull(event1.getDate());
-		
+
 		Event event2 = events.get(1);
-		
+
 		assertNotNull(event1);
 		assertEquals(0, event2.getChannelNumber());
 		assertEquals("R128", event2.getDescription());

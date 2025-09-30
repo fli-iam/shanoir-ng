@@ -60,7 +60,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 1;
 		container.add(selectProfileCB, shanoirStartupGBC);
-		
+
 		selectProfileCB.removeAllItems();
 		String[] profiles = ShUpConfig.profiles;
 		for (int i = 0; i < profiles.length; i++) {
@@ -85,7 +85,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 3;
 		container.add(select, shanoirStartupGBC);
-		
+
 		selectProfilePanelActionListener.configure(this, sSC);
 		select.addActionListener(selectProfilePanelActionListener);
 	}

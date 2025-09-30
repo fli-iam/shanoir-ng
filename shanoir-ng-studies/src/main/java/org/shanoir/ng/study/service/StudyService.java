@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,11 +61,11 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
-	
-	
+
+
 	/**
 	 * Get all the studies
-	 * 
+	 *
 	 * @return a list of studies
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
@@ -76,18 +76,18 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostFilter("@studySecurityService.filterStudyIdNameDTOsHasRight(filterObject, 'CAN_SEE_ALL')")
 	List<IdName> findAllNames();
-	
+
 
 	/**
 	 * Get all the challenges
-	 * 
+	 *
 	 * @return a list of challenges
 	 */
 	List<Study> findChallenges();
 
 	/**
 	 * add new study
-	 * 
+	 *
 	 * @param study
 	 * @return created Study
 	 * @throws MicroServiceCommunicationException
@@ -96,10 +96,10 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
 	Study create(Study study) throws MicroServiceCommunicationException;
 
-	
+
 	/**
 	 * Update a study
-	 * 
+	 *
 	 * @param study
 	 * @return updated study
 	 * @throws EntityNotFoundException
@@ -127,7 +127,7 @@ public interface StudyService {
 	 * Links an examination to a study
 	 * @param examinationId an examination ID
 	 * @param studyId the lionked study ID
-	 * @param centerId 
+	 * @param centerId
 	 */
 	void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
 
@@ -141,7 +141,7 @@ public interface StudyService {
 
 	/**
 	 * Gets the protocol or data user agreement file path
-	 * 
+	 *
 	 * @param studyId
 	 *            id of the study
 	 * @param fileName
@@ -161,7 +161,7 @@ public interface StudyService {
 
 		/**
 	 * Get statistics for data analysts and study promoters
-	 * 
+	 *
 	 * @return imaging statistics
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")

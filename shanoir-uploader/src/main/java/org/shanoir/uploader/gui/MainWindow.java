@@ -70,9 +70,9 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 /**
  * The MainWindow of the ShanoirUploader.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
@@ -106,7 +106,7 @@ public class MainWindow extends JFrame {
 	public ButtonGroup sexRG;
 	public JRadioButton fSexR, mSexR, oSexR;
 	public JButton downloadOrCopyButton;
-	
+
 	public JButton queryButton;
 
 	public ImportDialog importDialog;
@@ -143,7 +143,7 @@ public class MainWindow extends JFrame {
 	public JLabel finishedUploadsLB;
 	public JLabel errorUploadsLB;
 	public JLabel uploadErrorAlert;
-	
+
 	public IDicomServerClient dicomServerClient;
 	public File shanoirUploaderFolder;
 
@@ -151,7 +151,7 @@ public class MainWindow extends JFrame {
 	public ShUpConfig shanoirUploaderConfiguration;
 
 	public ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
-	
+
 	private ImportDialogOpener importDialogOpener;
 
 	/**
@@ -202,10 +202,10 @@ public class MainWindow extends JFrame {
 
 		JMenu mnConfiguration = new JMenu(resourceBundle.getString("shanoir.uploader.configurationMenu"));
 		menuBar.add(mnConfiguration);
-		
+
 		JMenu mnImport = new JMenu(resourceBundle.getString("shanoir.uploader.importMenu"));
 		menuBar.add(mnImport);
-		
+
 		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.table"));
 		mnImport.add(mnImportExcell);
 
@@ -343,7 +343,7 @@ public class MainWindow extends JFrame {
 		gbc_queryLevelLabel.gridx = 0;
 		gbc_queryLevelLabel.gridy = 1;
 		queryPanel.add(queryLevelLabel, gbc_queryLevelLabel);
-		
+
 		JPanel queryRadioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
 		queryLevelRG = new ButtonGroup();
 
@@ -427,7 +427,7 @@ public class MainWindow extends JFrame {
 		patientIDTF.setColumns(15);
 		patientIDTF.setText("");
 		patientIDTF.addCaretListener(caretQueryPACSfields);
-		
+
 		// Add Birth Date field
 		JLabel birthDateReasearchLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientBirthDateLabel"));
 		GridBagConstraints gbc_birthDateReasearchLabel = new GridBagConstraints();
@@ -508,7 +508,7 @@ public class MainWindow extends JFrame {
 				}
 			}
 		});
-		
+
 		JLabel studyDescriptionLabel = new JLabel();
 		studyDescriptionLabel.setText("<html>" + resourceBundle.getString("shanoir.uploader.studyDescriptionLabel") + " <img src='" + infoIcon + "'> :</html>");
 		studyDescriptionLabel.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
@@ -618,7 +618,7 @@ public class MainWindow extends JFrame {
 		gbc_modalityLabel.gridx = 0;
 		gbc_modalityLabel.gridy = 7;
 		queryPanel.add(modalityLabel, gbc_modalityLabel);
-		
+
 		String[] modalityList = { "MR", "CT", "PT", "NM", "XA", "None" };
 		JComboBox<String> modalityCB = new JComboBox<String>(modalityList);
 		// We set by default the modality to None because some PACS do not support modality at Patient or even Study root query
@@ -638,10 +638,10 @@ public class MainWindow extends JFrame {
 					modality = null;
 				} else {
 					modality = (String) modalityCB.getSelectedItem();
-				}	
+				}
 			}
 		});
-		
+
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
 		gbc_queryButton.anchor = GridBagConstraints.CENTER;
@@ -833,18 +833,18 @@ public class MainWindow extends JFrame {
 		gbc_btnRetrieve.gridx = 0;
 		gbc_btnRetrieve.gridy = 6;
 		editPanel.add(downloadOrCopyButton, gbc_btnRetrieve);
-		
+
 		menuBar.add(Box.createHorizontalGlue());
-		
+
 		dOCAL = new DownloadOrCopyActionListener(this, ShUpOnloadConfig.getPseudonymizer(), dicomServerClient, dicomFileAnalyzer);
 		downloadOrCopyButton.addActionListener(dOCAL);
 		downloadOrCopyButton.setEnabled(false);
-		
+
 		/**
 		 * Init ImportDialog and its Opener here.
 		 */
 		importDialogOpener = new ImportDialogOpener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
-		
+
 		// add ShUp principal panel (splitPane) and upload job display pane
 		// (scrollPaneUpload) to TabbedPane
 		final JPanel notificationPanel = new JPanel();
@@ -967,9 +967,9 @@ public class MainWindow extends JFrame {
 		gbc_errorAlert.gridy = 6;
 		gbc_errorAlert.gridheight = 2;
 		notificationPanel.add(uploadErrorAlert, gbc_errorAlert);
-		
+
 		menuBar.add(Box.createRigidArea(new Dimension(8, 0)));
-		
+
 		// add main split pane here
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"), null, mainSplitPane,
 				resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
@@ -1002,7 +1002,7 @@ public class MainWindow extends JFrame {
 	public FindDicomActionListener getFindDicomActionListener() {
 		return fAL;
 	}
-	
+
 	public SelectionActionListener getSAL() {
 		return sAL;
 	}
@@ -1018,5 +1018,5 @@ public class MainWindow extends JFrame {
 	public ImportDialogOpener getImportDialogOpener() {
 		return importDialogOpener;
 	}
-	
+
 }

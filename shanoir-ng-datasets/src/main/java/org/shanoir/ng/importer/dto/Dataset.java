@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,36 +25,36 @@ import org.shanoir.ng.shared.model.DiffusionGradient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Dataset {
-	
+
 	@JsonProperty("name")
 	private String name;
-	
+
 	private List<ExpressionFormat> expressionFormats;
-	
+
 	@JsonProperty("diffusionGradients")
 	private List<DiffusionGradient> diffusionGradients;
 
 	@JsonProperty("repetitionTimes")
 	public Set<Double> repetitionTimes;
-	
+
 	@JsonProperty("inversionTimes")
 	public Set<Double> inversionTimes;
 
 	@JsonProperty("echoTimes")
 	public Set<EchoTime> echoTimes;
-	
+
 	@JsonProperty("flipAngles")
 	public Set<String> flipAngles;
-	
+
 	@JsonProperty("bValues")
 	private List<Double> bValues;
-	
+
 	@JsonProperty("bVectors")
 	private List<Double> bVectors;
 
 	@JsonProperty("firstImageSOPInstanceUID")
 	private String firstImageSOPInstanceUID;
-	
+
 	public String getName() {
 		return name;
 	}
@@ -70,7 +70,7 @@ public class Dataset {
 	public void setExpressionFormats(List<ExpressionFormat> expressionFormats) {
 		this.expressionFormats = expressionFormats;
 	}
-	
+
 	public List<Double> getbValues() {
 		return bValues;
 	}
@@ -86,7 +86,7 @@ public class Dataset {
 	public void setbVectors(List<Double> bVectors) {
 		this.bVectors = bVectors;
 	}
-	
+
 	public List<DiffusionGradient> getDiffusionGradients() {
 		if (diffusionGradients == null) {
 			diffusionGradients = new ArrayList<>();
@@ -97,7 +97,7 @@ public class Dataset {
 	public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
 		this.diffusionGradients = diffusionGradients;
 	}
-	
+
 	public Set<Double> getRepetitionTimes() {
 		if (repetitionTimes == null) {
 			this.repetitionTimes = new HashSet<>();

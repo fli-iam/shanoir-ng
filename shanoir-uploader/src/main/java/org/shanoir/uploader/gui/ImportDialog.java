@@ -49,11 +49,11 @@ import org.shanoir.uploader.model.rest.SubjectType;
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination
  * selection in order to import the data automatically under Shanoir Webapp.
- * 
+ *
  * Part of the MVC Pattern : View Controller is available under package
  * org.shanoir.uploader.action as importDetailsListener.java Model is available
  * under package org.shanoir.uploader.model as ExportData.java
- * 
+ *
  * @author mkain
  * @author atouboul
  *
@@ -71,7 +71,7 @@ public class ImportDialog extends JDialog {
 	public JComboBoxMandatory<StudyCard> studyCardCB;
 	public JLabel studyCardFilterLabel;
 	public JTextField studyCardFilterTextField;
-	
+
 	// Subject(s)
 	public JLabel subjectLabel;
 	public JTextFieldMandatory subjectTextField;
@@ -134,14 +134,14 @@ public class ImportDialog extends JDialog {
 	public JSeparator separatorSubject;
 	public JLabel separatorMrExaminationLabel;
 	public JSeparator separatorMrExamination;
-	
+
 	public MainWindow mainWindow;
-	
+
 	/**
 	 * On injecting both listeners the ImportDialog becomes invisible of
 	 * the differences between sh-old and sh-ng. ImportDialog is a clean
 	 * view component, no dependency to the models.
-	 * 
+	 *
 	 * @param mainWindow
 	 * @param title
 	 * @param trueOrFalse
@@ -169,7 +169,7 @@ public class ImportDialog extends JDialog {
         dicomPanel.setBorder(BorderFactory.createTitledBorder("Informations DICOM"));
         GridBagConstraints dicomPanelGBC = new GridBagConstraints();
         dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
-		
+
 		int style = Font.ITALIC;
 		Font font = new Font("about", style, 12);
 
@@ -450,7 +450,7 @@ public class ImportDialog extends JDialog {
 		formPanel.add(existingSubjectsCB, importDialogGBC);
 		existingSubjectsCB.addItemListener(importStudyAndStudyCardCBIL);
 		AutoCompleteDecorator.decorate(existingSubjectsCB);
-		
+
 		subjectImageObjectCategoryLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectImageObjectCategoryLabel") + " *");
 		subjectImageObjectCategoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -768,7 +768,7 @@ public class ImportDialog extends JDialog {
 
 		CancelButtonActionListener cBAL = new CancelButtonActionListener(this);
 		cancelButton.addActionListener(cBAL);
-		
+
 		exportButton = new JButton(resourceBundle.getString("shanoir.uploader.exportimport"));
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;

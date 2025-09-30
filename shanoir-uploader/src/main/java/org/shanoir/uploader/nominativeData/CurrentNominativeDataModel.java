@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class contains a hash key of nominative data extracted from the
  * workfolder.
- * 
+ *
  * @author atouboul
  *
  */

@@ -78,7 +78,7 @@ public class BidsImporterService {
 
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
 
@@ -88,9 +88,9 @@ public class BidsImporterService {
 	 * Create BIDS dataset.
 	 * @param importJob the import job
 	 * @param userId the user id
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
@@ -175,13 +175,13 @@ public class BidsImporterService {
 
 	/**
 	 * Import some nifti datasets
-	 * @param bidsDataType 
-	 * @param modalityType 
-	 * @param event 
+	 * @param bidsDataType
+	 * @param modalityType
+	 * @param event
 	 * @param workfolder the work folder we are working in
-	 * @throws IOException 
-	 * @throws ParseException 
-	 * @throws JSONException 
+	 * @throws IOException
+	 * @throws ParseException
+	 * @throws JSONException
 	 */
 	private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException, ParseException, JSONException {
 
@@ -198,9 +198,9 @@ public class BidsImporterService {
 			public boolean accept(File arg0, String name) {
 				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
 			} });
-		
+
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
-		
+
 		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
@@ -213,7 +213,7 @@ public class BidsImporterService {
 			String name = importedFile.getName().replaceAll("\\.", "_");
 
 			// Parse name to get acquisition / session / run / task
-			
+
 			BidsDataset datasetToCreate;
 			DatasetExpression expression;
 
@@ -232,11 +232,11 @@ public class BidsImporterService {
 				originMetadata.setName(name);
 				originMetadata.setDatasetModalityType(modalityType);
 				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-				
+
 				datasetToCreate.setOriginMetadata(originMetadata);
 				datasetToCreate.setUpdatedMetadata(originMetadata);
 				datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
-				
+
 				// DatasetExpression with list of files
 				expression = new DatasetExpression();
 				expression.setCreationDate(LocalDateTime.now());
@@ -280,7 +280,7 @@ public class BidsImporterService {
 					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
 				}
 			}
-			
+
 			expression.setDatasetFiles(files);
 			expression.setSize(Files.size(importedFileFinalLocation));
 			datasets.add(datasetToCreate);
@@ -295,7 +295,7 @@ public class BidsImporterService {
 
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
-		
+
 		event.setStatus(ShanoirEvent.SUCCESS);
 
 		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"

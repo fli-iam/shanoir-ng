@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -77,7 +77,7 @@ public class User extends HalEntity implements UserDetails {
 	@Column(unique = true)
 	@Unique
 	private String email;
-	
+
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	@LocalDateAnnotations
@@ -90,11 +90,11 @@ public class User extends HalEntity implements UserDetails {
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@NotNull
 	private Boolean extensionRequestDemand = Boolean.FALSE;
-	
+
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@NotNull
 	private Boolean firstExpirationNotificationSent = Boolean.FALSE;
-	
+
 	@NotBlank
 	private String firstName;
 
@@ -111,7 +111,7 @@ public class User extends HalEntity implements UserDetails {
 	@NotNull
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Role role;
-	
+
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@NotNull
 	private Boolean secondExpirationNotificationSent = Boolean.FALSE;
@@ -241,7 +241,7 @@ public class User extends HalEntity implements UserDetails {
 	public Boolean isExtensionRequestDemand() {
 		return extensionRequestDemand;
 	}
-	
+
 	/**
 	 * @param extensionRequestDemand
 	 *            the extensionRequestDemand to set
@@ -249,7 +249,7 @@ public class User extends HalEntity implements UserDetails {
 	public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
 		this.extensionRequestDemand = extensionRequestDemand;
 	}
-	
+
 	/**
 	 * @return the firstExpirationNotificationSent
 	 */

@@ -35,20 +35,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the start import button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ImportFinishActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
 	private MainWindow mainWindow;
-	
+
 	private File uploadFolder;
-	
+
 	private Subject subjectREST;
-	
+
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
 	public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST,
@@ -176,7 +176,7 @@ public class ImportFinishActionListener implements ActionListener {
 				}
 			}
 		}
-		
+
 		// In case user selects existing subject from study, just use it
 		if (!useExistingSubjectInStudy) {
 			// subject name: entered by the user in the GUI
@@ -200,7 +200,7 @@ public class ImportFinishActionListener implements ActionListener {
 				return;
 			}
 		}
-		
+
 		Long examinationId = null;
 		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
@@ -223,19 +223,19 @@ public class ImportFinishActionListener implements ActionListener {
 			examinationId = examinationDTO.getId();
 			logger.info("Examination used on server with ID: " + examinationId);
 		}
-				
+
 		/**
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId,
 				(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
-		
+
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
 			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
 			// If quality check resulted in errors, show a message and do not start the import
 			if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
-				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
 				// set status FAILED
 				ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
@@ -245,7 +245,7 @@ public class ImportFinishActionListener implements ActionListener {
 				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjects().isEmpty()) {
 					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
-						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
 								ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
 					}
 					// If Failed Valid No updated subject studies exist in the qualityControlResult
@@ -254,12 +254,12 @@ public class ImportFinishActionListener implements ActionListener {
 						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
 						importJob.setQualityTag(qualityControlResult.getUpdatedSubjects().get(0).getQualityTag());
 					}
-				}				
+				}
 			}
         } catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			JOptionPane.showMessageDialog(mainWindow.frame, 
-					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(), 
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(),
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
@@ -275,7 +275,7 @@ public class ImportFinishActionListener implements ActionListener {
 		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
 		mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
 		mainWindow.setCursor(null); // turn off the wait cursor
-		((JButton) event.getSource()).setEnabled(true);	
+		((JButton) event.getSource()).setEnabled(true);
 	}
 
 }

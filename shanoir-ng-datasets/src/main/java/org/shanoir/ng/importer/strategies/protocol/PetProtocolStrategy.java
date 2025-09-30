@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,14 +31,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PetProtocolStrategy {
-	
+
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
-	
-	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) throws IOException {		
-		PetProtocol petProtocol = new PetProtocol();  
+
+	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) throws IOException {
+		PetProtocol petProtocol = new PetProtocol();
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
-		
+
 		/** (0028, 0010) Rows */
 		final Integer dimensionX = attributes.getInt(Tag.Rows, 0);
 		LOG.debug("extractMetadata : dimensionX=" + dimensionX);
@@ -54,7 +54,7 @@ public class PetProtocolStrategy {
 		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
 		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
 		petProtocol.setSliceThickness(sliceThickness);
-		
+
 		/** (0054, 0081) Number of Slices */
 		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
 		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
@@ -64,9 +64,9 @@ public class PetProtocolStrategy {
 			LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		}
 		petProtocol.setNumberOfSlices(numberOfSlices);
-		
+
 		/**
-		 * (0028, 0030) Pixel Spacing in X and Y direction in mm. 
+		 * (0028, 0030) Pixel Spacing in X and Y direction in mm.
 		 * The unit of measure of voxel size X, must be in mm.
 		 */
 		final double[] pixelspacing = attributes.getDoubles(Tag.PixelSpacing);
@@ -78,15 +78,15 @@ public class PetProtocolStrategy {
 			petProtocol.setVoxelSizeX(voxelSizeX);
 			petProtocol.setVoxelSizeY(voxelSizeY);
 		}
-		
+
 		/**
-		 * (0018, 0050) Slice Thickness in mm. 
+		 * (0018, 0050) Slice Thickness in mm.
 		 * The unit of measure of voxel size Z, must be in mm.
 		 */
 		final Double voxelSizeZ = attributes.getDouble(Tag.SliceThickness, 0);
 		LOG.debug("extractMetadata : voxelSizeZ=" + voxelSizeZ);
 		petProtocol.setVoxelSizeZ(voxelSizeZ);
-		
+
 		/** (0054, 1101) Attenuation Correction Method */
 		final String attenuationCorrectionMethod = attributes.getString(Tag.AttenuationCorrectionMethod);
 		LOG.debug("extractMetadata : attenuationCorrectionMethod=" + attenuationCorrectionMethod);
@@ -106,14 +106,14 @@ public class PetProtocolStrategy {
 		final Integer decayFactor = attributes.getInt(Tag.DecayFactor, 0);
 		LOG.debug("extractMetadata : decayFactor=" + decayFactor);
 		petProtocol.setDecayFactor(decayFactor);
-		
+
 		/** (0054,1322) Dose calibration factor */
 		final Integer doseCalibrationFactor = attributes.getInt(Tag.DoseCalibrationFactor, 0);
 		LOG.debug("extractMetadata : doseCalibrationFactor=" + doseCalibrationFactor);
 		petProtocol.setDoseCalibrationFactor(doseCalibrationFactor);
 
 		/**
-		 * (0054,0014) Energy window lower limit in KeV. 
+		 * (0054,0014) Energy window lower limit in KeV.
 		 * The unit of measure of the energy window lower limit must be in KeV.
 		 */
 		final Integer energyWindowLowerLimit = attributes.getInt(Tag.EnergyWindowLowerLimit, 0);
@@ -121,7 +121,7 @@ public class PetProtocolStrategy {
 		petProtocol.setEnergyWindowLowerLimit(energyWindowLowerLimit);
 
 		/**
-		 * (0054,0015) Energy window upper limit in KeV. 
+		 * (0054,0015) Energy window upper limit in KeV.
 		 * The unit of measure of the energy window upper limit must be in KeV.
 		 */
 		final Integer energyWindowUpperLimit = attributes.getInt(Tag.EnergyWindowUpperLimit, 0);
@@ -132,14 +132,14 @@ public class PetProtocolStrategy {
 		final String numberOfIterations = attributes.getString(Tag.NumberOfIterations);
 		LOG.debug("extractMetadata : numberOfIterations=" + numberOfIterations);
 		petProtocol.setNumberOfIterations(numberOfIterations);
-		
+
 		/** (0018,9740) number of subsets */
 		final String numberOfSubsets = attributes.getString(Tag.NumberOfSubsets);
 		LOG.debug("extractMetadata : numberOfSubsets=" + numberOfSubsets);
 		petProtocol.setNumberOfSubsets(numberOfSubsets);
-		
+
 		/**
-		 * (0018,1075) Radionuclide Half Life in sec. 
+		 * (0018,1075) Radionuclide Half Life in sec.
 		 * The unit of measure of the radionuclide half life must be in sec.
 		 */
 		final Double radionuclideHalfLife = attributes.getDouble(Tag.RadionuclideHalfLife, 0);
@@ -147,7 +147,7 @@ public class PetProtocolStrategy {
 		petProtocol.setRadionuclideHalfLife(radionuclideHalfLife);
 
 		/**
-		 * (0018,1074) Radionuclide Total Dose in bq. 
+		 * (0018,1074) Radionuclide Total Dose in bq.
 		 * The unit of measure of the radionuclide total dose must be in bq.
 		 */
 		final Integer radionuclideTotalDose = attributes.getInt(Tag.RadionuclideTotalDose, 0);
@@ -193,7 +193,7 @@ public class PetProtocolStrategy {
 		final String units = attributes.getString(Tag.Units);
 		LOG.debug("extractMetadata : units=" + units);
 		petProtocol.setUnits(units);
-		
+
 		return petProtocol;
 	}
 

@@ -8,17 +8,17 @@ import javax.swing.event.DocumentListener;
 
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.StudyCard;
- 
+
 public class ImportStudyCardFilterDocumentListener implements DocumentListener {
- 
+
     private MainWindow mainWindow;
- 
+
     private List<StudyCard> defaultStudyCards = new ArrayList<StudyCard>();
 
     public ImportStudyCardFilterDocumentListener(final MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }
- 
+
     @Override
  	public void insertUpdate(DocumentEvent e) {
  		filter();

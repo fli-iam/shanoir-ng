@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -68,10 +68,10 @@ import jakarta.validation.Valid;
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
-	
+
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
 	private ImporterService importerService;
 
@@ -80,13 +80,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
-	
+
 	@Autowired
 	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
-	
+
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
@@ -116,7 +116,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 		EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
-		
+
 		eegImporterService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return HttpStatus.OK.value();
@@ -140,7 +140,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			importerService.cleanTempFiles(importJob.getWorkFolder());
 		}
 	}
-	
+
 	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
 		LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
 		long startTime = System.currentTimeMillis();
@@ -149,7 +149,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		long duration = endTime - startTime;
 		LOG.info("Creation of dataset acquisition required " + duration + " millis.");
 	}
-	
+
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
 			  Long studyCardId) {
@@ -168,7 +168,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0)
 						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
 			}
 		});
@@ -178,17 +178,17 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
 			@Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
-		
+
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
-		
+
 		daList.sort(new Comparator<DatasetAcquisition>() {
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return o1.getExamination() != null && o2.getExamination() != null 
+				return o1.getExamination() != null && o2.getExamination() != null
 						? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
 						: 0;
 			}
@@ -199,14 +199,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
 			  Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
 			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
-			
+
 			datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
@@ -223,7 +223,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			  Long datasetAcquisitionId) {
-		
+
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -239,8 +239,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
 	}
-	
-	
+
+
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
@@ -252,13 +252,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {

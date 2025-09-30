@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,7 +30,7 @@ public interface TherapyService {
 
 	/**
 	 * Delete a therapy.
-	 * 
+	 *
 	 * @param id
 	 *            therapy id.
 	 * @throws ShanoirException
@@ -39,12 +39,12 @@ public interface TherapyService {
 
 	/**
 	 * Get all the therapies.
-	 * 
+	 *
 	 * @return a list of therapies.
 	 */
 	List<Therapy> findAll();
 
-	
+
 	/**
 	 * Find Therapy by its id.
 	 *
@@ -53,7 +53,7 @@ public interface TherapyService {
 	 * @return a Therapy or null.
 	 */
 	Therapy findById(Long id);
-	
+
 	/**
 	 * Find Therapy by its name.
 	 *
@@ -62,7 +62,7 @@ public interface TherapyService {
 	 * @return a Therapy or null.
 	 */
 	Therapy findByName(String name);
-	
+
 	/**
 	 * Find Therapies by their type.
 	 *
@@ -92,6 +92,6 @@ public interface TherapyService {
 	 */
 	Therapy update(Therapy therapy) throws ShanoirException;
 
-	
+
 
 }

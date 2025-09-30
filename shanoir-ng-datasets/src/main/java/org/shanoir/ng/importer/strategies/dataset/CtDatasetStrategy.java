@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,14 +37,14 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
 	@Autowired
 	DicomProcessing dicomProcessing;
-	
+
 	@Autowired
 	DatasetExpressionContext datasetExpressionContext;
-	
+
 	@Override
 	public DatasetsWrapper<CtDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
-		
+
 		DatasetsWrapper<CtDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -104,9 +104,9 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
 		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
+		 *
 		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
-		 * 
+		 *
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
@@ -114,10 +114,10 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 			datasetExpression.setDataset(ctDataset);
 			ctDataset.getDatasetExpressions().add(datasetExpression);
 		}
-		
+
 		DatasetMetadata originalDM = ctDataset.getOriginMetadata();
 		ctDataset.setUpdatedMetadata(originalDM);
-		
+
 		return ctDataset;
 	}
 

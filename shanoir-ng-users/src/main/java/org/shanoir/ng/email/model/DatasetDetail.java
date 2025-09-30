@@ -3,7 +3,7 @@ package org.shanoir.ng.email.model;
 public class DatasetDetail {
 
 	private String url;
-	
+
 	private String name;
 
 	public String getUrl() {

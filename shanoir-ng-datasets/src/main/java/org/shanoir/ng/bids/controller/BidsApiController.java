@@ -38,7 +38,7 @@ import jakarta.validation.Valid;
 
 @Controller
 public class BidsApiController implements BidsApi {
-	
+
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
 	private static final String ZIP = ".zip";
@@ -47,10 +47,10 @@ public class BidsApiController implements BidsApi {
 
 	@Autowired
 	BIDSService bidsService;
-	
+
 	@Autowired
 	BidsDeserializer bidsDeserializer;
-	
+
 	@Autowired
 	StudyRepository studyRepo;
 
@@ -79,7 +79,7 @@ public class BidsApiController implements BidsApi {
 	@Override
     public void exportBIDSFile(
     		@Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, 
+    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
 			HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
@@ -94,7 +94,7 @@ public class BidsApiController implements BidsApi {
 			response.sendError(HttpStatus.NO_CONTENT.value());
 			return;
     	}
-    	
+
     	// Copy / zip it (and by the way filter only folder that we are interested in)
     	String userDir = getUserDir(System.getProperty(JAVA_IO_TMPDIR)).getAbsolutePath();
 
@@ -111,12 +111,12 @@ public class BidsApiController implements BidsApi {
 		} else {
 			Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
 		}
-		
+
 		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
 		zipFile.createNewFile();
 
 		zip(fileDir.getAbsolutePath(), zipFile.getAbsolutePath());
-		
+
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
@@ -154,10 +154,10 @@ public class BidsApiController implements BidsApi {
 
 		return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
 	}
-	
+
 	/**
 	 * Zip
-	 * 
+	 *
 	 * @param sourceDirPath
 	 * @param zipFilePath
 	 * @throws IOException
@@ -169,7 +169,7 @@ public class BidsApiController implements BidsApi {
 			// 2. "Walk" => iterate over the source file
 			Path pp = Paths.get(sourceDirPath);
 			try (Stream<Path> walker = Files.walk(pp)) {
-				
+
 				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
 				walker.filter(path -> !path.toFile().isDirectory()).forEach(path -> {
 					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());

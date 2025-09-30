@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope("prototype")
 public class ProcessedDatasetImporterService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetImporterService.class);
 
     private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
@@ -67,7 +67,7 @@ public class ProcessedDatasetImporterService {
 
     /**
      * Create a processed dataset dataset associated with a dataset processing.
-     * 
+     *
      * @param importJob
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
@@ -107,7 +107,7 @@ public class ProcessedDatasetImporterService {
                 datasetFile.setPath(location.toUri().toString());
             }
             expression.setDatasetFiles(Collections.singletonList(datasetFile));
-            
+
             dataset = datasetService.create(dataset);
             solrService.indexDataset(dataset.getId());
 
@@ -146,7 +146,7 @@ public class ProcessedDatasetImporterService {
 
     /**
      * Check ProcessedDatasetImportJob.
-     * 
+     *
      * @param job
      * @param event
      * @return

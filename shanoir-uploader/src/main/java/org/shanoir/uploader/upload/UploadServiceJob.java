@@ -30,9 +30,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * The UploadServiceJob.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 @Service
 public class UploadServiceJob {
@@ -63,9 +63,9 @@ public class UploadServiceJob {
 
 	/**
 	 * Walk trough all folders within the work folder.
-	 * 
+	 *
 	 * @param workFolder
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws IOException {
 		final List<File> folders = Util.listFolders(workFolder);
@@ -95,7 +95,7 @@ public class UploadServiceJob {
 
 	/**
 	 * Inspects the content of a folder.
-	 * 
+	 *
 	 * @param folder
 	 */
 	private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
@@ -130,7 +130,7 @@ public class UploadServiceJob {
 
 	/**
 	 * This method processes the state START.
-	 * 
+	 *
 	 * @param folder
 	 * @param allFiles
 	 * @param uploadJob
@@ -163,7 +163,7 @@ public class UploadServiceJob {
 			/**
 			 * Start job on server
 			 */
-			setTempDirIdAndStartImport(tempDirId, importJob);	
+			setTempDirIdAndStartImport(tempDirId, importJob);
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);

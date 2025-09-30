@@ -18,7 +18,7 @@ public class Tag {
 
 	@Id
 	private Long id;
-	
+
 	private String name;
 
 	private String color;

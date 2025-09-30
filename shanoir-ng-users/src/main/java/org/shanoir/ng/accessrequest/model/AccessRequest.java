@@ -16,9 +16,9 @@ import org.shanoir.ng.user.model.User;
 public class AccessRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 4662874539537675259L;
-	
+
 	public static final int APPROVED = 1;
-	
+
 	public static final int REFUSED = -1;
 
 	public static final int ON_DEMAND = 0;
@@ -26,11 +26,11 @@ public class AccessRequest extends AbstractEntity {
 	private String studyName;
 
 	private Long studyId;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
-	
+
 	private String motivation;
 
 	/** 0: unresolved

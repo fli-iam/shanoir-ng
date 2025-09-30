@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,7 +28,7 @@ import jakarta.validation.constraints.NotNull;
 /**
  * This class represents an echo time. It is used in the MR protocol to list and
  * rank all the echo times of the acquisition.
- * 
+ *
  * @author msimon
  *
  */
@@ -46,7 +46,7 @@ public class EchoTime extends AbstractEntity {
 	@JoinColumn(name = "mr_dataset_id")
 	@JsonIgnore
 	private MrDataset mrDataset;
-	
+
 	/**
 	 * The echo number. Comes from dicom tag (0018,0086) VR=IS, VM=1-n Echo
 	 * Number(s).
@@ -99,8 +99,8 @@ public class EchoTime extends AbstractEntity {
 	public void setEchoTimeValue(Double echoTimeValue) {
 		this.echoTimeValue = echoTimeValue;
 	}
-	
-	
+
+
 	public void setMrDataset(MrDataset mrDataset) {
 		this.mrDataset = mrDataset;
 	}
@@ -122,7 +122,7 @@ public class EchoTime extends AbstractEntity {
 
 		return retVal && retVal1;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int hash = 7;

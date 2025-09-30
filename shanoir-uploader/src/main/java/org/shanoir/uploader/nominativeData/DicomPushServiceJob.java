@@ -45,10 +45,10 @@ public class DicomPushServiceJob {
 	private DownloadOrCopyActionListener dOCAL;
 
 	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
-	
+
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
-	// We keep it as a List because we can have PACS answers with 2 series, 
+	// We keep it as a List because we can have PACS answers with 2 series,
 	// but the same serie, same SeriesInstanceUID but both with different images to manage.
 	private final List<Serie> incomingSeries = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class DicomPushServiceJob {
 
 	private final File workFolder = ShUpOnloadConfig.getWorkFolder();
 
-	
+
 	public void setDownloadOrCopyActionListener(MainWindow mainWindow) {
 		this.dOCAL = mainWindow.dOCAL;
 		this.dicomFileAnalyzer = mainWindow.dicomFileAnalyzer;
@@ -93,7 +93,7 @@ public class DicomPushServiceJob {
 						incomingSeries.clear();
 						if (isExamComplete(dir)) {
 							logger.info("Complete exam found in folder {}.", dir.getName());
-						}	
+						}
 					}
 				}
 			}
@@ -119,7 +119,7 @@ public class DicomPushServiceJob {
         		String studyUID = null;
 				String seriesUID = null;
 				dicomAttributes.clear();
-		
+
         		for (File file : dicomFiles) {
             		try (DicomInputStream dis = new DicomInputStream(file)) {
                 		dicomAttributes = dis.readDataset();
@@ -143,7 +143,7 @@ public class DicomPushServiceJob {
 							//We set the Institution attributes
 							dicomFileAnalyzer.addSeriesCenter(serie, dicomAttributes);
 							incomingSeries.add(serie);
-							// if we have multiple series in the same folder (is it possible ?), 
+							// if we have multiple series in the same folder (is it possible ?),
 						} else if (!seriesUID.equals(currentSeriesUID)) {
 							logger.info("Warning: DICOM files from different series found in the same folder.");
 							return false;
@@ -166,7 +166,7 @@ public class DicomPushServiceJob {
 				if (instances.size() < expectedSize) {
 					logger.debug("DICOM serie {} is incomplete.", entry.getKey());
 					return false;
-				}		
+				}
 			}
 			logger.info("DICOM study {} is complete.", folder.getName());
 			// We create the DICOMDIR file in the exam folder
@@ -185,7 +185,7 @@ public class DicomPushServiceJob {
 						patient.setPatientSex(dicomAttributes.getString(Tag.PatientSex));
 					}
 					Study study = patient.getStudies().get(0);
-					// We map the acquisition equipment data from the series list generated from dicom attributes to the series list generated from dicomdir 
+					// We map the acquisition equipment data from the series list generated from dicom attributes to the series list generated from dicomdir
 					Map<String, Serie> incomingSeriesMap = incomingSeries.stream().collect(Collectors.toMap(Serie::getSeriesInstanceUID, Function.identity()));
 
 					for (Serie serie : study.getSeries()) {
@@ -244,7 +244,7 @@ public class DicomPushServiceJob {
 		importJob.setTimestamp(System.currentTimeMillis());
 		importJob.setUploadState(UploadState.READY);
 		importJob.setUploadPercentage("");
-		
+
 		// We write the import-job.json file
 		NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
 		importJobManager.writeImportJob(importJob);
@@ -254,5 +254,5 @@ public class DicomPushServiceJob {
 							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
 							+ importJob.getPatient().getPatientName());
 	}
-    
+
 }

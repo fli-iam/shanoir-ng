@@ -67,9 +67,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  *
  */
 public class ImportUtils {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
-	
+
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
 	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
@@ -79,7 +79,7 @@ public class ImportUtils {
 			.registerModule(new Jdk8Module())
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
-	
+
 	public static boolean addStudyToSubject(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
 		subject.setStudy(new IdName(study.getId(), study.getName()));
 		if (!StringUtils.isEmpty(studyIdentifier)) {
@@ -139,7 +139,7 @@ public class ImportUtils {
 		return importJob;
 	}
 
-	// The following 3 methods are used to retrieve informations from the xml files 
+	// The following 3 methods are used to retrieve informations from the xml files
 	// used previously to store upload jobs informations.
 	// These are supposed to be deleted in the future.
 
@@ -190,7 +190,7 @@ public class ImportUtils {
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
 	 * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
 	 * tree, as still expected like this on the server.
-	 * 
+	 *
 	 * @param uploadJob
 	 * @param subjectName
 	 * @param subjectId
@@ -198,9 +198,9 @@ public class ImportUtils {
 	 * @param study
 	 * @param studyCard
 	 * @return
-	 * @throws IOException 
-	 * @throws DatabindException 
-	 * @throws StreamReadException 
+	 * @throws IOException
+	 * @throws DatabindException
+	 * @throws StreamReadException
 	 */
 	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
 		// Handle study and study card
@@ -281,14 +281,14 @@ public class ImportUtils {
 	 * of Tag.ReferencedFileID to the uploadFolder in a flat way: the uploadFolder does not contain sub-folders.
 	 * To avoid overwrites because of the same file name, the original path to the file is used as file name,
 	 * separated by "_" underscores.
-	 * 
+	 *
 	 * @param isFromPACS
 	 * @param selectedSeries
 	 * @param uploadFolder
 	 * @param dicomServerClient
 	 * @param filePathDicomDir
 	 * @return
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
@@ -297,7 +297,7 @@ public class ImportUtils {
 			if (allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
-				logger.info(uploadFolder.getName() + ": error with download from PACS.");    
+				logger.info(uploadFolder.getName() + ": error with download from PACS.");
 				return null;
 			}
 		} else {
@@ -373,7 +373,7 @@ public class ImportUtils {
 		}
 		return subjectREST;
 	}
-	
+
 	public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
 		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
 		subjectREST.setIdentifier(subject.getIdentifier());
@@ -427,7 +427,7 @@ public class ImportUtils {
 	 * added into the Excel table of the mass import or by-patient
 	 * added into the GUI of ShUp. If nothing is added for modification,
 	 * we assume, that the values from the DICOMs are correct and continue.
-	 * 
+	 *
 	 * @param patient
 	 * @param firstName
 	 * @param lastName
@@ -447,7 +447,7 @@ public class ImportUtils {
 		}
 		if (birthDateString != null && !birthDateString.isEmpty()) {
 			LocalDate birthDate = Util.convertStringToLocalDate(birthDateString);
-			patient.setPatientBirthDate(birthDate);	
+			patient.setPatientBirthDate(birthDate);
 		}
 		return patient;
 	}
@@ -535,7 +535,7 @@ public class ImportUtils {
 	 * Find matching equipment via manufacturer model name + device serial number
 	 * from entire database, no study restriction, equipment points to center for
 	 * study card.
-	 * 
+	 *
 	 * @param acquisitionEquipments
 	 * @param manufacturerModelName
 	 * @param deviceSerialNumber

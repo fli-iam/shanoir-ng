@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,14 +28,14 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 public class StudyRightsService {
-		
+
 	@Autowired
 	private StudyUserRightsRepository repo;
-	
-	
+
+
 	/**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -52,7 +52,7 @@ public class StudyRightsService {
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
 				&& founded.isConfirmed();
     }
-   
+
     public boolean hasRightOnCenter(Long studyId, Long centerId) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		if (userId == null) {
@@ -63,7 +63,7 @@ public class StudyRightsService {
 		founded.setCenterIds(centerIds);
 		return
 				founded != null
-				&& 
+				&&
 				(founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId));
     }
 
@@ -76,7 +76,7 @@ public class StudyRightsService {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights");
 		}
 		List<StudyUser> founded = Utils.toList(repo.findByUserIdAndStudyIdIn(userId, studies));
-		
+
 		if (CollectionUtils.isEmpty(founded)) {
 			return false;
 		}
@@ -91,7 +91,7 @@ public class StudyRightsService {
 
     /**
 	 * Check that the connected user has one of the given rights for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -110,7 +110,7 @@ public class StudyRightsService {
 
     /**
      * Check that the connected user has the given right for the given studies.
-     * 
+     *
      * @param studyIds the study ids.
      * @param rightStr the right
      * @return ids that have the right, removes others.
@@ -127,14 +127,14 @@ public class StudyRightsService {
 				if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 					validIds.add(su.getStudyId());
 				}
-			}			
+			}
 		}
 		return validIds;
 	}
 
 	/**
 	 * Check that the connected user has the given right for one study at least.
-	 * 
+	 *
 	 * @param rightStr
 	 * @return true or false
 	 */
@@ -149,7 +149,7 @@ public class StudyRightsService {
 				if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 					return true;
 				}
-			}			
+			}
 		}
 		return false;
 	}

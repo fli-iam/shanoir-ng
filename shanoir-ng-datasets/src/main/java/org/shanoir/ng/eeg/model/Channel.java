@@ -66,27 +66,27 @@ public class Channel extends HalEntity {
 	/** Type of channel. */
 	@JsonProperty("referenceType")
 	private ChannelType referenceType;
-	
+
 	/** Low cutoff filter value. */
 	@JsonProperty("lowCutoff")
 	private int lowCutoff;
-	
+
 	/** High cutoff filter value. */
 	@JsonProperty("highCutoff")
 	private int highCutoff;
-	
+
 	/** Notch filter value. */
 	@JsonProperty("notch")
 	private float notch;
-	
+
 	/** X position in space. */
 	@JsonProperty("x")
 	private int x;
-	
+
 	/** Y position in space. */
 	@JsonProperty("y")
 	private int y;
-	
+
 	/** Z position in space. */
 	@JsonProperty("z")
 	private int z;

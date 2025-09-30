@@ -36,21 +36,21 @@ import java.util.regex.Pattern;
  * a WADO-URI link or from a WADO-RS link in the path colum of dataset_file.
  * Furthermore the StudyInstanceUIDHandler replaces the StudyInstanceUIDs + retrieveURLs
  * send from the backup PACS in the DICOMWeb Json, to match the examinationId.
- * 
+ *
  * StudyInstanceUIDHandler contains a internal cache, that is cleaned at 6:00h every
  * morning, to accelerate the resolution between examinationUID and StudyInstanceUID;
  * what avoids database look ups for every request.
- * 
+ *
  * @author mkain
  *
  */
 @Component
 public class StudyInstanceUIDHandler {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDHandler.class);
 
 	private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
-	
+
 	private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
 
 	private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
@@ -66,14 +66,14 @@ public class StudyInstanceUIDHandler {
 	private static final String STUDIES = "/studies/";
 
 	private static final String SERIES = "/series/";
-	
+
 	public static final String PREFIX = UIDGeneration.ROOT + ".";
 
 	@Autowired
 	private ExaminationService examinationService;
 
 	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
-	
+
 	@PostConstruct
 	public void init() {
 		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
@@ -89,7 +89,7 @@ public class StudyInstanceUIDHandler {
 	/**
 	 * This method replaces StudyInstanceUIDs returned from the PACS with IDs
 	 * of examinations in Shanoir, in the Json returned.
-	 * 
+	 *
 	 * @param root
 	 * @param examinationUID
 	 * @param studyLevel
@@ -103,7 +103,7 @@ public class StudyInstanceUIDHandler {
 				for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
 					studyInstanceUIDArray.remove(i);
 					studyInstanceUIDArray.insert(i,  examinationUID);
-				}				
+				}
 			}
 			// find attribute: RetrieveURL
 			JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
@@ -121,7 +121,7 @@ public class StudyInstanceUIDHandler {
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					}
-				}				
+				}
 			}
 		} else if (root.isArray()) {
 			ArrayNode arrayNode = (ArrayNode) root;
@@ -136,7 +136,7 @@ public class StudyInstanceUIDHandler {
 	 * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
 	 * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
 	 * request response time or from the database, in table dataset_file.
-	 * 
+	 *
 	 * @param examinationUID
 	 * @return
 	 */
@@ -158,12 +158,12 @@ public class StudyInstanceUIDHandler {
 		}
 		return studyInstanceUID;
 	}
-	
+
 	/**
 	 * This method walks down the information model in Shanoir to read the StudyInstanceUID
 	 * from the table dataset_file.path, that contains the WADO link.
 	 * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
-	 * 
+	 *
 	 * @param examination
 	 * @return
 	 */
@@ -204,7 +204,7 @@ public class StudyInstanceUIDHandler {
 	 * This method extracts the StudyInstanceUID from a WADO string.
 	 * It tries first WADO-URI, and then WADO-RS, in case of nothing
 	 * could be found for WADO-URI.
-	 * 
+	 *
 	 * @param path
 	 */
 	private String findStudyInstanceUID(String path) {

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Scheduled tasks.
- * 
+ *
  * @author msimon
  *
  */
@@ -56,7 +56,7 @@ public class ScheduledTasks {
 	@Scheduled(cron = "0 0 8 * * ?")
 	public void checkExpirationDate() {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		
+
 		// Get list of users who have to receive first expiration notification
 		List<User> usersToNotify = userService.getUsersToReceiveFirstExpirationNotification();
 		for (User userToNotify : usersToNotify) {
@@ -85,7 +85,7 @@ public class ScheduledTasks {
 		for (User userToExpire : usersToNotify) {
 			keycloakClient.updateUser(userToExpire);
 		}
-		
+
 		SecurityContextUtil.clearAuthentication();
 	}
 

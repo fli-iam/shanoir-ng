@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * This class manages WADO-URLs, either WADO-RS or WADO-URI.
- * 
+ *
  * @author mkain
  *
  */
@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
 public class WADOURLHandler {
 
 	private static final String WADO_URI = "requestType=WADO";
-	
+
 	private static final String CONTENT_TYPE = "&contentType";
 
 	public boolean isWadoUri(String url) {
 		return url.contains(WADO_URI);
 	}
-	
+
 	public String convertWadoUriToWadoRs(String url) {
 		String[] patterns = {
 				"wado\\?requestType=WADO", "rs",

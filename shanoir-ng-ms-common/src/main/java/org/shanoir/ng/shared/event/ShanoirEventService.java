@@ -20,7 +20,7 @@ public class ShanoirEventService {
 
 	@Autowired
 	RabbitTemplate rabbitTemplate;
-	
+
 	@Autowired
 	private ObjectMapper mapper;
 

@@ -34,7 +34,7 @@ import java.util.Date;
  * Changed for issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
  */
 public class EDFAnnotationFileHeaderBuilder {
-	
+
 	private String recordingId;
 	private String recordingStartDate;
 	private String startDate;

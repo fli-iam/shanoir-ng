@@ -32,9 +32,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebApiController.class);
-	
+
 	private static final String INCLUDEFIELD = "includefield";
 
 	private static final String LIMIT = "limit";
@@ -55,7 +55,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Autowired
 	private ExaminationService examinationService;
-	
+
 	@Autowired
 	private DICOMWebService dicomWebService;
 
@@ -67,7 +67,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Override
 	public ResponseEntity<String> findPatients() throws RestServiceException {
 		return null;
@@ -174,7 +174,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 				JsonNode root = mapper.readTree(response);
 				root = sortSeriesBySeriesNumber(root);
 				studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
-				return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);	
+				return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -199,7 +199,7 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
 		return root;
 	}
-	
+
 	@Override
 	public ResponseEntity<String> findSerieMetadataOfStudy(String examinationUID, String serieId)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
@@ -213,7 +213,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity findFrameOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
 			String sopInstanceUID, String frame) throws RestServiceException {
@@ -231,7 +231,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			throws RestServiceException {
 		return null;
 	}
-	
+
 	@Override
 	public ResponseEntity findInstance(String examinationUID, String serieInstanceUID, String sopInstanceUID)
 			throws RestServiceException {
@@ -260,11 +260,11 @@ public class DICOMWebApiController implements DICOMWebApi {
 	 * the Shanoir research study/project and the subjects, that are pure shanoir entities.
 	 * In the future there might be an option for temporary file storage via stow-rs and then
 	 * using the dicom files from this tmp folder to process a classic shanoir DICOM import.
-	 * The implementation of stow-sr for the ohif-viewer can be found in the MultipartRequestFilter. 
+	 * The implementation of stow-sr for the ohif-viewer can be found in the MultipartRequestFilter.
 	 */
 	@Override
 	public ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException {
 		return null;
 	}
-	
+
 }

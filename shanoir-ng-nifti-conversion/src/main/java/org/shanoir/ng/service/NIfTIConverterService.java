@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,13 +40,13 @@ import org.springframework.stereotype.Service;
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files. To use the
  * converter the dcm files have to be put in separate folders.
- * 
+ *
  * 1) all images for one serie are moved into /SERIES/{seriesID} and 2) all
  * images are concerning the acquisitionNumber, echoNumbers and the
  * imageOrientationPatient informations moved into /dataset{index} folders.
- * 
+ *
  * Inside each dataset folder the nii conversion is called.
- * 
+ *
  * @author mkain
  *
  */
@@ -136,7 +136,7 @@ public class NIfTIConverterService {
 	/**
 	 * This method is needed to identify generated nifti files in the middle of dcm
 	 * files.
-	 * 
+	 *
 	 * @return List of nifti files
 	 */
 	public List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
@@ -172,7 +172,7 @@ public class NIfTIConverterService {
 
 	/**
 	 * adapt to generated folders by dicom2nifti converter
-	 * 
+	 *
 	 * @param existingFiles the currently existing files in the directory
 	 * @param directory     the import directory
 	 * @param dataset       the dataset we are importing
@@ -221,7 +221,7 @@ public class NIfTIConverterService {
 	 * Check if the newly created nifti files list contains a .prop file If it is
 	 * the case, then there has been a problem during conversion and should be
 	 * considered as failed.
-	 * 
+	 *
 	 */
 	private boolean containsPropFile(List<File> niftiFiles) {
 		for (File current : niftiFiles) {

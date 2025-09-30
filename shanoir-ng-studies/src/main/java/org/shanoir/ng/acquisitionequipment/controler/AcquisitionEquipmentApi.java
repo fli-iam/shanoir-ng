@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -98,7 +98,7 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "/byCenter/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
-	
+
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a study")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
@@ -109,7 +109,7 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-	
+
 	@Operation(summary = "", description = "Returns all the acquisition equipments")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),

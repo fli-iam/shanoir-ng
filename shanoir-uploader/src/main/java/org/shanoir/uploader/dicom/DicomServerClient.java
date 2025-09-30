@@ -26,7 +26,7 @@ import org.weasis.dicom.param.DicomNode;
  * AET to configure in the PACS, the method retrieveDicomFiles is
  * synchronized in case of multiple threads in ShUp (ImportFinishRunnable)
  * call the methods and another download of dicom files is still ongoing.
- * 
+ *
  * @author mkain
  *
  */
@@ -61,7 +61,7 @@ public class DicomServerClient implements IDicomServerClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#echoDicomServer()
 	 */
 	@Override
@@ -92,14 +92,14 @@ public class DicomServerClient implements IDicomServerClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.shanoir.uploader.dicom.IDicomServerClient#queryDicomServer(java.lang.
 	 * String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public List<Patient> queryDicomServer(
-			final boolean studyRootQuery, 
+			final boolean studyRootQuery,
 			final String modality,
 			final String patientName,
 			final String patientID,
@@ -123,7 +123,7 @@ public class DicomServerClient implements IDicomServerClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.shanoir.uploader.dicom.IDicomServerClient#retrieveDicomFiles(java.util.
 	 * Collection)
@@ -142,7 +142,7 @@ public class DicomServerClient implements IDicomServerClient {
 						+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
 						+ e.getMessage(), e);
 				return null;
-			}				
+			}
 		}
 		return retrievedDicomFiles;
 	}
@@ -157,7 +157,7 @@ public class DicomServerClient implements IDicomServerClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#getWorkFolder()
 	 */
 	@Override

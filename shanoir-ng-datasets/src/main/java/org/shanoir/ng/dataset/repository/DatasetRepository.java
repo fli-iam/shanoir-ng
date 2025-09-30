@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -55,7 +55,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
-	
+
 	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
 
 	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
@@ -106,21 +106,21 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			""")
 	List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
-	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight(" 
-			+ "ds.id, dm.name, TYPE(ds), " 
-			+ "ds.datasetAcquisition.examination.study.id, "  
-			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) " 
-			+ "FROM Dataset ds " 
-			+ "JOIN ds.originMetadata dm " 
-			+ "LEFT JOIN ds.datasetAcquisition da "  
-			+ "LEFT JOIN da.examination e "  
-			+ "LEFT JOIN e.study s " 
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight("
+			+ "ds.id, dm.name, TYPE(ds), "
+			+ "ds.datasetAcquisition.examination.study.id, "
+			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
+			+ "FROM Dataset ds "
+			+ "JOIN ds.originMetadata dm "
+			+ "LEFT JOIN ds.datasetAcquisition da "
+			+ "LEFT JOIN da.examination e "
+			+ "LEFT JOIN e.study s "
 			+ "WHERE ds.id IN :ids")
 	List<DatasetLight> findAllLightById(List<Long> ids);
 
 	// select rd.study_id from related_datasets rd where dataset_id = ?1
 	@Query("""
-		SELECT DISTINCT 
+		SELECT DISTINCT
 		ds.id                      AS id,
 		ex.study.id                AS studyId,
 		ex.centerId                AS centerId,
@@ -132,17 +132,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 		WHERE ds.id IN :ids
 			""")
   List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
-	
-	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight(" 
-			+ "ds.id, dm.name, TYPE(ds), " 
-			+ "ds.datasetAcquisition.examination.study.id, "  
-			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) " 
-			+ "FROM Dataset ds " 
-			+ "JOIN ds.originMetadata dm " 
-			+ "LEFT JOIN ds.datasetAcquisition da "  
-			+ "LEFT JOIN da.examination e "  
-			+ "LEFT JOIN e.study s " 
+
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight("
+			+ "ds.id, dm.name, TYPE(ds), "
+			+ "ds.datasetAcquisition.examination.study.id, "
+			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
+			+ "FROM Dataset ds "
+			+ "JOIN ds.originMetadata dm "
+			+ "LEFT JOIN ds.datasetAcquisition da "
+			+ "LEFT JOIN da.examination e "
+			+ "LEFT JOIN e.study s "
 			+ "WHERE s.id = :studyId")
 	List<DatasetLight> findAllLightByStudyId(Long studyId);
-	
+
 }

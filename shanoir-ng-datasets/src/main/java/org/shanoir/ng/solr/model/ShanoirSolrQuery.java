@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,7 +26,7 @@ import java.util.Map;
  *
  */
 public class ShanoirSolrQuery {
-	
+
 	private Collection<String> studyName;
 
 	private Collection<Long> studyId;
@@ -44,13 +44,13 @@ public class ShanoirSolrQuery {
 	private Collection<String> examinationComment;
 
 	private Collection<String> acquisitionEquipmentName;
-	
+
 	private	Collection<String> datasetName;
-	
+
 	private	Collection<String> centerName;
 
 	private Collection<Long> centerId;
-	
+
 	private	Collection<String> tags;
 
 	private LocalDate datasetStartDate;
@@ -60,27 +60,27 @@ public class ShanoirSolrQuery {
 	private LocalDate importStartDate;
 
 	private LocalDate importEndDate;
-	
+
 	private	Collection<String> datasetType;
-	
+
 	private Collection<String> datasetNature;
-	
+
 	private String searchText;
-	
+
 	private boolean expertMode;
-	
+
 	private Range<Float> sliceThickness;
-	
+
 	private Range<Float> pixelBandwidth;
-	
+
 	private Range<Float> magneticFieldStrength;
 
 	private Collection<Boolean> processed;
 
 	private Collection<String> username;
-	
+
 	private Map<String, FacetPageable> facetPaging;
-	
+
 	/**
 	 * @return the studyName
 	 */
@@ -266,7 +266,7 @@ public class ShanoirSolrQuery {
 	public boolean isExpertMode() {
 		return expertMode;
 	}
-	
+
 	public boolean getExpertMode() {
 		return isExpertMode();
 	}

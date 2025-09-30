@@ -64,7 +64,7 @@ public class PageDeserializer extends JsonDeserializer<Page<?>> implements Conte
         }
 
         //Note that Sort field of Page is ignored here.
-        //Feel free to add more switch cases above to deserialize it as well.  
+        //Feel free to add more switch cases above to deserialize it as well.
         return new PageImpl<>(list, PageRequest.of(pageNumber, pageSize), total);
     }
 

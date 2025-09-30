@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -75,10 +75,10 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ExaminationService examinationService;
-	
+
 	@Autowired
 	private SubjectRepository subjectRepository;
-	
+
 	@Autowired
 	private CenterRepository centerRepository;
 
@@ -139,7 +139,7 @@ public class ExaminationApiController implements ExaminationApi {
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
-	
+
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
 			@Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
@@ -223,19 +223,19 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
-	
+
 	@Override
 	public ResponseEntity<Void> createExaminationAndAddExtraData(
 			@Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-		
+
 		Subject subject = subjectRepository.findByName(subjectName);
 		if (subject == null) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find subject with name " + subjectName);
 			throw new RestServiceException(error);
 		}
-		
+
 		if (centerRepository.findById(centerId).isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find center with id " + centerId);
 			throw new RestServiceException(error);
@@ -251,16 +251,16 @@ public class ExaminationApiController implements ExaminationApi {
 		pathList.add(file.getOriginalFilename());
 		examination.setExtraDataFilePathList(pathList);
 		Examination dbExamination = examinationService.save(examination);
-		
+
 		String path = examinationService.addExtraData(dbExamination.getId(), file);
-		
+
 		if (path != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}		
+		}
 	}
-	
+
 
 	@Override
 	public void downloadExtraData(
@@ -287,7 +287,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	/**
 	 * Validate a dataset
-	 * 
+	 *
 	 * @param result
 	 * @throws RestServiceException
 	 */

@@ -35,21 +35,21 @@ import org.springframework.stereotype.Service;
 /*
  * This scheduled service iterates over all import job folders within
  * the workFolder and searches for import jobs, state FINISHED.
- * 
+ *
  * For performance reasons, especially on the limit network bandwith
  * in the hospital, this job only runs, when no UploadServiceJob is
  * running, see LOCK.
- * 
+ *
  * When the timestamp is older than 2 hours the DICOMWeb API of
  * the server is used to verify, that all local images have well
  * arrived on the server and that the examination is complete.
  * If all is perfect, that state moves to CHECK_OK or CHECK_KO.
- * 
+ *
  * DICOM tags and the binary pixel data are compared instance/image
  * by instance/image.
- * 
+ *
  * When the check runs on instance-by-instance after each
- * 
+ *
  */
 @Service
 public class ExaminationConsistencyServiceJob {
@@ -57,7 +57,7 @@ public class ExaminationConsistencyServiceJob {
     private static final Logger logger = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
 
     private static final long THIRTY_MIN_IN_MILLIS = 30 * 60 * 1000;
-    
+
     private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 
    	@Autowired
@@ -75,7 +75,7 @@ public class ExaminationConsistencyServiceJob {
                 logger.info("ExaminationConsistencyServiceJob started...");
                 UploadServiceJob.LOCK.lock();
                 File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-                processWorkFolder(workFolder, currentNominativeDataController);    
+                processWorkFolder(workFolder, currentNominativeDataController);
                 UploadServiceJob.LOCK.unlock();
                 logger.info("ExaminationConsistencyServiceJob ended...");
             }
@@ -179,7 +179,7 @@ public class ExaminationConsistencyServiceJob {
                     } else {
                         deleteInstanceFileAndSerieFolder(importJobFolder, instanceFile);
                         numberOfInstances++;
-                    }   
+                    }
                 } else {
                     throw new Exception("Serie: " + serie.getSeriesDescription()
                         + ", DICOM instance not found on server: " + instance.getSopInstanceUID());

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A utility class introduced to perform
  * read/write operations over properties files.
- * 
+ *
  * @author lvallet
  *
  */

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -19,8 +19,8 @@ public enum Operation {
 	STARTS_WITH(1, new DicomTagType[] {
 		DicomTagType.String}),
 	EQUALS(2, new DicomTagType[] {
-		DicomTagType.String, 
-		DicomTagType.Date, 
+		DicomTagType.String,
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.FloatArray,
@@ -32,13 +32,13 @@ public enum Operation {
 	CONTAINS(4, new DicomTagType[] {
 		DicomTagType.String}),
 	SMALLER_THAN(5, new DicomTagType[] {
-		DicomTagType.Date, 
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.Integer,
 		DicomTagType.Long}),
 	BIGGER_THAN(6, new DicomTagType[] {
-		DicomTagType.Date, 
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.Integer,
@@ -48,8 +48,8 @@ public enum Operation {
 	DOES_NOT_START_WITH(8, new DicomTagType[] {
 		DicomTagType.String}),
 	NOT_EQUALS(9, new DicomTagType[] {
-		DicomTagType.String, 
-		DicomTagType.Date, 
+		DicomTagType.String,
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.FloatArray,
@@ -59,8 +59,8 @@ public enum Operation {
 	DOES_NOT_END_WITH(10, new DicomTagType[] {
 		DicomTagType.String}),
 	PRESENT(11, new DicomTagType[] {
-		DicomTagType.String, 
-		DicomTagType.Date, 
+		DicomTagType.String,
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.FloatArray,
@@ -69,8 +69,8 @@ public enum Operation {
 		DicomTagType.Long,
 		DicomTagType.Binary}),
 	ABSENT(12, new DicomTagType[] {
-		DicomTagType.String, 
-		DicomTagType.Date, 
+		DicomTagType.String,
+		DicomTagType.Date,
 		DicomTagType.Double,
 		DicomTagType.Float,
 		DicomTagType.FloatArray,
@@ -78,10 +78,10 @@ public enum Operation {
 		DicomTagType.Integer,
 		DicomTagType.Long,
 		DicomTagType.Binary});
-	
+
 	private int id;
 	private DicomTagType[] dicomTypeCompatibilities;
-	
+
 	private Operation(final int id, DicomTagType[] dicomTypeCompatibilities) {
 		this.id = id;
 		this.dicomTypeCompatibilities = dicomTypeCompatibilities;
@@ -89,7 +89,7 @@ public enum Operation {
 
 	/**
 	 * Get an operation type by its id.
-	 * 
+	 *
 	 * @param id type id.
 	 * @return operation type.
 	 */

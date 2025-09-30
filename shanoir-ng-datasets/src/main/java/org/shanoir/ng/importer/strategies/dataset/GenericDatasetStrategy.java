@@ -21,13 +21,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
-	
+
 	@Autowired
 	DicomProcessing dicomProcessing;
-	
+
 	@Autowired
 	DatasetExpressionContext datasetExpressionContext;
-	
+
 	@Override
 	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
@@ -87,13 +87,13 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
 		}
 		genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-		
+
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
 		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
+		 *
 		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
-		 * 
+		 *
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
@@ -101,10 +101,10 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 			datasetExpression.setDataset(genericDataset);
 			genericDataset.getDatasetExpressions().add(datasetExpression);
 		}
-		
+
 		DatasetMetadata originalDM = genericDataset.getOriginMetadata();
 		genericDataset.setUpdatedMetadata(originalDM);
-		
+
 		return genericDataset;
 	}
 

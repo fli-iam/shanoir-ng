@@ -1,13 +1,13 @@
 package org.shanoir.ng.shared.email;
 
 public class StudyInvitationEmail extends EmailBase {
-	
+
 	private String invitedMail = null;
 
 	private String invitationIssuer = null;
 
 	private String function = null;
-	
+
 	public String getInvitedMail() {
 		return invitedMail;
 	}

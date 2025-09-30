@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,7 +40,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface SubjectService {
-	
+
 	/**
 	 * Get all the subjects.
 	 *
@@ -49,7 +49,7 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findAll();
-	
+
 	/**
 	 * Get all the subjects.
 	 *
@@ -60,7 +60,7 @@ public interface SubjectService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	List<IdName> findNames(List<Long> subjectIds);
-	
+
 	/**
 	 * Get all the subjects of a study
 	 *
@@ -70,7 +70,7 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId);
-	
+
 	/**
 	 * Get all the subjects of a study
 	 *
@@ -81,7 +81,7 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
-	
+
 	/**
 	 * Find subject by its id.
 	 *
@@ -94,7 +94,7 @@ public interface SubjectService {
 
 	/**
 	 * Find subject by its identifier and a list of studies (based on the rights).
-	 * 
+	 *
 	 * As only the list of accessible studies is used here, that is rights filtered,
 	 * I remove here the additional PostAuthorize filter to check again the rights
 	 * on the subject. We do not want to impact performance to heavily with double
@@ -106,10 +106,10 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
-	
+
 	/**
 	 * Find a subject by its subject-study relationship id.
-	 * 
+	 *
 	 * @param id id
 	 * @return a subject or null
 	 */
@@ -125,7 +125,7 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findSubjectFromCenterCode(String centerCode);
-	
+
 	/**
 	 * Save a subject.
 	 *
@@ -134,7 +134,7 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	Subject create(Subject subject) throws ShanoirException;
-	
+
 	/**
 	 * Save a subject and auto-increment the common name on using the centerId.
 	 *
@@ -143,7 +143,7 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
 	Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
-	
+
 	/**
 	 * Update a subject.
 	 *
@@ -170,7 +170,7 @@ public interface SubjectService {
 	/**
 	 * Update subject name and values for other microservices.
 	 * @param subjectToSubjectDTO the subject DTO to update
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	boolean updateSubjectInMicroservices(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 

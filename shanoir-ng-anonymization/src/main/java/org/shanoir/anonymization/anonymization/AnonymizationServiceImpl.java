@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,10 +38,10 @@ import org.slf4j.LoggerFactory;
  * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
  * e.g. when used by server; bug fixed for identical media storage sop instance
  * uid and sop instance uid; bug fixed for invalid uid generation.
- * 
+ *
  * @author ifakhfakh
  * @author mkain
- * 
+ *
  */
 public class AnonymizationServiceImpl implements AnonymizationService {
 
@@ -51,9 +51,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	private static final String CURVE_DATA_TAGS = "0x50xxxxxx";
 	private static final String OVERLAY_COMMENTS_TAGS = "0x60xx4000";
 	private static final String OVERLAY_DATA_TAGS = "0x60xx3000";
-	
+
 	private Random rand = new Random();
-	
+
 	private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
 	@Override
@@ -115,7 +115,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		}
 		logInfos("End anonymization", startTime);
 	}
-	
+
 	private void logInfos(final String methodName, long startTime) {
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
@@ -147,10 +147,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * file with a C-STORE request and an Affected SOP Instance UID (== header) in
 	 * the request header. If the file arrives in the PACS, the SOP Instance UID in
 	 * the file does not match with the request header and this is refused.
-	 * 
+	 *
 	 * Further does each part of an UID has to start with a non-zero value, see
 	 * UIDGeneration code.
-	 * 
+	 *
 	 * @param dicomFile
 	 *            the image path
 	 * @param profile
@@ -164,7 +164,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		DicomOutputStream dos = null;
 		try {
 			din = new DicomInputStream(dicomFile);
-			
+
 			/**
 			 * DICOM "header"/meta-information fields: read tags
 			 */
@@ -178,7 +178,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			final String mediaStorageSOPInstanceUIDGenerated = metaInformationAttributes
 					.getString(Tag.MediaStorageSOPInstanceUID);
-			
+
 			/**
 			 * MK: Read entire dataset with PixelData. Attention: do NOT change here to only
 			 * readDatasetUntilPixelData(), as the modified DICOM image will MISS the PixelData!
@@ -186,7 +186,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			 * the entire dataset here (I made the mistake already twice...).
 			 */
 			Attributes datasetAttributes = din.readDataset();
-			
+
 			// temporarily keep the patient credentials in memory to search in private tags
 			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
 			String[] patientNameArrayAttr = null;
@@ -265,7 +265,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Handle tags to delete for manufacturer here
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param tagString
 	 * @param action
@@ -328,7 +328,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Tag Anonymization
-	 * 
+	 *
 	 * @param tagInt
 	 *            : the tag to anonymize
 	 * @param action
@@ -372,7 +372,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Get the anonymized value of the tag
-	 * 
+	 *
 	 * @param action
 	 *            : the action letter to apply
 	 * @return
@@ -405,7 +405,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * anonymize Tag According To its VR
-	 * 
+	 *
 	 * @param attributes
 	 *            : the list of dicom attributes to modify
 	 * @param tag

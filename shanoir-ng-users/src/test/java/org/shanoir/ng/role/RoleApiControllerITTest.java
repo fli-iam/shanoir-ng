@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -65,14 +65,14 @@
 //public class RoleApiControllerITTest extends KeycloakControllerTestIT {
 //
 //	private static final String REQUEST_PATH = "/roles";
-//	
+//
 //	@Autowired
 //    private TestRestTemplate restTemplate;
-//    
+//
 //
 //    @Before
 //	public void setup() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException  {
-//    	
+//
 ////    	SSLContext sslContext = SSLContext.getInstance("SSL");
 ////		sslContext.init(null, new TrustManager[] { new TestTrustManager() }, new java.security.SecureRandom());
 ////    	SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
@@ -80,7 +80,7 @@
 ////    	        .setSSLSocketFactory(csf)
 ////    	        .build();
 ////    	HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-////    	
+////
 ////    	restTemplate = new RestTemplate(requestFactory);
 //    }
 //
@@ -88,7 +88,7 @@
 //	@Test
 //	public void findRolesWithLogin() throws GeneralSecurityException {
 //		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(true));
-//		
+//
 //		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
 //		//final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
 //		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -97,9 +97,9 @@
 //	@Test
 //	public void findRolesWithBadRole() throws GeneralSecurityException {
 //		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(false));
-//		
+//
 //		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
 //		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 //	}
-//	
+//
 //}

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ public interface QualityCardApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<QualityCard> findQualityCardById(
 			@Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId);
-	
+
 	@Operation(summary = "", description = "If exists, returns the quality cards corresponding to the given study id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -73,7 +73,7 @@ public interface QualityCardApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-	
+
 	@Operation(summary = "", description = "Returns all the quality Cards")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
 			@ApiResponse(responseCode = "204", description = "no quality card found"),
@@ -97,7 +97,7 @@ public interface QualityCardApi {
 	ResponseEntity<QualityCard> saveNewQualityCard(
 			@Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Updates a quality card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "quality card updated"),
 		@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -124,7 +124,7 @@ public interface QualityCardApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
 			@Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
-	
+
 	@Operation(summary = "", description = "Test a quality card on a study for quality control")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "applied a quality card on its study for quality control"),

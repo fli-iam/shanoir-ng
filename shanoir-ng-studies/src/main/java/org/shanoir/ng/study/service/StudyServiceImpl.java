@@ -142,7 +142,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private ShanoirEventService eventService;
-  
+
 	@Autowired
 	private TagRepository tagRepository;
 
@@ -277,13 +277,13 @@ public class StudyServiceImpl implements StudyService {
         public boolean check(StudyCenter a, StudyCenter b) {
             boolean result =  a != null && b != null && (
 					a.getId() != null && a.getId().equals(b.getId()) || (
-						a.getCenter() != null && a.getCenter().getId() != null 
-						&& b.getCenter() != null && b.getCenter().getId() != null 
+						a.getCenter() != null && a.getCenter().getId() != null
+						&& b.getCenter() != null && b.getCenter().getId() != null
 						&& a.getCenter().getId().equals(b.getCenter().getId())
 						&& a.getStudy() != null && a.getStudy().getId() != null
 						&& b.getStudy() != null && b.getStudy().getId() != null
 						&& a.getStudy().getId().equals(b.getStudy().getId())
-					) 
+					)
 			);
 			return result;
         }
@@ -416,7 +416,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	/**
-	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 
+	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags,
 	 * then update db subject study tags lists with the given study
 	 *
 	 * @param subjectStudyList

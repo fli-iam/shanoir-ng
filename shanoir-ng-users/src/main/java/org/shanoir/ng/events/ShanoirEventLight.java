@@ -23,10 +23,10 @@ public class ShanoirEventLight {
 	/** ID of the event, normally generated BEFORE arriving here **/
 	@Id
 	protected Long id;
-	
+
 	/** See EventType **/
 	protected String eventType;
-	
+
 	/** ID of the concerned object **/
 	protected String objectId;
 
@@ -45,7 +45,7 @@ public class ShanoirEventLight {
 	/** Last update date, automatically generated **/
 	@UpdateTimestamp
 	protected Date lastUpdate;
-	
+
 	/** Status, can be either 0 (created), 1 (success) or -1 (in error) **/
 	protected int status;
 

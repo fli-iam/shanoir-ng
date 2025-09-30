@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,9 +46,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -74,13 +74,13 @@ public class UserServiceSecurityTest {
 
 	@MockBean
 	private UserRepository userRepository;
-	
+
 	@MockBean
     private ApplicationEventPublisher publisher;
 
 	@Autowired
 	private UserService userService;
-	
+
 	private User mockUser;
 	private User mockNewUser;
 	private User mockAccountReqUser;
@@ -94,7 +94,7 @@ public class UserServiceSecurityTest {
 		mockAccountReqUser.setAccountRequestDemand(true);
 		mockAccountReqUser.setRole(null);
 		mockMe = ModelsUtil.createAdmin(LOGGED_USER_ID);
-		
+
 		given(userRepository.findById(USER_ID)).willReturn(Optional.of(mockUser));
 		given(userRepository.findById(LOGGED_USER_ID)).willReturn(Optional.of(mockMe));
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
@@ -112,8 +112,8 @@ public class UserServiceSecurityTest {
 //		given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
 //		given(keycloakClient.createUserWithPassword(Mockito.any(User.class), Mockito.anyString())).willReturn(RandomStringUtils.randomAlphanumeric(10));
 	}
-	
-	
+
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
@@ -129,7 +129,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::getUsersToReceiveSecondExpirationNotification);
 		assertAccessAuthorized(userService::requestExtension, USER_ID, new ExtensionRequestInfo());
 		assertAccessDenied(userService::create, mockNewUser);
-		
+
 		assertAccessAuthorized(userService::createAccountRequest, mockAccountReqUser);
 		User mockBadAccountReqUser = ModelsUtil.createUser(666L);
 		mockBadAccountReqUser.setAccountRequestDemand(true);
@@ -141,7 +141,7 @@ public class UserServiceSecurityTest {
 		mockBadAccountReqUser.setAccountRequestDemand(true);
 		mockBadAccountReqUser.setRole(ModelsUtil.createAdminRole());
 		assertAccessDenied(userService::createAccountRequest, mockBadAccountReqUser);
-		
+
 		assertAccessDenied(userService::findByIds, Arrays.asList(USER_ID));
 		assertAccessDenied(userService::update, mockUser);
 		assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
@@ -202,7 +202,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
 		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
 	}
-	
+
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
