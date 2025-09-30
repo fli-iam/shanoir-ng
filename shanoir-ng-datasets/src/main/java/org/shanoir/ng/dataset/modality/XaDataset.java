@@ -28,21 +28,21 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class XaDataset extends Dataset {
 
-	public XaDataset() {
-	}
+    public XaDataset() {
+    }
 
-	public XaDataset(Dataset other) {
-		super(other);
-	}
+    public XaDataset(Dataset other) {
+        super(other);
+    }
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -3926301273461759120L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -3926301273461759120L;
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.XA;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.XA;
+    }
 
 }

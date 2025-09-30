@@ -7,7 +7,7 @@ package org.shanoir.uploader.action.init;
  *  {@link InitialStartupState}
  *  {@link ProxyConfigurationState}
  *  {@link ProxyManualConfigurationState}
- * 	{@link AuthenticationConfigurationState}
+ *     {@link AuthenticationConfigurationState}
  *  {@link AuthenticationManualConfigurationState}
  *  {@link WSDLConfigurationState}
  *  {@link PacsConfigurationState}
@@ -20,6 +20,6 @@ package org.shanoir.uploader.action.init;
  */
 public interface State {
 
-	public void load(StartupStateContext context) throws Exception;
+    public void load(StartupStateContext context) throws Exception;
 
 }

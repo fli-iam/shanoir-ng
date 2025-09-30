@@ -22,68 +22,68 @@ package org.shanoir.uploader.model.rest;
  */
 public enum SubjectType {
 
-	/**
-	 * Healthy volunteer.
-	 */
-	HEALTHY_VOLUNTEER(1, "Healthy volunteer"),
+    /**
+     * Healthy volunteer.
+     */
+    HEALTHY_VOLUNTEER(1, "Healthy volunteer"),
 
-	/**
-	 * Patient.
-	 */
-	PATIENT(2, "Patient"),
+    /**
+     * Patient.
+     */
+    PATIENT(2, "Patient"),
 
-	/**
-	 * Phantom.
-	 */
-	PHANTOM(3, "Phantom");
+    /**
+     * Phantom.
+     */
+    PHANTOM(3, "Phantom");
 
-	private int id;
+    private int id;
 
-	private String name;
+    private String name;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private SubjectType(final int id, final String name) {
-		this.id = id;
-		this.name = name;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private SubjectType(final int id, final String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	/**
-	 * Get a subject type by its id.
-	 *
-	 * @param id
-	 *            type id.
-	 * @return subject type.
-	 */
-	public static SubjectType getType(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (SubjectType type : SubjectType.values()) {
-			if (id.equals(type.getId())) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching subject type for id " + id);
-	}
+    /**
+     * Get a subject type by its id.
+     *
+     * @param id
+     *            type id.
+     * @return subject type.
+     */
+    public static SubjectType getType(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (SubjectType type : SubjectType.values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No matching subject type for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String toString() {
-		return this.name;
-	}
+    public String toString() {
+        return this.name;
+    }
 
 }

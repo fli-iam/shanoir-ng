@@ -20,14 +20,14 @@ import java.util.function.Supplier;
 
 public class MapSupplier implements Supplier<Map<String, String>> {
 
-	Map<String, String> map = new HashMap<>();
+    Map<String, String> map = new HashMap<>();
 
-	@Override
-	public Map<String, String> get() {
-		return map;
-	}
+    @Override
+    public Map<String, String> get() {
+        return map;
+    }
 
-	public String put(String key, String value) {
-		return map.put(key, value);
-	}
+    public String put(String key, String value) {
+        return map.put(key, value);
+    }
 }

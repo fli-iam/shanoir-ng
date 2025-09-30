@@ -43,34 +43,34 @@ import org.springframework.validation.BindingResult;
 @ActiveProfiles("test")
 public class AccountRequestApiSecurityTest {
 
-	private BindingResult mockBindingResult;
+    private BindingResult mockBindingResult;
 
-	@MockBean
-	private UserRepository userRepository;
+    @MockBean
+    private UserRepository userRepository;
 
-	@Autowired
-	private AccountRequestApi accountRequestApi;
+    @Autowired
+    private AccountRequestApi accountRequestApi;
 
-	private User mockAccountReqUser;
+    private User mockAccountReqUser;
 
-	@BeforeEach
-	public void setup() {
-		mockAccountReqUser = ModelsUtil.createUser(null);
-		mockAccountReqUser.setAccountRequestDemand(true);
-		mockAccountReqUser.setRole(null);
-		mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
-	}
+    @BeforeEach
+    public void setup() {
+        mockAccountReqUser = ModelsUtil.createUser(null);
+        mockAccountReqUser.setAccountRequestDemand(true);
+        mockAccountReqUser.setRole(null);
+        mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
+    }
 
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		assertAccessAuthorized((t, u) -> {
-			try {
-				accountRequestApi.saveNewAccountRequest(t, u);
-			} catch (RestServiceException e) {
-				fail(e.toString());
-			}
-		}, mockAccountReqUser, mockBindingResult);
-	}
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        assertAccessAuthorized((t, u) -> {
+            try {
+                accountRequestApi.saveNewAccountRequest(t, u);
+            } catch (RestServiceException e) {
+                fail(e.toString());
+            }
+        }, mockAccountReqUser, mockBindingResult);
+    }
 
 }

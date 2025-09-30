@@ -32,54 +32,54 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class FlipAngle extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 7894925972778553896L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 7894925972778553896L;
 
-	/** MR dataset. */
-	@ManyToOne
-	@JoinColumn(name = "mr_dataset_id")
-	@JsonIgnore
-	private MrDataset mrDataset;
+    /** MR dataset. */
+    @ManyToOne
+    @JoinColumn(name = "mr_dataset_id")
+    @JsonIgnore
+    private MrDataset mrDataset;
 
-	/**
-	 * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
-	 * measure must be in degrees.
-	 */
-	@NotNull
-	private String flipAngleValue;
+    /**
+     * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
+     * measure must be in degrees.
+     */
+    @NotNull
+    private String flipAngleValue;
 
-	public FlipAngle() {
+    public FlipAngle() {
 
-	}
+    }
 
-	public FlipAngle(FlipAngle other, MrDataset mr) {
-		this.mrDataset = mr;
-		this.flipAngleValue = other.flipAngleValue;
-	}
+    public FlipAngle(FlipAngle other, MrDataset mr) {
+        this.mrDataset = mr;
+        this.flipAngleValue = other.flipAngleValue;
+    }
 
-	/**
-	 * @return the flipAngleValue
-	 */
-	public String getFlipAngleValue() {
-		return flipAngleValue;
-	}
+    /**
+     * @return the flipAngleValue
+     */
+    public String getFlipAngleValue() {
+        return flipAngleValue;
+    }
 
-	/**
-	 * @param flipAngleValue
-	 *            the flipAngleValue to set
-	 */
-	public void setFlipAngleValue(String flipAngleValue) {
-		this.flipAngleValue = flipAngleValue;
-	}
+    /**
+     * @param flipAngleValue
+     *            the flipAngleValue to set
+     */
+    public void setFlipAngleValue(String flipAngleValue) {
+        this.flipAngleValue = flipAngleValue;
+    }
 
-	public MrDataset getMrDataset() {
-		return mrDataset;
-	}
+    public MrDataset getMrDataset() {
+        return mrDataset;
+    }
 
-	public void setMrDataset(MrDataset mrDataset) {
-		this.mrDataset = mrDataset;
-	}
+    public void setMrDataset(MrDataset mrDataset) {
+        this.mrDataset = mrDataset;
+    }
 
 }

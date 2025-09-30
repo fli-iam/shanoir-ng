@@ -31,17 +31,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-	@Autowired
-	private RoleRepository roleRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-	@Override
-	public List<Role> findAll() {
-		return Utils.toList(roleRepository.findAll());
-	}
+    @Override
+    public List<Role> findAll() {
+        return Utils.toList(roleRepository.findAll());
+    }
 
-	@Override
-	public Role findByName(String name) {
-		return roleRepository.findByName(name);
-	}
+    @Override
+    public Role findByName(String name) {
+        return roleRepository.findByName(name);
+    }
 
 }

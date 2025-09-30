@@ -27,16 +27,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/common")
 public interface CommonApi {
 
-	@Operation(summary = "", description = "If exists, returns the study name, subject name, center name corresponding to the given ids")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found elements"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no element found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PostMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" })
-	ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
-			@Parameter(description = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
+    @Operation(summary = "", description = "If exists, returns the study name, subject name, center name corresponding to the given ids")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found elements"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no element found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
+    ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
+            @Parameter(description = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
 
 }

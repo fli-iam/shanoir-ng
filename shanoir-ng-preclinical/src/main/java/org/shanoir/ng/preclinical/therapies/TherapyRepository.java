@@ -22,8 +22,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface TherapyRepository extends CrudRepository<Therapy, Long> {
 
-	Optional<Therapy> findByName(String name);
+    Optional<Therapy> findByName(String name);
 
-	List<Therapy> findByTherapyType(TherapyType therapyType);
+    List<Therapy> findByTherapyType(TherapyType therapyType);
 
 }

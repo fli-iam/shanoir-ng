@@ -32,63 +32,63 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 @Embeddable
 public class ExtensionRequestInfo implements Serializable {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6296721709358679698L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -6296721709358679698L;
 
-	@NotNull
-	@LocalDateAnnotations
-	private LocalDate extensionDate;
+    @NotNull
+    @LocalDateAnnotations
+    private LocalDate extensionDate;
 
-	@NotNull
-	private String extensionMotivation;
+    @NotNull
+    private String extensionMotivation;
 
-	@Transient
-	private String email;
+    @Transient
+    private String email;
 
 
-	/**
-	 * @return the extensionDate
-	 */
-	public LocalDate getExtensionDate() {
-		return extensionDate;
-	}
+    /**
+     * @return the extensionDate
+     */
+    public LocalDate getExtensionDate() {
+        return extensionDate;
+    }
 
-	/**
-	 * @param extensionDate
-	 *            the extensionDate to set
-	 */
-	public void setExtensionDate(LocalDate extensionDate) {
-		this.extensionDate = extensionDate;
-	}
+    /**
+     * @param extensionDate
+     *            the extensionDate to set
+     */
+    public void setExtensionDate(LocalDate extensionDate) {
+        this.extensionDate = extensionDate;
+    }
 
-	/**
-	 * @return the extensionMotivation
-	 */
-	public String getExtensionMotivation() {
-		return extensionMotivation;
-	}
+    /**
+     * @return the extensionMotivation
+     */
+    public String getExtensionMotivation() {
+        return extensionMotivation;
+    }
 
-	/**
-	 * @param extensionMotivation
-	 *            the extensionMotivation to set
-	 */
-	public void setExtensionMotivation(String extensionMotivation) {
-		this.extensionMotivation = extensionMotivation;
-	}
+    /**
+     * @param extensionMotivation
+     *            the extensionMotivation to set
+     */
+    public void setExtensionMotivation(String extensionMotivation) {
+        this.extensionMotivation = extensionMotivation;
+    }
 
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
+    /**
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
 
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    /**
+     * @param email the email to set
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

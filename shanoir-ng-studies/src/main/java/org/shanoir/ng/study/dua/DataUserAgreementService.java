@@ -28,79 +28,79 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataUserAgreementService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DataUserAgreementService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataUserAgreementService.class);
 
-	@Autowired
-	private DataUserAgreementRepository repository;
+    @Autowired
+    private DataUserAgreementRepository repository;
 
-	@Autowired
-	private StudyUserRepository repositoryStudyUser;
+    @Autowired
+    private StudyUserRepository repositoryStudyUser;
 
-	@Autowired
-	private StudyUserUpdateBroadcastService studyUserCom;
+    @Autowired
+    private StudyUserUpdateBroadcastService studyUserCom;
 
-	public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
-		return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
-	}
+    public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
+        return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
+    }
 
-	public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
-		DataUserAgreement dataUserAgreement = repository.findById(duaId).orElseThrow();
-		dataUserAgreement.setTimestampOfAccepted(new Date());
-		repository.save(dataUserAgreement);
-		StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
-		if (studyUser == null) {
-			throw new ShanoirException("Could not validate the data user agreement acceptation. The user don't seems to be a member of the study.");
-		}
-		studyUser.setConfirmed(true);
-		repositoryStudyUser.save(studyUser);
-		// Send updates via RabbitMQ
-		try {
-			List<StudyUserCommand> commands = new ArrayList<>();
-			commands.add(new StudyUserCommand(CommandType.UPDATE, studyUser));
-			studyUserCom.broadcast(commands);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user update info through RabbitMQ");
-		}
-	}
+    public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
+        DataUserAgreement dataUserAgreement = repository.findById(duaId).orElseThrow();
+        dataUserAgreement.setTimestampOfAccepted(new Date());
+        repository.save(dataUserAgreement);
+        StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
+        if (studyUser == null) {
+            throw new ShanoirException("Could not validate the data user agreement acceptation. The user don't seems to be a member of the study.");
+        }
+        studyUser.setConfirmed(true);
+        repositoryStudyUser.save(studyUser);
+        // Send updates via RabbitMQ
+        try {
+            List<StudyUserCommand> commands = new ArrayList<>();
+            commands.add(new StudyUserCommand(CommandType.UPDATE, studyUser));
+            studyUserCom.broadcast(commands);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not transmit study-user update info through RabbitMQ");
+        }
+    }
 
-	public void createDataUserAgreementsForStudy(Study study) {
-		List<StudyUser> studyUserList = study.getStudyUserList();
-		for (StudyUser studyUser : studyUserList) {
-			DataUserAgreement dataUserAgreement = new DataUserAgreement();
-			dataUserAgreement.setStudy(study);
-			dataUserAgreement.setUserId(studyUser.getUserId());
-			repository.save(dataUserAgreement);
-		}
-	}
+    public void createDataUserAgreementsForStudy(Study study) {
+        List<StudyUser> studyUserList = study.getStudyUserList();
+        for (StudyUser studyUser : studyUserList) {
+            DataUserAgreement dataUserAgreement = new DataUserAgreement();
+            dataUserAgreement.setStudy(study);
+            dataUserAgreement.setUserId(studyUser.getUserId());
+            repository.save(dataUserAgreement);
+        }
+    }
 
-	public DataUserAgreement createDataUserAgreementForUserInStudy(Study study, Long userId) {
-		DataUserAgreement dataUserAgreement = new DataUserAgreement();
-		dataUserAgreement.setStudy(study);
-		dataUserAgreement.setUserId(userId);
-		return repository.save(dataUserAgreement);
-	}
+    public DataUserAgreement createDataUserAgreementForUserInStudy(Study study, Long userId) {
+        DataUserAgreement dataUserAgreement = new DataUserAgreement();
+        dataUserAgreement.setStudy(study);
+        dataUserAgreement.setUserId(userId);
+        return repository.save(dataUserAgreement);
+    }
 
-	public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
-		DataUserAgreement dataUserAgreement = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, study.getId());
-		if (dataUserAgreement != null) {
-			repository.deleteById(dataUserAgreement.getId());
-		}
-	}
+    public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
+        DataUserAgreement dataUserAgreement = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, study.getId());
+        if (dataUserAgreement != null) {
+            repository.deleteById(dataUserAgreement.getId());
+        }
+    }
 
-	public List<DataUserAgreement> findDUAByStudyId(Long studyId) {
-		return repository.findByStudyId(studyId);
-	}
+    public List<DataUserAgreement> findDUAByStudyId(Long studyId) {
+        return repository.findByStudyId(studyId);
+    }
 
-	public DataUserAgreement findDUAByUserIdAndStudyId(Long userId, Long studyId) {
-		return repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId);
-	}
+    public DataUserAgreement findDUAByUserIdAndStudyId(Long userId, Long studyId) {
+        return repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId);
+    }
 
-	public void deleteAll(Iterable<DataUserAgreement> duas) {
-		this.repository.deleteAll(duas);
-	}
+    public void deleteAll(Iterable<DataUserAgreement> duas) {
+        this.repository.deleteAll(duas);
+    }
 
-	public void update(DataUserAgreement dua) {
-		this.repository.save(dua);
-	}
+    public void update(DataUserAgreement dua) {
+        this.repository.save(dua);
+    }
 
 }

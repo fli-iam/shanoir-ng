@@ -22,83 +22,83 @@ package org.shanoir.uploader.model.rest;
  */
 public enum ImagedObjectCategory {
 
-	/**
-	 * Phantom
-	 */
-	PHANTOM(1, "Phantom"),
+    /**
+     * Phantom
+     */
+    PHANTOM(1, "Phantom"),
 
-	/**
-	 * Living human being
-	 */
-	LIVING_HUMAN_BEING(2, "Living human being"),
+    /**
+     * Living human being
+     */
+    LIVING_HUMAN_BEING(2, "Living human being"),
 
-	/**
-	 * Human cadaver
-	 */
-	HUMAN_CADAVER(3, "Human cadaver"),
+    /**
+     * Human cadaver
+     */
+    HUMAN_CADAVER(3, "Human cadaver"),
 
-	/**
-	 * Anatomical piece
-	 */
-	ANATOMICAL_PIECE(4, "Anatomical piece"),
+    /**
+     * Anatomical piece
+     */
+    ANATOMICAL_PIECE(4, "Anatomical piece"),
 
-	/**
-	 * Living animal
-	 */
-	LIVING_ANIMAL(5, "Living animal"),
+    /**
+     * Living animal
+     */
+    LIVING_ANIMAL(5, "Living animal"),
 
-	/**
-	 * Animal cadaver
-	 */
-	ANIMAL_CADAVER(6, "Animal cadaver");
+    /**
+     * Animal cadaver
+     */
+    ANIMAL_CADAVER(6, "Animal cadaver");
 
-	private int id;
+    private int id;
 
-	private String name;
+    private String name;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private ImagedObjectCategory(final int id, final String name) {
-		this.id = id;
-		this.name = name;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private ImagedObjectCategory(final int id, final String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	/**
-	 * Get an imaged object category by its id.
-	 *
-	 * @param id
-	 *            category id.
-	 * @return imaged object category.
-	 */
-	public static ImagedObjectCategory getCategory(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
-			if (id.equals(category.getId())) {
-				return category;
-			}
-		}
-		throw new IllegalArgumentException("No matching imaged object category for id " + id);
-	}
+    /**
+     * Get an imaged object category by its id.
+     *
+     * @param id
+     *            category id.
+     * @return imaged object category.
+     */
+    public static ImagedObjectCategory getCategory(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
+            if (id.equals(category.getId())) {
+                return category;
+            }
+        }
+        throw new IllegalArgumentException("No matching imaged object category for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String toString() {
-		return this.name;
-	}
+    public String toString() {
+        return this.name;
+    }
 
 }

@@ -29,40 +29,40 @@ import org.springframework.stereotype.Service;
 public class IsMeSecurityService {
 
     public boolean isMe(Long id) {
-    	if (id == null) throw new IllegalArgumentException("id cannot be null");
-    	else if (isAnonymousConnected()) return false;
-    	else return id.equals(getConnectedUserId());
+        if (id == null) throw new IllegalArgumentException("id cannot be null");
+        else if (isAnonymousConnected()) return false;
+        else return id.equals(getConnectedUserId());
     }
 
     public boolean isMe(String username) {
-    	final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-		return username.equals(authentication.getToken().getClaimAsString("preferred_username"));
+        final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        return username.equals(authentication.getToken().getClaimAsString("preferred_username"));
     }
 
     public boolean isMe(User user) {
-    	if (user == null) throw new IllegalArgumentException("user cannot be null");
-    	else return isMe(user.getId());
+        if (user == null) throw new IllegalArgumentException("user cannot be null");
+        else return isMe(user.getId());
     }
 
     private boolean isAnonymousConnected() {
-    	return SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken;
+        return SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken;
     }
 
     private Long getConnectedUserId() {
-    	final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-    	final Jwt jwt = authentication.getToken();
-		if (jwt == null) {
-			throw new TokenNotFoundException("Cannot find token while checking access to method");
-		}
+        final Jwt jwt = authentication.getToken();
+        if (jwt == null) {
+            throw new TokenNotFoundException("Cannot find token while checking access to method");
+        }
 
-		Long tokenUserId = null;
-		final Map<String, Object> otherClaims = jwt.getClaims();
-		if (otherClaims.containsKey(KeycloakUtil.USER_ID_TOKEN_ATT)) {
-			tokenUserId = Long.valueOf(otherClaims.get(KeycloakUtil.USER_ID_TOKEN_ATT).toString());
-		}
+        Long tokenUserId = null;
+        final Map<String, Object> otherClaims = jwt.getClaims();
+        if (otherClaims.containsKey(KeycloakUtil.USER_ID_TOKEN_ATT)) {
+            tokenUserId = Long.valueOf(otherClaims.get(KeycloakUtil.USER_ID_TOKEN_ATT).toString());
+        }
 
-		return tokenUserId;
+        return tokenUserId;
     }
 
 }

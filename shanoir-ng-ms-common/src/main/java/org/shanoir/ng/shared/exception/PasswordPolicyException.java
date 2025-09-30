@@ -21,11 +21,11 @@ package org.shanoir.ng.shared.exception;
  */
 public class PasswordPolicyException extends SecurityException {
 
-	private static final long serialVersionUID = 6668952716780935465L;
+    private static final long serialVersionUID = 6668952716780935465L;
 
-	public PasswordPolicyException() {
-		super("Password did not match policy");
-	}
+    public PasswordPolicyException() {
+        super("Password did not match policy");
+    }
 
 
 }

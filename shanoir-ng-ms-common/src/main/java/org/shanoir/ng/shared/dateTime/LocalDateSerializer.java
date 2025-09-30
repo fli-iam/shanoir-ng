@@ -21,13 +21,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class LocalDateSerializer extends JsonSerializer<LocalDate> {
 
-	@Override
-	public void serialize(LocalDate date, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    @Override
+    public void serialize(LocalDate date, JsonGenerator generator, SerializerProvider provider) throws IOException {
         generator.writeStartArray();
         generator.writeNumber(date.getYear());
         generator.writeNumber(date.getMonthValue());
         generator.writeNumber(date.getDayOfMonth());
         generator.writeEndArray();
-	}
+    }
 
 }

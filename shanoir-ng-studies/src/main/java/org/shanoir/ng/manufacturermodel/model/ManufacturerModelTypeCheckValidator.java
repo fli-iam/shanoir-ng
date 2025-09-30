@@ -24,17 +24,17 @@ import jakarta.validation.ConstraintValidatorContext;
  *
  */
 public class ManufacturerModelTypeCheckValidator
-		implements ConstraintValidator<ManufacturerModelTypeCheck, ManufacturerModel> {
+        implements ConstraintValidator<ManufacturerModelTypeCheck, ManufacturerModel> {
 
-	@Override
-	public void initialize(final ManufacturerModelTypeCheck constraintAnnotation) {
-		// empty initializer
-	}
+    @Override
+    public void initialize(final ManufacturerModelTypeCheck constraintAnnotation) {
+        // empty initializer
+    }
 
-	@Override
-	public boolean isValid(final ManufacturerModel manufacturerModel, final ConstraintValidatorContext context) {
+    @Override
+    public boolean isValid(final ManufacturerModel manufacturerModel, final ConstraintValidatorContext context) {
 
-		return true;
-	}
+        return true;
+    }
 
 }

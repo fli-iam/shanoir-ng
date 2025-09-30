@@ -40,62 +40,62 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ManufacturerSecurityTest {
 
-	private static final long LOGGED_USER_ID = 2L;
-	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final long ENTITY_ID = 1L;
+    private static final long LOGGED_USER_ID = 2L;
+    private static final String LOGGED_USER_USERNAME = "logged";
+    private static final long ENTITY_ID = 1L;
 
-	private Manufacturer mockNew;
-	private Manufacturer mockExisting;
+    private Manufacturer mockNew;
+    private Manufacturer mockExisting;
 
-	@Autowired
-	private ManufacturerService service;
+    @Autowired
+    private ManufacturerService service;
 
-	@BeforeEach
-	public void setup() {
-		mockNew = ModelsUtil.createManufacturer();
-		mockExisting = ModelsUtil.createManufacturer();
-		mockExisting.setId(ENTITY_ID);
-	}
+    @BeforeEach
+    public void setup() {
+        mockNew = ModelsUtil.createManufacturer();
+        mockExisting = ModelsUtil.createManufacturer();
+        mockExisting.setId(ENTITY_ID);
+    }
 
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
-		assertAccessDenied(service::deleteById, ENTITY_ID);
-	}
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        assertAccessDenied(service::findById, ENTITY_ID);
+        assertAccessDenied(service::findAll);
+        assertAccessDenied(service::create, mockNew);
+        assertAccessDenied(service::update, mockExisting);
+        assertAccessDenied(service::deleteById, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsUser() throws ShanoirException {
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
-		assertAccessDenied(service::deleteById, ENTITY_ID);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsUser() throws ShanoirException {
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessDenied(service::create, mockNew);
+        assertAccessDenied(service::update, mockExisting);
+        assertAccessDenied(service::deleteById, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsExpert() throws ShanoirException {
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::create, mockNew);
-		assertAccessDenied(service::create, mockExisting);
-		assertAccessAuthorized(service::update, mockExisting);
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsExpert() throws ShanoirException {
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::create, mockNew);
+        assertAccessDenied(service::create, mockExisting);
+        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::deleteById, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAdmin() throws ShanoirException {
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::create, mockNew);
-		assertAccessDenied(service::create, mockExisting);
-		assertAccessAuthorized(service::update, mockExisting);
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAdmin() throws ShanoirException {
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::create, mockNew);
+        assertAccessDenied(service::create, mockExisting);
+        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::deleteById, ENTITY_ID);
+    }
 }

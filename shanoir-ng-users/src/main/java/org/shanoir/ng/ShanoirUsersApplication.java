@@ -26,8 +26,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class ShanoirUsersApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShanoirUsersApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ShanoirUsersApplication.class, args);
+    }
 
 }

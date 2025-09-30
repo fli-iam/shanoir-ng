@@ -66,7 +66,7 @@ public class DefaultHandler extends OutputHandler {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-	private ProcessedDatasetImporterService processedDatasetImporterService;
+    private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {

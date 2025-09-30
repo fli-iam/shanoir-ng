@@ -39,38 +39,38 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class ExaminationAnestheticRepositoryTest {
 
-	private static final Long EXAM_ANESTHETIC_TEST_1_ID = 1L;
-	private static final Long ANESTHETIC_ID = 1L;
+    private static final Long EXAM_ANESTHETIC_TEST_1_ID = 1L;
+    private static final Long ANESTHETIC_ID = 1L;
 
-	@Autowired
-	private ExaminationAnestheticRepository repository;
+    @Autowired
+    private ExaminationAnestheticRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<ExaminationAnesthetic> examAnestheticsDb = repository.findAll();
-		assertThat(examAnestheticsDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<ExaminationAnesthetic> examAnestheticsIt = examAnestheticsDb.iterator();
-		while (examAnestheticsIt.hasNext()) {
-			examAnestheticsIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<ExaminationAnesthetic> examAnestheticsDb = repository.findAll();
+        assertThat(examAnestheticsDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<ExaminationAnesthetic> examAnestheticsIt = examAnestheticsDb.iterator();
+        while (examAnestheticsIt.hasNext()) {
+            examAnestheticsIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(3);
+    }
 
-	@Test
-	public void findAllByExaminationTest() throws Exception {
-		List<ExaminationAnesthetic> examAnestheticsDb = repository.findByExaminationId(1L);
-		assertNotNull(examAnestheticsDb);
-		assertThat(examAnestheticsDb.size()).isEqualTo(1);
-		assertThat(examAnestheticsDb.get(0).getId()).isEqualTo(EXAM_ANESTHETIC_TEST_1_ID);
-	}
+    @Test
+    public void findAllByExaminationTest() throws Exception {
+        List<ExaminationAnesthetic> examAnestheticsDb = repository.findByExaminationId(1L);
+        assertNotNull(examAnestheticsDb);
+        assertThat(examAnestheticsDb.size()).isEqualTo(1);
+        assertThat(examAnestheticsDb.get(0).getId()).isEqualTo(EXAM_ANESTHETIC_TEST_1_ID);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		ExaminationAnesthetic examAnestheticDb = repository.findById(EXAM_ANESTHETIC_TEST_1_ID).orElse(null);
-		assertThat(examAnestheticDb.getAnesthetic().getId()).isEqualTo(ANESTHETIC_ID);
-		assertThat(examAnestheticDb.getAnesthetic().getName()).isEqualTo(AnestheticModelUtil.ANESTHETIC_NAME);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        ExaminationAnesthetic examAnestheticDb = repository.findById(EXAM_ANESTHETIC_TEST_1_ID).orElse(null);
+        assertThat(examAnestheticDb.getAnesthetic().getId()).isEqualTo(ANESTHETIC_ID);
+        assertThat(examAnestheticDb.getAnesthetic().getName()).isEqualTo(AnestheticModelUtil.ANESTHETIC_NAME);
+    }
 
 }

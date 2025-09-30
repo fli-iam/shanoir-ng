@@ -49,18 +49,18 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class QualityExaminationRule extends AbstractEntity {
 
-	private Integer tag;
+    private Integer tag;
 
     @NotNull
-	private boolean orConditions;
+    private boolean orConditions;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	// there is a join table because a rule_id fk would lead to an ambiguity and bugs
-	// because it could refer to a study card or quality card rule
-	@JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
-	private List<StudyCardCondition> conditions;
+    // there is a join table because a rule_id fk would lead to an ambiguity and bugs
+    // because it could refer to a study card or quality card rule
+    @JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
+    private List<StudyCardCondition> conditions;
 
-	public QualityTag getQualityTag() {
+    public QualityTag getQualityTag() {
         return QualityTag.get(tag);
     }
 
@@ -68,15 +68,15 @@ public class QualityExaminationRule extends AbstractEntity {
         this.tag = tag != null ? tag.getId() : null;
     }
 
-	public List<StudyCardCondition> getConditions() {
-		return conditions;
-	}
+    public List<StudyCardCondition> getConditions() {
+        return conditions;
+    }
 
-	public void setConditions(List<StudyCardCondition> conditions) {
-		this.conditions = conditions;
-	}
+    public void setConditions(List<StudyCardCondition> conditions) {
+        this.conditions = conditions;
+    }
 
-	public boolean isOrConditions() {
+    public boolean isOrConditions() {
         return orConditions;
     }
 
@@ -92,14 +92,14 @@ public class QualityExaminationRule extends AbstractEntity {
         apply(examination, null, result, downloader);
     }
 
-	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
-	    ExaminationData examData = new ExaminationData(examination);
-	    if (examData.getSubjectId() == null) {
-	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
-	        log.warn("No subject in exam " + examination.getId());
-	    } else {
-	        apply(examData, examinationDicomAttributes, result, downloader);
-	    }
+    public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+        ExaminationData examData = new ExaminationData(examination);
+        if (examData.getSubjectId() == null) {
+            Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
+            log.warn("No subject in exam " + examination.getId());
+        } else {
+            apply(examData, examinationDicomAttributes, result, downloader);
+        }
     }
 
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {

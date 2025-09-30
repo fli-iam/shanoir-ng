@@ -60,164 +60,164 @@ import org.springframework.validation.BindingResult;
 @ActiveProfiles("test")
 public class StudyApiSecurityTest {
 
-	private static final long LOGGED_USER_ID = 2L;
-	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final long ENTITY_ID = 1L;
+    private static final long LOGGED_USER_ID = 2L;
+    private static final String LOGGED_USER_USERNAME = "logged";
+    private static final long ENTITY_ID = 1L;
 
-	private Study mockNew;
-	private Study mockExisting;
-	private BindingResult mockBindingResult;
+    private Study mockNew;
+    private Study mockExisting;
+    private BindingResult mockBindingResult;
 
-	@Autowired
-	private StudyApi api;
+    @Autowired
+    private StudyApi api;
 
-	@MockBean
-	private SubjectRepository subjectRepository;
+    @MockBean
+    private SubjectRepository subjectRepository;
 
-	@MockBean
-	private StudyRepository repository;
+    @MockBean
+    private StudyRepository repository;
 
-	@MockBean
-	private StudyUserRepository studyUserRepository;
+    @MockBean
+    private StudyUserRepository studyUserRepository;
 
-	@MockBean
-	private SubjectStudyRepository subjectStudyRepository;
+    @MockBean
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@BeforeEach
-	public void setup() {
-		mockNew = ModelsUtil.createStudy();
-		mockExisting = ModelsUtil.createStudy();
-		mockExisting.setId(ENTITY_ID);
-		mockBindingResult = new BeanPropertyBindingResult(mockExisting, "study");
-	}
+    @BeforeEach
+    public void setup() {
+        mockNew = ModelsUtil.createStudy();
+        mockExisting = ModelsUtil.createStudy();
+        mockExisting.setId(ENTITY_ID);
+        mockBindingResult = new BeanPropertyBindingResult(mockExisting, "study");
+    }
 
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException, RestServiceException {
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		assertAccessDenied(api::findStudies);
-		assertAccessDenied(api::findStudiesNames);
-		assertAccessDenied(api::findStudyById, ENTITY_ID, false);
-		assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
-		assertAccessDenied(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
-	}
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException, RestServiceException {
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        assertAccessDenied(api::findStudies);
+        assertAccessDenied(api::findStudiesNames);
+        assertAccessDenied(api::findStudyById, ENTITY_ID, false);
+        assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
+        assertAccessDenied(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsUser() throws ShanoirException, RestServiceException {
-		testRead();
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsUser() throws ShanoirException, RestServiceException {
+        testRead();
 
-		assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
-		assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
+        assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
+        assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
 
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL)));
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE)));
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL)));
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE)));
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
 
-	}
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsExpert() throws ShanoirException, RestServiceException {
-		testRead();
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsExpert() throws ShanoirException, RestServiceException {
+        testRead();
 
-		assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
-		assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
-		assertAccessAuthorized(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD), mockBindingResult);
+        assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
+        assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
+        assertAccessAuthorized(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD), mockBindingResult);
 
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL)));
-		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL)));
-		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
-	}
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL)));
+        assertAccessDenied(api::deleteStudy, ENTITY_ID);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL)));
+        assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAdmin() throws ShanoirException, RestServiceException {
-		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
-		assertAccessAuthorized(api::findStudies);
-		assertAccessAuthorized(api::findStudiesNames);
-		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
-		assertAccessAuthorized(api::findStudyById, ENTITY_ID, false);
-		assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
-		assertAccessAuthorized(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAdmin() throws ShanoirException, RestServiceException {
+        assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
+        assertAccessAuthorized(api::findStudies);
+        assertAccessAuthorized(api::findStudiesNames);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
+        assertAccessAuthorized(api::findStudyById, ENTITY_ID, false);
+        assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
+        assertAccessAuthorized(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
+    }
 
-	private void testRead() throws ShanoirException, RestServiceException {
-		// No rights
-		Study studyMockNoRights = buildStudyMock(1L);
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, null, true)).willReturn(Arrays.asList(studyMockNoRights));
-		given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
-		given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
-		given(repository.findById(1L)).willReturn(Optional.of(studyMockNoRights));
-		given(studyUserRepository.findByStudy_Id(1L)).willReturn(studyMockNoRights.getStudyUserList());
-		assertAccessAuthorized(api::findStudies);
-		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(api::findStudiesNames);
-		assertEquals(null, api.findStudiesNames().getBody());
-		assertAccessDenied(api::findStudyById, 1L, false);
+    private void testRead() throws ShanoirException, RestServiceException {
+        // No rights
+        Study studyMockNoRights = buildStudyMock(1L);
+        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, null, true)).willReturn(Arrays.asList(studyMockNoRights));
+        given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
+        given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
+        given(repository.findById(1L)).willReturn(Optional.of(studyMockNoRights));
+        given(studyUserRepository.findByStudy_Id(1L)).willReturn(studyMockNoRights.getStudyUserList());
+        assertAccessAuthorized(api::findStudies);
+        assertEquals(null, api.findStudies().getBody());
+        assertAccessAuthorized(api::findStudiesNames);
+        assertEquals(null, api.findStudiesNames().getBody());
+        assertAccessDenied(api::findStudyById, 1L, false);
 
-		// Wrong Rights
-		Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-		given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
-		given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockWrongRights));
-		given(repository.findById(2L)).willReturn(Optional.of(studyMockNoRights));
-		given(studyUserRepository.findByStudy_Id(2L)).willReturn(studyMockWrongRights.getStudyUserList());
-		assertAccessAuthorized(api::findStudies);
-		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(api::findStudiesNames);
-		assertEquals(null, api.findStudiesNames().getBody());
-		assertAccessDenied(api::findStudyById, 2L, false);
+        // Wrong Rights
+        Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
+        given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
+        given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
+        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockWrongRights));
+        given(repository.findById(2L)).willReturn(Optional.of(studyMockNoRights));
+        given(studyUserRepository.findByStudy_Id(2L)).willReturn(studyMockWrongRights.getStudyUserList());
+        assertAccessAuthorized(api::findStudies);
+        assertEquals(null, api.findStudies().getBody());
+        assertAccessAuthorized(api::findStudiesNames);
+        assertEquals(null, api.findStudiesNames().getBody());
+        assertAccessDenied(api::findStudyById, 2L, false);
 
-		// Right rights
-		Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
-		given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-		given(repository.findAllIdAndName()).willReturn(Arrays.asList(
-				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()),
-				new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()),
-				new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
-		given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(
-				new IdName(studyMockRightRights.getId(), studyMockRightRights.getName())));
-		given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-		given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
-		given(studyUserRepository.findByStudy_Id(3L)).willReturn(studyMockRightRights.getStudyUserList());
-		assertAccessAuthorized(api::findStudies);
-		assertNotNull(api.findStudies().getBody());
-		assertEquals(1, api.findStudies().getBody().size());
-		assertAccessAuthorized(api::findStudiesNames);
-		assertNotNull(api.findStudiesNames().getBody());
-		assertEquals(1, api.findStudiesNames().getBody().size());
-		assertAccessAuthorized(api::findStudyById, 3L, false);
-	}
+        // Right rights
+        Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
+        given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
+        given(repository.findAllIdAndName()).willReturn(Arrays.asList(
+                new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()),
+                new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()),
+                new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
+        given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(
+                new IdName(studyMockRightRights.getId(), studyMockRightRights.getName())));
+        given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
+        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
+        given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
+        given(studyUserRepository.findByStudy_Id(3L)).willReturn(studyMockRightRights.getStudyUserList());
+        assertAccessAuthorized(api::findStudies);
+        assertNotNull(api.findStudies().getBody());
+        assertEquals(1, api.findStudies().getBody().size());
+        assertAccessAuthorized(api::findStudiesNames);
+        assertNotNull(api.findStudiesNames().getBody());
+        assertEquals(1, api.findStudiesNames().getBody().size());
+        assertAccessAuthorized(api::findStudyById, 3L, false);
+    }
 
-	private Study buildStudyMock(Long id, StudyUserRight... rights) {
-		Study study = ModelsUtil.createStudy();
-		study.setId(id);
-		List<StudyUser> studyUserList = new ArrayList<>();
-		for (StudyUserRight right : rights) {
-			StudyUser studyUser = new StudyUser();
-			studyUser.setUserId(LOGGED_USER_ID);
-			studyUser.setUserName(LOGGED_USER_USERNAME);
-			studyUser.setStudy(study);
-			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);
-		}
-		study.setStudyUserList(studyUserList);
-		StudyCenter studyCenter = new StudyCenter();
-		studyCenter.setCenter(ModelsUtil.createCenter());
-		studyCenter.setStudy(study);
-		studyCenter.setId(1L);
-		study.setStudyCenterList(Arrays.asList(studyCenter));
-		return study;
-	}
+    private Study buildStudyMock(Long id, StudyUserRight... rights) {
+        Study study = ModelsUtil.createStudy();
+        study.setId(id);
+        List<StudyUser> studyUserList = new ArrayList<>();
+        for (StudyUserRight right : rights) {
+            StudyUser studyUser = new StudyUser();
+            studyUser.setUserId(LOGGED_USER_ID);
+            studyUser.setUserName(LOGGED_USER_USERNAME);
+            studyUser.setStudy(study);
+            studyUser.setStudyUserRights(Arrays.asList(right));
+            studyUserList.add(studyUser);
+        }
+        study.setStudyUserList(studyUserList);
+        StudyCenter studyCenter = new StudyCenter();
+        studyCenter.setCenter(ModelsUtil.createCenter());
+        studyCenter.setStudy(study);
+        studyCenter.setId(1L);
+        study.setStudyCenterList(Arrays.asList(studyCenter));
+        return study;
+    }
 
 }

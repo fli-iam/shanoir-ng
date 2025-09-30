@@ -27,104 +27,104 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Subject {
 
-	@JsonProperty("id")
-	private Long id;
+    @JsonProperty("id")
+    private Long id;
 
-	@JsonProperty("name")
-	private String name;
+    @JsonProperty("name")
+    private String name;
 
-	@JsonProperty("study")
-	private IdName study;
+    @JsonProperty("study")
+    private IdName study;
 
-	@JsonProperty("identifier")
-	private String identifier;
+    @JsonProperty("identifier")
+    private String identifier;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	private LocalDate birthDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
-	@JsonProperty("sex")
-	private String sex;
+    @JsonProperty("sex")
+    private String sex;
 
-	@JsonProperty("imagedObjectCategory")
-	private Integer imagedObjectCategory;
+    @JsonProperty("imagedObjectCategory")
+    private Integer imagedObjectCategory;
 
-	// Not used by MS Import, but by ShanoirUploader via Maven reference
-	private PseudonymusHashValues pseudonymusHashValues;
+    // Not used by MS Import, but by ShanoirUploader via Maven reference
+    private PseudonymusHashValues pseudonymusHashValues;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	/**
-	 * @return the sex
-	 */
-	public String getSex() {
-		return sex;
-	}
+    /**
+     * @return the sex
+     */
+    public String getSex() {
+        return sex;
+    }
 
-	/**
-	 * @param sex the sex to set
-	 */
-	public void setSex(String sex) {
-		this.sex = sex;
-	}
+    /**
+     * @param sex the sex to set
+     */
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
 
-	/**
-	 * @return the imagedObjectCategory
-	 */
-	public Integer getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    /**
+     * @return the imagedObjectCategory
+     */
+    public Integer getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	/**
-	 * @param imagedObjectCategory the imagedObjectCategory to set
-	 */
-	public void setImagedObjectCategory(Integer imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    /**
+     * @param imagedObjectCategory the imagedObjectCategory to set
+     */
+    public void setImagedObjectCategory(Integer imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
-	public String getIdentifier() {
-		return identifier;
-	}
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	public PseudonymusHashValues getPseudonymusHashValues() {
-		return pseudonymusHashValues;
-	}
+    public PseudonymusHashValues getPseudonymusHashValues() {
+        return pseudonymusHashValues;
+    }
 
-	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
-		this.pseudonymusHashValues = pseudonymusHashValues;
-	}
+    public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
+        this.pseudonymusHashValues = pseudonymusHashValues;
+    }
 
-	public IdName getStudy() {
-		return study;
-	}
+    public IdName getStudy() {
+        return study;
+    }
 
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
 
 }

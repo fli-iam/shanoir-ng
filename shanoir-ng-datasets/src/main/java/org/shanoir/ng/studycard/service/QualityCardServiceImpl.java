@@ -50,35 +50,35 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> findAll() {
         return Utils.toList(qualityCardRepository.findAll());
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
     public QualityCard findById(final Long id) {
         return qualityCardRepository.findById(id).orElse(null);
     }
 
     @Override
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
     public QualityCard save(final QualityCard card) throws MicroServiceCommunicationException {
         QualityCard savedQualityCard = qualityCardRepository.save(card);
         return savedQualityCard;
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> search(final List<Long> studyIdList) {
         return qualityCardRepository.findByStudyIdIn(studyIdList);
     }
 
     @Override
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
     public QualityCard update(final QualityCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
         QualityCard qualityCardDb = qualityCardRepository.findById(card.getId()).orElse(null);
         if (qualityCardDb == null) throw new EntityNotFoundException(QualityCard.class, card.getId());
@@ -107,14 +107,14 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> findByStudy(Long studyId) {
         return this.qualityCardRepository.findByStudyId(studyId);
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public QualityCard findByName(String name) {
         return qualityCardRepository.findByName(name);
     }

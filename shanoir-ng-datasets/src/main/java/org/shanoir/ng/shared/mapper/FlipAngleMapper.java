@@ -32,12 +32,12 @@ import org.shanoir.ng.shared.model.FlipAngle;
 public interface FlipAngleMapper {
 
 
-	List<FlipAngle> flipAngleDTOListToFlipAngleList(
-			List<String> flipAngleDTOList);
+    List<FlipAngle> flipAngleDTOListToFlipAngleList(
+            List<String> flipAngleDTOList);
 
 
-	@Mapping(target = "flipAngleValue", source = "flipAngle")
-	FlipAngle flipAngleDTOToFlipAngle(
-			String flipAngle);
+    @Mapping(target = "flipAngleValue", source = "flipAngle")
+    FlipAngle flipAngleDTOToFlipAngle(
+            String flipAngle);
 
 }

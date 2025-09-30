@@ -16,35 +16,35 @@ package org.shanoir.ng.utils;
 
 public class Range<T> {
 
-	private T lowerBound;
+    private T lowerBound;
 
-	private T upperBound;
+    private T upperBound;
 
 
-	public Range() {
-		this.lowerBound = null;
-		this.upperBound = null;
-	}
+    public Range() {
+        this.lowerBound = null;
+        this.upperBound = null;
+    }
 
-	public Range(T lowerBound, T upperBound) {
-		this.lowerBound = lowerBound;
-		this.upperBound = upperBound;
-	}
+    public Range(T lowerBound, T upperBound) {
+        this.lowerBound = lowerBound;
+        this.upperBound = upperBound;
+    }
 
-	public T getLowerBound() {
-		return lowerBound;
-	}
+    public T getLowerBound() {
+        return lowerBound;
+    }
 
-	public void setLowerBound(T lowerBound) {
-		this.lowerBound = lowerBound;
-	}
+    public void setLowerBound(T lowerBound) {
+        this.lowerBound = lowerBound;
+    }
 
-	public T getUpperBound() {
-		return upperBound;
-	}
+    public T getUpperBound() {
+        return upperBound;
+    }
 
-	public void setUpperBound(T upperBound) {
-		this.upperBound = upperBound;
-	}
+    public void setUpperBound(T upperBound) {
+        this.upperBound = upperBound;
+    }
 
 }

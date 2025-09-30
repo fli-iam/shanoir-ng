@@ -15,10 +15,10 @@
 package org.shanoir.ng.api;
 
 public class NotFoundException extends ApiException {
-	private int code;
+    private int code;
 
-	public NotFoundException(int code, String msg) {
-		super(code, msg);
-		this.code = code;
-	}
+    public NotFoundException(int code, String msg) {
+        super(code, msg);
+        this.code = code;
+    }
 }

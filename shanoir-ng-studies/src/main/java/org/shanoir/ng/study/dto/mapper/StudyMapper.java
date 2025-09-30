@@ -42,58 +42,58 @@ import org.shanoir.ng.timepoint.TimepointMapper;
 @DecoratedWith(StudyDecorator.class)
 public interface StudyMapper {
 
-	@Named("studies.simple")
-	@IterableMapping(qualifiedByName = "study.simple")
-	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
+    @Named("studies.simple")
+    @IterableMapping(qualifiedByName = "study.simple")
+    List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
-	@Named("study.simple")
-	@Mappings({ @Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
-		@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
-		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
-		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
-	StudyDTO studyToStudyDTO(Study study);
+    @Named("study.simple")
+    @Mappings({ @Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+        @Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
+        @Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
+        @Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
+    StudyDTO studyToStudyDTO(Study study);
 
-	@Named("studies.detailed")
-	@IterableMapping(qualifiedByName = "study.detailed")
-	List<StudyDTO> studiesToStudyDTOsDetailed(List<Study> studies);
+    @Named("studies.detailed")
+    @IterableMapping(qualifiedByName = "study.detailed")
+    List<StudyDTO> studiesToStudyDTOsDetailed(List<Study> studies);
 
-	@Named("study.detailed")
-	StudyDTO studyToStudyDTODetailed(Study study);
+    @Named("study.detailed")
+    StudyDTO studyToStudyDTODetailed(Study study);
 
-	@Named("studies.light")
-	@IterableMapping(qualifiedByName = "study.light")
-	List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
+    @Named("studies.light")
+    @IterableMapping(qualifiedByName = "study.light")
+    List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
 
-	@Named("study.light")
-	@Mapping(target = "studyTags", ignore = true)
-	StudyLightDTO studyToStudyLightDTO(Study study);
+    @Named("study.light")
+    @Mapping(target = "studyTags", ignore = true)
+    StudyLightDTO studyToStudyLightDTO(Study study);
 
-	@Named("study.light.no.paths")
-	@Mappings({
-		@Mapping(target = "protocolFilePaths", ignore = true),
-		@Mapping(target = "dataUserAgreementPaths", ignore = true)
-	})
-	StudyLightDTO studyToStudyLightDTONoFilePaths(Study study);
+    @Named("study.light.no.paths")
+    @Mappings({
+        @Mapping(target = "protocolFilePaths", ignore = true),
+        @Mapping(target = "dataUserAgreementPaths", ignore = true)
+    })
+    StudyLightDTO studyToStudyLightDTONoFilePaths(Study study);
 
-	@Named("studies.idname")
-	@IterableMapping(qualifiedByName = "study.idname")
-	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
+    @Named("studies.idname")
+    @IterableMapping(qualifiedByName = "study.idname")
+    List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
 
-	@Named("study.idname")
-	@Mappings({
-		@Mapping(target = "studyCenterList", ignore = true),
-		@Mapping(target = "tags", ignore = true)
-	})
-	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
+    @Named("study.idname")
+    @Mappings({
+        @Mapping(target = "studyCenterList", ignore = true),
+        @Mapping(target = "tags", ignore = true)
+    })
+    IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
 
-	IdName studyToIdNameDTO(Study study);
+    IdName studyToIdNameDTO(Study study);
 
-	@Mappings({
-		@Mapping(target = "subjectPreclinical", source = "subject.preclinical")
-	})
-	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
+    @Mappings({
+        @Mapping(target = "subjectPreclinical", source = "subject.preclinical")
+    })
+    SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 
-	default Integer map(StudyCardPolicy policy) {
+    default Integer map(StudyCardPolicy policy) {
         if (policy == null) return null;
         return policy.getId();
     }

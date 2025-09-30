@@ -21,59 +21,59 @@ import org.shanoir.ng.importer.model.Serie;
  */
 public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Comparator<Serie> {
 
-	@Override
-	public int compare(Serie s1, Serie s2) {
-		String s1SeriesNumber = s1.getSeriesNumber();
-		String s2SeriesNumber = s2.getSeriesNumber();
-		try {
-			int s1SeriesNumberInt = Integer.parseInt(s1SeriesNumber);
-			int s2SeriesNumberInt = Integer.parseInt(s2SeriesNumber);
-			if (s1SeriesNumberInt == 0 && s2SeriesNumberInt == 0) {
-				return orderByAcquisitionTime(s1, s2);
-			}
-			if (s1SeriesNumberInt == s2SeriesNumberInt) {
-				return 0;
-			} else {
-				if (s1SeriesNumberInt < s2SeriesNumberInt) {
-					return -1;
-				} else {
-					return 1;
-				}
-			}
-		} catch (NumberFormatException e) {
-			return orderByAcquisitionTime(s1, s2);
-		}
-	}
+    @Override
+    public int compare(Serie s1, Serie s2) {
+        String s1SeriesNumber = s1.getSeriesNumber();
+        String s2SeriesNumber = s2.getSeriesNumber();
+        try {
+            int s1SeriesNumberInt = Integer.parseInt(s1SeriesNumber);
+            int s2SeriesNumberInt = Integer.parseInt(s2SeriesNumber);
+            if (s1SeriesNumberInt == 0 && s2SeriesNumberInt == 0) {
+                return orderByAcquisitionTime(s1, s2);
+            }
+            if (s1SeriesNumberInt == s2SeriesNumberInt) {
+                return 0;
+            } else {
+                if (s1SeriesNumberInt < s2SeriesNumberInt) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        } catch (NumberFormatException e) {
+            return orderByAcquisitionTime(s1, s2);
+        }
+    }
 
-	private int orderByAcquisitionTime(Serie s1, Serie s2) {
-		String s1AcquisitionTime = s1.getAcquisitionTime();
-		String s2AcquisitionTime = s2.getAcquisitionTime();
-		if (s1AcquisitionTime == null || s2AcquisitionTime == null) {
-			return orderBySeriesDescription(s1, s2);
-		}
-		LocalTime t1 = parseDicomTime(s1AcquisitionTime);
-		LocalTime t2 = parseDicomTime(s2AcquisitionTime);
-		return t1.compareTo(t2);
-	}
+    private int orderByAcquisitionTime(Serie s1, Serie s2) {
+        String s1AcquisitionTime = s1.getAcquisitionTime();
+        String s2AcquisitionTime = s2.getAcquisitionTime();
+        if (s1AcquisitionTime == null || s2AcquisitionTime == null) {
+            return orderBySeriesDescription(s1, s2);
+        }
+        LocalTime t1 = parseDicomTime(s1AcquisitionTime);
+        LocalTime t2 = parseDicomTime(s2AcquisitionTime);
+        return t1.compareTo(t2);
+    }
 
-	private LocalTime parseDicomTime(String dicomTime) {
-		String padded = String.format("%-6s", dicomTime).replace(' ', '0');
-		if (padded.contains(".")) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
-			return LocalTime.parse(padded, formatter);
-		} else {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
-			return LocalTime.parse(padded, formatter);
-		}
-	}
+    private LocalTime parseDicomTime(String dicomTime) {
+        String padded = String.format("%-6s", dicomTime).replace(' ', '0');
+        if (padded.contains(".")) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
+            return LocalTime.parse(padded, formatter);
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
+            return LocalTime.parse(padded, formatter);
+        }
+    }
 
-	private int orderBySeriesDescription(Serie s1, Serie s2) {
-		String s1SeriesDescription = s1.getSeriesDescription();
-		String s2SeriesDescription = s2.getSeriesDescription();
-		if (s1SeriesDescription == null || s2SeriesDescription == null) {
-			return 0;
-		}
-		return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
-	}
+    private int orderBySeriesDescription(Serie s1, Serie s2) {
+        String s1SeriesDescription = s1.getSeriesDescription();
+        String s2SeriesDescription = s2.getSeriesDescription();
+        if (s1SeriesDescription == null || s2SeriesDescription == null) {
+            return 0;
+        }
+        return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
+    }
 
 }

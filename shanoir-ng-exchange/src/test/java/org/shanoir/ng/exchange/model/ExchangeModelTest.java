@@ -14,38 +14,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ExchangeModelTest {
 
 
-	@Before
-	public void setup() {
-	}
+    @Before
+    public void setup() {
+    }
 
-	@Test
-	public void testCreateJson() throws JsonProcessingException {
-		Exchange exchange = new Exchange();
-		exchange.setAnonymisationProfileToUse("OFSEP Profile");
-		ExStudy exStudy = new ExStudy();
-		exStudy.setStudyName("NATIVE Divers");
-		exchange.setExStudy(exStudy);
-		ExStudyCard exStudyCard = new ExStudyCard();
-		exStudyCard.setName("Magic studycard");
-		ArrayList<ExStudyCard> exStudyCards = new ArrayList<>();
-		exStudyCards.add(exStudyCard);
-		exStudy.setExStudyCards(exStudyCards);
+    @Test
+    public void testCreateJson() throws JsonProcessingException {
+        Exchange exchange = new Exchange();
+        exchange.setAnonymisationProfileToUse("OFSEP Profile");
+        ExStudy exStudy = new ExStudy();
+        exStudy.setStudyName("NATIVE Divers");
+        exchange.setExStudy(exStudy);
+        ExStudyCard exStudyCard = new ExStudyCard();
+        exStudyCard.setName("Magic studycard");
+        ArrayList<ExStudyCard> exStudyCards = new ArrayList<>();
+        exStudyCards.add(exStudyCard);
+        exStudy.setExStudyCards(exStudyCards);
 
-		ExSubject exSubject = new ExSubject();
-		exSubject.setSubjectName("toto001");
-		ArrayList<ExSubject> exSubjects = new ArrayList<>();
-		exSubjects.add(exSubject);
-		exStudy.setExSubjects(exSubjects);
+        ExSubject exSubject = new ExSubject();
+        exSubject.setSubjectName("toto001");
+        ArrayList<ExSubject> exSubjects = new ArrayList<>();
+        exSubjects.add(exSubject);
+        exStudy.setExSubjects(exSubjects);
 
-		ExExamination exExamination = new ExExamination();
-		exExamination.setId(new Long(1));
-		ArrayList<ExExamination> exExaminations = new ArrayList<>();
-		exExaminations.add(exExamination);
-		exSubject.setExExaminations(exExaminations);
+        ExExamination exExamination = new ExExamination();
+        exExamination.setId(new Long(1));
+        ArrayList<ExExamination> exExaminations = new ArrayList<>();
+        exExaminations.add(exExamination);
+        exSubject.setExExaminations(exExaminations);
 
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonStr = mapper.writeValueAsString(exchange);
-		System.out.println(jsonStr);
-	}
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonStr = mapper.writeValueAsString(exchange);
+        System.out.println(jsonStr);
+    }
 
 }

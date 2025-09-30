@@ -26,42 +26,42 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class MrDatasetMetadata extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 2523777086183952849L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 2523777086183952849L;
 
-	/** MR Dataset Nature. */
-	private Integer mrDatasetNature;
+    /** MR Dataset Nature. */
+    private Integer mrDatasetNature;
 
-	public MrDatasetMetadata() {
+    public MrDatasetMetadata() {
 
-	}
-	public MrDatasetMetadata(MrDatasetMetadata mrdsm) {
-		if (mrdsm != null && mrdsm.getMrDatasetNature() != null)
-			this.mrDatasetNature = mrdsm.getMrDatasetNature().getId();
-		else {
-			this.mrDatasetNature = null;
-		}
-	}
+    }
+    public MrDatasetMetadata(MrDatasetMetadata mrdsm) {
+        if (mrdsm != null && mrdsm.getMrDatasetNature() != null)
+            this.mrDatasetNature = mrdsm.getMrDatasetNature().getId();
+        else {
+            this.mrDatasetNature = null;
+        }
+    }
 
-	/**
-	 * @return the mrDatasetNature
-	 */
-	public MrDatasetNature getMrDatasetNature() {
-		return MrDatasetNature.getNature(mrDatasetNature);
-	}
+    /**
+     * @return the mrDatasetNature
+     */
+    public MrDatasetNature getMrDatasetNature() {
+        return MrDatasetNature.getNature(mrDatasetNature);
+    }
 
-	/**
-	 * @param mrDatasetNature
-	 *            the mrDatasetNature to set
-	 */
-	public void setMrDatasetNature(MrDatasetNature mrDatasetNature) {
-		if (mrDatasetNature == null) {
-			this.mrDatasetNature = null;
-		} else {
-			this.mrDatasetNature = mrDatasetNature.getId();
-		}
-	}
+    /**
+     * @param mrDatasetNature
+     *            the mrDatasetNature to set
+     */
+    public void setMrDatasetNature(MrDatasetNature mrDatasetNature) {
+        if (mrDatasetNature == null) {
+            this.mrDatasetNature = null;
+        } else {
+            this.mrDatasetNature = mrDatasetNature.getId();
+        }
+    }
 
 }

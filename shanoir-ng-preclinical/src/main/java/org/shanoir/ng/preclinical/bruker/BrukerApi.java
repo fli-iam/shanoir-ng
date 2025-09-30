@@ -29,14 +29,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "bruker")
 public interface BrukerApi {
 
-	@Operation(summary = "Upload bruker zip archive file", description = "")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns "),
-			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
-			@ApiResponse(responseCode = "406", description = "Not valid bruker file"),
-			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
-	@PostMapping(value = "/bruker/upload", produces = { "application/json" }, consumes = {
-			MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
-	ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
-			throws RestServiceException;
+    @Operation(summary = "Upload bruker zip archive file", description = "")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns "),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+            @ApiResponse(responseCode = "406", description = "Not valid bruker file"),
+            @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PostMapping(value = "/bruker/upload", produces = { "application/json" }, consumes = {
+            MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
+    ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
+            throws RestServiceException;
 
 }

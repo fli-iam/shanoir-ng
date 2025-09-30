@@ -16,11 +16,11 @@ package org.shanoir.ng.shared.email;
 
 public class DuaDraftWrapper {
 
-	private String recipienEmailAddress;
+    private String recipienEmailAddress;
 
-	private Long senderUserId;
+    private Long senderUserId;
 
-	private String duaLink;
+    private String duaLink;
 
     private String studyName;
 

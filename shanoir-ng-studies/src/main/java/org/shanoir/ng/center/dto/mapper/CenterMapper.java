@@ -36,65 +36,65 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 @Mapper(componentModel = "spring", uses = { AcquisitionEquipmentMapper.class, StudyCenterMapper.class })
 public interface CenterMapper {
 
-	@Named("centersToCenterDTOsFlat")
-	@IterableMapping(qualifiedByName = "centerToCenterDTOFlat")
-	List<CenterDTO> centersToCenterDTOsFlat(List<Center> centers);
+    @Named("centersToCenterDTOsFlat")
+    @IterableMapping(qualifiedByName = "centerToCenterDTOFlat")
+    List<CenterDTO> centersToCenterDTOsFlat(List<Center> centers);
 
-	@Named("centerToCenterDTOFlat")
-	@Mappings({
-		@Mapping(target = "acquisitionEquipments", ignore = true),
-		@Mapping(target = "compatible", ignore = true)
-	})
-	CenterDTO centerToCenterDTOFlat(Center center);
+    @Named("centerToCenterDTOFlat")
+    @Mappings({
+        @Mapping(target = "acquisitionEquipments", ignore = true),
+        @Mapping(target = "compatible", ignore = true)
+    })
+    CenterDTO centerToCenterDTOFlat(Center center);
 
-	@Named("centersToCenterDTOsEquipments")
-	@IterableMapping(qualifiedByName = "centerToCenterDTOEquipments")
-	List<CenterDTO> centersToCenterDTOsEquipments(List<Center> centers);
+    @Named("centersToCenterDTOsEquipments")
+    @IterableMapping(qualifiedByName = "centerToCenterDTOEquipments")
+    List<CenterDTO> centersToCenterDTOsEquipments(List<Center> centers);
 
-	@Named("centerToCenterDTOEquipments")
-	@Mappings({
-		@Mapping(target = "studyCenterList", ignore = true),
-		@Mapping(target = "compatible", ignore = true)
-	})
-	CenterDTO centerToCenterDTOEquipments(Center center);
+    @Named("centerToCenterDTOEquipments")
+    @Mappings({
+        @Mapping(target = "studyCenterList", ignore = true),
+        @Mapping(target = "compatible", ignore = true)
+    })
+    CenterDTO centerToCenterDTOEquipments(Center center);
 
-	@Named("centersToCenterDTOsStudyCenters")
-	@IterableMapping(qualifiedByName = "centerToCenterDTOStudyCenters")
-	List<CenterDTO> centersToCenterDTOsStudyCenters(List<Center> centers);
+    @Named("centersToCenterDTOsStudyCenters")
+    @IterableMapping(qualifiedByName = "centerToCenterDTOStudyCenters")
+    List<CenterDTO> centersToCenterDTOsStudyCenters(List<Center> centers);
 
-	@Named("centerToCenterDTOStudyCenters")
-	@Mappings({
-		@Mapping(target = "acquisitionEquipments", ignore = true),
-		@Mapping(target = "compatible", ignore = true)
-	})
-	CenterDTO centerToCenterDTOStudyCenters(Center center);
+    @Named("centerToCenterDTOStudyCenters")
+    @Mappings({
+        @Mapping(target = "acquisitionEquipments", ignore = true),
+        @Mapping(target = "compatible", ignore = true)
+    })
+    CenterDTO centerToCenterDTOStudyCenters(Center center);
 
-	@Named("centersToCenterDTOsFull")
-	@IterableMapping(qualifiedByName = "centerToCenterDTOFull")
-	List<CenterDTO> centersToCenterDTOsFull(List<Center> centers);
+    @Named("centersToCenterDTOsFull")
+    @IterableMapping(qualifiedByName = "centerToCenterDTOFull")
+    List<CenterDTO> centersToCenterDTOsFull(List<Center> centers);
 
-	@Named("centerToCenterDTOFull")
-	@Mappings({
-		@Mapping(target = "compatible", ignore = true)
-	})
-	CenterDTO centerToCenterDTOFull(Center center);
+    @Named("centerToCenterDTOFull")
+    @Mappings({
+        @Mapping(target = "compatible", ignore = true)
+    })
+    CenterDTO centerToCenterDTOFull(Center center);
 
-	/**
-	 * Map list of @Center to list of @IdNameDTO.
-	 *
-	 * @param centers
-	 *            list of centers.
-	 * @return list of centers DTO.
-	 */
-	List<IdName> centersToIdNameDTOs(List<Center> centers);
+    /**
+     * Map list of @Center to list of @IdNameDTO.
+     *
+     * @param centers
+     *            list of centers.
+     * @return list of centers DTO.
+     */
+    List<IdName> centersToIdNameDTOs(List<Center> centers);
 
-	/**
-	 * Map a @Center to a @IdNameDTO.
-	 *
-	 * @param center
-	 *            center to map.
-	 * @return center DTO.
-	 */
-	IdName centerToIdNameDTO(Center center);
+    /**
+     * Map a @Center to a @IdNameDTO.
+     *
+     * @param center
+     *            center to map.
+     * @return center DTO.
+     */
+    IdName centerToIdNameDTO(Center center);
 
 }

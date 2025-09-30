@@ -38,36 +38,36 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CoilRepositoryTest {
 
-	private static final String COIL_TEST_1_NAME = "coil 1";
-	private static final Long COIL_TEST_1_ID = 1L;
+    private static final String COIL_TEST_1_NAME = "coil 1";
+    private static final Long COIL_TEST_1_ID = 1L;
 
-	@Autowired
-	private CoilRepository repository;
+    @Autowired
+    private CoilRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<Coil> coilsDb = repository.findAll();
-		assertThat(coilsDb).isNotNull();
-		int nbCoils = 0;
-		Iterator<Coil> coilsIt = coilsDb.iterator();
-		while (coilsIt.hasNext()) {
-			coilsIt.next();
-			nbCoils++;
-		}
-		assertThat(nbCoils).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<Coil> coilsDb = repository.findAll();
+        assertThat(coilsDb).isNotNull();
+        int nbCoils = 0;
+        Iterator<Coil> coilsIt = coilsDb.iterator();
+        while (coilsIt.hasNext()) {
+            coilsIt.next();
+            nbCoils++;
+        }
+        assertThat(nbCoils).isEqualTo(3);
+    }
 
-	@Test
-	public void findByNameTest() throws Exception {
-		Optional<Coil> coilDb = repository.findByName(COIL_TEST_1_NAME);
-		assertTrue(coilDb.isPresent());
-		assertThat(coilDb.get().getId()).isEqualTo(COIL_TEST_1_ID);
-	}
+    @Test
+    public void findByNameTest() throws Exception {
+        Optional<Coil> coilDb = repository.findByName(COIL_TEST_1_NAME);
+        assertTrue(coilDb.isPresent());
+        assertThat(coilDb.get().getId()).isEqualTo(COIL_TEST_1_ID);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		Coil coilDb = repository.findById(COIL_TEST_1_ID).orElseThrow();
-		assertThat(coilDb.getName()).isEqualTo(COIL_TEST_1_NAME);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        Coil coilDb = repository.findById(COIL_TEST_1_ID).orElseThrow();
+        assertThat(coilDb.getName()).isEqualTo(COIL_TEST_1_NAME);
+    }
 
 }

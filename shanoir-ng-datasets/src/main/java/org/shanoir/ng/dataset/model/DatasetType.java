@@ -16,46 +16,46 @@ package org.shanoir.ng.dataset.model;
 
 public enum DatasetType {
 
-	CALIBRATION(Names.CALIBRATION),
-	CT(Names.CT),
-	EEG(Names.EEG),
-	MEG(Names.MEG),
-	MESH(Names.MESH),
-	MR(Names.MR),
-	GENERIC(Names.GENERIC),
-	PARAMETER_QUANTIFICATION(Names.PARAMETER_QUANTIFICATION),
-	PET(Names.PET),
-	REGISTRATION(Names.REGISTRATION),
-	SEGMENTATION(Names.SEGMENTATION),
-	SPECT(Names.SPECT),
-	STATISTICAL(Names.STATISTICAL),
-	TEMPLATE(Names.TEMPLATE),
-	BIDS(Names.BIDS),
-	MEASUREMENT(Names.MEASUREMENT),
-	XA(Names.XA);
+    CALIBRATION(Names.CALIBRATION),
+    CT(Names.CT),
+    EEG(Names.EEG),
+    MEG(Names.MEG),
+    MESH(Names.MESH),
+    MR(Names.MR),
+    GENERIC(Names.GENERIC),
+    PARAMETER_QUANTIFICATION(Names.PARAMETER_QUANTIFICATION),
+    PET(Names.PET),
+    REGISTRATION(Names.REGISTRATION),
+    SEGMENTATION(Names.SEGMENTATION),
+    SPECT(Names.SPECT),
+    STATISTICAL(Names.STATISTICAL),
+    TEMPLATE(Names.TEMPLATE),
+    BIDS(Names.BIDS),
+    MEASUREMENT(Names.MEASUREMENT),
+    XA(Names.XA);
 
-	// this is a hack to use the enum as string values in @JsonSubTypes as it takes no java expressions
-	public class Names {
-		public static final String CALIBRATION = "Calibration";
-		public static final String CT = "Ct";
-		public static final String EEG = "Eeg";
-		public static final String MEG = "Meg";
-		public static final String MESH = "Mesh";
-		public static final String MR = "Mr";
-		public static final String GENERIC = "Generic";
-		public static final String PARAMETER_QUANTIFICATION = "ParameterQuantification";
-		public static final String PET = "Pet";
-		public static final String REGISTRATION = "Registration";
-		public static final String SEGMENTATION = "Segmentation";
-		public static final String SPECT = "Spect";
-		public static final String STATISTICAL = "Statistical";
-		public static final String TEMPLATE = "Template";
-		public static final String BIDS = "BIDS";
-		public static final String MEASUREMENT = "Measurement";
-		public static final String XA = "Xa";
+    // this is a hack to use the enum as string values in @JsonSubTypes as it takes no java expressions
+    public class Names {
+        public static final String CALIBRATION = "Calibration";
+        public static final String CT = "Ct";
+        public static final String EEG = "Eeg";
+        public static final String MEG = "Meg";
+        public static final String MESH = "Mesh";
+        public static final String MR = "Mr";
+        public static final String GENERIC = "Generic";
+        public static final String PARAMETER_QUANTIFICATION = "ParameterQuantification";
+        public static final String PET = "Pet";
+        public static final String REGISTRATION = "Registration";
+        public static final String SEGMENTATION = "Segmentation";
+        public static final String SPECT = "Spect";
+        public static final String STATISTICAL = "Statistical";
+        public static final String TEMPLATE = "Template";
+        public static final String BIDS = "BIDS";
+        public static final String MEASUREMENT = "Measurement";
+        public static final String XA = "Xa";
     }
 
-	private final String label;
+    private final String label;
 
     private DatasetType(String label) {
         this.label = label;

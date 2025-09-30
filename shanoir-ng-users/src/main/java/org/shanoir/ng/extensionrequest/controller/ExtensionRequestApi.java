@@ -30,17 +30,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/extensionrequest")
 public interface ExtensionRequestApi {
 
-	@Operation(summary = "", description = "Requests a date extension for current user")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "request ok"),
-			@ApiResponse(responseCode = "400", description = "user not found"),
-			@ApiResponse(responseCode = "406", description = "user enabled or already under extension"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PostMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" })
-	ResponseEntity<Void> requestExtension(
-			@Parameter(name = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
+    @Operation(summary = "", description = "Requests a date extension for current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "request ok"),
+            @ApiResponse(responseCode = "400", description = "user not found"),
+            @ApiResponse(responseCode = "406", description = "user enabled or already under extension"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
+    ResponseEntity<Void> requestExtension(
+            @Parameter(name = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
 
 }

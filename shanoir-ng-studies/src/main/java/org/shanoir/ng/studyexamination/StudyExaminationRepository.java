@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface StudyExaminationRepository extends CrudRepository<StudyExamination, Long> {
 
-	public Iterable<StudyExamination> findByCenterId(Long centerId);
+    public Iterable<StudyExamination> findByCenterId(Long centerId);
 
     public void deleteBySubject(Subject subject);
 

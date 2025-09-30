@@ -34,9 +34,9 @@ import java.util.List;
 @JsonTypeName("AcqMetadataCondOnDatasets")
 public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AcqMetadataCondOnDatasets.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AcqMetadataCondOnDatasets.class);
 
-	@Override
+    @Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
     }

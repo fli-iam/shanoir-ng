@@ -2,60 +2,60 @@ package org.shanoir.ng.dataset.modality;
 
 public enum BidsDataType {
 
-	/* task based and resting state functional MRI.*/
-	FUNC("func"),
+    /* task based and resting state functional MRI.*/
+    FUNC("func"),
 
-	/* diffusion weighted imaging.*/
-	DWI("dwi"),
+    /* diffusion weighted imaging.*/
+    DWI("dwi"),
 
-	/* field inhomogeneity mapping data such as field maps.*/
-	FMAP("fmap"),
+    /* field inhomogeneity mapping data such as field maps.*/
+    FMAP("fmap"),
 
-	/* structural imaging such as T1, T2, PD, and so on.*/
-	ANAT("anat"),
+    /* structural imaging such as T1, T2, PD, and so on.*/
+    ANAT("anat"),
 
-	/* perfusion.*/
-	PERF("perf"),
+    /* perfusion.*/
+    PERF("perf"),
 
-	/* ct.*/
-	CT("ct"),
+    /* ct.*/
+    CT("ct"),
 
-	/* MEG.*/
-	MEG("meg"),
+    /* MEG.*/
+    MEG("meg"),
 
-	/* EEG.*/
-	EEG("eeg"),
+    /* EEG.*/
+    EEG("eeg"),
 
-	/* IEEG.*/
-	IEEG("ieeg"),
+    /* IEEG.*/
+    IEEG("ieeg"),
 
-	/* Behavioural.*/
-	BEH("beh"),
+    /* Behavioural.*/
+    BEH("beh"),
 
-	/* PET.*/
-	PET("pet"),
+    /* PET.*/
+    PET("pet"),
 
-	/* Microscopy.*/
-	MICR("micr"),
+    /* Microscopy.*/
+    MICR("micr"),
 
-	/* Near-Infrared Spectroscopy */
-	NIRS("nirs"),
+    /* Near-Infrared Spectroscopy */
+    NIRS("nirs"),
 
-	/* X-Ray Angiography */
-	XA("xa");
+    /* X-Ray Angiography */
+    XA("xa");
 
-	private String folderName;
+    private String folderName;
 
-	BidsDataType(String string) {
-		this.setFolderName(string);
-	}
+    BidsDataType(String string) {
+        this.setFolderName(string);
+    }
 
-	public String getFolderName() {
-		return folderName;
-	}
+    public String getFolderName() {
+        return folderName;
+    }
 
-	public void setFolderName(String folderName) {
-		this.folderName = folderName;
-	}
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
+    }
 
 }

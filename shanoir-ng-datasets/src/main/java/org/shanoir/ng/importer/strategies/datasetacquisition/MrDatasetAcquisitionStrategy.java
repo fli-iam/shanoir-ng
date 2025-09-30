@@ -56,14 +56,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
 
-	@Autowired
-	private MrProtocolStrategy mrProtocolStrategy;
+    @Autowired
+    private MrProtocolStrategy mrProtocolStrategy;
 
-	@Autowired
-	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+    @Autowired
+    private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
     private static final Map<String, BidsDataType> DATA_TYPE_MAPPING;
     static {
@@ -81,51 +81,51 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         DATA_TYPE_MAPPING = Collections.unmodifiableMap(aMap);
     }
 
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		mrDatasetAcquisition.setUsername(importJob.getUsername());
-		mrDatasetAcquisition.setImportDate(LocalDate.now());
-		mrDatasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
-		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		mrDatasetAcquisition.setMrProtocol(mrProtocol);
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
+        LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
+        mrDatasetAcquisition.setUsername(importJob.getUsername());
+        mrDatasetAcquisition.setImportDate(LocalDate.now());
+        mrDatasetAcquisition.setRank(rank);
+        importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+        mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
+        MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
+        mrDatasetAcquisition.setMrProtocol(mrProtocol);
 
-		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(mrDatasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		mrDatasetAcquisition.setDatasets(genericizedList);
+        DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(mrDatasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        mrDatasetAcquisition.setDatasets(genericizedList);
 
-		// total acquisition time
-		if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
-			Double totalAcquisitionTime = null;
-			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
-				Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
-				totalAcquisitionTime = Double.valueOf(duration.toMillis());
-				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
-			} else {
-				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
-			}
-		}
+        // total acquisition time
+        if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
+            Double totalAcquisitionTime = null;
+            if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
+                Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
+                totalAcquisitionTime = Double.valueOf(duration.toMillis());
+                mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
+            } else {
+                mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
+            }
+        }
 
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
-		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
+                dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+        mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 
-		// Can be overridden by study cards
-		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);
-		if (imageType != null && DATA_TYPE_MAPPING.get(imageType) != null) {
-			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
-				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-			}
-			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(DATA_TYPE_MAPPING.get(imageType));
-		}
-		return mrDatasetAcquisition;
-	}
+        // Can be overridden by study cards
+        String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);
+        if (imageType != null && DATA_TYPE_MAPPING.get(imageType) != null) {
+            if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
+                mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+            }
+            mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(DATA_TYPE_MAPPING.get(imageType));
+        }
+        return mrDatasetAcquisition;
+    }
 }

@@ -33,26 +33,26 @@ import org.springframework.data.repository.query.Param;
  */
 public interface DatasetAcquisitionRepository extends PagingAndSortingRepository<DatasetAcquisition, Long>, CrudRepository<DatasetAcquisition, Long>, DatasetAcquisitionRepositoryCustom  {
 
-	List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
+    List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
 
-	Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
+    Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
 
-	List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
+    List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
 
     boolean existsByStudyCard_Id(Long studyCardId);
 
-	List<DatasetAcquisition> findBySourceId(Long sourceId);
-	DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
+    List<DatasetAcquisition> findBySourceId(Long sourceId);
+    DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
-	@Query("""
-		SELECT DISTINCT
-			da.id              AS id,
-			ex.study.id        AS studyId,
-			ex.centerId        AS centerId
-		FROM DatasetAcquisition da
-			LEFT JOIN da.examination ex
-		WHERE da.id IN :acquisitionIds
-    		""")
+    @Query("""
+        SELECT DISTINCT
+            da.id              AS id,
+            ex.study.id        AS studyId,
+            ex.centerId        AS centerId
+        FROM DatasetAcquisition da
+            LEFT JOIN da.examination ex
+        WHERE da.id IN :acquisitionIds
+            """)
     List<DatasetAcquisitionForRightsProjection> findAllForRightsById(@Param("acquisitionIds") List<Long> acquisitionIds);
 }
 

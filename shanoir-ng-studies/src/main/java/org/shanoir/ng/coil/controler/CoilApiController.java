@@ -43,95 +43,95 @@ import jakarta.validation.Valid;
 @Controller
 public class CoilApiController implements CoilApi {
 
-	@Autowired
-	private CoilMapper coilMapper;
+    @Autowired
+    private CoilMapper coilMapper;
 
-	@Autowired
-	private CoilService coilService;
+    @Autowired
+    private CoilService coilService;
 
-	@Autowired
-	private ShanoirEventService eventService;
+    @Autowired
+    private ShanoirEventService eventService;
 
-	@Override
-	public ResponseEntity<Void> deleteCoil(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
-			throws RestServiceException {
-		try {
-			coilService.deleteById(coilId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @Override
+    public ResponseEntity<Void> deleteCoil(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
+            throws RestServiceException {
+        try {
+            coilService.deleteById(coilId);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-	@Override
-	public ResponseEntity<CoilDTO> findCoilById(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
-		final Coil coil = coilService.findById(coilId).orElse(null);
-		if (coil == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(coilMapper.coilToCoilDTO(coil), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<CoilDTO> findCoilById(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
+        final Coil coil = coilService.findById(coilId).orElse(null);
+        if (coil == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(coilMapper.coilToCoilDTO(coil), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
-		final List<Coil> coils = coilService.findByCenterId(centerId);
-		if (coils.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
+            @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+        final List<Coil> coils = coilService.findByCenterId(centerId);
+        if (coils.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<CoilDTO>> findCoils() {
-		final List<Coil> coils = coilService.findAll();
-		if (coils.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<CoilDTO>> findCoils() {
+        final List<Coil> coils = coilService.findAll();
+        if (coils.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<CoilDTO> saveNewCoil(
-			@Parameter(description = "coil to create", required = true) @Valid @RequestBody Coil coil,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<CoilDTO> saveNewCoil(
+            @Parameter(description = "coil to create", required = true) @Valid @RequestBody Coil coil,
+            final BindingResult result) throws RestServiceException {
 
-		/* Validation */
-		validate(result);
+        /* Validation */
+        validate(result);
 
-		/* Save coil in db. */
-		final Coil createdCoil = coilService.create(coil);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_COIL_EVENT, createdCoil.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(coilMapper.coilToCoilDTO(createdCoil), HttpStatus.OK);
-	}
+        /* Save coil in db. */
+        final Coil createdCoil = coilService.create(coil);
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_COIL_EVENT, createdCoil.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        return new ResponseEntity<>(coilMapper.coilToCoilDTO(createdCoil), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updateCoil(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
-			@Parameter(description = "coil to update", required = true) @Valid @RequestBody Coil coil,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> updateCoil(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
+            @Parameter(description = "coil to update", required = true) @Valid @RequestBody Coil coil,
+            final BindingResult result) throws RestServiceException {
 
-		validate(result);
-		try {
-			coilService.update(coil);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        validate(result);
+        try {
+            coilService.update(coil);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 
-	private void validate(BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
+    private void validate(BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
 }

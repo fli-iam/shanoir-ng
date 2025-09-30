@@ -16,74 +16,74 @@ import org.shanoir.uploader.upload.UploadState;
 @XmlRootElement
 public class NominativeDataUploadJob {
 
-	private String patientPseudonymusHash;
+    private String patientPseudonymusHash;
 
-	private String patientName;
+    private String patientName;
 
-	private String IPP;
+    private String IPP;
 
-	private String studyDate;
+    private String studyDate;
 
-	private String mriSerialNumber;
+    private String mriSerialNumber;
 
-	private String uploadPercentage;
+    private String uploadPercentage;
 
-	private UploadState uploadState;
+    private UploadState uploadState;
 
-	public String getPatientPseudonymusHash() {
-		return patientPseudonymusHash;
-	}
+    public String getPatientPseudonymusHash() {
+        return patientPseudonymusHash;
+    }
 
-	public void setPatientPseudonymusHash(String patientPseudonymusHash) {
-		this.patientPseudonymusHash = patientPseudonymusHash;
-	}
+    public void setPatientPseudonymusHash(String patientPseudonymusHash) {
+        this.patientPseudonymusHash = patientPseudonymusHash;
+    }
 
-	public String getPatientName() {
-		return patientName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 
-	public String getIPP() {
-		return IPP;
-	}
+    public String getIPP() {
+        return IPP;
+    }
 
-	public void setIPP(String iPP) {
-		IPP = iPP;
-	}
+    public void setIPP(String iPP) {
+        IPP = iPP;
+    }
 
-	public String getStudyDate() {
-		return studyDate;
-	}
+    public String getStudyDate() {
+        return studyDate;
+    }
 
-	public void setStudyDate(String studyDate) {
-		this.studyDate = studyDate;
-	}
+    public void setStudyDate(String studyDate) {
+        this.studyDate = studyDate;
+    }
 
-	public String getMriSerialNumber() {
-		return mriSerialNumber;
-	}
+    public String getMriSerialNumber() {
+        return mriSerialNumber;
+    }
 
-	public void setMriSerialNumber(String mriSerialNumber) {
-		this.mriSerialNumber = mriSerialNumber;
-	}
+    public void setMriSerialNumber(String mriSerialNumber) {
+        this.mriSerialNumber = mriSerialNumber;
+    }
 
-	public String getUploadPercentage() {
-		return uploadPercentage;
-	}
+    public String getUploadPercentage() {
+        return uploadPercentage;
+    }
 
-	public void setUploadPercentage(String uploadPercentage) {
-		this.uploadPercentage = uploadPercentage;
-	}
+    public void setUploadPercentage(String uploadPercentage) {
+        this.uploadPercentage = uploadPercentage;
+    }
 
-	public UploadState getUploadState() {
-		return uploadState;
-	}
+    public UploadState getUploadState() {
+        return uploadState;
+    }
 
-	public void setUploadState(UploadState uploadState) {
-		this.uploadState = uploadState;
-	}
+    public void setUploadState(UploadState uploadState) {
+        this.uploadState = uploadState;
+    }
 
 }

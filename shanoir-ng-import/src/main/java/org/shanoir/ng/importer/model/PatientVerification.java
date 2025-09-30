@@ -42,13 +42,13 @@ public class PatientVerification {
         this.birthDate = birthDate;
     }
 
-	public String[] displayPatientVerification() {
-		return new String[] {
-				firstName,
-				lastName,
-				birthName,
-				birthDate
-		};
-	}
+    public String[] displayPatientVerification() {
+        return new String[] {
+                firstName,
+                lastName,
+                birthName,
+                birthDate
+        };
+    }
 
 }

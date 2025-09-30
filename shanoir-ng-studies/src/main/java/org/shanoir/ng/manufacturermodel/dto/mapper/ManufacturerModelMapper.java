@@ -31,23 +31,23 @@ import org.shanoir.ng.shared.core.model.IdName;
 @Mapper(componentModel = "spring")
 public interface ManufacturerModelMapper {
 
-	/**
-	 * Map a @ManufacturerModel to a @IdNameDTO.
-	 *
-	 * @param manufacturerModel
-	 *            manufacturer model to map.
-	 * @return manufacturer model DTO.
-	 */
-	IdName manufacturerModelToIdNameDTO(ManufacturerModel manufacturerModel);
+    /**
+     * Map a @ManufacturerModel to a @IdNameDTO.
+     *
+     * @param manufacturerModel
+     *            manufacturer model to map.
+     * @return manufacturer model DTO.
+     */
+    IdName manufacturerModelToIdNameDTO(ManufacturerModel manufacturerModel);
 
-	/**
-	 * Map a @ManufacturerModel to a @ManufacturerModelDTO.
-	 *
-	 * @param manufacturerModel
-	 *            manufacturer model to map.
-	 * @return manufacturer model DTO.
-	 */
-	@Mappings({ @Mapping(source = "manufacturer.name", target = "manufacturerName")})
-	ManufacturerModelDTO manufacturerModelToManufacturerModelDTO(ManufacturerModel manufacturerModel);
+    /**
+     * Map a @ManufacturerModel to a @ManufacturerModelDTO.
+     *
+     * @param manufacturerModel
+     *            manufacturer model to map.
+     * @return manufacturer model DTO.
+     */
+    @Mappings({ @Mapping(source = "manufacturer.name", target = "manufacturerName")})
+    ManufacturerModelDTO manufacturerModelToManufacturerModelDTO(ManufacturerModel manufacturerModel);
 
 }

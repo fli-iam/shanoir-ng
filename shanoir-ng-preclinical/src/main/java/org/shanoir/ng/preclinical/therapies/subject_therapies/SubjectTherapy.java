@@ -43,200 +43,200 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({ "_links", "therapy", "startDate", "endDate", "dose", "frequency", "animalSubject", "molecule" })
 public class SubjectTherapy extends HalEntity {
 
-	@JsonProperty("animalSubject")
-	@ManyToOne
-	@NotNull
-	@JsonIgnore
-	@JsonManagedReference
-	private AnimalSubject animalSubject = null;
+    @JsonProperty("animalSubject")
+    @ManyToOne
+    @NotNull
+    @JsonIgnore
+    @JsonManagedReference
+    private AnimalSubject animalSubject = null;
 
-	@JsonProperty("therapy")
-	@ManyToOne
-	@NotNull
-	private Therapy therapy = null;
+    @JsonProperty("therapy")
+    @ManyToOne
+    @NotNull
+    private Therapy therapy = null;
 
-	@JsonProperty("startDate")
-	private Date startDate = null;
+    @JsonProperty("startDate")
+    private Date startDate = null;
 
-	@JsonProperty("endDate")
-	private Date endDate = null;
+    @JsonProperty("endDate")
+    private Date endDate = null;
 
-	@JsonProperty("dose")
-	private Double dose;
+    @JsonProperty("dose")
+    private Double dose;
 
-	@JsonProperty("dose_unit")
-	// @RefValueExists
-	@ManyToOne
-	private Reference doseUnit = null;
+    @JsonProperty("dose_unit")
+    // @RefValueExists
+    @ManyToOne
+    private Reference doseUnit = null;
 
-	@JsonProperty("frequency")
-	private String frequency;
+    @JsonProperty("frequency")
+    private String frequency;
 
-	@JsonProperty("molecule")
-	private String molecule;
+    @JsonProperty("molecule")
+    private String molecule;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/therapy/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/therapy/" + getId());
+    }
 
-	public SubjectTherapy subject(final AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-		return this;
-	}
+    public SubjectTherapy subject(final AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public AnimalSubject getAnimalSubject() {
-		return animalSubject;
-	}
+    @Schema(name = "none")
+    public AnimalSubject getAnimalSubject() {
+        return animalSubject;
+    }
 
-	public void setAnimalSubject(final AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-	}
+    public void setAnimalSubject(final AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+    }
 
-	public SubjectTherapy therapy(final Therapy therapy) {
-		this.therapy = therapy;
-		return this;
-	}
+    public SubjectTherapy therapy(final Therapy therapy) {
+        this.therapy = therapy;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Therapy getTherapy() {
-		return therapy;
-	}
+    @Schema(name = "none")
+    public Therapy getTherapy() {
+        return therapy;
+    }
 
-	public void setTherapy(final Therapy therapy) {
-		this.therapy = therapy;
-	}
+    public void setTherapy(final Therapy therapy) {
+        this.therapy = therapy;
+    }
 
-	public SubjectTherapy startDate(final Date startDate) {
-		this.startDate = startDate;
-		return this;
-	}
+    public SubjectTherapy startDate(final Date startDate) {
+        this.startDate = startDate;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Date getStartDate() {
-		return startDate;
-	}
+    @Schema(name = "none")
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public void setStartDate(final Date startDate) {
-		this.startDate = startDate;
-	}
+    public void setStartDate(final Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public SubjectTherapy endDate(final Date endDate) {
-		this.endDate = endDate;
-		return this;
-	}
+    public SubjectTherapy endDate(final Date endDate) {
+        this.endDate = endDate;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Date getEndDate() {
-		return endDate;
-	}
+    @Schema(name = "none")
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public void setEndDate(final Date endDate) {
-		this.endDate = endDate;
-	}
+    public void setEndDate(final Date endDate) {
+        this.endDate = endDate;
+    }
 
-	public SubjectTherapy dose(final Double dose) {
-		this.dose = dose;
-		return this;
-	}
+    public SubjectTherapy dose(final Double dose) {
+        this.dose = dose;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Double getDose() {
-		return dose;
-	}
+    @Schema(name = "none")
+    public Double getDose() {
+        return dose;
+    }
 
-	public void setDose(final Double dose) {
-		this.dose = dose;
-	}
+    public void setDose(final Double dose) {
+        this.dose = dose;
+    }
 
-	public SubjectTherapy doseUnit(final Reference unit) {
-		this.doseUnit = unit;
-		return this;
-	}
+    public SubjectTherapy doseUnit(final Reference unit) {
+        this.doseUnit = unit;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Reference getDoseUnit() {
-		return doseUnit;
-	}
+    @Schema(name = "none")
+    public Reference getDoseUnit() {
+        return doseUnit;
+    }
 
-	public void setDoseUnit(final Reference unit) {
-		this.doseUnit = unit;
-	}
+    public void setDoseUnit(final Reference unit) {
+        this.doseUnit = unit;
+    }
 
-	public SubjectTherapy frequency(final String frequency) {
-		this.frequency = frequency;
-		return this;
-	}
+    public SubjectTherapy frequency(final String frequency) {
+        this.frequency = frequency;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public String getFrequency() {
-		return frequency;
-	}
+    @Schema(name = "none")
+    public String getFrequency() {
+        return frequency;
+    }
 
-	public void setFrequency(final String frequency) {
-		this.frequency = frequency;
-	}
+    public void setFrequency(final String frequency) {
+        this.frequency = frequency;
+    }
 
-	/**
-	 * @return the molecule
-	 */
-	@Schema(name = "none")
-	public String getMolecule() {
-		return molecule;
-	}
+    /**
+     * @return the molecule
+     */
+    @Schema(name = "none")
+    public String getMolecule() {
+        return molecule;
+    }
 
-	/**
-	 * @param molecule the molecule to set
-	 */
-	public void setMolecule(final String molecule) {
-		this.molecule = molecule;
-	}
+    /**
+     * @param molecule the molecule to set
+     */
+    public void setMolecule(final String molecule) {
+        this.molecule = molecule;
+    }
 
-	@Override
-	public boolean equals(final java.lang.Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		SubjectTherapy subjectTherapy = (SubjectTherapy) o;
-		return Objects.equals(this.therapy, subjectTherapy.therapy);
-	}
+    @Override
+    public boolean equals(final java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubjectTherapy subjectTherapy = (SubjectTherapy) o;
+        return Objects.equals(this.therapy, subjectTherapy.therapy);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(therapy);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(therapy);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class SubjectTherapies {\n");
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class SubjectTherapies {\n");
 
-		sb.append("    therapy: ").append(toIndentedString(therapy)).append("\n");
-		sb.append("    dose: ").append(toIndentedString(dose)).append("\n");
-		sb.append("    unit: ").append(toIndentedString(doseUnit)).append("\n");
-		sb.append("    frequency: ").append(toIndentedString(frequency)).append("\n");
-		sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
-		sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
-		sb.append("    molecule: ").append(toIndentedString(molecule)).append("\n");
-		sb.append("}");
-		return sb.toString();
-	}
+        sb.append("    therapy: ").append(toIndentedString(therapy)).append("\n");
+        sb.append("    dose: ").append(toIndentedString(dose)).append("\n");
+        sb.append("    unit: ").append(toIndentedString(doseUnit)).append("\n");
+        sb.append("    frequency: ").append(toIndentedString(frequency)).append("\n");
+        sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
+        sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+        sb.append("    molecule: ").append(toIndentedString(molecule)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
 
-	/**
-	 * Convert the given object to string with each line indented by 4 spaces
-	 * (except the first line).
-	 */
-	private String toIndentedString(final java.lang.Object o) {
-		if (o == null) {
-			return "null";
-		}
-		return o.toString().replace("\n", "\n    ");
-	}
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(final java.lang.Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
 }

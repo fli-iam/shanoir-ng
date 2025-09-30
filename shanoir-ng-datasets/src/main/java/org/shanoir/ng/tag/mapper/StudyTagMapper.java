@@ -10,11 +10,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StudyTagMapper {
 
-	List<StudyTagDTO> studyTagListToStudyTagDTOList(List<StudyTag> studyTags);
+    List<StudyTagDTO> studyTagListToStudyTagDTOList(List<StudyTag> studyTags);
 
-	StudyTagDTO studyTagToStudyTagDTO(StudyTag studyTag);
+    StudyTagDTO studyTagToStudyTagDTO(StudyTag studyTag);
 
-	List<StudyTag> studyTagDTOListToStudyTagList(List<StudyTagDTO> dtos);
+    List<StudyTag> studyTagDTOListToStudyTagList(List<StudyTagDTO> dtos);
 
-	StudyTag studyTagDTOToStudyTag(StudyTagDTO dto);
+    StudyTag studyTagDTOToStudyTag(StudyTagDTO dto);
 }

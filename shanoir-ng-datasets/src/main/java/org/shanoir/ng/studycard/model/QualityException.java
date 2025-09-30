@@ -34,11 +34,11 @@ public class QualityException extends Exception {
         this.qualityResult = qualityResult;
     }
 
-	public QualityException(Examination examination, QualityCardResult qualityResult, Throwable cause) {
-		super(cause);
-		this.examination = examination;
-		this.qualityResult = qualityResult;
-	}
+    public QualityException(Examination examination, QualityCardResult qualityResult, Throwable cause) {
+        super(cause);
+        this.examination = examination;
+        this.qualityResult = qualityResult;
+    }
 
 
     public Examination getExamination() {

@@ -36,179 +36,179 @@ import java.util.regex.Pattern;
 @Service
 public class RabbitMQStudiesService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
 
-	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
+    private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
-	@Autowired
-	private StudyRepository studyRepo;
+    @Autowired
+    private StudyRepository studyRepo;
 
-	@Autowired
-	private StudyService studyService;
+    @Autowired
+    private StudyService studyService;
 
-	@Autowired
-	private SubjectRepository subjectRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
-	@Autowired
-	private DataUserAgreementService dataUserAgreementService;
+    @Autowired
+    private DataUserAgreementService dataUserAgreementService;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	ShanoirEventService eventService;
-	/**
-	 * Receives a shanoirEvent as a json object, concerning an examination creation
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
-			)
-	@RabbitHandler
-	@Transactional
-	public void linkExamination(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
-			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = event.getStudyId();
-			String message = event.getMessage();
-			Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
-			Matcher mat = pat.matcher(message);
+    @Autowired
+    ShanoirEventService eventService;
+    /**
+     * Receives a shanoirEvent as a json object, concerning an examination creation
+     * @param commandArrStr the task as a json string.
+     */
+    @RabbitListener(bindings = @QueueBinding(
+            key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
+            value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
+            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+            autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
+            )
+    @RabbitHandler
+    @Transactional
+    public void linkExamination(final String eventStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+            Long examinationId = Long.valueOf(event.getObjectId());
+            Long studyId = event.getStudyId();
+            String message = event.getMessage();
+            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Matcher mat = pat.matcher(message);
 
-			Long centerId = null;
-			Long subjectId = null;
-			if (mat.matches()) {
-				centerId = Long.valueOf(mat.group(1));
-				subjectId = Long.valueOf(mat.group(2));
-			} else {
-				LOG.error("Something wrong happend while updating study examination list.");
-				throw new ShanoirException("Could not read subject ID and center ID from event message");
-			}
+            Long centerId = null;
+            Long subjectId = null;
+            if (mat.matches()) {
+                centerId = Long.valueOf(mat.group(1));
+                subjectId = Long.valueOf(mat.group(2));
+            } else {
+                LOG.error("Something wrong happend while updating study examination list.");
+                throw new ShanoirException("Could not read subject ID and center ID from event message");
+            }
 
-			this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
+            this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
 
-		} catch (Exception e) {
-			LOG.error("Could not index examination on given study ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
-		}
-	}
+        } catch (Exception e) {
+            LOG.error("Could not index examination on given study ", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+        }
+    }
 
-	/**
-	 * Receives a shanoirEvent as a json object, concerning an examination creation
-	 * @param eventStr the event as a json string.
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public void deleteExaminationStudy(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
-			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = Long.valueOf(event.getStudyId());
-			this.studyService.deleteExamination(examinationId, studyId);
-		} catch (Exception e) {
-			LOG.error("Could not index examination on given study ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
-		}
-	}
+    /**
+     * Receives a shanoirEvent as a json object, concerning an examination creation
+     * @param eventStr the event as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public void deleteExaminationStudy(final String eventStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+            Long examinationId = Long.valueOf(event.getObjectId());
+            Long studyId = Long.valueOf(event.getStudyId());
+            this.studyService.deleteExamination(examinationId, studyId);
+        } catch (Exception e) {
+            LOG.error("Could not index examination on given study ", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public String getStudyName(final long studyId) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		Study study = this.studyRepo.findById(studyId).get();
-		if (study != null) {
-			return study.getName();
-		}
-		return null;
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyName(final long studyId) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        Study study = this.studyRepo.findById(studyId).get();
+        if (study != null) {
+            return study.getName();
+        }
+        return null;
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public String getStudyAnonymisationProfile(final long studyId) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		Study study = this.studyRepo.findById(studyId).get();
-		if (study != null) {
-			return study.getProfile().getProfileName();
-		}
-		return null;
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyAnonymisationProfile(final long studyId) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        Study study = this.studyRepo.findById(studyId).get();
+        if (study != null) {
+            return study.getProfile().getProfileName();
+        }
+        return null;
+    }
 
-	/**
-	 * Receives a json object, concerning a study subscription
-	 * @param commandArrStr the studyUser as a json string.
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public boolean studySubscription(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
-			Long userId = event.getUserId();
-			Long studyId = Long.valueOf(event.getObjectId());
-			// Get the study
-			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
+    /**
+     * Receives a json object, concerning a study subscription
+     * @param commandArrStr the studyUser as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public boolean studySubscription(final String studyStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
+            Long userId = event.getUserId();
+            Long studyId = Long.valueOf(event.getObjectId());
+            // Get the study
+            Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
 
-			for (StudyUser su : studyToUpdate.getStudyUserList()) {
-				if (su.getUserId().equals(userId)) {
-					// user already exists on study
-					return true;
-				}
-			}
+            for (StudyUser su : studyToUpdate.getStudyUserList()) {
+                if (su.getUserId().equals(userId)) {
+                    // user already exists on study
+                    return true;
+                }
+            }
 
-			// Create a new StudyUser
-			StudyUser subscription = new StudyUser();
-			subscription.setStudy(studyToUpdate);
-			subscription.setUserId(userId);
-			subscription.setReceiveNewImportReport(false);
-			subscription.setReceiveStudyUserReport(false);
-			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
-			subscription.setUserName(event.getMessage());
+            // Create a new StudyUser
+            StudyUser subscription = new StudyUser();
+            subscription.setStudy(studyToUpdate);
+            subscription.setUserId(userId);
+            subscription.setReceiveNewImportReport(false);
+            subscription.setReceiveStudyUserReport(false);
+            subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
+            subscription.setUserName(event.getMessage());
 
-			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
-				subscription.setConfirmed(false);
-				dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
-			} else {
-				subscription.setConfirmed(true);
-			}
-			studyService.addStudyUserToStudy(subscription, studyToUpdate);
-			eventService.publishEvent(event);
-			return true;
-		} catch (Exception e) {
-			LOG.error("Could not directly subscribe a user to the study: ", e);
-			return false;
-		}
-	}
+            if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
+                subscription.setConfirmed(false);
+                dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
+            } else {
+                subscription.setConfirmed(true);
+            }
+            studyService.addStudyUserToStudy(subscription, studyToUpdate);
+            eventService.publishEvent(event);
+            return true;
+        } catch (Exception e) {
+            LOG.error("Could not directly subscribe a user to the study: ", e);
+            return false;
+        }
+    }
 
-	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
-		try {
-		    LOG.info(messageStr);
-			List<SubjectQualityTagDTO> subjectStudyCardTagList =
-					objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
-			// build a id -> dto map
-			Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
-			for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
-			    dtoMap.put(dto.getSubjectId(), dto);
-			}
-			// get subjects from db
-			Iterable<Subject> dbList = subjectRepository.findAllById(dtoMap.keySet());
-			// update subjects
-			for (Subject subject : dbList) {
-			    subject.setQualityTag(dtoMap.get(subject.getId()).getTag());
-			}
-			// save
-			subjectRepository.saveAll(dbList);
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
-		}
-	}
+    @Transactional
+    @RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
+        try {
+            LOG.info(messageStr);
+            List<SubjectQualityTagDTO> subjectStudyCardTagList =
+                    objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
+            // build a id -> dto map
+            Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
+            for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
+                dtoMap.put(dto.getSubjectId(), dto);
+            }
+            // get subjects from db
+            Iterable<Subject> dbList = subjectRepository.findAllById(dtoMap.keySet());
+            // update subjects
+            for (Subject subject : dbList) {
+                subject.setQualityTag(dtoMap.get(subject.getId()).getTag());
+            }
+            // save
+            subjectRepository.saveAll(dbList);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+        }
+    }
 
 }

@@ -29,54 +29,54 @@ import org.shanoir.ng.shared.exception.ShanoirException;
  */
 public interface PathologyModelService {
 
-	/**
-	 * Delete a reference value.
-	 *
-	 * @param id
-	 *            template id.
-	 * @throws ShanoirException
-	 */
-	void deleteById(Long id) throws ShanoirException;
+    /**
+     * Delete a reference value.
+     *
+     * @param id
+     *            template id.
+     * @throws ShanoirException
+     */
+    void deleteById(Long id) throws ShanoirException;
 
-	/**
-	 * Get all the references.
-	 *
-	 * @return a list of references.
-	 */
-	List<PathologyModel> findAll();
-
-
-	/**
-	 * Find reference by its id.
-	 *
-	 * @param id
-	 *            reference id.
-	 * @return a reference or null.
-	 */
-	PathologyModel findById(Long id);
+    /**
+     * Get all the references.
+     *
+     * @return a list of references.
+     */
+    List<PathologyModel> findAll();
 
 
-	List<PathologyModel> findByPathology(Pathology pathology);
+    /**
+     * Find reference by its id.
+     *
+     * @param id
+     *            reference id.
+     * @return a reference or null.
+     */
+    PathologyModel findById(Long id);
 
-	/**
-	 * Save a reference.
-	 *
-	 * @param reference
-	 *            reference to create.
-	 * @return created reference.
-	 * @throws ShanoirException
-	 */
-	PathologyModel save(PathologyModel model) throws ShanoirException;
 
-	/**
-	 * Update a reference.
-	 *
-	 * @param reference
-	 *            reference to update.
-	 * @return updated reference.
-	 * @throws ShanoirException
-	 */
-	PathologyModel update(PathologyModel model) throws ShanoirException;
+    List<PathologyModel> findByPathology(Pathology pathology);
+
+    /**
+     * Save a reference.
+     *
+     * @param reference
+     *            reference to create.
+     * @return created reference.
+     * @throws ShanoirException
+     */
+    PathologyModel save(PathologyModel model) throws ShanoirException;
+
+    /**
+     * Update a reference.
+     *
+     * @param reference
+     *            reference to update.
+     * @return updated reference.
+     * @throws ShanoirException
+     */
+    PathologyModel update(PathologyModel model) throws ShanoirException;
 
 
 

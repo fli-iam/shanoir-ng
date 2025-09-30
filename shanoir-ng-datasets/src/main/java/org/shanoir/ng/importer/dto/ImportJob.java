@@ -28,19 +28,19 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class ImportJob implements Serializable {
 
-	public static final String RANK_PROPERTY = "rank";
+    public static final String RANK_PROPERTY = "rank";
 
-	public static final String INDEX_PROPERTY = "index";
+    public static final String INDEX_PROPERTY = "index";
 
-	private static final long serialVersionUID = 8804929608059674037L;
+    private static final long serialVersionUID = 8804929608059674037L;
 
     private long timestamp;
 
     private boolean fromDicomZip;
 
-	private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<>();
 
-	private boolean fromShanoirUploader;
+    private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 

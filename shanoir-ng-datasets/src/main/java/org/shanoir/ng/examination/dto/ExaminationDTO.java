@@ -30,183 +30,183 @@ import org.shanoir.ng.shared.model.SubjectDTO;
  */
 public class ExaminationDTO {
 
-	private Long id;
+    private Long id;
 
-	private Long centerId;
+    private Long centerId;
 
-	private String comment;
+    private String comment;
 
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	private String note;
+    private String note;
 
-	private Long studyId;
+    private Long studyId;
 
-	private SubjectDTO subject;
+    private SubjectDTO subject;
 
-	private Double subjectWeight;
+    private Double subjectWeight;
 
-	private UnitOfMeasure weightUnitOfMeasure;
+    private UnitOfMeasure weightUnitOfMeasure;
 
-	private boolean preclinical;
+    private boolean preclinical;
 
-	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
+    private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
-	private List<String> extraDataFilePathList;
+    private List<String> extraDataFilePathList;
 
-	private Long source;
+    private Long source;
 
-	private List<Long> copies;
+    private List<Long> copies;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(final Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(final Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(final String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(final String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(final LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(final LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	/**
-	 * @param note
-	 *            the note to set
-	 */
-	public void setNote(final String note) {
-		this.note = note;
-	}
+    /**
+     * @param note
+     *            the note to set
+     */
+    public void setNote(final String note) {
+        this.note = note;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
 
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(final Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
+    /**
+     * @param subjectWeight
+     *            the subjectWeight to set
+     */
+    public void setSubjectWeight(final Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public void setPreclinical(final boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public void setPreclinical(final boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
-		return instrumentBasedAssessmentList;
-	}
+    public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
+        return instrumentBasedAssessmentList;
+    }
 
-	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
-		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
-	}
+    public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
+        this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
+    }
 
-	public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
 
-	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}
+    public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
 
-	public SubjectDTO getSubject() {
-		return subject;
-	}
+    public SubjectDTO getSubject() {
+        return subject;
+    }
 
-	public void setSubject(SubjectDTO subject) {
-		this.subject = subject;
-	}
+    public void setSubject(SubjectDTO subject) {
+        this.subject = subject;
+    }
 
-	public void setSubjectId(Long subjectId) {
-		this.subject = new SubjectDTO(subjectId, "");
-	}
+    public void setSubjectId(Long subjectId) {
+        this.subject = new SubjectDTO(subjectId, "");
+    }
 
-	public UnitOfMeasure getWeightUnitOfMeasure() {
-		return weightUnitOfMeasure;
-	}
+    public UnitOfMeasure getWeightUnitOfMeasure() {
+        return weightUnitOfMeasure;
+    }
 
-	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
-		this.weightUnitOfMeasure = weightUnitOfMeasure;
-	}
+    public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
+        this.weightUnitOfMeasure = weightUnitOfMeasure;
+    }
 
-	public Long getSource() {
-		return source;
-	}
+    public Long getSource() {
+        return source;
+    }
 
-	public void setSource(Long source) {
-		this.source = source;
-	}
+    public void setSource(Long source) {
+        this.source = source;
+    }
 
-	public List<Long> getCopies() {
-		return copies;
-	}
+    public List<Long> getCopies() {
+        return copies;
+    }
 
-	public void setCopies(List<Long> copies) {
-		this.copies = copies;
-	}
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
 }

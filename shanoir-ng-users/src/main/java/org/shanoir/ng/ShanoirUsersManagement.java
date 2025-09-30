@@ -76,192 +76,192 @@ import jakarta.ws.rs.core.Response;
 @Component
 public class ShanoirUsersManagement implements ApplicationRunner {
 
-	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
+    private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ShanoirUsersManagement.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(ShanoirUsersManagement.class);
 
-	/**
-	 * Five values are necessary to init the Keycloak client: url, realm, client-id, login, pw
-	 * Login and pw are given from the command line to avoid admin pw storage on the disk and
-	 * in application.yml. URL, realm and client-id come from application.yml or env configuration.
-	 *
-	 */
-	@Value("${kc.admin.client.server.url}")
-	private String kcAdminClientServerUrl;
+    /**
+     * Five values are necessary to init the Keycloak client: url, realm, client-id, login, pw
+     * Login and pw are given from the command line to avoid admin pw storage on the disk and
+     * in application.yml. URL, realm and client-id come from application.yml or env configuration.
+     *
+     */
+    @Value("${kc.admin.client.server.url}")
+    private String kcAdminClientServerUrl;
 
-	@Value("${kc.admin.client.realm}")
-	private String kcAdminClientRealm;
+    @Value("${kc.admin.client.realm}")
+    private String kcAdminClientRealm;
 
-	@Value("${kc.admin.client.client.id}")
-	private String kcAdminClientClientId;
+    @Value("${kc.admin.client.client.id}")
+    private String kcAdminClientClientId;
 
-	@Value("${SHANOIR_KEYCLOAK_USER}")
-	private String kcAdminClientUsername;
+    @Value("${SHANOIR_KEYCLOAK_USER}")
+    private String kcAdminClientUsername;
 
-	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
-	private String kcAdminClientPassword;
+    @Value("${SHANOIR_KEYCLOAK_PASSWORD}")
+    private String kcAdminClientPassword;
 
-	@Value("${kc.admin.client.realm.users}")
-	private String keycloakRealm;
+    @Value("${kc.admin.client.realm.users}")
+    private String keycloakRealm;
 
-	@Value("${service-account.user.name}")
-	private String vipSrvUsername;
+    @Value("${service-account.user.name}")
+    private String vipSrvUsername;
 
-	@Value("${service-account.user.email}")
-	private String vipSrvEmail;
+    @Value("${service-account.user.email}")
+    private String vipSrvEmail;
 
-	private Keycloak keycloak = null;
+    private Keycloak keycloak = null;
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	@Autowired
-	private EmailService emailService;
+    @Autowired
+    private EmailService emailService;
 
-	@Autowired
-	StudyRightsService commService;
-	private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    @Autowired
+    StudyRightsService commService;
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
-	@Override
-	public void run(final ApplicationArguments args) throws Exception {
+    @Override
+    public void run(final ApplicationArguments args) throws Exception {
 
-		if (args.getOptionNames().isEmpty()) {
-			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
-			return;
-		}
+        if (args.getOptionNames().isEmpty()) {
+            LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
+            return;
+        }
 
-		if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
-				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
+        if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
+                && "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
 
-			initKeycloakAdminClient();
-			if (!StringUtils.isBlank(vipSrvEmail)) {
-				this.setVIPServiceAccountEmail();
-			}
+            initKeycloakAdminClient();
+            if (!StringUtils.isBlank(vipSrvEmail)) {
+                this.setVIPServiceAccountEmail();
+            }
 
-			int tries = 0;
-			boolean success = false;
-			while (!success && tries < 50) {
-				try {
-					createUsersIfNotExisting();
-					success = true;
-				} catch (Exception e) {
-					tries++;
-					String msg = "Try [" + tries + "] failed for updating keycloak users on startup (" + e.getMessage() + ")";
-					LOG.error(msg, e); // users logs
-					System.out.println(msg); // docker compose console
-					TimeUnit.SECONDS.sleep(5);
-				}
-			}
-			if (!success) {
-				throw new IllegalStateException("Could not export users to Keycloak.");
-			}
-		}
-	}
+            int tries = 0;
+            boolean success = false;
+            while (!success && tries < 50) {
+                try {
+                    createUsersIfNotExisting();
+                    success = true;
+                } catch (Exception e) {
+                    tries++;
+                    String msg = "Try [" + tries + "] failed for updating keycloak users on startup (" + e.getMessage() + ")";
+                    LOG.error(msg, e); // users logs
+                    System.out.println(msg); // docker compose console
+                    TimeUnit.SECONDS.sleep(5);
+                }
+            }
+            if (!success) {
+                throw new IllegalStateException("Could not export users to Keycloak.");
+            }
+        }
+    }
 
-	private void initKeycloakAdminClient() {
+    private void initKeycloakAdminClient() {
 
-		if (this.keycloak != null) {
-			return;
-		}
+        if (this.keycloak != null) {
+            return;
+        }
 
-		this.keycloak = Keycloak.getInstance(
-			kcAdminClientServerUrl,
-			kcAdminClientRealm,
-			kcAdminClientUsername,
-			kcAdminClientPassword,
-			kcAdminClientClientId);
-	}
+        this.keycloak = Keycloak.getInstance(
+            kcAdminClientServerUrl,
+            kcAdminClientRealm,
+            kcAdminClientUsername,
+            kcAdminClientPassword,
+            kcAdminClientClientId);
+    }
 
-	private void createUsersIfNotExisting() {
-		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
-		final Iterable<User> users = userRepository.findAll();
-		for (final User user : users) {
-			final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
-			if (userRepresentationList != null && !userRepresentationList.isEmpty()) {
-				LOG.debug("User already existing in Keycloak. Do nothing.");
-			} else {
-				// Add user to Keycloak and save its keycloakId in the users database after
-				final UserRepresentation userRepresentation = getUserRepresentation(user);
-				final Response response = keycloak.realm(keycloakRealm).users().create(userRepresentation);
-				final String keycloakId = KeycloakShanoirUtil.getCreatedUserId(response);
-				user.setKeycloakId(keycloakId);
-				userRepository.save(user);
-				// Reset user password, which is stored in Keycloak only
-				final CredentialRepresentation credential = new CredentialRepresentation();
-				credential.setType(CredentialRepresentation.PASSWORD);
-				String newPassword = PasswordUtils.generatePassword();
-				credential.setValue(newPassword);
-				credential.setTemporary(true);
-				final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-				userResource.resetPassword(credential);
-				final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
-				userResource.roles().realmLevel().add(Arrays.asList(roleResource.toRepresentation()));
-				// Notify user
-				emailService.notifyUserResetPassword(user, newPassword);
-			}
-		}
-	}
+    private void createUsersIfNotExisting() {
+        LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
+        final Iterable<User> users = userRepository.findAll();
+        for (final User user : users) {
+            final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
+            if (userRepresentationList != null && !userRepresentationList.isEmpty()) {
+                LOG.debug("User already existing in Keycloak. Do nothing.");
+            } else {
+                // Add user to Keycloak and save its keycloakId in the users database after
+                final UserRepresentation userRepresentation = getUserRepresentation(user);
+                final Response response = keycloak.realm(keycloakRealm).users().create(userRepresentation);
+                final String keycloakId = KeycloakShanoirUtil.getCreatedUserId(response);
+                user.setKeycloakId(keycloakId);
+                userRepository.save(user);
+                // Reset user password, which is stored in Keycloak only
+                final CredentialRepresentation credential = new CredentialRepresentation();
+                credential.setType(CredentialRepresentation.PASSWORD);
+                String newPassword = PasswordUtils.generatePassword();
+                credential.setValue(newPassword);
+                credential.setTemporary(true);
+                final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
+                userResource.resetPassword(credential);
+                final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
+                userResource.roles().realmLevel().add(Arrays.asList(roleResource.toRepresentation()));
+                // Notify user
+                emailService.notifyUserResetPassword(user, newPassword);
+            }
+        }
+    }
 
-	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<>();
-		attributes.put("userId", List.of(user.getId().toString()));
-		attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
-		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
-		}
-		final UserRepresentation userRepresentation = new UserRepresentation();
-		userRepresentation.setAttributes(attributes);
-		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEmailVerified(Boolean.TRUE);
-		userRepresentation.setEnabled(user.isEnabled());
-		userRepresentation.setFirstName(user.getFirstName());
-		userRepresentation.setLastName(user.getLastName());
-		userRepresentation.setUsername(user.getUsername());
-		return userRepresentation;
-	}
+    private UserRepresentation getUserRepresentation(final User user) {
+        final Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("userId", List.of(user.getId().toString()));
+        attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
+        if (user.getExpirationDate() != null) {
+            attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
+        }
+        final UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setAttributes(attributes);
+        userRepresentation.setEmail(user.getEmail());
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        userRepresentation.setEnabled(user.isEnabled());
+        userRepresentation.setFirstName(user.getFirstName());
+        userRepresentation.setLastName(user.getLastName());
+        userRepresentation.setUsername(user.getUsername());
+        return userRepresentation;
+    }
 
-	/**
-	 * Set up the email ${service-account.user.email}
-	 * of the keycloak user ${service-account.user.name} ('service-account-service-account')
-	 * associated with the keycloak client 'service-account'
-	 *
-	 * See service-account.user.* application properties
-	 */
-	private void setVIPServiceAccountEmail() {
+    /**
+     * Set up the email ${service-account.user.email}
+     * of the keycloak user ${service-account.user.name} ('service-account-service-account')
+     * associated with the keycloak client 'service-account'
+     *
+     * See service-account.user.* application properties
+     */
+    private void setVIPServiceAccountEmail() {
 
-		final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
-		if (userRepresentationList == null || userRepresentationList.isEmpty()) {
-			LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
-			return;
-		}
-		if (userRepresentationList.size() > 1) {
-			LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
-			return;
-		}
-		UserRepresentation user = userRepresentationList.get(0);
-		user.setEmail(this.vipSrvEmail);
+        final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
+        if (userRepresentationList == null || userRepresentationList.isEmpty()) {
+            LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
+            return;
+        }
+        if (userRepresentationList.size() > 1) {
+            LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
+            return;
+        }
+        UserRepresentation user = userRepresentationList.get(0);
+        user.setEmail(this.vipSrvEmail);
 
-		UserResource userResource = keycloak.realm(keycloakRealm).users().get(user.getId());
-		userResource.update(user);
-	}
+        UserResource userResource = keycloak.realm(keycloakRealm).users().get(user.getId());
+        userResource.update(user);
+    }
 
-	/**
-	 * Check that the connected user has the given right for the given study.
-	 *
-	 * @param studyId the study id
-	 * @param rightStr the right
-	 * @return true or false
-	 */
-	public boolean hasRightOnStudy(Long studyId, String rightStr) {
-		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-			return true;
-		}
-		if (studyId == null) {
-			return false;
-		}
-		return commService.hasRightOnStudy(studyId, rightStr);
-	}
+    /**
+     * Check that the connected user has the given right for the given study.
+     *
+     * @param studyId the study id
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasRightOnStudy(Long studyId, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+            return true;
+        }
+        if (studyId == null) {
+            return false;
+        }
+        return commService.hasRightOnStudy(studyId, rightStr);
+    }
 }

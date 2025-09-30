@@ -36,39 +36,39 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/dua")
 public interface DuaDraftAPI {
 
-	@Operation(summary = "", description = "Saves a new dua draft")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created dua draft"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#dua.duaDraft.studyId, 'CAN_ADMINISTRATE')")
-	ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
-			throws RestServiceException;
+    @Operation(summary = "", description = "Saves a new dua draft")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created dua draft"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" }, method = RequestMethod.POST)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#dua.duaDraft.studyId, 'CAN_ADMINISTRATE')")
+    ResponseEntity<String> saveNew(
+            @Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
+            throws RestServiceException;
 
-	@Operation(summary = "", description = "Updates a dua draft")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dua draft updated"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "/{duaId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
-	ResponseEntity<Void> update(
-			@Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
-			@Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
-			throws RestServiceException;
+    @Operation(summary = "", description = "Updates a dua draft")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dua draft updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/{duaId}", produces = { "application/json" }, consumes = {
+            "application/json" }, method = RequestMethod.PUT)
+    ResponseEntity<Void> update(
+            @Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
+            @Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
+            throws RestServiceException;
 
-	@Operation(summary = "", description = "If exists, returns the dua draft corresponding to the given id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dua draft"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no study found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "/{duaId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<DuaDraftDTO> findById(
-			@Parameter(description = "id of the dua draft", required = true) @PathVariable("duaId") String duaId);
+    @Operation(summary = "", description = "If exists, returns the dua draft corresponding to the given id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dua draft"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/{duaId}", produces = { "application/json" }, method = RequestMethod.GET)
+    ResponseEntity<DuaDraftDTO> findById(
+            @Parameter(description = "id of the dua draft", required = true) @PathVariable("duaId") String duaId);
 }

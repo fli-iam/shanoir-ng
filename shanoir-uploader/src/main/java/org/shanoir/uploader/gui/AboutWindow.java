@@ -29,64 +29,64 @@ import org.slf4j.LoggerFactory;
 
 public class AboutWindow extends JFrame {
 
-	private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
+    private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
 
-	String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail", "developers_shanoir@inria.fr");
+    String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail", "developers_shanoir@inria.fr");
 
-	String releasesUrl = ShUpConfig.endpointProperties.getProperty("github.releases");
+    String releasesUrl = ShUpConfig.endpointProperties.getProperty("github.releases");
 
-	public AboutWindow(final ResourceBundle resourceBundle) {
-		// Create the frame.
-		JFrame frame = new JFrame(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.title"));
+    public AboutWindow(final ResourceBundle resourceBundle) {
+        // Create the frame.
+        JFrame frame = new JFrame(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.title"));
 
-		// What happens when the frame closes?
-		frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        // What happens when the frame closes?
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-		// Panel content
+        // Panel content
 
-		JPanel masterPanel = new JPanel(new BorderLayout());
-		frame.setContentPane(masterPanel);
+        JPanel masterPanel = new JPanel(new BorderLayout());
+        frame.setContentPane(masterPanel);
 
-		final JPanel aboutPanel = new JPanel();
-		aboutPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        final JPanel aboutPanel = new JPanel();
+        aboutPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
-		masterPanel.add(aboutPanel, BorderLayout.CENTER);
+        masterPanel.add(aboutPanel, BorderLayout.CENTER);
 
-		GridBagLayout gBLPanel = new GridBagLayout();
-		gBLPanel.columnWidths = new int[] { 0, 0, 0 };
-		gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		aboutPanel.setLayout(gBLPanel);
+        GridBagLayout gBLPanel = new GridBagLayout();
+        gBLPanel.columnWidths = new int[] { 0, 0, 0 };
+        gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
+        gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        aboutPanel.setLayout(gBLPanel);
 
-		JLabel icon = new JLabel();
-		icon.setIcon(DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png"));// your image
-																											// here
-		// aboutPanel.add(icon);
-		addItem(aboutPanel, icon, 0, 1, 1, GridBagConstraints.CENTER);
+        JLabel icon = new JLabel();
+        icon.setIcon(DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png"));// your image
+                                                                                                            // here
+        // aboutPanel.add(icon);
+        addItem(aboutPanel, icon, 0, 1, 1, GridBagConstraints.CENTER);
 
-		JLabel nameLabel = new JLabel("<html><body><B>"
-				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
-		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
+        JLabel nameLabel = new JLabel("<html><body><B>"
+                + resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
+        addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		// Setting a default value for release date (-in dev mode for exemple- it might not be set)
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		String defaultDate = LocalDate.now().format(formatter)
+        // Setting a default value for release date (-in dev mode for exemple- it might not be set)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String defaultDate = LocalDate.now().format(formatter)
 ;
-		if (ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE) == null
-				|| ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).isEmpty()) {
-			ShUpConfig.basicProperties.setProperty(ShUpConfig.RELEASE_DATE, defaultDate);
-		}
+        if (ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE) == null
+                || ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).isEmpty()) {
+            ShUpConfig.basicProperties.setProperty(ShUpConfig.RELEASE_DATE, defaultDate);
+        }
 
-		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: "
-				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 10));
-		addItem(aboutPanel, versionLabel, 0, 3, 1, GridBagConstraints.CENTER);
+        JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: "
+                + ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 10));
+        addItem(aboutPanel, versionLabel, 0, 3, 1, GridBagConstraints.CENTER);
 
-		JLabel releasesLabel = new JLabel("<html><div style='white-space: nowrap;'><a href=''>"
-				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.releases") + "</a></div></html>");
-		addItem(aboutPanel, releasesLabel, 0, 4, 1, GridBagConstraints.CENTER);
+        JLabel releasesLabel = new JLabel("<html><div style='white-space: nowrap;'><a href=''>"
+                + resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.releases") + "</a></div></html>");
+        addItem(aboutPanel, releasesLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
-		releasesLabel.addMouseListener(new MouseAdapter() {
+        releasesLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     try {
@@ -97,68 +97,68 @@ public class AboutWindow extends JFrame {
                 }
             });
 
-		JLabel copyrightLabel = new JLabel(
-				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightShUp"));
-		addItem(aboutPanel, copyrightLabel, 0, 5, 1, GridBagConstraints.CENTER);
+        JLabel copyrightLabel = new JLabel(
+                resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightShUp"));
+        addItem(aboutPanel, copyrightLabel, 0, 5, 1, GridBagConstraints.CENTER);
 
-		JLabel copyrightPseudonymusLabel = new JLabel(
-				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightPseudonymus"));
-		addItem(aboutPanel, copyrightPseudonymusLabel, 0, 6, 1, GridBagConstraints.CENTER);
+        JLabel copyrightPseudonymusLabel = new JLabel(
+                resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightPseudonymus"));
+        addItem(aboutPanel, copyrightPseudonymusLabel, 0, 6, 1, GridBagConstraints.CENTER);
 
-		final JLabel SupportLabel = new JLabel("<html><a href='mailto:" + supportMail + "'>" + supportMail + "</a></html>");
-		addItem(aboutPanel, SupportLabel, 0, 7, 1, GridBagConstraints.CENTER);
+        final JLabel SupportLabel = new JLabel("<html><a href='mailto:" + supportMail + "'>" + supportMail + "</a></html>");
+        addItem(aboutPanel, SupportLabel, 0, 7, 1, GridBagConstraints.CENTER);
 
-		SupportLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				try {
-					Desktop.getDesktop().mail(new URI(
-							"mailto:" + supportMail));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
+        SupportLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                try {
+                    Desktop.getDesktop().mail(new URI(
+                            "mailto:" + supportMail));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
 
-			public void mouseEntered(MouseEvent e) {
+            public void mouseEntered(MouseEvent e) {
 
-				SupportLabel
-						.setText("<html><body><u><font color =#0000FF>" + supportMail + "</font></u></body></html>");
+                SupportLabel
+                        .setText("<html><body><u><font color =#0000FF>" + supportMail + "</font></u></body></html>");
 
-			}
+            }
 
-			public void mouseExited(MouseEvent e) {
-				SupportLabel.setText(supportMail);
-			}
+            public void mouseExited(MouseEvent e) {
+                SupportLabel.setText(supportMail);
+            }
 
-		});
+        });
 
-		// Size the frame.
-		frame.pack();
+        // Size the frame.
+        frame.pack();
 
-		// center the frame
-		// frame.setLocationRelativeTo(null );
-		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		int windowWidth = 415;
-		int windowHeight = 400;
-		// set position and size
-		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
+        // center the frame
+        // frame.setLocationRelativeTo(null );
+        Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+        int windowWidth = 415;
+        int windowHeight = 400;
+        // set position and size
+        frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
 
-		// Show it.
-		frame.setVisible(true);
+        // Show it.
+        frame.setVisible(true);
 
-	}
+    }
 
-	private void addItem(JPanel p, JComponent c, int x, int y, int width, int align) {
+    private void addItem(JPanel p, JComponent c, int x, int y, int width, int align) {
 
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.gridx = x;
-		gc.gridy = y;
-		gc.gridwidth = width;
-		gc.anchor = align;
-		gc.insets = new Insets(10, 10, 10, 10);
-		p.add(c, gc);
-	}
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.gridx = x;
+        gc.gridy = y;
+        gc.gridwidth = width;
+        gc.anchor = align;
+        gc.insets = new Insets(10, 10, 10, 10);
+        p.add(c, gc);
+    }
 
 }

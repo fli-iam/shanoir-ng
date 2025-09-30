@@ -13,29 +13,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class EegImportJob extends ImportJob {
 
-	private static final long serialVersionUID = 2425683448060201704L;
+    private static final long serialVersionUID = 2425683448060201704L;
 
-	/** List of associated datasets. */
-	@JsonProperty("subjectId")
-	private Long subjectId;
+    /** List of associated datasets. */
+    @JsonProperty("subjectId")
+    private Long subjectId;
 
-	/** List of associated datasets. */
-	@JsonProperty("datasets")
-	private List<EegDatasetDTO> datasets;
+    /** List of associated datasets. */
+    @JsonProperty("datasets")
+    private List<EegDatasetDTO> datasets;
 
-	public List<EegDatasetDTO> getDatasets() {
-		return datasets;
-	}
+    public List<EegDatasetDTO> getDatasets() {
+        return datasets;
+    }
 
-	public void setDatasets(List<EegDatasetDTO> datasets) {
-		this.datasets = datasets;
-	}
+    public void setDatasets(List<EegDatasetDTO> datasets) {
+        this.datasets = datasets;
+    }
 
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    public Long getSubjectId() {
+        return subjectId;
+    }
 
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
 }

@@ -31,45 +31,45 @@ import jakarta.persistence.OneToOne;
 @Entity
 public class CtProtocol extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5062475142212117502L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5062475142212117502L;
 
-	@JsonIgnore
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
-	private CtDatasetAcquisition ctDatasetAcquisition;
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
+    private CtDatasetAcquisition ctDatasetAcquisition;
 
-	/** (0054, 0081) Number of Slices */
-	private Integer numberOfSlices;
+    /** (0054, 0081) Number of Slices */
+    private Integer numberOfSlices;
 
-	/**
-	 * The unit of measure of the slice thickness must be in mm.
-	 */
-	private Double sliceThickness;
+    /**
+     * The unit of measure of the slice thickness must be in mm.
+     */
+    private Double sliceThickness;
 
-	public CtProtocol() {
+    public CtProtocol() {
 
-	}
+    }
 
-	public CtProtocol(CtDatasetAcquisition acq) {
-		this.ctDatasetAcquisition = acq;
-	}
+    public CtProtocol(CtDatasetAcquisition acq) {
+        this.ctDatasetAcquisition = acq;
+    }
 
-	/**
-	 * @return the ctDatasetAcquisition
-	 */
-	public CtDatasetAcquisition getCtDatasetAcquisition() {
-		return ctDatasetAcquisition;
-	}
+    /**
+     * @return the ctDatasetAcquisition
+     */
+    public CtDatasetAcquisition getCtDatasetAcquisition() {
+        return ctDatasetAcquisition;
+    }
 
-	/**
-	 * @param ctDatasetAcquisition
-	 *            the ctDatasetAcquisition to set
-	 */
-	public void setCtDatasetAcquisition(CtDatasetAcquisition ctDatasetAcquisition) {
-		this.ctDatasetAcquisition = ctDatasetAcquisition;
-	}
+    /**
+     * @param ctDatasetAcquisition
+     *            the ctDatasetAcquisition to set
+     */
+    public void setCtDatasetAcquisition(CtDatasetAcquisition ctDatasetAcquisition) {
+        this.ctDatasetAcquisition = ctDatasetAcquisition;
+    }
 
     public Integer getNumberOfSlices() {
         return numberOfSlices;

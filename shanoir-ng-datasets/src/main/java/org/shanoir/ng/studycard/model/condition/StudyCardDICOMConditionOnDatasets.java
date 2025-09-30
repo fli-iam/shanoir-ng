@@ -51,9 +51,9 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMConditionOnDatasets.class);
 
-	private int dicomTag;
+    private int dicomTag;
 
-	public Integer getDicomTag() {
+    public Integer getDicomTag() {
         return dicomTag;
     }
 

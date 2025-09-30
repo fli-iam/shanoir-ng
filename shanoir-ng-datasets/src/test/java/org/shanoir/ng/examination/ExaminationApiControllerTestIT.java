@@ -44,92 +44,92 @@
 //@ActiveProfiles("test")
 //public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 //
-//	private static final String REQUEST_PATH = "/examinations";
-//	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
-//	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+//    private static final String REQUEST_PATH = "/examinations";
+//    private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
+//    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
-//	@Autowired
-//	private TestRestTemplate restTemplate;
+//    @Autowired
+//    private TestRestTemplate restTemplate;
 //
-//	@Test
-//	public void countExaminationsProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_COUNT, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void countExaminationsProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_COUNT, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void countExaminationsWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void countExaminationsWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_COUNT, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_COUNT, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findExaminationByIdProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void findExaminationByIdProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findExaminationByIdWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findExaminationByIdWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findExaminationsProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void findExaminationsProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findExaminationsWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findExaminationsWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewExaminationProtected() {
-//		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Examination(),
-//				String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void saveNewExaminationProtected() {
+//        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Examination(),
+//                String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewExaminationWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
-//				getHeadersWithToken(true));
+//    @Test
+//    public void saveNewExaminationWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
+//                getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewExaminationProtected() {
-//		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination());
+//    @Test
+//    public void updateNewExaminationProtected() {
+//        final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination());
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewExaminationWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
-//				getHeadersWithToken(true));
+//    @Test
+//    public void updateNewExaminationWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
+//                getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
 //
 //}

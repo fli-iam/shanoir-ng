@@ -21,71 +21,71 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class DataUserAgreement extends AbstractEntity {
 
-	private static final long serialVersionUID = 6095755233940273029L;
+    private static final long serialVersionUID = 6095755233940273029L;
 
-	@ManyToOne
-	@NotNull
-	@JsonProperty("studyId")
-	@JsonIdentityReference(alwaysAsId = true)
-	private Study study;
+    @ManyToOne
+    @NotNull
+    @JsonProperty("studyId")
+    @JsonIdentityReference(alwaysAsId = true)
+    private Study study;
 
-	@NotNull
-	private Long userId;
+    @NotNull
+    private Long userId;
 
-	@CreationTimestamp
-	@Column(updatable = false)
-	private Date timestampOfNew;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Date timestampOfNew;
 
-	private Date timestampOfAccepted;
+    private Date timestampOfAccepted;
 
-	public Study getStudy() {
-		return study;
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public Date getTimestampOfNew() {
-		return timestampOfNew;
-	}
+    public Date getTimestampOfNew() {
+        return timestampOfNew;
+    }
 
-	public Date getTimestampOfAccepted() {
-		return timestampOfAccepted;
-	}
+    public Date getTimestampOfAccepted() {
+        return timestampOfAccepted;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public void setTimestampOfNew(Date timestampOfNew) {
-		this.timestampOfNew = timestampOfNew;
-	}
+    public void setTimestampOfNew(Date timestampOfNew) {
+        this.timestampOfNew = timestampOfNew;
+    }
 
-	public void setTimestampOfAccepted(Date timestampOfAccepted) {
-		this.timestampOfAccepted = timestampOfAccepted;
-	}
+    public void setTimestampOfAccepted(Date timestampOfAccepted) {
+        this.timestampOfAccepted = timestampOfAccepted;
+    }
 
-	@JsonProperty("path")
-	public String getPath() {
-		if (this.study.getDataUserAgreementPaths() != null && !this.study.getDataUserAgreementPaths().isEmpty()) {
-			return this.study.getDataUserAgreementPaths().get(0);
-		}
-		return null;
-	}
+    @JsonProperty("path")
+    public String getPath() {
+        if (this.study.getDataUserAgreementPaths() != null && !this.study.getDataUserAgreementPaths().isEmpty()) {
+            return this.study.getDataUserAgreementPaths().get(0);
+        }
+        return null;
+    }
 
-	@JsonProperty("studyName")
-	public String getStudyName() {
-		return this.study.getName();
-	}
+    @JsonProperty("studyName")
+    public String getStudyName() {
+        return this.study.getName();
+    }
 
-	@JsonProperty("isChallenge")
-	public boolean getIsChallenge() {
-		return this.study.isChallenge();
-	}
+    @JsonProperty("isChallenge")
+    public boolean getIsChallenge() {
+        return this.study.isChallenge();
+    }
 
 }

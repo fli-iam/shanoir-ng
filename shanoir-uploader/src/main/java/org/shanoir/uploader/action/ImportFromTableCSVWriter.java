@@ -14,7 +14,7 @@ import com.opencsv.CSVWriter;
 
 public class ImportFromTableCSVWriter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ImportFromTableCSVWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFromTableCSVWriter.class);
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 

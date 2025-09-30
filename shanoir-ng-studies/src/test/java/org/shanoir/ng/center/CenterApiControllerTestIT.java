@@ -44,120 +44,120 @@
 //@ActiveProfiles("dev")
 //public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 //
-//	private static final String REQUEST_PATH = "/centers";
-//	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
-//	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+//    private static final String REQUEST_PATH = "/centers";
+//    private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
+//    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
-//	@Autowired
-//	private TestRestTemplate restTemplate;
+//    @Autowired
+//    private TestRestTemplate restTemplate;
 //
-//	@Test
-//	public void findCenterByIdProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void findCenterByIdProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCenterByIdWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findCenterByIdWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void findCentersProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findCentersWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersWithBadRole() {
-//		// test with guest role
-//		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
+//    @Test
+//    public void findCentersWithBadRole() {
+//        // test with guest role
+//        final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersNamesProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_NAMES, String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void findCentersNamesProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_NAMES, String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersNamesWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findCentersNamesWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findCentersNamesWithBadRole() {
-//		// test with guest role
-//		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
+//    @Test
+//    public void findCentersNamesWithBadRole() {
+//        // test with guest role
+//        final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewCenterProtected() {
-//		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Center(), String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//    @Test
+//    public void saveNewCenterProtected() {
+//        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Center(), String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewCenterWithLogin() throws ClientProtocolException, IOException {
+//    @Test
+//    public void saveNewCenterWithLogin() throws ClientProtocolException, IOException {
 //
-//		final Center center = ModelsUtil.createCenter();
-//		center.setName("tt");
-//		final HttpEntity<Center> entity = new HttpEntity<Center>(center, getHeadersWithToken(true));
+//        final Center center = ModelsUtil.createCenter();
+//        center.setName("tt");
+//        final HttpEntity<Center> entity = new HttpEntity<Center>(center, getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
 //
-//		// Get center id
-//		String centerId = response.getBody().split("\"id\":")[1].split(",")[0];
+//        // Get center id
+//        String centerId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
-//		// Delete center
-//		final ResponseEntity<String> responseDelete = restTemplate
-//				.exchange(REQUEST_PATH + "/" + centerId, HttpMethod.DELETE, entity, String.class);
-//		assertEquals(HttpStatus.NO_CONTENT, responseDelete.getStatusCode());
-//	}
+//        // Delete center
+//        final ResponseEntity<String> responseDelete = restTemplate
+//                .exchange(REQUEST_PATH + "/" + centerId, HttpMethod.DELETE, entity, String.class);
+//        assertEquals(HttpStatus.NO_CONTENT, responseDelete.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewCenterProtected() {
-//		final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter());
+//    @Test
+//    public void updateNewCenterProtected() {
+//        final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter());
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewCenterWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter(), getHeadersWithToken(true));
+//    @Test
+//    public void updateNewCenterWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter(), getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
 //
 //}

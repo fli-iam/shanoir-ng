@@ -22,7 +22,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ContrastAgentRepository extends CrudRepository<ContrastAgent, Long> {
 
-	Optional<ContrastAgent> findByProtocolId(Long protocolId);
+    Optional<ContrastAgent> findByProtocolId(Long protocolId);
 
-	Optional<ContrastAgent> findByName(Reference name);
+    Optional<ContrastAgent> findByName(Reference name);
 }

@@ -40,140 +40,140 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class AnestheticApiController implements AnestheticApi {
 
-	private static final String BAD_ARGUMENTS = "Bad arguments";
+    private static final String BAD_ARGUMENTS = "Bad arguments";
 
-	private static final Logger LOG = LoggerFactory.getLogger(AnestheticApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AnestheticApiController.class);
 
-	@Autowired
-	private AnestheticService anestheticsService;
+    @Autowired
+    private AnestheticService anestheticsService;
 
-	@Autowired
-	private ShanoirEventService eventService;
-	@Autowired
-	private AnestheticUniqueValidator uniqueValidator;
+    @Autowired
+    private ShanoirEventService eventService;
+    @Autowired
+    private AnestheticUniqueValidator uniqueValidator;
 
-	@Autowired
-	private AnestheticEditableByManager editableOnlyValidator;
+    @Autowired
+    private AnestheticEditableByManager editableOnlyValidator;
 
 
-	@Override
-	public ResponseEntity<Anesthetic> createAnesthetic(
-			@Parameter(name = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
-			BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Anesthetic> createAnesthetic(
+            @Parameter(name = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
+            BindingResult result) throws RestServiceException {
 
-		final FieldErrorMap accessErrors = this.getCreationRightsErrors(anesthetic);
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(anesthetic);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
-		}
+        final FieldErrorMap accessErrors = this.getCreationRightsErrors(anesthetic);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(anesthetic);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
 
-		// Guarantees it is a creation, not an update
-		anesthetic.setId(null);
+        // Guarantees it is a creation, not an update
+        anesthetic.setId(null);
 
-		/* Save anesthetic in db. */
-		try {
-			final Anesthetic createdAnesthetic = anestheticsService.save(anesthetic);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_ANESTHETIC_EVENT, createdAnesthetic.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(createdAnesthetic, HttpStatus.OK);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
-		}
+        /* Save anesthetic in db. */
+        try {
+            final Anesthetic createdAnesthetic = anestheticsService.save(anesthetic);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_ANESTHETIC_EVENT, createdAnesthetic.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(createdAnesthetic, HttpStatus.OK);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
 
-	}
+    }
 
-	@Override
-	public ResponseEntity<Void> deleteAnesthetic(
-			@Parameter(name = "Anesthetic id to delete", required = true) @PathVariable("id") Long id) {
-		if (anestheticsService.findById(id) == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		try {
-			anestheticsService.deleteById(id);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		} catch (ShanoirException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Void> deleteAnesthetic(
+            @Parameter(name = "Anesthetic id to delete", required = true) @PathVariable("id") Long id) {
+        if (anestheticsService.findById(id) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        try {
+            anestheticsService.deleteById(id);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        } catch (ShanoirException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Anesthetic> getAnestheticById(
-			@Parameter(name = "ID of anesthetic that needs to be fetched", required = true) @PathVariable("id") Long id) {
-		final Anesthetic anesthetic = anestheticsService.findById(id);
-		if (anesthetic == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(anesthetic, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Anesthetic> getAnestheticById(
+            @Parameter(name = "ID of anesthetic that needs to be fetched", required = true) @PathVariable("id") Long id) {
+        final Anesthetic anesthetic = anestheticsService.findById(id);
+        if (anesthetic == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(anesthetic, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<Anesthetic>> getAnesthetics() {
-		final List<Anesthetic> anesthetics = anestheticsService.findAll();
-		if (anesthetics.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(anesthetics, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<Anesthetic>> getAnesthetics() {
+        final List<Anesthetic> anesthetics = anestheticsService.findAll();
+        if (anesthetics.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(anesthetics, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<Anesthetic>> getAnestheticsByType(
-			@Parameter(name = "Anesthetic type ", required = true) @PathVariable("type") String type) {
-		try {
-			final List<Anesthetic> anesthetics = anestheticsService
-					.findAllByAnestheticType(AnestheticType.valueOf(type.toUpperCase()));
+    @Override
+    public ResponseEntity<List<Anesthetic>> getAnestheticsByType(
+            @Parameter(name = "Anesthetic type ", required = true) @PathVariable("type") String type) {
+        try {
+            final List<Anesthetic> anesthetics = anestheticsService
+                    .findAllByAnestheticType(AnestheticType.valueOf(type.toUpperCase()));
 
-			if (anesthetics.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(anesthetics, HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-	}
+            if (anesthetics.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(anesthetics, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
 
-	@Override
-	public ResponseEntity<Void> updateAnesthetic(
-			@Parameter(name = "ID of anesthetic that needs to be updated", required = true) @PathVariable("id") Long id,
-			@Parameter(name = "Anesthetic object that needs to be updated", required = true) @RequestBody Anesthetic anesthetic,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> updateAnesthetic(
+            @Parameter(name = "ID of anesthetic that needs to be updated", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "Anesthetic object that needs to be updated", required = true) @RequestBody Anesthetic anesthetic,
+            final BindingResult result) throws RestServiceException {
 
-		anesthetic.setId(id);
-		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(anesthetic);
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(anesthetic);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
-		}
+        anesthetic.setId(id);
+        final FieldErrorMap accessErrors = this.getUpdateRightsErrors(anesthetic);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(anesthetic);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
 
-		try {
-			anestheticsService.update(anesthetic);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		} catch (ShanoirException e) {
-			LOG.error("Error while trying to update anesthetic " + id + " : ", e);
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+        try {
+            anestheticsService.update(anesthetic);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        } catch (ShanoirException e) {
+            LOG.error("Error while trying to update anesthetic " + id + " : ", e);
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	private FieldErrorMap getUpdateRightsErrors(final Anesthetic anesthetic) {
-	    return editableOnlyValidator.validate(anesthetic);
-	}
+    private FieldErrorMap getUpdateRightsErrors(final Anesthetic anesthetic) {
+        return editableOnlyValidator.validate(anesthetic);
+    }
 
-	private FieldErrorMap getCreationRightsErrors(final Anesthetic anesthetic) {
-	    return editableOnlyValidator.validate(anesthetic);
-	}
+    private FieldErrorMap getCreationRightsErrors(final Anesthetic anesthetic) {
+        return editableOnlyValidator.validate(anesthetic);
+    }
 
-	private FieldErrorMap getUniqueConstraintErrors(final Anesthetic anesthetic) {
-		return uniqueValidator.validate(anesthetic);
-	}
+    private FieldErrorMap getUniqueConstraintErrors(final Anesthetic anesthetic) {
+        return uniqueValidator.validate(anesthetic);
+    }
 
 }

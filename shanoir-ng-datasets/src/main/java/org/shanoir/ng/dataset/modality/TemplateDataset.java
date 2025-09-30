@@ -28,49 +28,49 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class TemplateDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -3399415257911069266L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -3399415257911069266L;
 
-	public TemplateDataset() {
+    public TemplateDataset() {
 
-	}
+    }
 
-	public TemplateDataset(Dataset other) {
-		super(other);
-		if (((TemplateDataset) other).getTemplateDatasetNature() != null) {
-			this.templateDatasetNature = ((TemplateDataset) other).getTemplateDatasetNature().getId();
-		} else {
-			this.templateDatasetNature = null;
-		}
-	}
+    public TemplateDataset(Dataset other) {
+        super(other);
+        if (((TemplateDataset) other).getTemplateDatasetNature() != null) {
+            this.templateDatasetNature = ((TemplateDataset) other).getTemplateDatasetNature().getId();
+        } else {
+            this.templateDatasetNature = null;
+        }
+    }
 
-	/** Template Dataset Nature. */
-	private Integer templateDatasetNature;
+    /** Template Dataset Nature. */
+    private Integer templateDatasetNature;
 
-	/**
-	 * @return the templateDatasetNature
-	 */
-	public TemplateDatasetNature getTemplateDatasetNature() {
-		return TemplateDatasetNature.getNature(templateDatasetNature);
-	}
+    /**
+     * @return the templateDatasetNature
+     */
+    public TemplateDatasetNature getTemplateDatasetNature() {
+        return TemplateDatasetNature.getNature(templateDatasetNature);
+    }
 
-	/**
-	 * @param templateDatasetNature
-	 *            the templateDatasetNature to set
-	 */
-	public void setTemplateDatasetNature(TemplateDatasetNature templateDatasetNature) {
-		if (templateDatasetNature == null) {
-			this.templateDatasetNature = null;
-		} else {
-			this.templateDatasetNature = templateDatasetNature.getId();
-		}
-	}
+    /**
+     * @param templateDatasetNature
+     *            the templateDatasetNature to set
+     */
+    public void setTemplateDatasetNature(TemplateDatasetNature templateDatasetNature) {
+        if (templateDatasetNature == null) {
+            this.templateDatasetNature = null;
+        } else {
+            this.templateDatasetNature = templateDatasetNature.getId();
+        }
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.TEMPLATE;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.TEMPLATE;
+    }
 
 }

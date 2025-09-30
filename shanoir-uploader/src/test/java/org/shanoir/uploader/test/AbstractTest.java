@@ -33,94 +33,94 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
 
-	private static final String TEST_PROPERTIES = "test.properties";
+    private static final String TEST_PROPERTIES = "test.properties";
 
-	public static Properties testProperties = new Properties();
+    public static Properties testProperties = new Properties();
 
-	private static final String PROFILE = "profile";
+    private static final String PROFILE = "profile";
 
-	private static final String USER_NAME = "user.name";
+    private static final String USER_NAME = "user.name";
 
-	private static final String USER_PASSWORD = "user.password";
+    private static final String USER_PASSWORD = "user.password";
 
-	protected static ShanoirUploaderServiceClient shUpClient;
+    protected static ShanoirUploaderServiceClient shUpClient;
 
-	protected static Pseudonymizer pseudonymizer;
+    protected static Pseudonymizer pseudonymizer;
 
-	protected static IdentifierCalculator identifierCalculator;
+    protected static IdentifierCalculator identifierCalculator;
 
-	@BeforeAll
-	public static void setup() {
-		ShanoirUploader.initShanoirUploaderFolders();
-		PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
-		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
-		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
-		identifierCalculator = new IdentifierCalculator();
-		shUpClient = new ShanoirUploaderServiceClient();
-		shUpClient.configure();
-		ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
-		String user = testProperties.getProperty(USER_NAME);
-		String password = testProperties.getProperty(USER_PASSWORD);
-		String token;
-		try {
-			token = shUpClient.loginWithKeycloakForToken(user, password);
-			if (token != null) {
-				ShUpOnloadConfig.setTokenString(token);
-			} else {
-				logger.error("ERROR: login not successful.");
-	            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
-			}
-			if (ShUpConfig.isModePseudonymus()) {
-				File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-				String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
-				try {
-					pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
-				} catch (PseudonymusException e) {
-					logger.error(e.getMessage(), e);
-					System.exit(0);
-				}
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+    @BeforeAll
+    public static void setup() {
+        ShanoirUploader.initShanoirUploaderFolders();
+        PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
+        PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
+        PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
+        identifierCalculator = new IdentifierCalculator();
+        shUpClient = new ShanoirUploaderServiceClient();
+        shUpClient.configure();
+        ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
+        String user = testProperties.getProperty(USER_NAME);
+        String password = testProperties.getProperty(USER_PASSWORD);
+        String token;
+        try {
+            token = shUpClient.loginWithKeycloakForToken(user, password);
+            if (token != null) {
+                ShUpOnloadConfig.setTokenString(token);
+            } else {
+                logger.error("ERROR: login not successful.");
+                Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
+            }
+            if (ShUpConfig.isModePseudonymus()) {
+                File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+                String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+                try {
+                    pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
+                } catch (PseudonymusException e) {
+                    logger.error(e.getMessage(), e);
+                    System.exit(0);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
-		}
-	}
+        }
+    }
 
-	public static Center createCenter() {
-		Center center = new Center();
-		String centerUUID = UUID.randomUUID().toString();
-		center.setName("Center-Name-" + centerUUID);
-		center.setCity("Rennes");
-		center.setStreet("Center-Street-" + centerUUID);
-		center.setCountry("Center-Country-" + centerUUID);
-		center.setPostalCode("35000");
-		center.setWebsite("Center-Website-" + centerUUID);
-		center.setPhoneNumber("+3335353535");
-		Center createdCenter = shUpClient.createCenter(center);
-		return createdCenter;
-	}
+    public static Center createCenter() {
+        Center center = new Center();
+        String centerUUID = UUID.randomUUID().toString();
+        center.setName("Center-Name-" + centerUUID);
+        center.setCity("Rennes");
+        center.setStreet("Center-Street-" + centerUUID);
+        center.setCountry("Center-Country-" + centerUUID);
+        center.setPostalCode("35000");
+        center.setWebsite("Center-Website-" + centerUUID);
+        center.setPhoneNumber("+3335353535");
+        Center createdCenter = shUpClient.createCenter(center);
+        return createdCenter;
+    }
 
-	public static AcquisitionEquipment createEquipment(Center createdCenter) {
-		Manufacturer manufacturer = new Manufacturer();
-		manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());
-		Manufacturer createdManufacturer = shUpClient.createManufacturer(manufacturer);
-		Assertions.assertNotNull(createdManufacturer);
-		ManufacturerModel manufacturerModel = new ManufacturerModel();
-		manufacturerModel.setName("Manufacturer-Model-" + UUID.randomUUID().toString());
-		manufacturerModel.setManufacturer(createdManufacturer);
-		manufacturerModel.setDatasetModalityType("0"); // 0 == MR
-		manufacturerModel.setMagneticField(3.0);
-		ManufacturerModel createdManufacturerModel = shUpClient.createManufacturerModel(manufacturerModel);
-		Assertions.assertNotNull(createdManufacturerModel);
-		AcquisitionEquipment equipment = new AcquisitionEquipment();
-		String serialNumberRandom = "Serial-Number-" + UUID.randomUUID().toString();
-		equipment.setSerialNumber(serialNumberRandom);
-		equipment.setCenter(new IdName(createdCenter.getId(), createdCenter.getName()));
-		equipment.setManufacturerModel(createdManufacturerModel);
-		AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
-		return createdEquipment;
-	}
+    public static AcquisitionEquipment createEquipment(Center createdCenter) {
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());
+        Manufacturer createdManufacturer = shUpClient.createManufacturer(manufacturer);
+        Assertions.assertNotNull(createdManufacturer);
+        ManufacturerModel manufacturerModel = new ManufacturerModel();
+        manufacturerModel.setName("Manufacturer-Model-" + UUID.randomUUID().toString());
+        manufacturerModel.setManufacturer(createdManufacturer);
+        manufacturerModel.setDatasetModalityType("0"); // 0 == MR
+        manufacturerModel.setMagneticField(3.0);
+        ManufacturerModel createdManufacturerModel = shUpClient.createManufacturerModel(manufacturerModel);
+        Assertions.assertNotNull(createdManufacturerModel);
+        AcquisitionEquipment equipment = new AcquisitionEquipment();
+        String serialNumberRandom = "Serial-Number-" + UUID.randomUUID().toString();
+        equipment.setSerialNumber(serialNumberRandom);
+        equipment.setCenter(new IdName(createdCenter.getId(), createdCenter.getName()));
+        equipment.setManufacturerModel(createdManufacturerModel);
+        AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
+        return createdEquipment;
+    }
 
 }

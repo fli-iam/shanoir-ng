@@ -38,38 +38,38 @@ import jakarta.persistence.PostLoad;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Manufacturer extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -4761707953959168601L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -4761707953959168601L;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	@Length(min = 2, max = 200)
-	private String name;
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    @Length(min = 2, max = 200)
+    private String name;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "manufacturer/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "manufacturer/" + getId());
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

@@ -31,6 +31,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EditableOnlyBy {
 
-	String[] roles();
+    String[] roles();
 
 }

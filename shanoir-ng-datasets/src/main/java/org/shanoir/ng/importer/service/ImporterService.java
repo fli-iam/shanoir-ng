@@ -152,7 +152,7 @@ public class ImporterService {
                         // add tag to subject-study
                         subjectService.update(qualityResult.getUpdatedSubjects());
                     }
-                	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
+                    generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs

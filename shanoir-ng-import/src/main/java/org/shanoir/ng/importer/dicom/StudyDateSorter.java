@@ -13,10 +13,10 @@ import org.shanoir.ng.importer.model.Study;
  */
 public class StudyDateSorter implements Comparator<Study> {
 
-	@Override
-	public int compare(Study s1, Study s2) {
-		LocalDate s1StudyDate = s1.getStudyDate();
-		LocalDate s2StudyDate = s2.getStudyDate();
+    @Override
+    public int compare(Study s1, Study s2) {
+        LocalDate s1StudyDate = s1.getStudyDate();
+        LocalDate s2StudyDate = s2.getStudyDate();
         if (s1StudyDate.isEqual(s2StudyDate)) {
             return 0;
         } else {
@@ -26,6 +26,6 @@ public class StudyDateSorter implements Comparator<Study> {
                 return 1;
             }
         }
-	}
+    }
 
 }

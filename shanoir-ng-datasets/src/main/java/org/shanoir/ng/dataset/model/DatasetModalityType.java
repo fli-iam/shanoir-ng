@@ -22,78 +22,78 @@ package org.shanoir.ng.dataset.model;
  */
 public enum DatasetModalityType {
 
-	// MR Dataset
-	MR_DATASET(1),
+    // MR Dataset
+    MR_DATASET(1),
 
-	// MEG Dataset
-	MEG_DATASET(2),
+    // MEG Dataset
+    MEG_DATASET(2),
 
-	// CT Dataset
-	CT_DATASET(3),
+    // CT Dataset
+    CT_DATASET(3),
 
-	// SPECT Dataset
-	SPECT_DATASET(4),
+    // SPECT Dataset
+    SPECT_DATASET(4),
 
-	// PET Dataset
-	PET_DATASET(5),
+    // PET Dataset
+    PET_DATASET(5),
 
-	// EEG Dataset
-	EEG_DATASET(6),
+    // EEG Dataset
+    EEG_DATASET(6),
 
-	// GENERIC Dataset
-	GENERIC_DATASET(7),
+    // GENERIC Dataset
+    GENERIC_DATASET(7),
 
-	// IEEG Dataset
-	IEEG_DATASET(8),
+    // IEEG Dataset
+    IEEG_DATASET(8),
 
-	// Microscopy Dataset
-	MICR_DATASET(9),
+    // Microscopy Dataset
+    MICR_DATASET(9),
 
-	// Behavioural Dataset
-	BEH_DATASET(10),
+    // Behavioural Dataset
+    BEH_DATASET(10),
 
-	// Near-Infrared Spectroscopy dataset
-	NIRS_DATASET(11),
+    // Near-Infrared Spectroscopy dataset
+    NIRS_DATASET(11),
 
-	// X-RAY ANGIOGRAPHY dataset
-	XA_DATASET(12);
+    // X-RAY ANGIOGRAPHY dataset
+    XA_DATASET(12);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private DatasetModalityType(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private DatasetModalityType(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a dataset modality type by its id.
-	 *
-	 * @param id
-	 *            type id.
-	 * @return dataset modality type.
-	 */
-	public static DatasetModalityType getType(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (DatasetModalityType type : DatasetModalityType.values()) {
-			if (id.equals(type.getId())) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching dataset modality type for id " + id);
-	}
+    /**
+     * Get a dataset modality type by its id.
+     *
+     * @param id
+     *            type id.
+     * @return dataset modality type.
+     */
+    public static DatasetModalityType getType(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (DatasetModalityType type : DatasetModalityType.values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No matching dataset modality type for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

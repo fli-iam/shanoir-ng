@@ -26,88 +26,88 @@ import org.slf4j.LoggerFactory;
  */
 public enum MrScanningSequence {
 
-	// Spin Echo
-	SE(1),
+    // Spin Echo
+    SE(1),
 
-	// Inversion Recovery
-	IR(2),
+    // Inversion Recovery
+    IR(2),
 
-	// Gradient Recalled
-	GR(3),
+    // Gradient Recalled
+    GR(3),
 
-	// Echo Planar
-	EP(4),
+    // Echo Planar
+    EP(4),
 
-	// Research Mode
-	RM(5),
+    // Research Mode
+    RM(5),
 
-	// Spectroscopy
-	S(6),
+    // Spectroscopy
+    S(6),
 
-	// Fast Field Echo (Philips)
-	FFE(7),
+    // Fast Field Echo (Philips)
+    FFE(7),
 
-	// Could not map correctly
-	UNKNOWN(8);
+    // Could not map correctly
+    UNKNOWN(8);
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(MrScanningSequence.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(MrScanningSequence.class);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private MrScanningSequence(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private MrScanningSequence(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a Scanning Sequence by its id.
-	 *
-	 * @param id
-	 *            sequence id.
-	 * @return Scanning Sequence.
-	 */
-	public static MrScanningSequence getScanningSequence(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (MrScanningSequence scanningSequence : MrScanningSequence.values()) {
-			if (id.equals(scanningSequence.getId())) {
-				return scanningSequence;
-			}
-		}
-		return UNKNOWN;
-	}
+    /**
+     * Get a Scanning Sequence by its id.
+     *
+     * @param id
+     *            sequence id.
+     * @return Scanning Sequence.
+     */
+    public static MrScanningSequence getScanningSequence(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (MrScanningSequence scanningSequence : MrScanningSequence.values()) {
+            if (id.equals(scanningSequence.getId())) {
+                return scanningSequence;
+            }
+        }
+        return UNKNOWN;
+    }
 
-	/**
-	 * Get a Scanning Sequence by its name.
-	 *
-	 * @param type
-	 *            sequence id.
-	 * @return Scanning Sequence.
-	 */
-	public static MrScanningSequence getIdByType(final String type) {
-		if (type == null) {
-			return null;
-		}
-		if (EnumUtils.isValidEnum(MrScanningSequence.class, type)) {
-			return MrScanningSequence.valueOf(type);
-		} else {
-			LOG.warn("MrScanningSequence of type: " + type + " set to UNKNOWN.");
-			return UNKNOWN;
-		}
-	}
+    /**
+     * Get a Scanning Sequence by its name.
+     *
+     * @param type
+     *            sequence id.
+     * @return Scanning Sequence.
+     */
+    public static MrScanningSequence getIdByType(final String type) {
+        if (type == null) {
+            return null;
+        }
+        if (EnumUtils.isValidEnum(MrScanningSequence.class, type)) {
+            return MrScanningSequence.valueOf(type);
+        } else {
+            LOG.warn("MrScanningSequence of type: " + type + " set to UNKNOWN.");
+            return UNKNOWN;
+        }
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

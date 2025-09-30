@@ -33,15 +33,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 @ConditionalOnProperty(prefix = "shanoir", name = "database", havingValue = "other", matchIfMissing = true)
 public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
 
-	@PersistenceContext
-	private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz) {
-		final StringBuilder sqlQuery = new StringBuilder();
-		sqlQuery.append("SELECT e FROM " + clazz.getSimpleName() + " e WHERE TRIM(e.").append(fieldName).append(") LIKE :value");
-		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz) {
+        final StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("SELECT e FROM " + clazz.getSimpleName() + " e WHERE TRIM(e.").append(fieldName).append(") LIKE :value");
+        return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
+    }
 
 }

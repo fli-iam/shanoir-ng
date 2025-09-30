@@ -43,90 +43,90 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("dev")
 public class TherapyApiControllerTestIT extends KeycloakControllerTestIT {
 
-	private static final String REQUEST_PATH = "/therapy";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH;
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_TYPE = "/type/Drug";
+    private static final String REQUEST_PATH = "/therapy";
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH;
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_TYPE = "/type/Drug";
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Test
-	public void findTherapyByIdProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void findTherapyByIdProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findTherapyByIdWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findTherapyByIdWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void findTherapiesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_ALL, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void findTherapiesProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_ALL, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findTherapiesWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findTherapiesWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_ALL, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_ALL, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void findTherapiesByTypeProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_TYPE, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void findTherapiesByTypeProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_TYPE, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findTherapiesByTypeWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findTherapiesByTypeWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_TYPE, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_TYPE, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void saveNewTherapyProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Therapy(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void saveNewTherapyProtected() {
+        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Therapy(), String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void saveNewTherapyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain(), getHeadersWithToken(true));
+    @Test
+    public void saveNewTherapyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain(), getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void updateNewTherapyProtected() {
-		final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain());
+    @Test
+    public void updateNewTherapyProtected() {
+        final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain());
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+                String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void updateNewTherapyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain(), getHeadersWithToken(true));
+    @Test
+    public void updateNewTherapyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain(), getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-				String.class);
-		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+                String.class);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
 
 }

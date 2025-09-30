@@ -35,88 +35,88 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ExaminationDatasetAcquisitionDecorator implements ExaminationDatasetAcquisitionMapper {
 
-	@Autowired
-	private ExaminationDatasetAcquisitionMapper delegate;
+    @Autowired
+    private ExaminationDatasetAcquisitionMapper delegate;
 
-	@Override
-	public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
-			final List<DatasetAcquisition> datasetAcquisitions) {
-		if (datasetAcquisitions == null) {
-			return null;
-		}
-		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
-		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-			datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
-		}
-		return datasetAcquisitionDTOs;
-	}
+    @Override
+    public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
+            final List<DatasetAcquisition> datasetAcquisitions) {
+        if (datasetAcquisitions == null) {
+            return null;
+        }
+        final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
+        for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+            datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
+        }
+        return datasetAcquisitionDTOs;
+    }
 
-	@Override
-	public ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
-			final DatasetAcquisition datasetAcquisition) {
-		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate
-				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
-		datasetAcquisitionDTO.setName(getExaminationDatasetAcquisitionDTOName(datasetAcquisition));
-		datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
-		datasetAcquisitionDTO.setExaminationId(datasetAcquisition.getExamination().getId());
-		return datasetAcquisitionDTO;
-	}
+    @Override
+    public ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
+            final DatasetAcquisition datasetAcquisition) {
+        final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate
+                .datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
+        datasetAcquisitionDTO.setName(getExaminationDatasetAcquisitionDTOName(datasetAcquisition));
+        datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
+        datasetAcquisitionDTO.setExaminationId(datasetAcquisition.getExamination().getId());
+        return datasetAcquisitionDTO;
+    }
 
-	/**
-	 * Get dataset acquisition name. If all the datasets have the same name,
-	 * then return the name of the datasets. Else if all the datasets have the
-	 * same comment, then return the comment of the datasets.
-	 *
-	 * @param datasetAcquisition dataset acquisition.
-	 * @return name.
-	 */
-	private String getExaminationDatasetAcquisitionDTOName(final DatasetAcquisition datasetAcquisition) {
-		final StringBuilder result = new StringBuilder();
-		final List<String> datasetNameSet = new ArrayList<>();
-		final List<String> datasetCommentSet = new ArrayList<>();
-		if (datasetAcquisition instanceof BidsDatasetAcquisition) {
-			BidsDatasetAcquisition bidsDataAcq = (BidsDatasetAcquisition) datasetAcquisition;
-			if (!CollectionUtils.isEmpty(bidsDataAcq.getDatasets())) {
-				datasetNameSet.add(((BidsDataset) bidsDataAcq.getDatasets().get(0)).getBidsDataType());
-			}
-		} else if (datasetAcquisition.getDatasets() != null) {
-			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (!DatasetType.MEASUREMENT.equals(dataset.getType())) {
-					final String datasetName = dataset.getName();
-					if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
-						datasetNameSet.add(datasetName);
-					}
-					String datasetComment = null;
-					if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-						datasetComment = dataset.getUpdatedMetadata().getComment();
-					} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
-						datasetComment = dataset.getOriginMetadata().getComment();
-					}
-					if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
-						datasetCommentSet.add(datasetComment);
-					}
-				}
-			}
-		}
+    /**
+     * Get dataset acquisition name. If all the datasets have the same name,
+     * then return the name of the datasets. Else if all the datasets have the
+     * same comment, then return the comment of the datasets.
+     *
+     * @param datasetAcquisition dataset acquisition.
+     * @return name.
+     */
+    private String getExaminationDatasetAcquisitionDTOName(final DatasetAcquisition datasetAcquisition) {
+        final StringBuilder result = new StringBuilder();
+        final List<String> datasetNameSet = new ArrayList<>();
+        final List<String> datasetCommentSet = new ArrayList<>();
+        if (datasetAcquisition instanceof BidsDatasetAcquisition) {
+            BidsDatasetAcquisition bidsDataAcq = (BidsDatasetAcquisition) datasetAcquisition;
+            if (!CollectionUtils.isEmpty(bidsDataAcq.getDatasets())) {
+                datasetNameSet.add(((BidsDataset) bidsDataAcq.getDatasets().get(0)).getBidsDataType());
+            }
+        } else if (datasetAcquisition.getDatasets() != null) {
+            for (final Dataset dataset : datasetAcquisition.getDatasets()) {
+                if (!DatasetType.MEASUREMENT.equals(dataset.getType())) {
+                    final String datasetName = dataset.getName();
+                    if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
+                        datasetNameSet.add(datasetName);
+                    }
+                    String datasetComment = null;
+                    if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+                        datasetComment = dataset.getUpdatedMetadata().getComment();
+                    } else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
+                        datasetComment = dataset.getOriginMetadata().getComment();
+                    }
+                    if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
+                        datasetCommentSet.add(datasetComment);
+                    }
+                }
+            }
+        }
 
-		if (datasetNameSet.size() == 1) {
-			result.append(datasetNameSet.get(0));
-		} else if (datasetCommentSet.size() == 1) {
-			result.append(datasetCommentSet.get(0));
-		} else if (datasetNameSet.size() > 1) {
-			for (final String name : datasetNameSet) {
-				result.append(name).append(" ");
-			}
-			result.deleteCharAt(result.length() - 1);
-		} else {
-			result.append("id=").append(datasetAcquisition.getId());
-			if (datasetAcquisition.getRank() != null) {
-				result.append(" rank=").append(datasetAcquisition.getRank());
-			}
-		}
+        if (datasetNameSet.size() == 1) {
+            result.append(datasetNameSet.get(0));
+        } else if (datasetCommentSet.size() == 1) {
+            result.append(datasetCommentSet.get(0));
+        } else if (datasetNameSet.size() > 1) {
+            for (final String name : datasetNameSet) {
+                result.append(name).append(" ");
+            }
+            result.deleteCharAt(result.length() - 1);
+        } else {
+            result.append("id=").append(datasetAcquisition.getId());
+            if (datasetAcquisition.getRank() != null) {
+                result.append(" rank=").append(datasetAcquisition.getRank());
+            }
+        }
 
-		final String type = datasetAcquisition.getType();
-		return result.append(" (").append(type).append(")").toString();
-	}
+        final String type = datasetAcquisition.getType();
+        return result.append(" (").append(type).append(")").toString();
+    }
 
 }

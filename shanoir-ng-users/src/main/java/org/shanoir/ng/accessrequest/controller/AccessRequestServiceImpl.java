@@ -13,50 +13,50 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccessRequestServiceImpl implements AccessRequestService {
 
-	@Autowired
-	AccessRequestRepository accessRequestRepository;
+    @Autowired
+    AccessRequestRepository accessRequestRepository;
 
-	@Override
-	public Optional<AccessRequest> findById(Long id) {
-		return this.accessRequestRepository.findById(id);
-	}
+    @Override
+    public Optional<AccessRequest> findById(Long id) {
+        return this.accessRequestRepository.findById(id);
+    }
 
-	public List<AccessRequest> findAll() {
-		return Utils.toList(this.accessRequestRepository.findAll());
-	}
+    public List<AccessRequest> findAll() {
+        return Utils.toList(this.accessRequestRepository.findAll());
+    }
 
-	public AccessRequest create(AccessRequest entity) {
-		return this.accessRequestRepository.save(entity);
-	}
+    public AccessRequest create(AccessRequest entity) {
+        return this.accessRequestRepository.save(entity);
+    }
 
-	@Override
-	public AccessRequest createAllowed(AccessRequest entity) {
-		return this.accessRequestRepository.save(entity);
-	}
+    @Override
+    public AccessRequest createAllowed(AccessRequest entity) {
+        return this.accessRequestRepository.save(entity);
+    }
 
-	@Override
-	public AccessRequest update(AccessRequest entity) {
-		return this.accessRequestRepository.save(entity);
-	}
+    @Override
+    public AccessRequest update(AccessRequest entity) {
+        return this.accessRequestRepository.save(entity);
+    }
 
-	@Override
-	public void deleteById(Long id) throws EntityNotFoundException {
-		this.accessRequestRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(Long id) throws EntityNotFoundException {
+        this.accessRequestRepository.deleteById(id);
+    }
 
-	@Override
-	public List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status) {
-		return this.accessRequestRepository.findByStudyIdInAndStatus(studiesId, AccessRequest.ON_DEMAND);
-	}
+    @Override
+    public List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status) {
+        return this.accessRequestRepository.findByStudyIdInAndStatus(studiesId, AccessRequest.ON_DEMAND);
+    }
 
-	@Override
-	public List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId) {
-		return this.accessRequestRepository.findByUserIdAndStudyId(userId, studyId);
-	}
+    @Override
+    public List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId) {
+        return this.accessRequestRepository.findByUserIdAndStudyId(userId, studyId);
+    }
 
-	@Override
-	public List<AccessRequest> findByUserId(Long userId) {
-		return this.accessRequestRepository.findByUserId(userId);
-	}
+    @Override
+    public List<AccessRequest> findByUserId(Long userId) {
+        return this.accessRequestRepository.findByUserId(userId);
+    }
 
 }

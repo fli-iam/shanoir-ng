@@ -54,43 +54,43 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StowRSMultipartRelatedRequestFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StowRSMultipartRelatedRequestFilter.class);
 
-	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+    private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
-	private static final String DICOMWEB_STUDIES = "/dicomweb/studies";
+    private static final String DICOMWEB_STUDIES = "/dicomweb/studies";
 
-	@Autowired
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+    @Autowired
+    private DicomSEGAndSRImporterService dicomSRImporterService;
 
     @Override
     public void doFilter(
-			ServletRequest request,
-			ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-    	HttpServletRequest httpRequest = (HttpServletRequest) request;
-    	if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
-    			&& httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
-    			&& httpRequest.getContentType().contains(MediaType.MULTIPART_RELATED_VALUE)) {
-    		try (ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
-    			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
-    			MimeMultipart multipart = new MimeMultipart(datasource);
-    			int count = multipart.getCount();
-    			for (int i = 0; i < count; i++) {
-    				BodyPart bodyPart = multipart.getBodyPart(i);
-    				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					if (!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
-    						throw new ServletException("Error in importDicomSEGAndSR.");
-    					}
-    				} else {
-    					throw new IOException("StowRSMultipartRelatedRequestFilter: exception sending dicom file to pacs (stow-sr).");
-    				}
-    			}
-			} catch (Exception e) {
-				LOG.error(e.getMessage(), e);
-			}
-    		return;
-    	}
+            ServletRequest request,
+            ServletResponse response,
+            FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
+                && httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
+                && httpRequest.getContentType().contains(MediaType.MULTIPART_RELATED_VALUE)) {
+            try (ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
+                ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
+                MimeMultipart multipart = new MimeMultipart(datasource);
+                int count = multipart.getCount();
+                for (int i = 0; i < count; i++) {
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
+                        if (!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
+                            throw new ServletException("Error in importDicomSEGAndSR.");
+                        }
+                    } else {
+                        throw new IOException("StowRSMultipartRelatedRequestFilter: exception sending dicom file to pacs (stow-sr).");
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+            return;
+        }
         chain.doFilter(request, response);
     }
 

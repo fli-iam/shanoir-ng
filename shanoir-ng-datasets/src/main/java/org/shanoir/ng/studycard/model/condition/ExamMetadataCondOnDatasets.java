@@ -38,9 +38,9 @@ import jakarta.persistence.Entity;
 @JsonTypeName("ExamMetadataCondOnDatasets")
 public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
 
-	@Override
+    @Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
     }

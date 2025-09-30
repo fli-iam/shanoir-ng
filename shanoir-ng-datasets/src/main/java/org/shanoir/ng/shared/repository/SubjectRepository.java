@@ -25,10 +25,10 @@ import java.util.List;
  */
 public interface SubjectRepository extends CrudRepository<Subject, Long> {
 
-	Subject findByName(String name);
+    Subject findByName(String name);
 
-	List<Subject> findByStudy(Study study);
+    List<Subject> findByStudy(Study study);
 
-	List<Subject> findByStudy_Id(Long studyId);
+    List<Subject> findByStudy_Id(Long studyId);
 
 }

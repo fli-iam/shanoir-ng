@@ -53,178 +53,178 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class StudyCardServiceSecurityTest {
 
-	private static final long LOGGED_USER_ID = 2L;
-	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final long ENTITY_ID = 1L;
+    private static final long LOGGED_USER_ID = 2L;
+    private static final String LOGGED_USER_USERNAME = "logged";
+    private static final long ENTITY_ID = 1L;
 
-	@Autowired
-	private StudyCardService service;
+    @Autowired
+    private StudyCardService service;
 
-	@MockBean
-	private StudyRightsService rightsService;
+    @MockBean
+    private StudyRightsService rightsService;
 
-	@MockBean
-	private StudyUserRightsRepository rightsRepository;
+    @MockBean
+    private StudyUserRightsRepository rightsRepository;
 
-	@MockBean
-	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
-	@BeforeEach
-	public void setup() {
-		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
-		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
-	}
+    @BeforeEach
+    public void setup() {
+        given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
+        given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
+    }
 
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySet();
-		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+        Set<Long> ids = Mockito.anySet();
+        given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 
-		// Fetch one
-		assertAccessDenied(service::findById, ENTITY_ID);
+        // Fetch one
+        assertAccessDenied(service::findById, ENTITY_ID);
 
-		// Fetch list
-		assertAccessDenied(service::search, Arrays.asList(1L, 2L));
-		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::findStudyCardsByAcqEq, 1L);
-		assertAccessDenied(service::findByStudy, 1L);
+        // Fetch list
+        assertAccessDenied(service::search, Arrays.asList(1L, 2L));
+        assertAccessDenied(service::findAll);
+        assertAccessDenied(service::findStudyCardsByAcqEq, 1L);
+        assertAccessDenied(service::findByStudy, 1L);
 
-		// Write
-		assertAccessDenied(service::deleteById, 4L);
-		assertAccessDenied(service::save, mockStudyCard());
-		assertAccessDenied(service::update, mockStudyCard(1L));
-	}
+        // Write
+        assertAccessDenied(service::deleteById, 4L);
+        assertAccessDenied(service::save, mockStudyCard());
+        assertAccessDenied(service::update, mockStudyCard(1L));
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsUser() throws ShanoirException {
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsUser() throws ShanoirException {
 
-		// Fetch one
-		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(false);
-		assertAccessAuthorized(service::findById, 1L);
-		assertAccessDenied(service::findById, 3L);
+        // Fetch one
+        given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+        given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(false);
+        assertAccessAuthorized(service::findById, 1L);
+        assertAccessDenied(service::findById, 3L);
 
-		// Fetch list
-		HashSet<Long> idSetAuthStudies = new HashSet<Long>(); idSetAuthStudies.add(1L);
-		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSetAuthStudies);
+        // Fetch list
+        HashSet<Long> idSetAuthStudies = new HashSet<Long>(); idSetAuthStudies.add(1L);
+        given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSetAuthStudies);
 
-		assertAccessAuthorized(service::search, Arrays.asList(1L, 2L, 3L));
-		for (StudyCard sc : service.search(Arrays.asList(1L, 2L, 3L))) {
-			assertEquals(new Long(1), sc.getStudyId());
-		}
+        assertAccessAuthorized(service::search, Arrays.asList(1L, 2L, 3L));
+        for (StudyCard sc : service.search(Arrays.asList(1L, 2L, 3L))) {
+            assertEquals(new Long(1), sc.getStudyId());
+        }
 
-		assertAccessAuthorized(service::findAll);
-		for (StudyCard sc : service.findAll()) {
-			assertEquals(new Long(1), sc.getStudyId());
-		}
+        assertAccessAuthorized(service::findAll);
+        for (StudyCard sc : service.findAll()) {
+            assertEquals(new Long(1), sc.getStudyId());
+        }
 
-		assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
-		assertEquals(2, service.findStudyCardsByAcqEq(1L).size());
-		assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
-		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
+        assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
+        assertEquals(2, service.findStudyCardsByAcqEq(1L).size());
+        assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
+        assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 
-		assertAccessAuthorized(service::findByStudy, 1L);
-		assertEquals(3, service.findByStudy(1L).size());
-		assertEquals(0, service.findByStudy(2L).size());
-		assertEquals(0, service.findByStudy(3L).size());
+        assertAccessAuthorized(service::findByStudy, 1L);
+        assertEquals(3, service.findByStudy(1L).size());
+        assertEquals(0, service.findByStudy(2L).size());
+        assertEquals(0, service.findByStudy(3L).size());
 
-		// Write
-		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		HashSet<Long> idSet = new HashSet<Long>(); idSet.add(1L);
-		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSet);
+        // Write
+        given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+        HashSet<Long> idSet = new HashSet<Long>(); idSet.add(1L);
+        given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSet);
 
-		assertAccessDenied(service::deleteById, 4L);
-		assertAccessDenied(service::save, mockStudyCard());
-		assertAccessDenied(service::update, mockStudyCard(1L));
-	}
+        assertAccessDenied(service::deleteById, 4L);
+        assertAccessDenied(service::save, mockStudyCard());
+        assertAccessDenied(service::update, mockStudyCard(1L));
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsExpert() throws ShanoirException {
-		// Fetch one
-		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(false);
-		assertAccessAuthorized(service::findById, 1L);
-		assertAccessDenied(service::findById, 3L);
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsExpert() throws ShanoirException {
+        // Fetch one
+        given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+        given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(false);
+        assertAccessAuthorized(service::findById, 1L);
+        assertAccessDenied(service::findById, 3L);
 
-		// Fetch list
-		HashSet<Long> idSetAuthStudies = new HashSet<Long>(); idSetAuthStudies.add(1L);
-		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSetAuthStudies);
+        // Fetch list
+        HashSet<Long> idSetAuthStudies = new HashSet<Long>(); idSetAuthStudies.add(1L);
+        given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSetAuthStudies);
 
-		assertAccessAuthorized(service::search, Arrays.asList(1L, 2L, 3L));
-		for (StudyCard sc : service.search(Arrays.asList(1L, 2L, 3L))) {
-			assertEquals(new Long(1), sc.getStudyId());
-		}
+        assertAccessAuthorized(service::search, Arrays.asList(1L, 2L, 3L));
+        for (StudyCard sc : service.search(Arrays.asList(1L, 2L, 3L))) {
+            assertEquals(new Long(1), sc.getStudyId());
+        }
 
-		assertAccessAuthorized(service::findAll);
-		for (StudyCard sc : service.findAll()) {
-			assertEquals(new Long(1), sc.getStudyId());
-		}
+        assertAccessAuthorized(service::findAll);
+        for (StudyCard sc : service.findAll()) {
+            assertEquals(new Long(1), sc.getStudyId());
+        }
 
-		assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
-		assertEquals(2, service.findStudyCardsByAcqEq(1L).size());
-		assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
-		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
+        assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
+        assertEquals(2, service.findStudyCardsByAcqEq(1L).size());
+        assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
+        assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 
-		assertAccessAuthorized(service::findByStudy, 1L);
-		assertEquals(3, service.findByStudy(1L).size());
-		assertEquals(0, service.findByStudy(2L).size());
-		assertEquals(0, service.findByStudy(3L).size());
+        assertAccessAuthorized(service::findByStudy, 1L);
+        assertEquals(3, service.findByStudy(1L).size());
+        assertEquals(0, service.findByStudy(2L).size());
+        assertEquals(0, service.findByStudy(3L).size());
 
-		// Write
-		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		HashSet<Long> idSet = new HashSet<Long>(); idSet.add(1L);
-		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSet);
-		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
-		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
+        // Write
+        given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+        HashSet<Long> idSet = new HashSet<Long>(); idSet.add(1L);
+        given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(idSet);
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+        given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
 
-		StudyCard testSc = mockStudyCard();
+        StudyCard testSc = mockStudyCard();
 
-		assertAccessAuthorized(service::save, testSc);
+        assertAccessAuthorized(service::save, testSc);
 
-		assertAccessAuthorized(service::update, testSc);
-		testSc.setStudyId(3L);
-		assertAccessDenied(service::update, testSc);
+        assertAccessAuthorized(service::update, testSc);
+        testSc.setStudyId(3L);
+        assertAccessDenied(service::update, testSc);
 
-		StudyCard testSc2 = mockStudyCard(3L);
-		testSc2.setStudyId(1L);
-		assertAccessDenied(service::update, testSc);
+        StudyCard testSc2 = mockStudyCard(3L);
+        testSc2.setStudyId(1L);
+        assertAccessDenied(service::update, testSc);
 
-		assertAccessAuthorized(service::deleteById, testSc.getId());
-		assertAccessDenied(service::deleteById, 3L);
-	}
+        assertAccessAuthorized(service::deleteById, testSc.getId());
+        assertAccessDenied(service::deleteById, 3L);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAdmin() throws ShanoirException {
-		// Fetch one
-		assertAccessAuthorized(service::findById, ENTITY_ID);
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAdmin() throws ShanoirException {
+        // Fetch one
+        assertAccessAuthorized(service::findById, ENTITY_ID);
 
-		// Fetch list
-		assertAccessAuthorized(service::search, Arrays.asList(1L, 2L));
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
-		assertAccessAuthorized(service::findByStudy, 1L);
+        // Fetch list
+        assertAccessAuthorized(service::search, Arrays.asList(1L, 2L));
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
+        assertAccessAuthorized(service::findByStudy, 1L);
 
-		// Write
-		StudyCard sc = mockStudyCard();
-		assertAccessAuthorized(service::save, sc);
-		assertAccessAuthorized(service::update, sc);
-		assertAccessAuthorized(service::deleteById, sc.getId());
-	}
+        // Write
+        StudyCard sc = mockStudyCard();
+        assertAccessAuthorized(service::save, sc);
+        assertAccessAuthorized(service::update, sc);
+        assertAccessAuthorized(service::deleteById, sc.getId());
+    }
 
-	private StudyCard mockStudyCard(Long id) {
-		StudyCard sc = ModelsUtil.createStudyCard();
-		sc.setId(id);
-		return sc;
-	}
+    private StudyCard mockStudyCard(Long id) {
+        StudyCard sc = ModelsUtil.createStudyCard();
+        sc.setId(id);
+        return sc;
+    }
 
-	private StudyCard mockStudyCard() {
-		return mockStudyCard(null);
-	}
+    private StudyCard mockStudyCard() {
+        return mockStudyCard(null);
+    }
 
 }

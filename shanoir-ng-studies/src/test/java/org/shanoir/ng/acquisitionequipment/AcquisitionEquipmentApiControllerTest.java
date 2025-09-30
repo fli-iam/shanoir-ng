@@ -57,85 +57,85 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class AcquisitionEquipmentApiControllerTest {
 
-	private static final String REQUEST_PATH = "/acquisitionequipments";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/acquisitionequipments";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
+    @MockBean
+    private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 
-	@MockBean
-	private AcquisitionEquipmentService acquisitionEquipmentService;
+    @MockBean
+    private AcquisitionEquipmentService acquisitionEquipmentService;
 
-	@MockBean
-	private ShanoirEventService eventService;
+    @MockBean
+    private ShanoirEventService eventService;
 
-	@MockBean(name = "controllerSecurityService")
-	private ControllerSecurityService controllerSecurityService;
+    @MockBean(name = "controllerSecurityService")
+    private ControllerSecurityService controllerSecurityService;
 
-	@BeforeEach
-	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		given(acquisitionEquipmentMapper
-				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyList()))
-						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
-		AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
-		acqEq.setId(Long.valueOf(123));
-		AcquisitionEquipment equip = new AcquisitionEquipment();
-		equip.setId(1L);
-		given(acquisitionEquipmentMapper
-				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
-						.willReturn(acqEq);
-		doNothing().when(acquisitionEquipmentService).deleteById(1L);
-		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(equip));
-		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(equip));
-		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(equip);
-		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
-	}
+    @BeforeEach
+    public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
+        given(acquisitionEquipmentMapper
+                .acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyList()))
+                        .willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
+        AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
+        acqEq.setId(Long.valueOf(123));
+        AcquisitionEquipment equip = new AcquisitionEquipment();
+        equip.setId(1L);
+        given(acquisitionEquipmentMapper
+                .acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
+                        .willReturn(acqEq);
+        doNothing().when(acquisitionEquipmentService).deleteById(1L);
+        given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(equip));
+        given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(equip));
+        given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(equip);
+        given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteAcquisitionEquipmentTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteAcquisitionEquipmentTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteAcquisitionEquipmentUnknownTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNotFound());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteAcquisitionEquipmentUnknownTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
-	@Test
-	@WithMockUser
-	public void findAcquisitionEquipmentByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void findAcquisitionEquipmentByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void findAcquisitionEquipmentsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void findAcquisitionEquipmentsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewAcquisitionEquipmentTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewAcquisitionEquipmentTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateAcquisitionEquipmentTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateAcquisitionEquipmentTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
+                .andExpect(status().isNoContent());
+    }
 
 }

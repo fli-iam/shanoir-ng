@@ -32,36 +32,36 @@ import java.util.Set;
 @Service
 public class SecurityService {
 
-	@Autowired
-	StudyUserRightsRepository rightsRepository;
+    @Autowired
+    StudyUserRightsRepository rightsRepository;
 
-	@Autowired
-	StudyRepository studyRepository;
+    @Autowired
+    StudyRepository studyRepository;
 
-	/**
-	 * Get study center rights for the current user as two separate variable.
-	 *
-	 * @param studyCenterIds is to be populated with the current user's study-centers
-	 * @param unrestrictedStudies is to be populated with the current user's unrestricted studies
-	 */
-	public void getStudyCentersAndUnrestrictedStudies(List<Pair<Long, Long>> studyCenters, Set<Long> unrestrictedStudies) {
-		Long userId = KeycloakUtil.getTokenUserId();
-		// Check if user has restrictions.
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			for (Study stud : studyRepository.findAll()) {
-				unrestrictedStudies.add(stud.getId());
-			}
-		} else {
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
-			for (StudyUser studyUser : studyUsers) {
-				if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
-					unrestrictedStudies.add(studyUser.getStudyId());
-				} else {
-					for (Long centerId : studyUser.getCenterIds()) {
-						studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));
-					}
-				}
-			}
-		}
-	}
+    /**
+     * Get study center rights for the current user as two separate variable.
+     *
+     * @param studyCenterIds is to be populated with the current user's study-centers
+     * @param unrestrictedStudies is to be populated with the current user's unrestricted studies
+     */
+    public void getStudyCentersAndUnrestrictedStudies(List<Pair<Long, Long>> studyCenters, Set<Long> unrestrictedStudies) {
+        Long userId = KeycloakUtil.getTokenUserId();
+        // Check if user has restrictions.
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            for (Study stud : studyRepository.findAll()) {
+                unrestrictedStudies.add(stud.getId());
+            }
+        } else {
+            List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
+            for (StudyUser studyUser : studyUsers) {
+                if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
+                    unrestrictedStudies.add(studyUser.getStudyId());
+                } else {
+                    for (Long centerId : studyUser.getCenterIds()) {
+                        studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));
+                    }
+                }
+            }
+        }
+    }
 }

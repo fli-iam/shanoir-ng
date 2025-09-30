@@ -28,20 +28,20 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class SegmentationDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -2192498115566764115L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -2192498115566764115L;
 
-	public SegmentationDataset() { }
+    public SegmentationDataset() { }
 
-	public SegmentationDataset(Dataset other) {
-		super(other);
-	}
+    public SegmentationDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.SEGMENTATION;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.SEGMENTATION;
+    }
 
 }

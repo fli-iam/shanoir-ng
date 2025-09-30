@@ -30,42 +30,42 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Xa")
 public class XaDatasetAcquisition extends DatasetAcquisition {
 
-	public static final String DATASET_ACQUISITION_TYPE = "Xa";
+    public static final String DATASET_ACQUISITION_TYPE = "Xa";
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -1525419756058748021L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -1525419756058748021L;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	private XaProtocol xaProtocol;
+    @OneToOne(cascade = CascadeType.ALL)
+    private XaProtocol xaProtocol;
 
-	public XaDatasetAcquisition() {
-	}
+    public XaDatasetAcquisition() {
+    }
 
-	public XaDatasetAcquisition(DatasetAcquisition other) {
-		super(other);
-		this.xaProtocol = new XaProtocol(this);
-	}
+    public XaDatasetAcquisition(DatasetAcquisition other) {
+        super(other);
+        this.xaProtocol = new XaProtocol(this);
+    }
 
-	/**
-	 * @return the xaProtocol
-	 */
-	public XaProtocol getXaProtocol() {
-		return xaProtocol;
-	}
+    /**
+     * @return the xaProtocol
+     */
+    public XaProtocol getXaProtocol() {
+        return xaProtocol;
+    }
 
-	/**
-	 * @param xaProtocol
-	 *            the xaProtocol to set
-	 */
-	public void setXaProtocol(XaProtocol xaProtocol) {
-		this.xaProtocol = xaProtocol;
-	}
+    /**
+     * @param xaProtocol
+     *            the xaProtocol to set
+     */
+    public void setXaProtocol(XaProtocol xaProtocol) {
+        this.xaProtocol = xaProtocol;
+    }
 
-	@Override
-	public String getType() {
-		return "Xa";
-	}
+    @Override
+    public String getType() {
+        return "Xa";
+    }
 
 }

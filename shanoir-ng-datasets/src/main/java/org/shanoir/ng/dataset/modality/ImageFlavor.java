@@ -13,52 +13,52 @@ package org.shanoir.ng.dataset.modality;
  */
 public enum ImageFlavor {
 
-	ANGIO_TIME,
+    ANGIO_TIME,
 
-	METABOLITE_MAP,
+    METABOLITE_MAP,
 
-	CINE,
+    CINE,
 
-	DIFFUSION,
+    DIFFUSION,
 
-	FLOW_ENCODED,
+    FLOW_ENCODED,
 
-	FLUID_ATTENUATED,
+    FLUID_ATTENUATED,
 
-	FMRI,
+    FMRI,
 
-	LOCALIZER,
+    LOCALIZER,
 
-	MAX_IP,
+    MAX_IP,
 
-	MIN_IP,
+    MIN_IP,
 
-	M_MODE,
+    M_MODE,
 
-	MOTION,
+    MOTION,
 
-	PERFUSION,
+    PERFUSION,
 
-	PROTON_DENSITY,
+    PROTON_DENSITY,
 
-	REALTIME,
+    REALTIME,
 
-	STIR,
+    STIR,
 
-	STRESS,
+    STRESS,
 
-	TAGGING,
+    TAGGING,
 
-	TEMPERATURE,
+    TEMPERATURE,
 
-	T1,
+    T1,
 
-	T2,
+    T2,
 
-	T2_STAR,
+    T2_STAR,
 
-	TOF,
+    TOF,
 
-	VELOCITY
+    VELOCITY
 
 }

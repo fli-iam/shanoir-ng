@@ -32,9 +32,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @EnableAsync
 public class ShanoirNiftiConversionConfiguration {
 
-	@Bean(name = "asyncExecutor")
+    @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
-		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(100);
         executor.setMaxPoolSize(100);

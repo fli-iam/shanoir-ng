@@ -60,11 +60,11 @@ public class ExaminationConsistencyServiceJob {
 
     private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 
-   	@Autowired
-	private CurrentNominativeDataController currentNominativeDataController;
+       @Autowired
+    private CurrentNominativeDataController currentNominativeDataController;
 
     @Autowired
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     @Scheduled(fixedRate = THIRTY_MIN_IN_MILLIS)
     public void execute() throws Exception {
@@ -80,16 +80,16 @@ public class ExaminationConsistencyServiceJob {
                 logger.info("ExaminationConsistencyServiceJob ended...");
             }
         }
-	}
+    }
 
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws Exception {
         final List<File> folders = Util.listFolders(workFolder);
-		logger.debug("Found " + folders.size() + " folders in work folder.");
-		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			final File importJobFolder = (File) foldersIt.next();
-			final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-			// file could be missing in case of downloadOrCopy ongoing
-			if (importJobFile.exists()) {
+        logger.debug("Found " + folders.size() + " folders in work folder.");
+        for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
+            final File importJobFolder = (File) foldersIt.next();
+            final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+            // file could be missing in case of downloadOrCopy ongoing
+            if (importJobFile.exists()) {
                 // if the check.on.server flag has been activated after, do not check on previous
                 // already imported folders, as they do not contain any DICOM anymore
                 if (importJobFolder.listFiles().length > 1) {
@@ -122,9 +122,9 @@ public class ExaminationConsistencyServiceJob {
                         }
                     }
                 } // do nothing, keep already imported untouched
-			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
-			}
+            } else {
+                logger.error("Folder found in workFolder without import-job.json.");
+            }
         }
     }
 

@@ -22,8 +22,8 @@ package org.shanoir.ng.shared.exception;
  */
 public class StreamExceptionWrapper extends RuntimeException {
 
-	public StreamExceptionWrapper(Exception exception) {
-		super(exception);
+    public StreamExceptionWrapper(Exception exception) {
+        super(exception);
 
-	}
+    }
 }

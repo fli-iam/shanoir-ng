@@ -22,57 +22,57 @@ package org.shanoir.ng.subject.model;
  */
 public enum Sex {
 
-	/**
-	 * Other.
-	 */
-	O(0),
+    /**
+     * Other.
+     */
+    O(0),
 
-	/**
-	 * Male.
-	 */
-	M(1),
+    /**
+     * Male.
+     */
+    M(1),
 
-	/**
-	 * Female.
-	 */
-	F(2);
+    /**
+     * Female.
+     */
+    F(2);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private Sex(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private Sex(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a sex by its id.
-	 *
-	 * @param id
-	 *            sex id.
-	 * @return sex.
-	 */
-	public static Sex getSex(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (Sex sex : Sex.values()) {
-			if (id.equals(sex.getId())) {
-				return sex;
-			}
-		}
-		throw new IllegalArgumentException("No matching sex for id " + id);
-	}
+    /**
+     * Get a sex by its id.
+     *
+     * @param id
+     *            sex id.
+     * @return sex.
+     */
+    public static Sex getSex(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (Sex sex : Sex.values()) {
+            if (id.equals(sex.getId())) {
+                return sex;
+            }
+        }
+        throw new IllegalArgumentException("No matching sex for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

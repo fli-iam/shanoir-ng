@@ -45,96 +45,96 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class DatasetRepositoryTest {
 
-	@Autowired
-	private DatasetRepository repository;
+    @Autowired
+    private DatasetRepository repository;
 
-	/**
-	 * Test the hierarchy strategy :
-	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 *
-	 * @throws ShanoirException
-	 */
-	@Test
-	public void heritageConcreteTest() throws ShanoirException {
-		MrDataset mr = ModelsUtil.createMrDataset();
-		mr.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
+    /**
+     * Test the hierarchy strategy :
+     * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
+     *
+     * @throws ShanoirException
+     */
+    @Test
+    public void heritageConcreteTest() throws ShanoirException {
+        MrDataset mr = ModelsUtil.createMrDataset();
+        mr.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
 
-		MrDataset result = repository.save(mr); // SAVE AS A MR
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, result.getMrQualityProcedureType());
-		assertNotNull(result.getId());
-		Long id = result.getId();
+        MrDataset result = repository.save(mr); // SAVE AS A MR
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, result.getMrQualityProcedureType());
+        assertNotNull(result.getId());
+        Long id = result.getId();
 
-		Dataset founded = repository.findById(id).orElse(null);
-		assertTrue(founded instanceof MrDataset);
-		MrDataset foundedMr = (MrDataset) founded;
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
-	}
+        Dataset founded = repository.findById(id).orElse(null);
+        assertTrue(founded instanceof MrDataset);
+        MrDataset foundedMr = (MrDataset) founded;
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
+    }
 
-	/**
-	 * Test the hierarchy strategy :
-	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 *
-	 * @throws ShanoirException
-	 */
-	@Test
-	public void heritageAbstractTest() throws ShanoirException {
-		MrDataset mr = ModelsUtil.createMrDataset();
-		mr.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
-		Dataset ds = mr; // <----------
+    /**
+     * Test the hierarchy strategy :
+     * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
+     *
+     * @throws ShanoirException
+     */
+    @Test
+    public void heritageAbstractTest() throws ShanoirException {
+        MrDataset mr = ModelsUtil.createMrDataset();
+        mr.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
+        Dataset ds = mr; // <----------
 
-		Dataset result = repository.save(ds); // SAVE AS A DATASET
-		assertTrue(result instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) result).getMrQualityProcedureType());
-		assertNotNull(result.getId());
-		Long id = result.getId();
+        Dataset result = repository.save(ds); // SAVE AS A DATASET
+        assertTrue(result instanceof MrDataset);
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) result).getMrQualityProcedureType());
+        assertNotNull(result.getId());
+        Long id = result.getId();
 
-		Dataset founded = repository.findById(id).orElse(null);
-		assertTrue(founded instanceof MrDataset);
-		MrDataset foundedMr = (MrDataset) founded;
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
-	}
+        Dataset founded = repository.findById(id).orElse(null);
+        assertTrue(founded instanceof MrDataset);
+        MrDataset foundedMr = (MrDataset) founded;
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
+    }
 
-	/**
-	 * Test the hierarchy strategy :
-	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
-	 *
-	 * @throws ShanoirException
-	 */
-	@Test
-	public void heritageListTest() throws ShanoirException {
-		repository.deleteAll();
-		MrDataset mr1 = ModelsUtil.createMrDataset();
-		mr1.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
-		Long mr1Id = repository.save(mr1).getId();
-		MrDataset mr2 = ModelsUtil.createMrDataset();
-		mr2.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME);
-		Long mr2Id = repository.save(mr2).getId();
-		PetDataset pet1 = ModelsUtil.createPetDataset();
-		Long pet1Id = repository.save(pet1).getId();
+    /**
+     * Test the hierarchy strategy :
+     * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
+     *
+     * @throws ShanoirException
+     */
+    @Test
+    public void heritageListTest() throws ShanoirException {
+        repository.deleteAll();
+        MrDataset mr1 = ModelsUtil.createMrDataset();
+        mr1.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
+        Long mr1Id = repository.save(mr1).getId();
+        MrDataset mr2 = ModelsUtil.createMrDataset();
+        mr2.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME);
+        Long mr2Id = repository.save(mr2).getId();
+        PetDataset pet1 = ModelsUtil.createPetDataset();
+        Long pet1Id = repository.save(pet1).getId();
 
-		List<Dataset> all = Utils.toList(repository.findAllById(Arrays.asList(mr1Id, mr2Id, pet1Id)));
-		assertEquals(3, all.size());
+        List<Dataset> all = Utils.toList(repository.findAllById(Arrays.asList(mr1Id, mr2Id, pet1Id)));
+        assertEquals(3, all.size());
 
-		Dataset foundedMr1 = all.get(0);
-		assertEquals(mr1Id, foundedMr1.getId());
-		assertTrue(foundedMr1 instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) foundedMr1).getMrQualityProcedureType());
+        Dataset foundedMr1 = all.get(0);
+        assertEquals(mr1Id, foundedMr1.getId());
+        assertTrue(foundedMr1 instanceof MrDataset);
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset) foundedMr1).getMrQualityProcedureType());
 
-		Dataset foundedMr2 = all.get(1);
-		assertEquals(mr2Id, foundedMr2.getId());
-		assertTrue(foundedMr2 instanceof MrDataset);
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset) foundedMr2).getMrQualityProcedureType());
+        Dataset foundedMr2 = all.get(1);
+        assertEquals(mr2Id, foundedMr2.getId());
+        assertTrue(foundedMr2 instanceof MrDataset);
+        assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset) foundedMr2).getMrQualityProcedureType());
 
-		Dataset foundedPet1 = all.get(2);
-		assertEquals(pet1Id, foundedPet1.getId());
-		assertTrue(foundedPet1 instanceof PetDataset);
-		assertEquals(DatasetType.PET, ((PetDataset) foundedPet1).getType());
-	}
+        Dataset foundedPet1 = all.get(2);
+        assertEquals(pet1Id, foundedPet1.getId());
+        assertTrue(foundedPet1 instanceof PetDataset);
+        assertEquals(DatasetType.PET, ((PetDataset) foundedPet1).getType());
+    }
 
-	@Test
-	public void loadingStrategyTest() throws ShanoirException {
-		assertNotNull(repository.findById(1L).orElse(null).getDatasetAcquisition());
-		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition());
-	}
+    @Test
+    public void loadingStrategyTest() throws ShanoirException {
+        assertNotNull(repository.findById(1L).orElse(null).getDatasetAcquisition());
+        assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition());
+    }
 
 }

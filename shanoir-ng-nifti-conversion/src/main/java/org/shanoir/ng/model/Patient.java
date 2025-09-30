@@ -32,115 +32,115 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Patient {
 
-	@JsonProperty("patientID")
-	private String patientID;
+    @JsonProperty("patientID")
+    private String patientID;
 
-	@JsonProperty("patientName")
-	private String patientName;
+    @JsonProperty("patientName")
+    private String patientName;
 
-	@JsonProperty("patientBirthName")
-	private String patientBirthName;
+    @JsonProperty("patientBirthName")
+    private String patientBirthName;
 
-	@JsonProperty("patientBirthDate")
-	@LocalDateAnnotations
-	private LocalDate patientBirthDate;
+    @JsonProperty("patientBirthDate")
+    @LocalDateAnnotations
+    private LocalDate patientBirthDate;
 
-	@JsonProperty("patientSex")
-	private String patientSex;
+    @JsonProperty("patientSex")
+    private String patientSex;
 
-	@JsonProperty("patientIdentityRemoved")
-	private boolean patientIdentityRemoved;
+    @JsonProperty("patientIdentityRemoved")
+    private boolean patientIdentityRemoved;
 
-	@JsonProperty("deIdentificationMethod")
-	private String deIdentificationMethod;
+    @JsonProperty("deIdentificationMethod")
+    private String deIdentificationMethod;
 
-	@JsonProperty("subject")
-	private Subject subject;
+    @JsonProperty("subject")
+    private Subject subject;
 
-	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() { }
+    // Keep this empty constructor to avoid Jackson deserialization exceptions
+    public Patient() { }
 
-	public Patient(final Attributes attributes) {
-		this.patientID = attributes.getString(Tag.PatientID);
-		this.patientName = attributes.getString(Tag.PatientName);
-		this.patientBirthName = attributes.getString(Tag.PatientBirthName);
-		this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
-		this.patientSex = attributes.getString(Tag.PatientSex);
-	}
+    public Patient(final Attributes attributes) {
+        this.patientID = attributes.getString(Tag.PatientID);
+        this.patientName = attributes.getString(Tag.PatientName);
+        this.patientBirthName = attributes.getString(Tag.PatientBirthName);
+        this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
+        this.patientSex = attributes.getString(Tag.PatientSex);
+    }
 
-	@JsonProperty("studies")
-	private List<Study> studies;
+    @JsonProperty("studies")
+    private List<Study> studies;
 
-	public String getPatientID() {
-		return patientID;
-	}
+    public String getPatientID() {
+        return patientID;
+    }
 
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
+    }
 
-	public String getPatientName() {
-		return patientName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 
-	public String getPatientBirthName() {
-		return patientBirthName;
-	}
+    public String getPatientBirthName() {
+        return patientBirthName;
+    }
 
-	public void setPatientBirthName(String patientBirthName) {
-		this.patientBirthName = patientBirthName;
-	}
+    public void setPatientBirthName(String patientBirthName) {
+        this.patientBirthName = patientBirthName;
+    }
 
-	public LocalDate getPatientBirthDate() {
-		return patientBirthDate;
-	}
+    public LocalDate getPatientBirthDate() {
+        return patientBirthDate;
+    }
 
-	public void setPatientBirthDate(LocalDate patientBirthDate) {
-		this.patientBirthDate = patientBirthDate;
-	}
+    public void setPatientBirthDate(LocalDate patientBirthDate) {
+        this.patientBirthDate = patientBirthDate;
+    }
 
-	public String getPatientSex() {
-		return patientSex;
-	}
+    public String getPatientSex() {
+        return patientSex;
+    }
 
-	public void setPatientSex(String patientSex) {
-		this.patientSex = patientSex;
-	}
+    public void setPatientSex(String patientSex) {
+        this.patientSex = patientSex;
+    }
 
-	public List<Study> getStudies() {
-		return studies;
-	}
+    public List<Study> getStudies() {
+        return studies;
+    }
 
-	public void setStudies(List<Study> studies) {
-		this.studies = studies;
-	}
+    public void setStudies(List<Study> studies) {
+        this.studies = studies;
+    }
 
-	public Subject getSubject() {
-		return subject;
-	}
+    public Subject getSubject() {
+        return subject;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	public boolean isPatientIdentityRemoved() {
-		return patientIdentityRemoved;
-	}
+    public boolean isPatientIdentityRemoved() {
+        return patientIdentityRemoved;
+    }
 
-	public void setPatientIdentityRemoved(boolean patientIdentityRemoved) {
-		this.patientIdentityRemoved = patientIdentityRemoved;
-	}
+    public void setPatientIdentityRemoved(boolean patientIdentityRemoved) {
+        this.patientIdentityRemoved = patientIdentityRemoved;
+    }
 
-	public String getDeIdentificationMethod() {
-		return deIdentificationMethod;
-	}
+    public String getDeIdentificationMethod() {
+        return deIdentificationMethod;
+    }
 
-	public void setDeIdentificationMethod(String deIdentificationMethod) {
-		this.deIdentificationMethod = deIdentificationMethod;
-	}
+    public void setDeIdentificationMethod(String deIdentificationMethod) {
+        this.deIdentificationMethod = deIdentificationMethod;
+    }
 
 }

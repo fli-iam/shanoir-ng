@@ -34,14 +34,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DatasetProcessingService {
 
-	/**
-	 * Find dataset processing by name.
-	 *
-	 * @param name name.
-	 * @return a dataset processing.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<DatasetProcessing> findByComment(String comment);
+    /**
+     * Find dataset processing by name.
+     *
+     * @param name name.
+     * @return a dataset processing.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Optional<DatasetProcessing> findByComment(String comment);
 
     /**
      * Save an entity.

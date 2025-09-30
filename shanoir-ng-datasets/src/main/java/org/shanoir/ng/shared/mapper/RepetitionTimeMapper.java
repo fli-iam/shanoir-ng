@@ -32,12 +32,12 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 public interface RepetitionTimeMapper {
 
 
-	List<RepetitionTime> repetitionTimeDTOListToRepetitionTimeList(
-			List<Double> repetitionTimeDTOList);
+    List<RepetitionTime> repetitionTimeDTOListToRepetitionTimeList(
+            List<Double> repetitionTimeDTOList);
 
 
-	@Mapping(target = "repetitionTimeValue", source = "repetitionTime")
-	RepetitionTime repetitionTimeDTOToRepetitionTime(
-			Double repetitionTime);
+    @Mapping(target = "repetitionTimeValue", source = "repetitionTime")
+    RepetitionTime repetitionTimeDTOToRepetitionTime(
+            Double repetitionTime);
 
 }

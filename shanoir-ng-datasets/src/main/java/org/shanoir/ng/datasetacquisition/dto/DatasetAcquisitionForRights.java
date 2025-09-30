@@ -17,11 +17,11 @@ package org.shanoir.ng.datasetacquisition.dto;
 
 public class DatasetAcquisitionForRights implements DatasetAcquisitionForRightsProjection {
 
-	private Long id;
+    private Long id;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long centerId;
+    private Long centerId;
 
     public DatasetAcquisitionForRights(Long id, Long centerId, Long studyId) {
         this.centerId = centerId;

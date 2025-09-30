@@ -47,79 +47,79 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class StudyUserServiceImpl implements StudyUserService {
 
-	@Autowired
-	private StudyUserRepository studyUserRepository;
+    @Autowired
+    private StudyUserRepository studyUserRepository;
 
-	@Autowired
-	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
+    @Autowired
+    private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
 
-	@Autowired
-	private ObjectMapper mapper;
+    @Autowired
+    private ObjectMapper mapper;
 
-	@Override
-	public List<StudyUserRight> getRightsForStudy(Long studyId) {
-		Long userId = KeycloakUtil.getTokenUserId();
-		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-		if (studyUser != null) {
-			return studyUser.getStudyUserRights();
-		} else {
-			return new ArrayList<>();
-		}
-	}
+    @Override
+    public List<StudyUserRight> getRightsForStudy(Long studyId) {
+        Long userId = KeycloakUtil.getTokenUserId();
+        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        if (studyUser != null) {
+            return studyUser.getStudyUserRights();
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
-	@Override
-	public Map<Long, List<StudyUserRight>> getRights() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		List<StudyUser> studyUsers = studyUserRepository.findByUserId(userId);
-		if (studyUsers != null) {
-			Map<Long, List<StudyUserRight>> map = new HashMap<>();
-			for (StudyUser studyUser : studyUsers) {
-				map.put(studyUser.getStudyId(), studyUser.getStudyUserRights());
-			}
-			return map;
-		} else {
-			return new HashMap<>();
-		}
-	}
+    @Override
+    public Map<Long, List<StudyUserRight>> getRights() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<StudyUser> studyUsers = studyUserRepository.findByUserId(userId);
+        if (studyUsers != null) {
+            Map<Long, List<StudyUserRight>> map = new HashMap<>();
+            for (StudyUser studyUser : studyUsers) {
+                map.put(studyUser.getStudyId(), studyUser.getStudyUserRights());
+            }
+            return map;
+        } else {
+            return new HashMap<>();
+        }
+    }
 
-	@Override
-	public boolean hasOneStudyToImport() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		for (StudyUser studyUser : studyUserRepository.findByUserId(userId)) {
-			if (studyUser.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT) && studyUser.isConfirmed()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean hasOneStudyToImport() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        for (StudyUser studyUser : studyUserRepository.findByUserId(userId)) {
+            if (studyUser.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT) && studyUser.isConfirmed()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public List<StudyUser> findStudyUsersByStudyId(Long studyId) {
-		List<StudyUser> studyUsers = studyUserRepository.findByStudy_Id(studyId);
-		// two bags contraint on EntityGraph expression in findByStudy_Id: load centers manually
-		studyUsers.stream().forEach(su -> su.setCenters(studyUserRepository.findDistinctCentersByStudyId(studyId)));
-		return studyUsers;
-	}
+    @Override
+    public List<StudyUser> findStudyUsersByStudyId(Long studyId) {
+        List<StudyUser> studyUsers = studyUserRepository.findByStudy_Id(studyId);
+        // two bags contraint on EntityGraph expression in findByStudy_Id: load centers manually
+        studyUsers.stream().forEach(su -> su.setCenters(studyUserRepository.findDistinctCentersByStudyId(studyId)));
+        return studyUsers;
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	@Transactional
-	@Override
-	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
-			Long userId = Long.valueOf(event.getObjectId());
-			List<StudyUser> sus =  this.studyUserRepository.findByUserId(userId);
-			List<StudyUserCommand> commands = new ArrayList<>();
-			for (StudyUser su : sus) {
-				StudyUserCommand command = new StudyUserCommand(CommandType.DELETE, su.getId());
-				commands.add(command);
-			}
-			this.studyUserUpdateBroadcastService.broadcast(commands);
-			this.studyUserRepository.deleteAll(sus);
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    @Transactional
+    @Override
+    public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
+            Long userId = Long.valueOf(event.getObjectId());
+            List<StudyUser> sus =  this.studyUserRepository.findByUserId(userId);
+            List<StudyUserCommand> commands = new ArrayList<>();
+            for (StudyUser su : sus) {
+                StudyUserCommand command = new StudyUserCommand(CommandType.DELETE, su.getId());
+                commands.add(command);
+            }
+            this.studyUserUpdateBroadcastService.broadcast(commands);
+            this.studyUserRepository.deleteAll(sus);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 }

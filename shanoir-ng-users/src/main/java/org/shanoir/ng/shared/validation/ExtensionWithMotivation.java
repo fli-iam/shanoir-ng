@@ -27,19 +27,19 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = ExtensionWithMotivationValidator.class)
 public @interface ExtensionWithMotivation {
 
-	/**
-	 * Message.
-	 */
-	String message() default "Motivation is mandatory for extension request";
+    /**
+     * Message.
+     */
+    String message() default "Motivation is mandatory for extension request";
 
-	/**
-	 * Groups.
-	 */
-	Class<?>[] groups() default {};
+    /**
+     * Groups.
+     */
+    Class<?>[] groups() default {};
 
-	/**
-	 * Payload.
-	 */
-	Class<? extends Payload>[] payload() default {};
+    /**
+     * Payload.
+     */
+    Class<? extends Payload>[] payload() default {};
 
 }

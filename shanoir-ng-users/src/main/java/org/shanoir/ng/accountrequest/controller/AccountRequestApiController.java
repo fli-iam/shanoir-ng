@@ -32,44 +32,44 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
 
-	@Value("${vip.enabled}")
-	private boolean vipEnabled;
+    @Value("${vip.enabled}")
+    private boolean vipEnabled;
 
-	@Override
-	public ResponseEntity<Void> saveNewAccountRequest(
-			@Parameter(name = "user to create from account request", required = true) @RequestBody final User user,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> saveNewAccountRequest(
+            @Parameter(name = "user to create from account request", required = true) @RequestBody final User user,
+            final BindingResult result) throws RestServiceException {
 
-		/* Now we generate a username for the new user creation */
-		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
-			generateUsername(user);
-		}
+        /* Now we generate a username for the new user creation */
+        if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
+            generateUsername(user);
+        }
 
-		user.setExpirationDate(null);
-		user.setAccountRequestDemand(true);
+        user.setExpirationDate(null);
+        user.setAccountRequestDemand(true);
 
-		validate(user, result);
+        validate(user, result);
 
-		user.setCreationDate(LocalDate.now()); // Set creation date on creation.
+        user.setCreationDate(LocalDate.now()); // Set creation date on creation.
 
-		/* Save user in db. */
-		try {
-			User savedUser = getUserService().createAccountRequest(user);
-			if (vipEnabled) {
-				getVipUserService().createVIPAccountRequest(savedUser);
-			}
-		} catch (PasswordPolicyException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
-		} catch (SecurityException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
-		} catch (MicroServiceCommunicationException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
-		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
+        /* Save user in db. */
+        try {
+            User savedUser = getUserService().createAccountRequest(user);
+            if (vipEnabled) {
+                getVipUserService().createVIPAccountRequest(savedUser);
+            }
+        } catch (PasswordPolicyException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
+        } catch (SecurityException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 }

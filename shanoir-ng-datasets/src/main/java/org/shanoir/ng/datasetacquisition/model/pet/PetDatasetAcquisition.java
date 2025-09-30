@@ -30,43 +30,43 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Pet")
 public class PetDatasetAcquisition extends DatasetAcquisition {
 
-	public static final String DATASET_ACQUISITION_TYPE = "Pet";
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -7819600575968825257L;
+    public static final String DATASET_ACQUISITION_TYPE = "Pet";
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -7819600575968825257L;
 
-	/** PET protocol. */
-	@OneToOne(cascade = CascadeType.ALL)
-	private PetProtocol petProtocol;
+    /** PET protocol. */
+    @OneToOne(cascade = CascadeType.ALL)
+    private PetProtocol petProtocol;
 
-	public PetDatasetAcquisition() {
+    public PetDatasetAcquisition() {
 
-	}
+    }
 
-	public PetDatasetAcquisition(DatasetAcquisition other) {
-		super(other);
-		this.petProtocol = new PetProtocol(((PetDatasetAcquisition) other).getPetProtocol(), this);
-	}
+    public PetDatasetAcquisition(DatasetAcquisition other) {
+        super(other);
+        this.petProtocol = new PetProtocol(((PetDatasetAcquisition) other).getPetProtocol(), this);
+    }
 
-	/**
-	 * @return the petProtocol
-	 */
-	public PetProtocol getPetProtocol() {
-		return petProtocol;
-	}
+    /**
+     * @return the petProtocol
+     */
+    public PetProtocol getPetProtocol() {
+        return petProtocol;
+    }
 
-	/**
-	 * @param petProtocol
-	 *            the petProtocol to set
-	 */
-	public void setPetProtocol(PetProtocol petProtocol) {
-		this.petProtocol = petProtocol;
-	}
+    /**
+     * @param petProtocol
+     *            the petProtocol to set
+     */
+    public void setPetProtocol(PetProtocol petProtocol) {
+        this.petProtocol = petProtocol;
+    }
 
-	@Override
-	public String getType() {
-		return "Pet";
-	}
+    @Override
+    public String getType() {
+        return "Pet";
+    }
 
 }

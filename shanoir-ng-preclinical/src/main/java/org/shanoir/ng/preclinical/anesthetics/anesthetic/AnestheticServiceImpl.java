@@ -33,64 +33,64 @@ import org.springframework.stereotype.Service;
 @Service
 public class AnestheticServiceImpl implements AnestheticService {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(AnestheticServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(AnestheticServiceImpl.class);
 
-	@Autowired
-	private AnestheticRepository anestheticsRepository;
+    @Autowired
+    private AnestheticRepository anestheticsRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		anestheticsRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        anestheticsRepository.deleteById(id);
+    }
 
-	@Override
-	public List<Anesthetic> findAll() {
-		return Utils.toList(anestheticsRepository.findAll());
-	}
+    @Override
+    public List<Anesthetic> findAll() {
+        return Utils.toList(anestheticsRepository.findAll());
+    }
 
-	@Override
-	public List<Anesthetic> findAllByAnestheticType(AnestheticType type) {
-		return Utils.toList(anestheticsRepository.findAllByAnestheticType(type));
-	}
+    @Override
+    public List<Anesthetic> findAllByAnestheticType(AnestheticType type) {
+        return Utils.toList(anestheticsRepository.findAllByAnestheticType(type));
+    }
 
-	@Override
-	public Anesthetic findById(final Long id) {
-		return anestheticsRepository.findById(id).orElse(null);
-	}
+    @Override
+    public Anesthetic findById(final Long id) {
+        return anestheticsRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public Anesthetic save(final Anesthetic anesthetic) throws ShanoirException {
-		Anesthetic savedAnesthetic = null;
-		try {
-			savedAnesthetic = anestheticsRepository.save(anesthetic);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating anesthetic: ", dive);
-			throw new ShanoirException("Error while creating anesthetic: ", dive);
-		}
-		return savedAnesthetic;
-	}
+    @Override
+    public Anesthetic save(final Anesthetic anesthetic) throws ShanoirException {
+        Anesthetic savedAnesthetic = null;
+        try {
+            savedAnesthetic = anestheticsRepository.save(anesthetic);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating anesthetic: ", dive);
+            throw new ShanoirException("Error while creating anesthetic: ", dive);
+        }
+        return savedAnesthetic;
+    }
 
-	@Override
-	public Anesthetic update(final Anesthetic anesthetic) throws ShanoirException {
-		final Anesthetic anestheticDb = anestheticsRepository.findById(anesthetic.getId()).orElse(null);
-		updateModelValues(anestheticDb, anesthetic);
-		try {
-			anestheticsRepository.save(anestheticDb);
-		} catch (Exception e) {
-			LOG.error("Error while updating anesthetic: ", e);
-			throw new ShanoirException("Error while updating anesthetic: ", e);
-		}
-		return anestheticDb;
-	}
+    @Override
+    public Anesthetic update(final Anesthetic anesthetic) throws ShanoirException {
+        final Anesthetic anestheticDb = anestheticsRepository.findById(anesthetic.getId()).orElse(null);
+        updateModelValues(anestheticDb, anesthetic);
+        try {
+            anestheticsRepository.save(anestheticDb);
+        } catch (Exception e) {
+            LOG.error("Error while updating anesthetic: ", e);
+            throw new ShanoirException("Error while updating anesthetic: ", e);
+        }
+        return anestheticDb;
+    }
 
-	private Anesthetic updateModelValues(final Anesthetic anestheticDb, final Anesthetic anesthetic) {
-		anestheticDb.setName(anesthetic.getName());
-		anestheticDb.setComment(anesthetic.getComment());
-		anestheticDb.setAnestheticType(anesthetic.getAnestheticType());
-		return anestheticDb;
-	}
+    private Anesthetic updateModelValues(final Anesthetic anestheticDb, final Anesthetic anesthetic) {
+        anestheticDb.setName(anesthetic.getName());
+        anestheticDb.setComment(anesthetic.getComment());
+        anestheticDb.setAnestheticType(anesthetic.getAnestheticType());
+        return anestheticDb;
+    }
 
 }

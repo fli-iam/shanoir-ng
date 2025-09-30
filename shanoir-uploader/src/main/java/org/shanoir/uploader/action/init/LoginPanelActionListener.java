@@ -15,62 +15,62 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 @Component
 public class LoginPanelActionListener implements ActionListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(LoginPanelActionListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginPanelActionListener.class);
 
-	private LoginConfigurationPanel loginPanel;
+    private LoginConfigurationPanel loginPanel;
 
-	private StartupStateContext sSC;
+    private StartupStateContext sSC;
 
-	@Autowired
-	private PacsConfigurationState pacsConfigurationState;
+    @Autowired
+    private PacsConfigurationState pacsConfigurationState;
 
-	@Autowired
-	private AuthenticationManualConfigurationState authenticationManualConfigurationState;
+    @Autowired
+    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
 
-	public void configure(LoginConfigurationPanel loginPanel, StartupStateContext sSC) {
-		this.loginPanel = loginPanel;
-		this.sSC = sSC;
-	}
+    public void configure(LoginConfigurationPanel loginPanel, StartupStateContext sSC) {
+        this.loginPanel = loginPanel;
+        this.sSC = sSC;
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(loginPanel.connect)) {
-			String username = this.loginPanel.loginText.getText();
-			String password = String.valueOf(this.loginPanel.passwordText.getPassword());
-			login(username, password);
-		} else if (e.getSource().equals(loginPanel.connectLater)) {
-			logger.info("Connect later, no username.");
-			ShUpConfig.username = "anonymous";
-			sSC.setState(pacsConfigurationState);
-			sSC.nextState();
-		}
-	}
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource().equals(loginPanel.connect)) {
+            String username = this.loginPanel.loginText.getText();
+            String password = String.valueOf(this.loginPanel.passwordText.getPassword());
+            login(username, password);
+        } else if (e.getSource().equals(loginPanel.connectLater)) {
+            logger.info("Connect later, no username.");
+            ShUpConfig.username = "anonymous";
+            sSC.setState(pacsConfigurationState);
+            sSC.nextState();
+        }
+    }
 
-	public void login(String username, String password) {
-		ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
-		String token;
-		try {
-			token = shanoirUploaderServiceClient.loginWithKeycloakForToken(username, password);
-			if (token != null) {
-				ShUpOnloadConfig.setTokenString(token);
-				sSC.getShUpStartupDialog().updateStartupText(
-						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
-				logger.info("Login successful with username: " + username);
-				ShUpConfig.username = username;
-				sSC.setState(pacsConfigurationState);
-			} else {
-				sSC.getShUpStartupDialog().updateStartupText(
-						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-				sSC.setState(authenticationManualConfigurationState);
-				logger.info("Login error with username: " + username);
-				ShUpConfig.username = null;
-			}
-		} catch (Exception e1) {
-			logger.error(e1.getMessage(), e1);
-			sSC.getShUpStartupDialog().updateStartupText(
-					"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-			sSC.setState(authenticationManualConfigurationState);
-		}
-		sSC.nextState();
-	}
+    public void login(String username, String password) {
+        ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
+        String token;
+        try {
+            token = shanoirUploaderServiceClient.loginWithKeycloakForToken(username, password);
+            if (token != null) {
+                ShUpOnloadConfig.setTokenString(token);
+                sSC.getShUpStartupDialog().updateStartupText(
+                        "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
+                logger.info("Login successful with username: " + username);
+                ShUpConfig.username = username;
+                sSC.setState(pacsConfigurationState);
+            } else {
+                sSC.getShUpStartupDialog().updateStartupText(
+                        "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+                sSC.setState(authenticationManualConfigurationState);
+                logger.info("Login error with username: " + username);
+                ShUpConfig.username = null;
+            }
+        } catch (Exception e1) {
+            logger.error(e1.getMessage(), e1);
+            sSC.getShUpStartupDialog().updateStartupText(
+                    "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+            sSC.setState(authenticationManualConfigurationState);
+        }
+        sSC.nextState();
+    }
 
 }

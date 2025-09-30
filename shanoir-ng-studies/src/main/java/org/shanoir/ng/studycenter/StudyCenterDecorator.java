@@ -28,23 +28,23 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class StudyCenterDecorator implements StudyCenterMapper {
 
-	@Autowired
-	private StudyCenterMapper delegate;
+    @Autowired
+    private StudyCenterMapper delegate;
 
-	@Override
-	public StudyCenterDTO studyCenterToStudyCenterDTO(StudyCenter studyCenter) {
-		return delegate.studyCenterToStudyCenterDTO(studyCenter);
-	}
+    @Override
+    public StudyCenterDTO studyCenterToStudyCenterDTO(StudyCenter studyCenter) {
+        return delegate.studyCenterToStudyCenterDTO(studyCenter);
+    }
 
-	@Override
-	public List<StudyCenterDTO> studyCenterListToStudyCenterDTOList(List<StudyCenter> studyCenterList) {
-		final List<StudyCenterDTO> studyCenterDTOs = new ArrayList<>();
-		if (studyCenterList != null) {
-			for (StudyCenter studyCenter : studyCenterList) {
-				studyCenterDTOs.add(studyCenterToStudyCenterDTO(studyCenter));
-			}
-		}
-		return studyCenterDTOs;
-	}
+    @Override
+    public List<StudyCenterDTO> studyCenterListToStudyCenterDTOList(List<StudyCenter> studyCenterList) {
+        final List<StudyCenterDTO> studyCenterDTOs = new ArrayList<>();
+        if (studyCenterList != null) {
+            for (StudyCenter studyCenter : studyCenterList) {
+                studyCenterDTOs.add(studyCenterToStudyCenterDTO(studyCenter));
+            }
+        }
+        return studyCenterDTOs;
+    }
 
 }

@@ -29,12 +29,12 @@ import org.shanoir.ng.dua.model.DuaDraft;
 @Mapper(componentModel = "spring", uses = { })
 public interface DuaDraftMapper {
 
-	@Mapping(target = "id", ignore = true)
-	DuaDraft duaDraftCreationDTOToDuaDraft(DuaDraftCreationDTO dto);
+    @Mapping(target = "id", ignore = true)
+    DuaDraft duaDraftCreationDTOToDuaDraft(DuaDraftCreationDTO dto);
 
-	@Mapping(target = "studyId", ignore = true)
-	DuaDraft duaDraftDTOToDuaDraft(DuaDraftDTO dto);
+    @Mapping(target = "studyId", ignore = true)
+    DuaDraft duaDraftDTOToDuaDraft(DuaDraftDTO dto);
 
-	DuaDraftDTO duaDraftToDuaDraftDTO(DuaDraft entity);
+    DuaDraftDTO duaDraftToDuaDraftDTO(DuaDraft entity);
 
 }

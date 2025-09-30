@@ -25,20 +25,20 @@ import java.util.List;
 // keep the annotations here.
 public interface CardService<T extends Card> {
 
-	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
+    void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-	T save(T card) throws MicroServiceCommunicationException;
+    T save(T card) throws MicroServiceCommunicationException;
 
-	T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
+    T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-	List<T> findAll();
+    List<T> findAll();
 
-	T findById(Long id);
+    T findById(Long id);
 
-	T findByName(String name);
+    T findByName(String name);
 
-	List<T> search(List<Long> studyIdList);
+    List<T> search(List<Long> studyIdList);
 
-	List<T> findByStudy(Long studyId);
+    List<T> findByStudy(Long studyId);
 
 }

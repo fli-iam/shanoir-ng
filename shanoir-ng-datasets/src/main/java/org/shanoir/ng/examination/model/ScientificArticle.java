@@ -27,52 +27,52 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class ScientificArticle extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 250233615450555267L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 250233615450555267L;
 
-	/** The reference to the article. */
-	@NotNull
-	private String scientificArticleReference;
+    /** The reference to the article. */
+    @NotNull
+    private String scientificArticleReference;
 
-	/**
-	 * the type of article (instrument definition, score standardization, etc.).
-	 */
-	private Integer scientificArticleType;
+    /**
+     * the type of article (instrument definition, score standardization, etc.).
+     */
+    private Integer scientificArticleType;
 
-	/**
-	 * @return the scientificArticleReference
-	 */
-	public String getScientificArticleReference() {
-		return scientificArticleReference;
-	}
+    /**
+     * @return the scientificArticleReference
+     */
+    public String getScientificArticleReference() {
+        return scientificArticleReference;
+    }
 
-	/**
-	 * @param scientificArticleReference
-	 *            the scientificArticleReference to set
-	 */
-	public void setScientificArticleReference(String scientificArticleReference) {
-		this.scientificArticleReference = scientificArticleReference;
-	}
+    /**
+     * @param scientificArticleReference
+     *            the scientificArticleReference to set
+     */
+    public void setScientificArticleReference(String scientificArticleReference) {
+        this.scientificArticleReference = scientificArticleReference;
+    }
 
-	/**
-	 * @return the scientificArticleType
-	 */
-	public ScientificArticleType getScientificArticleType() {
-		return ScientificArticleType.getType(scientificArticleType);
-	}
+    /**
+     * @return the scientificArticleType
+     */
+    public ScientificArticleType getScientificArticleType() {
+        return ScientificArticleType.getType(scientificArticleType);
+    }
 
-	/**
-	 * @param scientificArticleType
-	 *            the scientificArticleType to set
-	 */
-	public void setScientificArticleType(ScientificArticleType scientificArticleType) {
-		if (scientificArticleType == null) {
-			this.scientificArticleType = null;
-		} else {
-			this.scientificArticleType = scientificArticleType.getId();
-		}
-	}
+    /**
+     * @param scientificArticleType
+     *            the scientificArticleType to set
+     */
+    public void setScientificArticleType(ScientificArticleType scientificArticleType) {
+        if (scientificArticleType == null) {
+            this.scientificArticleType = null;
+        } else {
+            this.scientificArticleType = scientificArticleType.getId();
+        }
+    }
 
 }

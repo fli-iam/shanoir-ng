@@ -30,10 +30,10 @@ import org.shanoir.ng.preclinical.references.Reference;
  */
 public interface SubjectPathologyRepositoryCustom {
 
-	List<SubjectPathology> findAllByPathology(Pathology pathology);
+    List<SubjectPathology> findAllByPathology(Pathology pathology);
 
-	List<SubjectPathology> findAllByPathologyModel(PathologyModel model);
+    List<SubjectPathology> findAllByPathologyModel(PathologyModel model);
 
-	List<SubjectPathology> findAllByLocation(Reference location);
+    List<SubjectPathology> findAllByLocation(Reference location);
 
 }

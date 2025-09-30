@@ -41,50 +41,50 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CenterRepositoryTest {
 
-	private static final String CENTER_TEST_1_NAME = "CHU Rennes";
-	private static final Long CENTER_TEST_1_ID = 1L;
+    private static final String CENTER_TEST_1_NAME = "CHU Rennes";
+    private static final Long CENTER_TEST_1_ID = 1L;
 
-	@Autowired
-	private CenterRepository repository;
+    @Autowired
+    private CenterRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<Center> centersDb = repository.findAll();
-		assertThat(centersDb).isNotNull();
-		int nbCenters = 0;
-		Iterator<Center> centersIt = centersDb.iterator();
-		while (centersIt.hasNext()) {
-			centersIt.next();
-			nbCenters++;
-		}
-		assertThat(nbCenters).isEqualTo(2);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<Center> centersDb = repository.findAll();
+        assertThat(centersDb).isNotNull();
+        int nbCenters = 0;
+        Iterator<Center> centersIt = centersDb.iterator();
+        while (centersIt.hasNext()) {
+            centersIt.next();
+            nbCenters++;
+        }
+        assertThat(nbCenters).isEqualTo(2);
+    }
 
-	@Test
-	public void findByNameTest() throws Exception {
-		Optional<Center> centerDb = repository.findFirstByNameContainingOrderByIdAsc(CENTER_TEST_1_NAME);
-		assertNotNull(centerDb.get());
-		assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
-	}
+    @Test
+    public void findByNameTest() throws Exception {
+        Optional<Center> centerDb = repository.findFirstByNameContainingOrderByIdAsc(CENTER_TEST_1_NAME);
+        assertNotNull(centerDb.get());
+        assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
+    }
 
-	@Test
-	public void findIdsAndNamesTest() throws Exception {
-		List<IdName> centersDb = repository.findIdsAndNames();
-		assertNotNull(centersDb);
-		assertThat(centersDb.size()).isEqualTo(2);
-	}
+    @Test
+    public void findIdsAndNamesTest() throws Exception {
+        List<IdName> centersDb = repository.findIdsAndNames();
+        assertNotNull(centersDb);
+        assertThat(centersDb.size()).isEqualTo(2);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		Center centerDb = repository.findById(CENTER_TEST_1_ID).orElse(null);
-		assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        Center centerDb = repository.findById(CENTER_TEST_1_ID).orElse(null);
+        assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
+    }
 
-	@Test
-	public void findNamesByStudyIdTest() throws Exception {
-		List<IdName> centersDb = repository.findIdsAndNames(1L);
-		assertNotNull(centersDb);
-		assertThat(centersDb.size()).isEqualTo(2);
-	}
+    @Test
+    public void findNamesByStudyIdTest() throws Exception {
+        List<IdName> centersDb = repository.findIdsAndNames(1L);
+        assertNotNull(centersDb);
+        assertThat(centersDb.size()).isEqualTo(2);
+    }
 
 }

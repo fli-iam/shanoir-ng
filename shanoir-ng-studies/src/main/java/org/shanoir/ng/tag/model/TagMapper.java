@@ -9,20 +9,20 @@ import org.mapstruct.Mapper;
 @DecoratedWith(TagDecorator.class)
 public interface TagMapper {
 
-	/**
-	 * Map list of @Tag to list of @TagDTO.
-	 *
-	 * @param tagList
-	 *            list of tags
-	 * @return list of DTO.
-	 */
-	List<TagDTO> tagListToTagDTOList(List<Tag> tagList);
+    /**
+     * Map list of @Tag to list of @TagDTO.
+     *
+     * @param tagList
+     *            list of tags
+     * @return list of DTO.
+     */
+    List<TagDTO> tagListToTagDTOList(List<Tag> tagList);
 
-	/**
-	 * Map a @Tag to a @TagDTO.
-	 *
-	 * @param tag
-	 * @return DTO.
-	 */
-	TagDTO tagToTagDTO(Tag tag);
+    /**
+     * Map a @Tag to a @TagDTO.
+     *
+     * @param tag
+     * @return DTO.
+     */
+    TagDTO tagToTagDTO(Tag tag);
 }

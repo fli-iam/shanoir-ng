@@ -76,7 +76,7 @@ public class DicomPushTest {
             throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-       	Device device = new Device(this.getClass().getName());
+           Device device = new Device(this.getClass().getName());
         device.setExecutor(executor);
         device.setScheduledExecutor(scheduledExecutor);
         ApplicationEntity ae = new ApplicationEntity(CALLING_AET);

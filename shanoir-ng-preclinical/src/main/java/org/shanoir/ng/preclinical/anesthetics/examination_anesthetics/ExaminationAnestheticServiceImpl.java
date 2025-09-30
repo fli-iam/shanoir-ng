@@ -34,75 +34,75 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticService {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ExaminationAnestheticServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(ExaminationAnestheticServiceImpl.class);
 
-	@Autowired
-	private ExaminationAnestheticRepository examAnestheticsRepository;
+    @Autowired
+    private ExaminationAnestheticRepository examAnestheticsRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		examAnestheticsRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        examAnestheticsRepository.deleteById(id);
+    }
 
-	@Override
-	public List<ExaminationAnesthetic> findAll() {
-		return Utils.toList(examAnestheticsRepository.findAll());
-	}
+    @Override
+    public List<ExaminationAnesthetic> findAll() {
+        return Utils.toList(examAnestheticsRepository.findAll());
+    }
 
-	@Override
-	public List<ExaminationAnesthetic> findByExaminationId(Long examinationId) {
-		return Utils.toList(examAnestheticsRepository.findByExaminationId(examinationId));
-	}
+    @Override
+    public List<ExaminationAnesthetic> findByExaminationId(Long examinationId) {
+        return Utils.toList(examAnestheticsRepository.findByExaminationId(examinationId));
+    }
 
-	@Override
-	public ExaminationAnesthetic findById(final Long id) {
-		return examAnestheticsRepository.findById(id).orElse(null);
-	}
+    @Override
+    public ExaminationAnesthetic findById(final Long id) {
+        return examAnestheticsRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public ExaminationAnesthetic save(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
-		ExaminationAnesthetic savedExamAnesthetic = null;
-		try {
-			savedExamAnesthetic = examAnestheticsRepository.save(examAnesthetic);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating an  examination anesthetic:  ", dive);
-			throw new ShanoirException("Error while creating an  examination anesthetic:  ", dive);
-		}
-		return savedExamAnesthetic;
-	}
+    @Override
+    public ExaminationAnesthetic save(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
+        ExaminationAnesthetic savedExamAnesthetic = null;
+        try {
+            savedExamAnesthetic = examAnestheticsRepository.save(examAnesthetic);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating an  examination anesthetic:  ", dive);
+            throw new ShanoirException("Error while creating an  examination anesthetic:  ", dive);
+        }
+        return savedExamAnesthetic;
+    }
 
-	@Override
-	public ExaminationAnesthetic update(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
-		final ExaminationAnesthetic examAnestheticDb = examAnestheticsRepository.findById(examAnesthetic.getId()).orElse(null);
-		updateModelValues(examAnestheticDb, examAnesthetic);
-		try {
-			examAnestheticsRepository.save(examAnestheticDb);
-		} catch (Exception e) {
-			LOG.error("Error while updating an  examination anesthetic:  ", e);
-			throw new ShanoirException("Error while updating an  examination anesthetic:  ", e);
-		}
-		return examAnestheticDb;
-	}
+    @Override
+    public ExaminationAnesthetic update(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
+        final ExaminationAnesthetic examAnestheticDb = examAnestheticsRepository.findById(examAnesthetic.getId()).orElse(null);
+        updateModelValues(examAnestheticDb, examAnesthetic);
+        try {
+            examAnestheticsRepository.save(examAnestheticDb);
+        } catch (Exception e) {
+            LOG.error("Error while updating an  examination anesthetic:  ", e);
+            throw new ShanoirException("Error while updating an  examination anesthetic:  ", e);
+        }
+        return examAnestheticDb;
+    }
 
-	@Override
-	public List<ExaminationAnesthetic> findByAnesthetic(Anesthetic anesthetic) {
-		return Utils.toList(examAnestheticsRepository.findByAnesthetic(anesthetic));
-	}
+    @Override
+    public List<ExaminationAnesthetic> findByAnesthetic(Anesthetic anesthetic) {
+        return Utils.toList(examAnestheticsRepository.findByAnesthetic(anesthetic));
+    }
 
-	private ExaminationAnesthetic updateModelValues(final ExaminationAnesthetic examAnestheticDb,
-			final ExaminationAnesthetic examAnesthetic) {
-		examAnestheticDb.setAnesthetic(examAnesthetic.getAnesthetic());
-		examAnestheticDb.setDose(examAnesthetic.getDose());
-		examAnestheticDb.setDoseUnit(examAnesthetic.getDoseUnit());
-		examAnestheticDb.setInjectionInterval(examAnesthetic.getInjectionInterval());
-		examAnestheticDb.setInjectionSite(examAnesthetic.getInjectionSite());
-		examAnestheticDb.setInjectionType(examAnesthetic.getInjectionType());
-		examAnestheticDb.setStartDate(examAnesthetic.getStartDate());
-		examAnestheticDb.setEndDate(examAnesthetic.getEndDate());
-		return examAnestheticDb;
-	}
+    private ExaminationAnesthetic updateModelValues(final ExaminationAnesthetic examAnestheticDb,
+            final ExaminationAnesthetic examAnesthetic) {
+        examAnestheticDb.setAnesthetic(examAnesthetic.getAnesthetic());
+        examAnestheticDb.setDose(examAnesthetic.getDose());
+        examAnestheticDb.setDoseUnit(examAnesthetic.getDoseUnit());
+        examAnestheticDb.setInjectionInterval(examAnesthetic.getInjectionInterval());
+        examAnestheticDb.setInjectionSite(examAnesthetic.getInjectionSite());
+        examAnestheticDb.setInjectionType(examAnesthetic.getInjectionType());
+        examAnestheticDb.setStartDate(examAnesthetic.getStartDate());
+        examAnestheticDb.setEndDate(examAnesthetic.getEndDate());
+        return examAnestheticDb;
+    }
 
 }

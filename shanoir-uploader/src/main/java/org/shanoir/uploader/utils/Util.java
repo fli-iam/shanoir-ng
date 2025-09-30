@@ -66,544 +66,544 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  */
 public final class Util {
 
-	private static final String DATE_PATTERN = "dd/MM/yyyy";
+    private static final String DATE_PATTERN = "dd/MM/yyyy";
 
-	private static final Logger logger = LoggerFactory.getLogger(Util.class);
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
-	/** Time pattern. */
-	public static String TIME_PATTERN = "HH'h'mm'm'ss's'";
+    /** Time pattern. */
+    public static String TIME_PATTERN = "HH'h'mm'm'ss's'";
 
-	/** Time pattern for file system. */
-	public static String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
+    /** Time pattern for file system. */
+    public static String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
 
-	public static ObjectMapper objectMapper = new ObjectMapper();
+    public static ObjectMapper objectMapper = new ObjectMapper();
 
-	public static ObjectWriter objectWriter;
+    public static ObjectWriter objectWriter;
 
-	static {
-		objectMapper
-			.registerModule(new JavaTimeModule())
-			.registerModule(new Jdk8Module())
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
-	}
+    static {
+        objectMapper
+            .registerModule(new JavaTimeModule())
+            .registerModule(new Jdk8Module())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+    }
 
-	/**
-	 * Convert an array into its string representation.
-	 *
-	 * @param array the array
-	 *
-	 * @return the string[]
-	 */
-	public static String arrayToString(final Object[] array) {
-		String result = "null";
-		if (array != null) {
-			result = "[";
-			if (array.length > 0) {
-				for (int i = 0; i < array.length; i++) {
-					final Object obj = array[i];
-					if (obj != null) {
-						result += obj.toString();
-					}
-					if (i != array.length - 1) {
-						result += ", ";
-					}
-				}
-			}
-			result += "]";
-		}
-		return result;
-	}
+    /**
+     * Convert an array into its string representation.
+     *
+     * @param array the array
+     *
+     * @return the string[]
+     */
+    public static String arrayToString(final Object[] array) {
+        String result = "null";
+        if (array != null) {
+            result = "[";
+            if (array.length > 0) {
+                for (int i = 0; i < array.length; i++) {
+                    final Object obj = array[i];
+                    if (obj != null) {
+                        result += obj.toString();
+                    }
+                    if (i != array.length - 1) {
+                        result += ", ";
+                    }
+                }
+            }
+            result += "]";
+        }
+        return result;
+    }
 
-	/**
-	 * Try to compute patient first name from dicom tags. eg TOM^HANKS -> return TOM
-	 *
-	 * @param name the name of the patient
-	 *
-	 * @return the patient first name
-	 */
-	public static String computeFirstName(final String name) {
-		if (name != null) {
-			final String[] names = name.split("\\^");
-			if (names != null && names.length == 2) {
-				return names[1];
-			}
-		}
-		return name;
-	}
+    /**
+     * Try to compute patient first name from dicom tags. eg TOM^HANKS -> return TOM
+     *
+     * @param name the name of the patient
+     *
+     * @return the patient first name
+     */
+    public static String computeFirstName(final String name) {
+        if (name != null) {
+            final String[] names = name.split("\\^");
+            if (names != null && names.length == 2) {
+                return names[1];
+            }
+        }
+        return name;
+    }
 
-	/**
-	 * Try to compute patient last name from dicom tags. eg TOM^HANKS -> return
-	 * HANKS
-	 *
-	 * @param name the name of the patient
-	 *
-	 * @return the patient last name
-	 */
-	public static String computeLastName(final String name) {
-		if (name != null) {
-			final String[] names = name.split("\\^");
-			if (names != null && names.length == 2) {
-				return names[0];
-			}
-		}
-		return name;
-	}
+    /**
+     * Try to compute patient last name from dicom tags. eg TOM^HANKS -> return
+     * HANKS
+     *
+     * @param name the name of the patient
+     *
+     * @return the patient last name
+     */
+    public static String computeLastName(final String name) {
+        if (name != null) {
+            final String[] names = name.split("\\^");
+            if (names != null && names.length == 2) {
+                return names[0];
+            }
+        }
+        return name;
+    }
 
-	public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-		return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-	}
+    public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
 
-	public static void copyFileFromJar(final String fileName, final File file) {
-		InputStream iS = null;
-		FileOutputStream fOS = null;
-		try {
-			iS = Util.class.getResourceAsStream("/" + fileName);
-			if (iS != null) {
-				file.createNewFile();
-				fOS = new FileOutputStream(file);
-				byte[] buffer = new byte[1024];
-				int len;
-				while ((len = iS.read(buffer)) != -1) {
-					fOS.write(buffer, 0, len);
-				}
-			}
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage());
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-		} finally {
-			try {
-				if (iS != null) {
-					iS.close();
-				}
-				if (fOS != null) {
-					fOS.close();
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage());
-			}
-		}
-	}
+    public static void copyFileFromJar(final String fileName, final File file) {
+        InputStream iS = null;
+        FileOutputStream fOS = null;
+        try {
+            iS = Util.class.getResourceAsStream("/" + fileName);
+            if (iS != null) {
+                file.createNewFile();
+                fOS = new FileOutputStream(file);
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = iS.read(buffer)) != -1) {
+                    fOS.write(buffer, 0, len);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        } finally {
+            try {
+                if (iS != null) {
+                    iS.close();
+                }
+                if (fOS != null) {
+                    fOS.close();
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        }
+    }
 
-	public static void copyFileUsingStream(File source, File dest) throws IOException {
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			is = new FileInputStream(source);
-			os = new FileOutputStream(dest);
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = is.read(buffer)) > 0) {
-				os.write(buffer, 0, length);
-			}
-		} finally {
-			is.close();
-			os.close();
-		}
-	}
+    public static void copyFileUsingStream(File source, File dest) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
+        }
+    }
 
-	/**
-	 * Copy the contents of pseudonymus folder into .SU
-	 *
-	 * @param folderName
-	 */
-	public static void copyPseudonymusFolder(String folderName) {
-		logger.info("start " + folderName + " copy");
-		final File destinationFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator + folderName);
-		boolean propertiesExists = destinationFolder.exists();
-		if (propertiesExists) {
-			// do nothing
-			logger.info(folderName + " folder already exists.");
-		} else {
-			try {
-				// create pseudonymus folder
-				destinationFolder.mkdirs();
-				String[] folderContents = getResourceListing(ShanoirUploader.class,
-						Pseudonymizer.PSEUDONYMUS_FOLDER + "/");
-				for (int i = 0; i < folderContents.length; i++) {
-					final File subDestinationFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator
-							+ folderName + File.separator + folderContents[i]);
-					// create folders inside pseudonymus folder
-					subDestinationFolder.mkdir();
-					// copy files
-					String[] subFolderContents = getResourceListing(ShanoirUploader.class,
-							Pseudonymizer.PSEUDONYMUS_FOLDER + "/" + folderContents[i] + "/");
-					for (int j = 0; j < subFolderContents.length; j++) {
-						final File destinationFolder2 = new File(
-								ShUpConfig.shanoirUploaderFolder + File.separator + folderName + File.separator
-										+ folderContents[i] + File.separator + subFolderContents[j]);
-						copyFileFromJar(folderName + "/" + folderContents[i] + "/" + subFolderContents[j],
-								destinationFolder2);
-						logger.info(folderName + "/" + folderContents[i] + "/" + subFolderContents[j]
-								+ " successfully copied");
-					}
-				}
-				logger.info("end " + folderName + " copy");
-			} catch (Exception e) {
-				logger.error(folderName + " could not be copied: " + e.getMessage(), e);
-			}
-		}
-	}
+    /**
+     * Copy the contents of pseudonymus folder into .SU
+     *
+     * @param folderName
+     */
+    public static void copyPseudonymusFolder(String folderName) {
+        logger.info("start " + folderName + " copy");
+        final File destinationFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator + folderName);
+        boolean propertiesExists = destinationFolder.exists();
+        if (propertiesExists) {
+            // do nothing
+            logger.info(folderName + " folder already exists.");
+        } else {
+            try {
+                // create pseudonymus folder
+                destinationFolder.mkdirs();
+                String[] folderContents = getResourceListing(ShanoirUploader.class,
+                        Pseudonymizer.PSEUDONYMUS_FOLDER + "/");
+                for (int i = 0; i < folderContents.length; i++) {
+                    final File subDestinationFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator
+                            + folderName + File.separator + folderContents[i]);
+                    // create folders inside pseudonymus folder
+                    subDestinationFolder.mkdir();
+                    // copy files
+                    String[] subFolderContents = getResourceListing(ShanoirUploader.class,
+                            Pseudonymizer.PSEUDONYMUS_FOLDER + "/" + folderContents[i] + "/");
+                    for (int j = 0; j < subFolderContents.length; j++) {
+                        final File destinationFolder2 = new File(
+                                ShUpConfig.shanoirUploaderFolder + File.separator + folderName + File.separator
+                                        + folderContents[i] + File.separator + subFolderContents[j]);
+                        copyFileFromJar(folderName + "/" + folderContents[i] + "/" + subFolderContents[j],
+                                destinationFolder2);
+                        logger.info(folderName + "/" + folderContents[i] + "/" + subFolderContents[j]
+                                + " successfully copied");
+                    }
+                }
+                logger.info("end " + folderName + " copy");
+            } catch (Exception e) {
+                logger.error(folderName + " could not be copied: " + e.getMessage(), e);
+            }
+        }
+    }
 
-	/**
-	 * This method copies the content of the dicom.server.properties in the .jar
-	 * file to the same file in the user.home.
-	 *
-	 * @param propertiesFile
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public static void encryptPasswordAndCopyPropertiesFile(File shanoirUploaderFolder, Properties propertyObject,
-			String propertyFile, final String passwordPropertyName) {
-		if (propertyObject.getProperty(passwordPropertyName) != null
-				&& !propertyObject.getProperty(passwordPropertyName).equals("")) {
-			propertyObject.setProperty(passwordPropertyName,
-					ShUpConfig.encryption.cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
-		} else {
-			propertyObject.setProperty(passwordPropertyName, "");
-		}
-		final File propertiesFile = new File(shanoirUploaderFolder + File.separator + propertyFile);
-		OutputStream out;
-		try {
-			out = new FileOutputStream(propertiesFile);
-			try {
-				propertyObject.store(out, "Configuration");
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-			out.close();
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
+    /**
+     * This method copies the content of the dicom.server.properties in the .jar
+     * file to the same file in the user.home.
+     *
+     * @param propertiesFile
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public static void encryptPasswordAndCopyPropertiesFile(File shanoirUploaderFolder, Properties propertyObject,
+            String propertyFile, final String passwordPropertyName) {
+        if (propertyObject.getProperty(passwordPropertyName) != null
+                && !propertyObject.getProperty(passwordPropertyName).equals("")) {
+            propertyObject.setProperty(passwordPropertyName,
+                    ShUpConfig.encryption.cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
+        } else {
+            propertyObject.setProperty(passwordPropertyName, "");
+        }
+        final File propertiesFile = new File(shanoirUploaderFolder + File.separator + propertyFile);
+        OutputStream out;
+        try {
+            out = new FileOutputStream(propertiesFile);
+            try {
+                propertyObject.store(out, "Configuration");
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+            out.close();
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
-	public static String generateErrorMessage(ResourceBundle resourceBundle, String message, boolean contactAdmin) {
-		if (contactAdmin) {
-			return "<html><body><p>" + resourceBundle.getString(message) + "</p><p><i>"
-					+ resourceBundle.getString("shanoir.uploader.systemErrorDialog.contactAdmin")
-					+ "</i></p></body></html>";
-		} else {
-			return "<html><body><p>" + resourceBundle.getString(message) + "</p></body></html>";
-		}
-	}
+    public static String generateErrorMessage(ResourceBundle resourceBundle, String message, boolean contactAdmin) {
+        if (contactAdmin) {
+            return "<html><body><p>" + resourceBundle.getString(message) + "</p><p><i>"
+                    + resourceBundle.getString("shanoir.uploader.systemErrorDialog.contactAdmin")
+                    + "</i></p></body></html>";
+        } else {
+            return "<html><body><p>" + resourceBundle.getString(message) + "</p></body></html>";
+        }
+    }
 
-	/**
-	 * For OFSEP, do not transfer the real birth date but the first day of the year
-	 *
-	 * @return the date of the first day of the year
-	 */
-	public static Date getFirstDayOfTheYear(Date pBirthDate) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("getFirstDayOfTheYear : Begin");
-			logger.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
-		}
+    /**
+     * For OFSEP, do not transfer the real birth date but the first day of the year
+     *
+     * @return the date of the first day of the year
+     */
+    public static Date getFirstDayOfTheYear(Date pBirthDate) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("getFirstDayOfTheYear : Begin");
+            logger.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
+        }
 
-		if (pBirthDate != null) {
-			final GregorianCalendar birthDate = new GregorianCalendar();
-			birthDate.setTime(pBirthDate);
-			// set day and month to 01/01
-			birthDate.set(Calendar.MONTH, Calendar.JANUARY);
-			birthDate.set(Calendar.DAY_OF_MONTH, 1);
-			birthDate.set(Calendar.HOUR, 1);
-			if (logger.isDebugEnabled()) {
-				logger.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
-				logger.debug("getFirstDayOfTheYear : End");
-			}
+        if (pBirthDate != null) {
+            final GregorianCalendar birthDate = new GregorianCalendar();
+            birthDate.setTime(pBirthDate);
+            // set day and month to 01/01
+            birthDate.set(Calendar.MONTH, Calendar.JANUARY);
+            birthDate.set(Calendar.DAY_OF_MONTH, 1);
+            birthDate.set(Calendar.HOUR, 1);
+            if (logger.isDebugEnabled()) {
+                logger.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
+                logger.debug("getFirstDayOfTheYear : End");
+            }
 
-			return birthDate.getTime();
-		}
+            return birthDate.getTime();
+        }
 
-		logger.debug("getFirstDayOfTheYear : End - return null");
+        logger.debug("getFirstDayOfTheYear : End - return null");
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Generic method for converting Json object (of type list) to a list of pojo.
-	 *
-	 * @param List<T>
-	 */
-	public static <T> List<T> getMappedList(CloseableHttpResponse response, Class<T> classname) {
-		StringBuffer result = new StringBuffer();
-		result = readStringBuffer(response);
-		if (result != null) {
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			try {
-				JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, classname);
-				List<T> myObjects = objectMapper.readValue(result.toString(), type);
-				return myObjects;
-			} catch (JsonGenerationException e) {
-				logger.error(e.getMessage(), e);
-			} catch (JsonMappingException e) {
-				logger.error(e.getMessage(), e);
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-		return null;
-	}
+    /**
+     * Generic method for converting Json object (of type list) to a list of pojo.
+     *
+     * @param List<T>
+     */
+    public static <T> List<T> getMappedList(CloseableHttpResponse response, Class<T> classname) {
+        StringBuffer result = new StringBuffer();
+        result = readStringBuffer(response);
+        if (result != null) {
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try {
+                JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, classname);
+                List<T> myObjects = objectMapper.readValue(result.toString(), type);
+                return myObjects;
+            } catch (JsonGenerationException e) {
+                logger.error(e.getMessage(), e);
+            } catch (JsonMappingException e) {
+                logger.error(e.getMessage(), e);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
 
-	public static <T> T getMappedObject(CloseableHttpResponse response, Class<T> classname) {
-		StringBuffer result = new StringBuffer();
-		result = readStringBuffer(response);
-		if (result != null) {
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			try {
-				JavaType type = objectMapper.constructType(classname);
-				T myObjects = objectMapper.readValue(result.toString(), type);
-				return myObjects;
-			} catch (JsonGenerationException e) {
-				logger.error(e.getMessage(), e);
-			} catch (JsonMappingException e) {
-				logger.error(e.getMessage(), e);
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-		return null;
-	}
+    public static <T> T getMappedObject(CloseableHttpResponse response, Class<T> classname) {
+        StringBuffer result = new StringBuffer();
+        result = readStringBuffer(response);
+        if (result != null) {
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try {
+                JavaType type = objectMapper.constructType(classname);
+                T myObjects = objectMapper.readValue(result.toString(), type);
+                return myObjects;
+            } catch (JsonGenerationException e) {
+                logger.error(e.getMessage(), e);
+            } catch (JsonMappingException e) {
+                logger.error(e.getMessage(), e);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * List directory contents for a resource folder. Not recursive. This is
-	 * basically a brute-force implementation. Works for regular files and also
-	 * JARs.
-	 *
-	 * @param clazz Any java class that lives in the same place as the resources you
-	 *              want.
-	 * @param path  Should end with "/", but not start with one.
-	 * @return Just the name of each member item, not the full paths.
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 */
-	static String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
-		URL dirURL = clazz.getClassLoader().getResource(path);
-		if (dirURL != null && dirURL.getProtocol().equals("file")) {
-			/* A file path: easy enough */
-			return new File(dirURL.toURI()).list();
-		}
+    /**
+     * List directory contents for a resource folder. Not recursive. This is
+     * basically a brute-force implementation. Works for regular files and also
+     * JARs.
+     *
+     * @param clazz Any java class that lives in the same place as the resources you
+     *              want.
+     * @param path  Should end with "/", but not start with one.
+     * @return Just the name of each member item, not the full paths.
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    static String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
+        URL dirURL = clazz.getClassLoader().getResource(path);
+        if (dirURL != null && dirURL.getProtocol().equals("file")) {
+            /* A file path: easy enough */
+            return new File(dirURL.toURI()).list();
+        }
 
-		if (dirURL == null) {
-			/*
-			 * In case of a jar file, we can't actually find a directory. Have to assume the
-			 * same jar as clazz.
-			 */
-			String me = clazz.getName().replace(".", "/") + ".class";
-			dirURL = clazz.getClassLoader().getResource(me);
-		}
+        if (dirURL == null) {
+            /*
+             * In case of a jar file, we can't actually find a directory. Have to assume the
+             * same jar as clazz.
+             */
+            String me = clazz.getName().replace(".", "/") + ".class";
+            dirURL = clazz.getClassLoader().getResource(me);
+        }
 
-		if (dirURL.getProtocol().equals("jar")) {
-			/* A JAR path */
-			String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); // strip
-																							// out
-																							// only
-																							// the
-																							// JAR
-																							// file
-			JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-			Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries
-															// in jar
-			Set<String> result = new HashSet<String>(); // avoid duplicates in
-														// case it is a
-														// subdirectory
-			while (entries.hasMoreElements()) {
-				String name = entries.nextElement().getName();
-				if (name.startsWith(path)) { // filter according to the path
-					String entry = name.substring(path.length());
-					int checkSubdir = entry.indexOf("/");
-					if (checkSubdir >= 0) {
-						// if it is a subdirectory, we just return the directory
-						// name
-						entry = entry.substring(0, checkSubdir);
-					}
-					result.add(entry);
-				}
-			}
-			return result.toArray(new String[result.size()]);
-		}
+        if (dirURL.getProtocol().equals("jar")) {
+            /* A JAR path */
+            String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); // strip
+                                                                                            // out
+                                                                                            // only
+                                                                                            // the
+                                                                                            // JAR
+                                                                                            // file
+            JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+            Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries
+                                                            // in jar
+            Set<String> result = new HashSet<String>(); // avoid duplicates in
+                                                        // case it is a
+                                                        // subdirectory
+            while (entries.hasMoreElements()) {
+                String name = entries.nextElement().getName();
+                if (name.startsWith(path)) { // filter according to the path
+                    String entry = name.substring(path.length());
+                    int checkSubdir = entry.indexOf("/");
+                    if (checkSubdir >= 0) {
+                        // if it is a subdirectory, we just return the directory
+                        // name
+                        entry = entry.substring(0, checkSubdir);
+                    }
+                    result.add(entry);
+                }
+            }
+            return result.toArray(new String[result.size()]);
+        }
 
-		throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
-	}
+        throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
+    }
 
-	public static boolean isHttpResponseValid(HttpResponse response) {
-		int code = response.getCode();
-		switch (code) {
-			case 200:
-				return true;
-			case 204:
-				return true;
-			case 401:
-				logger.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
-				return false;
-			case 403:
-				logger.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
-				return false;
-			case 404:
-				logger.warn("Error " + code + " : Rest Service is not reachable.");
-				return false;
-			case 500:
-				logger.warn("Error " + code + " : Rest Service is not reachable.");
-				return false;
-			default:
-				logger.warn("Error " + code + " : An error has occured.");
-				return false;
-		}
-	}
+    public static boolean isHttpResponseValid(HttpResponse response) {
+        int code = response.getCode();
+        switch (code) {
+            case 200:
+                return true;
+            case 204:
+                return true;
+            case 401:
+                logger.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
+                return false;
+            case 403:
+                logger.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
+                return false;
+            case 404:
+                logger.warn("Error " + code + " : Rest Service is not reachable.");
+                return false;
+            case 500:
+                logger.warn("Error " + code + " : Rest Service is not reachable.");
+                return false;
+            default:
+                logger.warn("Error " + code + " : An error has occured.");
+                return false;
+        }
+    }
 
-	/**
-	 * List all the folders of the given directory.
-	 *
-	 * @param serieFolder the serie folder
-	 *
-	 * @return the list< file>
-	 */
-	public static List<File> listFolders(File serieFolder) {
-		List<File> result = null;
-		if (serieFolder != null) {
-			result = new ArrayList<File>();
-			final File[] listFiles = serieFolder.listFiles();
-			for (final File file : listFiles) {
-				if (file.isDirectory() && !file.getName().equals("tmp")) {
-					result.add(file);
-				}
-			}
-		}
-		Collections.sort(result, new Comparator<File>() {
-			@Override
-			public int compare(File f1, File f2) {
-				return Long.compare(f1.lastModified(), f2.lastModified());
-			}
-		});
-		return result;
-	}
+    /**
+     * List all the folders of the given directory.
+     *
+     * @param serieFolder the serie folder
+     *
+     * @return the list< file>
+     */
+    public static List<File> listFolders(File serieFolder) {
+        List<File> result = null;
+        if (serieFolder != null) {
+            result = new ArrayList<File>();
+            final File[] listFiles = serieFolder.listFiles();
+            for (final File file : listFiles) {
+                if (file.isDirectory() && !file.getName().equals("tmp")) {
+                    result.add(file);
+                }
+            }
+        }
+        Collections.sort(result, new Comparator<File>() {
+            @Override
+            public int compare(File f1, File f2) {
+                return Long.compare(f1.lastModified(), f2.lastModified());
+            }
+        });
+        return result;
+    }
 
-	/**
-	 * method for deserializing HttpResponse in a StringBuffer
-	 */
-	public static StringBuffer readStringBuffer(CloseableHttpResponse response) {
-		if (response == null) {
-			return null;
-		} else {
-			BufferedReader rd = null;
-			try {
-				rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			} catch (UnsupportedOperationException e2) {
-				logger.error("Error on methode util.readStringBuffer()", e2);
-			} catch (IOException e2) {
-				logger.error("Error on methode util.readStringBuffer()", e2);
-			}
-			StringBuffer result = new StringBuffer();
-			String line = "";
-			try {
-				while ((line = rd.readLine()) != null) {
-					result.append(line);
-				}
-			} catch (IOException e2) {
-				logger.error("Error on methode util.readStringBuffer()", e2);
-			}
-			return result;
-		}
-	}
+    /**
+     * method for deserializing HttpResponse in a StringBuffer
+     */
+    public static StringBuffer readStringBuffer(CloseableHttpResponse response) {
+        if (response == null) {
+            return null;
+        } else {
+            BufferedReader rd = null;
+            try {
+                rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            } catch (UnsupportedOperationException e2) {
+                logger.error("Error on methode util.readStringBuffer()", e2);
+            } catch (IOException e2) {
+                logger.error("Error on methode util.readStringBuffer()", e2);
+            }
+            StringBuffer result = new StringBuffer();
+            String line = "";
+            try {
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+            } catch (IOException e2) {
+                logger.error("Error on methode util.readStringBuffer()", e2);
+            }
+            return result;
+        }
+    }
 
-	/*
-	 * Converts java.util.Date to javax.xml.datatype.XMLGregorianCalendar
-	 */
-	public static XMLGregorianCalendar toXMLGregorianCalendar(Date date) {
-		GregorianCalendar gCalendar = new GregorianCalendar();
-		gCalendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-		gCalendar.setTime(date);
-		XMLGregorianCalendar xmlCalendar = null;
-		try {
-			xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCalendar);
-		} catch (DatatypeConfigurationException ex) {
-			logger.error("Error on methode util.XMLGregorianCalendar() Unable to convert date to XML GREGORIAN DATE",
-					ex);
-		}
-		return xmlCalendar;
-	}
+    /*
+     * Converts java.util.Date to javax.xml.datatype.XMLGregorianCalendar
+     */
+    public static XMLGregorianCalendar toXMLGregorianCalendar(Date date) {
+        GregorianCalendar gCalendar = new GregorianCalendar();
+        gCalendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        gCalendar.setTime(date);
+        XMLGregorianCalendar xmlCalendar = null;
+        try {
+            xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCalendar);
+        } catch (DatatypeConfigurationException ex) {
+            logger.error("Error on methode util.XMLGregorianCalendar() Unable to convert date to XML GREGORIAN DATE",
+                    ex);
+        }
+        return xmlCalendar;
+    }
 
-	/*
-	 * Converts XMLGregorianCalendar to java.util.Date in Java
-	 */
-	public static Date toDate(XMLGregorianCalendar calendar) {
-		if (calendar == null) {
-			return null;
-		}
-		return calendar.toGregorianCalendar().getTime();
-	}
+    /*
+     * Converts XMLGregorianCalendar to java.util.Date in Java
+     */
+    public static Date toDate(XMLGregorianCalendar calendar) {
+        if (calendar == null) {
+            return null;
+        }
+        return calendar.toGregorianCalendar().getTime();
+    }
 
-	/**
-	 * Returns a collection of files that match the given filter for the given
-	 * directory.
-	 *
-	 * @param directory the directory to look up
-	 * @param filter    the filter on file names
-	 * @param recurse   true if search in sub-folders
-	 *
-	 * @return a collection of files
-	 */
-	public static Collection<File> listFiles(final File directory, final FilenameFilter filter, final boolean recurse) {
-		// List of files / directories
-		Vector<File> files = new Vector<File>();
+    /**
+     * Returns a collection of files that match the given filter for the given
+     * directory.
+     *
+     * @param directory the directory to look up
+     * @param filter    the filter on file names
+     * @param recurse   true if search in sub-folders
+     *
+     * @return a collection of files
+     */
+    public static Collection<File> listFiles(final File directory, final FilenameFilter filter, final boolean recurse) {
+        // List of files / directories
+        Vector<File> files = new Vector<File>();
 
-		// Get files / directories in the directory
-		File[] entries = directory.listFiles();
+        // Get files / directories in the directory
+        File[] entries = directory.listFiles();
 
-		// Go over entries
-		for (File entry : entries) {
-			// If there is no filter or the filter accepts the
-			// file / directory, add it to the list
-			if (filter == null || filter.accept(directory, entry.getName())) {
-				files.add(entry);
-			}
+        // Go over entries
+        for (File entry : entries) {
+            // If there is no filter or the filter accepts the
+            // file / directory, add it to the list
+            if (filter == null || filter.accept(directory, entry.getName())) {
+                files.add(entry);
+            }
 
-			// If the file is a directory and the recurse flag
-			// is set, recurse into the directory
-			if (recurse && entry.isDirectory()) {
-				files.addAll(listFiles(entry, filter, recurse));
-			}
-		}
+            // If the file is a directory and the recurse flag
+            // is set, recurse into the directory
+            if (recurse && entry.isDirectory()) {
+                files.addAll(listFiles(entry, filter, recurse));
+            }
+        }
 
-		// Return collection of files
-		return files;
-	}
+        // Return collection of files
+        return files;
+    }
 
-	/**
-	 * Formats a date according to the pattern ShanoirConstants.TIME_PATTERN.
-	 *
-	 * @param date
-	 * @return
-	 */
-	public static String formatTimePattern(final Date date) {
-		if (date != null) {
-			final SimpleDateFormat formatter = new SimpleDateFormat(TIME_PATTERN);
-			return formatter.format(date);
-		}
-		return null;
-	}
+    /**
+     * Formats a date according to the pattern ShanoirConstants.TIME_PATTERN.
+     *
+     * @param date
+     * @return
+     */
+    public static String formatTimePattern(final Date date) {
+        if (date != null) {
+            final SimpleDateFormat formatter = new SimpleDateFormat(TIME_PATTERN);
+            return formatter.format(date);
+        }
+        return null;
+    }
 
-	/**
-	 * Returns the current time stamp usable for file systems.
-	 *
-	 * @return
-	 */
-	public static String getCurrentTimeStampForFS() {
-		SimpleDateFormat sdfDate = new SimpleDateFormat(TIME_PATTERN_FILE_SYSTEM);
-		Date now = new Date();
-		String strDate = sdfDate.format(now);
-		return strDate;
-	}
+    /**
+     * Returns the current time stamp usable for file systems.
+     *
+     * @return
+     */
+    public static String getCurrentTimeStampForFS() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat(TIME_PATTERN_FILE_SYSTEM);
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
 
-	public static String convertLocalDateToString(final LocalDate localDate) {
-		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
-		return localDate.format(pattern);
-	}
+    public static String convertLocalDateToString(final LocalDate localDate) {
+        DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
+        return localDate.format(pattern);
+    }
 
-	public static LocalDate convertStringToLocalDate(final String date) {
-		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
-		return LocalDate.parse(date, pattern);
-	}
+    public static LocalDate convertStringToLocalDate(final String date) {
+        DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
+        return LocalDate.parse(date, pattern);
+    }
 
 }

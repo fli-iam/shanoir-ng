@@ -42,39 +42,39 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class AnestheticIngredientRepositoryTest {
 
-	private static final Long INGREDIENT_TEST_1_ID = 1L;
-	private static final String INGREDIENT_TEST_1_NAME = "Isoflurane";
+    private static final Long INGREDIENT_TEST_1_ID = 1L;
+    private static final String INGREDIENT_TEST_1_NAME = "Isoflurane";
 
-	@Autowired
-	private AnestheticIngredientRepository repository;
+    @Autowired
+    private AnestheticIngredientRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<AnestheticIngredient> ingredientsDb = repository.findAll();
-		assertThat(ingredientsDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<AnestheticIngredient> ingredientsIt = ingredientsDb.iterator();
-		while (ingredientsIt.hasNext()) {
-			ingredientsIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<AnestheticIngredient> ingredientsDb = repository.findAll();
+        assertThat(ingredientsDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<AnestheticIngredient> ingredientsIt = ingredientsDb.iterator();
+        while (ingredientsIt.hasNext()) {
+            ingredientsIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(3);
+    }
 
-	@Test
-	public void findAllByAnestheticTest() throws Exception {
-		List<AnestheticIngredient> ingredientsDb = repository
-				.findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
-		assertNotNull(ingredientsDb);
-		assertThat(ingredientsDb.size()).isEqualTo(2);
-		assertThat(ingredientsDb.get(0).getId()).isEqualTo(INGREDIENT_TEST_1_ID);
-	}
+    @Test
+    public void findAllByAnestheticTest() throws Exception {
+        List<AnestheticIngredient> ingredientsDb = repository
+                .findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
+        assertNotNull(ingredientsDb);
+        assertThat(ingredientsDb.size()).isEqualTo(2);
+        assertThat(ingredientsDb.get(0).getId()).isEqualTo(INGREDIENT_TEST_1_ID);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		AnestheticIngredient ingredientDb = repository.findById(INGREDIENT_TEST_1_ID).orElse(null);
-		assertThat(ingredientDb.getName().getValue()).isEqualTo(INGREDIENT_TEST_1_NAME);
-		assertThat(ingredientDb.getAnesthetic().getName()).isEqualTo(AnestheticModelUtil.ANESTHETIC_NAME);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        AnestheticIngredient ingredientDb = repository.findById(INGREDIENT_TEST_1_ID).orElse(null);
+        assertThat(ingredientDb.getName().getValue()).isEqualTo(INGREDIENT_TEST_1_NAME);
+        assertThat(ingredientDb.getAnesthetic().getName()).isEqualTo(AnestheticModelUtil.ANESTHETIC_NAME);
+    }
 
 }

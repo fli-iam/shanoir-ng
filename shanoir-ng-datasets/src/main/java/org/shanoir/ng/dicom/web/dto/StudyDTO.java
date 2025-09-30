@@ -27,17 +27,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class StudyDTO {
 
-	/**
-	 * STUDY: 5 attributes (1 not in standard: studyDescription, but used by OHIF viewer)
-	 * ".1." is chosen randomly by MK, to separate from other instances and indicate study.
-	 */
-	// Unique key == RootPrefix + ".1." + ExaminationID
+    /**
+     * STUDY: 5 attributes (1 not in standard: studyDescription, but used by OHIF viewer)
+     * ".1." is chosen randomly by MK, to separate from other instances and indicate study.
+     */
+    // Unique key == RootPrefix + ".1." + ExaminationID
     @JsonProperty("StudyInstanceUID")
-	private String studyInstanceUID;
+    private String studyInstanceUID;
 
     // == ExaminationID
     @JsonProperty("StudyID")
-	private Long studyID;
+    private Long studyID;
 
     // == ExaminationComment, not mandatory by DICOMweb standard
     @JsonProperty("StudyDescription")
@@ -45,11 +45,11 @@ public class StudyDTO {
 
     // == ExaminationDate, dicom format 20010108
     @JsonProperty("StudyDate")
-	private String studyDate;
+    private String studyDate;
 
     // == not stored today, return always 000000
     @JsonProperty("StudyTime")
-	private String studyTime;
+    private String studyTime;
 
     // == number of examination per patient starting with 1
     @JsonProperty("AccessionNumber")
@@ -60,11 +60,11 @@ public class StudyDTO {
      */
     // subject.name == common name
     @JsonProperty("PatientName")
-	private String patientName;
+    private String patientName;
 
     // == subject.id
     @JsonProperty("PatientID")
-	private String patientID;
+    private String patientID;
 
     // == subject.birthDate 19800101
     @JsonProperty("PatientBirthDate")
@@ -72,126 +72,126 @@ public class StudyDTO {
 
     // == subject.sex, can be empty
     @JsonProperty("PatientSex")
-	private String patientSex;
+    private String patientSex;
 
     /**
      * try if OHIF viewer works without 4 required items below:
-    	ModalitiesInStudy
-		ReferringPhysicianName
-		NumberOfStudyRelatedSeries
-		NumberOfStudyRelatedInstances
+        ModalitiesInStudy
+        ReferringPhysicianName
+        NumberOfStudyRelatedSeries
+        NumberOfStudyRelatedInstances
      */
     @JsonProperty("NumInstances")
-	private Integer numInstances;
+    private Integer numInstances;
 
     @JsonProperty("Modalities")
-	private String modalities;
+    private String modalities;
 
     @JsonProperty("series")
-	private List<SerieDTO> series;
+    private List<SerieDTO> series;
 
-	public String getStudyInstanceUID() {
-		return studyInstanceUID;
-	}
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
 
-	public void setStudyInstanceUID(String studyInstanceUID) {
-		this.studyInstanceUID = studyInstanceUID;
-	}
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
-	public Long getStudyID() {
-		return studyID;
-	}
+    public Long getStudyID() {
+        return studyID;
+    }
 
-	public void setStudyID(Long studyID) {
-		this.studyID = studyID;
-	}
+    public void setStudyID(Long studyID) {
+        this.studyID = studyID;
+    }
 
-	public String getStudyDescription() {
-		return studyDescription;
-	}
+    public String getStudyDescription() {
+        return studyDescription;
+    }
 
-	public void setStudyDescription(String studyDescription) {
-		this.studyDescription = studyDescription;
-	}
+    public void setStudyDescription(String studyDescription) {
+        this.studyDescription = studyDescription;
+    }
 
-	public String getStudyDate() {
-		return studyDate;
-	}
+    public String getStudyDate() {
+        return studyDate;
+    }
 
-	public void setStudyDate(String studyDate) {
-		this.studyDate = studyDate;
-	}
+    public void setStudyDate(String studyDate) {
+        this.studyDate = studyDate;
+    }
 
-	public String getStudyTime() {
-		return studyTime;
-	}
+    public String getStudyTime() {
+        return studyTime;
+    }
 
-	public void setStudyTime(String studyTime) {
-		this.studyTime = studyTime;
-	}
+    public void setStudyTime(String studyTime) {
+        this.studyTime = studyTime;
+    }
 
-	public String getAccessionNumber() {
-		return accessionNumber;
-	}
+    public String getAccessionNumber() {
+        return accessionNumber;
+    }
 
-	public void setAccessionNumber(String accessionNumber) {
-		this.accessionNumber = accessionNumber;
-	}
+    public void setAccessionNumber(String accessionNumber) {
+        this.accessionNumber = accessionNumber;
+    }
 
-	public String getPatientName() {
-		return patientName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 
-	public String getPatientID() {
-		return patientID;
-	}
+    public String getPatientID() {
+        return patientID;
+    }
 
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
+    }
 
-	public String getPatientBirthDate() {
-		return patientBirthDate;
-	}
+    public String getPatientBirthDate() {
+        return patientBirthDate;
+    }
 
-	public void setPatientBirthDate(String patientBirthDate) {
-		this.patientBirthDate = patientBirthDate;
-	}
+    public void setPatientBirthDate(String patientBirthDate) {
+        this.patientBirthDate = patientBirthDate;
+    }
 
-	public String getPatientSex() {
-		return patientSex;
-	}
+    public String getPatientSex() {
+        return patientSex;
+    }
 
-	public void setPatientSex(String patientSex) {
-		this.patientSex = patientSex;
-	}
+    public void setPatientSex(String patientSex) {
+        this.patientSex = patientSex;
+    }
 
-	public List<SerieDTO> getSeries() {
-		return series;
-	}
+    public List<SerieDTO> getSeries() {
+        return series;
+    }
 
-	public void setSeries(List<SerieDTO> series) {
-		this.series = series;
-	}
+    public void setSeries(List<SerieDTO> series) {
+        this.series = series;
+    }
 
-	public Integer getNumInstances() {
-		return numInstances;
-	}
+    public Integer getNumInstances() {
+        return numInstances;
+    }
 
-	public void setNumInstances(Integer numInstances) {
-		this.numInstances = numInstances;
-	}
+    public void setNumInstances(Integer numInstances) {
+        this.numInstances = numInstances;
+    }
 
-	public String getModalities() {
-		return modalities;
-	}
+    public String getModalities() {
+        return modalities;
+    }
 
-	public void setModalities(String modalities) {
-		this.modalities = modalities;
-	}
+    public void setModalities(String modalities) {
+        this.modalities = modalities;
+    }
 
 }

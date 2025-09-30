@@ -22,10 +22,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudyRepositoryCustom {
 
-	/**
-	 * Lists all datasets from a study with associated modality type and quality tags
-	 *
-	 */
-	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
+    /**
+     * Lists all datasets from a study with associated modality type and quality tags
+     *
+     */
+    List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
 
 }

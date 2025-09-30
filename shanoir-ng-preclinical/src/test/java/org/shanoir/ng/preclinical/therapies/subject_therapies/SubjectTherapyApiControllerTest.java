@@ -58,97 +58,97 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class SubjectTherapyApiControllerTest {
 
-	private static final String REQUEST_PATH_ANIMAL_SUBJECT = "/subject";
-	private static final String SUBJECT_ID = "/1";
-	private static final String REQUEST_PATH_THERAPY = "/therapy";
-	private static final String REQUEST_PATH = REQUEST_PATH_ANIMAL_SUBJECT + SUBJECT_ID + REQUEST_PATH_THERAPY;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_SUBJECT_BY_THERAPY = REQUEST_PATH_ANIMAL_SUBJECT + "/all"
-			+ REQUEST_PATH_THERAPY + "/1";
-	private static final String REQUEST_PATH_THERAPY_BY_SUBJECT = REQUEST_PATH_ANIMAL_SUBJECT + SUBJECT_ID
-			+ REQUEST_PATH_THERAPY + "/all";
+    private static final String REQUEST_PATH_ANIMAL_SUBJECT = "/subject";
+    private static final String SUBJECT_ID = "/1";
+    private static final String REQUEST_PATH_THERAPY = "/therapy";
+    private static final String REQUEST_PATH = REQUEST_PATH_ANIMAL_SUBJECT + SUBJECT_ID + REQUEST_PATH_THERAPY;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_SUBJECT_BY_THERAPY = REQUEST_PATH_ANIMAL_SUBJECT + "/all"
+            + REQUEST_PATH_THERAPY + "/1";
+    private static final String REQUEST_PATH_THERAPY_BY_SUBJECT = REQUEST_PATH_ANIMAL_SUBJECT + SUBJECT_ID
+            + REQUEST_PATH_THERAPY + "/all";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private SubjectTherapyService subTherapiesServiceMock;
-	@MockBean
-	private TherapyService therapiesServiceMock;
-	@MockBean
-	private AnimalSubjectService subjectsServiceMock;
-	@MockBean
-	private SubjectTherapyUniqueValidator uniqueValidator;
-	@MockBean
-	private SubjectTherapyEditableByManager editableOnlyValidator;
+    @MockBean
+    private SubjectTherapyService subTherapiesServiceMock;
+    @MockBean
+    private TherapyService therapiesServiceMock;
+    @MockBean
+    private AnimalSubjectService subjectsServiceMock;
+    @MockBean
+    private SubjectTherapyUniqueValidator uniqueValidator;
+    @MockBean
+    private SubjectTherapyEditableByManager editableOnlyValidator;
 
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(subTherapiesServiceMock).deleteById(1L);
-		given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
-		given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
-		given(therapiesServiceMock.findById(1L)).willReturn(new Therapy());
-		given(subTherapiesServiceMock.findById(1L)).willReturn(new SubjectTherapy());
-		given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(new SubjectTherapy()));
-		given(subTherapiesServiceMock.findAllByAnimalSubject(new AnimalSubject()))
-				.willReturn(Arrays.asList(new SubjectTherapy()));
-		given(subTherapiesServiceMock.save(Mockito.mock(SubjectTherapy.class))).willReturn(new SubjectTherapy());
-		given(uniqueValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
-	}
+        doNothing().when(subTherapiesServiceMock).deleteById(1L);
+        given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
+        given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
+        given(therapiesServiceMock.findById(1L)).willReturn(new Therapy());
+        given(subTherapiesServiceMock.findById(1L)).willReturn(new SubjectTherapy());
+        given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(new SubjectTherapy()));
+        given(subTherapiesServiceMock.findAllByAnimalSubject(new AnimalSubject()))
+                .willReturn(Arrays.asList(new SubjectTherapy()));
+        given(subTherapiesServiceMock.save(Mockito.mock(SubjectTherapy.class))).willReturn(new SubjectTherapy());
+        given(uniqueValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteSubjectTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteSubjectTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteSubjectTherapiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteSubjectTherapiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectTherapyByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectTherapyByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectTherapiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectTherapiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewSubjectTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewSubjectTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updateSubjectTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updateSubjectTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectsByTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_SUBJECT_BY_THERAPY).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectsByTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_SUBJECT_BY_THERAPY).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
 }

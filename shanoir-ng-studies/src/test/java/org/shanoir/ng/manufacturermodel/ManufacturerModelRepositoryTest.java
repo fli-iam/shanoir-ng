@@ -36,30 +36,30 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ManufacturerModelRepositoryTest {
 
-	private static final Long MANUFACTURER_MODEL_TEST_1_ID = 1L;
-	private static final String MANUFACTURER_MODEL_TEST_1_NAME = "DISCOVERY MR750";
+    private static final Long MANUFACTURER_MODEL_TEST_1_ID = 1L;
+    private static final String MANUFACTURER_MODEL_TEST_1_NAME = "DISCOVERY MR750";
 
-	@Autowired
-	private ManufacturerModelRepository repository;
+    @Autowired
+    private ManufacturerModelRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<ManufacturerModel> manufacturerModelsDb = repository.findAll();
-		assertThat(manufacturerModelsDb).isNotNull();
-		int nbManufacturerModels = 0;
-		Iterator<ManufacturerModel> manufacturerModelsIt = manufacturerModelsDb.iterator();
-		while (manufacturerModelsIt.hasNext()) {
-			manufacturerModelsIt.next();
-			nbManufacturerModels++;
-		}
-		assertThat(nbManufacturerModels).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<ManufacturerModel> manufacturerModelsDb = repository.findAll();
+        assertThat(manufacturerModelsDb).isNotNull();
+        int nbManufacturerModels = 0;
+        Iterator<ManufacturerModel> manufacturerModelsIt = manufacturerModelsDb.iterator();
+        while (manufacturerModelsIt.hasNext()) {
+            manufacturerModelsIt.next();
+            nbManufacturerModels++;
+        }
+        assertThat(nbManufacturerModels).isEqualTo(3);
+    }
 
-	@Test
-	public void findByIdTest() throws Exception {
-		ManufacturerModel manufacturerModelDb = repository.findById(MANUFACTURER_MODEL_TEST_1_ID).orElseThrow();
-		assertThat(manufacturerModelDb).isNotNull();
-		assertThat(manufacturerModelDb.getName()).isEqualTo(MANUFACTURER_MODEL_TEST_1_NAME);
-	}
+    @Test
+    public void findByIdTest() throws Exception {
+        ManufacturerModel manufacturerModelDb = repository.findById(MANUFACTURER_MODEL_TEST_1_ID).orElseThrow();
+        assertThat(manufacturerModelDb).isNotNull();
+        assertThat(manufacturerModelDb.getName()).isEqualTo(MANUFACTURER_MODEL_TEST_1_NAME);
+    }
 
 }

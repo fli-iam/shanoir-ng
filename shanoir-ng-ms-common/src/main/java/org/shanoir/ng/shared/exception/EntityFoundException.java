@@ -24,21 +24,21 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  */
 public class EntityFoundException extends ShanoirException {
 
-	private static final long serialVersionUID = -497761359516114600L;
+    private static final long serialVersionUID = -497761359516114600L;
 
-	public EntityFoundException(String message) {
-		super(message);
-	}
+    public EntityFoundException(String message) {
+        super(message);
+    }
 
-	public EntityFoundException(Class<? extends AbstractEntity> clazz, Long id) {
-		super(getMessage(clazz, id));
-	}
+    public EntityFoundException(Class<? extends AbstractEntity> clazz, Long id) {
+        super(getMessage(clazz, id));
+    }
 
-	private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
-		return "Cannot find "
-				+ clazz.getSimpleName()
-				+ " with id "
-				+ id;
-	}
+    private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
+        return "Cannot find "
+                + clazz.getSimpleName()
+                + " with id "
+                + id;
+    }
 
 }

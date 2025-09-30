@@ -21,33 +21,33 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize(as = FacetPageableImpl.class)
 public interface FacetPageable extends Pageable {
 
-	/**
-	 * Get the filtering term for this paging configuration
-	 */
-	public String getFilter();
+    /**
+     * Get the filtering term for this paging configuration
+     */
+    public String getFilter();
 
-	/**
-	 * Get the facet order, can only be COUNT or INDEX
-	 */
-	public FacetOrder getFacetOrder();
+    /**
+     * Get the facet order, can only be COUNT or INDEX
+     */
+    public FacetOrder getFacetOrder();
 
 
-	enum FacetOrder {
+    enum FacetOrder {
 
-		COUNT("COUNT"),
-		INDEX("INDEX");
+        COUNT("COUNT"),
+        INDEX("INDEX");
 
-		private final String value;
+        private final String value;
 
-		FacetOrder(String str) {
-			this.value = str;
-		}
+        FacetOrder(String str) {
+            this.value = str;
+        }
 
-		@Override
-		public String toString() {
-			return value;
-		}
+        @Override
+        public String toString() {
+            return value;
+        }
 
-	}
+    }
 
 }

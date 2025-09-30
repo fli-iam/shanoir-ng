@@ -38,40 +38,40 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 
-	@Autowired
-	private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
+    @Autowired
+    private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
 
-	@Autowired
-	private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
+    @Autowired
+    private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
 
-	@Autowired
-	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
+    @Autowired
+    private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
 
-	@Autowired
-	private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
+    @Autowired
+    private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
 
-	@Autowired
-	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
+    @Autowired
+    private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
 
-	// add other strategies for other modalities here
+    // add other strategies for other modalities here
 
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
-		String modality = serie.getModality();
-		if ("MR".equals(modality)) {
-			datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
-		} else if ("CT".equals(modality)) {
-			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
-		} else if ("PT".equals(modality)) {
-			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
-		} else if ("XA".equals(modality)) {
-			datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
-		} else {
-			// By default we just create a generic dataset acquisition
-			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-		}
-		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
-	}
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy;
+        String modality = serie.getModality();
+        if ("MR".equals(modality)) {
+            datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
+        } else if ("CT".equals(modality)) {
+            datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+        } else if ("PT".equals(modality)) {
+            datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+        } else if ("XA".equals(modality)) {
+            datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
+        } else {
+            // By default we just create a generic dataset acquisition
+            datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
+        }
+        return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
+    }
 
 }

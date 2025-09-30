@@ -43,43 +43,43 @@ import java.util.List;
 @ActiveProfiles("test")
 public class DatasetAcquisitionMapperTest {
 
-	private static final Long DATASET_ACQUISITION_ID = 1L;
-	private static final String DATASET_ACQUISITION_WIHTOUT_DATASET_NAME = "id=1 (Mr)";
-	private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " (Mr)";
+    private static final Long DATASET_ACQUISITION_ID = 1L;
+    private static final String DATASET_ACQUISITION_WIHTOUT_DATASET_NAME = "id=1 (Mr)";
+    private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " (Mr)";
 
-	@Autowired
-	private ExaminationDatasetAcquisitionMapper datasetAcquisitionMapper;
+    @Autowired
+    private ExaminationDatasetAcquisitionMapper datasetAcquisitionMapper;
 
-	@Test
-	public void datasetAcquisitionsToExaminationDatasetAcquisitionDTOsTest() {
-		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = datasetAcquisitionMapper
-				.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(Arrays.asList(createDatasetAcquisition()));
-		Assertions.assertNotNull(datasetAcquisitionDTOs);
-		Assertions.assertTrue(datasetAcquisitionDTOs.size() == 1);
-		Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTOs.get(0).getId()));
-		Assertions.assertTrue(DATASET_ACQUISITION_WIHTOUT_DATASET_NAME.equals(datasetAcquisitionDTOs.get(0).getName()));
-	}
+    @Test
+    public void datasetAcquisitionsToExaminationDatasetAcquisitionDTOsTest() {
+        final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = datasetAcquisitionMapper
+                .datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(Arrays.asList(createDatasetAcquisition()));
+        Assertions.assertNotNull(datasetAcquisitionDTOs);
+        Assertions.assertTrue(datasetAcquisitionDTOs.size() == 1);
+        Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTOs.get(0).getId()));
+        Assertions.assertTrue(DATASET_ACQUISITION_WIHTOUT_DATASET_NAME.equals(datasetAcquisitionDTOs.get(0).getName()));
+    }
 
-	@Test
-	public void datasetAcquisitionToExaminationDatasetAcquisitionDTOTest() {
-		final DatasetAcquisition datasetAcquisition = createDatasetAcquisition();
-		datasetAcquisition.setDatasets(Arrays.asList(ModelsUtil.createMrDataset()));
+    @Test
+    public void datasetAcquisitionToExaminationDatasetAcquisitionDTOTest() {
+        final DatasetAcquisition datasetAcquisition = createDatasetAcquisition();
+        datasetAcquisition.setDatasets(Arrays.asList(ModelsUtil.createMrDataset()));
 
-		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = datasetAcquisitionMapper
-				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
-		Assertions.assertNotNull(datasetAcquisitionDTO);
-		Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTO.getId()));
-		Assertions.assertTrue(DATASET_ACQUISITION_WIHT_DATASET_NAME.equals(datasetAcquisitionDTO.getName()));
-	}
+        final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = datasetAcquisitionMapper
+                .datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
+        Assertions.assertNotNull(datasetAcquisitionDTO);
+        Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTO.getId()));
+        Assertions.assertTrue(DATASET_ACQUISITION_WIHT_DATASET_NAME.equals(datasetAcquisitionDTO.getName()));
+    }
 
-	private DatasetAcquisition createDatasetAcquisition() {
-		final DatasetAcquisition datasetAcquisition = new MrDatasetAcquisition();
-		datasetAcquisition.setId(DATASET_ACQUISITION_ID);
-		datasetAcquisition.setDatasets(new ArrayList<>());
-		datasetAcquisition.setExamination(new Examination());
-		datasetAcquisition.getExamination().setStudy(new Study());
-		datasetAcquisition.getExamination().getStudy().setId(1L);
-		return datasetAcquisition;
-	}
+    private DatasetAcquisition createDatasetAcquisition() {
+        final DatasetAcquisition datasetAcquisition = new MrDatasetAcquisition();
+        datasetAcquisition.setId(DATASET_ACQUISITION_ID);
+        datasetAcquisition.setDatasets(new ArrayList<>());
+        datasetAcquisition.setExamination(new Examination());
+        datasetAcquisition.getExamination().setStudy(new Study());
+        datasetAcquisition.getExamination().getStudy().setId(1L);
+        return datasetAcquisition;
+    }
 
 }

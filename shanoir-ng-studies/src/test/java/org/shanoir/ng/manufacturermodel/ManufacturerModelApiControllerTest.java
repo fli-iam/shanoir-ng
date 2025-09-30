@@ -52,57 +52,57 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class ManufacturerModelApiControllerTest {
 
-	private static final String REQUEST_PATH = "/manufacturermodels";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/manufacturermodels";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private ManufacturerModelService manufacturerModelServiceMock;
+    @MockBean
+    private ManufacturerModelService manufacturerModelServiceMock;
 
-	@MockBean(name = "controllerSecurityService")
-	private ControllerSecurityService controllerSecurityService;
+    @MockBean(name = "controllerSecurityService")
+    private ControllerSecurityService controllerSecurityService;
 
-	@BeforeEach
-	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ManufacturerModel model = new ManufacturerModel();
-		model.setId(1L);
-		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(model));
-		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
-		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
-				.willReturn(model);
-		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
-	}
+    @BeforeEach
+    public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        ManufacturerModel model = new ManufacturerModel();
+        model.setId(1L);
+        given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(model));
+        given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
+        given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
+                .willReturn(model);
+        given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findManufacturerModelByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findManufacturerModelByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findManufacturerModelsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findManufacturerModelsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewManufacturerModelTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void saveNewManufacturerModelTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateManufacturerModelTTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void updateManufacturerModelTTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
+                .andExpect(status().isNoContent());
+    }
 
 }

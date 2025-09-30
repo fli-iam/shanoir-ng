@@ -25,24 +25,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface SubjectStudyService {
 
-	/**
-	 * Find subject study by its id.
-	 *
-	 * @param id subject study id.
-	 * @return a subject study or null.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject.getStudy(), 'CAN_SEE_ALL')")
-	SubjectStudy findById(Long id);
+    /**
+     * Find subject study by its id.
+     *
+     * @param id subject study id.
+     * @return a subject study or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject.getStudy(), 'CAN_SEE_ALL')")
+    SubjectStudy findById(Long id);
 
-	/**
-	 * Update subject study.
-	 *
-	 * @param subject study subject study to update.
-	 * @return updated subject study.
-	 * @throws EntityNotFoundException
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnStudy(#subjectStudyNew.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudyNew.getStudy(), 'CAN_ADMINISTRATE')))")
-	SubjectStudy update(SubjectStudy subjectStudyNew) throws EntityNotFoundException;
+    /**
+     * Update subject study.
+     *
+     * @param subject study subject study to update.
+     * @return updated subject study.
+     * @throws EntityNotFoundException
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnStudy(#subjectStudyNew.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudyNew.getStudy(), 'CAN_ADMINISTRATE')))")
+    SubjectStudy update(SubjectStudy subjectStudyNew) throws EntityNotFoundException;
 
 }

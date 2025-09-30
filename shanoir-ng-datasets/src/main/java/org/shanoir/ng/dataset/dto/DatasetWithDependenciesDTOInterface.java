@@ -20,11 +20,11 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 public interface DatasetWithDependenciesDTOInterface extends DatasetWithProcessingsDTOInterface {
 
-	DatasetProcessingDTO getDatasetProcessing();
+    DatasetProcessingDTO getDatasetProcessing();
 
-	void setDatasetProcessing(DatasetProcessingDTO datasetProcessing);
+    void setDatasetProcessing(DatasetProcessingDTO datasetProcessing);
 
-	DatasetAcquisitionDTO getDatasetAcquisition();
+    DatasetAcquisitionDTO getDatasetAcquisition();
 
-	void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+    void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 }

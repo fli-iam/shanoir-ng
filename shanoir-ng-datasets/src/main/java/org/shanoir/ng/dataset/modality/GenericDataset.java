@@ -8,22 +8,22 @@ import jakarta.persistence.Entity;
 @Entity
 public class GenericDataset extends Dataset {
 
-	/**
-	 * Serial version UUID
-	 */
-	private static final long serialVersionUID = -5363216669486303309L;
+    /**
+     * Serial version UUID
+     */
+    private static final long serialVersionUID = -5363216669486303309L;
 
-	public GenericDataset() {
+    public GenericDataset() {
 
-	}
+    }
 
-	public GenericDataset(Dataset other) {
-		super(other);
-	}
+    public GenericDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.GENERIC;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.GENERIC;
+    }
 
 }

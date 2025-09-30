@@ -31,24 +31,24 @@ import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
 @Mapper(componentModel = "spring", uses = { EquipmentCenterMapper.class, ManufacturerModelMapper.class })
 public interface AcquisitionEquipmentMapper {
 
-	/**
-	 * Map list of @AcquisitionEquipment to list of @AcquisitionEquipmentDTO.
-	 *
-	 * @param acquisitionEquipments
-	 *            list of acquisition equipments.
-	 * @return list of acquisition equipments DTO.
-	 */
-	List<AcquisitionEquipmentDTO> acquisitionEquipmentsToAcquisitionEquipmentDTOs(
-			List<AcquisitionEquipment> acquisitionEquipments);
+    /**
+     * Map list of @AcquisitionEquipment to list of @AcquisitionEquipmentDTO.
+     *
+     * @param acquisitionEquipments
+     *            list of acquisition equipments.
+     * @return list of acquisition equipments DTO.
+     */
+    List<AcquisitionEquipmentDTO> acquisitionEquipmentsToAcquisitionEquipmentDTOs(
+            List<AcquisitionEquipment> acquisitionEquipments);
 
-	/**
-	 * Map a @AcquisitionEquipment to a @AcquisitionEquipmentDTO.
-	 *
-	 * @param acquisitionEquipment
-	 *            acquisition equipment to map.
-	 * @return acquisition equipment DTO.
-	 */
-	@Mapping(target = "compatible", ignore = true)
-	AcquisitionEquipmentDTO acquisitionEquipmentToAcquisitionEquipmentDTO(AcquisitionEquipment acquisitionEquipment);
+    /**
+     * Map a @AcquisitionEquipment to a @AcquisitionEquipmentDTO.
+     *
+     * @param acquisitionEquipment
+     *            acquisition equipment to map.
+     * @return acquisition equipment DTO.
+     */
+    @Mapping(target = "compatible", ignore = true)
+    AcquisitionEquipmentDTO acquisitionEquipmentToAcquisitionEquipmentDTO(AcquisitionEquipment acquisitionEquipment);
 
 }

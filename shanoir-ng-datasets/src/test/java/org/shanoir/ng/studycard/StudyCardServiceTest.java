@@ -47,68 +47,68 @@ import static org.mockito.BDDMockito.given;
 @ActiveProfiles("test")
 public class StudyCardServiceTest {
 
-	private static final Long TEMPLATE_ID = 1L;
-	private static final String UPDATED_STUDYCARD_DATA = "StudyCard1";
+    private static final Long TEMPLATE_ID = 1L;
+    private static final String UPDATED_STUDYCARD_DATA = "StudyCard1";
 
-	@Mock
-	private StudyCardRepository studyCardRepository;
+    @Mock
+    private StudyCardRepository studyCardRepository;
 
-	@MockBean
-	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	@InjectMocks
-	private StudyCardServiceImpl studyCardService;
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    @InjectMocks
+    private StudyCardServiceImpl studyCardService;
 
-	@BeforeEach
-	public void setup() {
-		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.findById(TEMPLATE_ID)).willReturn(Optional.of(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
-	}
+    @BeforeEach
+    public void setup() {
+        given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
+        given(studyCardRepository.findById(TEMPLATE_ID)).willReturn(Optional.of(ModelsUtil.createStudyCard()));
+        given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
+    }
 
-	@Test
-	public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
-		studyCardService.deleteById(TEMPLATE_ID);
-		Mockito.verify(studyCardRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+    @Test
+    public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+        studyCardService.deleteById(TEMPLATE_ID);
+        Mockito.verify(studyCardRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<StudyCard> studyCards = studyCardService.findAll();
-		Assertions.assertNotNull(studyCards);
-		Assertions.assertTrue(studyCards.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<StudyCard> studyCards = studyCardService.findAll();
+        Assertions.assertNotNull(studyCards);
+        Assertions.assertTrue(studyCards.size() == 1);
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(studyCardRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
-		Assertions.assertNotNull(studyCard);
+    @Test
+    public void findByIdTest() {
+        final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
+        Assertions.assertNotNull(studyCard);
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
-		studyCardService.save(createStudyCard());
+    @Test
+    public void saveTest() throws MicroServiceCommunicationException {
+        studyCardService.save(createStudyCard());
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
-	}
+        Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
+    }
 
-	@Test
-	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
-		final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
-		Assertions.assertNotNull(updatedStudyCard);
-		Assertions.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
+    @Test
+    public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+        final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
+        Assertions.assertNotNull(updatedStudyCard);
+        Assertions.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
-	}
+        Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
+    }
 
-	private StudyCard createStudyCard() {
-		final StudyCard studyCard = new StudyCard();
-		studyCard.setId(TEMPLATE_ID);
-		studyCard.setName(UPDATED_STUDYCARD_DATA);
-		return studyCard;
-	}
+    private StudyCard createStudyCard() {
+        final StudyCard studyCard = new StudyCard();
+        studyCard.setId(TEMPLATE_ID);
+        studyCard.setName(UPDATED_STUDYCARD_DATA);
+        return studyCard;
+    }
 
 }

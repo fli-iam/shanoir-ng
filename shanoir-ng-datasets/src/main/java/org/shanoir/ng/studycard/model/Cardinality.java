@@ -22,68 +22,68 @@ package org.shanoir.ng.studycard.model;
  */
 public class Cardinality {
 
-	int number;
+    int number;
 
-	boolean isMultiplier;
+    boolean isMultiplier;
 
-	public static final Cardinality ONE = new Cardinality(1);
+    public static final Cardinality ONE = new Cardinality(1);
 
-	Cardinality(String str) {
-		String strCopy = new String(str);
-		if ("n".equals(str)) {
-			isMultiplier = true;
-			number = 1;
-		} else {
-			if (strCopy.contains("n")) {
-				isMultiplier = true;
-				strCopy = strCopy.replace("n", "");
-			} else {
-				isMultiplier = false;
-			}
-			number = Integer.parseInt(strCopy);
-		}
-	}
+    Cardinality(String str) {
+        String strCopy = new String(str);
+        if ("n".equals(str)) {
+            isMultiplier = true;
+            number = 1;
+        } else {
+            if (strCopy.contains("n")) {
+                isMultiplier = true;
+                strCopy = strCopy.replace("n", "");
+            } else {
+                isMultiplier = false;
+            }
+            number = Integer.parseInt(strCopy);
+        }
+    }
 
-	Cardinality(int singleValue) {
-		number = singleValue;
-		isMultiplier = false;
-	}
+    Cardinality(int singleValue) {
+        number = singleValue;
+        isMultiplier = false;
+    }
 
-	public int getNumber() {
-		return number;
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	public void setNumber(int number) {
-		this.number = number;
-	}
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
-	public boolean isMultiplier() {
-		return isMultiplier;
-	}
+    public boolean isMultiplier() {
+        return isMultiplier;
+    }
 
-	public void setMultiplier(boolean isMultiplier) {
-		this.isMultiplier = isMultiplier;
-	}
+    public void setMultiplier(boolean isMultiplier) {
+        this.isMultiplier = isMultiplier;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Cardinality
-			&& ((Cardinality) obj).isMultiplier() == this.isMultiplier()
-			&& ((Cardinality) obj).getNumber() == this.getNumber();
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj instanceof Cardinality
+            && ((Cardinality) obj).isMultiplier() == this.isMultiplier()
+            && ((Cardinality) obj).getNumber() == this.getNumber();
+    }
 
-	@Override
-	public int hashCode() {
-		int result = 17;
-		result = 31 * result + number;
-		result = 31 * result + (isMultiplier ? 1 : 0);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + number;
+        result = 31 * result + (isMultiplier ? 1 : 0);
+        return result;
+    }
 
-	@Override
-	public String toString() {
-		return getNumber() + (isMultiplier() ? "N" : "");
-	}
+    @Override
+    public String toString() {
+        return getNumber() + (isMultiplier() ? "N" : "");
+    }
 
 }
 

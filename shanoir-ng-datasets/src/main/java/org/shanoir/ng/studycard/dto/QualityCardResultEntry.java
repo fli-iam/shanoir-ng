@@ -24,42 +24,42 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class QualityCardResultEntry {
 
-	private String subjectName;
+    private String subjectName;
 
-	@LocalDateAnnotations
+    @LocalDateAnnotations
     private LocalDate examinationDate;
 
-	private String examinationComment;
+    private String examinationComment;
 
-	private String message;
+    private String message;
 
-	private QualityTag tagSet;
+    private QualityTag tagSet;
 
-	private boolean failedValid = false; // if tag VALID was to put but conditions failed
+    private boolean failedValid = false; // if tag VALID was to put but conditions failed
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	public void setExaminationDate(LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    public void setExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	public String getExaminationComment() {
-		return examinationComment;
-	}
+    public String getExaminationComment() {
+        return examinationComment;
+    }
 
-	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
-	}
+    public void setExaminationComment(String examinationComment) {
+        this.examinationComment = examinationComment;
+    }
 
     public String getMessage() {
         return message;
@@ -77,11 +77,11 @@ public class QualityCardResultEntry {
         this.tagSet = tagSet;
     }
 
-	public boolean isFailedValid() {
-		return failedValid;
-	}
+    public boolean isFailedValid() {
+        return failedValid;
+    }
 
-	public void setFailedValid(boolean failedValid) {
-		this.failedValid = failedValid;
-	}
+    public void setFailedValid(boolean failedValid) {
+        this.failedValid = failedValid;
+    }
 }

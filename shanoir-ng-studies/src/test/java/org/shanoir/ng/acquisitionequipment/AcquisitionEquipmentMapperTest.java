@@ -37,34 +37,34 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class AcquisitionEquipmentMapperTest {
 
-	private static final Long ACQ_EQPT_ID = 1L;
-	private static final String ACQ_EQPT_SERIAL_NUMBER = "test";
+    private static final Long ACQ_EQPT_ID = 1L;
+    private static final String ACQ_EQPT_SERIAL_NUMBER = "test";
 
-	@Autowired
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
+    @Autowired
+    private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 
-	@Test
-	public void acquisitionEquipmentsToAcquisitionEquipmentDTOsTest() {
-		final List<AcquisitionEquipmentDTO> AcquisitionEquipmentDTOs = acquisitionEquipmentMapper
-				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Arrays.asList(createAcquisitionEquipment()));
-		Assertions.assertNotNull(AcquisitionEquipmentDTOs);
-		Assertions.assertTrue(AcquisitionEquipmentDTOs.size() == 1);
-		Assertions.assertTrue(AcquisitionEquipmentDTOs.get(0).getId().equals(ACQ_EQPT_ID));
-	}
+    @Test
+    public void acquisitionEquipmentsToAcquisitionEquipmentDTOsTest() {
+        final List<AcquisitionEquipmentDTO> AcquisitionEquipmentDTOs = acquisitionEquipmentMapper
+                .acquisitionEquipmentsToAcquisitionEquipmentDTOs(Arrays.asList(createAcquisitionEquipment()));
+        Assertions.assertNotNull(AcquisitionEquipmentDTOs);
+        Assertions.assertTrue(AcquisitionEquipmentDTOs.size() == 1);
+        Assertions.assertTrue(AcquisitionEquipmentDTOs.get(0).getId().equals(ACQ_EQPT_ID));
+    }
 
-	@Test
-	public void acquisitionEquipmentToAcquisitionEquipmentDTOTest() {
-		final AcquisitionEquipmentDTO AcquisitionEquipmentDTO = acquisitionEquipmentMapper
-				.acquisitionEquipmentToAcquisitionEquipmentDTO(createAcquisitionEquipment());
-		Assertions.assertNotNull(AcquisitionEquipmentDTO);
-		Assertions.assertTrue(AcquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
-	}
+    @Test
+    public void acquisitionEquipmentToAcquisitionEquipmentDTOTest() {
+        final AcquisitionEquipmentDTO AcquisitionEquipmentDTO = acquisitionEquipmentMapper
+                .acquisitionEquipmentToAcquisitionEquipmentDTO(createAcquisitionEquipment());
+        Assertions.assertNotNull(AcquisitionEquipmentDTO);
+        Assertions.assertTrue(AcquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
+    }
 
-	private AcquisitionEquipment createAcquisitionEquipment() {
-		final AcquisitionEquipment equipment = new AcquisitionEquipment();
-		equipment.setId(ACQ_EQPT_ID);
-		equipment.setSerialNumber(ACQ_EQPT_SERIAL_NUMBER);
-		return equipment;
-	}
+    private AcquisitionEquipment createAcquisitionEquipment() {
+        final AcquisitionEquipment equipment = new AcquisitionEquipment();
+        equipment.setId(ACQ_EQPT_ID);
+        equipment.setSerialNumber(ACQ_EQPT_SERIAL_NUMBER);
+        return equipment;
+    }
 
 }

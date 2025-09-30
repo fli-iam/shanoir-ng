@@ -14,11 +14,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ServerUnreachableState implements State {
 
-	private static final Logger logger = LoggerFactory.getLogger(ServerUnreachableState.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServerUnreachableState.class);
 
-	public void load(StartupStateContext context) {
-		context.getShUpStartupDialog().updateStartupText("\nShanoir server unreachable, ShanoirUploader stopped.");
-		logger.error("Shanoir Server not reachable.");
-	}
+    public void load(StartupStateContext context) {
+        context.getShUpStartupDialog().updateStartupText("\nShanoir server unreachable, ShanoirUploader stopped.");
+        logger.error("Shanoir Server not reachable.");
+    }
 
 }

@@ -13,35 +13,35 @@ import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 
 
 public class DatasetAcquisitionUtils {
-	public static DatasetAcquisition copyDatasetAcquisitionFromDatasetAcquisition(DatasetAcquisition other) {
+    public static DatasetAcquisition copyDatasetAcquisitionFromDatasetAcquisition(DatasetAcquisition other) {
 
-		String type = other.getType();
-		DatasetAcquisition acq = null;
+        String type = other.getType();
+        DatasetAcquisition acq = null;
 
-		switch (type) {
-			case CtDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new CtDatasetAcquisition(other);
-				break;
-			case MrDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new MrDatasetAcquisition();
-				break;
-			case PetDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new PetDatasetAcquisition(other);
-				break;
-			case EegDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new EegDatasetAcquisition(other);
-				break;
-			case BidsDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new BidsDatasetAcquisition(other);
-				break;
-			case XaDatasetAcquisition.DATASET_ACQUISITION_TYPE:
-				acq = new XaDatasetAcquisition(other);
-				break;
-			default:
-				acq = new GenericDatasetAcquisition(other);
-				break;
-		}
-		return acq;
-	}
+        switch (type) {
+            case CtDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new CtDatasetAcquisition(other);
+                break;
+            case MrDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new MrDatasetAcquisition();
+                break;
+            case PetDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new PetDatasetAcquisition(other);
+                break;
+            case EegDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new EegDatasetAcquisition(other);
+                break;
+            case BidsDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new BidsDatasetAcquisition(other);
+                break;
+            case XaDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new XaDatasetAcquisition(other);
+                break;
+            default:
+                acq = new GenericDatasetAcquisition(other);
+                break;
+        }
+        return acq;
+    }
 
 }

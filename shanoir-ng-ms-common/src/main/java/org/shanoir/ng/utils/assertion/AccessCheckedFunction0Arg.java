@@ -16,5 +16,5 @@ package org.shanoir.ng.utils.assertion;
 
 @FunctionalInterface
 public interface AccessCheckedFunction0Arg {
-	void apply() throws Exception;
+    void apply() throws Exception;
 }

@@ -35,96 +35,96 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public abstract class StudyDecorator implements StudyMapper {
 
-	@Autowired
-	private StudyMapper delegate;
+    @Autowired
+    private StudyMapper delegate;
 
-	@Autowired
-	private StudyCenterMapper studyCenterMapper;
+    @Autowired
+    private StudyCenterMapper studyCenterMapper;
 
-	@Autowired
-	private SubjectStudyMapper subjectStudyMapper;
+    @Autowired
+    private SubjectStudyMapper subjectStudyMapper;
 
-	@Autowired
-	private TagMapper tagMapper;
+    @Autowired
+    private TagMapper tagMapper;
 
-	@Autowired
-	private StudyTagMapper studyTagMapper;
+    @Autowired
+    private StudyTagMapper studyTagMapper;
 
-	@Override
-	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
-		final List<StudyDTO> studyDTOs = new ArrayList<>();
-		for (Study study : studies) {
-			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
-			if (study.getSubjectStudyList() != null) {
-				studyDTO.setNbSubjects(study.getNbSubjects());
-			}
-			if (study.getExaminations() != null) {
-				studyDTO.setNbExaminations(study.getNbExaminations());
-			}
-			studyDTOs.add(studyDTO);
-		}
-		return studyDTOs;
-	}
+    @Override
+    public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
+        final List<StudyDTO> studyDTOs = new ArrayList<>();
+        for (Study study : studies) {
+            final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
+            if (study.getSubjectStudyList() != null) {
+                studyDTO.setNbSubjects(study.getNbSubjects());
+            }
+            if (study.getExaminations() != null) {
+                studyDTO.setNbExaminations(study.getNbExaminations());
+            }
+            studyDTOs.add(studyDTO);
+        }
+        return studyDTOs;
+    }
 
-	@Override
-	public StudyDTO studyToStudyDTO(final Study study) {
-		return convertStudyToStudyDTO(study, true);
-	}
+    @Override
+    public StudyDTO studyToStudyDTO(final Study study) {
+        return convertStudyToStudyDTO(study, true);
+    }
 
-	@Override
-	public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
-		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
-		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		//simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
-		simpleStudyDTO.setProfile(study.getProfile());
-		return simpleStudyDTO;
-	}
+    @Override
+    public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
+        final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
+        simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        //simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+        simpleStudyDTO.setProfile(study.getProfile());
+        return simpleStudyDTO;
+    }
 
-	@Override
-	public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(final List<Study> studies) {
-		List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
-		for (Study study: studies) {
-			final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);
-			simpleStudyDTOs.add(simpleStudyDTO);
-		}
-		return simpleStudyDTOs;
-	}
+    @Override
+    public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(final List<Study> studies) {
+        List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
+        for (Study study: studies) {
+            final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);
+            simpleStudyDTOs.add(simpleStudyDTO);
+        }
+        return simpleStudyDTOs;
+    }
 
-	/*
-	 * Map a @Study to a @StudyDTO.
-	 *
-	 * @param study study to map.
-	 *
-	 * @param withData study with data?
-	 *
-	 * @return study DTO.
-	 */
-	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
-		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
-		studyDTO.setStudyCenterList(
-				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		if (withData) {
-			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
-			if (study.getTags() != null) {
-				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
-			}
-		}
-		return studyDTO;
-	}
+    /*
+     * Map a @Study to a @StudyDTO.
+     *
+     * @param study study to map.
+     *
+     * @param withData study with data?
+     *
+     * @return study DTO.
+     */
+    private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
+        final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
+        studyDTO.setStudyCenterList(
+                studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        if (withData) {
+            studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
+            if (study.getTags() != null) {
+                studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+            }
+        }
+        return studyDTO;
+    }
 
-	@Override
-	public StudyLightDTO studyToStudyLightDTO(final Study study) {
-		final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
-		studyLightDTO.setNbSubjects(study.getNbSubjects());
-		studyLightDTO.setNbExaminations(study.getNbExaminations());
-		if (study.getStudyTags() != null) {
-			studyLightDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
-		}
-		if (study.getLicense() != null) {
-			studyLightDTO.setLicense(study.getLicense());
-		}
-		return studyLightDTO;
-	}
+    @Override
+    public StudyLightDTO studyToStudyLightDTO(final Study study) {
+        final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
+        studyLightDTO.setNbSubjects(study.getNbSubjects());
+        studyLightDTO.setNbExaminations(study.getNbExaminations());
+        if (study.getStudyTags() != null) {
+            studyLightDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
+        }
+        if (study.getLicense() != null) {
+            studyLightDTO.setLicense(study.getLicense());
+        }
+        return studyLightDTO;
+    }
 
 }
 

@@ -35,100 +35,100 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 public class EchoTime extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6515796982839794497L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -6515796982839794497L;
 
 
-	/** MR dataset. */
-	@ManyToOne
-	@JoinColumn(name = "mr_dataset_id")
-	@JsonIgnore
-	private MrDataset mrDataset;
+    /** MR dataset. */
+    @ManyToOne
+    @JoinColumn(name = "mr_dataset_id")
+    @JsonIgnore
+    private MrDataset mrDataset;
 
-	/**
-	 * The echo number. Comes from dicom tag (0018,0086) VR=IS, VM=1-n Echo
-	 * Number(s).
-	 */
-	@Min(value = 0)
-	private Integer echoNumber;
+    /**
+     * The echo number. Comes from dicom tag (0018,0086) VR=IS, VM=1-n Echo
+     * Number(s).
+     */
+    @Min(value = 0)
+    private Integer echoNumber;
 
-	/**
-	 * Comes from the dicom tag (0018,0081) VR=DS, VM=1 Echo Time. The unit of
-	 * measure must be in millisec.
-	 */
-	@NotNull
-	private Double echoTimeValue;
+    /**
+     * Comes from the dicom tag (0018,0081) VR=DS, VM=1 Echo Time. The unit of
+     * measure must be in millisec.
+     */
+    @NotNull
+    private Double echoTimeValue;
 
-	public EchoTime() {
-	}
+    public EchoTime() {
+    }
 
-	public EchoTime(EchoTime et, MrDataset mr) {
-		this.mrDataset = mr;
-		this.echoNumber = et.getEchoNumber();
-		this.echoTimeValue = et.getEchoTimeValue();
-	}
+    public EchoTime(EchoTime et, MrDataset mr) {
+        this.mrDataset = mr;
+        this.echoNumber = et.getEchoNumber();
+        this.echoTimeValue = et.getEchoTimeValue();
+    }
 
-	/**
-	 * @return the echoNumber
-	 */
-	public Integer getEchoNumber() {
-		return echoNumber;
-	}
+    /**
+     * @return the echoNumber
+     */
+    public Integer getEchoNumber() {
+        return echoNumber;
+    }
 
-	/**
-	 * @param echoNumber
-	 *            the echoNumber to set
-	 */
-	public void setEchoNumber(Integer echoNumber) {
-		this.echoNumber = echoNumber;
-	}
+    /**
+     * @param echoNumber
+     *            the echoNumber to set
+     */
+    public void setEchoNumber(Integer echoNumber) {
+        this.echoNumber = echoNumber;
+    }
 
-	/**
-	 * @return the echoTimeValue
-	 */
-	public Double getEchoTimeValue() {
-		return echoTimeValue;
-	}
+    /**
+     * @return the echoTimeValue
+     */
+    public Double getEchoTimeValue() {
+        return echoTimeValue;
+    }
 
-	/**
-	 * @param echoTimeValue
-	 *            the echoTimeValue to set
-	 */
-	public void setEchoTimeValue(Double echoTimeValue) {
-		this.echoTimeValue = echoTimeValue;
-	}
+    /**
+     * @param echoTimeValue
+     *            the echoTimeValue to set
+     */
+    public void setEchoTimeValue(Double echoTimeValue) {
+        this.echoTimeValue = echoTimeValue;
+    }
 
 
-	public void setMrDataset(MrDataset mrDataset) {
-		this.mrDataset = mrDataset;
-	}
+    public void setMrDataset(MrDataset mrDataset) {
+        this.mrDataset = mrDataset;
+    }
 
-	public MrDataset getMrDataset() {
-		return mrDataset;
-	}
+    public MrDataset getMrDataset() {
+        return mrDataset;
+    }
 
-	@Override
-	public boolean equals(Object v) {
-		boolean retVal = false;
-		boolean retVal1 = false;
+    @Override
+    public boolean equals(Object v) {
+        boolean retVal = false;
+        boolean retVal1 = false;
 
-		if (v instanceof EchoTime) {
-			EchoTime echoTime = (EchoTime) v;
-			retVal = echoTime.getEchoNumber() == this.echoNumber;
-			retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
-		}
+        if (v instanceof EchoTime) {
+            EchoTime echoTime = (EchoTime) v;
+            retVal = echoTime.getEchoNumber() == this.echoNumber;
+            retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
+        }
 
-		return retVal && retVal1;
-	}
+        return retVal && retVal1;
+    }
 
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
-		hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
-		return hash;
-	}
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
+        hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
+        return hash;
+    }
 
 }

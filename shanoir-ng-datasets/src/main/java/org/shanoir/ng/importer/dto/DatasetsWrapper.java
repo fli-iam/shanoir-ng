@@ -30,39 +30,39 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  */
 public class DatasetsWrapper<T> {
 
-	private List<T> datasets;
+    private List<T> datasets;
 
-	@LocalDateAnnotations
-	private LocalDateTime firstImageAcquisitionTime;
+    @LocalDateAnnotations
+    private LocalDateTime firstImageAcquisitionTime;
 
-	@LocalDateAnnotations
-	private LocalDateTime lastImageAcquisitionTime;
+    @LocalDateAnnotations
+    private LocalDateTime lastImageAcquisitionTime;
 
-	public List<T> getDatasets() {
-		if (datasets == null) {
-			this.datasets = new ArrayList<>();
-		}
-		return datasets;
-	}
+    public List<T> getDatasets() {
+        if (datasets == null) {
+            this.datasets = new ArrayList<>();
+        }
+        return datasets;
+    }
 
-	public void setDataset(List<T> datasetList) {
-		this.datasets = datasetList;
-	}
+    public void setDataset(List<T> datasetList) {
+        this.datasets = datasetList;
+    }
 
-	public LocalDateTime getFirstImageAcquisitionTime() {
-		return firstImageAcquisitionTime;
-	}
+    public LocalDateTime getFirstImageAcquisitionTime() {
+        return firstImageAcquisitionTime;
+    }
 
-	public void setFirstImageAcquisitionTime(LocalDateTime firstImageAcquisitionTime) {
-		this.firstImageAcquisitionTime = firstImageAcquisitionTime;
-	}
+    public void setFirstImageAcquisitionTime(LocalDateTime firstImageAcquisitionTime) {
+        this.firstImageAcquisitionTime = firstImageAcquisitionTime;
+    }
 
-	public LocalDateTime getLastImageAcquisitionTime() {
-		return lastImageAcquisitionTime;
-	}
+    public LocalDateTime getLastImageAcquisitionTime() {
+        return lastImageAcquisitionTime;
+    }
 
-	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
-		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
-	}
+    public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
+        this.lastImageAcquisitionTime = lastImageAcquisitionTime;
+    }
 
 }

@@ -19,6 +19,6 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 
 public interface UniqueConstraintManager<T extends AbstractEntity> {
 
-	public FieldErrorMap validate(final T entity);
+    public FieldErrorMap validate(final T entity);
 
 }

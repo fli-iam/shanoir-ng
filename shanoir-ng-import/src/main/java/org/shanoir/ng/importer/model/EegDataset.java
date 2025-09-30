@@ -14,81 +14,81 @@ public class EegDataset {
     @JsonProperty("events")
     private List<Event> events;
 
-	/** Name of the file -> name of the dataset created. */
-	@JsonProperty("name")
-	private String name;
+    /** Name of the file -> name of the dataset created. */
+    @JsonProperty("name")
+    private String name;
 
-	@JsonProperty("files")
-	private List<String> files;
+    @JsonProperty("files")
+    private List<String> files;
 
-	@JsonProperty("samplingFrequency")
-	private int samplingFrequency;
+    @JsonProperty("samplingFrequency")
+    private int samplingFrequency;
 
-	@JsonProperty("channelCount")
-	private int channelCount;
+    @JsonProperty("channelCount")
+    private int channelCount;
 
-	@JsonProperty("coordinatesSystem")
-	private String coordinatesSystem;
+    @JsonProperty("coordinatesSystem")
+    private String coordinatesSystem;
 
-	/**
-	 * @return the coordinatesSystem
-	 */
-	public String getCoordinatesSystem() {
-		return coordinatesSystem;
-	}
+    /**
+     * @return the coordinatesSystem
+     */
+    public String getCoordinatesSystem() {
+        return coordinatesSystem;
+    }
 
-	/**
-	 * @param coordinatesSystem the coordinatesSystem to set
-	 */
-	public void setCoordinatesSystem(String coordinatesSystem) {
-		this.coordinatesSystem = coordinatesSystem;
-	}
+    /**
+     * @param coordinatesSystem the coordinatesSystem to set
+     */
+    public void setCoordinatesSystem(String coordinatesSystem) {
+        this.coordinatesSystem = coordinatesSystem;
+    }
 
-	public int getChannelCount() {
-		return channelCount;
-	}
+    public int getChannelCount() {
+        return channelCount;
+    }
 
-	public void setChannelCount(int channelCount) {
-		this.channelCount = channelCount;
-	}
+    public void setChannelCount(int channelCount) {
+        this.channelCount = channelCount;
+    }
 
-	public int getSamplingFrequency() {
-		return samplingFrequency;
-	}
+    public int getSamplingFrequency() {
+        return samplingFrequency;
+    }
 
-	public void setSamplingFrequency(int samplingFrequency) {
-		this.samplingFrequency = samplingFrequency;
-	}
+    public void setSamplingFrequency(int samplingFrequency) {
+        this.samplingFrequency = samplingFrequency;
+    }
 
-	public List<Channel> getChannels() {
-		return channels;
-	}
+    public List<Channel> getChannels() {
+        return channels;
+    }
 
-	public void setChannels(List<Channel> channels) {
-		this.channels = channels;
-	}
+    public void setChannels(List<Channel> channels) {
+        this.channels = channels;
+    }
 
-	public List<Event> getEvents() {
-		return events;
-	}
+    public List<Event> getEvents() {
+        return events;
+    }
 
-	public void setEvents(List<Event> events) {
-		this.events = events;
-	}
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
 
-	public List<String> getFiles() {
-		return files;
-	}
+    public List<String> getFiles() {
+        return files;
+    }
 
-	public void setFiles(List<String> files) {
-		this.files = files;
-	}
+    public void setFiles(List<String> files) {
+        this.files = files;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 }

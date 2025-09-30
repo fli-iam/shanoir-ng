@@ -32,17 +32,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/accountrequest")
 public interface AccountRequestApi {
 
-	@Operation(summary = "", description = "Saves a new user from account request")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "created user from account request"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Void> saveNewAccountRequest(
-			@Parameter(name = "user to create from account request", required = true) @RequestBody User user,
-			BindingResult result) throws RestServiceException;
+    @Operation(summary = "", description = "Saves a new user from account request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "created user from account request"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" }, method = RequestMethod.POST)
+    ResponseEntity<Void> saveNewAccountRequest(
+            @Parameter(name = "user to create from account request", required = true) @RequestBody User user,
+            BindingResult result) throws RestServiceException;
 
 }

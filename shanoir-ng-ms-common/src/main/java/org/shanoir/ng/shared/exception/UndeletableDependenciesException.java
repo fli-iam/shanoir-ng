@@ -24,10 +24,10 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 public class UndeletableDependenciesException extends ShanoirException {
 
 
-	private static final long serialVersionUID = -4380502787558788081L;
+    private static final long serialVersionUID = -4380502787558788081L;
 
-	public UndeletableDependenciesException(FieldErrorMap errorMap) {
-		super(errorMap);
-	}
+    public UndeletableDependenciesException(FieldErrorMap errorMap) {
+        super(errorMap);
+    }
 
 }

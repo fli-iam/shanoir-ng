@@ -31,235 +31,235 @@ import org.shanoir.ng.tag.model.StudyTagDTO;
  */
 public class StudyLightDTO {
 
-	private boolean downloadableByDefault;
+    private boolean downloadableByDefault;
 
-	private boolean challenge;
+    private boolean challenge;
 
-	@LocalDateAnnotations
-	private LocalDate endDate;
+    @LocalDateAnnotations
+    private LocalDate endDate;
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private int nbExaminations;
+    private int nbExaminations;
 
-	private int nbSubjects;
+    private int nbSubjects;
 
-	@LocalDateAnnotations
-	private LocalDate startDate;
+    @LocalDateAnnotations
+    private LocalDate startDate;
 
-	private StudyStatus studyStatus;
+    private StudyStatus studyStatus;
 
-	private StudyType studyType;
+    private StudyType studyType;
 
-	private String description;
+    private String description;
 
-	private String license;
+    private String license;
 
-	private List<StudyTagDTO> studyTags;
+    private List<StudyTagDTO> studyTags;
 
-	private List<String> protocolFilePaths;
+    private List<String> protocolFilePaths;
 
-	private List<String> dataUserAgreementPaths;
+    private List<String> dataUserAgreementPaths;
 
-	private Profile profile;
+    private Profile profile;
 
-	/**
-	 * Default constructor.
-	 */
-	public StudyLightDTO() {
-		// empty constructor
-	}
+    /**
+     * Default constructor.
+     */
+    public StudyLightDTO() {
+        // empty constructor
+    }
 
-	public boolean isChallenge() {
-		return challenge;
-	}
+    public boolean isChallenge() {
+        return challenge;
+    }
 
-	public void setChallenge(boolean challenge) {
-		this.challenge = challenge;
-	}
+    public void setChallenge(boolean challenge) {
+        this.challenge = challenge;
+    }
 
-	/**
-	 * @return the downloadableByDefault
-	 */
-	public boolean isDownloadableByDefault() {
-		return downloadableByDefault;
-	}
+    /**
+     * @return the downloadableByDefault
+     */
+    public boolean isDownloadableByDefault() {
+        return downloadableByDefault;
+    }
 
-	/**
-	 * @param downloadableByDefault
-	 *            the downloadableByDefault to set
-	 */
-	public void setDownloadableByDefault(boolean downloadableByDefault) {
-		this.downloadableByDefault = downloadableByDefault;
-	}
+    /**
+     * @param downloadableByDefault
+     *            the downloadableByDefault to set
+     */
+    public void setDownloadableByDefault(boolean downloadableByDefault) {
+        this.downloadableByDefault = downloadableByDefault;
+    }
 
-	/**
-	 * @return the endDate
-	 */
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+    /**
+     * @return the endDate
+     */
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-	/**
-	 * @param endDate
-	 *            the endDate to set
-	 */
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+    /**
+     * @param endDate
+     *            the endDate to set
+     */
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the nbExaminations
-	 */
-	public int getNbExaminations() {
-		return nbExaminations;
-	}
+    /**
+     * @return the nbExaminations
+     */
+    public int getNbExaminations() {
+        return nbExaminations;
+    }
 
-	/**
-	 * @param nbExaminations
-	 *            the nbExaminations to set
-	 */
-	public void setNbExaminations(int nbExaminations) {
-		this.nbExaminations = nbExaminations;
-	}
+    /**
+     * @param nbExaminations
+     *            the nbExaminations to set
+     */
+    public void setNbExaminations(int nbExaminations) {
+        this.nbExaminations = nbExaminations;
+    }
 
-	/**
-	 * @return the nbSubjects
-	 */
-	public int getNbSubjects() {
-		return nbSubjects;
-	}
+    /**
+     * @return the nbSubjects
+     */
+    public int getNbSubjects() {
+        return nbSubjects;
+    }
 
-	/**
-	 * @param nbSubjects
-	 *            the nbSubjects to set
-	 */
-	public void setNbSubjects(int nbSubjects) {
-		this.nbSubjects = nbSubjects;
-	}
+    /**
+     * @param nbSubjects
+     *            the nbSubjects to set
+     */
+    public void setNbSubjects(int nbSubjects) {
+        this.nbSubjects = nbSubjects;
+    }
 
-	/**
-	 * @return the startDate
-	 */
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+    /**
+     * @return the startDate
+     */
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-	/**
-	 * @param startDate
-	 *            the startDate to set
-	 */
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+    /**
+     * @param startDate
+     *            the startDate to set
+     */
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-	/**
-	 * @return the studyStatus
-	 */
-	public StudyStatus getStudyStatus() {
-		return studyStatus;
-	}
+    /**
+     * @return the studyStatus
+     */
+    public StudyStatus getStudyStatus() {
+        return studyStatus;
+    }
 
-	/**
-	 * @param studyStatus
-	 *            the studyStatus to set
-	 */
-	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
-	}
+    /**
+     * @param studyStatus
+     *            the studyStatus to set
+     */
+    public void setStudyStatus(StudyStatus studyStatus) {
+        this.studyStatus = studyStatus;
+    }
 
-	/**
-	 * @return the studyType
-	 */
-	public StudyType getStudyType() {
-		return studyType;
-	}
+    /**
+     * @return the studyType
+     */
+    public StudyType getStudyType() {
+        return studyType;
+    }
 
-	/**
-	 * @param studyType
-	 *            the studyType to set
-	 */
-	public void setStudyType(StudyType studyType) {
-		this.studyType = studyType;
-	}
+    /**
+     * @param studyType
+     *            the studyType to set
+     */
+    public void setStudyType(StudyType studyType) {
+        this.studyType = studyType;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getLicense() {
-		return license;
-	}
+    public String getLicense() {
+        return license;
+    }
 
-	public void setLicense(String license) {
-		this.license = license;
-	}
+    public void setLicense(String license) {
+        this.license = license;
+    }
 
-	public List<StudyTagDTO> getStudyTags() {
-		return studyTags;
-	}
+    public List<StudyTagDTO> getStudyTags() {
+        return studyTags;
+    }
 
-	public void setStudyTags(List<StudyTagDTO> studyTags) {
-		this.studyTags = studyTags;
-	}
+    public void setStudyTags(List<StudyTagDTO> studyTags) {
+        this.studyTags = studyTags;
+    }
 
-	public List<String> getProtocolFilePaths() {
-		return protocolFilePaths;
-	}
+    public List<String> getProtocolFilePaths() {
+        return protocolFilePaths;
+    }
 
-	public void setProtocolFilePaths(List<String> protocolFilePaths) {
-		this.protocolFilePaths = protocolFilePaths;
-	}
+    public void setProtocolFilePaths(List<String> protocolFilePaths) {
+        this.protocolFilePaths = protocolFilePaths;
+    }
 
-	public List<String> getDataUserAgreementPaths() {
-		return dataUserAgreementPaths;
-	}
+    public List<String> getDataUserAgreementPaths() {
+        return dataUserAgreementPaths;
+    }
 
-	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
-		this.dataUserAgreementPaths = dataUserAgreementPaths;
-	}
+    public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+        this.dataUserAgreementPaths = dataUserAgreementPaths;
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public Profile getProfile() {
+        return profile;
+    }
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
 }

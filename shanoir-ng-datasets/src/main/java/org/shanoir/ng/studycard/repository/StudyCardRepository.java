@@ -26,12 +26,12 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface StudyCardRepository extends CrudRepository<StudyCard, Long> {
 
-	List<StudyCard> findByStudyIdIn(List<Long> studyIdList);
+    List<StudyCard> findByStudyIdIn(List<Long> studyIdList);
 
-	StudyCard findByName(String name);
+    StudyCard findByName(String name);
 
-	List<StudyCard> findByStudyId(Long studyId);
+    List<StudyCard> findByStudyId(Long studyId);
 
-	List<StudyCard> findByAcquisitionEquipmentId(Long acqEqId);
+    List<StudyCard> findByAcquisitionEquipmentId(Long acqEqId);
 
 }

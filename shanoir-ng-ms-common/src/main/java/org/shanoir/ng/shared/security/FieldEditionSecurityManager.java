@@ -21,6 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FieldEditionSecurityManager<T extends AbstractEntity> {
 
-	public FieldErrorMap validate(final T entity);
+    public FieldErrorMap validate(final T entity);
 
 }

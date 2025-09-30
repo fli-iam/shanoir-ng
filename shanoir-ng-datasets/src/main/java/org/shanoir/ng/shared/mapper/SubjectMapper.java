@@ -10,9 +10,9 @@ import org.shanoir.ng.shared.model.SubjectDTO;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubjectMapper {
 
-	List<Subject> echoTimeDTOListToEchoTimeList(
-			List<SubjectDTO> echoTimeDTOList);
+    List<Subject> echoTimeDTOListToEchoTimeList(
+            List<SubjectDTO> echoTimeDTOList);
 
-	Subject echoTimeDTOToEchoTime(
-			SubjectDTO echoTimes);
+    Subject echoTimeDTOToEchoTime(
+            SubjectDTO echoTimes);
 }

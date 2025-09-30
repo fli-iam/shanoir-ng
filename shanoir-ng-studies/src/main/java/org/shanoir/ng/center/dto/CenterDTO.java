@@ -27,184 +27,184 @@ import org.shanoir.ng.studycenter.StudyCenterDTO;
  */
 public class CenterDTO {
 
-	private List<AcquisitionEquipmentDTO> acquisitionEquipments;
+    private List<AcquisitionEquipmentDTO> acquisitionEquipments;
 
-	private String city;
+    private String city;
 
-	private String country;
+    private String country;
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String phoneNumber;
+    private String phoneNumber;
 
-	private String postalCode;
+    private String postalCode;
 
-	private String street;
+    private String street;
 
-	private String website;
+    private String website;
 
-	private Boolean compatible = false;
+    private Boolean compatible = false;
 
-	private List<StudyCenterDTO> studyCenterList;
+    private List<StudyCenterDTO> studyCenterList;
 
-	/**
-	 * Default constructor.
-	 */
-	public CenterDTO() {
-		// empty constructor
-	}
+    /**
+     * Default constructor.
+     */
+    public CenterDTO() {
+        // empty constructor
+    }
 
-	/**
-	 * @return the acquisitionEquipments
-	 */
-	public List<AcquisitionEquipmentDTO> getAcquisitionEquipments() {
-		return acquisitionEquipments;
-	}
+    /**
+     * @return the acquisitionEquipments
+     */
+    public List<AcquisitionEquipmentDTO> getAcquisitionEquipments() {
+        return acquisitionEquipments;
+    }
 
-	/**
-	 * @param acquisitionEquipments
-	 *            the acquisitionEquipments to set
-	 */
-	public void setAcquisitionEquipments(List<AcquisitionEquipmentDTO> acquisitionEquipments) {
-		this.acquisitionEquipments = acquisitionEquipments;
-	}
+    /**
+     * @param acquisitionEquipments
+     *            the acquisitionEquipments to set
+     */
+    public void setAcquisitionEquipments(List<AcquisitionEquipmentDTO> acquisitionEquipments) {
+        this.acquisitionEquipments = acquisitionEquipments;
+    }
 
-	/**
-	 * @return the city
-	 */
-	public String getCity() {
-		return city;
-	}
+    /**
+     * @return the city
+     */
+    public String getCity() {
+        return city;
+    }
 
-	/**
-	 * @param city
-	 *            the city to set
-	 */
-	public void setCity(String city) {
-		this.city = city;
-	}
+    /**
+     * @param city
+     *            the city to set
+     */
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	/**
-	 * @return the country
-	 */
-	public String getCountry() {
-		return country;
-	}
+    /**
+     * @return the country
+     */
+    public String getCountry() {
+        return country;
+    }
 
-	/**
-	 * @param country
-	 *            the country to set
-	 */
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    /**
+     * @param country
+     *            the country to set
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the phoneNumber
-	 */
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    /**
+     * @return the phoneNumber
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-	/**
-	 * @param phoneNumber
-	 *            the phoneNumber to set
-	 */
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    /**
+     * @param phoneNumber
+     *            the phoneNumber to set
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-	/**
-	 * @return the postalCode
-	 */
-	public String getPostalCode() {
-		return postalCode;
-	}
+    /**
+     * @return the postalCode
+     */
+    public String getPostalCode() {
+        return postalCode;
+    }
 
-	/**
-	 * @param postalCode
-	 *            the postalCode to set
-	 */
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
-	}
+    /**
+     * @param postalCode
+     *            the postalCode to set
+     */
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
 
-	/**
-	 * @return the street
-	 */
-	public String getStreet() {
-		return street;
-	}
+    /**
+     * @return the street
+     */
+    public String getStreet() {
+        return street;
+    }
 
-	/**
-	 * @param street
-	 *            the street to set
-	 */
-	public void setStreet(String street) {
-		this.street = street;
-	}
+    /**
+     * @param street
+     *            the street to set
+     */
+    public void setStreet(String street) {
+        this.street = street;
+    }
 
-	/**
-	 * @return the website
-	 */
-	public String getWebsite() {
-		return website;
-	}
+    /**
+     * @return the website
+     */
+    public String getWebsite() {
+        return website;
+    }
 
-	/**
-	 * @param website
-	 *            the website to set
-	 */
-	public void setWebsite(String website) {
-		this.website = website;
-	}
+    /**
+     * @param website
+     *            the website to set
+     */
+    public void setWebsite(String website) {
+        this.website = website;
+    }
 
-	public Boolean getCompatible() {
-		return compatible;
-	}
+    public Boolean getCompatible() {
+        return compatible;
+    }
 
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
-	}
+    public void setCompatible(Boolean compatible) {
+        this.compatible = compatible;
+    }
 
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public List<StudyCenterDTO> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
 }

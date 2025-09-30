@@ -29,7 +29,7 @@ public class Instance {
     @JsonProperty("sopInstanceUID")
     private String sopInstanceUID;
 
-	@JsonProperty("instanceNumber")
+    @JsonProperty("instanceNumber")
     private String instanceNumber;
 
     @JsonProperty("referencedSOPClassUIDInFile")
@@ -41,42 +41,42 @@ public class Instance {
     public Instance() { }
 
     public Instance(Attributes attributes) {
-		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
-		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-		this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
+        this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+        this.instanceNumber = attributes.getString(Tag.InstanceNumber);
+        this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+        this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
     }
 
-	public String getInstanceNumber() {
-		return instanceNumber;
-	}
+    public String getInstanceNumber() {
+        return instanceNumber;
+    }
 
-	public String getReferencedSOPClassUIDInFile() {
-		return referencedSOPClassUIDInFile;
-	}
+    public String getReferencedSOPClassUIDInFile() {
+        return referencedSOPClassUIDInFile;
+    }
 
-	public String[] getReferencedFileID() {
-		return referencedFileID;
-	}
+    public String[] getReferencedFileID() {
+        return referencedFileID;
+    }
 
-	public void setInstanceNumber(String instanceNumber) {
-		this.instanceNumber = instanceNumber;
-	}
+    public void setInstanceNumber(String instanceNumber) {
+        this.instanceNumber = instanceNumber;
+    }
 
-	public void setReferencedSOPClassUIDInFile(String referencedSOPClassUIDInFile) {
-		this.referencedSOPClassUIDInFile = referencedSOPClassUIDInFile;
-	}
+    public void setReferencedSOPClassUIDInFile(String referencedSOPClassUIDInFile) {
+        this.referencedSOPClassUIDInFile = referencedSOPClassUIDInFile;
+    }
 
-	public void setReferencedFileID(String[] referencedFileID) {
-		this.referencedFileID = referencedFileID;
-	}
+    public void setReferencedFileID(String[] referencedFileID) {
+        this.referencedFileID = referencedFileID;
+    }
 
-	public String getSopInstanceUID() {
-		return sopInstanceUID;
-	}
+    public String getSopInstanceUID() {
+        return sopInstanceUID;
+    }
 
-	public void setSopInstanceUID(String sopInstanceUID) {
-		this.sopInstanceUID = sopInstanceUID;
-	}
+    public void setSopInstanceUID(String sopInstanceUID) {
+        this.sopInstanceUID = sopInstanceUID;
+    }
 
 }

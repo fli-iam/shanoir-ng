@@ -26,9 +26,9 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class CommonConfiguration {
 
-	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder builder) {
-		return builder.build();
-	}
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.build();
+    }
 
 }

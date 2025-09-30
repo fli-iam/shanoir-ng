@@ -18,24 +18,24 @@ import java.util.List;
 
 public class StudyCardApply {
 
-	private Long studyCardId;
+    private Long studyCardId;
 
-	private List<Long> datasetAcquisitionIds;
+    private List<Long> datasetAcquisitionIds;
 
-	public Long getStudyCardId() {
-		return studyCardId;
-	}
+    public Long getStudyCardId() {
+        return studyCardId;
+    }
 
-	public void setStudyCardId(Long studyCardId) {
-		this.studyCardId = studyCardId;
-	}
+    public void setStudyCardId(Long studyCardId) {
+        this.studyCardId = studyCardId;
+    }
 
-	public List<Long> getDatasetAcquisitionIds() {
-		return datasetAcquisitionIds;
-	}
+    public List<Long> getDatasetAcquisitionIds() {
+        return datasetAcquisitionIds;
+    }
 
-	public void setDatasetAcquisitionIds(List<Long> datasetAcquisitionIds) {
-		this.datasetAcquisitionIds = datasetAcquisitionIds;
-	}
+    public void setDatasetAcquisitionIds(List<Long> datasetAcquisitionIds) {
+        this.datasetAcquisitionIds = datasetAcquisitionIds;
+    }
 
 }

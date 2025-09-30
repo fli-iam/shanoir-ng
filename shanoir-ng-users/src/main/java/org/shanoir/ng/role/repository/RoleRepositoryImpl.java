@@ -30,13 +30,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RoleRepositoryImpl implements RoleRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<String> getAllNames() {
-		return entityManager.createQuery("SELECT r.name FROM Role r").getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getAllNames() {
+        return entityManager.createQuery("SELECT r.name FROM Role r").getResultList();
+    }
 
 }

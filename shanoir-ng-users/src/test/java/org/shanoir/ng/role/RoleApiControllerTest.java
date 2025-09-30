@@ -44,23 +44,23 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class RoleApiControllerTest {
 
-	private static final String REQUEST_PATH = "/roles";
+    private static final String REQUEST_PATH = "/roles";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private RoleService roleServiceMock;
+    @MockBean
+    private RoleService roleServiceMock;
 
-	@BeforeEach
-	public void setup() {
-		given(roleServiceMock.findAll()).willReturn(Arrays.asList(new Role()));
-	}
+    @BeforeEach
+    public void setup() {
+        given(roleServiceMock.findAll()).willReturn(Arrays.asList(new Role()));
+    }
 
-	@Test
-	public void findRolesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findRolesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
 }

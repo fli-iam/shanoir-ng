@@ -43,43 +43,43 @@ import org.springframework.stereotype.Component;
 @Component
 public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(XaDatasetAcquisitionStrategy.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(XaDatasetAcquisitionStrategy.class);
 
-	@Autowired
-	private XaProtocolStrategy protocolStrategy;
+    @Autowired
+    private XaProtocolStrategy protocolStrategy;
 
-	@Autowired
-	private DatasetStrategy<XaDataset> datasetStrategy;
+    @Autowired
+    private DatasetStrategy<XaDataset> datasetStrategy;
 
 
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
-			throws Exception {
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+            throws Exception {
 
-		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
+        XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
+        LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
-		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		XaProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		datasetAcquisition.setXaProtocol(protocol);
+        datasetAcquisition.setImportDate(LocalDate.now());
+        datasetAcquisition.setUsername(importJob.getUsername());
+        datasetAcquisition.setRank(rank);
+        importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+        datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
+                dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+        datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        XaProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
+        datasetAcquisition.setXaProtocol(protocol);
 
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
-		DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(datasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		datasetAcquisition.setDatasets(genericizedList);
-		return datasetAcquisition;
-	}
+        // TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
+        DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(datasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        datasetAcquisition.setDatasets(genericizedList);
+        return datasetAcquisition;
+    }
 }

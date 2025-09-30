@@ -28,69 +28,69 @@ import org.shanoir.ng.shared.exception.ShanoirException;
  */
 public interface TherapyService {
 
-	/**
-	 * Delete a therapy.
-	 *
-	 * @param id
-	 *            therapy id.
-	 * @throws ShanoirException
-	 */
-	void deleteById(Long id) throws ShanoirException;
+    /**
+     * Delete a therapy.
+     *
+     * @param id
+     *            therapy id.
+     * @throws ShanoirException
+     */
+    void deleteById(Long id) throws ShanoirException;
 
-	/**
-	 * Get all the therapies.
-	 *
-	 * @return a list of therapies.
-	 */
-	List<Therapy> findAll();
+    /**
+     * Get all the therapies.
+     *
+     * @return a list of therapies.
+     */
+    List<Therapy> findAll();
 
 
-	/**
-	 * Find Therapy by its id.
-	 *
-	 * @param id
-	 *            Therapy id.
-	 * @return a Therapy or null.
-	 */
-	Therapy findById(Long id);
+    /**
+     * Find Therapy by its id.
+     *
+     * @param id
+     *            Therapy id.
+     * @return a Therapy or null.
+     */
+    Therapy findById(Long id);
 
-	/**
-	 * Find Therapy by its name.
-	 *
-	 * @param id
-	 *            Therapy name.
-	 * @return a Therapy or null.
-	 */
-	Therapy findByName(String name);
+    /**
+     * Find Therapy by its name.
+     *
+     * @param id
+     *            Therapy name.
+     * @return a Therapy or null.
+     */
+    Therapy findByName(String name);
 
-	/**
-	 * Find Therapies by their type.
-	 *
-	 * @param type
-	 *            Therapy type.
-	 * @return a list of therapies or null.
-	 */
-	List<Therapy> findByTherapyType(TherapyType therapyType);
+    /**
+     * Find Therapies by their type.
+     *
+     * @param type
+     *            Therapy type.
+     * @return a list of therapies or null.
+     */
+    List<Therapy> findByTherapyType(TherapyType therapyType);
 
-	/**
-	 * Save a therapy.
-	 *
-	 * @param therapy
-	 *            therapy to create.
-	 * @return created therapy.
-	 * @throws ShanoirException
-	 */
-	Therapy save(Therapy therapy) throws ShanoirException;
+    /**
+     * Save a therapy.
+     *
+     * @param therapy
+     *            therapy to create.
+     * @return created therapy.
+     * @throws ShanoirException
+     */
+    Therapy save(Therapy therapy) throws ShanoirException;
 
-	/**
-	 * Update a therapy.
-	 *
-	 * @param therapy
-	 *            therapy to update.
-	 * @return updated therapy.
-	 * @throws ShanoirException
-	 */
-	Therapy update(Therapy therapy) throws ShanoirException;
+    /**
+     * Update a therapy.
+     *
+     * @param therapy
+     *            therapy to update.
+     * @return updated therapy.
+     * @throws ShanoirException
+     */
+    Therapy update(Therapy therapy) throws ShanoirException;
 
 
 

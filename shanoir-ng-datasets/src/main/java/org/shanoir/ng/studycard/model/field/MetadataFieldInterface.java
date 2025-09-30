@@ -26,23 +26,23 @@ public interface MetadataFieldInterface<T> {
      *
      * @param object
      * @param updatedValue
-	 * @throws CheckedIllegalClassException if object class is incompatible with this field
+     * @throws CheckedIllegalClassException if object class is incompatible with this field
      */
-	void update(T object, String updatedValue) throws CheckedIllegalClassException;
+    void update(T object, String updatedValue) throws CheckedIllegalClassException;
 
-	/**
-	 * Get the object's metadata field value
-	 *
-	 * @param object
-	 * @return field value
-	 * @throws CheckedIllegalClassException if object class is incompatible with this field
-	 */
-	String get(T object) throws CheckedIllegalClassException;
+    /**
+     * Get the object's metadata field value
+     *
+     * @param object
+     * @return field value
+     * @throws CheckedIllegalClassException if object class is incompatible with this field
+     */
+    String get(T object) throws CheckedIllegalClassException;
 
-	/**
-	 * Get the enum object id
-	 *
-	 * @return id
-	 */
-	public int getId();
+    /**
+     * Get the enum object id
+     *
+     * @return id
+     */
+    public int getId();
 }

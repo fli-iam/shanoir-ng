@@ -33,109 +33,109 @@ import org.springframework.data.repository.query.Param;
  */
 public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
 
-	/**
-	 * Get a list of examinations for a subject.
-	 *
-	 * @param subjectId
-	 * @return
-	 * @author yyao
-	 *            subject id.
-	 * @return list of examinations.
-	 */
-	List<Examination> findBySubjectId(Long subjectId);
+    /**
+     * Get a list of examinations for a subject.
+     *
+     * @param subjectId
+     * @return
+     * @author yyao
+     *            subject id.
+     * @return list of examinations.
+     */
+    List<Examination> findBySubjectId(Long subjectId);
 
-	/**
-	 * Get a list of examinations for a list of subjects.
-	 *
-	 * @param subjectId
-	 * @return list of examinations.
-	 */
-	List<Examination> findBySubjectIdIn(List<Long> subjectId);
+    /**
+     * Get a list of examinations for a list of subjects.
+     *
+     * @param subjectId
+     * @return list of examinations.
+     */
+    List<Examination> findBySubjectIdIn(List<Long> subjectId);
 
-	/**
-	 *
-	 * @param subjectId:
-	 * @param studyId
-	 * @return list of examinations.
-	 */
-	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
+    /**
+     *
+     * @param subjectId:
+     * @param studyId
+     * @return list of examinations.
+     */
+    List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	List<Examination> findByIdGreaterThan(Long id);
+    List<Examination> findByIdGreaterThan(Long id);
 
-	/**
-	 * Get a paginated list of examinations
-	 *
-	 * @param preclinical preclinical examination
-	 * @param pageable pagination data.
-	 * @return list of examinations.
-	 */
-	Page<Examination> findAllByPreclinical(Pageable pageable, boolean preclinical);
+    /**
+     * Get a paginated list of examinations
+     *
+     * @param preclinical preclinical examination
+     * @param pageable pagination data.
+     * @return list of examinations.
+     */
+    Page<Examination> findAllByPreclinical(Pageable pageable, boolean preclinical);
 
-	/**
-	 * Get a list of examinations for a study.
-	 *
-	 * @param studyId
-	 * @return list of examinations.
-	 */
-	List<Examination> findByStudy_Id(Long studyId);
+    /**
+     * Get a list of examinations for a study.
+     *
+     * @param studyId
+     * @return list of examinations.
+     */
+    List<Examination> findByStudy_Id(Long studyId);
 
-	/**
-	 * Get a list of examinations for a study.
-	 *
-	 * @param studyId
-	 * @return list of examinations.
-	 */
-	@Query("select e.id from Examination e where e.study.id = :studyId")
-	List<Long> findIdsByStudyId(Long studyId);
+    /**
+     * Get a list of examinations for a study.
+     *
+     * @param studyId
+     * @return list of examinations.
+     */
+    @Query("select e.id from Examination e where e.study.id = :studyId")
+    List<Long> findIdsByStudyId(Long studyId);
 
-	/**
-	 * Get all examinations, clinical or preclinical.
-	 *
-	 * @return list of examinations.
-	 */
-	List<Examination> findAll();
+    /**
+     * Get all examinations, clinical or preclinical.
+     *
+     * @return list of examinations.
+     */
+    List<Examination> findAll();
 
-	/**
-	 * Get all examinations, clinical or preclinical filtered by the patient/subject name.
-	 *
-	 * @param patientName
-	 * @param pageable
-	 * @return
-	 */
-	Page<Examination> findAllBySubjectName(String patientName, Pageable pageable);
+    /**
+     * Get all examinations, clinical or preclinical filtered by the patient/subject name.
+     *
+     * @param patientName
+     * @param pageable
+     * @return
+     */
+    Page<Examination> findAllBySubjectName(String patientName, Pageable pageable);
 
-	/**
-	 * Get the parent examination
-	 *
-	 * @param sourceId
-	 * @return
-	 */
-	List<Examination> findBySourceId(Long sourceId);
+    /**
+     * Get the parent examination
+     *
+     * @param sourceId
+     * @return
+     */
+    List<Examination> findBySourceId(Long sourceId);
 
-	/**
-	 * Get the parent examination for a specific study
-	 *
-	 * @param sourceId
-	 * @param studyId
-	 * @return
-	 */
-	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
+    /**
+     * Get the parent examination for a specific study
+     *
+     * @param sourceId
+     * @param studyId
+     * @return
+     */
+    Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
-	Page<Examination> findPageByComment(String comment, Pageable pageable);
+    Page<Examination> findPageByComment(String comment, Pageable pageable);
 
-	@Query("""
-		SELECT DISTINCT
-		ex.id                      AS id,
-		ex.study.id                AS studyId,
-		ex.centerId                AS centerId
-		FROM Examination ex
-		WHERE ex.id IN :ids
-			""")
-  	List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
+    @Query("""
+        SELECT DISTINCT
+        ex.id                      AS id,
+        ex.study.id                AS studyId,
+        ex.centerId                AS centerId
+        FROM Examination ex
+        WHERE ex.id IN :ids
+            """)
+      List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
 
-	@EntityGraph(attributePaths = {"datasetAcquisitions"})
-	@Query("SELECT e FROM Examination e WHERE e.id = :id")
-	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
+    @EntityGraph(attributePaths = {"datasetAcquisitions"})
+    @Query("SELECT e FROM Examination e WHERE e.id = :id")
+    Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
 
 }

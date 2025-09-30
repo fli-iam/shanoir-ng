@@ -28,17 +28,17 @@ import java.util.List;
 @Service
 public interface StudyService {
 
-	/**
-	 * Find study by its id. Check if current user can see study.
-	 *
-	 * @param id study id.
-	 * @return a study or null.
-	 * @throws AccessDeniedException
-	 */
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
-	Study findById(Long id);
+    /**
+     * Find study by its id. Check if current user can see study.
+     *
+     * @param id study id.
+     * @return a study or null.
+     * @throws AccessDeniedException
+     */
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
+    Study findById(Long id);
 
     void updateStudy(Study updated, Study current);
 
-	List<String> validate(Study updated, Study current);
+    List<String> validate(Study updated, Study current);
 }

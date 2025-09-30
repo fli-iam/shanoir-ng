@@ -43,85 +43,85 @@ import org.springframework.stereotype.Service;
 @Service
 public class DicomDirToModelService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
 
-	/**
-	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
-	 *
-	 * @param file DICOMDIR file
-	 * @return List<Patient>
-	 * @throws IOException
-	 */
-	public List<Patient> readDicomDirToPatients(final File file) throws IOException {
-		try (DicomDirReader dicomDirReader = new DicomDirReader(file)) {
-			// patient level
-			List<Patient> patients = new ArrayList<Patient>();
-			Attributes patientRecord = dicomDirReader.findPatientRecord();
-			while (patientRecord != null) {
-				Patient patient = new Patient(patientRecord);
-				patients.add(patient);
-				// study level
-				List<Study> studies = new ArrayList<Study>();
-				Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
-				while (studyRecord != null) {
-					Study study = new Study(studyRecord);
-					studies.add(study);
-					// serie level
-					List<Serie> series = new ArrayList<Serie>();
-					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
-					while (serieRecord != null) {
-						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
-						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
-					}
-					series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
-					study.setSeries(series);
-					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
-				}
-				studies.sort(new StudyDateSorter());
-				patient.setStudies(studies);
-				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
-			}
-			return patients;
-		} catch (IOException e) {
-			LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
-		}
-		return Collections.emptyList();
-	}
+    /**
+     * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
+     *
+     * @param file DICOMDIR file
+     * @return List<Patient>
+     * @throws IOException
+     */
+    public List<Patient> readDicomDirToPatients(final File file) throws IOException {
+        try (DicomDirReader dicomDirReader = new DicomDirReader(file)) {
+            // patient level
+            List<Patient> patients = new ArrayList<Patient>();
+            Attributes patientRecord = dicomDirReader.findPatientRecord();
+            while (patientRecord != null) {
+                Patient patient = new Patient(patientRecord);
+                patients.add(patient);
+                // study level
+                List<Study> studies = new ArrayList<Study>();
+                Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
+                while (studyRecord != null) {
+                    Study study = new Study(studyRecord);
+                    studies.add(study);
+                    // serie level
+                    List<Serie> series = new ArrayList<Serie>();
+                    Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
+                    while (serieRecord != null) {
+                        handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
+                        serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
+                    }
+                    series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                    study.setSeries(series);
+                    studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
+                }
+                studies.sort(new StudyDateSorter());
+                patient.setStudies(studies);
+                patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
+            }
+            return patients;
+        } catch (IOException e) {
+            LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
+        }
+        return Collections.emptyList();
+    }
 
-	/**
-	 * Handles Serie and Instance records.
-	 *
-	 * @param series
-	 * @param serieRecord
-	 * @param dicomDirReader
-	 * @throws IOException
-	 */
-	private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
-		Serie serie = new Serie(serieRecord);
-		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
-			List<Instance> instances = new ArrayList<Instance>();
-			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
-			while (instanceRecord != null) {
-				Instance instance = new Instance(instanceRecord);
-				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
-					instances.add(instance);
-				}
-				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
-			}
-			if (!instances.isEmpty()) {
-				instances.sort(new InstanceNumberSorter());
-				serie.setInstances(instances);
-			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-				serie.setIgnored(true);
-				serie.setSelected(false);
-			}
-		} else {
-			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-			serie.setIgnored(true);
-			serie.setSelected(false);
-		}
-		series.add(serie);
-	}
+    /**
+     * Handles Serie and Instance records.
+     *
+     * @param series
+     * @param serieRecord
+     * @param dicomDirReader
+     * @throws IOException
+     */
+    private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
+        Serie serie = new Serie(serieRecord);
+        if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
+            List<Instance> instances = new ArrayList<Instance>();
+            Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
+            while (instanceRecord != null) {
+                Instance instance = new Instance(instanceRecord);
+                if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
+                    instances.add(instance);
+                }
+                instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
+            }
+            if (!instances.isEmpty()) {
+                instances.sort(new InstanceNumberSorter());
+                serie.setInstances(instances);
+            } else {
+                LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+                serie.setIgnored(true);
+                serie.setSelected(false);
+            }
+        } else {
+            LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+            serie.setIgnored(true);
+            serie.setSelected(false);
+        }
+        series.add(serie);
+    }
 
 }

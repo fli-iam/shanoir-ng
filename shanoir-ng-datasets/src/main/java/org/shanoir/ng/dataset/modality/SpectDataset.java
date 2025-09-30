@@ -28,49 +28,49 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class SpectDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -4934855853599640771L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -4934855853599640771L;
 
-	/** Spect Dataset Nature. */
-	private Integer spectDatasetNature;
+    /** Spect Dataset Nature. */
+    private Integer spectDatasetNature;
 
-	public SpectDataset() {
+    public SpectDataset() {
 
-	}
+    }
 
-	public SpectDataset(Dataset other) {
-		super(other);
-		if (((SpectDataset) other).getSpectDatasetNature() != null) {
-			this.spectDatasetNature = ((SpectDataset) other).getSpectDatasetNature().getId();
-		} else {
-			this.spectDatasetNature = null;
-		}
-	}
+    public SpectDataset(Dataset other) {
+        super(other);
+        if (((SpectDataset) other).getSpectDatasetNature() != null) {
+            this.spectDatasetNature = ((SpectDataset) other).getSpectDatasetNature().getId();
+        } else {
+            this.spectDatasetNature = null;
+        }
+    }
 
-	/**
-	 * @return the spectDatasetNature
-	 */
-	public SpectDatasetNature getSpectDatasetNature() {
-		return SpectDatasetNature.getNature(spectDatasetNature);
-	}
+    /**
+     * @return the spectDatasetNature
+     */
+    public SpectDatasetNature getSpectDatasetNature() {
+        return SpectDatasetNature.getNature(spectDatasetNature);
+    }
 
-	/**
-	 * @param spectDatasetNature
-	 *            the spectDatasetNature to set
-	 */
-	public void setSpectDatasetNature(SpectDatasetNature spectDatasetNature) {
-		if (spectDatasetNature == null) {
-			this.spectDatasetNature = null;
-		} else {
-			this.spectDatasetNature = spectDatasetNature.getId();
-		}
-	}
+    /**
+     * @param spectDatasetNature
+     *            the spectDatasetNature to set
+     */
+    public void setSpectDatasetNature(SpectDatasetNature spectDatasetNature) {
+        if (spectDatasetNature == null) {
+            this.spectDatasetNature = null;
+        } else {
+            this.spectDatasetNature = spectDatasetNature.getId();
+        }
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.SPECT;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.SPECT;
+    }
 
 }

@@ -82,11 +82,11 @@ public class ExecutionMonitoring extends DatasetProcessing {
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
     }
-	public String getOutputProcessing() {
-		return outputProcessing;
-	}
-	public void setOutputProcessing(String outputProcessing) {
-		this.outputProcessing = outputProcessing;
-	}
+    public String getOutputProcessing() {
+        return outputProcessing;
+    }
+    public void setOutputProcessing(String outputProcessing) {
+        this.outputProcessing = outputProcessing;
+    }
 
 }

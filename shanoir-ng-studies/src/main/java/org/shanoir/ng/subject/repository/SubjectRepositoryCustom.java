@@ -26,23 +26,23 @@ import org.shanoir.ng.subject.model.Subject;
  */
 public interface SubjectRepositoryCustom {
 
-	/**
-	 * Find subject by Id with subject study info (since it is a Lazy Loading).
-	 *
-	 * @Param Long id;
-	 *
-	 * @return Subject.
-	 */
-	Subject findSubjectWithSubjectStudyById(Long id);
+    /**
+     * Find subject by Id with subject study info (since it is a Lazy Loading).
+     *
+     * @Param Long id;
+     *
+     * @return Subject.
+     */
+    Subject findSubjectWithSubjectStudyById(Long id);
 
-	/**
-	 * Find entities by field value.
-	 *
-	 * @param fieldName searched field name.
-	 * @param value value.
-	 * @return list of entities.
-	 */
-	List<Subject> findBy(String fieldName, Object value);
+    /**
+     * Find entities by field value.
+     *
+     * @param fieldName searched field name.
+     * @param value value.
+     * @return list of entities.
+     */
+    List<Subject> findBy(String fieldName, Object value);
 
 
 }

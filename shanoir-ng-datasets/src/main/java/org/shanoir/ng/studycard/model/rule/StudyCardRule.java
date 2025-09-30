@@ -48,37 +48,37 @@ import jakarta.validation.constraints.NotNull;
     @JsonSubTypes.Type(value = DatasetAcquisitionRule.class, name = "DatasetAcquisition") })
 public abstract class StudyCardRule<T> extends AbstractEntity {
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "rule_id")
-	private List<StudyCardAssignment<?>> assignments;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "rule_id")
+    private List<StudyCardAssignment<?>> assignments;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	// there is a join table because a rule_id fk would lead to an ambiguity and bugs
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
-	@JoinTable(name = "study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
-	private List<StudyCardCondition> conditions;
+    @JoinTable(name = "study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
+    private List<StudyCardCondition> conditions;
 
-	@NotNull
-	private boolean orConditions;
+    @NotNull
+    private boolean orConditions;
 
-	public List<StudyCardAssignment<?>> getAssignments() {
-		return assignments;
-	}
+    public List<StudyCardAssignment<?>> getAssignments() {
+        return assignments;
+    }
 
-	public void setAssignments(List<StudyCardAssignment<?>> assignments) {
-		this.assignments = assignments;
-	}
+    public void setAssignments(List<StudyCardAssignment<?>> assignments) {
+        this.assignments = assignments;
+    }
 
-	public List<StudyCardCondition> getConditions() {
-		return conditions;
-	}
+    public List<StudyCardCondition> getConditions() {
+        return conditions;
+    }
 
-	public void setConditions(List<StudyCardCondition> conditions) {
-		this.conditions = conditions;
-	}
+    public void setConditions(List<StudyCardCondition> conditions) {
+        this.conditions = conditions;
+    }
 
 
-	public boolean isOrConditions() {
+    public boolean isOrConditions() {
         return orConditions;
     }
 

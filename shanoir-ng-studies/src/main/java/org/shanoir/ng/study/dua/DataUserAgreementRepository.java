@@ -20,10 +20,10 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface DataUserAgreementRepository extends CrudRepository<DataUserAgreement, Long> {
 
-	List<DataUserAgreement> findByUserIdAndTimestampOfAcceptedIsNull(Long userId);
+    List<DataUserAgreement> findByUserIdAndTimestampOfAcceptedIsNull(Long userId);
 
-	DataUserAgreement findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(Long userId, Long studyId);
+    DataUserAgreement findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(Long userId, Long studyId);
 
-	List<DataUserAgreement> findByStudyId(Long studyId);
+    List<DataUserAgreement> findByStudyId(Long studyId);
 
 }

@@ -20,11 +20,11 @@ import java.util.Set;
 
 public class DatasetForRights implements DatasetForRightsProjection {
 
-	private Long id;
+    private Long id;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long centerId;
+    private Long centerId;
 
     private Set<Long> relatedStudiesIds;
 

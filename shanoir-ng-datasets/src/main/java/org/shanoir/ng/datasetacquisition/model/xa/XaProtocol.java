@@ -31,47 +31,47 @@ import jakarta.persistence.OneToOne;
 @Entity
 public class XaProtocol extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 3100284961389018913L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 3100284961389018913L;
 
-	@JsonIgnore
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "xaProtocol")
-	private XaDatasetAcquisition xaDatasetAcquisition;
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "xaProtocol")
+    private XaDatasetAcquisition xaDatasetAcquisition;
 
 
-	/** (0054, 0081) Number of Slices */
-	private Integer numberOfSlices;
+    /** (0054, 0081) Number of Slices */
+    private Integer numberOfSlices;
 
-	/**
-	 * (0018,0050) Slice thickness Nominal reconstructed slice thickness, in mm.
-	 * The unit of measure of the slice thickness must be in mm.
-	 */
-	private Double sliceThickness;
+    /**
+     * (0018,0050) Slice thickness Nominal reconstructed slice thickness, in mm.
+     * The unit of measure of the slice thickness must be in mm.
+     */
+    private Double sliceThickness;
 
-	public XaProtocol() {
+    public XaProtocol() {
 
-	}
+    }
 
-	public XaProtocol(XaDatasetAcquisition acq) {
-		this.xaDatasetAcquisition = acq;
-	}
+    public XaProtocol(XaDatasetAcquisition acq) {
+        this.xaDatasetAcquisition = acq;
+    }
 
-	/**
-	 * @return the xaDatasetAcquisition
-	 */
-	public XaDatasetAcquisition getXaDatasetAcquisition() {
-		return xaDatasetAcquisition;
-	}
+    /**
+     * @return the xaDatasetAcquisition
+     */
+    public XaDatasetAcquisition getXaDatasetAcquisition() {
+        return xaDatasetAcquisition;
+    }
 
-	/**
-	 * @param xaDatasetAcquisition
-	 *            the xaDatasetAcquisition to set
-	 */
-	public void setXaDatasetAcquisition(XaDatasetAcquisition xaDatasetAcquisition) {
-		this.xaDatasetAcquisition = xaDatasetAcquisition;
-	}
+    /**
+     * @param xaDatasetAcquisition
+     *            the xaDatasetAcquisition to set
+     */
+    public void setXaDatasetAcquisition(XaDatasetAcquisition xaDatasetAcquisition) {
+        this.xaDatasetAcquisition = xaDatasetAcquisition;
+    }
 
     public Integer getNumberOfSlices() {
         return numberOfSlices;

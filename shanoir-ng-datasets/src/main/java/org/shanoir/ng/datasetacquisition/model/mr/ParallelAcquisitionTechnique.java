@@ -25,88 +25,88 @@ import org.slf4j.LoggerFactory;
  */
 public enum ParallelAcquisitionTechnique {
 
-	// PILS
-	PILS(1),
+    // PILS
+    PILS(1),
 
-	// SENSE
-	SENSE(2),
+    // SENSE
+    SENSE(2),
 
-	// SMASH
-	SMASH(3),
+    // SMASH
+    SMASH(3),
 
-	// GRAPPA
-	GRAPPA(4),
+    // GRAPPA
+    GRAPPA(4),
 
-	// mSENSE
-	M_SENSE(5),
+    // mSENSE
+    M_SENSE(5),
 
-	// alternative of mSENSE
-	MBSENSE(5),
+    // alternative of mSENSE
+    MBSENSE(5),
 
-	CSENSE(6),
+    CSENSE(6),
 
-	OTHER(7);
+    OTHER(7);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private ParallelAcquisitionTechnique(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private ParallelAcquisitionTechnique(final int id) {
+        this.id = id;
+    }
 
-	private static final Logger LOG = LoggerFactory.getLogger(ParallelAcquisitionTechnique.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ParallelAcquisitionTechnique.class);
 
-	/**
-	 * Get a parallel acquisition technique by its id.
-	 *
-	 * @param id
-	 *            technique id.
-	 * @return parallel acquisition technique.
-	 */
-	public static ParallelAcquisitionTechnique getTechnique(final Integer id) {
-		if (id == null) {
-			return OTHER;
-		}
-		for (ParallelAcquisitionTechnique technique : ParallelAcquisitionTechnique.values()) {
-			if (id.equals(technique.getId())) {
-				return technique;
-			} else {
-				return OTHER;
-			}
-		}
-		throw new IllegalArgumentException("No matching parallel acquisition technique for id " + id);
-	}
+    /**
+     * Get a parallel acquisition technique by its id.
+     *
+     * @param id
+     *            technique id.
+     * @return parallel acquisition technique.
+     */
+    public static ParallelAcquisitionTechnique getTechnique(final Integer id) {
+        if (id == null) {
+            return OTHER;
+        }
+        for (ParallelAcquisitionTechnique technique : ParallelAcquisitionTechnique.values()) {
+            if (id.equals(technique.getId())) {
+                return technique;
+            } else {
+                return OTHER;
+            }
+        }
+        throw new IllegalArgumentException("No matching parallel acquisition technique for id " + id);
+    }
 
-	/**
-	 * Get a parallel acquisition technique by its id.
-	 *
-	 * @param technique
-	 *            technique id.
-	 * @return parallel acquisition technique.
-	 */
-	public static ParallelAcquisitionTechnique getIdByTechnique(final String technique) {
-		if (technique == null) {
-			return null;
-		}
-		try {
-			return ParallelAcquisitionTechnique.valueOf(technique);
-		} catch (IllegalArgumentException e) {
-			LOG.error("ERROR: Parrallel acquisition technique not found: {}, null was set.", technique);
-			// If not found, just return null and log it instead of blocking all import.
-			return null;
-		}
-	}
+    /**
+     * Get a parallel acquisition technique by its id.
+     *
+     * @param technique
+     *            technique id.
+     * @return parallel acquisition technique.
+     */
+    public static ParallelAcquisitionTechnique getIdByTechnique(final String technique) {
+        if (technique == null) {
+            return null;
+        }
+        try {
+            return ParallelAcquisitionTechnique.valueOf(technique);
+        } catch (IllegalArgumentException e) {
+            LOG.error("ERROR: Parrallel acquisition technique not found: {}, null was set.", technique);
+            // If not found, just return null and log it instead of blocking all import.
+            return null;
+        }
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

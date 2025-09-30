@@ -39,39 +39,39 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class StudyCenterMapperTest {
 
-	private static final Long STUDY_ID = 1L;
+    private static final Long STUDY_ID = 1L;
 
-	@MockBean
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+    @MockBean
+    private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
-	@MockBean
-	private CenterMapper centerMapperMock;
+    @MockBean
+    private CenterMapper centerMapperMock;
 
-	@Autowired
-	private StudyCenterMapper studyCenterMapper;
+    @Autowired
+    private StudyCenterMapper studyCenterMapper;
 
-	@Test
-	public void studyCenterListToStudyCenterDTOListTest() {
-		final List<StudyCenterDTO> subjectStudyDTOs = studyCenterMapper
-				.studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
-		Assertions.assertNotNull(subjectStudyDTOs);
-		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
-		Assertions.assertTrue(subjectStudyDTOs.get(0).getStudy().getId().equals(STUDY_ID));
-	}
+    @Test
+    public void studyCenterListToStudyCenterDTOListTest() {
+        final List<StudyCenterDTO> subjectStudyDTOs = studyCenterMapper
+                .studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
+        Assertions.assertNotNull(subjectStudyDTOs);
+        Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+        Assertions.assertTrue(subjectStudyDTOs.get(0).getStudy().getId().equals(STUDY_ID));
+    }
 
-	@Test
-	public void studyCenterToStudyCenterDTOTest() {
-		final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
-		Assertions.assertNotNull(subjectStudyDTO);
-		Assertions.assertTrue(subjectStudyDTO.getStudy().getId().equals(STUDY_ID));
-	}
+    @Test
+    public void studyCenterToStudyCenterDTOTest() {
+        final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
+        Assertions.assertNotNull(subjectStudyDTO);
+        Assertions.assertTrue(subjectStudyDTO.getStudy().getId().equals(STUDY_ID));
+    }
 
-	private StudyCenter createStudyCenter() {
-		final StudyCenter studyCenter = new StudyCenter();
-		final Study study = new Study();
-		study.setId(STUDY_ID);
-		studyCenter.setStudy(study);
-		return studyCenter;
-	}
+    private StudyCenter createStudyCenter() {
+        final StudyCenter studyCenter = new StudyCenter();
+        final Study study = new Study();
+        study.setId(STUDY_ID);
+        studyCenter.setStudy(study);
+        return studyCenter;
+    }
 
 }

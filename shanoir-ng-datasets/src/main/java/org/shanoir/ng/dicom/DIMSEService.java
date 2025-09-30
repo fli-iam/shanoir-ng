@@ -38,73 +38,73 @@ import org.springframework.stereotype.Component;
 @Component
 public class DIMSEService {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
 
-	private static final String STORESCU = "storescu";
+    private static final String STORESCU = "storescu";
 
-	private static final String C = "-c";
+    private static final String C = "-c";
 
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
+    @Value("${dcm4chee-arc.host}")
+    private String dcm4cheeHost;
 
-	@Value("${dcm4chee-arc.port.dcm}")
-	private String dcm4cheePortDcm;
+    @Value("${dcm4chee-arc.port.dcm}")
+    private String dcm4cheePortDcm;
 
-	@Value("${dcm4chee-arc.dicom.c-store.aet.called}")
-	private String dcm4cheeCStoreAETCalled;
+    @Value("${dcm4chee-arc.dicom.c-store.aet.called}")
+    private String dcm4cheeCStoreAETCalled;
 
-	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
-		if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
-				&& directoryWithDicomFiles.isDirectory()) {
-			File[] dicomFiles = directoryWithDicomFiles.listFiles();
-			LOG.info("Start: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
-					+ directoryWithDicomFiles.getAbsolutePath());
-			List<String> args = new ArrayList<String>();
-			args.add(STORESCU);
-			args.add(C);
-			args.add(dcm4cheeCStoreAETCalled + "@" + dcm4cheeHost + ":" + dcm4cheePortDcm);
-			args.add(directoryWithDicomFiles.getAbsolutePath());
-			execute(args);
-			LOG.info("Finished: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
-					+ directoryWithDicomFiles.getAbsolutePath());
-		} else {
-			throw new ShanoirException(
-					"sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
-		}
-	}
+    public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
+        if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
+                && directoryWithDicomFiles.isDirectory()) {
+            File[] dicomFiles = directoryWithDicomFiles.listFiles();
+            LOG.info("Start: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
+                    + directoryWithDicomFiles.getAbsolutePath());
+            List<String> args = new ArrayList<String>();
+            args.add(STORESCU);
+            args.add(C);
+            args.add(dcm4cheeCStoreAETCalled + "@" + dcm4cheeHost + ":" + dcm4cheePortDcm);
+            args.add(directoryWithDicomFiles.getAbsolutePath());
+            execute(args);
+            LOG.info("Finished: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
+                    + directoryWithDicomFiles.getAbsolutePath());
+        } else {
+            throw new ShanoirException(
+                    "sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
+        }
+    }
 
-	/**
-	 * Calls the command line, error occurred if exitCode != 0.
-	 *
-	 * Uses ProcessBuilder here as Runtime.exec did not work (stopped after sending 49 images),
-	 * very probably related to a buffer problem: many output of the script saturates the default
-	 * output buffer of Runtime.exec, so we have been obliged to use ProcessBuilder here.
-	 *
-	 * Furthermore the below code is blocking by intention. It could be coded not blocking, BUT
-	 * the problem is when to check for the results: 5, 10, 15 secs?, in any case we want to continue
-	 * when it terminates, so no real gain when using ExecuterService.
-	 *
-	 * @param args
-	 * @throws Exception
-	 */
-	private void execute(List<String> args) throws Exception {
-		LOG.debug("Calling command: " + args.toString());
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.redirectErrorStream(true);
-		processBuilder.command(args);
-		Process process = processBuilder.start();
+    /**
+     * Calls the command line, error occurred if exitCode != 0.
+     *
+     * Uses ProcessBuilder here as Runtime.exec did not work (stopped after sending 49 images),
+     * very probably related to a buffer problem: many output of the script saturates the default
+     * output buffer of Runtime.exec, so we have been obliged to use ProcessBuilder here.
+     *
+     * Furthermore the below code is blocking by intention. It could be coded not blocking, BUT
+     * the problem is when to check for the results: 5, 10, 15 secs?, in any case we want to continue
+     * when it terminates, so no real gain when using ExecuterService.
+     *
+     * @param args
+     * @throws Exception
+     */
+    private void execute(List<String> args) throws Exception {
+        LOG.debug("Calling command: " + args.toString());
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.redirectErrorStream(true);
+        processBuilder.command(args);
+        Process process = processBuilder.start();
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
-        	if (line.contains(" ERROR ")) {
-        		LOG.error(line);
-        	}
+            if (line.contains(" ERROR ")) {
+                LOG.error(line);
+            }
         }
         int exitCode = process.waitFor();
-		if (exitCode != 0) {
-			throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
-		}
-	}
+        if (exitCode != 0) {
+            throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
+        }
+    }
 
 }

@@ -44,74 +44,74 @@
 //@ActiveProfiles("dev")
 //public class SubjectApiControllerTestIT extends KeycloakControllerTestIT {
 //
-//	private static final String REQUEST_PATH = "/subject";
-//	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
-//	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+//    private static final String REQUEST_PATH = "/subject";
+//    private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+//    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
-//	@Autowired
-//	private TestRestTemplate restTemplate;
+//    @Autowired
+//    private TestRestTemplate restTemplate;
 //
-//	@Test
-//	public void findSubjectByIdProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-//		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-//	}
+//    @Test
+//    public void findSubjectByIdProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+//        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findSubjectByIdWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findSubjectByIdWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findTemplatesProtected() {
-//		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-//		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-//	}
+//    @Test
+//    public void findTemplatesProtected() {
+//        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
+//        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+//    @Test
+//    public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewSubjectProtected() {
-//		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Subject(), String.class);
-//		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-//	}
+//    @Test
+//    public void saveNewSubjectProtected() {
+//        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Subject(), String.class);
+//        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void saveNewSubjectWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject(), getHeadersWithToken(true));
+//    @Test
+//    public void saveNewSubjectWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject(), getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
-//				String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+//                String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewSubjectProtected() {
-//		final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject());
+//    @Test
+//    public void updateNewSubjectProtected() {
+//        final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject());
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void updateNewSubjectWithLogin() throws ClientProtocolException, IOException {
-//		final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject(), getHeadersWithToken(true));
+//    @Test
+//    public void updateNewSubjectWithLogin() throws ClientProtocolException, IOException {
+//        final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject(), getHeadersWithToken(true));
 //
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-//				String.class);
-//		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-//	}
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+//                String.class);
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
 //
 //}

@@ -28,20 +28,20 @@ import jakarta.persistence.Entity;
 @Entity
 public class StatisticalDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 7175768970653122456L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 7175768970653122456L;
 
-	public StatisticalDataset() { }
+    public StatisticalDataset() { }
 
-	public StatisticalDataset(Dataset other) {
-		super(other);
-	}
+    public StatisticalDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.STATISTICAL;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.STATISTICAL;
+    }
 
 }

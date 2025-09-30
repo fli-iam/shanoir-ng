@@ -12,11 +12,11 @@ import org.shanoir.ng.importer.model.Patient;
  */
 public class PatientNameSorter implements Comparator<Patient> {
 
-	@Override
-	public int compare(Patient p1, Patient p2) {
-		String patientName1 = p1.getPatientName();
+    @Override
+    public int compare(Patient p1, Patient p2) {
+        String patientName1 = p1.getPatientName();
         String patientName2 = p2.getPatientName();
         return patientName1.compareTo(patientName2);
-	}
+    }
 
 }

@@ -37,49 +37,49 @@ import org.springframework.data.domain.Page;
 public interface DatasetAcquisitionMapper {
 
 
-	List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
-			List<DatasetAcquisition> datasetAcquisitions);
+    List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
+            List<DatasetAcquisition> datasetAcquisitions);
 
-	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
+    public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
 
 
-	@Mapping(target = "copies", expression = "java(mapCopiesFromDatasetAcquisition(datasetAcquisition.getCopies()))")
-	@Mapping(target = "source", expression = "java(mapSourceFromDatasetAcquisition(datasetAcquisition.getSource()))")
-	DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
-			DatasetAcquisition datasetAcquisition);
+    @Mapping(target = "copies", expression = "java(mapCopiesFromDatasetAcquisition(datasetAcquisition.getCopies()))")
+    @Mapping(target = "source", expression = "java(mapSourceFromDatasetAcquisition(datasetAcquisition.getSource()))")
+    DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
+            DatasetAcquisition datasetAcquisition);
 
-	DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+    DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 
-	@ObjectFactory
-	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
-		if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
-		else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition();
-		else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition();
-		else if (dto.getType().equals("BIDS")) return new BidsDatasetAcquisition();
-		else if (dto.getType().equals("Eeg")) return new EegDatasetAcquisition();
-		else if (dto.getType().equals("Xa")) return new XaDatasetAcquisition();
-		else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
+    @ObjectFactory
+    default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
+        if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
+        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition();
+        else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition();
+        else if (dto.getType().equals("BIDS")) return new BidsDatasetAcquisition();
+        else if (dto.getType().equals("Eeg")) return new EegDatasetAcquisition();
+        else if (dto.getType().equals("Xa")) return new XaDatasetAcquisition();
+        else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
         else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
     }
 
-	default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
-		if (copies == null) {
-			return null;
-		}
-		return copies.stream()
-				.map(DatasetAcquisition::getId)
-				.collect(Collectors.toList());
-	}
+    default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(DatasetAcquisition::getId)
+                .collect(Collectors.toList());
+    }
 
-	default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
-		return source != null ? source.getId() : null;
-	}
+    default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
+        return source != null ? source.getId() : null;
+    }
 
-	default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
-		return null;
-	}
+    default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
+        return null;
+    }
 
-	default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
-		return null;
-	}
+    default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
+        return null;
+    }
 }

@@ -41,38 +41,38 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class StudyMapperTest {
 
-	private static final Long STUDY_ID = 1L;
-	private static final String STUDY_NAME = "test";
+    private static final Long STUDY_ID = 1L;
+    private static final String STUDY_NAME = "test";
 
-	@Autowired
-	private StudyMapper studyMapper;
+    @Autowired
+    private StudyMapper studyMapper;
 
-	@MockBean
-	private TimepointMapper timepointMapperMock;
+    @MockBean
+    private TimepointMapper timepointMapperMock;
 
-	@Test
-	public void studiesToStudyDTOsTest() {
-		final List<StudyDTO> studyDTOs = studyMapper.studiesToStudyDTOs(Arrays.asList(createStudy()));
-		Assertions.assertNotNull(studyDTOs);
-		Assertions.assertTrue(studyDTOs.size() == 1);
-		Assertions.assertTrue(studyDTOs.get(0).getId().equals(STUDY_ID));
-	}
+    @Test
+    public void studiesToStudyDTOsTest() {
+        final List<StudyDTO> studyDTOs = studyMapper.studiesToStudyDTOs(Arrays.asList(createStudy()));
+        Assertions.assertNotNull(studyDTOs);
+        Assertions.assertTrue(studyDTOs.size() == 1);
+        Assertions.assertTrue(studyDTOs.get(0).getId().equals(STUDY_ID));
+    }
 
-	@Test
-	public void studyToStudyDTOTest() {
-		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
-		Assertions.assertNotNull(studyDTO);
-		Assertions.assertTrue(studyDTO.getId().equals(STUDY_ID));
-	}
+    @Test
+    public void studyToStudyDTOTest() {
+        final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
+        Assertions.assertNotNull(studyDTO);
+        Assertions.assertTrue(studyDTO.getId().equals(STUDY_ID));
+    }
 
-	private Study createStudy() {
-		final Study study = new Study();
-		study.setId(STUDY_ID);
-		study.setName(STUDY_NAME);
-		study.setStudyCenterList(new ArrayList<>());
-		study.setStudyUserList(new ArrayList<>());
-		study.setSubjectStudyList(new ArrayList<>());
-		return study;
-	}
+    private Study createStudy() {
+        final Study study = new Study();
+        study.setId(STUDY_ID);
+        study.setName(STUDY_NAME);
+        study.setStudyCenterList(new ArrayList<>());
+        study.setStudyUserList(new ArrayList<>());
+        study.setSubjectStudyList(new ArrayList<>());
+        return study;
+    }
 
 }

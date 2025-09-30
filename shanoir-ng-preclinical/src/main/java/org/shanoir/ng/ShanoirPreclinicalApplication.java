@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 @OpenAPIDefinition
 public class ShanoirPreclinicalApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShanoirPreclinicalApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ShanoirPreclinicalApplication.class, args);
+    }
 
 }

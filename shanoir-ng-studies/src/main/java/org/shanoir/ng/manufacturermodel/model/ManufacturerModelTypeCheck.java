@@ -33,19 +33,19 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = ManufacturerModelTypeCheckValidator.class)
 public @interface ManufacturerModelTypeCheck {
 
-	/**
-	 * Message.
-	 */
-	String message() default "Manufacturer model not correct depending on its type.";
+    /**
+     * Message.
+     */
+    String message() default "Manufacturer model not correct depending on its type.";
 
-	/**
-	 * Groups.
-	 */
-	Class<?>[] groups() default {};
+    /**
+     * Groups.
+     */
+    Class<?>[] groups() default {};
 
-	/**
-	 * Payload.
-	 */
-	Class<? extends Payload>[] payload() default {};
+    /**
+     * Payload.
+     */
+    Class<? extends Payload>[] payload() default {};
 
 }

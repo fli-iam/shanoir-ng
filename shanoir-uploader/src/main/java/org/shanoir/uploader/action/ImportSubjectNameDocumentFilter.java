@@ -49,15 +49,15 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
             mainWindow.importDialog.existingSubjectsCB.setEnabled(false);
             // Clear subject information for new information
             mainWindow.importDialog.subjectTextField.setValueSet(false);
-			mainWindow.importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-			mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
-			mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-			mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
-			mainWindow.importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
-			mainWindow.importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
-			mainWindow.importDialog.subjectPersonalCommentTextArea.setText("");
-			mainWindow.importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
-			mainWindow.importDialog.subjectPersonalCommentTextArea.setEditable(true);
+            mainWindow.importDialog.subjectImageObjectCategoryCB.setEnabled(true);
+            mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
+            mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
+            mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+            mainWindow.importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
+            mainWindow.importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+            mainWindow.importDialog.subjectPersonalCommentTextArea.setText("");
+            mainWindow.importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
+            mainWindow.importDialog.subjectPersonalCommentTextArea.setEditable(true);
             ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(null, mainWindow.importDialog);
             // Clear examinations
             mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();

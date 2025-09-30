@@ -32,59 +32,59 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class AbstractEntity implements Serializable {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -3276989363792089822L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -3276989363792089822L;
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (Hibernate.getClass(this) != Hibernate.getClass(obj)) {
-			return false;
-		}
-		AbstractEntity entity = (AbstractEntity) obj;
-		if (this.getId() == null || entity.getId() == null) {
-			return false;
-		} else {
-			return this.getId().equals(entity.getId());
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (Hibernate.getClass(this) != Hibernate.getClass(obj)) {
+            return false;
+        }
+        AbstractEntity entity = (AbstractEntity) obj;
+        if (this.getId() == null || entity.getId() == null) {
+            return false;
+        } else {
+            return this.getId().equals(entity.getId());
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		if (getId() != null) {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getId().hashCode();
-			return result;
-		}
-		// ID is not set, return a unique constant hash code to avoid
-		// all objects having the same hash code of 31.
-		return System.identityHashCode(this);
-	}
+    @Override
+    public int hashCode() {
+        if (getId() != null) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getId().hashCode();
+            return result;
+        }
+        // ID is not set, return a unique constant hash code to avoid
+        // all objects having the same hash code of 31.
+        return System.identityHashCode(this);
+    }
 }

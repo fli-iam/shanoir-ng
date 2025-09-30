@@ -34,23 +34,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class InterMicroservicesCommunicator {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(InterMicroservicesCommunicator.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(InterMicroservicesCommunicator.class);
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@EventListener
+    @EventListener
     public void handleUserDeleteEvent(UserDeleteEvent event) {
-		try {
-			LOG.debug("Start sending UserDeleteEvent...");
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.MS_USERS_TO_MS_STUDIES_USER_DELETE, event.getUserId());
-			LOG.debug("Sending UserDeleteEvent finished...");
-		} catch (AmqpException e) {
-			LOG.error("Error while sending message to RabbitMQ", e);
-		}
+        try {
+            LOG.debug("Start sending UserDeleteEvent...");
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.MS_USERS_TO_MS_STUDIES_USER_DELETE, event.getUserId());
+            LOG.debug("Sending UserDeleteEvent finished...");
+        } catch (AmqpException e) {
+            LOG.error("Error while sending message to RabbitMQ", e);
+        }
     }
 
 }

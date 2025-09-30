@@ -18,8 +18,8 @@ public interface Card {
 
     public Long getId();
 
-	public Long getStudyId();
+    public Long getStudyId();
 
-	public String getName();
+    public String getName();
 
 }

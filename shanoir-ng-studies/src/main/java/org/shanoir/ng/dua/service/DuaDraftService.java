@@ -24,9 +24,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface DuaDraftService {
 
-	Optional<DuaDraft> findById(final String id);
+    Optional<DuaDraft> findById(final String id);
 
-	DuaDraft create(final DuaDraft dua) throws EntityFoundException;
+    DuaDraft create(final DuaDraft dua) throws EntityFoundException;
 
-	DuaDraft update(final DuaDraft dua) throws EntityNotFoundException;
+    DuaDraft update(final DuaDraft dua) throws EntityNotFoundException;
 }

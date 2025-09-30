@@ -34,76 +34,76 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Study {
 
-	@JsonProperty("studyInstanceUID")
-	private String studyInstanceUID;
+    @JsonProperty("studyInstanceUID")
+    private String studyInstanceUID;
 
-	@JsonProperty("studyDate")
-	@LocalDateAnnotations
-	private LocalDate studyDate;
+    @JsonProperty("studyDate")
+    @LocalDateAnnotations
+    private LocalDate studyDate;
 
-	@JsonProperty("studyDescription")
-	private String studyDescription;
+    @JsonProperty("studyDescription")
+    private String studyDescription;
 
-	@JsonProperty("series")
-	private List<Serie> series;
+    @JsonProperty("series")
+    private List<Serie> series;
 
-	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Study() { }
+    // Keep this empty constructor to avoid Jackson deserialization exceptions
+    public Study() { }
 
-	public Study(final Attributes attributes) {
-		studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		// try to remove confusing spaces, in case DICOM server sends them wrongly
-		if (studyInstanceUID != null)
-			studyInstanceUID = studyInstanceUID.trim();
-		studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
-		studyDescription = attributes.getString(Tag.StudyDescription);
-	}
+    public Study(final Attributes attributes) {
+        studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+        // try to remove confusing spaces, in case DICOM server sends them wrongly
+        if (studyInstanceUID != null)
+            studyInstanceUID = studyInstanceUID.trim();
+        studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
+        studyDescription = attributes.getString(Tag.StudyDescription);
+    }
 
-	public String getStudyInstanceUID() {
-		return studyInstanceUID;
-	}
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
 
-	public void setStudyInstanceUID(String studyInstanceUID) {
-		this.studyInstanceUID = studyInstanceUID;
-	}
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
-	public LocalDate getStudyDate() {
-		return studyDate;
-	}
+    public LocalDate getStudyDate() {
+        return studyDate;
+    }
 
-	public void setStudyDate(LocalDate studyDate) {
-		this.studyDate = studyDate;
-	}
+    public void setStudyDate(LocalDate studyDate) {
+        this.studyDate = studyDate;
+    }
 
-	public String getStudyDescription() {
-		return studyDescription;
-	}
+    public String getStudyDescription() {
+        return studyDescription;
+    }
 
-	public void setStudyDescription(String studyDescription) {
-		this.studyDescription = studyDescription;
-	}
+    public void setStudyDescription(String studyDescription) {
+        this.studyDescription = studyDescription;
+    }
 
-	public List<Serie> getSeries() {
-		return series;
-	}
+    public List<Serie> getSeries() {
+        return series;
+    }
 
-	@JsonIgnore
-	public List<Serie> getSelectedSeries() {
-		return series.stream().filter(Serie::getSelected).collect(Collectors.toList());
-	}
+    @JsonIgnore
+    public List<Serie> getSelectedSeries() {
+        return series.stream().filter(Serie::getSelected).collect(Collectors.toList());
+    }
 
-	public void setSeries(List<Serie> series) {
-		this.series = series;
-	}
+    public void setSeries(List<Serie> series) {
+        this.series = series;
+    }
 
-	@Override
-	public String toString() {
-		return "Study [studyInstanceUID=" + studyInstanceUID + ", studyDate=" + studyDate + ", studyDescription="
-				+ studyDescription + "]";
-	}
+    @Override
+    public String toString() {
+        return "Study [studyInstanceUID=" + studyInstanceUID + ", studyDate=" + studyDate + ", studyDescription="
+                + studyDescription + "]";
+    }
 
-	public String toTreeString() {
-		return "[" + studyDate + "] " + studyDescription + " [number of series=" + series.size() + ", studyInstanceUID=" + studyInstanceUID + "]";
-	}
+    public String toTreeString() {
+        return "[" + studyDate + "] " + studyDescription + " [number of series=" + series.size() + ", studyInstanceUID=" + studyInstanceUID + "]";
+    }
 
 }

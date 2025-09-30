@@ -53,182 +53,182 @@ import org.springframework.stereotype.Service;
 @Service
 public class NIfTIConverterService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(NIfTIConverterService.class);
-	public static final String DICOM_TO_NIFTI_METHOD = "to-nifti";
-	public static final String BRUKER_TO_DICOM_METHOD = "to-dicom";
+    private static final Logger LOG = LoggerFactory.getLogger(NIfTIConverterService.class);
+    public static final String DICOM_TO_NIFTI_METHOD = "to-nifti";
+    public static final String BRUKER_TO_DICOM_METHOD = "to-dicom";
 
-	@Autowired
-	private ShanoirExec shanoirExec;
+    @Autowired
+    private ShanoirExec shanoirExec;
 
-	/** Output files mapped by series UID. */
-	private HashMap<String, List<String>> outputFiles = new HashMap<>();
+    /** Output files mapped by series UID. */
+    private HashMap<String, List<String>> outputFiles = new HashMap<>();
 
-	Random rand = new Random();
+    Random rand = new Random();
 
-	public void brukerToDicomExec(String inputFolder, String outputFolder) {
-		shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);
-	}
+    public void brukerToDicomExec(String inputFolder, String outputFolder) {
+        shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);
+    }
 
-	public boolean animaToNiftiExec(String imagePathToConvert) {
-		return shanoirExec.anima(imagePathToConvert);
-	}
+    public boolean animaToNiftiExec(String imagePathToConvert) {
+        return shanoirExec.anima(imagePathToConvert);
+    }
 
-	/**
-	 * Execute the Nifti conversion
-	 *
-	 * @param converter
-	 * @param input     folder
-	 * @param output    folder
-	 *
-	 */
-	public boolean convertToNiftiExec(Long converterId, String inputFolder, String outputFolder) {
-		if (converterId == null) {
-			return false;
-		}
+    /**
+     * Execute the Nifti conversion
+     *
+     * @param converter
+     * @param input     folder
+     * @param output    folder
+     *
+     */
+    public boolean convertToNiftiExec(Long converterId, String inputFolder, String outputFolder) {
+        if (converterId == null) {
+            return false;
+        }
 
-		NiftiConverter converter = NiftiConverter.getType(Math.toIntExact(converterId));
-		String conversionLogs = "";
+        NiftiConverter converter = NiftiConverter.getType(Math.toIntExact(converterId));
+        String conversionLogs = "";
 
-	    switch (converter) {
-			case MCVERTER_2_0_7:
-			case MCVERTER_2_1_0:
-				conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
-				break;
-			case DICOMIFIER:
-				conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder, NiftiConverter.DICOMIFIER.getPath(), DICOM_TO_NIFTI_METHOD);
-				break;
-			case MRICONVERTER:
-				conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());
-				break;
-			default:
-				conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
-				break;
-		}
-		// Here we should check logs to check which converter failed or not.
-		LOG.error(conversionLogs);
+        switch (converter) {
+            case MCVERTER_2_0_7:
+            case MCVERTER_2_1_0:
+                conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
+                break;
+            case DICOMIFIER:
+                conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder, NiftiConverter.DICOMIFIER.getPath(), DICOM_TO_NIFTI_METHOD);
+                break;
+            case MRICONVERTER:
+                conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());
+                break;
+            default:
+                conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
+                break;
+        }
+        // Here we should check logs to check which converter failed or not.
+        LOG.error(conversionLogs);
 
-		return !conversionLogs.contains("an error has probably occured");
-	}
+        return !conversionLogs.contains("an error has probably occured");
+    }
 
-	/**
-	 * Remove unused files that are created during the conversion process.
-	 */
-	private void removeUnusedFiles() {
-		final List<File> toBeRemovedList = new ArrayList<>();
-		for (final List<String> listPath : outputFiles.values()) {
-			for (final String path : listPath) {
-				File file = new File(path);
-				if (file.getName().startsWith("o") || file.getName().startsWith("x")) {
-					toBeRemovedList.add(file);
-				}
-			}
-		}
-		for (final File toBeRemovedFile : toBeRemovedList) {
-			// TODO : ne marche pas
-			outputFiles.remove(toBeRemovedFile);
-			boolean success = toBeRemovedFile.delete();
-			if (!success) {
-				LOG.error("removeUnusedFiles : error while deleting {}", toBeRemovedFile);
-			}
-		}
-	}
+    /**
+     * Remove unused files that are created during the conversion process.
+     */
+    private void removeUnusedFiles() {
+        final List<File> toBeRemovedList = new ArrayList<>();
+        for (final List<String> listPath : outputFiles.values()) {
+            for (final String path : listPath) {
+                File file = new File(path);
+                if (file.getName().startsWith("o") || file.getName().startsWith("x")) {
+                    toBeRemovedList.add(file);
+                }
+            }
+        }
+        for (final File toBeRemovedFile : toBeRemovedList) {
+            // TODO : ne marche pas
+            outputFiles.remove(toBeRemovedFile);
+            boolean success = toBeRemovedFile.delete();
+            if (!success) {
+                LOG.error("removeUnusedFiles : error while deleting {}", toBeRemovedFile);
+            }
+        }
+    }
 
-	/**
-	 * This method is needed to identify generated nifti files in the middle of dcm
-	 * files.
-	 *
-	 * @return List of nifti files
-	 */
-	public List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
-		// If one of the output files is a prop file, there has been an error
-		List<File> niftiFileResult = null;
-		if (outputFiles.get(serieIDFolderFile.getName()) != null) {
-			List<File> niiFiles = diff(existingFiles, directory.getPath());
-			niftiFileResult = niiFiles;
-			if (!containsPropFile(niiFiles)) {
-				for (File niiFile : niiFiles) {
-					outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
-					LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
-				}
-			}
-		} else {
-			List<String> niiPathList = new ArrayList<>();
-			if (!containsPropFile(diff(existingFiles, directory.getPath()))) {
-				List<File> niiFileList = diff(existingFiles, directory.getPath());
-				niftiFileResult = niiFileList;
-				for (File niiFile : niiFileList) {
-					niiPathList.add(niiFile.getAbsolutePath());
-					LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
-				}
-				outputFiles.put(serieIDFolderFile.getName(), niiPathList);
-			} else {
-				// TODO: Something went wrong here -> throw an error maybe ?
-			}
-		}
-		// delete the unused files
-		removeUnusedFiles();
-		return niftiFileResult;
-	}
+    /**
+     * This method is needed to identify generated nifti files in the middle of dcm
+     * files.
+     *
+     * @return List of nifti files
+     */
+    public List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
+        // If one of the output files is a prop file, there has been an error
+        List<File> niftiFileResult = null;
+        if (outputFiles.get(serieIDFolderFile.getName()) != null) {
+            List<File> niiFiles = diff(existingFiles, directory.getPath());
+            niftiFileResult = niiFiles;
+            if (!containsPropFile(niiFiles)) {
+                for (File niiFile : niiFiles) {
+                    outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
+                    LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
+                }
+            }
+        } else {
+            List<String> niiPathList = new ArrayList<>();
+            if (!containsPropFile(diff(existingFiles, directory.getPath()))) {
+                List<File> niiFileList = diff(existingFiles, directory.getPath());
+                niftiFileResult = niiFileList;
+                for (File niiFile : niiFileList) {
+                    niiPathList.add(niiFile.getAbsolutePath());
+                    LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
+                }
+                outputFiles.put(serieIDFolderFile.getName(), niiPathList);
+            } else {
+                // TODO: Something went wrong here -> throw an error maybe ?
+            }
+        }
+        // delete the unused files
+        removeUnusedFiles();
+        return niftiFileResult;
+    }
 
-	/**
-	 * adapt to generated folders by dicom2nifti converter
-	 *
-	 * @param existingFiles the currently existing files in the directory
-	 * @param directory     the import directory
-	 * @param dataset       the dataset we are importing
-	 * @return
-	 */
-	public List<File> niftiFileSortingDicom2Nifti(List<File> existingFiles, File directory, Dataset dataset) {
-		// Have to adapt to generated folders by dicom2nifti converter
-		List<File> niiFiles = new ArrayList<>(FileUtils.listFiles(directory,
-				new RegexFileFilter("^(.*?)\\.(nii|json|nii.gz)"), DirectoryFileFilter.DIRECTORY));
+    /**
+     * adapt to generated folders by dicom2nifti converter
+     *
+     * @param existingFiles the currently existing files in the directory
+     * @param directory     the import directory
+     * @param dataset       the dataset we are importing
+     * @return
+     */
+    public List<File> niftiFileSortingDicom2Nifti(List<File> existingFiles, File directory, Dataset dataset) {
+        // Have to adapt to generated folders by dicom2nifti converter
+        List<File> niiFiles = new ArrayList<>(FileUtils.listFiles(directory,
+                new RegexFileFilter("^(.*?)\\.(nii|json|nii.gz)"), DirectoryFileFilter.DIRECTORY));
 
-		for (File file : niiFiles) {
-			try {
-				// Copy all nifti files
-				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + rand.nextInt()
-						+ dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				LOG.error("Error while copying files", e);
-			}
-		}
+        for (File file : niiFiles) {
+            try {
+                // Copy all nifti files
+                Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + rand.nextInt()
+                        + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                LOG.error("Error while copying files", e);
+            }
+        }
 
-		return diff(existingFiles, directory.getPath()).stream().filter(file -> file.isFile())
-				.collect(Collectors.toList());
-	}
+        return diff(existingFiles, directory.getPath()).stream().filter(file -> file.isFile())
+                .collect(Collectors.toList());
+    }
 
-	/**
-	 * Make a diff to know which files from destinationFolder are not in the given
-	 * list of files.
-	 *
-	 * @param existingFiles     the existing files
-	 * @param destinationFolder the destination folder
-	 *
-	 * @return the list< file>
-	 */
-	private List<File> diff(final List<File> existingFiles, final String destinationFolder) {
-		final List<File> resultList = new ArrayList<>();
-		final List<File> outputFilesToDiff = Arrays.asList(new File(destinationFolder).listFiles());
-		for (final File file : outputFilesToDiff) {
-			if (!existingFiles.contains(file)) {
-				resultList.add(file);
-			}
-		}
-		return resultList;
-	}
+    /**
+     * Make a diff to know which files from destinationFolder are not in the given
+     * list of files.
+     *
+     * @param existingFiles     the existing files
+     * @param destinationFolder the destination folder
+     *
+     * @return the list< file>
+     */
+    private List<File> diff(final List<File> existingFiles, final String destinationFolder) {
+        final List<File> resultList = new ArrayList<>();
+        final List<File> outputFilesToDiff = Arrays.asList(new File(destinationFolder).listFiles());
+        for (final File file : outputFilesToDiff) {
+            if (!existingFiles.contains(file)) {
+                resultList.add(file);
+            }
+        }
+        return resultList;
+    }
 
-	/**
-	 * Check if the newly created nifti files list contains a .prop file If it is
-	 * the case, then there has been a problem during conversion and should be
-	 * considered as failed.
-	 *
-	 */
-	private boolean containsPropFile(List<File> niftiFiles) {
-		for (File current : niftiFiles) {
-			if (current.getPath().contains(".prop")) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * Check if the newly created nifti files list contains a .prop file If it is
+     * the case, then there has been a problem during conversion and should be
+     * considered as failed.
+     *
+     */
+    private boolean containsPropFile(List<File> niftiFiles) {
+        for (File current : niftiFiles) {
+            if (current.getPath().contains(".prop")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

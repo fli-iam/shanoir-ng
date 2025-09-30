@@ -28,20 +28,20 @@ import jakarta.persistence.Entity;
 @Entity
 public class MegDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 8986396467410158683L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 8986396467410158683L;
 
-	public MegDataset() { }
+    public MegDataset() { }
 
-	public MegDataset(Dataset other) {
-		super(other);
-	}
+    public MegDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.MEG;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.MEG;
+    }
 
 }

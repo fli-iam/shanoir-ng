@@ -9,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum UploadState {
-	START, //
-	START_AUTOIMPORT,
-	START_AUTOIMPORT_FAIL,
-	MISSING, // Is it used ?
-	READY, // Is it used ?
-	UPLOADING_IMAGES, // Is it used ?
-	UPLOADING_JOB_FILE, // Is it used ?
-	FINISHED, //
-	ERROR,
-	CHECK_OK,
-	CHECK_KO; //
+    START, //
+    START_AUTOIMPORT,
+    START_AUTOIMPORT_FAIL,
+    MISSING, // Is it used ?
+    READY, // Is it used ?
+    UPLOADING_IMAGES, // Is it used ?
+    UPLOADING_JOB_FILE, // Is it used ?
+    FINISHED, //
+    ERROR,
+    CHECK_OK,
+    CHECK_KO; //
 
-	public static UploadState fromString(String value) {
-		// Handle modification of FINISHED_UPLOAD state to FINISHED
-		if (value.equalsIgnoreCase("FINISHED_UPLOAD")) {
-			return UploadState.FINISHED;
-		}
+    public static UploadState fromString(String value) {
+        // Handle modification of FINISHED_UPLOAD state to FINISHED
+        if (value.equalsIgnoreCase("FINISHED_UPLOAD")) {
+            return UploadState.FINISHED;
+        }
         for (UploadState state : UploadState.values()) {
             if (state.name().equalsIgnoreCase(value)) {
                 return state;

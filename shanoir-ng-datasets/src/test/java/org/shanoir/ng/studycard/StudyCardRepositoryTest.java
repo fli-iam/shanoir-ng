@@ -41,39 +41,39 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 public class StudyCardRepositoryTest {
 
-	private static final String STUDYCARD_TEST_1_DATA = "StudyCard1";
-	private static final Long STUDYCARD_TEST_1_ID = 1L;
-	private static final Long STUDY_TEST_1_ID = 1L;
+    private static final String STUDYCARD_TEST_1_DATA = "StudyCard1";
+    private static final Long STUDYCARD_TEST_1_ID = 1L;
+    private static final Long STUDY_TEST_1_ID = 1L;
 
-	@Autowired
-	private StudyCardRepository studyCardRepository;
+    @Autowired
+    private StudyCardRepository studyCardRepository;
 
-	@MockBean
-	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<StudyCard> studyCardDb = studyCardRepository.findAll();
-		assertThat(studyCardDb).isNotNull();
-		int nbStudyCard = 0;
-		Iterator<StudyCard> studyCardIt = studyCardDb.iterator();
-		while (studyCardIt.hasNext()) {
-			studyCardIt.next();
-			nbStudyCard++;
-		}
-		assertThat(nbStudyCard).isBetween(5, 7); // weird fix for difference: locally and GitHub CI
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<StudyCard> studyCardDb = studyCardRepository.findAll();
+        assertThat(studyCardDb).isNotNull();
+        int nbStudyCard = 0;
+        Iterator<StudyCard> studyCardIt = studyCardDb.iterator();
+        while (studyCardIt.hasNext()) {
+            studyCardIt.next();
+            nbStudyCard++;
+        }
+        assertThat(nbStudyCard).isBetween(5, 7); // weird fix for difference: locally and GitHub CI
+    }
 
-	@Test
-	public void findByStudyIdInTest() throws Exception {
-		List<StudyCard> studyCards = studyCardRepository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
-		assertNotNull(studyCards);
-	}
+    @Test
+    public void findByStudyIdInTest() throws Exception {
+        List<StudyCard> studyCards = studyCardRepository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
+        assertNotNull(studyCards);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		StudyCard studyCardDb = studyCardRepository.findById(STUDYCARD_TEST_1_ID).orElse(null);
-		assertThat(studyCardDb.getName()).isEqualTo(STUDYCARD_TEST_1_DATA);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        StudyCard studyCardDb = studyCardRepository.findById(STUDYCARD_TEST_1_ID).orElse(null);
+        assertThat(studyCardDb.getName()).isEqualTo(STUDYCARD_TEST_1_DATA);
+    }
 
 }

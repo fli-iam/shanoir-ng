@@ -40,34 +40,34 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class SubjectStudyMapperTest {
 
-	private static final Long SUBJECT_ID = 1L;
+    private static final Long SUBJECT_ID = 1L;
 
-	@Autowired
-	private SubjectStudyMapper subjectStudyMapper;
+    @Autowired
+    private SubjectStudyMapper subjectStudyMapper;
 
-	@Test
-	public void subjectStudyListToSubjectStudyDTOListTest() {
-		final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
-				.subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
-		Assertions.assertNotNull(subjectStudyDTOs);
-		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
-		Assertions.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
-	}
+    @Test
+    public void subjectStudyListToSubjectStudyDTOListTest() {
+        final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
+                .subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
+        Assertions.assertNotNull(subjectStudyDTOs);
+        Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+        Assertions.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
+    }
 
-	@Test
-	public void subjectStudyToSubjectStudyDTOTest() {
-		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
-		Assertions.assertNotNull(subjectStudyDTO);
-		Assertions.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
-	}
+    @Test
+    public void subjectStudyToSubjectStudyDTOTest() {
+        final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
+        Assertions.assertNotNull(subjectStudyDTO);
+        Assertions.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
+    }
 
-	private SubjectStudy createSubjectStudy() {
-		final SubjectStudy subjectStudy = new SubjectStudy();
-		final Subject subject = new Subject();
-		subject.setId(SUBJECT_ID);
-		subjectStudy.setSubject(subject);
-		subjectStudy.setStudy(new Study());
-		return subjectStudy;
-	}
+    private SubjectStudy createSubjectStudy() {
+        final SubjectStudy subjectStudy = new SubjectStudy();
+        final Subject subject = new Subject();
+        subject.setId(SUBJECT_ID);
+        subjectStudy.setSubject(subject);
+        subjectStudy.setStudy(new Study());
+        return subjectStudy;
+    }
 
 }

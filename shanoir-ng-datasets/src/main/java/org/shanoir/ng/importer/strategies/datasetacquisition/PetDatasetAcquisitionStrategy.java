@@ -43,44 +43,44 @@ import org.springframework.stereotype.Component;
 @Component
 public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(PetDatasetAcquisitionStrategy.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(PetDatasetAcquisitionStrategy.class);
 
-	@Autowired
-	private PetProtocolStrategy protocolStrategy;
+    @Autowired
+    private PetProtocolStrategy protocolStrategy;
 
-	@Autowired
-	private DatasetStrategy<PetDataset> datasetStrategy;
+    @Autowired
+    private DatasetStrategy<PetDataset> datasetStrategy;
 
 
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
-			throws Exception {
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+            throws Exception {
 
-		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
+        PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
+        LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+        datasetAcquisition.setImportDate(LocalDate.now());
+        datasetAcquisition.setUsername(importJob.getUsername());
+        datasetAcquisition.setRank(rank);
+        importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
-		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		datasetAcquisition.setPetProtocol(protocol);
+        datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate),
+                dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+        datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
+        datasetAcquisition.setPetProtocol(protocol);
 
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
-		DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(datasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		datasetAcquisition.setDatasets(genericizedList);
-		return datasetAcquisition;
-	}
+        // TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
+        DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(datasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        datasetAcquisition.setDatasets(genericizedList);
+        return datasetAcquisition;
+    }
 }

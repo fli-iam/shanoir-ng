@@ -35,265 +35,265 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
-	private StudyTreeNode parent;
+    private StudyTreeNode parent;
 
-	private Serie serie;
+    private Serie serie;
 
-	private List<String> fileNames;
+    private List<String> fileNames;
 
-	// constructor for JAXB
-	public SerieTreeNode() {
-		this.serie = new Serie();
-	}
+    // constructor for JAXB
+    public SerieTreeNode() {
+        this.serie = new Serie();
+    }
 
-	/**
-	 * Creates a new Serie object.
-	 *
-	 * @param modality
-	 *            the modality
-	 * @param protocol
-	 *            the protocol
-	 * @param desc
-	 *            the desc
-	 * @param id
-	 *            the id
-	 * @param date
-	 *            the date
-	 */
-	public SerieTreeNode(final Serie serie) {
-		this.serie = serie;
-	}
+    /**
+     * Creates a new Serie object.
+     *
+     * @param modality
+     *            the modality
+     * @param protocol
+     *            the protocol
+     * @param desc
+     *            the desc
+     * @param id
+     *            the id
+     * @param date
+     *            the date
+     */
+    public SerieTreeNode(final Serie serie) {
+        this.serie = serie;
+    }
 
-	public Serie getSerie() {
-		return this.serie;
-	}
+    public Serie getSerie() {
+        return this.serie;
+    }
 
-	@XmlElement
-	public String getId() {
-		return this.serie.getSeriesInstanceUID();
-	}
+    @XmlElement
+    public String getId() {
+        return this.serie.getSeriesInstanceUID();
+    }
 
-	public void setId(String seriesInstanceUID) {
-		this.serie.setSeriesInstanceUID(seriesInstanceUID);
-	}
+    public void setId(String seriesInstanceUID) {
+        this.serie.setSeriesInstanceUID(seriesInstanceUID);
+    }
 
-	@XmlElement
-	public String getModality() {
-		return this.serie.getModality();
-	}
+    @XmlElement
+    public String getModality() {
+        return this.serie.getModality();
+    }
 
-	public void setModality(String modality) {
-		this.serie.setModality(modality);
-	}
+    public void setModality(String modality) {
+        this.serie.setModality(modality);
+    }
 
-	@XmlElement
-	public String getProtocol() {
-		return this.serie.getProtocolName();
-	}
+    @XmlElement
+    public String getProtocol() {
+        return this.serie.getProtocolName();
+    }
 
-	public void setProtocol(String protocolName) {
-		this.serie.setProtocolName(protocolName);
-	}
+    public void setProtocol(String protocolName) {
+        this.serie.setProtocolName(protocolName);
+    }
 
-	@XmlElement
-	public String getDescription() {
-		return this.serie.getSeriesDescription();
-	}
+    @XmlElement
+    public String getDescription() {
+        return this.serie.getSeriesDescription();
+    }
 
-	public void setDescription(String seriesDescription) {
-		this.serie.setSeriesDescription(seriesDescription);
-	}
+    public void setDescription(String seriesDescription) {
+        this.serie.setSeriesDescription(seriesDescription);
+    }
 
-	@XmlElement
-	public String getSeriesDate() {
-		if (this.serie.getSeriesDate() != null) {
-			return this.serie.getSeriesDate().toString();
-		}
-		return "";
-	}
+    @XmlElement
+    public String getSeriesDate() {
+        if (this.serie.getSeriesDate() != null) {
+            return this.serie.getSeriesDate().toString();
+        }
+        return "";
+    }
 
-	@XmlElement
-	public String getSeriesNumber() {
-		return this.serie.getSeriesNumber();
-	}
+    @XmlElement
+    public String getSeriesNumber() {
+        return this.serie.getSeriesNumber();
+    }
 
-	public void setSeriesNumber(String seriesNumber) {
-		this.serie.setSeriesNumber(seriesNumber);
-	}
+    public void setSeriesNumber(String seriesNumber) {
+        this.serie.setSeriesNumber(seriesNumber);
+    }
 
-	@XmlElement
-	public String getImagesCount() {
-		if (this.serie.getImagesNumber() != null) {
-			return this.serie.getImagesNumber().toString();
-		}
-		return "";
-	}
+    @XmlElement
+    public String getImagesCount() {
+        if (this.serie.getImagesNumber() != null) {
+            return this.serie.getImagesNumber().toString();
+        }
+        return "";
+    }
 
-	/**
-	 * Gets the child.
-	 *
-	 * @param id
-	 *            id
-	 *
-	 * @return the child
-	 */
-	public TreeNode getChild(final Object id) {
-		return null;
-	}
+    /**
+     * Gets the child.
+     *
+     * @param id
+     *            id
+     *
+     * @return the child
+     */
+    public TreeNode getChild(final Object id) {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
-	 */
-	@SuppressWarnings("rawtypes")
-	public Iterator getChildren() {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.richfaces.model.TreeNodeImpl#getChildren()
+     */
+    @SuppressWarnings("rawtypes")
+    public Iterator getChildren() {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
-	 */
-	@XmlTransient
-	public String getDisplayString() {
-		String result = "";
-		final String seriesNumber = this.serie.getSeriesNumber();
-		if (seriesNumber != null && !seriesNumber.isEmpty()) {
-			result += seriesNumber + " ";
-		}
-		final String modality = this.serie.getModality();
-		if (modality != null && !"".equals(modality)) {
-			result += "[" + modality + "] ";
-		}
-		final String description = this.serie.getSeriesDescription();
-		final String id = this.serie.getSeriesInstanceUID();
-		if (description != null && !"".equals(description)) {
-			result += description;
-		} else if (id != null && !id.equals("")) {
-			result += id;
-		}
-		Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
-		if (numberOfSeriesRelatedInstances != 0) {
-			result += " (" + numberOfSeriesRelatedInstances + ")";
-		}
-		EquipmentDicom equipment = this.serie.getEquipment();
-		if (equipment != null) {
-			String stationName = equipment.getStationName();
-			if (stationName != null && !"".equals(stationName)) {
-				result += " [ " + stationName + " , ";
-			}
-		}
-		InstitutionDicom institution = this.serie.getInstitution();
-		if (institution != null) {
-			String institutionName = institution.getInstitutionName();
-			if (institutionName != null && !"".equals(institutionName)) {
-				result += institutionName + " ] ";
-			}
-		}
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
+     */
+    @XmlTransient
+    public String getDisplayString() {
+        String result = "";
+        final String seriesNumber = this.serie.getSeriesNumber();
+        if (seriesNumber != null && !seriesNumber.isEmpty()) {
+            result += seriesNumber + " ";
+        }
+        final String modality = this.serie.getModality();
+        if (modality != null && !"".equals(modality)) {
+            result += "[" + modality + "] ";
+        }
+        final String description = this.serie.getSeriesDescription();
+        final String id = this.serie.getSeriesInstanceUID();
+        if (description != null && !"".equals(description)) {
+            result += description;
+        } else if (id != null && !id.equals("")) {
+            result += id;
+        }
+        Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
+        if (numberOfSeriesRelatedInstances != 0) {
+            result += " (" + numberOfSeriesRelatedInstances + ")";
+        }
+        EquipmentDicom equipment = this.serie.getEquipment();
+        if (equipment != null) {
+            String stationName = equipment.getStationName();
+            if (stationName != null && !"".equals(stationName)) {
+                result += " [ " + stationName + " , ";
+            }
+        }
+        InstitutionDicom institution = this.serie.getInstitution();
+        if (institution != null) {
+            String institutionName = institution.getInstitutionName();
+            if (institutionName != null && !"".equals(institutionName)) {
+                result += institutionName + " ] ";
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * Gets the type.\
-	 *
-	 * @return the type
-	 */
-	@XmlTransient
-	public String getType() {
-		return "Serie";
-	}
+    /**
+     * Gets the type.\
+     *
+     * @return the type
+     */
+    @XmlTransient
+    public String getType() {
+        return "Serie";
+    }
 
-	@XmlTransient
-	public boolean isMultiFrame() {
-		return this.serie.getIsMultiFrame();
-	}
+    @XmlTransient
+    public boolean isMultiFrame() {
+        return this.serie.getIsMultiFrame();
+    }
 
-	/**
-	 * Checks if is selected.
-	 *
-	 * @return true, if is selected
-	 */
-	public boolean isSelected() {
-		return this.serie.getSelected();
-	}
+    /**
+     * Checks if is selected.
+     *
+     * @return true, if is selected
+     */
+    public boolean isSelected() {
+        return this.serie.getSelected();
+    }
 
-	/**
-	 * Removes the child.
-	 *
-	 * @param id
-	 *            id
-	 */
-	public void removeChild(final Object id) {
-		// leaf
-	}
+    /**
+     * Removes the child.
+     *
+     * @param id
+     *            id
+     */
+    public void removeChild(final Object id) {
+        // leaf
+    }
 
-	/**
-	 * Sets the data.
-	 *
-	 * @param arg0
-	 *            arg0
-	 */
-	public void setData(final Object arg0) {
-	}
+    /**
+     * Sets the data.
+     *
+     * @param arg0
+     *            arg0
+     */
+    public void setData(final Object arg0) {
+    }
 
-	/**
-	 * Sets the selected.
-	 *
-	 * @param selected
-	 *            selected
-	 */
-	public void setSelected(final boolean selected) {
-		this.serie.setSelected(selected);
-	}
+    /**
+     * Sets the selected.
+     *
+     * @param selected
+     *            selected
+     */
+    public void setSelected(final boolean selected) {
+        this.serie.setSelected(selected);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return this.serie.toString();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return this.serie.toString();
+    }
 
-	public void addTreeNode(DicomTreeNode arg1) {
-	}
+    public void addTreeNode(DicomTreeNode arg1) {
+    }
 
-	public void addTreeNodes(DicomTreeNode arg0, DicomTreeNode arg1,
-			DicomTreeNode arg2) {
-	}
+    public void addTreeNodes(DicomTreeNode arg0, DicomTreeNode arg1,
+            DicomTreeNode arg2) {
+    }
 
-	public DicomTreeNode getFirstTreeNode() {
-		return null;
-	}
+    public DicomTreeNode getFirstTreeNode() {
+        return null;
+    }
 
-	public List<DicomTreeNode> getTreeNodes() {
-		return new ArrayList<DicomTreeNode>();
-	}
+    public List<DicomTreeNode> getTreeNodes() {
+        return new ArrayList<DicomTreeNode>();
+    }
 
-	public DicomTreeNode initChildTreeNode(Object arg0) {
-		return null;
-	}
+    public DicomTreeNode initChildTreeNode(Object arg0) {
+        return null;
+    }
 
-	@Override
-	public void setParent(DicomTreeNode parent) {
-		this.parent = (StudyTreeNode) parent;
-	}
+    @Override
+    public void setParent(DicomTreeNode parent) {
+        this.parent = (StudyTreeNode) parent;
+    }
 
-	public StudyTreeNode getParent() {
-		return this.parent;
-	}
+    public StudyTreeNode getParent() {
+        return this.parent;
+    }
 
-	@XmlElementWrapper(name = "fileNames")
-	@XmlElement(name = "fileName")
-	public List<String> getFileNames() {
-		return fileNames;
-	}
+    @XmlElementWrapper(name = "fileNames")
+    @XmlElement(name = "fileName")
+    public List<String> getFileNames() {
+        return fileNames;
+    }
 
-	public void setFileNames(List<String> fileNames) {
-		this.fileNames = fileNames;
-	}
+    public void setFileNames(List<String> fileNames) {
+        this.fileNames = fileNames;
+    }
 
 }

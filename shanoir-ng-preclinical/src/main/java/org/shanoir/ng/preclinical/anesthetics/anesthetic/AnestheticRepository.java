@@ -22,5 +22,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface AnestheticRepository extends CrudRepository<Anesthetic, Long> {
 
-	List<Anesthetic> findAllByAnestheticType(AnestheticType type);
+    List<Anesthetic> findAllByAnestheticType(AnestheticType type);
 }

@@ -22,52 +22,52 @@ package org.shanoir.ng.dataset.modality;
  */
 public enum ProcessedDatasetType {
 
-	// ReconstructedDataset
-	RECONSTRUCTEDDATASET(1),
+    // ReconstructedDataset
+    RECONSTRUCTEDDATASET(1),
 
-	// NonReconstructedDataset
-	NONRECONSTRUCTEDDATASET(2),
+    // NonReconstructedDataset
+    NONRECONSTRUCTEDDATASET(2),
 
-	UNDEFINED(3),
+    UNDEFINED(3),
 
-	EXECUTION_RESULT(4);
+    EXECUTION_RESULT(4);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private ProcessedDatasetType(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private ProcessedDatasetType(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a processed dataset type by its id.
-	 *
-	 * @param id
-	 *            type id.
-	 * @return processed dataset type.
-	 */
-	public static ProcessedDatasetType getType(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (ProcessedDatasetType type : ProcessedDatasetType.values()) {
-			if (id.equals(type.getId())) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching processed dataset type for id " + id);
-	}
+    /**
+     * Get a processed dataset type by its id.
+     *
+     * @param id
+     *            type id.
+     * @return processed dataset type.
+     */
+    public static ProcessedDatasetType getType(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (ProcessedDatasetType type : ProcessedDatasetType.values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No matching processed dataset type for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

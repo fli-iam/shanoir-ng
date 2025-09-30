@@ -29,22 +29,22 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class DICOMJsonApiController implements DICOMJsonApi {
 
-	@Autowired
-	private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
+    @Autowired
+    private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
 
-	@Autowired
-	private ExaminationService examinationService;
+    @Autowired
+    private ExaminationService examinationService;
 
-	@Override
-	public ResponseEntity<StudiesDTO> findStudies() {
-		List<Examination> examinations = examinationService.findAll();
-		if (examinations.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
-		StudiesDTO studiesDTO = new StudiesDTO();
-		studiesDTO.setStudies(studies);
-		return new ResponseEntity<StudiesDTO>(studiesDTO, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<StudiesDTO> findStudies() {
+        List<Examination> examinations = examinationService.findAll();
+        if (examinations.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
+        StudiesDTO studiesDTO = new StudiesDTO();
+        studiesDTO.setStudies(studies);
+        return new ResponseEntity<StudiesDTO>(studiesDTO, HttpStatus.OK);
+    }
 
 }

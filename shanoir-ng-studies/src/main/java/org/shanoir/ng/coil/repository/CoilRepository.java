@@ -28,20 +28,20 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface CoilRepository extends CrudRepository<Coil, Long> {
 
-	@EntityGraph(attributePaths = { "manufacturerModel.manufacturer" })
-	List<Coil> findAll();
+    @EntityGraph(attributePaths = { "manufacturerModel.manufacturer" })
+    List<Coil> findAll();
 
-	@EntityGraph(attributePaths = { "center", "manufacturerModel.manufacturer" })
-	Optional<Coil> findById(Long id);
+    @EntityGraph(attributePaths = { "center", "manufacturerModel.manufacturer" })
+    Optional<Coil> findById(Long id);
 
-	/**
-	 * Find coil by name.
-	 *
-	 * @param name name.
-	 * @return a coil.
-	 */
-	Optional<Coil> findByName(String name);
+    /**
+     * Find coil by name.
+     *
+     * @param name name.
+     * @return a coil.
+     */
+    Optional<Coil> findByName(String name);
 
-	List<Coil> findByCenterId(Long centerId);
+    List<Coil> findByCenterId(Long centerId);
 
 }

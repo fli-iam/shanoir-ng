@@ -34,32 +34,32 @@ import java.util.ArrayList;
 @ActiveProfiles("test")
 public class ExaminationToStudyDTOMapperTest {
 
-	private static final Long EXAMINATION_ID = 1L;
+    private static final Long EXAMINATION_ID = 1L;
 
-	private static final String EXAMINATION_COMMENT = "ExaminationComment";
+    private static final String EXAMINATION_COMMENT = "ExaminationComment";
 
-	private static final String DATE_STR = "2018-01-01";
+    private static final String DATE_STR = "2018-01-01";
 
-	private static final long SUBJECT_ID = 1L;
+    private static final long SUBJECT_ID = 1L;
 
-	@Autowired
-	private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
+    @Autowired
+    private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
 
-	@Test
-	public void examinationToStudyDTO() throws ParseException {
-		Examination examination = createExamination();
-		final StudyDTO studyDTO = examinationToStudyDTOMapper.examinationToStudyDTO(examination);
-		Assertions.assertNotNull(studyDTO);
-	}
+    @Test
+    public void examinationToStudyDTO() throws ParseException {
+        Examination examination = createExamination();
+        final StudyDTO studyDTO = examinationToStudyDTOMapper.examinationToStudyDTO(examination);
+        Assertions.assertNotNull(studyDTO);
+    }
 
-	private Examination createExamination() {
-		final Examination examination = new Examination();
-		examination.setId(EXAMINATION_ID);
-		examination.setComment(EXAMINATION_COMMENT);
-		examination.setExaminationDate(LocalDate.parse(DATE_STR));
-		examination.setSubject(new Subject(SUBJECT_ID, "subject"));
-		examination.setDatasetAcquisitions(new ArrayList<>());
-		return examination;
-	}
+    private Examination createExamination() {
+        final Examination examination = new Examination();
+        examination.setId(EXAMINATION_ID);
+        examination.setComment(EXAMINATION_COMMENT);
+        examination.setExaminationDate(LocalDate.parse(DATE_STR));
+        examination.setSubject(new Subject(SUBJECT_ID, "subject"));
+        examination.setDatasetAcquisitions(new ArrayList<>());
+        return examination;
+    }
 
 }

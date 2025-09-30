@@ -21,54 +21,54 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("deprecation")
 public class CurrentNominativeDataModel extends Observable {
 
-	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
-	// Hash key = folder name;
-	Map<String, ImportJob> currentUploads = null;
+    private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
+    // Hash key = folder name;
+    Map<String, ImportJob> currentUploads = null;
 
-	String hashKey = null;
+    String hashKey = null;
 
-	public HashMap<String, ImportJob> getCurrentUploads() {
-		if (currentUploads == null) {
-			return new LinkedHashMap<String, ImportJob>();
-		}
-		return (LinkedHashMap<String, ImportJob>) currentUploads;
-	}
+    public HashMap<String, ImportJob> getCurrentUploads() {
+        if (currentUploads == null) {
+            return new LinkedHashMap<String, ImportJob>();
+        }
+        return (LinkedHashMap<String, ImportJob>) currentUploads;
+    }
 
-	public void setCurrentUploads(Map<String, ImportJob> currentUploads) {
-		this.currentUploads = currentUploads;
-		String[] msg = { "fill" };
-		setChanged();
-		notifyObservers(msg);
-	}
+    public void setCurrentUploads(Map<String, ImportJob> currentUploads) {
+        this.currentUploads = currentUploads;
+        String[] msg = { "fill" };
+        setChanged();
+        notifyObservers(msg);
+    }
 
-	public void addUpload(String absolutePath, ImportJob nominativeDataImportJob) {
-		getCurrentUploads().put(absolutePath, nominativeDataImportJob);
-		if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
-			nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
-		}
-		String[] msg = { "add", absolutePath };
-		setChanged();
-		notifyObservers(msg);
-	}
+    public void addUpload(String absolutePath, ImportJob nominativeDataImportJob) {
+        getCurrentUploads().put(absolutePath, nominativeDataImportJob);
+        if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
+            nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
+        }
+        String[] msg = { "add", absolutePath };
+        setChanged();
+        notifyObservers(msg);
+    }
 
-	public void updateUploadPercentage(String absolutePath, String percentage) {
-		currentUploads.get(absolutePath).setUploadPercentage(percentage);
-		String[] msg = { "UpdatePercent", absolutePath, percentage };
-		setChanged();
-		notifyObservers(msg);
-	}
+    public void updateUploadPercentage(String absolutePath, String percentage) {
+        currentUploads.get(absolutePath).setUploadPercentage(percentage);
+        String[] msg = { "UpdatePercent", absolutePath, percentage };
+        setChanged();
+        notifyObservers(msg);
+    }
 
-	public String getHashKey() {
-		return hashKey;
-	}
+    public String getHashKey() {
+        return hashKey;
+    }
 
-	public void setHashKey(String hashKey) {
-		this.hashKey = hashKey;
-	}
+    public void setHashKey(String hashKey) {
+        this.hashKey = hashKey;
+    }
 
-	public void reset() {
-		this.currentUploads = null;
-		this.hashKey = null;
-	}
+    public void reset() {
+        this.currentUploads = null;
+        this.hashKey = null;
+    }
 
 }

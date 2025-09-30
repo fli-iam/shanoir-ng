@@ -39,81 +39,81 @@ import jakarta.validation.Valid;
 @Controller
 public class ManufacturerApiController implements ManufacturerApi {
 
-	@Autowired
-	private ManufacturerService manufacturerService;
+    @Autowired
+    private ManufacturerService manufacturerService;
 
-	@Autowired
-	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
+    @Autowired
+    private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
-	@Override
-	public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
-		final Optional<Manufacturer> manufacturerOpt = manufacturerService.findById(manufacturerId);
-		if (manufacturerOpt.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerOpt.orElseThrow(), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
+        final Optional<Manufacturer> manufacturerOpt = manufacturerService.findById(manufacturerId);
+        if (manufacturerOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturerOpt.orElseThrow(), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<Manufacturer>> findManufacturers() {
-		List<Manufacturer> manufacturers = manufacturerService.findAll();
-		// Remove "unknown" manufacturer
-		manufacturers = manufacturers.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
-		if (manufacturers.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturers, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<Manufacturer>> findManufacturers() {
+        List<Manufacturer> manufacturers = manufacturerService.findAll();
+        // Remove "unknown" manufacturer
+        manufacturers = manufacturers.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
+        if (manufacturers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturers, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
+            final BindingResult result) throws RestServiceException {
 
-		validate(manufacturer, result);
-		return new ResponseEntity<>(manufacturerService.create(manufacturer), HttpStatus.OK);
-	}
+        validate(manufacturer, result);
+        return new ResponseEntity<>(manufacturerService.create(manufacturer), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
-			@RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
+            @RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
 
-		validate(manufacturer, result);
-		try {
-			if (manufacturerId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown manufacturer");
-			}
-			/* Update user in db. */
-			manufacturerService.update(manufacturer);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        validate(manufacturer, result);
+        try {
+            if (manufacturerId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown manufacturer");
+            }
+            /* Update user in db. */
+            manufacturerService.update(manufacturer);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-	@Override
-	public ResponseEntity<Void> deleteManufacturer(Long manufacturerId) throws RestServiceException {
-		try {
-			if (manufacturerId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown manufacturer");
-			}
-			manufacturerService.deleteById(manufacturerId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @Override
+    public ResponseEntity<Void> deleteManufacturer(Long manufacturerId) throws RestServiceException {
+        try {
+            if (manufacturerId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown manufacturer");
+            }
+            manufacturerService.deleteById(manufacturerId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 
-	private void validate(Manufacturer manufacturer, BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap()
-				.add(new FieldErrorMap(result))
-				.add(uniqueConstraintManager.validate(manufacturer));
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
+    private void validate(Manufacturer manufacturer, BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap()
+                .add(new FieldErrorMap(result))
+                .add(uniqueConstraintManager.validate(manufacturer));
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
 
 }

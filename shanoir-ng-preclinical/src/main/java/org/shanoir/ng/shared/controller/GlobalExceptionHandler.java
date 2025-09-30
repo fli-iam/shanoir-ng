@@ -34,25 +34,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GlobalExceptionHandler {
 
-	private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-	@ExceptionHandler(value = RestServiceException.class)
-	public ResponseEntity<ErrorModel> handleRestServiceException(final RestServiceException e) {
-		LOG.warn("Error in the rest service. ", e);
-		return new ResponseEntity<>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
-	}
+    @ExceptionHandler(value = RestServiceException.class)
+    public ResponseEntity<ErrorModel> handleRestServiceException(final RestServiceException e) {
+        LOG.warn("Error in the rest service. ", e);
+        return new ResponseEntity<>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
+    }
 
-	@ExceptionHandler(value = AccessDeniedException.class)
-	public ResponseEntity<ErrorModel> handleAccessDeniedException(final AccessDeniedException e) {
-		final ErrorModel error = new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage());
-		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
-	}
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ErrorModel> handleAccessDeniedException(final AccessDeniedException e) {
+        final ErrorModel error = new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 
-	@ExceptionHandler(value = Exception.class)
-	public ResponseEntity<ErrorModel> handleException(final Exception e) {
-		final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
-		LOG.error("Unexpected error in the rest service. ", e);
-		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ErrorModel> handleException(final Exception e) {
+        final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        LOG.error("Unexpected error in the rest service. ", e);
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }

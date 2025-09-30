@@ -22,14 +22,14 @@ package org.shanoir.ng.shared.exception;
  */
 public class PacsException extends ShanoirException {
 
-	private static final long serialVersionUID = -1545868693201382850L;
+    private static final long serialVersionUID = -1545868693201382850L;
 
-	public PacsException(String message) {
-		super(message);
-	}
+    public PacsException(String message) {
+        super(message);
+    }
 
-	public PacsException(String message, Exception cause) {
-		super(message, cause);
-	}
+    public PacsException(String message, Exception cause) {
+        super(message, cause);
+    }
 
 }

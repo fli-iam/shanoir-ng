@@ -27,18 +27,18 @@ import org.shanoir.ng.user.model.User;
  */
 public class ExtensionWithMotivationValidator implements ConstraintValidator<ExtensionWithMotivation, User> {
 
-	@Override
-	public void initialize(final ExtensionWithMotivation constraintAnnotation) {
-		// empty initializer
-	}
+    @Override
+    public void initialize(final ExtensionWithMotivation constraintAnnotation) {
+        // empty initializer
+    }
 
-	@Override
-	public boolean isValid(final User user, final ConstraintValidatorContext context) {
-//		if (user.isExtensionRequest() && StringUtils.isEmpty(user.getExtensionMotivation())) {
-//			// Motivation is mandatory if extension request
-//			return false;
-//		}
-		return true;
-	}
+    @Override
+    public boolean isValid(final User user, final ConstraintValidatorContext context) {
+//        if (user.isExtensionRequest() && StringUtils.isEmpty(user.getExtensionMotivation())) {
+//            // Motivation is mandatory if extension request
+//            return false;
+//        }
+        return true;
+    }
 
 }

@@ -27,47 +27,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class RestServiceException extends Exception {
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	/**
-	 * Serial version uid
-	 */
-	private static final long serialVersionUID = 2796153429277618391L;
+    /**
+     * Serial version uid
+     */
+    private static final long serialVersionUID = 2796153429277618391L;
 
-	private ErrorModel errorModel;
+    private ErrorModel errorModel;
 
-	/**
-	 * @param cause
-	 * @param code
-	 */
-	public RestServiceException(Throwable cause, ErrorModel errorModel) {
-		super(cause);
-		this.errorModel = errorModel;
-	}
+    /**
+     * @param cause
+     * @param code
+     */
+    public RestServiceException(Throwable cause, ErrorModel errorModel) {
+        super(cause);
+        this.errorModel = errorModel;
+    }
 
-	/**
-	 * @param code
-	 */
-	public RestServiceException(ErrorModel errorModel) {
-		super();
-		this.errorModel = errorModel;
-	}
+    /**
+     * @param code
+     */
+    public RestServiceException(ErrorModel errorModel) {
+        super();
+        this.errorModel = errorModel;
+    }
 
-	/**
-	 * @return the errorModel
-	 */
-	public ErrorModel getErrorModel() {
-		return errorModel;
-	}
+    /**
+     * @return the errorModel
+     */
+    public ErrorModel getErrorModel() {
+        return errorModel;
+    }
 
-	@Override
-	public String toString() {
-		try {
-			return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
-		} catch (JsonProcessingException e) {
-			return "error while serializing errorModel : " + e.toString();
-		}
-	}
+    @Override
+    public String toString() {
+        try {
+            return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
+        } catch (JsonProcessingException e) {
+            return "error while serializing errorModel : " + e.toString();
+        }
+    }
 
 }

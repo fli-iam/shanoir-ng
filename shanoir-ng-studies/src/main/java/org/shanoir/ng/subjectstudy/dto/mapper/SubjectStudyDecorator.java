@@ -31,32 +31,32 @@ import org.springframework.util.StringUtils;
  */
 public class SubjectStudyDecorator implements SubjectStudyMapper {
 
-	@Autowired
-	private SubjectStudyMapper delegate;
+    @Autowired
+    private SubjectStudyMapper delegate;
 
-	@Autowired
-	private TagMapper tagMapper;
+    @Autowired
+    private TagMapper tagMapper;
 
-	@Override
-	public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
-		final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
-		if (subjectStudies != null) {
-			for (SubjectStudy subjectStudy : subjectStudies) {
-				subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
-			}
-		}
-		return subjectStudyDTOs;
-	}
+    @Override
+    public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
+        final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
+        if (subjectStudies != null) {
+            for (SubjectStudy subjectStudy : subjectStudies) {
+                subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
+            }
+        }
+        return subjectStudyDTOs;
+    }
 
-	@Override
-	public SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy) {
-		final SubjectStudyDTO subjectStudyDTO = delegate.subjectStudyToSubjectStudyDTO(subjectStudy);
-		if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
-			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-		}
-		subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
-		subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
-		return subjectStudyDTO;
-	}
+    @Override
+    public SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy) {
+        final SubjectStudyDTO subjectStudyDTO = delegate.subjectStudyToSubjectStudyDTO(subjectStudy);
+        if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
+            subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+        }
+        subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
+        subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
+        return subjectStudyDTO;
+    }
 
 }

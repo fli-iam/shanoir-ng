@@ -41,52 +41,52 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class RabbitMqExaminationService {
 
-	@Autowired
-	private ExaminationRepository examRepo;
+    @Autowired
+    private ExaminationRepository examRepo;
 
-	@Autowired
-	ObjectMapper mapper;
+    @Autowired
+    ObjectMapper mapper;
 
-	@Autowired
-	ExaminationService examinationService;
+    @Autowired
+    ExaminationService examinationService;
 
-	@Autowired
-	ShanoirEventService eventService;
+    @Autowired
+    ShanoirEventService eventService;
 
-	@Autowired
-	SubjectRepository subjectRepository;
+    @Autowired
+    SubjectRepository subjectRepository;
 
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional()
-	public Long createExamination(Message message) {
-		try {
-			Examination exam = mapper.readValue(message.getBody(), Examination.class);
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional()
+    public Long createExamination(Message message) {
+        try {
+            Examination exam = mapper.readValue(message.getBody(), Examination.class);
 
-			Subject subj = exam.getSubject();
-			Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
-			if (!dbSubject.isPresent()) {
-				subjectRepository.save(subj);
-			}
+            Subject subj = exam.getSubject();
+            Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
+            if (!dbSubject.isPresent()) {
+                subjectRepository.save(subj);
+            }
 
-			exam = examRepo.save(exam);
-			return exam.getId();
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+            exam = examRepo.save(exam);
+            return exam.getId();
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public void addExaminationExtraData(String path) {
-		try {
-			IdName examExtradata = mapper.readValue(path, IdName.class);
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public void addExaminationExtraData(String path) {
+        try {
+            IdName examExtradata = mapper.readValue(path, IdName.class);
 
-			// add examination extra-data
-			examinationService.addExtraDataFromFile(examExtradata.getId(), new File(examExtradata.getName()));
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+            // add examination extra-data
+            examinationService.addExtraDataFromFile(examExtradata.getId(), new File(examExtradata.getName()));
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 }

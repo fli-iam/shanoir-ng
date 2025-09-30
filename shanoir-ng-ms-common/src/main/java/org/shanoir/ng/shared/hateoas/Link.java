@@ -25,49 +25,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Link {
 
-	@JsonIgnore
-	private String rel;
+    @JsonIgnore
+    private String rel;
 
-	private String href;
+    private String href;
 
-	/**
-	 * @param rel
-	 * @param href
-	 */
-	@JsonCreator
-	public Link(@JsonProperty("rel") String rel, @JsonProperty("href") String href) {
-		this.rel = rel;
-		this.href = href;
-	}
+    /**
+     * @param rel
+     * @param href
+     */
+    @JsonCreator
+    public Link(@JsonProperty("rel") String rel, @JsonProperty("href") String href) {
+        this.rel = rel;
+        this.href = href;
+    }
 
-	/**
-	 * @return the rel
-	 */
-	public String getRel() {
-		return rel;
-	}
+    /**
+     * @return the rel
+     */
+    public String getRel() {
+        return rel;
+    }
 
-	/**
-	 * @param rel
-	 *            the rel to set
-	 */
-	public void setRel(String rel) {
-		this.rel = rel;
-	}
+    /**
+     * @param rel
+     *            the rel to set
+     */
+    public void setRel(String rel) {
+        this.rel = rel;
+    }
 
-	/**
-	 * @return the href
-	 */
-	public String getHref() {
-		return href;
-	}
+    /**
+     * @return the href
+     */
+    public String getHref() {
+        return href;
+    }
 
-	/**
-	 * @param href
-	 *            the href to set
-	 */
-	public void setHref(String href) {
-		this.href = href;
-	}
+    /**
+     * @param href
+     *            the href to set
+     */
+    public void setHref(String href) {
+        this.href = href;
+    }
 
 }

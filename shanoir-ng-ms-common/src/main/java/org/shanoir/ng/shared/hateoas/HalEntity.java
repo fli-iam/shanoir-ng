@@ -26,33 +26,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class HalEntity extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -8580796056437763225L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -8580796056437763225L;
 
-	@JsonIgnore
-	private Links links = new Links();
+    @JsonIgnore
+    private Links links = new Links();
 
-	/**
-	 * @return the links
-	 */
-	@JsonProperty("_links")
-	public Links getLinks() {
-		return links;
-	}
+    /**
+     * @return the links
+     */
+    @JsonProperty("_links")
+    public Links getLinks() {
+        return links;
+    }
 
-	/**
-	 * @param links the links to set
-	 */
-	@JsonIgnore
-	public void setLinks(Links links) {
-		this.links = links;
-	}
+    /**
+     * @param links the links to set
+     */
+    @JsonIgnore
+    public void setLinks(Links links) {
+        this.links = links;
+    }
 
 
-	public void addLink(String key, String href) {
-		links.put(key, new Link(key, Links.BASE_URL + href));
-	}
+    public void addLink(String key, String href) {
+        links.put(key, new Link(key, Links.BASE_URL + href));
+    }
 
 }

@@ -23,6 +23,6 @@ import java.io.IOException;
 
 public interface DatasetExpressionStrategy {
 
-	DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException;
+    DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException;
 
 }

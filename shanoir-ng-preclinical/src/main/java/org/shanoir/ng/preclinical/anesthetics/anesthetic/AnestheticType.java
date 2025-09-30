@@ -17,35 +17,35 @@ package org.shanoir.ng.preclinical.anesthetics.anesthetic;
 
 public enum AnestheticType {
 
-	GAS(Values.GAS),
-	INJECTION(Values.INJECTION);
+    GAS(Values.GAS),
+    INJECTION(Values.INJECTION);
 
-	private String value;
+    private String value;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param val
-	 *            value
-	 */
-	private AnestheticType(final String value) {
-		this.value = value;
-	}
+    /**
+     * Constructor.
+     *
+     * @param val
+     *            value
+     */
+    private AnestheticType(final String value) {
+        this.value = value;
+    }
 
-	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
+    /**
+     * @return the value
+     */
+    public String getValue() {
+        return value;
+    }
 
-	/**
-	 * List of enum values.
-	 *
-	 */
-	public static class Values {
-		public static final String GAS = "GAS";
-		public static final String INJECTION = "INJECTION";
-	}
+    /**
+     * List of enum values.
+     *
+     */
+    public static class Values {
+        public static final String GAS = "GAS";
+        public static final String INJECTION = "INJECTION";
+    }
 
 }

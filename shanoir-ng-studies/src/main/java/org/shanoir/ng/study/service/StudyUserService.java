@@ -30,23 +30,23 @@ import org.springframework.stereotype.Service;
 @Service
 public interface StudyUserService {
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<StudyUserRight> getRightsForStudy(Long studyId);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<StudyUserRight> getRightsForStudy(Long studyId);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Map<Long, List<StudyUserRight>> getRights();
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Map<Long, List<StudyUserRight>> getRights();
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	boolean hasOneStudyToImport();
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    boolean hasOneStudyToImport();
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<StudyUser> findStudyUsersByStudyId(Long studyId);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<StudyUser> findStudyUsersByStudyId(Long studyId);
 
-	/**
-	 * Deletes all study_user in study microservice when deleting a user.
-	 * @param eventAsString
-	 * @throws AmqpRejectAndDontRequeueException
-	 */
-	void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
+    /**
+     * Deletes all study_user in study microservice when deleting a user.
+     * @param eventAsString
+     * @throws AmqpRejectAndDontRequeueException
+     */
+    void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
 
 }

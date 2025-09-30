@@ -30,59 +30,59 @@ import org.shanoir.ng.shared.exception.ShanoirException;
  */
 public interface AnimalSubjectService {
 
-	/**
-	 * Delete a animalSubject value.
-	 *
-	 * @param id
-	 *            animalSubject id.
-	 * @throws ShanoirException
-	 */
-	void deleteBySubjectId(Long id) throws ShanoirException;
+    /**
+     * Delete a animalSubject value.
+     *
+     * @param id
+     *            animalSubject id.
+     * @throws ShanoirException
+     */
+    void deleteBySubjectId(Long id) throws ShanoirException;
 
-	/**
-	 * Get all the AnimalSubject.
-	 *
-	 * @return a list of AnimalSubject.
-	 */
-	List<AnimalSubject> findAll();
+    /**
+     * Get all the AnimalSubject.
+     *
+     * @return a list of AnimalSubject.
+     */
+    List<AnimalSubject> findAll();
 
-	/**
-	 * Find AnimalSubject by its id.
-	 *
-	 * @param id
-	 *            AnimalSubject id.
-	 * @return a AnimalSubject or null.
-	 */
-	AnimalSubject getBySubjectId(Long id);
+    /**
+     * Find AnimalSubject by its id.
+     *
+     * @param id
+     *            AnimalSubject id.
+     * @return a AnimalSubject or null.
+     */
+    AnimalSubject getBySubjectId(Long id);
 
-	/**
-	 * Save a AnimalSubject.
-	 *
-	 * @param AnimalSubject
-	 *            AnimalSubject to create.
-	 * @return created AnimalSubject.
-	 * @throws ShanoirException
-	 */
-	AnimalSubject save(AnimalSubject subject) throws ShanoirException;
+    /**
+     * Save a AnimalSubject.
+     *
+     * @param AnimalSubject
+     *            AnimalSubject to create.
+     * @return created AnimalSubject.
+     * @throws ShanoirException
+     */
+    AnimalSubject save(AnimalSubject subject) throws ShanoirException;
 
-	/**
-	 * Update a AnimalSubject.
-	 *
-	 * @param AnimalSubject
-	 *            AnimalSubject to update.
-	 * @return updated AnimalSubject.
-	 * @throws ShanoirException
-	 */
-	AnimalSubject update(AnimalSubject subject) throws ShanoirException;
+    /**
+     * Update a AnimalSubject.
+     *
+     * @param AnimalSubject
+     *            AnimalSubject to update.
+     * @return updated AnimalSubject.
+     * @throws ShanoirException
+     */
+    AnimalSubject update(AnimalSubject subject) throws ShanoirException;
 
-	List<AnimalSubject> findByReference(Reference reference);
+    List<AnimalSubject> findByReference(Reference reference);
 
-	Long getIdBySubjectId(long subjectId);
+    Long getIdBySubjectId(long subjectId);
 
-	boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId);
+    boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId);
 
     Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
 
-	List<AnimalSubject> findBySubjectIds(List<Long> subjectIds);
+    List<AnimalSubject> findBySubjectIds(List<Long> subjectIds);
 
 }

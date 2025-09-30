@@ -36,60 +36,60 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(BloodGasDataServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(BloodGasDataServiceImpl.class);
 
-	@Autowired
-	private BloodGasDataRepository bloodGasRepository;
+    @Autowired
+    private BloodGasDataRepository bloodGasRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		bloodGasRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        bloodGasRepository.deleteById(id);
+    }
 
-	@Override
-	public List<BloodGasData> findAllByExaminationId(Long id) {
-		return Utils.toList(bloodGasRepository.findAllByExaminationId(id));
-	}
+    @Override
+    public List<BloodGasData> findAllByExaminationId(Long id) {
+        return Utils.toList(bloodGasRepository.findAllByExaminationId(id));
+    }
 
-	@Override
-	public BloodGasData findById(final Long id) {
-		return bloodGasRepository.findById(id).orElse(null);
-	}
+    @Override
+    public BloodGasData findById(final Long id) {
+        return bloodGasRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public BloodGasData save(final BloodGasData extradata) throws ShanoirException {
-		BloodGasData savedPhysioData = null;
-		try {
-			savedPhysioData = bloodGasRepository.save(extradata);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating blood gas data:  ", dive);
-			throw new ShanoirException("Error while creating blood gas data:  ", dive);
-		}
-		return savedPhysioData;
-	}
+    @Override
+    public BloodGasData save(final BloodGasData extradata) throws ShanoirException {
+        BloodGasData savedPhysioData = null;
+        try {
+            savedPhysioData = bloodGasRepository.save(extradata);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating blood gas data:  ", dive);
+            throw new ShanoirException("Error while creating blood gas data:  ", dive);
+        }
+        return savedPhysioData;
+    }
 
-	@Override
-	public BloodGasData update(final BloodGasData extradata) throws ShanoirException {
-		final BloodGasData bloodgasDataDB = bloodGasRepository.findById(extradata.getId()).orElse(null);
-		updateBloodGasDataValues(bloodgasDataDB, extradata);
-		try {
-			bloodGasRepository.save(bloodgasDataDB);
-		} catch (Exception e) {
-			LOG.error("Error while updating blood gas data:  ", e);
-			throw new ShanoirException("Error while updating blood gas data:  ", e);
-		}
-		return bloodgasDataDB;
-	}
+    @Override
+    public BloodGasData update(final BloodGasData extradata) throws ShanoirException {
+        final BloodGasData bloodgasDataDB = bloodGasRepository.findById(extradata.getId()).orElse(null);
+        updateBloodGasDataValues(bloodgasDataDB, extradata);
+        try {
+            bloodGasRepository.save(bloodgasDataDB);
+        } catch (Exception e) {
+            LOG.error("Error while updating blood gas data:  ", e);
+            throw new ShanoirException("Error while updating blood gas data:  ", e);
+        }
+        return bloodgasDataDB;
+    }
 
-	private BloodGasData updateBloodGasDataValues(final BloodGasData bloodGasDataDb, final BloodGasData bloodGasData) {
-		bloodGasDataDb.setExaminationId(bloodGasData.getExaminationId());
-		bloodGasDataDb.setExtradatatype(bloodGasData.getExtradatatype());
-		bloodGasDataDb.setFilename(bloodGasData.getFilename());
-		bloodGasDataDb.setFilepath(bloodGasData.getFilepath());
-		return bloodGasDataDb;
-	}
+    private BloodGasData updateBloodGasDataValues(final BloodGasData bloodGasDataDb, final BloodGasData bloodGasData) {
+        bloodGasDataDb.setExaminationId(bloodGasData.getExaminationId());
+        bloodGasDataDb.setExtradatatype(bloodGasData.getExtradatatype());
+        bloodGasDataDb.setFilename(bloodGasData.getFilename());
+        bloodGasDataDb.setFilepath(bloodGasData.getFilepath());
+        return bloodGasDataDb;
+    }
 
 }

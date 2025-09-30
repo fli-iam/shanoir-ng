@@ -10,18 +10,18 @@ import org.shanoir.uploader.test.AbstractTest;
 
 public class StowDicomSRTest extends AbstractTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(StowDicomSRTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(StowDicomSRTest.class);
 
-	public void postDICOMSRToDicomWeb() throws Exception {
-		try {
-			URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
-			if (resource != null) {
-				File file = new File(resource.toURI());
-				shUpClient.postDicomSR(file);
-			}
-		} catch (URISyntaxException e) {
-			logger.error("Error while reading file", e);
-		}
-	}
+    public void postDICOMSRToDicomWeb() throws Exception {
+        try {
+            URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
+            if (resource != null) {
+                File file = new File(resource.toURI());
+                shUpClient.postDicomSR(file);
+            }
+        } catch (URISyntaxException e) {
+            logger.error("Error while reading file", e);
+        }
+    }
 
 }

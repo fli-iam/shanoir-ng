@@ -24,11 +24,11 @@ import java.util.List;
  */
 public interface RoleRepositoryCustom {
 
-	/**
-	 * Get list of roles name.
-	 *
-	 * @return list of names.
-	 */
-	List<String> getAllNames();
+    /**
+     * Get list of roles name.
+     *
+     * @return list of names.
+     */
+    List<String> getAllNames();
 
 }

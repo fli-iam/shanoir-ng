@@ -67,128 +67,128 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class ExtraDataApiControllerTest {
 
-	private static final String REQUEST_PATH_EXAMINATION = "/examination";
-	private static final String EXAMINATION_ID = "/1";
-	private static final String REQUEST_EXTRADATA = "/extradata";
-	private static final String REQUEST_PHYSIOLOGICALDATA = "/physiologicaldata";
-	private static final String REQUEST_BLOODGASDATA = "/bloodgasdata";
-	private static final String REQUEST_UPLOAD = "/upload";
-	private static final String REQUEST_PATH_EXTRADATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID + REQUEST_EXTRADATA;
-	private static final String REQUEST_PATH_PHYSIOLOGICALDATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID
-			+ REQUEST_PHYSIOLOGICALDATA;
-	private static final String REQUEST_PATH_BLOODGASDATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID
-			+ REQUEST_BLOODGASDATA;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH_EXTRADATA + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH_EXTRADATA + "/1";
-	private static final String REQUEST_PATH_PHYSIO_WITH_ID = REQUEST_PATH_PHYSIOLOGICALDATA + "/1";
-	private static final String REQUEST_PATH_BLOODGAS_WITH_ID = REQUEST_PATH_BLOODGASDATA + "/1";
-	private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD + "/1";
+    private static final String REQUEST_PATH_EXAMINATION = "/examination";
+    private static final String EXAMINATION_ID = "/1";
+    private static final String REQUEST_EXTRADATA = "/extradata";
+    private static final String REQUEST_PHYSIOLOGICALDATA = "/physiologicaldata";
+    private static final String REQUEST_BLOODGASDATA = "/bloodgasdata";
+    private static final String REQUEST_UPLOAD = "/upload";
+    private static final String REQUEST_PATH_EXTRADATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID + REQUEST_EXTRADATA;
+    private static final String REQUEST_PATH_PHYSIOLOGICALDATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID
+            + REQUEST_PHYSIOLOGICALDATA;
+    private static final String REQUEST_PATH_BLOODGASDATA = REQUEST_PATH_EXAMINATION + EXAMINATION_ID
+            + REQUEST_BLOODGASDATA;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH_EXTRADATA + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH_EXTRADATA + "/1";
+    private static final String REQUEST_PATH_PHYSIO_WITH_ID = REQUEST_PATH_PHYSIOLOGICALDATA + "/1";
+    private static final String REQUEST_PATH_BLOODGAS_WITH_ID = REQUEST_PATH_BLOODGASDATA + "/1";
+    private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD + "/1";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private ExtraDataService<ExaminationExtraData> extraDataServiceMock;
+    @MockBean
+    private ExtraDataService<ExaminationExtraData> extraDataServiceMock;
 
-	@MockBean
-	private ExtraDataService<PhysiologicalData> physioDataService;
+    @MockBean
+    private ExtraDataService<PhysiologicalData> physioDataService;
 
-	@MockBean
-	private ExtraDataService<BloodGasData> bloodGasDataService;
+    @MockBean
+    private ExtraDataService<BloodGasData> bloodGasDataService;
 
-	@MockBean
-	private ExtraDataUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private ExtraDataUniqueConstraintManager uniqueConstraintManager;
 
-	@MockBean
-	private PhysioDataUniqueConstraintManager physioConstraintManager;
+    @MockBean
+    private PhysioDataUniqueConstraintManager physioConstraintManager;
 
-	@MockBean
-	private BloogGasUniqueConstraintManager bloodGasConstraintManager;
+    @MockBean
+    private BloogGasUniqueConstraintManager bloodGasConstraintManager;
 
-	@MockBean
-	private ExtraDataEditableByManager editableOnlyValidator;
+    @MockBean
+    private ExtraDataEditableByManager editableOnlyValidator;
 
-	@TempDir
-	public static File tempFolder;
+    @TempDir
+    public static File tempFolder;
 
-	@BeforeAll
-	public static void beforeClass() {
-		System.setProperty("preclinical.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
-	}
+    @BeforeAll
+    public static void beforeClass() {
+        System.setProperty("preclinical.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
+    }
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
+    @BeforeEach
+    public void setup() throws ShanoirException {
 
-	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		ExaminationExtraData extraData = new ExaminationExtraData();
-		extraData.setId(1L);
+        ExaminationExtraData extraData = new ExaminationExtraData();
+        extraData.setId(1L);
 
-		doNothing().when(extraDataServiceMock).deleteById(1L);
-		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(extraData));
-		given(extraDataServiceMock.findById(1L)).willReturn(extraData);
-		given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
-				.willReturn(new ExaminationExtraData());
+        doNothing().when(extraDataServiceMock).deleteById(1L);
+        given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(extraData));
+        given(extraDataServiceMock.findById(1L)).willReturn(extraData);
+        given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
+                .willReturn(new ExaminationExtraData());
 
-		given(this.bloodGasConstraintManager.validate(Mockito.any(BloodGasData.class))).willReturn(new FieldErrorMap());
-		given(this.physioConstraintManager.validate(Mockito.any(PhysiologicalData.class))).willReturn(new FieldErrorMap());
-		given(this.uniqueConstraintManager.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
+        given(this.bloodGasConstraintManager.validate(Mockito.any(BloodGasData.class))).willReturn(new FieldErrorMap());
+        given(this.physioConstraintManager.validate(Mockito.any(PhysiologicalData.class))).willReturn(new FieldErrorMap());
+        given(this.uniqueConstraintManager.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
 
-		given(editableOnlyValidator.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
-	}
+        given(editableOnlyValidator.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteExtraDataTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteExtraDataTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findExtraDataByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findExtraDataByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findExtraDatasTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findExtraDatasTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewExtraDataTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_EXTRADATA).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(ExtraDataModelUtil.createExaminationExtraData()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewExtraDataTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_EXTRADATA).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(ExtraDataModelUtil.createExaminationExtraData()))).andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void uploadExtraDataTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", MediaType.MULTIPART_FORM_DATA_VALUE,
-				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void uploadExtraDataTest() throws Exception {
+        MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", MediaType.MULTIPART_FORM_DATA_VALUE,
+                "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updatePhysiologicalDataTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_PHYSIO_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(ExtraDataModelUtil.createExaminationPhysiologicalData())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updatePhysiologicalDataTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_PHYSIO_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(ExtraDataModelUtil.createExaminationPhysiologicalData())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updateBloodGasDataTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_BLOODGAS_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(ExtraDataModelUtil.createExaminationBloodGasData()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updateBloodGasDataTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_BLOODGAS_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(ExtraDataModelUtil.createExaminationBloodGasData()))).andExpect(status().isOk());
+    }
 
 }

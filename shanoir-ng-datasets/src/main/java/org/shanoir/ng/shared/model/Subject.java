@@ -43,87 +43,87 @@ import jakarta.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject extends IdName {
 
-	@Id
-	protected Long id;
+    @Id
+    protected Long id;
 
-	protected String name;
+    protected String name;
 
-	@ManyToOne
-	@JoinColumn(name = "study_id")
-	@NotNull
-	private Study study;
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
-	@ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
-			name = "subject_tag",
-			joinColumns = { @JoinColumn(name = "subject_id") },
-			inverseJoinColumns = { @JoinColumn(name = "tag_id") }
+            name = "subject_tag",
+            joinColumns = { @JoinColumn(name = "subject_id") },
+            inverseJoinColumns = { @JoinColumn(name = "tag_id") }
     )
-	private Set<Tag> tags = new HashSet<Tag>();
+    private Set<Tag> tags = new HashSet<Tag>();
 
-	private Integer qualityTag;
+    private Integer qualityTag;
 
-	private Integer subjectType;
+    private Integer subjectType;
 
-	public Subject() { }
+    public Subject() { }
 
-	/**
-	 * @param id
-	 * @param name
-	 */
-	public Subject(Long id, String name) {
-		this.setId(id);
-		this.setName(name);
-	}
+    /**
+     * @param id
+     * @param name
+     */
+    public Subject(Long id, String name) {
+        this.setId(id);
+        this.setName(name);
+    }
 
-	public Study getStudy() {
-		return study;
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	@Override
-	public Long getId() {
-		return id;
-	}
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the subjectType
-	 */
-	public SubjectType getSubjectType() {
-		return SubjectType.getType(subjectType);
-	}
+    /**
+     * @return the subjectType
+     */
+    public SubjectType getSubjectType() {
+        return SubjectType.getType(subjectType);
+    }
 
-	/**
-	 * @param subjectType
-	 *            the subjectType to set
-	 */
-	public void setSubjectType(SubjectType subjectType) {
-		if (subjectType == null) {
-			this.subjectType = null;
-		} else {
-			this.subjectType = subjectType.getId();
-		}
-	}
+    /**
+     * @param subjectType
+     *            the subjectType to set
+     */
+    public void setSubjectType(SubjectType subjectType) {
+        if (subjectType == null) {
+            this.subjectType = null;
+        } else {
+            this.subjectType = subjectType.getId();
+        }
+    }
 
-	public QualityTag getQualityTag() {
+    public QualityTag getQualityTag() {
         return QualityTag.get(qualityTag);
     }
 
@@ -131,21 +131,21 @@ public class Subject extends IdName {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
-	@JsonProperty("studyId")
-	public void setStudyId(Long studyId) {
-		if (studyId != null) {
-			Study s = new Study();
-			s.setId(studyId);
-			this.study = s;
-		}
-	}
+    @JsonProperty("studyId")
+    public void setStudyId(Long studyId) {
+        if (studyId != null) {
+            Study s = new Study();
+            s.setId(studyId);
+            this.study = s;
+        }
+    }
 
-	public Set<Tag> getTags() {
-		return tags;
-	}
+    public Set<Tag> getTags() {
+        return tags;
+    }
 
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
-	}
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
 
 }

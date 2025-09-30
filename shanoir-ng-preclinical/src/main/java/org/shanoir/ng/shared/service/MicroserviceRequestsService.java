@@ -26,24 +26,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MicroserviceRequestsService {
-	/**
-	 * Search request part.
-	 */
-	public static final String SUBJECT = "/subject";
-	public static final String STUDY = "/studies";
-	public static final String CENTER = "/centers";
+    /**
+     * Search request part.
+     */
+    public static final String SUBJECT = "/subject";
+    public static final String STUDY = "/studies";
+    public static final String CENTER = "/centers";
 
-	public static final String COMMON = "/common";
+    public static final String COMMON = "/common";
 
-	public static final String CENTERID = "/centerid";
+    public static final String CENTERID = "/centerid";
 
-	@Value("${ms.url.shanoir-ng-studies}")
-	private String studiesMsUrl;
+    @Value("${ms.url.shanoir-ng-studies}")
+    private String studiesMsUrl;
 
-	/**
-	 * @return the studiesMsUrl
-	 */
-	public String getStudiesMsUrl() {
-		return studiesMsUrl;
-	}
+    /**
+     * @return the studiesMsUrl
+     */
+    public String getStudiesMsUrl() {
+        return studiesMsUrl;
+    }
 }

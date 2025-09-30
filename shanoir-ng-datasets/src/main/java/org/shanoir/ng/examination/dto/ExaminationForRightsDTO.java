@@ -17,7 +17,7 @@ package org.shanoir.ng.examination.dto;
 
 public interface ExaminationForRightsDTO {
 
-	public Long getId();
+    public Long getId();
 
     public Long getCenterId();
 

@@ -60,10 +60,10 @@ public class SeriesInstanceUIDHandler {
                 seriesInstanceUID = findSeriesInstanceUID(acquisition);
                 if (seriesInstanceUID != null) {
                     String existing = acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
-					if (existing == null) {
-						LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
-						LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
-					}
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
+                    }
                 }
             }
         }

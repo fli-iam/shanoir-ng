@@ -34,42 +34,42 @@ import jakarta.transaction.Transactional;
 @Service
 public class SubjectStudyServiceImpl implements SubjectStudyService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyServiceImpl.class);
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Autowired
-	private SubjectService subjectService;
+    @Autowired
+    private SubjectService subjectService;
 
-	@Override
-	public SubjectStudy findById(final Long id) {
-		return subjectStudyRepository.findById(id).orElse(null);
-	}
+    @Override
+    public SubjectStudy findById(final Long id) {
+        return subjectStudyRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	@Transactional
-	public SubjectStudy update(final SubjectStudy subjectStudyNew) throws EntityNotFoundException {
-		final SubjectStudy subjectStudyOld = subjectStudyRepository.findById(subjectStudyNew.getId()).orElse(null);
-		if (subjectStudyOld == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudyNew.getId());
-		updateSubjectStudyValues(subjectStudyOld, subjectStudyNew);
-		subjectStudyRepository.save(subjectStudyOld);
-		return subjectStudyOld;
-	}
+    @Override
+    @Transactional
+    public SubjectStudy update(final SubjectStudy subjectStudyNew) throws EntityNotFoundException {
+        final SubjectStudy subjectStudyOld = subjectStudyRepository.findById(subjectStudyNew.getId()).orElse(null);
+        if (subjectStudyOld == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudyNew.getId());
+        updateSubjectStudyValues(subjectStudyOld, subjectStudyNew);
+        subjectStudyRepository.save(subjectStudyOld);
+        return subjectStudyOld;
+    }
 
-	/*
-	 * Update some values of subject study to save them in database.
-	 *
-	 * @param subjectStudyDb subjectStudy found in database.
-	 * @param subjectStudy subjectStudy with new values.
-	 * @return database subjectStudy with new values.
-	 */
-	private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyOld, final SubjectStudy subjectStudyNew) {
-		subjectStudyOld.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
-		subjectStudyOld.setSubjectStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
-		subjectStudyOld.setSubjectType(subjectStudyNew.getSubjectType());
-		subjectService.mapSubjectStudyTagListToSubjectStudyTagList(subjectStudyOld, subjectStudyNew);
-		return subjectStudyOld;
-	}
+    /*
+     * Update some values of subject study to save them in database.
+     *
+     * @param subjectStudyDb subjectStudy found in database.
+     * @param subjectStudy subjectStudy with new values.
+     * @return database subjectStudy with new values.
+     */
+    private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyOld, final SubjectStudy subjectStudyNew) {
+        subjectStudyOld.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
+        subjectStudyOld.setSubjectStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
+        subjectStudyOld.setSubjectType(subjectStudyNew.getSubjectType());
+        subjectService.mapSubjectStudyTagListToSubjectStudyTagList(subjectStudyOld, subjectStudyNew);
+        return subjectStudyOld;
+    }
 
 }

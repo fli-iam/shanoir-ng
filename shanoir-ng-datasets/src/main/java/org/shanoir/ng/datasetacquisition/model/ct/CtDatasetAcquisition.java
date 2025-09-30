@@ -30,42 +30,42 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Ct")
 public class CtDatasetAcquisition extends DatasetAcquisition {
 
-	public static final String DATASET_ACQUISITION_TYPE = "Ct";
+    public static final String DATASET_ACQUISITION_TYPE = "Ct";
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -8511002756058790037L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -8511002756058790037L;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	private CtProtocol ctProtocol;
+    @OneToOne(cascade = CascadeType.ALL)
+    private CtProtocol ctProtocol;
 
-	public CtDatasetAcquisition() {
-	}
+    public CtDatasetAcquisition() {
+    }
 
-	public CtDatasetAcquisition(DatasetAcquisition other) {
-		super(other);
-		this.ctProtocol = new CtProtocol(this);
-	}
+    public CtDatasetAcquisition(DatasetAcquisition other) {
+        super(other);
+        this.ctProtocol = new CtProtocol(this);
+    }
 
-	/**
-	 * @return the ctProtocol
-	 */
-	public CtProtocol getCtProtocol() {
-		return ctProtocol;
-	}
+    /**
+     * @return the ctProtocol
+     */
+    public CtProtocol getCtProtocol() {
+        return ctProtocol;
+    }
 
-	/**
-	 * @param ctProtocol
-	 *            the ctProtocol to set
-	 */
-	public void setCtProtocol(CtProtocol ctProtocol) {
-		this.ctProtocol = ctProtocol;
-	}
+    /**
+     * @param ctProtocol
+     *            the ctProtocol to set
+     */
+    public void setCtProtocol(CtProtocol ctProtocol) {
+        this.ctProtocol = ctProtocol;
+    }
 
-	@Override
-	public String getType() {
-		return "Ct";
-	}
+    @Override
+    public String getType() {
+        return "Ct";
+    }
 
 }

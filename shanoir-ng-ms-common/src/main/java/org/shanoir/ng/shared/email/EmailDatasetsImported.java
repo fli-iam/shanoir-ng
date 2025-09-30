@@ -10,84 +10,84 @@ import java.util.Map;
  */
 public class EmailDatasetsImported extends EmailBase {
 
-	private Map<Long, String> datasets;
+    private Map<Long, String> datasets;
 
-	private String subjectName;
+    private String subjectName;
 
-	private String examinationId;
+    private String examinationId;
 
-	private String examDate;
+    private String examDate;
 
-	private String studyCard;
+    private String studyCard;
 
-	/**
-	 * @return the datasets
-	 */
-	public Map<Long, String> getDatasets() {
-		return datasets;
-	}
+    /**
+     * @return the datasets
+     */
+    public Map<Long, String> getDatasets() {
+        return datasets;
+    }
 
-	/**
-	 * @param datasets the datasets to set
-	 */
-	public void setDatasets(Map<Long, String>  datasets) {
-		this.datasets = datasets;
-	}
+    /**
+     * @param datasets the datasets to set
+     */
+    public void setDatasets(Map<Long, String>  datasets) {
+        this.datasets = datasets;
+    }
 
-	/**
-	 * @return the subjectName
-	 */
-	public String getSubjectName() {
-		return subjectName;
-	}
+    /**
+     * @return the subjectName
+     */
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	/**
-	 * @param subjectName the subjectName to set
-	 */
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    /**
+     * @param subjectName the subjectName to set
+     */
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	/**
-	 * @return the examinationId
-	 */
-	public String getExaminationId() {
-		return examinationId;
-	}
+    /**
+     * @return the examinationId
+     */
+    public String getExaminationId() {
+        return examinationId;
+    }
 
-	/**
-	 * @param examinationId the examinationId to set
-	 */
-	public void setExaminationId(String examinationId) {
-		this.examinationId = examinationId;
-	}
+    /**
+     * @param examinationId the examinationId to set
+     */
+    public void setExaminationId(String examinationId) {
+        this.examinationId = examinationId;
+    }
 
-	/**
-	 * @return the examDate
-	 */
-	public String getExamDate() {
-		return examDate;
-	}
+    /**
+     * @return the examDate
+     */
+    public String getExamDate() {
+        return examDate;
+    }
 
-	/**
-	 * @param examDate the examDate to set
-	 */
-	public void setExamDate(String examDate) {
-		this.examDate = examDate;
-	}
+    /**
+     * @param examDate the examDate to set
+     */
+    public void setExamDate(String examDate) {
+        this.examDate = examDate;
+    }
 
-	/**
-	 * @return the studyCard
-	 */
-	public String getStudyCard() {
-		return studyCard;
-	}
+    /**
+     * @return the studyCard
+     */
+    public String getStudyCard() {
+        return studyCard;
+    }
 
-	/**
-	 * @param studyCard the studyCard to set
-	 */
-	public void setStudyCard(String studyCard) {
-		this.studyCard = studyCard;
-	}
+    /**
+     * @param studyCard the studyCard to set
+     */
+    public void setStudyCard(String studyCard) {
+        this.studyCard = studyCard;
+    }
 
 }

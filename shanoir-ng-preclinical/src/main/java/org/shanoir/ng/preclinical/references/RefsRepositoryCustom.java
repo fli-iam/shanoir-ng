@@ -26,16 +26,16 @@ import java.util.Optional;
 public interface RefsRepositoryCustom {
 
 
-	List<Reference> findByCategory(String category);
+    List<Reference> findByCategory(String category);
 
-	List<Reference> findByCategoryAndType(String category, String type);
+    List<Reference> findByCategoryAndType(String category, String type);
 
-	Optional<Reference> findByCategoryTypeAndValue(String category, String reftype, String value);
+    Optional<Reference> findByCategoryTypeAndValue(String category, String reftype, String value);
 
-	Optional<Reference> findByTypeAndValue(String reftype, String value);
+    Optional<Reference> findByTypeAndValue(String reftype, String value);
 
-	List<String> findCategories();
+    List<String> findCategories();
 
-	List<String> findTypesByCategory(String category);
+    List<String> findTypesByCategory(String category);
 
 }

@@ -23,19 +23,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthenticationConfigurationState implements State {
 
-	@Autowired
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    @Autowired
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-	@Autowired
-	private AuthenticationManualConfigurationState authenticationManualConfigurationState;
+    @Autowired
+    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
 
-	public void load(StartupStateContext context) {
-		shanoirUploaderServiceClient.configure();
-		ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
-		// https://github.com/fli-iam/shanoir-ng/issues/615, KeycloakInstalled removed here as not working in CHUs
-		context.setState(authenticationManualConfigurationState);
-		context.nextState();
-		return;
-	}
+    public void load(StartupStateContext context) {
+        shanoirUploaderServiceClient.configure();
+        ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
+        // https://github.com/fli-iam/shanoir-ng/issues/615, KeycloakInstalled removed here as not working in CHUs
+        context.setState(authenticationManualConfigurationState);
+        context.nextState();
+        return;
+    }
 
 }
