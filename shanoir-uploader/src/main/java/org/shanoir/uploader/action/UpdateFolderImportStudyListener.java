@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateFolderImportStudyListener implements ItemListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(UpdateFolderImportStudyListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateFolderImportStudyListener.class);
 
     private final ImportFromFolderWindow window;
     private final ShanoirUploaderServiceClient shanoirUploaderServiceClient;
@@ -74,7 +74,7 @@ public class UpdateFolderImportStudyListener implements ItemListener {
             this.updateStudyCards(studies.get(0));
 
         } catch (Exception e) {
-            logger.error("Could not correctly retrieve study and study cards: ", e);
+            LOG.error("Could not correctly retrieve study and study cards: ", e);
             // Set as error here
             this.window.displayError("Something went wrong when loading study and study cards, please retry later.");
         }

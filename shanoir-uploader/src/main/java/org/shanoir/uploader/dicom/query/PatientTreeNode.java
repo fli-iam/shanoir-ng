@@ -63,7 +63,7 @@ public class PatientTreeNode implements DicomTreeNode {
      * @return the child
      */
     public TreeNode getChild(final int id) {
-        return (TreeNode)relatedStudies.get(id);
+        return (TreeNode) relatedStudies.get(id);
     }
 
     /*
@@ -167,7 +167,7 @@ public class PatientTreeNode implements DicomTreeNode {
      *            parent
      */
     public void setParent(final DicomTreeNode parent) {
-        this.parent = (Media)parent;
+        this.parent = (Media) parent;
     }
 
     /*

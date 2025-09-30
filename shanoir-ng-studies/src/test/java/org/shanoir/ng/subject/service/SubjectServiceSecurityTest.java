@@ -168,10 +168,10 @@ public class SubjectServiceSecurityTest {
     }
 
     private void testRead() throws ShanoirException {
-        final String NAME = "data";
+        final String name = "data";
 
         Subject subjectMockNoRights = buildSubjectMock(1L);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockNoRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockNoRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
@@ -181,7 +181,7 @@ public class SubjectServiceSecurityTest {
 
         Subject subjectMockWrongRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockWrongRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockWrongRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
@@ -191,7 +191,7 @@ public class SubjectServiceSecurityTest {
 
         Subject subjectMockRightRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockRightRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockRightRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
@@ -211,7 +211,7 @@ public class SubjectServiceSecurityTest {
         // Create subject
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(9L));
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 9L }))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {9L}))).willReturn(studiesMock);
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 9L);
         assertAccessDenied(service::create, newSubjectMock);
@@ -219,7 +219,7 @@ public class SubjectServiceSecurityTest {
         // Create subject linked to a study where I can admin, download, see all but not import.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 10L }))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {10L}))).willReturn(studiesMock);
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
         assertAccessDenied(service::create, newSubjectMock);
@@ -228,8 +228,8 @@ public class SubjectServiceSecurityTest {
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(11L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
         studiesMock.add(buildStudyMock(12L, StudyUserRight.CAN_IMPORT));
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 12L, 11L }))).willReturn(studiesMock);
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 11L, 12L }))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {12L, 11L}))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {11L, 12L}))).willReturn(studiesMock);
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 11L);
         addStudyToMock(newSubjectMock, 12L);
@@ -239,7 +239,7 @@ public class SubjectServiceSecurityTest {
         studiesMock = new ArrayList<>();
         Study studyMock = buildStudyMock(13L, StudyUserRight.CAN_IMPORT);
         studiesMock.add(studyMock);
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {13L}))).willReturn(studiesMock);
         given(studyRepository.findById(13L)).willReturn(Optional.of(studyMock));
         given(studyUserRepository.findByStudy_Id(13L)).willReturn(studiesMock.get(0).getStudyUserList());
         newSubjectMock = buildSubjectMock(null);

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DownloadOrCopyActionListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadOrCopyActionListener.class);
 
     private MainWindow mainWindow;
     private ResourceBundle resourceBundle;
@@ -88,21 +88,21 @@ public class DownloadOrCopyActionListener implements ActionListener {
                     firstSubject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
                     importJob.setSubject(firstSubject);
                 } catch (PseudonymusException e) {
-                    logger.error(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                     JOptionPane.showMessageDialog(mainWindow.frame,
                             resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
                             resourceBundle.getString("shanoir.uploader.select.error.title"),
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 } catch (UnsupportedEncodingException e) {
-                    logger.error(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                     JOptionPane.showMessageDialog(mainWindow.frame,
                             resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
                             resourceBundle.getString("shanoir.uploader.select.error.title"),
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 } catch (NoSuchAlgorithmException e) {
-                    logger.error(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                     JOptionPane.showMessageDialog(mainWindow.frame,
                             resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
                             resourceBundle.getString("shanoir.uploader.select.error.title"),
@@ -128,12 +128,12 @@ public class DownloadOrCopyActionListener implements ActionListener {
                 Thread thread = new Thread(runnable);
                 thread.start();
             } catch (Exception e) {
-                logger.error("An error occured while running the thread.", e);
+                LOG.error("An error occured while running the thread.", e);
             } finally {
                 lock.unlock();
             }
         } else {
-            logger.warn("A previous thread is still running. Please wait until it is finished.");
+            LOG.warn("A previous thread is still running. Please wait until it is finished.");
         }
 
         // clear previous selection, but keep tree open in the tab

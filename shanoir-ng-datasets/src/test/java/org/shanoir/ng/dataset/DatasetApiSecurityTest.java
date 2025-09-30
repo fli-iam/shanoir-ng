@@ -15,22 +15,25 @@
 
 package org.shanoir.ng.dataset;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApi;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -55,8 +58,6 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -68,12 +69,6 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import org.shanoir.ng.dataset.dto.DatasetLight;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * DatasetAPI security test.
@@ -286,7 +281,7 @@ public class DatasetApiSecurityTest {
         //massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
-        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L,null);
+        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);

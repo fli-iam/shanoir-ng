@@ -122,7 +122,7 @@ public class ImporterApiControllerTest {
 
         FileOutputStream outStream = new FileOutputStream(importZip.getAbsolutePath());
         ZipOutputStream zipout = new ZipOutputStream(outStream);
-        ImportUtils.zipFile(importDir, importDir.getName(), zipout , true);
+        ImportUtils.zipFile(importDir, importDir.getName(), zipout, true);
         zipout.close();
         outStream.close();
         return new MockMultipartFile("file", "test-import-as-bids.zip", "application/zip", new FileInputStream(importZip.getAbsolutePath()));
@@ -148,7 +148,7 @@ public class ImporterApiControllerTest {
         verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
 
         //verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
-        assertTrue(((String)captor.getValue()).contains(dataset.getName()));
+        assertTrue(((String) captor.getValue()).contains(dataset.getName()));
     }
 
     @Test
@@ -157,7 +157,7 @@ public class ImporterApiControllerTest {
 
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
-        .andExpect(status().is(200));
+                .andExpect(status().is(200));
     }
 
 }

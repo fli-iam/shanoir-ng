@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PacsConfigurationState implements State {
 
-    private static final Logger logger = LoggerFactory.getLogger(PacsConfigurationState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PacsConfigurationState.class);
 
     public ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
 
@@ -54,9 +54,9 @@ public class PacsConfigurationState implements State {
         try {
             dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());
             shUpOnloadConfig.setDicomServerClient(dSC);
-            logger.info("PacsConfigurationState: DicomServerClient successfully initialized.");
+            LOG.info("PacsConfigurationState: DicomServerClient successfully initialized.");
         } catch (MalformedURLException e) {
-            logger.info("Error with init of DicomServerClient: " + e.getMessage(), e);
+            LOG.info("Error with init of DicomServerClient: " + e.getMessage(), e);
         }
     }
 

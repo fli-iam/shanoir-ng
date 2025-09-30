@@ -201,14 +201,14 @@ public class StudyTagApiControllerTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteDatasetTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findDatasetByIdTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class StudyTagApiControllerTest {
             mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
                     .param("format", "nii")
                     .param("datasetIds", ""))
-            .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"Please use a valid sets of dataset IDs.\",\"details\":null}");
         }
@@ -248,14 +248,14 @@ public class StudyTagApiControllerTest {
         for (int i = 0; i < 505; i++) {
             strb.append(i).append(",");
         }
-        String ids = strb.substring(0, strb.length() -1);
+        String ids = strb.substring(0, strb.length() - 1);
 
         // WHEN we export all the datasets with no datasets ID
         try {
             mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
                     .param("format", "nii")
                     .param("datasetIds", ids))
-            .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can't download more than 50 datasets.\",\"details\":null}");
         }
@@ -275,10 +275,10 @@ public class StudyTagApiControllerTest {
 
         try {
         // WHEN we export all the datasets
-        mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-                .param("format", "nii")
-                .param("studyId", "1"))
-        .andExpect(status().isForbidden());
+            mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+                    .param("format", "nii")
+                    .param("studyId", "1"))
+                    .andExpect(status().isForbidden());
         } catch (Exception e) {
             assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
         }

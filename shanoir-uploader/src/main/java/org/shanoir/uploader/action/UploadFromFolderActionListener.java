@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
 
     JFileChooser fileChooser;
 
@@ -50,8 +50,8 @@ public class UploadFromFolderActionListener implements ActionListener {
         this.importFromFolderWindow.studyCardCB.setEnabled(false);
 
         FolderImport folderImport = new FolderImport();
-        folderImport.setStudy(((Study)importFromFolderWindow.studyCB.getSelectedItem()));
-        folderImport.setStudyCard(((StudyCard)importFromFolderWindow.studyCardCB.getSelectedItem()));
+        folderImport.setStudy(((Study) importFromFolderWindow.studyCB.getSelectedItem()));
+        folderImport.setStudyCard(((StudyCard) importFromFolderWindow.studyCardCB.getSelectedItem()));
 
         folderImport.setExaminationImports(new ArrayList<>());
         // Check if it is a folder
@@ -66,7 +66,7 @@ public class UploadFromFolderActionListener implements ActionListener {
         }
         for (File subjectFile : selectedFile.listFiles()) {
             if (!subjectFile.isDirectory() || subjectFile.listFiles().length == 0) {
-                logger.info("Ignoring subject level file " + subjectFile.getName() + ", not a folder.");
+                LOG.info("Ignoring subject level file " + subjectFile.getName() + ", not a folder.");
                 continue;
             }
             String subjectName = subjectFile.getName();

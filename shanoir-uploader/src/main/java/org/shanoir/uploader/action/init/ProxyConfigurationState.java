@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProxyConfigurationState implements State {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProxyConfigurationState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProxyConfigurationState.class);
 
     @Autowired
     private AuthenticationConfigurationState authenticationConfigurationState;
@@ -39,9 +39,9 @@ public class ProxyConfigurationState implements State {
         try {
             httpResponseCode = ShanoirUploaderServiceClient.testProxy(testURL);
         } catch (Exception e) {
-            logger.error("Error during proxy test:", e);
+            LOG.error("Error during proxy test:", e);
         }
-        logger.info("Proxy test returned following code: " + httpResponseCode);
+        LOG.info("Proxy test returned following code: " + httpResponseCode);
         switch (httpResponseCode) {
             case 200 :
                 context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.success"));

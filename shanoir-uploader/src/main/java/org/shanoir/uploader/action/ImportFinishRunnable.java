@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ImportFinishRunnable implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
     private File uploadFolder;
 
@@ -46,7 +46,7 @@ public class ImportFinishRunnable implements Runnable {
             String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
             anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName);
         } catch (IOException e) {
-            logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+            LOG.error(uploadFolder.getName() + ": " + e.getMessage(), e);
         }
 
         if (anonymizationSuccess) {
@@ -58,7 +58,7 @@ public class ImportFinishRunnable implements Runnable {
                 importJobJson.createNewFile();
                 Util.objectMapper.writeValue(importJobJson, importJob);
             } catch (IOException e) {
-                logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                LOG.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }
 
             /**
@@ -69,10 +69,10 @@ public class ImportFinishRunnable implements Runnable {
             importJob.setUploadState(UploadState.START_AUTOIMPORT);
             NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
             importJobManager.writeImportJob(importJob);
-            logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
+            LOG.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
         } else {
             // NOTIFY THAT ANONYMIZATION HAS FAILED.
-            logger.error(uploadFolder.getName() + ": Error during anonymization.");
+            LOG.error(uploadFolder.getName() + ": Error during anonymization.");
         }
     }
 

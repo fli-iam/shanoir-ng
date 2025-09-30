@@ -41,7 +41,7 @@ public class ShanoirNgPostAuthAuthenticatorFactory implements AuthenticatorFacto
         return false;
     }
 
-    private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
         AuthenticationExecutionModel.Requirement.REQUIRED,
         AuthenticationExecutionModel.Requirement.DISABLED
     };
@@ -66,10 +66,10 @@ public class ShanoirNgPostAuthAuthenticatorFactory implements AuthenticatorFacto
     }
 
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = new ArrayList<ProviderConfigProperty>();
 
     public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
+        return CONFIG_PROPERTIES;
     }
 
 }

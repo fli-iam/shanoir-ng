@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class InitialStartupState implements State {
 
-    private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InitialStartupState.class);
 
     private static final String USER_HOME_FOLDER = System.getProperty(ShUpConfig.USER_HOME);
 
@@ -59,15 +59,15 @@ public class InitialStartupState implements State {
     private ShUpStartupDialog shUpStartupDialog;
 
     public void load(StartupStateContext context) throws Exception {
-        logger.info("Start running of ShanoirUploader...");
-        logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
-        logger.info("Java Vendor: " + System.getProperty("java.vendor"));
-        logger.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
-        logger.info("Java Version: " + System.getProperty("java.version"));
+        LOG.info("Start running of ShanoirUploader...");
+        LOG.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
+        LOG.info("Java Vendor: " + System.getProperty("java.vendor"));
+        LOG.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
+        LOG.info("Java Version: " + System.getProperty("java.version"));
         InetAddress inetAddress = InetAddress.getLocalHost();
-        logger.info("IP Address: " + inetAddress.getHostAddress());
-        logger.info("Host Name: " + inetAddress.getHostName());
-        logger.info("TimeZone: " + System.getProperty("user.timezone") + ", " + TimeZone.getDefault() + ", " + ZoneId.systemDefault());
+        LOG.info("IP Address: " + inetAddress.getHostAddress());
+        LOG.info("Host Name: " + inetAddress.getHostName());
+        LOG.info("TimeZone: " + System.getProperty("user.timezone") + ", " + TimeZone.getDefault() + ", " + ZoneId.systemDefault());
          // Disable http request to check for quartz upload
         System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
         System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
@@ -111,13 +111,13 @@ public class InitialStartupState implements State {
         } else {
             previousVersion = "5.2";
         }
-        logger.info("Start migrating properties from version " + previousVersion + " of ShUp.");
+        LOG.info("Start migrating properties from version " + previousVersion + " of ShUp.");
         copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
         copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
         copyPropertiesFile(shupFolder, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
-        logger.info("Finished migrating properties from version " + previousVersion + " of ShUp: language, proxy, dicom_server.");
+        LOG.info("Finished migrating properties from version " + previousVersion + " of ShUp: language, proxy, dicom_server.");
         Utils.deleteFolder(shupFolder);
-        logger.info("Folder " + shupFolder.getName() + " was successfully deleted.");
+        LOG.info("Folder " + shupFolder.getName() + " was successfully deleted.");
     }
 
     private void copyPropertiesFile(final File srcDir, final File destDir, final String fileName) throws IOException {
@@ -125,7 +125,7 @@ public class InitialStartupState implements State {
         final File propertiesDest = new File(destDir, fileName);
         if (propertiesDest.exists()) {
             // do nothing in case of already existing property file
-            logger.info("Start migrating properties: property not copied, because of existing already in destination folder: " + propertiesDest.getAbsolutePath());
+            LOG.info("Start migrating properties: property not copied, because of existing already in destination folder: " + propertiesDest.getAbsolutePath());
         } else {
             Util.copyFileUsingStream(propertiesSrc, propertiesDest);
         }
@@ -133,12 +133,12 @@ public class InitialStartupState implements State {
 
     private void copyPseudonymus() {
         Util.copyPseudonymusFolder(Pseudonymizer.PSEUDONYMUS_FOLDER);
-        logger.info("Pseudonymus successfully copied.");
+        LOG.info("Pseudonymus successfully copied.");
     }
 
     private void initProfiles() throws IOException {
         initProperties(ShUpConfig.PROFILES_PROPERTIES, ShUpConfig.profilesProperties);
-        logger.info("profiles.properties successfully initialized.");
+        LOG.info("profiles.properties successfully initialized.");
         // iterate over list of profiles, create folder and copy 3 types of files if existing
         String profilesStr = ShUpConfig.profilesProperties.getProperty(ShUpConfig.PROFILES_PROPERTY);
         String[] profiles = profilesStr.split(",");
@@ -150,39 +150,39 @@ public class InitialStartupState implements State {
             }
         }
         if (migrateProfiles) {
-            logger.info("Profiles migration starts...");
-            logger.info("Deletion of all old profiles folders.");
+            LOG.info("Profiles migration starts...");
+            LOG.info("Deletion of all old profiles folders.");
             for (int i = 0; i < profiles.length; i++) {
                 File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
                 if (profileDir.exists()) {
-                    logger.info("Profile migration: deletion of old profile: " + profileDir.getAbsolutePath());
+                    LOG.info("Profile migration: deletion of old profile: " + profileDir.getAbsolutePath());
                     Files.walk(profileDir.toPath())
                         .sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
                             .forEach(File::delete);
                 }
             }
-            logger.info("Deletion of old profiles.properties.");
+            LOG.info("Deletion of old profiles.properties.");
             File profilesPropertiesOld = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILES_PROPERTIES);
             if (profilesPropertiesOld.exists()) {
                 profilesPropertiesOld.delete();
             }
             initProperties(ShUpConfig.PROFILES_PROPERTIES, ShUpConfig.profilesProperties);
-            logger.info("New profiles.properties successfully initialized with new profiles.");
+            LOG.info("New profiles.properties successfully initialized with new profiles.");
             profilesStr = ShUpConfig.profilesProperties.getProperty(ShUpConfig.PROFILES_PROPERTY);
             profiles = profilesStr.split(",");
-            logger.info("Profiles migration finished...");
+            LOG.info("Profiles migration finished...");
         }
 
         for (int i = 0; i < profiles.length; i++) {
-            logger.info("Checking profile folder: " + profiles[i]);
+            LOG.info("Checking profile folder: " + profiles[i]);
             File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
             if (profileDir.exists()) {
-                logger.info("Keep existing profile folder: " + profiles[i]);
+                LOG.info("Keep existing profile folder: " + profiles[i]);
                 // do nothing and keep local config
             } else {
                 profileDir.mkdirs();
-                logger.info("Profile folder created: " + profiles[i]);
+                LOG.info("Profile folder created: " + profiles[i]);
                 // copy for each profile "profile.properties"
                 File profilePropertiesFile = new File(profileDir, ShUpConfig.PROFILE_PROPERTIES);
                 Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.PROFILE_PROPERTIES, profilePropertiesFile);
@@ -202,14 +202,14 @@ public class InitialStartupState implements State {
 
     private void initPropertiesFiles() throws FileNotFoundException, IOException {
         initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
-        logger.info("basic.properties successfully initialized.");
+        LOG.info("basic.properties successfully initialized.");
 
         initProperties(ShUpConfig.LANGUAGE_PROPERTIES, ShUpConfig.languageProperties);
-        logger.info("language.properties successfully initialized.");
+        LOG.info("language.properties successfully initialized.");
 
         String randomSeed = generateRandomSeed();
         ShUpConfig.encryption = new Encryption(randomSeed);
-        logger.info("random.seed successfully initialized.");
+        LOG.info("random.seed successfully initialized.");
 
         initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
         if (ShUpConfig.proxyProperties.getProperty("proxy.password") != null
@@ -218,15 +218,15 @@ public class InitialStartupState implements State {
             ShUpConfig.encryption.decryptIfEncryptedString(proxyProperties,
                     ShUpConfig.proxyProperties, "proxy.password");
         }
-        logger.info("proxy.properties successfully initialized.");
+        LOG.info("proxy.properties successfully initialized.");
 
         initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
                 ShUpConfig.dicomServerProperties);
-        logger.info("dicom_server.properties successfully initialized.");
+        LOG.info("dicom_server.properties successfully initialized.");
 
         initProperties(ShUpConfig.ENDPOINT_PROPERTIES,
                 ShUpConfig.endpointProperties);
-        logger.info("endpoint.properties successfully initialized.");
+        LOG.info("endpoint.properties successfully initialized.");
     }
 
     private String generateRandomSeed() throws FileNotFoundException, IOException {
@@ -287,7 +287,7 @@ public class InitialStartupState implements State {
         if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
             ShUpConfig.username = username;
             ShUpConfig.password = password;
-            logger.info("Pre-configured credentials found.");
+            LOG.info("Pre-configured credentials found.");
         }
     }
 

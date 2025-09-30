@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ImportDialogOpener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportDialogOpener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportDialogOpener.class);
 
     private MainWindow mainWindow;
 
@@ -56,14 +56,14 @@ public class ImportDialogOpener {
 
     public void openImportDialog(ImportJob importJob, File importFolder) {
         try {
-            Date studyDate = ShUpConfig.formatter.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
+            Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
             Subject subject = null;
             // Profile OFSEP: search with identifier
             if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
                 subject = getSubject(importJob);
             } // else Profile Neurinfo: no search with identifier, user selects existing subject
             List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
-            logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
+            LOG.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
             // Init components of GUI and listeners
             ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
@@ -81,7 +81,7 @@ public class ImportDialogOpener {
             importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
             importDialog.mrExaminationExamExecutiveCB.setVisible(false);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return;
         }
         importDialog.setVisible(true);
@@ -97,10 +97,10 @@ public class ImportDialogOpener {
     private List<Study> getStudiesWithStudyCards(final ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
         List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
         if (studies != null) {
-            logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
+            LOG.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
             List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
             if (studyCards != null) {
-                logger.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
+                LOG.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
                 for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
                     Study study = (Study) iterator.next();
                     study.setCompatible(new Boolean(false));

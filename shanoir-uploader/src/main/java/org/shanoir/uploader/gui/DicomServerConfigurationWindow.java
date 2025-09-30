@@ -48,7 +48,7 @@ public class DicomServerConfigurationWindow extends JFrame {
     public JButton configureButton;
     public boolean isDicomServerEnableTLS3DES = false;
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomServerConfigurationWindow.class);
 
     DicomServerConfigurationListener dSCL;
 
@@ -75,10 +75,10 @@ public class DicomServerConfigurationWindow extends JFrame {
         masterPanel.add(configurationPanel, BorderLayout.NORTH);
 
         GridBagLayout gBLPanel = new GridBagLayout();
-        gBLPanel.columnWidths = new int[] { 0, 0, 0 };
-        gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-        gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gBLPanel.columnWidths = new int[] {0, 0, 0};
+        gBLPanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        gBLPanel.columnWeights = new double[] {1.0, 1.0, Double.MIN_VALUE};
+        gBLPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         configurationPanel.setLayout(gBLPanel);
 
         JLabel configurationLabel = new JLabel(resourceBundle

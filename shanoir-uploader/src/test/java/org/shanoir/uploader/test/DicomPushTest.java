@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DicomPushTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomPushTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomPushTest.class);
 
     private static Properties dicomServerProperties = new Properties();
 
@@ -68,7 +68,7 @@ public class DicomPushTest {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error in testDicomPush", e);
+            LOG.error("Error in testDicomPush", e);
         }
     }
 
@@ -76,7 +76,7 @@ public class DicomPushTest {
             throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-           Device device = new Device(this.getClass().getName());
+        Device device = new Device(this.getClass().getName());
         device.setExecutor(executor);
         device.setScheduledExecutor(scheduledExecutor);
         ApplicationEntity ae = new ApplicationEntity(CALLING_AET);
@@ -95,8 +95,8 @@ public class DicomPushTest {
                 super.onDimseRSP(as, cmd, data);
                 int status = cmd.getInt(Tag.Status, -1);
                 if (status != Status.Success) {
-                    logger.error("C-STORE failed for: with status: "
-                        + TagUtils.shortToHexString(status));
+                    LOG.error("C-STORE failed for: with status: "
+                            + TagUtils.shortToHexString(status));
                 }
             }
         };

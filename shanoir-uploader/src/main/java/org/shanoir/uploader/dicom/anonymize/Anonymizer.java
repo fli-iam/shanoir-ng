@@ -12,7 +12,7 @@ import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 
 public class Anonymizer {
 
-    private static final Logger logger = LoggerFactory.getLogger(Anonymizer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Anonymizer.class);
 
     public boolean pseudonymize(final File uploadFolder,
             final String profile, final String subjectName)
@@ -22,9 +22,9 @@ public class Anonymizer {
         try {
             AnonymizationService anonymizationService = new AnonymizationServiceImpl();
             anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName);
-            logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
+            LOG.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
         } catch (Exception e) {
-            logger.error("pseudonymization service: ", e);
+            LOG.error("pseudonymization service: ", e);
             return false;
         }
         return true;

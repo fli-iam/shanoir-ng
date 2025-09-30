@@ -4,7 +4,7 @@ public class SubjectStudyDTO {
 
     private Long id;
 
-    private Long StudyId;
+    private Long studyId;
 
     private boolean physicallyInvolved;
 
@@ -16,7 +16,7 @@ public class SubjectStudyDTO {
             String subjectType) {
         super();
         this.id = id;
-        StudyId = studyId;
+        this.studyId = studyId;
         this.physicallyInvolved = physicallyInvolved;
         this.subjectStudyIdentifier = subjectStudyIdentifier;
         this.subjectType = subjectType;
@@ -55,11 +55,11 @@ public class SubjectStudyDTO {
     }
 
     public Long getStudyId() {
-        return StudyId;
+        return studyId;
     }
 
     public void setStudyId(Long studyId) {
-        StudyId = studyId;
+        this.studyId = studyId;
     }
 
 }

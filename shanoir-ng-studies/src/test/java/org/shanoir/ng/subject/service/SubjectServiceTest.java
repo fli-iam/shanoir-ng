@@ -166,13 +166,13 @@ public class SubjectServiceTest {
         subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
         subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
         subject.setManualHemisphericDominance(HemisphericDominance.Left);
-        PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
+        PseudonymusHashValues pseudonymusHashValues = new PseudonymusHashValues();
         pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
         subject.setPseudonymusHashValues(pseudonymusHashValues);
         subject.setSex(Sex.F);
-        UserPersonalCommentSubject userPersonalCommentList1= new UserPersonalCommentSubject();
+        UserPersonalCommentSubject userPersonalCommentList1 = new UserPersonalCommentSubject();
         userPersonalCommentList1.setComment("comment1");
-        UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();
+        UserPersonalCommentSubject userPersonalCommentList2 = new UserPersonalCommentSubject();
         userPersonalCommentList1.setComment("comment2");
         List<UserPersonalCommentSubject> listSubjectComments = new ArrayList<>();
         listSubjectComments.add(userPersonalCommentList1);

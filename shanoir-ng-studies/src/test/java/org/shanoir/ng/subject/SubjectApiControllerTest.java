@@ -93,13 +93,13 @@ public class SubjectApiControllerTest {
     @BeforeEach
     public void setup() throws EntityNotFoundException, MicroServiceCommunicationException, ShanoirException {
         given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
-        .willReturn(Arrays.asList(new SubjectDTO()));
+                .willReturn(Arrays.asList(new SubjectDTO()));
         doNothing().when(subjectServiceMock).deleteById(1L);
         given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
         given(subjectServiceMock.findById(1L)).willReturn(new Subject());
         Subject subject = new Subject();
         subject.setId(Long.valueOf(123));
-        given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject );
+        given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject);
         given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
     }
 

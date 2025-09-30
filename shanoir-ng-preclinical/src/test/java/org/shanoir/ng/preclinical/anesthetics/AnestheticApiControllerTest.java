@@ -96,7 +96,7 @@ public class AnestheticApiControllerTest {
         given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
         Anesthetic anes = new Anesthetic();
         anes.setId(Long.valueOf(123));
-        given(anestheticsServiceMock.save(Mockito.any(Anesthetic.class))).willReturn(anes );
+        given(anestheticsServiceMock.save(Mockito.any(Anesthetic.class))).willReturn(anes);
 
         given(uniqueValidator.validate(Mockito.any(Anesthetic.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(Anesthetic.class))).willReturn(new FieldErrorMap());

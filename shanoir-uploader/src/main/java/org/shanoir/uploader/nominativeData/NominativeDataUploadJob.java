@@ -20,7 +20,7 @@ public class NominativeDataUploadJob {
 
     private String patientName;
 
-    private String IPP;
+    private String ipp;
 
     private String studyDate;
 
@@ -47,11 +47,11 @@ public class NominativeDataUploadJob {
     }
 
     public String getIPP() {
-        return IPP;
+        return ipp;
     }
 
     public void setIPP(String iPP) {
-        IPP = iPP;
+        ipp = iPP;
     }
 
     public String getStudyDate() {

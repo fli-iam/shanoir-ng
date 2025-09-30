@@ -86,7 +86,7 @@ public class CoilApiControllerTest {
         given(coilServiceMock.findById(1L)).willReturn(Optional.of(new Coil()));
         Coil coil = new Coil();
         coil.setId(Long.valueOf(123));
-        given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );
+        given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil);
         given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Coil.class))).willReturn(true);
     }
 

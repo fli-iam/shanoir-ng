@@ -18,7 +18,7 @@ import jakarta.xml.bind.Unmarshaller;
  */
 public class NominativeDataUploadJobManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(NominativeDataUploadJobManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NominativeDataUploadJobManager.class);
 
     public static final String NOMINATIVE_DATA_JOB_XML = ShUpConfig.NOMINATIVE_DATA_JOB_XML;
 
@@ -40,7 +40,7 @@ public class NominativeDataUploadJobManager {
             uploadFolderPath
             + File.separatorChar
             + NOMINATIVE_DATA_JOB_XML);
-        logger.debug("UploadJobManager initialized with file: "
+        LOG.debug("UploadJobManager initialized with file: "
                 + this.nominativeDataJobFile.getAbsolutePath());
     }
 
@@ -50,7 +50,7 @@ public class NominativeDataUploadJobManager {
      */
     public NominativeDataUploadJobManager(final File uploadJobFile) {
         this.nominativeDataJobFile = uploadJobFile;
-        logger.debug("UploadJobManager initialized with file: "
+        LOG.debug("UploadJobManager initialized with file: "
                 + this.nominativeDataJobFile.getAbsolutePath());
     }
 
@@ -66,7 +66,7 @@ public class NominativeDataUploadJobManager {
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(nominativeDataUploadJob, nominativeDataJobFile);
         } catch (JAXBException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ public class NominativeDataUploadJobManager {
             final NominativeDataUploadJob uploadJob = (NominativeDataUploadJob) jaxbUnmarshaller.unmarshal(nominativeDataJobFile);
             return uploadJob;
         } catch (JAXBException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
         return null;
     }

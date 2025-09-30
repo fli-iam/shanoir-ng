@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(FindDicomActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FindDicomActionListener.class);
 
     private static final long serialVersionUID = 7126127792556196772L;
 
@@ -86,7 +86,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
         Media media = new Media();
         // when the open file from CD/DVD menu is clicked
         if (event.getSource().getClass() == JMenuItem.class) {
-            logger.info("Opening DICOM files from CD/DVD/local file system...");
+            LOG.info("Opening DICOM files from CD/DVD/local file system...");
             this.mainWindow.isFromPACS = false;
             int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -96,25 +96,25 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
                         boolean dicomDirGenerated = false;
                         File dicomDirFile = new File(selectedRootDir, ShUpConfig.DICOMDIR);
                         if (!dicomDirFile.exists()) {
-                            logger.info("No DICOMDIR found: generating one.");
+                            LOG.info("No DICOMDIR found: generating one.");
                             dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
                             dicomDirGenerated = true;
-                            logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+                            LOG.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
                         }
                         final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
                         List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
                         fillMediaWithPatients(media, patients);
                         filePathDicomDir = selectedRootDir.toString();
                     } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 } else {
-                    logger.error("Please choose a directory.");
+                    LOG.error("Please choose a directory.");
                 }
             }
         // when the query button is clicked
         } else if (event.getSource().getClass() == JButton.class) {
-            logger.info("Querying DICOM server with query parameters: "
+            LOG.info("Querying DICOM server with query parameters: "
                     + Utils.sha256(mainWindow.patientNameTF.getText()) + " "
                     + Utils.sha256(mainWindow.patientIDTF.getText()) + " "
                     + Utils.sha256(mainWindow.birthDate.toString()) + " "
@@ -185,13 +185,13 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
                 fillMediaWithPatients(media, patients);
                 this.mainWindow.setCursor(Cursor.getDefaultCursor());
             } catch (ConnectException cE) {
-                logger.error(cE.getMessage(), cE);
+                LOG.error(cE.getMessage(), cE);
                 this.mainWindow.setCursor(Cursor.getDefaultCursor());
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         "Connection to DICOM server could not be established.",
                         "Connection error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 this.mainWindow.setCursor(Cursor.getDefaultCursor());
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         "Connection to DICOM server could not be established.",
@@ -221,7 +221,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
             for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
                 Patient patient = (Patient) patientsIt.next();
                 final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
-                logger.info("Patient info read: " + patient.toString());
+                LOG.info("Patient info read: " + patient.toString());
                 // add patients
                 media.addTreeNode(patientTreeNode);
                 List<Study> studies = patient.getStudies();

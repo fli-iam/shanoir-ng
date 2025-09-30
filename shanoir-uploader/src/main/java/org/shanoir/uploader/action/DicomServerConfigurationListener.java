@@ -30,7 +30,7 @@ import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 public class DicomServerConfigurationListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomServerConfigurationListener.class);
 
     DicomServerConfigurationWindow dicomWindow;
 
@@ -82,7 +82,7 @@ public class DicomServerConfigurationListener implements ActionListener {
         }
         // Configure button
         if (event.getSource() == dicomWindow.configureButton) {
-            logger.info("Dicom Server configuration: Starting...");
+            LOG.info("Dicom Server configuration: Starting...");
 
             String fileName = dicomWindow.shanoirUploaderFolder + File.separator + ShUpConfig.DICOM_SERVER_PROPERTIES;
 
@@ -122,8 +122,8 @@ public class DicomServerConfigurationListener implements ActionListener {
                                             "shanoir.uploader.configurationMenu.dicomServer.configure.succeeded.title"),
                                     JOptionPane.INFORMATION_MESSAGE);
                         } catch (Exception e) {
-                            logger.error("Failed to configure connexion :");
-                            logger.error(e.getMessage(), e);
+                            LOG.error("Failed to configure connexion :");
+                            LOG.error(e.getMessage(), e);
                         }
                     } else {
                         String message = resourceBundle

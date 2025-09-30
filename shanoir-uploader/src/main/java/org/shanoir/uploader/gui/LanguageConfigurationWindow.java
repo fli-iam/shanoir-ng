@@ -24,7 +24,7 @@ import org.shanoir.uploader.action.LanguageConfigurationListener;
 
 public class LanguageConfigurationWindow extends JFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(LanguageConfigurationWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageConfigurationWindow.class);
     public File shanoirUploaderFolder;
     public ResourceBundle resourceBundle;
     public JRadioButton rbEnglish;
@@ -50,10 +50,10 @@ public class LanguageConfigurationWindow extends JFrame {
         masterPanel.add(configurationPanel, BorderLayout.NORTH);
 
         GridBagLayout gBLPanel = new GridBagLayout();
-        gBLPanel.columnWidths = new int[] { 0, 0, 0 };
-        gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-        gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gBLPanel.columnWidths = new int[] {0, 0, 0};
+        gBLPanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        gBLPanel.columnWeights = new double[] {1.0, 1.0, Double.MIN_VALUE};
+        gBLPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         configurationPanel.setLayout(gBLPanel);
 
         JLabel configurationLabel = new JLabel(

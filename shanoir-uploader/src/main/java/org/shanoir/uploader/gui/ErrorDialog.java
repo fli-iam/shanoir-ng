@@ -15,17 +15,17 @@ public class ErrorDialog extends JDialog {
     ResourceBundle resourceBundle;
 
     public ErrorDialog(JDialog jdialog, String title, ResourceBundle resourceBundle) {
-        super(jdialog,title,true);
-        errorDialog = new JDialog(this,resourceBundle.getString("shanoir.uploader.systemErrorDialog.title"));
+        super(jdialog, title, true);
+        errorDialog = new JDialog(this, resourceBundle.getString("shanoir.uploader.systemErrorDialog.title"));
         errorDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         errorDialog.setSize(400, 150);
         errorDialog.setLocationRelativeTo(this);
 
-        errorLabel = new JLabel("<html><p>"+resourceBundle.getString("shanoir.uploader.systemErrorDialog.label")+"</p>");
-        errorDialog.add(errorLabel,BorderLayout.NORTH);
+        errorLabel = new JLabel("<html><p>" + resourceBundle.getString("shanoir.uploader.systemErrorDialog.label") + "</p>");
+        errorDialog.add(errorLabel, BorderLayout.NORTH);
 
         errorButton = new JButton(resourceBundle.getString("shanoir.uploader.systemErrorDialog.button"));
-        errorDialog.add(errorButton,BorderLayout.SOUTH);
+        errorDialog.add(errorButton, BorderLayout.SOUTH);
 
     }
 

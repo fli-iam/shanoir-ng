@@ -82,7 +82,7 @@ public class RabbitMQSubjectServiceTest {
     @Test
     public void testGetSubjetsForStudy() throws JsonProcessingException {
         SimpleSubjectDTO dto = new SimpleSubjectDTO();
-        String ident="subjectIdentifier";
+        String ident = "subjectIdentifier";
         dto.setIdentifier(ident);
         Mockito.when(mapper.writeValueAsString(Mockito.any())).thenReturn(ident);
 
@@ -96,7 +96,7 @@ public class RabbitMQSubjectServiceTest {
     public void testGetSubjetsForStudyFail() throws JsonProcessingException {
         assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
         // GIVEN a study ID, retrieve all associated subjects
-        rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
+            rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
         });
     }
 

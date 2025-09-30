@@ -67,4 +67,16 @@ public class Center implements Comparable<Center> {
         return true;
     }
 
+    @Override
+    public int hashCode() {
+        if (getId() != null) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getId().hashCode();
+            return result;
+        }
+        // ID is not set, return a unique constant hash code to avoid
+        // all objects having the same hash code of 31.
+        return System.identityHashCode(this);
+    }
 }

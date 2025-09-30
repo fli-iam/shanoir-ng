@@ -1,19 +1,15 @@
 package org.shanoir.uploader.service.rest;
 
 import org.shanoir.uploader.ShUpConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServiceConfiguration {
-
-    private static final Logger logger = LoggerFactory.getLogger(ServiceConfiguration.class);
 
     /** Constructeur privé */
     private ServiceConfiguration() {
     }
 
     /** Instance unique pré-initialisée */
-    private static ServiceConfiguration INSTANCE = new ServiceConfiguration();
+    private static final ServiceConfiguration INSTANCE = new ServiceConfiguration();
 
     /** Point d'accès pour l'instance unique du singleton */
     public static ServiceConfiguration getInstance() {
@@ -75,21 +71,13 @@ public class ServiceConfiguration {
     }
 
     public Boolean isProxySecure() {
-        if (ShUpConfig.proxyProperties.getProperty("proxy.secure") != null
-                && Boolean.valueOf(ShUpConfig.proxyProperties.getProperty("proxy.secure"))) {
-            return true;
-        } else {
-            return false;
-        }
+        return ShUpConfig.proxyProperties.getProperty("proxy.secure") != null
+                && Boolean.valueOf(ShUpConfig.proxyProperties.getProperty("proxy.secure"));
     }
 
     public Boolean isProxyEnabled() {
-        if (ShUpConfig.proxyProperties.getProperty("proxy.enabled") != null
-                && Boolean.valueOf(ShUpConfig.proxyProperties.getProperty("proxy.enabled"))) {
-            return true;
-        } else {
-            return false;
-        }
+        return ShUpConfig.proxyProperties.getProperty("proxy.enabled") != null
+                && Boolean.valueOf(ShUpConfig.proxyProperties.getProperty("proxy.enabled"));
     }
 
     public String getTestURL() {

@@ -10,7 +10,7 @@ import org.shanoir.uploader.gui.ImportDialog;
 
 public class ImportCreateNewExamCBItemListener implements ItemListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportCreateNewExamCBItemListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportCreateNewExamCBItemListener.class);
 
     private ImportDialog importDialog;
 

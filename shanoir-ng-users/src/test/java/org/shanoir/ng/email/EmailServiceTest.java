@@ -134,7 +134,7 @@ public class EmailServiceTest {
         mail.setStudyName("StudyName");
         mail.setStudyId("12");
         mail.setUserId(1L);
-        mail.setRecipients(Arrays. asList(1L));
+        mail.setRecipients(Arrays.asList(1L));
         Map<Long, String> datasets = new HashMap<>();
         datasets.put(1L, "test");
         mail.setDatasets(datasets);

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QualityUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(QualityUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QualityUtils.class);
 
     private static QualityService qualityService = new QualityService();
 
@@ -53,13 +53,13 @@ public class QualityUtils {
         try {
             qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
         } catch (Exception e) {
-            logger.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
+            LOG.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
             throw e;
         }
 
         // If no quality cards are found for the study we skip the quality control
         if (qualityCards == null || qualityCards.isEmpty()) {
-            logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
+            LOG.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
             return qualityCardResult;
         }
 
@@ -78,7 +78,7 @@ public class QualityUtils {
                         serie.setDatasets(new ArrayList<Dataset>());
                         datasetsCreatorService.constructDicom(null, serie, true);
                     } catch (SecurityException e) {
-                        logger.error(e.getMessage());
+                        LOG.error(e.getMessage());
                     }
                 }
             }
@@ -93,7 +93,7 @@ public class QualityUtils {
         try {
             qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
         } catch (Exception e) {
-            logger.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
+            LOG.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
             throw e;
         }
 

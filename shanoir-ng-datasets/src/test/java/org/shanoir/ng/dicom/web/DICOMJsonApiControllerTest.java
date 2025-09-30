@@ -88,7 +88,7 @@ public class DICOMJsonApiControllerTest {
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept("application/dicom+json")
                 .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
-        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
     }
 
 }

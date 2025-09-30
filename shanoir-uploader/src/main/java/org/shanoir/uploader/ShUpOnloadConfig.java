@@ -39,7 +39,7 @@ public class ShUpOnloadConfig {
     }
 
     /** Instance unique pré-initialisée */
-    private static ShUpOnloadConfig INSTANCE = new ShUpOnloadConfig();
+    private static final ShUpOnloadConfig INSTANCE = new ShUpOnloadConfig();
 
     /** Point d'accès pour l'instance unique du singleton */
     public static ShUpOnloadConfig getInstance() {

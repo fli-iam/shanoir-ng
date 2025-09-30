@@ -24,7 +24,7 @@ import org.shanoir.uploader.dicom.query.StudyTreeNode;
  */
 public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
 
     private Icon mediaIcon;
     private Icon patientIcon;
@@ -48,7 +48,7 @@ public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
-            logger.error("Couldn't find file: " + path);
+            LOG.error("Couldn't find file: " + path);
             return null;
         }
     }

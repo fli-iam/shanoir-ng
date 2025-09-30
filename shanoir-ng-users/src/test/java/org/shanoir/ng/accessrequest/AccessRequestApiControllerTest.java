@@ -148,7 +148,7 @@ public class AccessRequestApiControllerTest {
         // I get data, but only the one in demand
         Mockito.when(rabbitTemplate.
                 convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
-        .thenReturn(Collections.singletonList(1L));
+                .thenReturn(Collections.singletonList(1L));
 
         List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
         listOfRequests.add(createAccessRequest());
@@ -158,7 +158,7 @@ public class AccessRequestApiControllerTest {
         listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
 
         Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
-        .thenReturn(listOfRequests);
+                .thenReturn(listOfRequests);
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byAdmin").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().string(
@@ -166,7 +166,7 @@ public class AccessRequestApiControllerTest {
                                 Matchers.containsString("name")
                                 )
                         )
-                    );
+                );
     }
 
     @Test
@@ -180,7 +180,7 @@ public class AccessRequestApiControllerTest {
         listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
 
         Mockito.when(this.accessRequestService.findByUserId(Mockito.anyLong()))
-            .thenReturn(listOfRequests);
+                .thenReturn(listOfRequests);
 
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
@@ -190,7 +190,7 @@ public class AccessRequestApiControllerTest {
                                 Matchers.containsString("name")
                                 )
                         )
-                    );
+                );
     }
 
     @Test
@@ -302,13 +302,13 @@ public class AccessRequestApiControllerTest {
         Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.of(user));
 
         Map<String, Object> theMap = new LinkedHashMap<>();
-        theMap.put("studyId", 1l);
+        theMap.put("studyId", 1L);
         theMap.put("studyName", "name");
         theMap.put("email", "mail@mail");
 
         MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("studyId", "" + 1l)
+                .param("studyId", "" + 1L)
                 .param("studyName", "name")
                 .param("email", "mail@mail"))
                 .andExpect(status().isOk())
@@ -317,7 +317,7 @@ public class AccessRequestApiControllerTest {
         AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
 
         assertEquals(user.getId(), request.getUser().getId());
-        assertEquals("1", ""+request.getStudyId());
+        assertEquals("1", "" + request.getStudyId());
         assertEquals("name", request.getStudyName());
         assertEquals("From study manager", request.getMotivation());
         assertEquals(AccessRequest.APPROVED, request.getStatus());
@@ -330,13 +330,13 @@ public class AccessRequestApiControllerTest {
         Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.of(user));
 
         Map<String, Object> theMap = new LinkedHashMap<>();
-        theMap.put("studyId", 1l);
+        theMap.put("studyId", 1L);
         theMap.put("studyName", "name");
         theMap.put("email", "login");
 
         MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("studyId", "" + 1l)
+                .param("studyId", "" + 1L)
                 .param("studyName", "name")
                 .param("email", "login"))
                 .andExpect(status().isOk())
@@ -345,7 +345,7 @@ public class AccessRequestApiControllerTest {
         AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
 
         assertEquals(user.getId(), request.getUser().getId());
-        assertEquals("1", ""+request.getStudyId());
+        assertEquals("1", "" + request.getStudyId());
         assertEquals("name", request.getStudyName());
         assertEquals("From study manager", request.getMotivation());
         assertEquals(AccessRequest.APPROVED, request.getStatus());
@@ -360,13 +360,13 @@ public class AccessRequestApiControllerTest {
 
 
         Map<String, Object> theMap = new LinkedHashMap<>();
-        theMap.put("studyId", 1l);
+        theMap.put("studyId", 1L);
         theMap.put("studyName", "name");
         theMap.put("email", "mail@mail");
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("studyId", "" + 1l)
+                .param("studyId", "" + 1L)
                 .param("studyName", "name")
                 .param("email", "mail@mail"))
                 .andExpect(status().isNoContent());
@@ -387,13 +387,13 @@ public class AccessRequestApiControllerTest {
         Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.empty());
 
         Map<String, Object> theMap = new LinkedHashMap<>();
-        theMap.put("studyId", 1l);
+        theMap.put("studyId", 1L);
         theMap.put("studyName", "name");
         theMap.put("email", "login");
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("studyId", "" + 1l)
+                .param("studyId", "" + 1L)
                 .param("studyName", "name")
                 .param("email", "login"))
                 .andExpect(status().isBadRequest());
@@ -404,7 +404,7 @@ public class AccessRequestApiControllerTest {
     public void testGetById() throws Exception {
         AccessRequest request = createAccessRequest();
 
-        Mockito.when(this.accessRequestService.findById(1l)).thenReturn(Optional.of(request));
+        Mockito.when(this.accessRequestService.findById(1L)).thenReturn(Optional.of(request));
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().string(JacksonUtils.serialize(request)));

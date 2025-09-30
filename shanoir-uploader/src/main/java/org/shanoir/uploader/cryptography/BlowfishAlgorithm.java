@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BlowfishAlgorithm {
 
-    private static final Logger logger = LoggerFactory.getLogger(BlowfishAlgorithm.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlowfishAlgorithm.class);
 
     private static byte[] symmetricKey = new byte[1000];
 
@@ -33,7 +33,7 @@ public class BlowfishAlgorithm {
             byte[] symmetricKey = getRawKey(knumb);
             return symmetricKey;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }
     }

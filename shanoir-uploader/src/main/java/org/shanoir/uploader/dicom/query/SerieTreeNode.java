@@ -32,7 +32,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  *
  */
-@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
+@XmlType(propOrder = {"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
     private StudyTreeNode parent;

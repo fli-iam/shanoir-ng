@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 @Service
 public class UploadServiceJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadServiceJob.class);
 
     public static final ReentrantLock LOCK = new ReentrantLock();
 
@@ -52,12 +52,12 @@ public class UploadServiceJob {
     @Scheduled(fixedRate = 5000)
     public void execute() throws Exception {
         if (!LOCK.isLocked()) {
-            logger.debug("UploadServiceJob started...");
+            LOG.debug("UploadServiceJob started...");
             LOCK.lock();
             File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
             processWorkFolder(workFolder, currentNominativeDataController);
             LOCK.unlock();
-            logger.debug("UploadServiceJob ended...");
+            LOG.debug("UploadServiceJob ended...");
         }
     }
 
@@ -69,7 +69,7 @@ public class UploadServiceJob {
      */
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws IOException {
         final List<File> folders = Util.listFolders(workFolder);
-        logger.debug("Found " + folders.size() + " folders in work folder.");
+        LOG.debug("Found " + folders.size() + " folders in work folder.");
         for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
             final File folder = (File) foldersIt.next();
             final File importJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
@@ -88,7 +88,7 @@ public class UploadServiceJob {
                     processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
                 }
             } else {
-                logger.warn("Folder found in workFolder without import-job.json.");
+                LOG.warn("Folder found in workFolder without import-job.json.");
             }
         }
     }
@@ -121,10 +121,10 @@ public class UploadServiceJob {
                 processStartForServer(folder, filesToTransfer, importJob, importJobManager, currentNominativeDataController);
                 long stopTime = System.currentTimeMillis();
                 long elapsedTime = stopTime - startTime;
-                logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
+                LOG.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
             }
         } else {
-            logger.error("importJobManager is null.");
+            LOG.error("importJobManager is null.");
         }
     }
 
@@ -140,7 +140,7 @@ public class UploadServiceJob {
             CurrentNominativeDataController currentNominativeDataController) {
         try {
             String tempDirId = shanoirUploaderServiceClient.createTempDir();
-            logger.info("Upload: tempDirId for import: " + tempDirId);
+            LOG.info("Upload: tempDirId for import: " + tempDirId);
             /**
              * Upload all DICOM files, one by one.
              */
@@ -148,17 +148,17 @@ public class UploadServiceJob {
             for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
                 File file = (File) iterator.next();
                 i++;
-                logger.debug("UploadServiceJob started to upload file: " + file.getName());
+                LOG.debug("UploadServiceJob started to upload file: " + file.getName());
                 shanoirUploaderServiceClient.uploadFile(tempDirId, file);
-                logger.debug("UploadServiceJob finished to upload file: " + file.getName());
+                LOG.debug("UploadServiceJob finished to upload file: " + file.getName());
                 uploadPercentage = i * 100 / allFiles.size() + " %";
                 // following 2 lines are doing same thing ?
                 importJob.setUploadPercentage(uploadPercentage);
                 currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
                 nominativeDataImportJobManager.writeImportJob(importJob);
-                logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
+                LOG.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
             }
-            logger.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
+            LOG.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
 
             /**
              * Start job on server
@@ -182,7 +182,7 @@ public class UploadServiceJob {
             importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
-            logger.error("An error occurred during upload to server: " + e.getMessage());
+            LOG.error("An error occurred during upload to server: " + e.getMessage());
         }
     }
 
@@ -204,7 +204,7 @@ public class UploadServiceJob {
                 FileUtils.deleteQuietly(file.getParentFile());
             }
         }
-        logger.info("All DICOM files deleted after successful upload to server.");
+        LOG.info("All DICOM files deleted after successful upload to server.");
     }
 
 }

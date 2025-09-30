@@ -20,7 +20,7 @@ public class ShUpConfig {
      */
     public static final String SHANOIR_UPLOADER_VERSION;
 
-    public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
 
     public static final String PROFILES_PROPERTIES = "profiles.properties";
 

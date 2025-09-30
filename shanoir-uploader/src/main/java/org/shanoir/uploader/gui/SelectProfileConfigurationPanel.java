@@ -46,7 +46,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
         selectProfileLabel.setHorizontalAlignment(SwingConstants.LEFT);
         shanoirStartupGBC.weightx = 0.2;
         shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-        shanoirStartupGBC.insets = new Insets(5,10, 5, 5);
+        shanoirStartupGBC.insets = new Insets(5, 10, 5, 5);
         shanoirStartupGBC.gridx = 1;
         shanoirStartupGBC.gridy = 0;
         container.add(selectProfileLabel, shanoirStartupGBC);

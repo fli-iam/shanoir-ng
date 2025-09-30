@@ -38,7 +38,7 @@ import org.shanoir.uploader.service.rest.ServiceConfiguration;
 @Component
 public class ShUpStartupDialog extends JFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShUpStartupDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShUpStartupDialog.class);
 
     public JFrame frame = this;
     public JPanel contentPanel;
@@ -76,7 +76,7 @@ public class ShUpStartupDialog extends JFrame {
         try {
             initLogo();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         initInfoPanel();
         initProxyPanel(sSC);

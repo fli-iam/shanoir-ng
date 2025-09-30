@@ -49,8 +49,8 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
     private static final String REQUEST_PATH = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY;
     private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-    private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT+ "/all" + REQUEST_PATH_PATHOLOGY + "/1";
-    private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT+ SUBJECT_ID + REQUEST_PATH_PATHOLOGY + "/all";
+    private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT + "/all" + REQUEST_PATH_PATHOLOGY + "/1";
+    private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY + "/all";
 
 
     @Autowired

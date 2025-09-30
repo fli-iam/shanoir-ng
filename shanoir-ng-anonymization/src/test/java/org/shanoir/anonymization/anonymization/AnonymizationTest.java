@@ -128,7 +128,7 @@ public class AnonymizationTest {
      * sendToPacs.processSendToPacs(Folder_TO_SEND_PATH); }
      */
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             anonymizationTest();
         } catch (Exception e) {

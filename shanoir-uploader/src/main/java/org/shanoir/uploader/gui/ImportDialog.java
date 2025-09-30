@@ -355,27 +355,27 @@ public class ImportDialog extends JDialog {
         studyCardCB.addItemListener(importStudyAndStudyCardCBIL);
 
         studyCardFilterLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardFilter"));
-         studyCardFilterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-         importDialogGBC.weightx = 0.2;
-         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-         importDialogGBC.insets = new Insets(5, 5, 5, 5);
-         importDialogGBC.gridx = 0;
-         importDialogGBC.gridy = 7;
-         importDialogGBC.gridwidth = 2;
-         importDialogGBC.gridheight = 1;
-         formPanel.add(studyCardFilterLabel, importDialogGBC);
+        studyCardFilterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        importDialogGBC.weightx = 0.2;
+        importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+        importDialogGBC.insets = new Insets(5, 5, 5, 5);
+        importDialogGBC.gridx = 0;
+        importDialogGBC.gridy = 7;
+        importDialogGBC.gridwidth = 2;
+        importDialogGBC.gridheight = 1;
+        formPanel.add(studyCardFilterLabel, importDialogGBC);
 
-         studyCardFilterTextField = new JTextField(15);
-         studyCardFilterTextField.setBackground(Color.WHITE);
-         importDialogGBC.weightx = 0.7;
-         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-         importDialogGBC.insets = new Insets(5, 5, 5, 5);
-         importDialogGBC.gridx = 2;
-         importDialogGBC.gridy = 7;
-         importDialogGBC.gridwidth = 1;
-         importDialogGBC.gridheight = 1;
-         formPanel.add(studyCardFilterTextField, importDialogGBC);
-         studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
+        studyCardFilterTextField = new JTextField(15);
+        studyCardFilterTextField.setBackground(Color.WHITE);
+        importDialogGBC.weightx = 0.7;
+        importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+        importDialogGBC.insets = new Insets(5, 5, 5, 5);
+        importDialogGBC.gridx = 2;
+        importDialogGBC.gridy = 7;
+        importDialogGBC.gridwidth = 1;
+        importDialogGBC.gridheight = 1;
+        formPanel.add(studyCardFilterTextField, importDialogGBC);
+        studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
 
         /**
          * Subject
@@ -784,22 +784,13 @@ public class ImportDialog extends JDialog {
     public boolean isExaminationFilledCorrectly(XMLGregorianCalendar dateMrExam, boolean skip) {
         if (!skip) {
             if (!mrExaminationNewExamCB.isSelected()) {
-                if (mrExaminationExistingExamCB.isValueSet()) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return mrExaminationExistingExamCB.isValueSet();
             } else {
-                if (mrExaminationCenterCB.isValueSet() && mrExaminationCommentTF.isValueSet() && !dateMrExam.equals("")
-                        && dateMrExam != null && mrExaminationExamExecutiveCB.isValueSet()) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return mrExaminationCenterCB.isValueSet() && mrExaminationCommentTF.isValueSet() && !dateMrExam.equals("")
+                        && dateMrExam != null && mrExaminationExamExecutiveCB.isValueSet();
             }
         } else {
             return false;
         }
     }
-
 }

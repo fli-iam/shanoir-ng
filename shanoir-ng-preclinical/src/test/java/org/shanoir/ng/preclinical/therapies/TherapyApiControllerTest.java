@@ -93,7 +93,7 @@ public class TherapyApiControllerTest {
         given(therapyServiceMock.findByTherapyType(TherapyType.DRUG)).willReturn(Arrays.asList(new Therapy()));
         Therapy therapy = new Therapy();
         therapy.setId(Long.valueOf(123));
-        given(therapyServiceMock.save(Mockito.any(Therapy.class))).willReturn(therapy );
+        given(therapyServiceMock.save(Mockito.any(Therapy.class))).willReturn(therapy);
         given(uniqueValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
     }

@@ -20,7 +20,7 @@ import org.shanoir.uploader.dicom.query.Media;
  */
 public class DicomTreeModel implements TreeModel {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomTreeModel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomTreeModel.class);
 
     private Vector<TreeModelListener> treeModelListeners =
             new Vector<TreeModelListener>();
@@ -96,7 +96,7 @@ public class DicomTreeModel implements TreeModel {
      * identified by path to newValue. Not used by this model.
      */
     public void valueForPathChanged(TreePath path, Object newValue) {
-        logger.info("*** valueForPathChanged : " + path + " --> " + newValue);
+        LOG.info("*** valueForPathChanged : " + path + " --> " + newValue);
     }
 
 }

@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImportFromTableWindow extends JFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportFromTableWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFromTableWindow.class);
 
     public JLabel studyLabel;
     public JComboBoxMandatory studyCB;
@@ -204,7 +204,7 @@ public class ImportFromTableWindow extends JFrame {
         gBCTableanchor.gridx = 0;
         gBCTableanchor.gridy = 5;
         tablePanel.setSize(1500, 500);
-        masterPanel.add(tablePanel , gBCTableanchor);
+        masterPanel.add(tablePanel, gBCTableanchor);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setSize(1500, 500);

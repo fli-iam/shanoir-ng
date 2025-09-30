@@ -45,7 +45,7 @@ public class ExaminationDTO {
     }
 
     public String toString() {
-        final String examinationDate = ShUpConfig.formatter.format(Util.toDate(this.getExaminationDate()));
+        final String examinationDate = ShUpConfig.FORMATTER.format(Util.toDate(this.getExaminationDate()));
         return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";
     }
 

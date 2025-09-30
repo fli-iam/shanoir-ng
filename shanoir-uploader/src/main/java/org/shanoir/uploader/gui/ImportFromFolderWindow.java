@@ -39,7 +39,7 @@ public class ImportFromFolderWindow extends JFrame {
     public JButton uploadButton;
     public JButton openButton;
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFromFolderWindow.class);
 
     FolderImport folderImport;
 
@@ -193,7 +193,7 @@ public class ImportFromFolderWindow extends JFrame {
         gBCTableanchor.gridx = 0;
         gBCTableanchor.gridy = 7;
         tablePanel.setSize(1500, 500);
-        masterPanel.add(tablePanel , gBCTableanchor);
+        masterPanel.add(tablePanel, gBCTableanchor);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setSize(1500, 500);

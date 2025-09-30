@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DicomPushServiceJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomPushServiceJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomPushServiceJob.class);
 
     private DownloadOrCopyActionListener dOCAL;
 
@@ -70,10 +70,10 @@ public class DicomPushServiceJob {
         // We only run the job if a username is set
         // and if there is no download or copy already running
         if (ShUpConfig.username != null && !dOCAL.isRunning()) {
-            logger.info("Monitoring of incoming 'DICOM PUSHED' examinations started...");
+            LOG.info("Monitoring of incoming 'DICOM PUSHED' examinations started...");
             // new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
             monitorPushedExaminations(workFolder);
-            logger.info("Monitoring of incoming 'DICOM PUSHED' examinations ended...");
+            LOG.info("Monitoring of incoming 'DICOM PUSHED' examinations ended...");
         }
     }
 
@@ -92,7 +92,7 @@ public class DicomPushServiceJob {
                     if (!jsonFile.exists()) {
                         incomingSeries.clear();
                         if (isExamComplete(dir)) {
-                            logger.info("Complete exam found in folder {}.", dir.getName());
+                            LOG.info("Complete exam found in folder {}.", dir.getName());
                         }
                     }
                 }
@@ -112,7 +112,7 @@ public class DicomPushServiceJob {
                 File[] dicomFiles = subdirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".dcm"));
 
                 if (dicomFiles == null || dicomFiles.length == 0) {
-                    logger.info("No DICOM files found in {}", folder.getName());
+                    LOG.info("No DICOM files found in {}", folder.getName());
                     continue;
                 }
 
@@ -132,7 +132,7 @@ public class DicomPushServiceJob {
                             // We define the studyInstanceUID
                             studyUID = currentStudyUID;
                         } else if (!studyUID.equals(currentStudyUID)) {
-                            logger.info("Warning: DICOM files from different studies found in the same folder.");
+                            LOG.info("Warning: DICOM files from different studies found in the same folder.");
                             return false;
                         }
 
@@ -145,7 +145,7 @@ public class DicomPushServiceJob {
                             incomingSeries.add(serie);
                             // if we have multiple series in the same folder (is it possible ?),
                         } else if (!seriesUID.equals(currentSeriesUID)) {
-                            logger.info("Warning: DICOM files from different series found in the same folder.");
+                            LOG.info("Warning: DICOM files from different series found in the same folder.");
                             return false;
                         }
 
@@ -153,7 +153,7 @@ public class DicomPushServiceJob {
                         seriesMap.computeIfAbsent(seriesUID, k -> new ArrayList<>()).add(instanceNumber);
 
                     } catch (IOException e) {
-                        logger.error("Error reading DICOM file: {}", file.getName());
+                        LOG.error("Error reading DICOM file: {}", file.getName());
                     }
                 }
             }
@@ -164,16 +164,16 @@ public class DicomPushServiceJob {
                 int expectedSize = instances.get(instances.size() - 1);
 
                 if (instances.size() < expectedSize) {
-                    logger.debug("DICOM serie {} is incomplete.", entry.getKey());
+                    LOG.debug("DICOM serie {} is incomplete.", entry.getKey());
                     return false;
                 }
             }
-            logger.info("DICOM study {} is complete.", folder.getName());
+            LOG.info("DICOM study {} is complete.", folder.getName());
             // We create the DICOMDIR file in the exam folder
             File dicomDirFile = new File(folder, ShUpConfig.DICOMDIR);
             try {
                 dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, folder);
-                logger.info("DICOMDIR generated in directory: " + folder.getAbsolutePath());
+                LOG.info("DICOMDIR generated in directory: " + folder.getAbsolutePath());
                 final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
                 List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
                 for (Patient patient : patients) {
@@ -198,10 +198,10 @@ public class DicomPushServiceJob {
                     prepareImportJob(patient, study, incomingSeries);
                 }
             } catch (IOException e) {
-                logger.error("Error occured during DICOMDIR creation: " + e.getMessage());
+                LOG.error("Error occured during DICOMDIR creation: " + e.getMessage());
             }
         } else {
-            logger.info("No DICOM series folder found in study folder {}", folder.getName());
+            LOG.info("No DICOM series folder found in study folder {}", folder.getName());
             return false;
         }
         return true;
@@ -218,13 +218,13 @@ public class DicomPushServiceJob {
         try {
             importJob.setSubject(ImportUtils.createSubjectFromPatient(patient, dOCAL.pseudonymizer, dOCAL.identifierCalculator));
         } catch (PseudonymusException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return;
         } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return;
         } catch (NoSuchAlgorithmException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return;
         }
 
@@ -250,7 +250,7 @@ public class DicomPushServiceJob {
         importJobManager.writeImportJob(importJob);
         // We add the nominative data to current uploads
         ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, importJob);
-        logger.info(uploadFolder.getName() + ": finished for DICOM Pushed study: " + importJob.getStudy().getStudyDescription()
+        LOG.info(uploadFolder.getName() + ": finished for DICOM Pushed study: " + importJob.getStudy().getStudyDescription()
                             + ", " + importJob.getStudy().getStudyDate() + " of patient: "
                             + importJob.getPatient().getPatientName());
     }

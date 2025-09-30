@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTest.class);
 
     private static final String TEST_PROPERTIES = "test.properties";
 
@@ -69,7 +69,7 @@ public abstract class AbstractTest {
             if (token != null) {
                 ShUpOnloadConfig.setTokenString(token);
             } else {
-                logger.error("ERROR: login not successful.");
+                LOG.error("ERROR: login not successful.");
                 Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
             }
             if (ShUpConfig.isModePseudonymus()) {
@@ -78,12 +78,12 @@ public abstract class AbstractTest {
                 try {
                     pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
                 } catch (PseudonymusException e) {
-                    logger.error(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                     System.exit(0);
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
         }
     }

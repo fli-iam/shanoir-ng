@@ -121,7 +121,7 @@ public class AnimalSubjectApiControllerTest {
         given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(subject);
         AnimalSubject anSubj = new AnimalSubject();
         anSubj.setId(1L);
-        given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );
+        given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj);
         given(uniqueValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
     }

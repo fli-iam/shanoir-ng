@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
     private MainWindow mainWindow;
 
@@ -65,7 +65,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                     updateStudyCards(study);
                     showOrHideStudyCardComponents(true);
                 } else { // if no study card, we generate the center from the info DICOM
-                     mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
+                    mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
                     IdName centerIdName = new IdName(0L, "Automatic, as above");
                     mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
                     showOrHideStudyCardComponents(false);
@@ -85,12 +85,12 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
                 JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
                 StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-                 // put center into exam using study card and acquisition equipment
-                 mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-                 AcquisitionEquipment equipment = studyCard.getAcquisitionEquipment();
-                 if (equipment != null) {
-                     IdName center = equipment.getCenter();
-                     mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+                // put center into exam using study card and acquisition equipment
+                mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
+                AcquisitionEquipment equipment = studyCard.getAcquisitionEquipment();
+                if (equipment != null) {
+                    IdName center = equipment.getCenter();
+                    mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
                 }
             }
             // the selection of an existing subject defines the list of existing exams
@@ -135,13 +135,13 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private void updateImportDialogForMRICenter(InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom) {
         if (institutionDicom == null) {
-            logger.error("updateImportDialogForMRICenter: no institution found.");
+            LOG.error("updateImportDialogForMRICenter: no institution found.");
         } else {
             mainWindow.importDialog.mriCenterText.setText(institutionDicom.getInstitutionName());
             mainWindow.importDialog.mriCenterAddressText.setText(institutionDicom.getInstitutionAddress());
         }
         if (equipmentDicom == null) {
-            logger.error("updateImportDialogForMRICenter: no equipment found.");
+            LOG.error("updateImportDialogForMRICenter: no equipment found.");
         } else {
             mainWindow.importDialog.mriStationNameText.setText(equipmentDicom.getStationName());
             mainWindow.importDialog.mriManufacturerText.setText(equipmentDicom.getManufacturer());
@@ -205,7 +205,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -216,7 +216,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 return examinationList;
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return null;
     }

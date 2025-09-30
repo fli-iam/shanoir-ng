@@ -63,7 +63,7 @@ public class StudyTreeNode implements DicomTreeNode {
      * @return the child
      */
     public TreeNode getChild(final int id) {
-        return (TreeNode)relatedSeries.get(id);
+        return (TreeNode) relatedSeries.get(id);
     }
 
     /*

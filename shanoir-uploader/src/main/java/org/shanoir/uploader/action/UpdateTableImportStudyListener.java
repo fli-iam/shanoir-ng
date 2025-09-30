@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateTableImportStudyListener implements ItemListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
 
     private final ImportFromTableWindow window;
 
@@ -60,7 +60,7 @@ public class UpdateTableImportStudyListener implements ItemListener {
             }
             window.studyCB.setSelectedItem(studies.get(0));
         } catch (Exception e) {
-            logger.error("Could not correctly retrieve studies and study cards: ", e);
+            LOG.error("Could not correctly retrieve studies and study cards: ", e);
             this.window.displayError("Something went wrong when loading study and study cards, please retry later.");
         }
     }

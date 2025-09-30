@@ -20,9 +20,9 @@ import org.shanoir.uploader.gui.LanguageConfigurationWindow;
 
 public class LanguageConfigurationListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(LanguageConfigurationListener.class);
-    final String ENGLISH_LANGUAGE = "ENGLISH";
-    final String FRENCH_LANGUAGE = "FRENCH";
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageConfigurationListener.class);
+    private static final String ENGLISH_LANGUAGE = "ENGLISH";
+    private static final String FRENCH_LANGUAGE = "FRENCH";
 
     public LanguageConfigurationWindow languageWindow;
 
@@ -32,7 +32,7 @@ public class LanguageConfigurationListener implements ActionListener {
 
     public void actionPerformed(ActionEvent event) {
         if (languageWindow.rbEnglish.isSelected()) {
-            logger.info("English language configuration: Starting...");
+            LOG.info("English language configuration: Starting...");
             String fileName = languageWindow.shanoirUploaderFolder + File.separator
                     + ShUpConfig.LANGUAGE_PROPERTIES;
             final File propertiesFile = new File(fileName);
@@ -58,16 +58,16 @@ public class LanguageConfigurationListener implements ActionListener {
                             languageWindow.resourceBundle
                                     .getString("shanoir.uploader.configurationMenu.language.configure.succeeded.title"),
                             JOptionPane.INFORMATION_MESSAGE);
-                    logger.info("English language successfully configured");
+                    LOG.info("English language successfully configured");
 
                 } catch (Exception e) {
-                    logger.error("Failed to configure english language : " + e.getMessage());
+                    LOG.error("Failed to configure english language : " + e.getMessage());
                 }
 
             }
 
         } else if (languageWindow.rbFrench.isSelected()) {
-            logger.info("French language configuration: Starting...");
+            LOG.info("French language configuration: Starting...");
 
             String fileName = languageWindow.shanoirUploaderFolder + File.separator
                     + ShUpConfig.LANGUAGE_PROPERTIES;
@@ -95,10 +95,10 @@ public class LanguageConfigurationListener implements ActionListener {
                             languageWindow.resourceBundle
                                     .getString("shanoir.uploader.configurationMenu.language.configure.succeeded.title"),
                             JOptionPane.INFORMATION_MESSAGE);
-                    logger.info("French language successfully configured");
+                    LOG.info("French language successfully configured");
 
                 } catch (Exception e) {
-                    logger.error("Failed to configure french language : " + e.getMessage());
+                    LOG.error("Failed to configure french language : " + e.getMessage());
                 }
 
             }

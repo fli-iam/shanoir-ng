@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class UploadFromTableActionListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadFromTableActionListener.class);
 
     private static SimpleDateFormat dicomStudyDateFormat = new SimpleDateFormat("yyyymmdd");
 
@@ -78,11 +78,11 @@ public class UploadFromTableActionListener implements ActionListener {
                 }
             }
         } catch (InvalidFormatException | IOException | IllegalStateException e) {
-            logger.error("Error while parsing the input file: ", e);
+            LOG.error("Error while parsing the input file: ", e);
             this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
             return;
         }
-        logger.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
+        LOG.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
         this.importFromTableWindow.displayImportJobs(importJobs);
     }
 

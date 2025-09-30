@@ -165,11 +165,11 @@ public class SubjectApiSecurityTest {
     }
 
     private void testRead() throws ShanoirException {
-        final String NAME = "data";
+        final String name = "data";
 
         // No rights
         Subject subjectMockNoRights = buildSubjectMock(1L);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockNoRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockNoRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
@@ -177,7 +177,7 @@ public class SubjectApiSecurityTest {
         assertAccessDenied(api::findSubjectById, ENTITY_ID);
 
         given(repository.findAll()).willReturn(Arrays.asList(subjectMockNoRights));
-        assertAccessAuthorized(api::findSubjects,true, true);
+        assertAccessAuthorized(api::findSubjects, true, true);
         assertEquals(null, api.findSubjects(true, true).getBody());
         assertAccessAuthorized(api::findAllSubjectsNames);
         assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
@@ -194,7 +194,7 @@ public class SubjectApiSecurityTest {
         // Wrong Rights
         Subject subjectMockWrongRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockWrongRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockWrongRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
@@ -217,7 +217,7 @@ public class SubjectApiSecurityTest {
         // Right rights (!)
         Subject subjectMockRightRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
-        given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockRightRights);
+        given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockRightRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
         given(repository.findFirstByIdentifierAndSubjectStudyListStudyIdIn("identifier", List.of(ENTITY_ID))).willReturn(subjectMockRightRights);
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
@@ -240,7 +240,7 @@ public class SubjectApiSecurityTest {
         given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
         given(studyRepository.findById(1L)).willReturn(Optional.of(subjectStudyMock.getStudy()));
         assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
-        assertNotNull(api.findSubjectsByStudyId(1L,null).getBody());
+        assertNotNull(api.findSubjectsByStudyId(1L, null).getBody());
         assertEquals(1, api.findSubjectsByStudyId(1L, null).getBody().size());
     }
 
@@ -272,7 +272,7 @@ public class SubjectApiSecurityTest {
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
-        given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
+        given(studyRepository.findAllById(Arrays.asList(new Long[] {13L}))).willReturn(studiesMock);
         given(studyRepository.findById(13L)).willReturn(Optional.of(buildStudyMock(13L, StudyUserRight.CAN_IMPORT)));
         given(studyUserRepository.findByStudy_Id(13L)).willReturn(buildStudyMock(13L, StudyUserRight.CAN_IMPORT).getStudyUserList());
         newSubjectMock = buildSubjectMock(null);

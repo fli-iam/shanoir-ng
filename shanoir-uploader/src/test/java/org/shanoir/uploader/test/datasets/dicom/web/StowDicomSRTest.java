@@ -10,7 +10,7 @@ import org.shanoir.uploader.test.AbstractTest;
 
 public class StowDicomSRTest extends AbstractTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(StowDicomSRTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StowDicomSRTest.class);
 
     public void postDICOMSRToDicomWeb() throws Exception {
         try {
@@ -20,7 +20,7 @@ public class StowDicomSRTest extends AbstractTest {
                 shUpClient.postDicomSR(file);
             }
         } catch (URISyntaxException e) {
-            logger.error("Error while reading file", e);
+            LOG.error("Error while reading file", e);
         }
     }
 

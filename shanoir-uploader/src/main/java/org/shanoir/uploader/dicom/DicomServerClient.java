@@ -32,7 +32,7 @@ import org.weasis.dicom.param.DicomNode;
  */
 public class DicomServerClient implements IDicomServerClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomServerClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomServerClient.class);
 
     private ConfigBean config = new ConfigBean();
 
@@ -44,7 +44,7 @@ public class DicomServerClient implements IDicomServerClient {
 
     public DicomServerClient(final Properties dicomServerProperties, final File workFolder)
             throws MalformedURLException {
-        logger.info("New DicomServerClient created with properties: " + dicomServerProperties.toString());
+        LOG.info("New DicomServerClient created with properties: " + dicomServerProperties.toString());
         config.initWithPropertiesFile(dicomServerProperties);
         this.workFolder = workFolder;
         // Initialize connection configuration parameters here: to be used for all
@@ -70,9 +70,9 @@ public class DicomServerClient implements IDicomServerClient {
         boolean result = queryPACSService.queryECHO(config.getDicomServerAETCalled(), config.getDicomServerHost(), port,
                 config.getLocalDicomServerAETCalling());
         if (result) {
-            logger.info("Echoing of the DICOM server was successful? -> " + result);
+            LOG.info("Echoing of the DICOM server was successful? -> " + result);
         } else {
-            logger.info("Echoing of the DICOM server was successful? -> " + result);
+            LOG.info("Echoing of the DICOM server was successful? -> " + result);
             return false;
         }
         return true;
@@ -82,9 +82,9 @@ public class DicomServerClient implements IDicomServerClient {
     public boolean echoDicomServer(String calledAET, String hostName, int port, String callingAET) {
         boolean result = queryPACSService.queryECHO(calledAET, hostName, port, callingAET);
         if (result) {
-            logger.info("Echoing of the DICOM server was successful? -> " + result);
+            LOG.info("Echoing of the DICOM server was successful? -> " + result);
         } else {
-            logger.info("Echoing of the DICOM server was successful? -> " + result);
+            LOG.info("Echoing of the DICOM server was successful? -> " + result);
             return false;
         }
         return true;
@@ -138,7 +138,7 @@ public class DicomServerClient implements IDicomServerClient {
                 FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
                 FileUtil.deleteFolderDownloadFromDicomServer(workFolder, studyInstanceUID, selectedSeries);
             } catch (Exception e) {
-                logger.error(":\n\n Download of "
+                LOG.error(":\n\n Download of "
                         + " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
                         + e.getMessage(), e);
                 return null;

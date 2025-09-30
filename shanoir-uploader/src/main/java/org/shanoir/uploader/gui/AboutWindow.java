@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class AboutWindow extends JFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AboutWindow.class);
 
     String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail", "developers_shanoir@inria.fr");
 
@@ -53,15 +53,15 @@ public class AboutWindow extends JFrame {
         masterPanel.add(aboutPanel, BorderLayout.CENTER);
 
         GridBagLayout gBLPanel = new GridBagLayout();
-        gBLPanel.columnWidths = new int[] { 0, 0, 0 };
-        gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-        gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gBLPanel.columnWidths = new int[] {0, 0, 0};
+        gBLPanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        gBLPanel.columnWeights = new double[] {1.0, 1.0, Double.MIN_VALUE};
+        gBLPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         aboutPanel.setLayout(gBLPanel);
 
         JLabel icon = new JLabel();
-        icon.setIcon(DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png"));// your image
-                                                                                                            // here
+        icon.setIcon(DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png")); // your image
+
         // aboutPanel.add(icon);
         addItem(aboutPanel, icon, 0, 1, 1, GridBagConstraints.CENTER);
 
@@ -71,8 +71,8 @@ public class AboutWindow extends JFrame {
 
         // Setting a default value for release date (-in dev mode for exemple- it might not be set)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String defaultDate = LocalDate.now().format(formatter)
-;
+        String defaultDate = LocalDate.now().format(formatter);
+
         if (ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE) == null
                 || ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).isEmpty()) {
             ShUpConfig.basicProperties.setProperty(ShUpConfig.RELEASE_DATE, defaultDate);
@@ -105,10 +105,10 @@ public class AboutWindow extends JFrame {
                 resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightPseudonymus"));
         addItem(aboutPanel, copyrightPseudonymusLabel, 0, 6, 1, GridBagConstraints.CENTER);
 
-        final JLabel SupportLabel = new JLabel("<html><a href='mailto:" + supportMail + "'>" + supportMail + "</a></html>");
-        addItem(aboutPanel, SupportLabel, 0, 7, 1, GridBagConstraints.CENTER);
+        final JLabel supportLabel = new JLabel("<html><a href='mailto:" + supportMail + "'>" + supportMail + "</a></html>");
+        addItem(aboutPanel, supportLabel, 0, 7, 1, GridBagConstraints.CENTER);
 
-        SupportLabel.addMouseListener(new MouseAdapter() {
+        supportLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
                 try {
@@ -123,13 +123,13 @@ public class AboutWindow extends JFrame {
 
             public void mouseEntered(MouseEvent e) {
 
-                SupportLabel
+                supportLabel
                         .setText("<html><body><u><font color =#0000FF>" + supportMail + "</font></u></body></html>");
 
             }
 
             public void mouseExited(MouseEvent e) {
-                SupportLabel.setText(supportMail);
+                supportLabel.setText(supportMail);
             }
 
         });

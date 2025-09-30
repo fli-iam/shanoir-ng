@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SelectProfileConfigurationState implements State {
 
-    private static final Logger logger = LoggerFactory.getLogger(SelectProfileConfigurationState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SelectProfileConfigurationState.class);
 
     @Autowired
     private ProxyConfigurationState proxyConfigurationState;
@@ -26,7 +26,7 @@ public class SelectProfileConfigurationState implements State {
             context.setState(selectProfileManualConfigurationState);
             context.nextState();
         } else {
-            logger.info("Profile found in basic.properties. Used as default: " + ShUpConfig.profileSelected);
+            LOG.info("Profile found in basic.properties. Used as default: " + ShUpConfig.profileSelected);
             selectProfilePanelActionListener.configure(null, null);
             selectProfilePanelActionListener.configureSelectedProfile(ShUpConfig.profileSelected);
             context.getShUpStartupDialog().updateStartupText("\nProfile: " + ShUpConfig.profileSelected);

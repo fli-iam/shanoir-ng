@@ -29,7 +29,7 @@ import org.weasis.dicom.tool.DicomListener;
  */
 public class DcmRcvManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(DcmRcvManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DcmRcvManager.class);
 
     private static final String PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE = "1.3.12.2.1107.5.9.1";
 
@@ -47,7 +47,7 @@ public class DcmRcvManager {
     public static final String DICOM_FILE_SUFFIX = ".dcm";
 
     public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
-        logger.info("DICOM SCP server (mini-pacs) configured locally with params:"
+        LOG.info("DICOM SCP server (mini-pacs) configured locally with params:"
                 + " AET title: " + configBean.getLocalDicomServerAETCalling()
                 + ", AET host: " + configBean.getLocalDicomServerHost()
                 + ", AET port: " + configBean.getLocalDicomServerPort());
@@ -78,12 +78,12 @@ public class DcmRcvManager {
             DicomListener listener = new DicomListener(storageDir);
             listener.start(scpNode, lParams);
             StoreSCP storeSCP = listener.getStoreSCP();
-            logger.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
+            LOG.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
             TransferCapability tc = storeSCP.getApplicationEntity().getTransferCapabilityFor(PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE, Role.SCP);
             String[] ts = tc.getTransferSyntaxes();
-            logger.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
+            LOG.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
         } catch (Exception e) {
-            logger.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
+            LOG.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
         }
     }
 

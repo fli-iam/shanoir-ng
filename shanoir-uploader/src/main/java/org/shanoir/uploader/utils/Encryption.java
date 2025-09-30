@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Encryption {
 
-    private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Encryption.class);
 
     private BlowfishAlgorithm blow;
 
@@ -38,15 +38,15 @@ public class Encryption {
     public void decryptIfEncryptedString(File propertiesFile, Properties propertyObject, String propertyString) {
         String unknownString = propertyObject.getProperty(propertyString);
         try {
-            logger.debug("Start decrypting string " + propertyString);
+            LOG.debug("Start decrypting string " + propertyString);
             byte[] ibyte = Hex.decodeHex(unknownString.toCharArray());
             byte[] dbyte = blow.decrypt(ibyte);
             String uncryptedString = new String(dbyte);
             propertyObject.setProperty(propertyString, uncryptedString);
-            logger.debug("End decrypt encrypted string");
+            LOG.debug("End decrypt encrypted string");
         } catch (RuntimeException e) {
-            logger.warn(propertyString + " is not well configured : the string is not crypted");
-            logger.debug("Start encrypting string");
+            LOG.warn(propertyString + " is not well configured : the string is not crypted");
+            LOG.debug("Start encrypting string");
             try {
                 String encryptedPassword = cryptEncryptedString(unknownString);
                 propertyObject.setProperty(propertyString, encryptedPassword);
@@ -55,15 +55,15 @@ public class Encryption {
                 propertyObject.store(out, "SHANOIR Server Configuration");
                 // get non crypted password
                 propertyObject.setProperty(propertyString, unknownString);
-                logger.debug("End encrypt String");
+                LOG.debug("End encrypt String");
                 out.close();
             } catch (FileNotFoundException e1) {
-                logger.error(e1.getMessage());
+                LOG.error(e1.getMessage());
             } catch (IOException e1) {
-                logger.error(e1.getMessage());
+                LOG.error(e1.getMessage());
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class Encryption {
             encryptedPasswordByte = blow.encrypt(ibyte);
             return String.valueOf(Hex.encodeHex(encryptedPasswordByte));
         } catch (Exception e) {
-            logger.error("Issue during encryption", e);
+            LOG.error("Issue during encryption", e);
             return "";
         }
     }

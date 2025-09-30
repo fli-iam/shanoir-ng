@@ -129,7 +129,7 @@ public class StudyApiControllerTest {
     @BeforeEach
     public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
         given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
-        .willReturn(Arrays.asList(new StudyDTO()));
+                .willReturn(Arrays.asList(new StudyDTO()));
         given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
         doNothing().when(studyServiceMock).deleteById(1L);
         given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
@@ -145,7 +145,7 @@ public class StudyApiControllerTest {
     public void addMember() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
-        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
     }
 
     // TODO: manage keycloak token
@@ -154,7 +154,7 @@ public class StudyApiControllerTest {
     public void deleteStudyTest() throws Exception {
         Mockito.when(studyServiceMock.findById(Mockito.any(Long.class))).thenReturn(null);
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -162,14 +162,14 @@ public class StudyApiControllerTest {
     public void findStudiesTest() throws Exception {
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void findStudiesNamesTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -192,7 +192,7 @@ public class StudyApiControllerTest {
             // WHEN The file is added to the examination
 
             mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
-            .andExpect(status().isOk());
+                    .andExpect(status().isOk());
 
             // THEN the file is saved
             assertTrue(saved.exists());

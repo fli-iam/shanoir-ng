@@ -45,19 +45,19 @@ public class AcquisitionEquipmentMapperTest {
 
     @Test
     public void acquisitionEquipmentsToAcquisitionEquipmentDTOsTest() {
-        final List<AcquisitionEquipmentDTO> AcquisitionEquipmentDTOs = acquisitionEquipmentMapper
+        final List<AcquisitionEquipmentDTO> acquisitionEquipmentDTOs = acquisitionEquipmentMapper
                 .acquisitionEquipmentsToAcquisitionEquipmentDTOs(Arrays.asList(createAcquisitionEquipment()));
-        Assertions.assertNotNull(AcquisitionEquipmentDTOs);
-        Assertions.assertTrue(AcquisitionEquipmentDTOs.size() == 1);
-        Assertions.assertTrue(AcquisitionEquipmentDTOs.get(0).getId().equals(ACQ_EQPT_ID));
+        Assertions.assertNotNull(acquisitionEquipmentDTOs);
+        Assertions.assertTrue(acquisitionEquipmentDTOs.size() == 1);
+        Assertions.assertTrue(acquisitionEquipmentDTOs.get(0).getId().equals(ACQ_EQPT_ID));
     }
 
     @Test
     public void acquisitionEquipmentToAcquisitionEquipmentDTOTest() {
-        final AcquisitionEquipmentDTO AcquisitionEquipmentDTO = acquisitionEquipmentMapper
+        final AcquisitionEquipmentDTO acquisitionEquipmentDTO = acquisitionEquipmentMapper
                 .acquisitionEquipmentToAcquisitionEquipmentDTO(createAcquisitionEquipment());
-        Assertions.assertNotNull(AcquisitionEquipmentDTO);
-        Assertions.assertTrue(AcquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
+        Assertions.assertNotNull(acquisitionEquipmentDTO);
+        Assertions.assertTrue(acquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
     }
 
     private AcquisitionEquipment createAcquisitionEquipment() {

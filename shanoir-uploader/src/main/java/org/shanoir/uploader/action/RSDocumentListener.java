@@ -17,7 +17,7 @@ public class RSDocumentListener implements DocumentListener {
         if (mainWindow.lastNameTF.getText().length() != 0 & mainWindow.firstNameTF.getText().length() != 0
                 & mainWindow.birthNameTF.getText().length() != 0 & mainWindow.birthDateTF.getText().length() != 0
                 & (mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected() || mainWindow.oSexR.isSelected())
-                & mainWindow.isDicomObjectSelected == true)
+                & mainWindow.isDicomObjectSelected)
             mainWindow.downloadOrCopyButton.setEnabled(true);
     }
 
@@ -25,7 +25,7 @@ public class RSDocumentListener implements DocumentListener {
         if (mainWindow.lastNameTF.getText().length() == 0 || mainWindow.firstNameTF.getText().length() == 0
                 || mainWindow.birthNameTF.getText().length() == 0 || mainWindow.birthDateTF.getText().length() == 0
                 || !(mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected() || mainWindow.oSexR.isSelected())
-                || mainWindow.isDicomObjectSelected == false)
+                || !mainWindow.isDicomObjectSelected)
             mainWindow.downloadOrCopyButton.setEnabled(false);
     }
 

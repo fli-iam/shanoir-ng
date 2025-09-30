@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DownloadOrCopyRunnable implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
 
     private boolean isFromPACS;
 
@@ -74,7 +74,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 
     @Override
     public void run() {
-        logger.info(importJobs.size() + " DICOM study(ies) selected for download or copy.");
+        LOG.info(importJobs.size() + " DICOM study(ies) selected for download or copy.");
         StringBuilder downloadOrCopyReportSummary = new StringBuilder();
         for (String studyInstanceUID : importJobs.keySet()) {
             StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
@@ -104,7 +104,7 @@ public class DownloadOrCopyRunnable implements Runnable {
                             importJob.getStudy(), serie, isFromPACS);
                 }
             } catch (FileNotFoundException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 // as exception occured, we set allFileNames to null, to force ERROR state of import
                 allFileNames = null;
             }
@@ -130,11 +130,11 @@ public class DownloadOrCopyRunnable implements Runnable {
                 importJobJson.createNewFile();
                 Util.objectMapper.writeValue(importJobJson, importJob);
             } catch (IOException e) {
-                logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                LOG.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }
 
             ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, importJob);
-            logger.info(
+            LOG.info(
                     uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
                             + ", " + importJob.getStudy().getStudyDate() + " of patient: "
                             + Utils.sha256(importJob.getPatient().getPatientName()));
@@ -142,7 +142,7 @@ public class DownloadOrCopyRunnable implements Runnable {
             downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
         }
         if (isTableImport) {
-            logger.info(downloadOrCopyReportSummary.toString());
+            LOG.info(downloadOrCopyReportSummary.toString());
         } else {
             /**
              * Display downloadOrCopy summary to user.

@@ -68,7 +68,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  */
 public class ImportUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -242,7 +242,7 @@ public class ImportUtils {
             if (instances == null || instances.isEmpty()) {
                 serie.setIgnored(true);
                 serie.setSelected(false);
-                logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
+                LOG.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
                 continue;
             }
             /**
@@ -295,17 +295,17 @@ public class ImportUtils {
         if (isFromPACS) {
             allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries, uploadFolder);
             if (allFileNames != null && !allFileNames.isEmpty()) {
-                logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
+                LOG.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
             } else {
-                logger.info(uploadFolder.getName() + ": error with download from PACS.");
+                LOG.info(uploadFolder.getName() + ": error with download from PACS.");
                 return null;
             }
         } else {
             allFileNames = copyFilesToUploadFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
             if (allFileNames != null) {
-                logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
+                LOG.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
             } else {
-                logger.error("Error while copying file from CD/DVD/local file system.");
+                LOG.error("Error while copying file from CD/DVD/local file system.");
                 return null;
             }
         }
@@ -356,7 +356,7 @@ public class ImportUtils {
             try {
                 subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 return null;
             }
             if (addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
@@ -365,11 +365,11 @@ public class ImportUtils {
                 if (subjectREST == null) {
                     return null;
                 } else {
-                    logger.info("Subject created on server: " + subjectREST.toString());
+                    LOG.info("Subject created on server: " + subjectREST.toString());
                 }
             }
         } else {
-            logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
+            LOG.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
         }
         return subjectREST;
     }
@@ -416,7 +416,7 @@ public class ImportUtils {
         if (examinationREST == null) {
             return null;
         } else {
-            logger.info("Examination created on server with ID: " + examinationREST.getId());
+            LOG.info("Examination created on server with ID: " + examinationREST.getId());
             return examinationREST.getId();
         }
     }
@@ -497,7 +497,7 @@ public class ImportUtils {
         studyCard.setAcquisitionEquipment(equipment);
         studyCard.setCenterId(equipment.getCenter().getId());
         studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
-        logger.info("New study card created: {} {}", studyCard.getId(), studyCard.getName());
+        LOG.info("New study card created: {} {}", studyCard.getId(), studyCard.getName());
         return studyCard;
     }
 
@@ -510,7 +510,7 @@ public class ImportUtils {
         equipment.setSerialNumber(deviceSerialNumber);
         equipment.setManufacturerModel(manufacturerModel);
         equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
-        logger.info("New equipment created: {} {}", equipment.getId(), equipment.getSerialNumber());
+        LOG.info("New equipment created: {} {}", equipment.getId(), equipment.getSerialNumber());
         return equipment;
     }
 
@@ -521,7 +521,7 @@ public class ImportUtils {
         manufacturerModel.setDatasetModalityType(modality);
         manufacturerModel.setMagneticField(magneticFieldStrength);
         manufacturerModel = ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
-        logger.info("New manufacturer model created: {} {}", manufacturerModel.getId(), manufacturerModel.getName());
+        LOG.info("New manufacturer model created: {} {}", manufacturerModel.getId(), manufacturerModel.getName());
         return manufacturerModel;
     }
 
@@ -600,10 +600,10 @@ public class ImportUtils {
         boolean dicomDirGenerated = false;
         File dicomDirFile = new File(directory, ShUpConfig.DICOMDIR);
         if (!dicomDirFile.exists()) {
-            logger.info("No DICOMDIR found: generating one.");
+            LOG.info("No DICOMDIR found: generating one.");
             dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);
             dicomDirGenerated = true;
-            logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+            LOG.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
         }
         final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
         List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
@@ -617,9 +617,9 @@ public class ImportUtils {
     public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Center center) {
         AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
         if (equipment == null) {
-            logger.error("Error: could not find or create equipment.");
+            LOG.error("Error: could not find or create equipment.");
         } else {
-            logger.info("Equipment found or created: Id: {}, Name: {}", equipment.getId(), equipment.getManufacturerModel().getName());
+            LOG.info("Equipment found or created: Id: {}, Name: {}", equipment.getId(), equipment.getManufacturerModel().getName());
         }
         return equipment;
     }
@@ -627,14 +627,14 @@ public class ImportUtils {
     public static Center findOrCreateCenterWithInstitutionDicom(InstitutionDicom institutionDicom, Long studyId) {
         String institutionName = institutionDicom.getInstitutionName();
         if (institutionName == null || institutionName.isBlank()) {
-            logger.error("Error: no institution name.");
+            LOG.error("Error: no institution name.");
             return null;
         }
         Center center = ShUpOnloadConfig.getShanoirUploaderServiceClient().findCenterOrCreateByInstitutionDicom(institutionDicom, studyId);
         if (center == null) {
-            logger.error("Error: could not find or create center.");
+            LOG.error("Error: could not find or create center.");
         } else {
-            logger.info("Center found or created: Id: {}, Name: {}", center.getId(), center.getName());
+            LOG.info("Center found or created: Id: {}, Name: {}", center.getId(), center.getName());
         }
         return center;
     }

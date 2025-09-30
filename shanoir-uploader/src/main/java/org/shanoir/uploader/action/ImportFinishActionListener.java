@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ImportFinishActionListener implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
     private MainWindow mainWindow;
 
@@ -77,7 +77,7 @@ public class ImportFinishActionListener implements ActionListener {
         try {
             importJob = ImportUtils.readImportJob(uploadFolder);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             JOptionPane.showMessageDialog(mainWindow.frame,
                     mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -136,14 +136,14 @@ public class ImportFinishActionListener implements ActionListener {
                 equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
                 equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
                 if (equipment == null) {
-                    logger.error("No study card: equipment not found or created.");
+                    LOG.error("No study card: equipment not found or created.");
                     JOptionPane.showMessageDialog(mainWindow.frame,
                             "Equipment not found or created.",
                             "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             } else {
-                logger.error("No study card: center not found or created.");
+                LOG.error("No study card: center not found or created.");
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         "Center not found or created.",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -166,7 +166,7 @@ public class ImportFinishActionListener implements ActionListener {
             if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
                 subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
                 if (subjectREST != null) {
-                    logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+                    LOG.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
                     useExistingSubjectInStudy = true;
                 } else {
                     JOptionPane.showMessageDialog(mainWindow.frame,
@@ -215,13 +215,13 @@ public class ImportFinishActionListener implements ActionListener {
                 ((JButton) event.getSource()).setEnabled(true);
                 return;
             } else {
-                logger.info("Examination created on server with ID: " + examinationId);
+                LOG.info("Examination created on server with ID: " + examinationId);
             }
         // If the user wants to use an existing examination
         } else {
             Examination examinationDTO = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
             examinationId = examinationDTO.getId();
-            logger.info("Examination used on server with ID: " + examinationId);
+            LOG.info("Examination used on server with ID: " + examinationId);
         }
 
         /**
@@ -239,7 +239,7 @@ public class ImportFinishActionListener implements ActionListener {
                         ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
                 // set status FAILED
                 ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
-                logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
+                LOG.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
             } else {
                 // If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
                 if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjects().isEmpty()) {
@@ -257,7 +257,7 @@ public class ImportFinishActionListener implements ActionListener {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            LOG.error(ex.getMessage(), ex);
             JOptionPane.showMessageDialog(mainWindow.frame,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(),
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);

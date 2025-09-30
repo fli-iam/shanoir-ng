@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectionActionListener implements TreeSelectionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(SelectionActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SelectionActionListener.class);
 
     private MainWindow mainWindow;
 
@@ -111,13 +111,13 @@ public class SelectionActionListener implements TreeSelectionListener {
                         ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
                         Serie serie = (Serie) serieTreeNode.getSerie();
                         if (!serie.isIgnored() && !serie.isErroneous()) {
-                            importJob.getSelectedSeries().add((Serie)serie.clone());
+                            importJob.getSelectedSeries().add((Serie) serie.clone());
                         }
                     }
                 }
             }
         } catch (CloneNotSupportedException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
 
         if (!importJobs.isEmpty()) {
@@ -167,7 +167,7 @@ public class SelectionActionListener implements TreeSelectionListener {
         Study study = studyTreeNode.getStudy();
         LocalDate studyDate = study.getStudyDate();
         if (studyDate == null) {
-            logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
+            LOG.error("Study date could not be used for import, study: " + study.getStudyDescription());
             if (mainWindow != null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         "Study date could not be used for import: " + study.getStudyDescription(),
@@ -188,7 +188,7 @@ public class SelectionActionListener implements TreeSelectionListener {
                         List<Serie> series = study.getSeries();
                         for (Serie serie : series) {
                             if (!serie.isIgnored() && !serie.isErroneous()) {
-                                importJob.getSelectedSeries().add((Serie)serie.clone());
+                                importJob.getSelectedSeries().add((Serie) serie.clone());
                             }
                         }
                     }

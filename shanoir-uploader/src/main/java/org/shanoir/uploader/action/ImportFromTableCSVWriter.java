@@ -16,7 +16,7 @@ public class ImportFromTableCSVWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportFromTableCSVWriter.class);
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
     private static final String MASS_IMPORT_EXAMINATIONS = "mass_import_examinations_";
 
@@ -32,7 +32,7 @@ public class ImportFromTableCSVWriter {
     public ImportFromTableCSVWriter() {
         File workFolder = ShUpOnloadConfig.getWorkFolder();
         Date now = new Date();
-        String timestamp = sdf.format(now);
+        String timestamp = SDF.format(now);
         String csvFileName = MASS_IMPORT_EXAMINATIONS + timestamp + "_OK" + CSV;
         this.examinationsOK = createCSVFile(workFolder, csvFileName);
         csvFileName = MASS_IMPORT_EXAMINATIONS + timestamp + "_KO" + CSV;

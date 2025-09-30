@@ -104,9 +104,9 @@ public class Study implements Comparable<Study> {
     public boolean isWithStudyCards() {
         if (SC_MANDATORY.equals(studyCardPolicy)) {
             return true;
-        } else if (SC_DISABLED.equals(studyCardPolicy)) {
-            return false;
-        } else { return true; }
+        } else {
+            return SC_DISABLED.equals(studyCardPolicy);
+        }
     }
 
 }

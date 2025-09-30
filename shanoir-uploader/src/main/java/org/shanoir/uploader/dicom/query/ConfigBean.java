@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigBean {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigBean.class);
 
     public static final String DICOM_SERVER_HOST = "dicom.server.host";
 
@@ -127,17 +127,17 @@ public class ConfigBean {
         final String truststoreURL = configBean.getBackupDicomServerTrustStoreURL();
         final String truststorePassword = configBean.getBackupDicomServerTrustStorePassword();
 
-        logger.info("initWithDefaultValues : host=" + host);
-        logger.info("initWithDefaultValues : port=" + port);
-        logger.info("initWithDefaultValues : aetCalled=" + aetCalled);
-        logger.info("initWithDefaultValues : webPort=" + webPort);
-        logger.info("initWithDefaultValues : protocol=" + protocol);
+        LOG.info("initWithDefaultValues : host=" + host);
+        LOG.info("initWithDefaultValues : port=" + port);
+        LOG.info("initWithDefaultValues : aetCalled=" + aetCalled);
+        LOG.info("initWithDefaultValues : webPort=" + webPort);
+        LOG.info("initWithDefaultValues : protocol=" + protocol);
 
-        logger.info("initWithDefaultValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
-        logger.info("initWithDefaultValues : keystoreURL=" + keystoreURL);
-        logger.info("initWithDefaultValues : keystorePassword=" + keystorePassword);
-        logger.info("initWithDefaultValues : truststoreURL=" + truststoreURL);
-        logger.info("initWithDefaultValues : truststorePassword=" + truststorePassword);
+        LOG.info("initWithDefaultValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
+        LOG.info("initWithDefaultValues : keystoreURL=" + keystoreURL);
+        LOG.info("initWithDefaultValues : keystorePassword=" + keystorePassword);
+        LOG.info("initWithDefaultValues : truststoreURL=" + truststoreURL);
+        LOG.info("initWithDefaultValues : truststorePassword=" + truststorePassword);
 
         setDicomServerHost(host);
         setDicomServerPort(port);
@@ -176,17 +176,17 @@ public class ConfigBean {
         setDicomServerTruststoreURL(truststoreURL);
         setDicomServerTruststorePassword(truststorePassword);
 
-        logger.info("initWithValues : host=" + host);
-        logger.info("initWithValues : port=" + port);
-        logger.info("initWithValues : aetCalled=" + aetCalled);
-        logger.info("initWithValues : webPort=" + webPort);
-        logger.info("initWithValues : protocol=" + protocol);
+        LOG.info("initWithValues : host=" + host);
+        LOG.info("initWithValues : port=" + port);
+        LOG.info("initWithValues : aetCalled=" + aetCalled);
+        LOG.info("initWithValues : webPort=" + webPort);
+        LOG.info("initWithValues : protocol=" + protocol);
 
-        logger.info("initWithValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
-        logger.info("initWithValues : keystoreURL=" + keystoreURL);
-        logger.info("initWithValues : keystorePassword=" + keystorePassword);
-        logger.info("initWithValues : truststoreURL=" + truststoreURL);
-        logger.info("initWithValues : truststorePassword=" + truststorePassword);
+        LOG.info("initWithValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
+        LOG.info("initWithValues : keystoreURL=" + keystoreURL);
+        LOG.info("initWithValues : keystorePassword=" + keystorePassword);
+        LOG.info("initWithValues : truststoreURL=" + truststoreURL);
+        LOG.info("initWithValues : truststorePassword=" + truststorePassword);
 
 
         // Init calling PACS (Shanoir)
@@ -198,9 +198,9 @@ public class ConfigBean {
         setLocalDicomServerPort(localPort);
         setLocalDicomServerAETCalling(localAETCalling);
 
-        logger.info("initWithValues : localHost=" + localHost);
-        logger.info("initWithValues : localPort=" + localPort);
-        logger.info("initWithValues : localAETCalling=" + localAETCalling);
+        LOG.info("initWithValues : localHost=" + localHost);
+        LOG.info("initWithValues : localPort=" + localPort);
+        LOG.info("initWithValues : localAETCalling=" + localAETCalling);
     }
 
     private boolean toBol(final String string) {

@@ -46,7 +46,7 @@ public class CurrentUploadsWindowTable implements Observer {
     public int rowsNb;
 
     // Formatter to display the dates in the table
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ShUpConfig.formatter.toPattern());
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ShUpConfig.FORMATTER.toPattern());
 
     private CurrentUploadsWindowTable(MainWindow frame) {
         this.frame = frame;
@@ -117,8 +117,8 @@ public class CurrentUploadsWindowTable implements Observer {
             table.getColumnModel().getColumn(j).setCellRenderer(centerRenderer);
         }
         // Change Background color of action column
-        table.getColumnModel().getColumn(importColumn).setCellRenderer(new Background_Renderer());
-        table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
+        table.getColumnModel().getColumn(importColumn).setCellRenderer(new BackgroundRenderer());
+        table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new BackgroundRenderer());
     }
 
     public void fillTable(Map<String, ImportJob> initialUploads) {
@@ -219,11 +219,11 @@ public class CurrentUploadsWindowTable implements Observer {
         });
     }
 
-    class Background_Renderer extends DefaultTableCellRenderer {
+    class BackgroundRenderer extends DefaultTableCellRenderer {
 
         private static final long serialVersionUID = -7514583714509447137L;
 
-        Background_Renderer() {
+        BackgroundRenderer() {
         }
 
         @Override

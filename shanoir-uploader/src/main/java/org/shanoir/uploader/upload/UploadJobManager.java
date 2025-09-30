@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UploadJobManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(UploadJobManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadJobManager.class);
 
     public static final String UPLOAD_JOB_XML = "upload-job.xml";
 
@@ -39,7 +39,7 @@ public class UploadJobManager {
             uploadFolderPath
             + File.separatorChar
             + UPLOAD_JOB_XML);
-        logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
+        LOG.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
     }
 
     /**
@@ -48,7 +48,7 @@ public class UploadJobManager {
      */
     public UploadJobManager(final File uploadJobFile) {
         this.uploadJobFile = uploadJobFile;
-        logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
+        LOG.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
     }
 
     /* (non-Javadoc)
@@ -62,7 +62,7 @@ public class UploadJobManager {
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(uploadJob, uploadJobFile);
         } catch (JAXBException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -76,7 +76,7 @@ public class UploadJobManager {
             final UploadJob uploadJob = (UploadJob) jaxbUnmarshaller.unmarshal(uploadJobFile);
             return uploadJob;
         } catch (JAXBException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
         return null;
     }

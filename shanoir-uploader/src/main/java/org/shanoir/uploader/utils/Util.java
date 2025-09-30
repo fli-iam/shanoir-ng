@@ -68,13 +68,13 @@ public final class Util {
 
     private static final String DATE_PATTERN = "dd/MM/yyyy";
 
-    private static final Logger logger = LoggerFactory.getLogger(Util.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
 
     /** Time pattern. */
-    public static String TIME_PATTERN = "HH'h'mm'm'ss's'";
+    public static final String TIME_PATTERN = "HH'h'mm'm'ss's'";
 
     /** Time pattern for file system. */
-    public static String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
+    public static final String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
 
     public static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -169,9 +169,9 @@ public final class Util {
                 }
             }
         } catch (FileNotFoundException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            LOG.error(e.getMessage());
         } finally {
             try {
                 if (iS != null) {
@@ -181,7 +181,7 @@ public final class Util {
                     fOS.close();
                 }
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                LOG.error(e.getMessage());
             }
         }
     }
@@ -209,12 +209,12 @@ public final class Util {
      * @param folderName
      */
     public static void copyPseudonymusFolder(String folderName) {
-        logger.info("start " + folderName + " copy");
+        LOG.info("start " + folderName + " copy");
         final File destinationFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator + folderName);
         boolean propertiesExists = destinationFolder.exists();
         if (propertiesExists) {
             // do nothing
-            logger.info(folderName + " folder already exists.");
+            LOG.info(folderName + " folder already exists.");
         } else {
             try {
                 // create pseudonymus folder
@@ -235,13 +235,13 @@ public final class Util {
                                         + folderContents[i] + File.separator + subFolderContents[j]);
                         copyFileFromJar(folderName + "/" + folderContents[i] + "/" + subFolderContents[j],
                                 destinationFolder2);
-                        logger.info(folderName + "/" + folderContents[i] + "/" + subFolderContents[j]
+                        LOG.info(folderName + "/" + folderContents[i] + "/" + subFolderContents[j]
                                 + " successfully copied");
                     }
                 }
-                logger.info("end " + folderName + " copy");
+                LOG.info("end " + folderName + " copy");
             } catch (Exception e) {
-                logger.error(folderName + " could not be copied: " + e.getMessage(), e);
+                LOG.error(folderName + " could not be copied: " + e.getMessage(), e);
             }
         }
     }
@@ -270,13 +270,13 @@ public final class Util {
             try {
                 propertyObject.store(out, "Configuration");
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
             out.close();
         } catch (FileNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -296,9 +296,9 @@ public final class Util {
      * @return the date of the first day of the year
      */
     public static Date getFirstDayOfTheYear(Date pBirthDate) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("getFirstDayOfTheYear : Begin");
-            logger.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("getFirstDayOfTheYear : Begin");
+            LOG.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
         }
 
         if (pBirthDate != null) {
@@ -308,15 +308,15 @@ public final class Util {
             birthDate.set(Calendar.MONTH, Calendar.JANUARY);
             birthDate.set(Calendar.DAY_OF_MONTH, 1);
             birthDate.set(Calendar.HOUR, 1);
-            if (logger.isDebugEnabled()) {
-                logger.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
-                logger.debug("getFirstDayOfTheYear : End");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
+                LOG.debug("getFirstDayOfTheYear : End");
             }
 
             return birthDate.getTime();
         }
 
-        logger.debug("getFirstDayOfTheYear : End - return null");
+        LOG.debug("getFirstDayOfTheYear : End - return null");
 
         return null;
     }
@@ -336,11 +336,11 @@ public final class Util {
                 List<T> myObjects = objectMapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             } catch (JsonMappingException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
         return null;
@@ -356,11 +356,11 @@ public final class Util {
                 T myObjects = objectMapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             } catch (JsonMappingException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
         return null;
@@ -435,19 +435,19 @@ public final class Util {
             case 204:
                 return true;
             case 401:
-                logger.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
+                LOG.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
                 return false;
             case 403:
-                logger.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
+                LOG.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
                 return false;
             case 404:
-                logger.warn("Error " + code + " : Rest Service is not reachable.");
+                LOG.warn("Error " + code + " : Rest Service is not reachable.");
                 return false;
             case 500:
-                logger.warn("Error " + code + " : Rest Service is not reachable.");
+                LOG.warn("Error " + code + " : Rest Service is not reachable.");
                 return false;
             default:
-                logger.warn("Error " + code + " : An error has occured.");
+                LOG.warn("Error " + code + " : An error has occured.");
                 return false;
         }
     }
@@ -490,9 +490,9 @@ public final class Util {
             try {
                 rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
             } catch (UnsupportedOperationException e2) {
-                logger.error("Error on methode util.readStringBuffer()", e2);
+                LOG.error("Error on methode util.readStringBuffer()", e2);
             } catch (IOException e2) {
-                logger.error("Error on methode util.readStringBuffer()", e2);
+                LOG.error("Error on methode util.readStringBuffer()", e2);
             }
             StringBuffer result = new StringBuffer();
             String line = "";
@@ -501,7 +501,7 @@ public final class Util {
                     result.append(line);
                 }
             } catch (IOException e2) {
-                logger.error("Error on methode util.readStringBuffer()", e2);
+                LOG.error("Error on methode util.readStringBuffer()", e2);
             }
             return result;
         }
@@ -518,7 +518,7 @@ public final class Util {
         try {
             xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCalendar);
         } catch (DatatypeConfigurationException ex) {
-            logger.error("Error on methode util.XMLGregorianCalendar() Unable to convert date to XML GREGORIAN DATE",
+            LOG.error("Error on methode util.XMLGregorianCalendar() Unable to convert date to XML GREGORIAN DATE",
                     ex);
         }
         return xmlCalendar;

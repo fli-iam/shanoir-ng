@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("deprecation")
 public class CurrentNominativeDataModel extends Observable {
 
-    private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
     // Hash key = folder name;
     Map<String, ImportJob> currentUploads = null;
 
@@ -36,7 +36,7 @@ public class CurrentNominativeDataModel extends Observable {
 
     public void setCurrentUploads(Map<String, ImportJob> currentUploads) {
         this.currentUploads = currentUploads;
-        String[] msg = { "fill" };
+        String[] msg = {"fill"};
         setChanged();
         notifyObservers(msg);
     }
@@ -46,14 +46,14 @@ public class CurrentNominativeDataModel extends Observable {
         if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
             nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
         }
-        String[] msg = { "add", absolutePath };
+        String[] msg = {"add", absolutePath};
         setChanged();
         notifyObservers(msg);
     }
 
     public void updateUploadPercentage(String absolutePath, String percentage) {
         currentUploads.get(absolutePath).setUploadPercentage(percentage);
-        String[] msg = { "UpdatePercent", absolutePath, percentage };
+        String[] msg = {"UpdatePercent", absolutePath, percentage};
         setChanged();
         notifyObservers(msg);
     }

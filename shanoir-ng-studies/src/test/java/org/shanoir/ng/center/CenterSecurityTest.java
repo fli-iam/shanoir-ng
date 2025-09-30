@@ -130,14 +130,14 @@ public class CenterSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testDependenciesCheckAcq() throws EntityNotFoundException, UndeletableDependenciesException {
         assertThrows(UndeletableDependenciesException.class, () -> {
-            final long ID = 666L;
+            final long id = 666L;
             Center center = ModelsUtil.createCenter();
-            center.setId(ID);
+            center.setId(id);
             List<AcquisitionEquipment> acqs = new ArrayList<>();
             acqs.add(new AcquisitionEquipment());
             center.setAcquisitionEquipments(acqs);
-            given(repository.findById(ID)).willReturn(Optional.of(center));
-            service.deleteByIdCheckDependencies(ID);
+            given(repository.findById(id)).willReturn(Optional.of(center));
+            service.deleteByIdCheckDependencies(id);
         });
     }
 
@@ -145,14 +145,14 @@ public class CenterSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testDependenciesCheckStuCenter() throws EntityNotFoundException, UndeletableDependenciesException {
         assertThrows(UndeletableDependenciesException.class, () -> {
-            final long ID = 69L;
+            final long id = 69L;
             Center center = ModelsUtil.createCenter();
-            center.setId(ID);
+            center.setId(id);
             List<StudyCenter> studyCenterList = new ArrayList<>();
             studyCenterList.add(new StudyCenter());
             center.setStudyCenterList(studyCenterList);
-            given(repository.findById(ID)).willReturn(Optional.of(center));
-            service.deleteByIdCheckDependencies(ID);
+            given(repository.findById(id)).willReturn(Optional.of(center));
+            service.deleteByIdCheckDependencies(id);
         });
     }
 

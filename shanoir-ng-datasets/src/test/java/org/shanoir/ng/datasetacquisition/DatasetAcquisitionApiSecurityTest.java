@@ -410,9 +410,9 @@ public class DatasetAcquisitionApiSecurityTest {
         List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
         studyCenterIds.add(Pair.of(1L, 1L));
         given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newSet(new Long[]{}), PageRequest.of(0, 10)))
-            .willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
+                .willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
         given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId()))
-            .willReturn(Arrays.asList(new Long[]{1L, 2L}));
+                .willReturn(Arrays.asList(new Long[]{1L, 2L}));
         StudyUser su1 = new StudyUser();
         su1.setStudyId(1L);
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));

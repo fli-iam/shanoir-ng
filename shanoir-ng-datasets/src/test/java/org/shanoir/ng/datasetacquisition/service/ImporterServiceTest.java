@@ -114,7 +114,7 @@ public class ImporterServiceTest {
     public void setUp() throws IOException {
         exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
-        exam.setId(1l);
+        exam.setId(1L);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
     }
 
@@ -152,7 +152,7 @@ public class ImporterServiceTest {
         patients.add(patient);
 
         ImportJob importJob = new ImportJob();
-        importJob.setPatients(patients );
+        importJob.setPatients(patients);
         importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
         importJob.setExaminationId(Long.valueOf(2));
         importJob.setSubjectName("subjectName");
@@ -185,8 +185,8 @@ public class ImporterServiceTest {
 
         try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
             dicomProcessingMock
-                .when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
-                .thenReturn(new Attributes());
+                    .when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
+                    .thenReturn(new Attributes());
 
             when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
             when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());

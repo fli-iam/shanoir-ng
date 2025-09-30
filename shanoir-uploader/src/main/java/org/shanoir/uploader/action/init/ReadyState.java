@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReadyState implements State {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReadyState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReadyState.class);
 
     @Autowired
     private CurrentNominativeDataController currentNominativeDataController;
@@ -54,8 +54,8 @@ public class ReadyState implements State {
                 Pseudonymizer pseudonymizer = new Pseudonymizer(pseudonymusKey, pseudonymusFolder.getAbsolutePath());
                 ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                logger.error("Mode pseudonymus requires Pseudonymizer.");
+                LOG.error(e.getMessage(), e);
+                LOG.error("Mode pseudonymus requires Pseudonymizer.");
                 System.exit(0);
             }
         }
@@ -108,7 +108,7 @@ public class ReadyState implements State {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        logger.info("JFrame successfully initialized.");
+        LOG.info("JFrame successfully initialized.");
         return frame;
     }
 
@@ -118,7 +118,7 @@ public class ReadyState implements State {
      */
     private void initNominativeDataFilesBeforeLaunchingJobs() {
         final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
-        logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
+        LOG.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
         for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
             NominativeDataImportJobManager dataJobManager = null;
             final File folder = (File) foldersIt.next();
@@ -127,7 +127,7 @@ public class ReadyState implements State {
             for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
                 final File file = (File) filesIt.next();
                 if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
-                    logger.debug(" Initializing data job manager before launching Jobs");
+                    LOG.debug(" Initializing data job manager before launching Jobs");
                     dataJobManager = new NominativeDataImportJobManager(file);
                     break;
                 }
@@ -141,16 +141,16 @@ public class ReadyState implements State {
                     importJob.setUploadPercentage(percentage);
                 }
                 String uploadPercentage = importJob.getUploadPercentage();
-                logger.debug(" upload percentage before launching Jobs "
+                LOG.debug(" upload percentage before launching Jobs "
                         + uploadPercentage);
                 if (!uploadPercentage.equals("100 %"))
                     uploadPercentage = "0 %";
-                logger.debug(" upload percentage initialized to "
+                LOG.debug(" upload percentage initialized to "
                         + uploadPercentage);
                 importJob.setUploadPercentage(uploadPercentage);
                 dataJobManager.writeImportJob(importJob);
             } else {
-                logger.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
+                LOG.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
             }
         }
     }

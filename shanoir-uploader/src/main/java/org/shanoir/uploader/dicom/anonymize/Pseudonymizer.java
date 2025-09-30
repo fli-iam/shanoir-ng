@@ -34,7 +34,7 @@ public class Pseudonymizer {
 
     private static final String DEBUG = "DEBUG";
 
-    private static final Logger logger = LoggerFactory.getLogger(Pseudonymizer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Pseudonymizer.class);
 
     public static final String PSEUDONYMUS_FOLDER = "pseudonymus";
     private static final String PSEUDONYMUS_SHANOIR = "PseudonymusShanoir";
@@ -56,7 +56,7 @@ public class Pseudonymizer {
     private String pseudonymusExePath;
 
     public Pseudonymizer(final String pseudonymusKey, final String pseudonymusFolderPath) throws PseudonymusException {
-        logger.info("Pseudonymizer: initialization started.");
+        LOG.info("Pseudonymizer: initialization started.");
         if (pseudonymusKey == null) {
             throw new PseudonymusException("Pseudonymus key is null.");
         }
@@ -65,11 +65,11 @@ public class Pseudonymizer {
         if (!pseudonymusFolder.exists()) {
             throw new PseudonymusException("Pseudonymus folder not existing: " + pseudonymusFolder.getAbsolutePath());
         }
-        logger.info("Pseudonymizer: pseudonymus used in OS: "
+        LOG.info("Pseudonymizer: pseudonymus used in OS: "
                 + SystemUtils.OS_NAME);
-        logger.info("Pseudonymizer: pseudonymus used in OS version: "
+        LOG.info("Pseudonymizer: pseudonymus used in OS version: "
                 + SystemUtils.OS_VERSION);
-        logger.info("Pseudonymizer: pseudonymus used in OS architecture: "
+        LOG.info("Pseudonymizer: pseudonymus used in OS architecture: "
                 + SystemUtils.OS_ARCH);
         if (SystemUtils.IS_OS_LINUX) {
             if (I386.equals(SystemUtils.OS_ARCH)) {
@@ -82,7 +82,7 @@ public class Pseudonymizer {
                         + LINUX_X86_64 + File.separator
                         + PSEUDONYMUS_SHANOIR;
             } else {
-                logger.error("Pseudonymizer: Linux system not supported by pseudonymus.");
+                LOG.error("Pseudonymizer: Linux system not supported by pseudonymus.");
             }
         } else if (SystemUtils.IS_OS_MAC_OSX) {
             this.pseudonymusExePath = pseudonymusFolderPath + File.separator
@@ -91,10 +91,10 @@ public class Pseudonymizer {
             this.pseudonymusExePath = pseudonymusFolderPath + File.separator
                     + WINDOWS + File.separator + PSEUDONYMUS_SHANOIR_EXE;
         } else {
-            logger.error("Pseudonymizer: operating system not supported by pseudonymus.");
+            LOG.error("Pseudonymizer: operating system not supported by pseudonymus.");
         }
-        logger.info("Pseudonymizer: pseudonymus exe path: " + pseudonymusExePath);
-        logger.info("Pseudonymizer: initialization finished.");
+        LOG.info("Pseudonymizer: pseudonymus exe path: " + pseudonymusExePath);
+        LOG.info("Pseudonymizer: initialization finished.");
     }
 
     /**
@@ -153,10 +153,10 @@ public class Pseudonymizer {
         /**
          * Log all created hash values into su.log file.
          */
-        logger.info("BirthName hashs: " + birthNameHash1 + ";" + birthNameHash2 + ";" + birthNameHash3);
-        logger.info("LastName hashs: " + lastNameHash1 + ";" + lastNameHash2 + ";" + lastNameHash3);
-        logger.info("FirstName hashs: " + firstNameHash1 + ";" + firstNameHash2 + ";" + firstNameHash3);
-        logger.info("BirthDate hash: " + birthDateHash);
+        LOG.info("BirthName hashs: " + birthNameHash1 + ";" + birthNameHash2 + ";" + birthNameHash3);
+        LOG.info("LastName hashs: " + lastNameHash1 + ";" + lastNameHash2 + ";" + lastNameHash3);
+        LOG.info("FirstName hashs: " + firstNameHash1 + ";" + firstNameHash2 + ";" + firstNameHash3);
+        LOG.info("BirthDate hash: " + birthDateHash);
 
         /**
          * Alert the user if an error occured during pseudonymus hash creation.
@@ -190,8 +190,8 @@ public class Pseudonymizer {
      */
     private String pseudonymusExec(final String input,
             final String pseudonymusPath, final int soundexValue) {
-        logger.debug("pseudonymusExec : Begin");
-        logger.debug("pseudonymusExec : " + pseudonymusPath);
+        LOG.debug("pseudonymusExec : Begin");
+        LOG.debug("pseudonymusExec : " + pseudonymusPath);
         String[] cmd = new String[4];
         cmd[0] = pseudonymusPath;
         cmd[1] = input;
@@ -203,7 +203,7 @@ public class Pseudonymizer {
             result = result.substring(result.length() - SHA256_LENGTH - 1,
                     result.length() - 1);
         }
-        logger.debug("pseudonymusExec : End");
+        LOG.debug("pseudonymusExec : End");
         return result;
     }
 
@@ -228,7 +228,7 @@ public class Pseudonymizer {
         for (final String item : cmd) {
             executingCommand += (item + " ");
         }
-        logger.debug("exec : Executing " + executingCommand);
+        LOG.debug("exec : Executing " + executingCommand);
         StreamGobbler errorGobbler = null;
         StreamGobbler outputGobbler = null;
         String result = null;
@@ -249,9 +249,9 @@ public class Pseudonymizer {
             outputGobbler.join();
             proc.getInputStream().close();
             proc.getErrorStream().close();
-            logger.debug("exec : ExitValue: " + exitVal);
+            LOG.debug("exec : ExitValue: " + exitVal);
         } catch (final Exception exc) {
-            logger.error("exec : ", exc);
+            LOG.error("exec : ", exc);
             if (errorGobbler != null && outputGobbler != null) {
                 result = errorGobbler.getStringDisplay();
                 if (result != null && !"".equals(result)) {
@@ -272,7 +272,7 @@ public class Pseudonymizer {
         if (outputGobbler != null) {
             result += outputGobbler.getStringDisplay();
         }
-        logger.debug("exec : return result " + result);
+        LOG.debug("exec : return result " + result);
         return result;
     }
 

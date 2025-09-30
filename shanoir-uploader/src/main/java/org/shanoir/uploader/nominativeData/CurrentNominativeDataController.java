@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @org.springframework.stereotype.Component
 public class CurrentNominativeDataController {
 
-    private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CurrentNominativeDataController.class);
 
     private CurrentNominativeDataModel currentNominativeDataModel = null;
 
@@ -123,7 +123,7 @@ public class CurrentNominativeDataController {
                         try {
                             showDeleteConfirmationDialog(workFolderFilePath, cuw, modelRow);
                         } catch (IOException eIO) {
-                            logger.error(eIO.getMessage(), eIO);
+                            LOG.error(eIO.getMessage(), eIO);
                         }
                     }
                 // start the import or try reimporting an exam with status "ERROR"
@@ -188,9 +188,9 @@ public class CurrentNominativeDataController {
                 cuw.rowsNb = cuw.table.getRowCount();
                 if (col == cuw.deleteColumn) {
                     try {
-                        cuw.table.getColumnModel().getColumn(col).setCellRenderer(new Delete_Renderer());
+                        cuw.table.getColumnModel().getColumn(col).setCellRenderer(new DeleteRenderer());
                     } catch (Exception exp) {
-                        logger.error(exp.toString());
+                        LOG.error(exp.toString());
                     }
                 }
                 cuw.table.repaint();
@@ -210,7 +210,7 @@ public class CurrentNominativeDataController {
      */
     private void processWorkFolder(File workFolder) throws IOException {
         List<File> folders = Util.listFolders(workFolder);
-        logger.info("Found " + folders.size() + " folders in workFolder.");
+        LOG.info("Found " + folders.size() + " folders in workFolder.");
         Map<String, ImportJob> currentUploads = new LinkedHashMap<String, ImportJob>();
         for (File f : folders) {
             ImportJob nominativeDataImportJob = processFolder(f);
@@ -226,7 +226,7 @@ public class CurrentNominativeDataController {
      * @param folder
      */
     private ImportJob processFolder(final File folder) throws IOException {
-        logger.info("Started processing folder " + folder.getName());
+        LOG.info("Started processing folder " + folder.getName());
         // Check if the folder contains an import-job.json file
         initNominativeDataImportJobManager(folder);
         if (importJobManager != null) {
@@ -263,10 +263,10 @@ public class CurrentNominativeDataController {
                 return importJob;
             }
         } else {
-            logger.error("Folder " + folder.getName() + " found in workFolder without import-job.json.");
+            LOG.error("Folder " + folder.getName() + " found in workFolder without import-job.json.");
         }
 
-        logger.info("Ended processing folder " + folder.getName() + ".");
+        LOG.info("Ended processing folder " + folder.getName() + ".");
         return null;
     }
 
@@ -299,9 +299,9 @@ public class CurrentNominativeDataController {
         currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataImportJob);
     }
 
-    public class Delete_Renderer extends DefaultTableCellRenderer {
-         Delete_Renderer() {
-         }
+    public class DeleteRenderer extends DefaultTableCellRenderer {
+        
+        DeleteRenderer() { }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
@@ -313,10 +313,10 @@ public class CurrentNominativeDataController {
             tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
 
             if (value instanceof String) {
-                 String string = (String) value;
-                 setText(getDeleteHTML(string));
-                 setToolTipText(cuw.frame.resourceBundle
-                         .getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
+                String string = (String) value;
+                setText(getDeleteHTML(string));
+                setToolTipText(cuw.frame.resourceBundle
+                        .getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
             }
             return tableCellRendererComponent;
         }

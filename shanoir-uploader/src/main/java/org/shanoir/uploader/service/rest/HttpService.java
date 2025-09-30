@@ -57,7 +57,7 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  */
 public class HttpService {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 
     private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
@@ -77,7 +77,7 @@ public class HttpService {
         try {
             httpClient = buildHttpClient(serverURL);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -85,7 +85,7 @@ public class HttpService {
         try {
             httpClient.close();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -96,7 +96,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -108,7 +108,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -142,7 +142,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -158,7 +158,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -170,12 +170,12 @@ public class HttpService {
             HttpEntity entity = multipartEntityBuilder.build();
             HttpPost httpPost = new HttpPost(url);
             httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
             httpPost.setEntity(entity);
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -189,7 +189,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPut, context);
             return response;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -206,7 +206,7 @@ public class HttpService {
                     return true;
                 }
             }).build();
-            logger.info("buildHttpClient: sslContextDev build.");
+            LOG.info("buildHttpClient: sslContextDev build.");
         }
         // In case of proxy: generate credentials provider with correct host
         HttpHost proxyHost = null;
@@ -222,10 +222,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    logger.info("buildHttpClient: credentialsProvider build.");
+                    LOG.info("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                logger.info("buildHttpClient: proxyHost (host+port) build.");
+                LOG.info("buildHttpClient: proxyHost (host+port) build.");
             // Only host is configured, so do not set port
             } else if (serviceConfiguration.getProxyHost() != null) {
                 proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
@@ -235,10 +235,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    logger.info("buildHttpClient: credentialsProvider build.");
+                    LOG.info("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                logger.info("buildHttpClient: proxyHost (host) build.");
+                LOG.info("buildHttpClient: proxyHost (host) build.");
             } else {
                 throw new Exception("Proxy enabled, but no host set or only port does not work.");
             }
@@ -260,7 +260,7 @@ public class HttpService {
         context.setCredentialsProvider(credentialsProvider);
         context.setAuthCache(authCache);
         this.context = context;
-        logger.info("createHttpClientContext: context created and assigned.");
+        LOG.info("createHttpClientContext: context created and assigned.");
     }
 
     /**
@@ -280,13 +280,13 @@ public class HttpService {
                     .setSslContext(sslContextDev)
                     .setTlsVersions(TLS.V_1_2)
                     .build();
-            logger.info("DEV SSLSocketFactory used.");
+            LOG.info("DEV SSLSocketFactory used.");
         } else {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setHostnameVerifier(new CustomHostnameVerifier())
                     .setTlsVersions(TLS.V_1_2)
                     .build();
-            logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+            LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
         }
         final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setMaxConnTotal(500)
@@ -302,7 +302,7 @@ public class HttpService {
                     .setDefaultCredentialsProvider(credentialsProvider)
                     .setProxy(proxyHost)
                     .build();
-            logger.info("CloseableHttpClient created with proxyHost: "
+            LOG.info("CloseableHttpClient created with proxyHost: "
                     + proxyHost.getHostName() + ":" + proxyHost.getPort()
                     + " and credentialsProvider: " + credentialsProvider.toString() + ".");
             return httpClient;
@@ -315,7 +315,7 @@ public class HttpService {
                         .setRoutePlanner(routePlanner)
                         .setProxy(proxyHost)
                         .build();
-                logger.info("CloseableHttpClient created with proxyHost: "
+                LOG.info("CloseableHttpClient created with proxyHost: "
                         + proxyHost.getHostName() + ":" + proxyHost.getPort()
                         + " and without a credentialsProvider.");
                 return httpClient;
@@ -324,7 +324,7 @@ public class HttpService {
                         .setConnectionManager(connectionManager)
                         .setConnectionManagerShared(true)
                         .build();
-                logger.info("CloseableHttpClient created without proxyHost"
+                LOG.info("CloseableHttpClient created without proxyHost"
                         + " and without a credentialsProvider.");
                 return httpClient;
             }

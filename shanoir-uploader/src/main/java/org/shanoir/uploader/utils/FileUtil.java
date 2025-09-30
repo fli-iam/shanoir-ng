@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileUtil.class);
 
     /**
      * This method receives a directory name as a string
@@ -45,7 +45,7 @@ public class FileUtil {
         final File folder = new File(dirName);
         if (!folder.exists()) {
             if (!folder.mkdir()) {
-                logger.error("dirExistsWithCreate: error while creating directory " + dirName);
+                LOG.error("dirExistsWithCreate: error while creating directory " + dirName);
             }
         }
     }
@@ -57,9 +57,9 @@ public class FileUtil {
      */
     public static String readableFileSize(long size) {
         if (size <= 0) return "0";
-        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
-        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        final String[] units = new String[] {"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     /**
@@ -82,9 +82,9 @@ public class FileUtil {
             destination = new FileOutputStream(destFile).getChannel();
             destination.transferFrom(source, 0, source.size());
         } catch (FileNotFoundException e) {
-            logger.error("File " +sourceFile.getAbsolutePath()+" not found",e);
+            LOG.error("File " + sourceFile.getAbsolutePath() + " not found", e);
         } catch (IOException e) {
-            logger.error("IO Exception" , e);
+            LOG.error("IO Exception", e);
         } finally {
             try {
                 if (source != null) {
@@ -94,7 +94,7 @@ public class FileUtil {
                     destination.close();
                 }
             } catch (IOException e) {
-                logger.error("IO Exception" , e);
+                LOG.error("IO Exception", e);
             }
         }
     }
@@ -106,7 +106,7 @@ public class FileUtil {
     //         }
     //     }
     //     if (!folder.delete()) {
-    //         logger.error("Error deleting file: " + folder.getAbsolutePath());
+    //         LOG.error("Error deleting file: " + folder.getAbsolutePath());
     //     }
     // }
 
@@ -114,7 +114,7 @@ public class FileUtil {
         File tempStudyInstanceUIDFolder = new File(workFolder, studyInstanceUID);
         if (tempStudyInstanceUIDFolder.exists()) {
             tempStudyInstanceUIDFolder.delete();
-            logger.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
+            LOG.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
         }
     }
 
@@ -150,9 +150,9 @@ public class FileUtil {
                 serie.setInstances(instances);
                 if (!instances.isEmpty()) {
                     instances.sort(new InstanceNumberSorter());
-                    logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+                    LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
                 } else {
-                    logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+                    LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
                     serie.setIgnored(true);
                     serie.setSelected(false);
                 }
@@ -170,7 +170,7 @@ public class FileUtil {
                 if (serie.getNumberOfSeriesRelatedInstances() != null
                         && serie.getNumberOfSeriesRelatedInstances().intValue() != 0
                         && serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
-                    logger.warn("Download: serie "
+                    LOG.warn("Download: serie "
                             + (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
                             + serie.getSeriesDescription()
                             + " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
@@ -178,14 +178,14 @@ public class FileUtil {
                     );
                 }
                 retrievedDicomFiles.addAll(fileNamesForSerie);
-                logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " was successful.\n\n");
             } else {
                 downloadOrCopyReport.append("Error: Download: serie "
                         + (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
                         + serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
-                logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " has failed.\n\n");
             }
