@@ -39,7 +39,7 @@ public class ImportFromFolderWindow extends JFrame {
     public JButton uploadButton;
     public JButton openButton;
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
 
     FolderImport folderImport;
 
@@ -218,7 +218,7 @@ public class ImportFromFolderWindow extends JFrame {
         uploadButton.addActionListener(importListener);
 
         // center the frame
-        // frame.setLocationRelativeTo( null );
+        // frame.setLocationRelativeTo(null );
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
         int windowWidth = 1600;
         int windowHeight = 700;

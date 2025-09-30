@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,102 +38,102 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Examination anesthetics service test.
- * 
+ *
  * @author sloury
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class ExtraDataServiceTest {
 
-	public static final Long EXAMINATION_ID = 1L;
-	public static final Long EXTRADATA_ID = 1L;
-	public static final String EXTRADATA_TYPE = "Extra data";
-	public static final Long PHYSIOLOGICALDATA_ID = 2L;
-	public static final String PHYSIOLOGICALDATA_TYPE = "Physiological data";
-	public static final Long BLOODGASDATA_ID = 3L;
-	public static final String BLOODGASDATA_TYPE = "Blood gas data";
-	public static final String EXTRADATA_FILEPATH = "/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/";
-	public static final String EXTRADATA_FILENAME = "extradata.txt";
+    public static final Long EXAMINATION_ID = 1L;
+    public static final Long EXTRADATA_ID = 1L;
+    public static final String EXTRADATA_TYPE = "Extra data";
+    public static final Long PHYSIOLOGICALDATA_ID = 2L;
+    public static final String PHYSIOLOGICALDATA_TYPE = "Physiological data";
+    public static final Long BLOODGASDATA_ID = 3L;
+    public static final String BLOODGASDATA_TYPE = "Blood gas data";
+    public static final String EXTRADATA_FILEPATH = "/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/";
+    public static final String EXTRADATA_FILENAME = "extradata.txt";
 
-	@Mock
-	private ExaminationExtraDataRepository extraDataRepository;
+    @Mock
+    private ExaminationExtraDataRepository extraDataRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private ExaminationExtraDataServiceImpl extraDataService;
+    @InjectMocks
+    private ExaminationExtraDataServiceImpl extraDataService;
 
-	@BeforeEach
-	public void setup() {
-		given(extraDataRepository.findAllByExaminationId(1L))
-				.willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
-		given(extraDataRepository.findById(EXTRADATA_ID)).willReturn(Optional.of(ExtraDataModelUtil.createExaminationExtraData()));
-		given(extraDataRepository.save(Mockito.any(ExaminationExtraData.class)))
-				.willReturn(ExtraDataModelUtil.createExaminationExtraData());
-	}
+    @BeforeEach
+    public void setup() {
+        given(extraDataRepository.findAllByExaminationId(1L))
+                .willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
+        given(extraDataRepository.findById(EXTRADATA_ID)).willReturn(Optional.of(ExtraDataModelUtil.createExaminationExtraData()));
+        given(extraDataRepository.save(Mockito.any(ExaminationExtraData.class)))
+                .willReturn(ExtraDataModelUtil.createExaminationExtraData());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		extraDataService.deleteById(EXTRADATA_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        extraDataService.deleteById(EXTRADATA_ID);
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(extraDataRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findByIdTest() {
-		final ExaminationExtraData extradata = extraDataService.findById(EXTRADATA_ID);
-		Assertions.assertNotNull(extradata);
-		Assertions.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
-		Assertions.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
+    @Test
+    public void findByIdTest() {
+        final ExaminationExtraData extradata = extraDataService.findById(EXTRADATA_ID);
+        Assertions.assertNotNull(extradata);
+        Assertions.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
+        Assertions.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findByExaminationIdTest() {
-		final List<ExaminationExtraData> extradata = extraDataService.findAllByExaminationId(EXAMINATION_ID);
-		Assertions.assertNotNull(extradata);
-		Assertions.assertTrue(extradata.size() == 1);
+    @Test
+    public void findByExaminationIdTest() {
+        final List<ExaminationExtraData> extradata = extraDataService.findAllByExaminationId(EXAMINATION_ID);
+        Assertions.assertNotNull(extradata);
+        Assertions.assertTrue(extradata.size() == 1);
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).findAllByExaminationId(EXAMINATION_ID);
-	}
+        Mockito.verify(extraDataRepository, Mockito.times(1)).findAllByExaminationId(EXAMINATION_ID);
+    }
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		extraDataService.save(createExtraData());
+    @Test
+    public void saveTest() throws ShanoirException {
+        extraDataService.save(createExtraData());
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
-	}
+        Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final ExaminationExtraData updatedExtraData = extraDataService.update(createExtraData());
-		Assertions.assertNotNull(updatedExtraData);
-		Assertions.assertTrue(EXTRADATA_FILENAME.equals(updatedExtraData.getFilename()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final ExaminationExtraData updatedExtraData = extraDataService.update(createExtraData());
+        Assertions.assertNotNull(updatedExtraData);
+        Assertions.assertTrue(EXTRADATA_FILENAME.equals(updatedExtraData.getFilename()));
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
-	}
+        Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
+    }
 
-	/*
-	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirException {
-	 * pathologiesService.updateFromShanoirOld(createPathology());
-	 * 
-	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
-	 */
-	private ExaminationExtraData createExtraData() {
-		final ExaminationExtraData extradata = new ExaminationExtraData();
-		extradata.setId(EXTRADATA_ID);
-		extradata.setExaminationId(EXAMINATION_ID);
-		extradata.setExtradatatype(EXTRADATA_TYPE);
-		extradata.setFilename(EXTRADATA_FILENAME);
-		extradata.setFilepath(EXTRADATA_FILEPATH);
-		return extradata;
-	}
+    /*
+     * @Test public void updateFromShanoirOldTest() throws
+     * ShanoirException {
+     * pathologiesService.updateFromShanoirOld(createPathology());
+     *
+     * Mockito.verify(pathologiesRepository,
+     * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+     * Mockito.verify(pathologiesRepository,
+     * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
+     */
+    private ExaminationExtraData createExtraData() {
+        final ExaminationExtraData extradata = new ExaminationExtraData();
+        extradata.setId(EXTRADATA_ID);
+        extradata.setExaminationId(EXAMINATION_ID);
+        extradata.setExtradatatype(EXTRADATA_TYPE);
+        extradata.setFilename(EXTRADATA_FILENAME);
+        extradata.setFilepath(EXTRADATA_FILEPATH);
+        return extradata;
+    }
 
 }

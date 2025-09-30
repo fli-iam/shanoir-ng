@@ -9,26 +9,26 @@ package org.shanoir.ng.bids.model;
  */
 public abstract class BidsElement {
 
-	/** Path of the Bids file. */
-	String path;
+    /** Path of the Bids file. */
+    String path;
 
-	public BidsElement(String path) {
-		this.path = path;
-	}
+    public BidsElement(String path) {
+        this.path = path;
+    }
 
-	/**
-	 * @return the path
-	 */
-	public String getPath() {
-		return path;
-	}
+    /**
+     * @return the path
+     */
+    public String getPath() {
+        return path;
+    }
 
-	/**
-	 * @param path the path to set
-	 */
-	public void setPath(String path) {
-		this.path = path;
-	}
+    /**
+     * @param path the path to set
+     */
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public abstract boolean isFile();
+    public abstract boolean isFile();
 }

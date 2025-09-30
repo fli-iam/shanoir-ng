@@ -1,7 +1,7 @@
 package org.shanoir.ng.importer.model;
 
 public class PatientVerification {
-    
+
     private String firstName;
 
     private String lastName;
@@ -42,13 +42,13 @@ public class PatientVerification {
         this.birthDate = birthDate;
     }
 
-	public String[] displayPatientVerification() {
-		return new String[] {
-				firstName,
-				lastName,
-				birthName,
-				birthDate
-		};
-	}
+    public String[] displayPatientVerification() {
+        return new String[] {
+                firstName,
+                lastName,
+                birthName,
+                birthDate
+        };
+    }
 
 }

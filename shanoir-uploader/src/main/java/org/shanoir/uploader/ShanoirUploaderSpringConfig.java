@@ -8,5 +8,5 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackages = "org.shanoir.uploader")
 @EnableScheduling
 public class ShanoirUploaderSpringConfig {
-    
+
 }

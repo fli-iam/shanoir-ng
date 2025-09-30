@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -55,206 +55,206 @@ import jakarta.validation.Valid;
 @Controller
 public class CenterApiController implements CenterApi {
 
-	@Autowired
-	private CenterMapper centerMapper;
+    @Autowired
+    private CenterMapper centerMapper;
 
-	@Autowired
-	private CenterService centerService;
+    @Autowired
+    private CenterService centerService;
 
-	@Autowired
-	private StudyService studyService;
+    @Autowired
+    private StudyService studyService;
 
-	@Autowired
-	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+    @Autowired
+    private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
 
-	@Autowired
-	private CenterUniqueConstraintManager uniqueConstraintManager;
+    @Autowired
+    private CenterUniqueConstraintManager uniqueConstraintManager;
 
-	@Autowired
-	private ShanoirEventService eventService;
+    @Autowired
+    private ShanoirEventService eventService;
 
-	@Override
-	public ResponseEntity<Void> deleteCenter(
-			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
-					throws RestServiceException {
-		try {
-			if (centerId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown center");
-			}
-			centerService.deleteByIdCheckDependencies(centerId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (UndeletableDependenciesException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",
-					new ErrorDetails(e.getErrorMap())));
-		}
-	}
+    @Override
+    public ResponseEntity<Void> deleteCenter(
+            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+                    throws RestServiceException {
+        try {
+            if (centerId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown center");
+            }
+            centerService.deleteByIdCheckDependencies(centerId);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (UndeletableDependenciesException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",
+                    new ErrorDetails(e.getErrorMap())));
+        }
+    }
 
-	@Override
-	@Transactional
-	public ResponseEntity<CenterDTO> findCenterById(
-			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
-		final Optional<Center> center = centerService.findById(centerId);
-		if (center.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
-	}
+    @Override
+    @Transactional
+    public ResponseEntity<CenterDTO> findCenterById(
+            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+        final Optional<Center> center = centerService.findById(centerId);
+        if (center.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
+    }
 
-	/**
-	 * This method is used by ShanoirUploader, during mass imports (Excel) and imports for studies
-	 * without study cards. We could add a check here to only allow this method on studies, that have
-	 * no study cards, but this would block existing mass imports into today's studies, that is why
-	 * we do not add this restriction today.
-	 */
-	@Override
-	@Transactional
-	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(description = "institution dicom to find or create a center", required = true)
-			@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
-		if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-		Optional<Center> centerOpt = centerService.findByName(institutionDicom.getInstitutionName());
-		if (centerOpt.isEmpty()) {
-			Center center = new Center();
-			center.setName(institutionDicom.getInstitutionName());
-			center.setStreet(institutionDicom.getInstitutionAddress());
-			StudyCenter studyCenter = new StudyCenter();
-			Study study = studyService.findById(studyId);
-			studyCenter.setStudy(study);
-			studyCenter.setCenter(center);
-			List<StudyCenter> studyCenterList = new ArrayList<>();
-			studyCenterList.add(studyCenter);
-			center.setStudyCenterList(studyCenterList);
-			return saveNewCenter(center, result);
-		} else {
-			Center center = centerOpt.orElseThrow();
-			boolean centerInStudy = false;
-			List<StudyCenter> studyCenterList = center.getStudyCenterList();
-			for (StudyCenter studyCenter : studyCenterList) {
-				if (studyCenter.getStudy().getId().equals(studyId)) {
-					centerInStudy = true;
-					break;
-				}
-			}
-			if(!centerInStudy) {
-				StudyCenter studyCenter = new StudyCenter();
-				Study study = studyService.findById(studyId);
-				studyCenter.setStudy(study);
-				studyCenter.setCenter(center);
-				center.getStudyCenterList().add(studyCenter);
-				try {
-					/* Update center in db. */
-					centerService.update(center);
-					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-				} catch (EntityNotFoundException e) {
-					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-				}	
-			}
-		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(centerOpt.orElseThrow()), HttpStatus.OK);			
-	}
+    /**
+     * This method is used by ShanoirUploader, during mass imports (Excel) and imports for studies
+     * without study cards. We could add a check here to only allow this method on studies, that have
+     * no study cards, but this would block existing mass imports into today's studies, that is why
+     * we do not add this restriction today.
+     */
+    @Override
+    @Transactional
+    public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "institution dicom to find or create a center", required = true)
+            @RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+        if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        Optional<Center> centerOpt = centerService.findByName(institutionDicom.getInstitutionName());
+        if (centerOpt.isEmpty()) {
+            Center center = new Center();
+            center.setName(institutionDicom.getInstitutionName());
+            center.setStreet(institutionDicom.getInstitutionAddress());
+            StudyCenter studyCenter = new StudyCenter();
+            Study study = studyService.findById(studyId);
+            studyCenter.setStudy(study);
+            studyCenter.setCenter(center);
+            List<StudyCenter> studyCenterList = new ArrayList<>();
+            studyCenterList.add(studyCenter);
+            center.setStudyCenterList(studyCenterList);
+            return saveNewCenter(center, result);
+        } else {
+            Center center = centerOpt.orElseThrow();
+            boolean centerInStudy = false;
+            List<StudyCenter> studyCenterList = center.getStudyCenterList();
+            for (StudyCenter studyCenter : studyCenterList) {
+                if (studyCenter.getStudy().getId().equals(studyId)) {
+                    centerInStudy = true;
+                    break;
+                }
+            }
+            if (!centerInStudy) {
+                StudyCenter studyCenter = new StudyCenter();
+                Study study = studyService.findById(studyId);
+                studyCenter.setStudy(study);
+                studyCenter.setCenter(center);
+                center.getStudyCenterList().add(studyCenter);
+                try {
+                    /* Update center in db. */
+                    centerService.update(center);
+                    eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+                } catch (EntityNotFoundException e) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+            }
+        }
+        return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(centerOpt.orElseThrow()), HttpStatus.OK);
+    }
 
-	@Override
-	@Transactional
-	public ResponseEntity<List<CenterDTO>> findCenters() {
-		List<Center> centers = centerService.findAll();
-		// Remove "unknown" center
-		centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
-		if (centers.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOsFull(centers), HttpStatus.OK);
-	}
+    @Override
+    @Transactional
+    public ResponseEntity<List<CenterDTO>> findCenters() {
+        List<Center> centers = centerService.findAll();
+        // Remove "unknown" center
+        centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
+        if (centers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(centerMapper.centersToCenterDTOsFull(centers), HttpStatus.OK);
+    }
 
-	@Override
-	@Transactional
-	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<Center> centers = centerService.findByStudy(studyId);
-		if (centers.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOsEquipments(centers), HttpStatus.OK);
-	}
+    @Override
+    @Transactional
+    public ResponseEntity<List<CenterDTO>> findCentersByStudy(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+        final List<Center> centers = centerService.findByStudy(studyId);
+        if (centers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(centerMapper.centersToCenterDTOsEquipments(centers), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<IdName>> findCentersNames() {
-		List<IdName> centers = centerService.findIdsAndNames();
-		// Remove "unknown" center
-		centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
-		if (centers.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(centers, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<IdName>> findCentersNames() {
+        List<IdName> centers = centerService.findIdsAndNames();
+        // Remove "unknown" center
+        centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
+        if (centers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(centers, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<IdName>> findCentersNames(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<IdName> centers = centerService.findIdsAndNames(studyId);
-		if (centers.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(centers, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<IdName>> findCentersNames(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+        final List<IdName> centers = centerService.findIdsAndNames(studyId);
+        if (centers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(centers, HttpStatus.OK);
+    }
 
-	@Override
-	@Transactional
-	public ResponseEntity<CenterDTO> saveNewCenter(
-			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
-			final BindingResult result) throws RestServiceException {
-		forceCentersOfStudyCenterList(center);
-		validate(center, result);
-		/* Save center in db. */
-		final Center createdCenter = centerService.create(center);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
-	}
+    @Override
+    @Transactional
+    public ResponseEntity<CenterDTO> saveNewCenter(
+            @Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
+            final BindingResult result) throws RestServiceException {
+        forceCentersOfStudyCenterList(center);
+        validate(center, result);
+        /* Save center in db. */
+        final Center createdCenter = centerService.create(center);
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updateCenter(
-			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
-			@Parameter(description = "the center to update", required = true) @RequestBody @Valid final Center center,
-			final BindingResult result) throws RestServiceException {
-		try {
-			if (centerId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown center");
-			}
-			forceCentersOfStudyCenterList(center);
-			validate(center, result);
+    @Override
+    public ResponseEntity<Void> updateCenter(
+            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
+            @Parameter(description = "the center to update", required = true) @RequestBody @Valid final Center center,
+            final BindingResult result) throws RestServiceException {
+        try {
+            if (centerId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown center");
+            }
+            forceCentersOfStudyCenterList(center);
+            validate(center, result);
 
-			/* Update center in db. */
-			centerService.update(center);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            /* Update center in db. */
+            centerService.update(center);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} 
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-	private void validate(Center center, BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap()
-				.add(fieldEditionSecurityManager.validate(center))
-				.add(new FieldErrorMap(result))
-				.add(uniqueConstraintManager.validate(center));
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
+    private void validate(Center center, BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap()
+                .add(fieldEditionSecurityManager.validate(center))
+                .add(new FieldErrorMap(result))
+                .add(uniqueConstraintManager.validate(center));
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
 
-	private void forceCentersOfStudyCenterList(Center center) {
-		if (center.getStudyCenterList() != null) {
-			for (StudyCenter sc : center.getStudyCenterList()) {
-				sc.setCenter(center);
-			}
-		}
-	}
+    private void forceCentersOfStudyCenterList(Center center) {
+        if (center.getStudyCenterList() != null) {
+            for (StudyCenter sc : center.getStudyCenterList()) {
+                sc.setCenter(center);
+            }
+        }
+    }
 
 }

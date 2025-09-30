@@ -15,19 +15,19 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  * installed in many hospitals. To progress with the migration and deploy
  * the new version, a "fix" is provided on the server side. Later, when
  * a new version of ShUp is deployed larger, this can be made undone.
- * 
+ *
  * @author mkain
  *
  */
 public class LocalDateSerializer extends JsonSerializer<LocalDate> {
 
-	@Override
-	public void serialize(LocalDate date, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    @Override
+    public void serialize(LocalDate date, JsonGenerator generator, SerializerProvider provider) throws IOException {
         generator.writeStartArray();
         generator.writeNumber(date.getYear());
         generator.writeNumber(date.getMonthValue());
         generator.writeNumber(date.getDayOfMonth());
         generator.writeEndArray();
-	}
+    }
 
 }

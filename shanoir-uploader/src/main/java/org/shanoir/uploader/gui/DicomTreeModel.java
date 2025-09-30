@@ -19,26 +19,26 @@ import org.shanoir.uploader.dicom.query.Media;
  *
  */
 public class DicomTreeModel implements TreeModel {
-	
-	private static final Logger logger = LoggerFactory.getLogger(DicomTreeModel.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(DicomTreeModel.class);
 
     private Vector<TreeModelListener> treeModelListeners =
-        new Vector<TreeModelListener>();
-    
+            new Vector<TreeModelListener>();
+
     private Media media;
- 
+
     public DicomTreeModel(Media media) {
         this.media = media;
-    } 
- 
+    }
+
     /**
      * Returns the child of parent at index index in the parent's child array.
      */
     public Object getChild(Object parent, int index) {
-    	DicomTreeNode p = (DicomTreeNode) parent;
-    	return p.getTreeNodes().toArray()[index];
+        DicomTreeNode p = (DicomTreeNode) parent;
+        return p.getTreeNodes().toArray()[index];
     }
- 
+
     /**
      * Returns the number of children of parent.
      */
@@ -46,29 +46,29 @@ public class DicomTreeModel implements TreeModel {
         DicomTreeNode p = (DicomTreeNode) parent;
         return p.getTreeNodes().size();
     }
- 
+
     /**
      * Returns the index of child in parent.
      */
     public int getIndexOfChild(Object parent, Object child) {
         DicomTreeNode p = (DicomTreeNode) parent;
         DicomTreeNode[] children = (DicomTreeNode[])
-        		p.getTreeNodes().toArray();
+                p.getTreeNodes().toArray();
         for (int i = 0; i < children.length; i++) {
-			if (children[i].equals(child)) {
-				return i;
-			}
-		}
+            if (children[i].equals(child)) {
+                return i;
+            }
+        }
         return -1;
     }
- 
+
     /**
      * Returns the root of the tree.
      */
     public Object getRoot() {
         return media;
     }
- 
+
     /**
      * Returns true if node is a leaf.
      */
@@ -83,14 +83,14 @@ public class DicomTreeModel implements TreeModel {
     public void addTreeModelListener(TreeModelListener l) {
         treeModelListeners.addElement(l);
     }
- 
+
     /**
      * Removes a listener previously added with addTreeModelListener().
      */
     public void removeTreeModelListener(TreeModelListener l) {
         treeModelListeners.removeElement(l);
     }
- 
+
     /**
      * Messaged when the user has altered the value for the item
      * identified by path to newValue. Not used by this model.

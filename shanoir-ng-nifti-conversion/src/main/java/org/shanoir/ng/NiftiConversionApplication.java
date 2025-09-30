@@ -13,10 +13,10 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
  */
 @OpenAPIDefinition
 @EnableWebMvc
-@SpringBootApplication(exclude={DataSourceAutoConfiguration.class,HibernateJpaAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class NiftiConversionApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(NiftiConversionApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(NiftiConversionApplication.class, args);
+    }
 }

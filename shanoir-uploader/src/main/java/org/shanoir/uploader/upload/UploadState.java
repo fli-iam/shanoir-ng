@@ -11,13 +11,13 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlType
 public enum UploadState {
-	START, //
-	START_AUTOIMPORT,
-	START_AUTOIMPORT_FAIL,
-	MISSING, // Is it used ?
-	READY, // Is it used ?
-	UPLOADING_IMAGES, // Is it used ?
-	UPLOADING_JOB_FILE, // Is it used ?
-	FINISHED_UPLOAD, //
-	ERROR //
+    START, //
+    START_AUTOIMPORT,
+    START_AUTOIMPORT_FAIL,
+    MISSING, // Is it used ?
+    READY, // Is it used ?
+    UPLOADING_IMAGES, // Is it used ?
+    UPLOADING_JOB_FILE, // Is it used ?
+    FINISHED_UPLOAD, //
+    ERROR //
 }

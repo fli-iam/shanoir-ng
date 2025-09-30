@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 public class OFSEPSeqIdProcessingTest {
-    
+
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
 
@@ -72,7 +72,7 @@ public class OFSEPSeqIdProcessingTest {
         assertEquals("volume_1", volume.get("id"));
     }
 
-    private double[] getDsOrientation(){
+    private double[] getDsOrientation() {
         return new double[]{1.0,0.0,6.12303176911e-17,6.12303176911e-17,0.0,-1.0};
     }
 
