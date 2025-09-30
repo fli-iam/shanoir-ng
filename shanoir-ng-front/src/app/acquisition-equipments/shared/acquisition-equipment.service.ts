@@ -21,6 +21,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {ShanoirError} from "../../shared/models/error.model";
 import {StudyCard} from "../../study-cards/shared/study-card.model";
 import {ManufacturerModel} from "./manufacturer-model.model";
+import {catchError, map} from "rxjs/operators";
+import {Observable, of} from "rxjs";
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
@@ -31,7 +33,9 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         super(http)
     }
 
-    getEntityInstance() { return new AcquisitionEquipment(); }
+    getEntityInstance() {
+        return new AcquisitionEquipment();
+    }
 
     getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
@@ -49,27 +53,38 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     delete(id: number): Promise<void> {
 
         return this.http.get<StudyCard[]>(AppUtils.BACKEND_API_STUDY_CARD_URL + '/byAcqEq/' + id).toPromise().then(cards => {
-            if (cards?.length == 1){
-                throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'}});
-            } else if (cards?.length > 1){
-                throw new ShanoirError({error: {
-                    code: 422,
-                    message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
-                    details: 'Study cards : ' + cards.map(card => card.id).join(', ')
-                }});
+            if (cards?.length == 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'
+                    }
+                });
+            } else if (cards?.length > 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
+                        details: 'Study cards : ' + cards.map(card => card.id).join(', ')
+                    }
+                });
             }
             return super.delete(id);
         })
     }
 
-    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
-        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
-            equipments => {
-                const hasDuplicate = equipments.some((eq, i, arr) =>
-                    arr.findIndex(e => e.serialNumber === eq.serialNumber && e.manufacturerModel.id === eq.manufacturerModel.id) !== i
-                );
-                return hasDuplicate;
-            }
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel, currentId?: number): Observable<boolean> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).pipe(
+            map(equipments =>
+                equipments.some(eq =>
+                    eq.id !== currentId &&
+                    eq.serialNumber === serialNumber &&
+                    eq.manufacturerModel.id === manufacturerModel.id
+                )
+            ),
+            catchError(() => of(false))
         );
     }
+
+
 }

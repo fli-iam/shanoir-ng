@@ -29,6 +29,8 @@ import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 import { Selection } from 'src/app/studies/study/tree.service';
+import {of, timer} from "rxjs";
+import {catchError, map, switchMap} from "rxjs/operators";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -139,7 +141,14 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): UntypedFormGroup {
         let form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
+            'serialNumber': [
+                this.acqEquip.serialNumber,
+                {
+                    validators: [this.noSpacesStartAndEndValidator],
+                    asyncValidators: [this.uniqueEquipmentValidator],
+                    updateOn: 'change'
+                }
+            ],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
         });
@@ -193,21 +202,22 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
-        if (!control.parent) return null;
+    private uniqueEquipmentValidator: AsyncValidatorFn = (control: AbstractControl) => {
+        if (!control.parent) return of(null);
 
         const serialNumber = control.value;
         const manufacturerModel = control.parent.get('manufacturerModel')?.value;
 
-        if (!serialNumber || !manufacturerModel) return null;
+        if (!serialNumber || !manufacturerModel) return of(null);
 
-        try {
-            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
-            return exists ? { unique: true } : null;
-        } catch (error) {
-            return null;
-        }
-    }
+        const currentId = this.acqEquip?.id;
+
+        return timer(100).pipe(
+            switchMap(() => this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel, currentId)),
+            map(exists => (exists ? { unique: true } : null)),
+            catchError(() => of(null))
+        );
+    };
 
     save(): Promise<AcquisitionEquipment> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
