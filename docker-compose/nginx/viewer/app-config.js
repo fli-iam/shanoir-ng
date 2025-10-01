@@ -3,7 +3,7 @@ window.config = {
 	extensions: [], 
 	modes: [],
 	experimentalStudyBrowserSort: true,
-	showStudyList: true,
+	showStudyList: false,
 	dataSources: [ 
 		{ 
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
