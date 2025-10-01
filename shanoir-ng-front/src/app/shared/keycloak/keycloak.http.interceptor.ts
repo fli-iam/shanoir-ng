@@ -52,7 +52,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
                     return new Observable((observer) => {
                         this.keycloakService.getToken().then((token: string) => {
                             authReq = this.setAuthHeader(authReq);
-                            observer.next();
+                            observer.next(null);
                             observer.complete();
                         }).catch(() => {
                             this.keycloakService.logout();

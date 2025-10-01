@@ -1,5 +1,5 @@
 /**
- < * Shanoir NG - Import, manage and share neuroimaging data
+ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  *

@@ -1,5 +1,5 @@
 /**
-* * Shanoir NG - Import, manage and share neuroimaging data
+ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  *
@@ -11,6 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 package org.shanoir.ng.shared.repository;
 
 import java.math.BigInteger;

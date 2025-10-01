@@ -1,4 +1,3 @@
-package org.shanoir.ng.exchange.model;
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -12,6 +11,7 @@ package org.shanoir.ng.exchange.model;
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.exchange.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

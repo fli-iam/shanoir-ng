@@ -30,7 +30,7 @@ export class Queue {
         return new Promise((resolve, reject) => {
             const sub: Subscription = this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
                 if (calledTicket == ticket) {
-                    stop.next();
+                    stop.next(null);
                     stop.complete();
                     const release = () => {
                         this._queue.next(ticket + 1);

@@ -1,5 +1,3 @@
-package org.shanoir.ng.importer.eeg.brainvision;
-
 /*
  * Copyright (C) 2016 Arne Weigenand
  *
@@ -16,6 +14,7 @@ package org.shanoir.ng.importer.eeg.brainvision;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.shanoir.ng.importer.eeg.brainvision;
 
 import java.io.BufferedReader;
 import java.io.File;
