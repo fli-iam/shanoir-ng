@@ -161,8 +161,6 @@ public class NIfTIConverterService {
                     LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
                 }
                 outputFiles.put(serieIDFolderFile.getName(), niiPathList);
-            } else {
-                // TODO: Something went wrong here -> throw an error maybe ?
             }
         }
         // delete the unused files

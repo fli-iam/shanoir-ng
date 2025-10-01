@@ -217,9 +217,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
             AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
             ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
             if (manufacturerModel != null) {
-                if (equipmentDicom.getManufacturerModelName().toLowerCase().contains(manufacturerModel.getName().toLowerCase())) {
+                if (!equipmentDicom.getManufacturerModelName().toLowerCase().contains(manufacturerModel.getName().toLowerCase())) {
                     // Issue #3012: we ignore the manufacturer name here
-                } else {
                     iterator.remove();
                 }
             } else {

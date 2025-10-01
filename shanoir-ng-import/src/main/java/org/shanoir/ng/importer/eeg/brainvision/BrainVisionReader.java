@@ -531,9 +531,7 @@ public class BrainVisionReader {
                 buf.order(ByteOrder.LITTLE_ENDIAN);
             }
 
-        } else if (dataFormat.equals(DataFormat.ASCII) && dataType.equals(DataType.TIMEDOMAIN)) {
-            // Nothing to be done here
-        } else {
+        } else if (!dataFormat.equals(DataFormat.ASCII) && dataType.equals(DataType.TIMEDOMAIN)) {
             LOG.error("Cannot recognize specific BrainVision format");
         }
 

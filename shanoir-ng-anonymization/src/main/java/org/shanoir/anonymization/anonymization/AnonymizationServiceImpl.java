@@ -340,8 +340,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         String value = getFinalValueForTag(action);
         if (value == null) {
             attributes.remove(tagInt);
-        } else if ("KEEP".equals(value)) {
-            // do nothing
+        // } else if ("KEEP".equals(value)) {
+        //     // do nothing
         } else {
             anonymizeTagAccordingToVR(attributes, tagInt, value);
         }

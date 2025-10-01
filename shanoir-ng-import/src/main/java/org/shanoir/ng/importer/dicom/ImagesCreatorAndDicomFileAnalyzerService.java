@@ -235,9 +235,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
         try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
             Attributes attributes = dIS.readDataset();
             // Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
-            if (DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
-                // do nothing here as instances list will be emptied after split between images and non-images
-            } else {
+            if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+                // else do nothing here as instances list will be emptied after split between images and non-images
                 Image image = new Image();
                 String relativeFilePath = new String();
                 /**

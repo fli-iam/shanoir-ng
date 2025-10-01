@@ -183,7 +183,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- Checks for blocks. You know, those {}'s         -->
     <!-- See https://checkstyle.org/checks/blocks/index.html -->
     <module name="AvoidNestedBlocks"/>
-    <!-- <module name="EmptyBlock"/> -->
+    <module name="EmptyBlock"/>
     <module name="LeftCurly"/>
     <module name="RightCurly"/>
     <!-- <module name="NeedBraces"/> -->
