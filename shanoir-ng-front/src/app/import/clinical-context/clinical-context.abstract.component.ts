@@ -439,6 +439,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectCenter(): Promise<any> {
         if (this.center) {
             this.loading++;
+            this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;
             this.acquisitionEquipment = null;
             if (this.center) {
                 this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
