@@ -61,7 +61,7 @@ public class JSONUtils {
                 } else if (valueThis instanceof Number && valueOther instanceof Number) {
                     if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                         return false;
-                    };
+                    }
                 } else if (!valueThis.equals(valueOther)) {
                     return false;
                 }
@@ -206,4 +206,3 @@ public class JSONUtils {
         return true;
     }
 }
-

@@ -39,7 +39,9 @@ public enum ExecutionStatus {
     @JsonCreator
     public static ExecutionStatus fromRestLabel(String restlabel) {
         for (ExecutionStatus status : values()) {
-            if (status.restLabel.equals(restlabel)) { return status; }
+            if (status.restLabel.equals(restlabel)) {
+                return status;
+            }
         }
         throw new IllegalArgumentException("Unknown execution status : " + restlabel);
     }

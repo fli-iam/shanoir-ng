@@ -184,9 +184,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- See https://checkstyle.org/checks/blocks/index.html -->
     <module name="AvoidNestedBlocks"/>
     <!-- <module name="EmptyBlock"/> -->
-    <!-- <module name="LeftCurly"/> -->
+    <module name="LeftCurly"/>
+    <module name="RightCurly"/>
     <!-- <module name="NeedBraces"/> -->
-    <!-- <module name="RightCurly"/> -->
 
     <!-- Checks for common coding problems               -->
     <!-- See https://checkstyle.org/checks/coding/index.html -->

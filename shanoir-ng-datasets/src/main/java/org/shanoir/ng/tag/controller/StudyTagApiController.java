@@ -45,7 +45,9 @@ public class StudyTagApiController implements StudyTagApi {
     @Override
     public ResponseEntity<Void> addStudyTagsToDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
         Dataset ds = datasetService.findById(datasetId);
-        if (Objects.isNull(ds)) { throw new EntityNotFoundException(Dataset.class, datasetId); }
+        if (Objects.isNull(ds)) {
+            throw new EntityNotFoundException(Dataset.class, datasetId);
+        }
 
         studyTagService.addStudyTagsToDataset(ds, studyTagIds);
 
@@ -55,7 +57,9 @@ public class StudyTagApiController implements StudyTagApi {
     @Override
     public ResponseEntity<Void> removeStudyTagsFromDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
         Dataset ds = datasetService.findById(datasetId);
-        if (Objects.isNull(ds)) { throw new EntityNotFoundException(Dataset.class, datasetId); }
+        if (Objects.isNull(ds)) {
+            throw new EntityNotFoundException(Dataset.class, datasetId);
+        }
 
         studyTagService.removeStudyTagsFromDataset(ds, studyTagIds);
 

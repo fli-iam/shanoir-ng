@@ -247,12 +247,10 @@ public class StudyServiceTest {
             assertTrue(su.isConfirmed());
             if (su.getId() == null) {
                 assertEquals(suToBeAdded, su);
-            }
-            else if (su.getId().equals("1L")) {
+            } else if (su.getId().equals("1L")) {
                 assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
                 assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
-            }
-            else if (su.getId().equals("2L")) {
+            } else if (su.getId().equals("2L")) {
                 //This su should have been deleted
                 fail("This study user with id 2 should have been removed");
             }
@@ -283,12 +281,10 @@ public class StudyServiceTest {
             assertFalse(su.isConfirmed());
             if (su.getId() == null) {
                 assertEquals(suToBeAdded, su);
-            }
-            else if (su.getId().equals(1L)) {
+            } else if (su.getId().equals(1L)) {
                 assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
                 assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
-            }
-            else if (su.getId().equals(2L)) {
+            } else if (su.getId().equals(2L)) {
                 //This su should have been deleted
                 fail("This study user with id 2 should have been removed");
             }

@@ -424,57 +424,41 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         if (vr.equals(VR.SL) || vr.equals(VR.UL) || vr.equals(VR.AT) || vr.equals(VR.SS) || vr.equals(VR.US)) {
             Integer iValue = Integer.decode(value);
             attributes.setInt(tag, vr, iValue);
-        }
-
-        // VR.FD = Floating Point Double
-        else if (vr.equals(VR.FD)) {
+        } else if (vr.equals(VR.FD)) { // VR.FD = Floating Point Double
             Double dValue = Double.valueOf(value);
             attributes.setDouble(tag, vr, dValue);
-        }
-
-        // VR.FL = Floating Point Single
-        else if (vr.equals(VR.FL)) {
+        } else if (vr.equals(VR.FL)) { // VR.FL = Floating Point Single
             Float fValue = Float.valueOf(value);
             attributes.setFloat(tag, vr, fValue);
-        }
-
-        // VR.OB = Other Byte String
-        else if (vr.equals(VR.OB)) {
+        } else if (vr.equals(VR.OB)) { // VR.OB = Other Byte String
             byte[] b = new byte[1];
             attributes.setBytes(tag, vr, b);
-        }
-
-        // VR.SQ = Sequence of Items || VR.UN = Unknown
-        else if (vr.equals(VR.SQ) || vr.equals(VR.UN)) {
+        } else if (vr.equals(VR.SQ) || vr.equals(VR.UN)) { // VR.SQ = Sequence of Items || VR.UN = Unknown
             attributes.setNull(tag, vr);
-        }
-
-        // Unlimited string:
-        // VR.AE = Age String
-        // VR.AS = Application Entity
-        // VR.CS = Code String
-        // VR.DA = Date
-        // VR.DS = Date Time
-        // VR.DT = Decimal String
-        // VR.IS = Integer String
-        // VR.LO = Long String
-        // VR.LT = Long Text
-        // VR.OF = Other Float String
-        // VR.OW = Other Word String
-        // VR.PN = Person Name
-        // VR.SH = Short String
-        // VR.ST = Short Text
-        // VR.TM = Time
-        // VR.UI = Unique Identifier (UID)
-        // VR.UT = Unlimited Text
-        else if (vr.equals(VR.AE) || vr.equals(VR.AS) || vr.equals(VR.CS) || vr.equals(VR.DA) || vr.equals(VR.DS)
+        } else if (vr.equals(VR.AE) || vr.equals(VR.AS) || vr.equals(VR.CS) || vr.equals(VR.DA) || vr.equals(VR.DS)
                 || vr.equals(VR.DT) || vr.equals(VR.IS) || vr.equals(VR.LO) || vr.equals(VR.LT) || vr.equals(VR.OW)
                 || vr.equals(VR.PN) || vr.equals(VR.SH) || vr.equals(VR.ST) || vr.equals(VR.TM) || vr.equals(VR.UI)
                 || vr.equals(VR.UT) || vr.equals(VR.OF)) {
+            // Unlimited string:
+            // VR.AE = Age String
+            // VR.AS = Application Entity
+            // VR.CS = Code String
+            // VR.DA = Date
+            // VR.DS = Date Time
+            // VR.DT = Decimal String
+            // VR.IS = Integer String
+            // VR.LO = Long String
+            // VR.LT = Long Text
+            // VR.OF = Other Float String
+            // VR.OW = Other Word String
+            // VR.PN = Person Name
+            // VR.SH = Short String
+            // VR.ST = Short Text
+            // VR.TM = Time
+            // VR.UI = Unique Identifier (UID)
+            // VR.UT = Unlimited Text
             attributes.setString(tag, vr, value);
-        }
-
-        else {
+        } else {
             attributes.setString(tag, vr, value);
         }
 

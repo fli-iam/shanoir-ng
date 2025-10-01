@@ -71,5 +71,7 @@ public enum NiftiConverter {
         return id;
     }
 
-    public String getPath() { return path; }
+    public String getPath() {
+        return path;
+    }
 }

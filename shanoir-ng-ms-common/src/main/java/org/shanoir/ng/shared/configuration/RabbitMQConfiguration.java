@@ -296,7 +296,9 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyDatasetTypeQueue() { return new Queue(STUDY_DATASET_TYPE, true); }
+    public static Queue studyDatasetTypeQueue() {
+        return new Queue(STUDY_DATASET_TYPE, true);
+    }
 
     @Bean
     public static Queue datasetSubjectStudyQueue() {

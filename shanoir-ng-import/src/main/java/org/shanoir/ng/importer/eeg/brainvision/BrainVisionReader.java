@@ -218,10 +218,8 @@ public class BrainVisionReader {
                     if (newLine.contains("<Marker number>") && !newLine.contains("<Description>")) {
                         description = false;
                     }
-                }
-
-                // Parse every new event coming
-                else if (newLine.startsWith("Mk")) {
+                } else if (newLine.startsWith("Mk")) {
+                    // Parse every new event coming
                     String[] tmp = newLine.split(",");
                     // <type>,
                     // [<description>],
@@ -266,20 +264,16 @@ public class BrainVisionReader {
 
             while ((zeile = in.readLine()) != null) {
 
-                // Open DataFile
                 if (zeile.startsWith("DataFile=")) {
+                    // Open DataFile
                     dataFileLocation = file.getParent() + File.separator + zeile.substring(9);
                     entititesInError.remove("DataFile");
-                }
-
-                // Open MarkerFile
-                else if (zeile.startsWith("MarkerFile=")) {
+                } else if (zeile.startsWith("MarkerFile=")) {
+                    // Open MarkerFile
                     markerFile = new File(file.getParent() + File.separator + zeile.substring(11));
                     entititesInError.remove("MarkerFile");
-                }
-
-                // Read DataFormat
-                else if (zeile.startsWith("DataFormat=")) {
+                } else if (zeile.startsWith("DataFormat=")) {
+                    // Read DataFormat
                     switch (zeile.substring(11)) {
                         case "BINARY":
                             dataFormat = DataFormat.BINARY;
@@ -292,10 +286,8 @@ public class BrainVisionReader {
                             break;
                     }
                     entititesInError.remove("DataFormat");
-                }
-
-                // Read DataOrientation
-                else if (zeile.startsWith("DataOrientation=")) {
+                } else if (zeile.startsWith("DataOrientation=")) {
+                    // Read DataOrientation
                     switch (zeile.substring(16)) {
                         case "MULTIPLEXED":
                             dataOrientation = DataOrientation.MULTIPLEXED;
@@ -308,44 +300,32 @@ public class BrainVisionReader {
                             break;
                     }
                     entititesInError.remove("DataOrientation");
-                }
-
-                // Read DataType
-                else if (zeile.startsWith("DataType=")) {
+                } else if (zeile.startsWith("DataType=")) {
+                    // Read DataType
                     if ("TIMEDOMAIN".equals(zeile.substring(9))) {
                         dataType = DataType.TIMEDOMAIN;
                     } else {
                         dataType = DataType.UNKNOWN;
                     }
                     entititesInError.remove("DataType");
-                }
-
-                // Read number of channels
-                else if (zeile.startsWith("NumberOfChannels=")) {
+                } else if (zeile.startsWith("NumberOfChannels=")) {
+                    // Read number of channels
                     nbchan = Integer.parseInt(zeile.substring(17));
                     channelNames = new String[nbchan];
                     entititesInError.remove("NumberOfChannels");
-                }
-
-                // Read number of data points
-                else if (zeile.startsWith("DataPoints=")) {
+                } else if (zeile.startsWith("DataPoints=")) {
+                    // Read number of data points
                     pnts = Integer.parseInt(zeile.substring(11));
                     entititesInError.remove("DataPoints");
-                }
-
-                // Read sampling intervall
-                else if (zeile.startsWith("SamplingInterval")) {
+                } else if (zeile.startsWith("SamplingInterval")) {
+                    // Read sampling intervall
                     samplingIntervall = Float.parseFloat(zeile.substring(17));
                     entititesInError.remove("SamplingInterval");
-                }
-
-                // Read sampling rate
-                else if (zeile.startsWith("Sampling Rate [Hz]: ")) {
+                } else if (zeile.startsWith("Sampling Rate [Hz]: ")) {
+                    // Read sampling rate
                     samplingFrequency = Integer.parseInt(zeile.substring(21));
-                }
-
-                // Read binary format
-                else if (zeile.startsWith("BinaryFormat=")) {
+                } else if (zeile.startsWith("BinaryFormat=")) {
+                    // Read binary format
                     bytes = 2; // default
                     switch (zeile.substring(13)) {
                         case "UINT_16":
@@ -369,10 +349,8 @@ public class BrainVisionReader {
                             break;
                     }
                     entititesInError.remove("BinaryFormat");
-                }
-
-                // Read endian order
-                else if (zeile.startsWith("UseBigEndianOrder=")) {
+                } else if (zeile.startsWith("UseBigEndianOrder=")) {
+                    // Read endian order
                     switch (zeile.substring(18)) {
                         case "NO":
                             useBigEndianOrder = false;
@@ -384,20 +362,14 @@ public class BrainVisionReader {
                             useBigEndianOrder = false;
                             break;
                     }
-                }
-
-                // Read skip lines
-                else if (zeile.startsWith("SkipLines=")) {
+                } else if (zeile.startsWith("SkipLines=")) {
+                    // Read skip lines
                     skipLines = Integer.parseInt(zeile.substring(10));
-                }
-
-                // Read skip columns
-                else if (zeile.startsWith("SkipColumns=")) {
+                } else if (zeile.startsWith("SkipColumns=")) {
+                    // Read skip columns
                     skipColumns = Integer.parseInt(zeile.substring(12));
-                }
-
-                // Construct a list of channels
-                else if (zeile.startsWith("Ch")) {
+                } else if (zeile.startsWith("Ch")) {
+                    // Construct a list of channels
                     String[] tmp = zeile.split(",");
 
                     if (tmp.length == 4) {
@@ -420,14 +392,10 @@ public class BrainVisionReader {
                         chan.setZ(Integer.valueOf(tmp[2]));
                     }
                     entititesInError.remove("Channel info");
-                }
-
-                else if (zeile.startsWith("A m p l i f i e r  S e t u p")) {
+                } else if (zeile.startsWith("A m p l i f i e r  S e t u p")) {
                     amplifier = true;
-                }
-
-                // Get the filter list
-                else if (zeile.startsWith(String.valueOf(channelIndex)) && amplifier) {
+                } else if (zeile.startsWith(String.valueOf(channelIndex)) && amplifier) {
+                    // Get the filter list
                     /*
                      * #     Name      Phys. Chn.    Resolution / Unit   Low Cutoff [s]   High Cutoff [Hz]   Notch [Hz]    Series Res. [kOhm] Gradient         Offset
                      * 1     Fp1         1                0.5 µV             DC             1000              Off                0
@@ -440,8 +408,7 @@ public class BrainVisionReader {
                     channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
                     channelToGet.setNotch("Off".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
                     channelIndex++;
-                }
-                else if (zeile.startsWith("[Coordinates]")) {
+                } else if (zeile.startsWith("[Coordinates]")) {
                     hasPosition = true;
                 }
             }

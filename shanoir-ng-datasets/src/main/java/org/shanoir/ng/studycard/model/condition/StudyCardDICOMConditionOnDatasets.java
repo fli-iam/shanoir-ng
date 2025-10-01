@@ -84,8 +84,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                     Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(datasetId), errorMsg);
                     if (fulfilled == null) {
                         nbUnknown++;
-                    }
-                    else if (fulfilled) {
+                    } else if (fulfilled) {
                         nbOk++;
                     }
                 }
@@ -124,8 +123,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                         Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(dataset.getId()), errorMsg);
                         if (fulfilled == null) {
                             nbUnknown++;
-                        }
-                        else if (fulfilled) {
+                        } else if (fulfilled) {
                             nbOk++;
                         }
                     }
@@ -151,8 +149,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                 Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(datasetId), errorMsg);
                 if (fulfilled == null) {
                     nbUnknown++;
-                }
-                else if (fulfilled) {
+                } else if (fulfilled) {
                     nbOk++;
                 }
             }

@@ -217,8 +217,7 @@ public class DatasetApiController implements DatasetApi {
 
         if (dataset instanceof MrDataset) {
             return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset), HttpStatus.OK);
-        }
-        else if (dataset instanceof EegDataset) {
+        } else if (dataset instanceof EegDataset) {
             return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset), HttpStatus.OK);

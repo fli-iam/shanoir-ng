@@ -67,8 +67,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
                         LOG.info("Solr index already complete, no re-indexation required.");
                     }
                     return;
-                }
-                catch (ConnectException e) {
+                } catch (ConnectException e) {
                     if (System.currentTimeMillis() > deadline) {
                         LOG.warn("Solr index not checked (server not reachable)");
                         return;
@@ -83,4 +82,3 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
         }
     }
 }
-

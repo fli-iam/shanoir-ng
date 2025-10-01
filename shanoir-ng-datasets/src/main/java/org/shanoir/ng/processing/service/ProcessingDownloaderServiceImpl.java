@@ -112,13 +112,16 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
-        };
+        }
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
         if (resultOnly) {
-            processingList.forEach(it -> { it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>()); });
+            processingList.forEach(it -> {
+                it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList());
+                it.setInputDatasets(new ArrayList<>());
+            });
         }
     }
 

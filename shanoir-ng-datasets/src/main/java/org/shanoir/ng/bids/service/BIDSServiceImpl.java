@@ -570,20 +570,13 @@ public class BIDSServiceImpl implements BIDSService {
                     if (metadata != null) {
                         MrSequenceApplication application = metadata.getMrSequenceApplication();
                         if (application != null) {
-                            // CALIBRATION(1), --> fieldmap
-                            if (application.equals(MrSequenceApplication.CALIBRATION)) {
+                            if (application.equals(MrSequenceApplication.CALIBRATION)) { // CALIBRATION(1), --> fieldmap
                                 dataFolder = createDataFolder("fmap", workDir);
-                            }
-                            //MORPHOMETRY(2), ==> anat
-                            else if (application.equals(MrSequenceApplication.MORPHOMETRY)) {
+                            } else if (application.equals(MrSequenceApplication.MORPHOMETRY)) { //MORPHOMETRY(2), ==> anat
                                 dataFolder = createDataFolder("anat", workDir);
-                            }
-                            // DIFFUSION(8), , ==> diffusion
-                            else if (application.equals(MrSequenceApplication.DIFFUSION)) {
+                            } else if (application.equals(MrSequenceApplication.DIFFUSION)) { // DIFFUSION(8), , ==> diffusion
                                 dataFolder = createDataFolder("dwi", workDir);
-                            }
-                            // BOLD(9), , ==> functional
-                            else if (application.equals(MrSequenceApplication.BOLD)) {
+                            } else if (application.equals(MrSequenceApplication.BOLD)) { // BOLD(9), , ==> functional
                                 dataFolder = createDataFolder("func", workDir);
                             }
                         }

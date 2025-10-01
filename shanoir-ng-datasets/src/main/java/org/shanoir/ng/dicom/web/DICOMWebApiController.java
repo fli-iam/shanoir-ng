@@ -192,8 +192,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             } else {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-        }
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

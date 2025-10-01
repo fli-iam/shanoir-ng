@@ -187,9 +187,8 @@ public class StudyCardApiController implements StudyCardApi {
                         VM tagVm = VM.of(tagCode);
                         DicomTagType tagType = DicomTagType.valueOf(tagVr, tagVm);
                         dicomTags.add(new DicomTag(tagCode, field.getName(), tagType, tagVm));
-                    }
-                    // longs actually code a date and a time, see Tag.class
-                    else if (field.getType().getName() == "long") {
+                    } else if (field.getType().getName() == "long") {
+                        // longs actually code a date and a time, see Tag.class
                         String name = field.getName().replace("DateAndTime", "");
                         String hexStr = String.format("%016X", field.getLong(null));
                         String dateStr = hexStr.substring(0, 8);

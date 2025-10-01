@@ -35,8 +35,7 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
                 return dataset.getUpdatedMetadata().getDatasetModalityType().name();
             } else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getDatasetModalityType() != null) {
                 return dataset.getOriginMetadata().getDatasetModalityType().name();
-            }
-            else return null;
+            } else return null;
         }
 
         @Override

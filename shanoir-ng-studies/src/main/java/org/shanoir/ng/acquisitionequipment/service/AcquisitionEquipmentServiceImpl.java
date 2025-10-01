@@ -135,7 +135,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
             updateName(updated);
         } catch (MicroServiceCommunicationException e) {
             LOG.error("Could not send the center name creation to the other microservices !", e);
-        }        return repository.save(entityDb);
+        }
+        return repository.save(entityDb);
     }
 
     public void deleteById(final Long id) throws EntityNotFoundException  {

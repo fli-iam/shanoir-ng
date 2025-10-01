@@ -185,16 +185,17 @@ public class QualityExaminationRule extends AbstractEntity {
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
+
             if (fulfilled) {
                 condResult.addFulfilledConditionsMsg(msg.toString());
             } else {
                 condResult.addUnfulfilledConditionsMsg(msg.toString());
             }
+
             if (isOrConditions() && fulfilled) {
                 allFulfilled = true;
                 break;
-            }
-            else {
+            } else {
                 allFulfilled &= fulfilled;
             }
         }
