@@ -12,18 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 public class DicomDirGeneratorServiceTest {
 
-	@Autowired
-	private DicomDirGeneratorService dicomDirGeneratorService;
+    @Autowired
+    private DicomDirGeneratorService dicomDirGeneratorService;
 
-	@BeforeEach
-	public void setup() {
-		dicomDirGeneratorService = new DicomDirGeneratorService();
-	}
+    @BeforeEach
+    public void setup() {
+        dicomDirGeneratorService = new DicomDirGeneratorService();
+    }
 
-	@Test
-	public void testGenerateDicomDir() throws NoSuchAlgorithmException, IOException {
-//		dicomDirGeneratorService.generateDicomDirFromDirectory(new File("/Users/mkain/Desktop/UCAN-SIM-dataset-5213f9fc-8251-4466-b1a8-194b528bc0af/DICOMDIR"),
-//				new File("/Users/mkain/Desktop/UCAN-SIM-dataset-5213f9fc-8251-4466-b1a8-194b528bc0af"));
-	}
+    @Test
+    public void testGenerateDicomDir() throws NoSuchAlgorithmException, IOException {
+//        dicomDirGeneratorService.generateDicomDirFromDirectory(new File("/Users/mkain/Desktop/UCAN-SIM-dataset-5213f9fc-8251-4466-b1a8-194b528bc0af/DICOMDIR"),
+//                new File("/Users/mkain/Desktop/UCAN-SIM-dataset-5213f9fc-8251-4466-b1a8-194b528bc0af"));
+    }
 
 }

@@ -11,14 +11,14 @@ import org.apache.hc.client5.http.ssl.HttpClientHostnameVerifier;
 
 public class CustomHostnameVerifier implements HttpClientHostnameVerifier {
 
-	@Override
-	public boolean verify(String host, SSLSession session) {
-		HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
-		return hv.verify(host, session);
-	}
+    @Override
+    public boolean verify(String host, SSLSession session) {
+        HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
+        return hv.verify(host, session);
+    }
 
-	@Override
-	public void verify(String host, X509Certificate cert) throws SSLException {
-	}
+    @Override
+    public void verify(String host, X509Certificate cert) throws SSLException {
+    }
 
 }

@@ -27,33 +27,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class ShanoirEventServiceTest {
 
-	@Autowired
-	private ShanoirEventService service;
+    @Autowired
+    private ShanoirEventService service;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@MockBean
-	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
-	@Test
-	public void testAddTask() {
-		// GIVEN a new task to add
-		ShanoirEvent t = new ShanoirEvent();
-		t.setId(Long.valueOf(123));
-		t.setUserId(Long.valueOf(456));
-		t.setMessage("uio");
+    @Test
+    public void testAddTask() {
+        // GIVEN a new task to add
+        ShanoirEvent t = new ShanoirEvent();
+        t.setId(Long.valueOf(123));
+        t.setUserId(Long.valueOf(456));
+        t.setMessage("uio");
 
-		// WHEN we add the task
-		service.publishEvent(t);
+        // WHEN we add the task
+        service.publishEvent(t);
 
-		// THEN the task is sent using RabbitMQ and sent to the front
-		ArgumentCaptor<String> argumentCatcher = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
-		String message = argumentCatcher.getValue();
-		assertNotNull(message);
-		assertTrue(message.contains(t.getId().toString()));
-		assertTrue(message.contains(t.getMessage()));
-		assertTrue(message.contains("" + t.getUserId()));
-	}
+        // THEN the task is sent using RabbitMQ and sent to the front
+        ArgumentCaptor<String> argumentCatcher = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
+        String message = argumentCatcher.getValue();
+        assertNotNull(message);
+        assertTrue(message.contains(t.getId().toString()));
+        assertTrue(message.contains(t.getMessage()));
+        assertTrue(message.contains("" + t.getUserId()));
+    }
 }

@@ -27,21 +27,21 @@ public class DatasetFileUtilsTest {
 
     @Test
     public void writeInputFileForExport() throws IOException {
-      
+
         File sample = new File("src/test/resources/input.json");
 
         Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
 
-        String[] files1 = { "/path/to/file_1.dcm",
+        String[] files1 = {"/path/to/file_1.dcm",
                 "/path/to/file_2.dcm",
-                "/path/to/file_3.dcm" };
+                "/path/to/file_3.dcm"};
 
-        String[] files2 = { "/path/to/file_4.dcm",
-               "/path/to/file_5.dcm" };
+        String[] files2 = {"/path/to/file_4.dcm",
+                "/path/to/file_5.dcm"};
 
         files2AcquisitionId.put(1L, Arrays.asList(files1));
         files2AcquisitionId.put(2L, Arrays.asList(files2));
-       
+
         ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bytesOutputStream, StandardCharsets.UTF_8);
 

@@ -62,12 +62,12 @@ public class DatasetTransactionalServiceImpl {
     public void deleteNifti(Dataset dataset) {
         Set<DatasetExpression> expressionsToDelete = new HashSet<>();
 
-        for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
+        for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext();) {
             DatasetExpression expression = iterex.next();
             if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
                 continue;
             }
-            for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext(); ) {
+            for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext();) {
                 DatasetFile file = iter.next();
                 URL url = null;
                 try {

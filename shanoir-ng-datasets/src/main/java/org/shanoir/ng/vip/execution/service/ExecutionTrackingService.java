@@ -11,7 +11,7 @@ public interface ExecutionTrackingService {
      * @param executionMonitoring
      * @param execStatus
      */
-    void updateTrackingFile(ExecutionMonitoring executionMonitoring, ExecutionTrackingServiceImpl.execStatus execStatus);
+    void updateTrackingFile(ExecutionMonitoring executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus execStatus);
 
     /**
      * Complete the tracking line relative to : the pipeline / the execution monitoring / the new processing generated

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -43,22 +43,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class SubjectService {
 
-	@Autowired
-	private SubjectRepository subjectRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
-	@Autowired
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	public List<Subject> update(final Iterable<Subject> subjectsNew) throws EntityNotFoundException, MicroServiceCommunicationException {
+    public List<Subject> update(final Iterable<Subject> subjectsNew) throws EntityNotFoundException, MicroServiceCommunicationException {
         if (subjectsNew == null) return null;
-		Set<Long> ids = new HashSet<>();
-	    for (Subject subjectNew : subjectsNew) {
-	        ids.add(subjectNew.getId());
-	    }
-		final Iterable<Subject> subjectsOld = subjectRepository.findAllById(ids);
+        Set<Long> ids = new HashSet<>();
+        for (Subject subjectNew : subjectsNew) {
+            ids.add(subjectNew.getId());
+        }
+        final Iterable<Subject> subjectsOld = subjectRepository.findAllById(ids);
         for (Subject subjectNew : subjectsNew) {
             for (Subject subjectOld : subjectsOld) {
                 if (subjectOld.getId().equals(subjectNew.getId())) {
@@ -67,12 +67,12 @@ public class SubjectService {
                 }
             }
         }
-		subjectRepository.saveAll(subjectsOld);
-        List<SubjectQualityTagDTO> SubjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectsOld));
-        this.send(SubjectTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
-		return Utils.toList(subjectsOld);
-	}
-	
+        subjectRepository.saveAll(subjectsOld);
+        List<SubjectQualityTagDTO> subjectTagDTOs = getSubjectTagDTOs(Utils.toList(subjectsOld));
+        this.send(subjectTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
+        return Utils.toList(subjectsOld);
+    }
+
     private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) {
         subjectOld.setId(subjectNew.getId());
         subjectOld.setSubjectType(subjectNew.getSubjectType());
@@ -83,12 +83,12 @@ public class SubjectService {
     private List<SubjectQualityTagDTO> getSubjectTagDTOs(List<Subject> updatedSubjects) {
         List<SubjectQualityTagDTO> dtos = new ArrayList<>();
         if (updatedSubjects != null) {
-            for (Subject Subject : updatedSubjects) {
+            for (Subject subject : updatedSubjects) {
                 SubjectQualityTagDTO dto = new SubjectQualityTagDTO();
-                dto.setSubjectId(Subject.getId());
-                dto.setTag(Subject.getQualityTag());
+                dto.setSubjectId(subject.getId());
+                dto.setTag(subject.getQualityTag());
                 dtos.add(dto);
-            }            
+            }
         }
         return dtos;
     }
@@ -97,12 +97,12 @@ public class SubjectService {
         return subjectRepository.findByStudy_Id(studyId);
     }
 
-	private void send(Object obj, String queue) throws MicroServiceCommunicationException {
-	    try {
-	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
-	    } catch (AmqpException | JsonProcessingException e) {
-	        throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
-	    }
-	}
+    private void send(Object obj, String queue) throws MicroServiceCommunicationException {
+        try {
+            rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+        }
+    }
 
 }

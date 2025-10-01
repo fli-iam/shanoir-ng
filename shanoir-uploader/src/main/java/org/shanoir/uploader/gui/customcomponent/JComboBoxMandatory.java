@@ -6,31 +6,31 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
 public class JComboBoxMandatory<E> extends JComboBox {
-	
-	public JComboBoxMandatory() {
-		super();
-	}
 
-	public JComboBoxMandatory(ComboBoxModel aModel) {
-		super(aModel);
-	}
+    public JComboBoxMandatory() {
+        super();
+    }
 
-	public JComboBoxMandatory(Object[] items) {
-		super(items);
-	}
+    public JComboBoxMandatory(ComboBoxModel aModel) {
+        super(aModel);
+    }
 
-	public JComboBoxMandatory(Vector items) {
-		super(items);
-	}
+    public JComboBoxMandatory(Object[] items) {
+        super(items);
+    }
 
-	private boolean valueSet;
+    public JComboBoxMandatory(Vector items) {
+        super(items);
+    }
 
-	public boolean isValueSet() {
-		return valueSet;
-	}
+    private boolean valueSet;
 
-	public void setValueSet(boolean valueSet) {
-		this.valueSet = valueSet;
-	}
-	
+    public boolean isValueSet() {
+        return valueSet;
+    }
+
+    public void setValueSet(boolean valueSet) {
+        this.valueSet = valueSet;
+    }
+
 }
