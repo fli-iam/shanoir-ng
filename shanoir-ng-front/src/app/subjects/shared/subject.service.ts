@@ -17,11 +17,9 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { SubjectStudy } from './subject-study.model';
 import { Subject } from './subject.model';
 import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
-import { SubjectStudyDTO } from './subject-study.dto';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 
 @Injectable()
@@ -66,13 +64,6 @@ export class SubjectService extends EntityService<Subject> {
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
         return this.http.get<SubjectDTO>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
             .toPromise().then(dto => this.mapEntity(dto));
-    }
-
-    updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<void> {
-        return this.http.put<void>(
-                AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id,
-                JSON.stringify(new SubjectStudyDTO(subjectStudy))
-            ).toPromise();
     }
 
     protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {

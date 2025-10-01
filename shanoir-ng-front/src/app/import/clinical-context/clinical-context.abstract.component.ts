@@ -67,10 +67,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public isAdminOfStudy: boolean[] = [];
     public scHasDifferentModality: string;
     public modality: string;
-    openSubjectStudy: boolean = false;
     loading: number = 0;
     reloading: boolean = false;
-    editSubjectStudy: boolean = true;
     protected stepTs: number;
 
     constructor(
@@ -329,7 +327,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     protected getSubjectList(studyId: number): Promise<Subject[]> {
-        this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
         } else {
@@ -451,8 +448,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.center) {
             this.loading++;
             this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;
-            this.openSubjectStudy = false;
-
             this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
             this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
             this.loading--;
@@ -474,7 +469,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                     });
         } else {
             this.loading--;
-            this.openSubjectStudy = false;
             return Promise.resolve();
         }
     }

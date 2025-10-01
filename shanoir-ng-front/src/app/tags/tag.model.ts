@@ -44,20 +44,3 @@ export class Tag extends Entity {
         t.name = this.name;
     }
 }
-
-
-export class SubjectStudyTagDTO {
-
-    constructor(
-        public subjectStudy: Id,
-        public tag: Tag
-    ) {}
-}
-
-export class StudyTagDTO {
-
-  constructor(
-    public subjectStudy: Id,
-    public tag: Tag
-  ) {}
-}

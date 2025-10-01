@@ -18,8 +18,6 @@ import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
@@ -105,10 +103,10 @@ export class StudyDTOService {
         }
         entity.studyStatus = dto.studyStatus;
         entity.studyType = dto.studyType;
-        if (dto.subjectStudyList) {
-            entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => this.dtoToSubjectStudy(subjectStudyDto, entity));
+        if (dto.subjects) {
+            entity.subjects = dto.subjects.map(subjectDto => this.dtoToSubject(subjectDto));
         } else {
-            entity.subjectStudyList = [];
+            entity.subjects = [];
         }
         if (dto.studyUserList) {
             entity.studyUserList = dto.studyUserList.map(studyUserDto => {
@@ -190,42 +188,27 @@ export class StudyDTOService {
         return tag;
     }
 
-    static dtoToSubjectStudy(subjectStudyDto: SubjectStudyDTO, study?: Study, subject?: Subject): SubjectStudy {
-        let subjectStudy: SubjectStudy = new SubjectStudy();
-        subjectStudy.id = subjectStudyDto.id;
-        subjectStudy.physicallyInvolved = subjectStudyDto.physicallyInvolved;
-        if (study) {
-            subjectStudy.study = study;
-            subjectStudy.studyId = study.id;
-            subjectStudy.study.tags = study.tags;
-            subjectStudy.study.studyTags = study.studyTags;
-        } else if (subjectStudyDto.study) {
-            subjectStudy.study = new Study();
-            subjectStudy.study.id = subjectStudyDto.study.id;
-            subjectStudy.study.name = subjectStudyDto.study.name;
-            subjectStudy.study.tags = subjectStudyDto.study.tags ? subjectStudyDto.study.tags.map(this.tagDTOToTag) : [];
-            subjectStudy.study.studyTags = subjectStudyDto.study.studyTags ? subjectStudyDto.study.studyTags.map(this.tagDTOToTag) : [];
-        }
-        subjectStudy.studyId = subjectStudy.study.id;
-        if (subject) {
-            subjectStudy.subject = subject;
-            subjectStudy.subjectId = subject.id;
-        } else if (subjectStudyDto.subject) {
-            subjectStudy.subject = new Subject();
-            subjectStudy.subject.id = subjectStudyDto.subject.id;
-            subjectStudy.subjectId = subjectStudyDto.subject.id;
-            subjectStudy.subject.name = subjectStudyDto.subject.name;
-            subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
-            subjectStudy.subject.subjectType = subjectStudyDto.subjectType;
-        }
-        subjectStudy.studyIdentifier = subjectStudyDto.studyIdentifier;
-        if (subjectStudyDto.tags) {
-          subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
-        } else {
-          subjectStudy.tags = [];
-        }
-        subjectStudy.qualityTag = subjectStudyDto.qualityTag;
-        return subjectStudy;
+    static dtoToSubject(dtoSubject: SubjectDTO): Subject {
+        let subject: Subject = new Subject();
+        subject.name = dtoSubject.name;
+        subject.imagedObjectCategory = dtoSubject.imagedObjectCategory;
+        subject.birthDate = dtoSubject.birthDate;
+        subject.id = dtoSubject.id;
+        subject.subjectType = dtoSubject.subjectType;
+        subject.physicallyInvolved = dtoSubject.physicallyInvolved;
+        subject.isAlreadyAnonymized = dtoSubject.isAlreadyAnonymized;
+        subject.studyIdentifier = dtoSubject.studyIdentifier;
+        subject.tags = dtoSubject.tags;
+        subject.qualityTag = dtoSubject.qualityTag;
+        subject.studyId = dtoSubject.studyId;
+        subject.languageHemisphericDominance = dtoSubject.languageHemisphericDominance;
+        subject.manualHemisphericDominance = dtoSubject.manualHemisphericDominance;
+        subject.identifier = dtoSubject.identifier;
+        subject.preclinical = dtoSubject.preclinical;
+        subject.sex = dtoSubject.sex;
+        subject.selected = dtoSubject.selected;
+
+        return subject;
     }
 
     static dtoToStudyCenter(dtoStudyCenter: StudyCenterDTO): StudyCenter {
@@ -281,7 +264,7 @@ export class StudyDTO {
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
     studyType: StudyType;
     studyUserList: StudyUserDTO[];
-    subjectStudyList: SubjectStudyDTO[] = [];
+    subjects: SubjectDTO[] = [];
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
@@ -317,8 +300,10 @@ export class StudyDTO {
             dto.study = null;
             return dto;
         }) : null;
-        this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
+        this.subjects = study.subjects ? study.subjects.map(su => {
+            console.log("su : ", su);
+            su.study = study;
+            let dto = new SubjectDTO(su);
             dto.study = null;
             return dto;
         }) : null;

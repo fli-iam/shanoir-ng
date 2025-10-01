@@ -15,10 +15,8 @@ import { Injectable } from '@angular/core';
 
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
-import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import {Sex, SubjectType} from './subject.types';
 import {formatDate} from "@angular/common";
@@ -74,11 +72,6 @@ export class SubjectDTOService {
         entity.manualHemisphericDominance = dto.manualHemisphericDominance;
         entity.imagedObjectCategory = dto.imagedObjectCategory;
         entity.sex = dto.sex;
-        if (dto.subjectStudyList) {
-            entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => StudyDTOService.dtoToSubjectStudy(subjectStudyDto, null, entity));
-        } else {
-            entity.subjectStudyList = [];
-        }
         entity.studyIdentifier = dto.studyIdentifier;
         entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
         entity.subjectType = dto.subjectType;
@@ -105,13 +98,12 @@ export class SubjectDTO {
     examinations: Id[];
     name: string;
     identifier: string;
-    birthDate: string;
+    birthDate: Date;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
-    subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
     studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
@@ -127,18 +119,13 @@ export class SubjectDTO {
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        if (subject.birthDate && !isNaN(subject.birthDate.getTime())) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
+        this.birthDate = subject.birthDate;
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;
         this.sex = subject.sex;
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
-        this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
-            dto.subject = null;
-            return dto;
-        }) : null;
         this.studyIdentifier = subject.studyIdentifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;
