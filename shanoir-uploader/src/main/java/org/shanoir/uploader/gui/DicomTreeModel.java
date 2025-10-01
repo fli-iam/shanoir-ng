@@ -23,7 +23,7 @@ public class DicomTreeModel implements TreeModel {
 	private static final Logger logger = LoggerFactory.getLogger(DicomTreeModel.class);
 
     private Vector<TreeModelListener> treeModelListeners =
-        new Vector<TreeModelListener>();
+            new Vector<TreeModelListener>();
     
     private Media media;
  

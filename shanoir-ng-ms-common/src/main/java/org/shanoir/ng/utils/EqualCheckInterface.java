@@ -15,6 +15,6 @@
 package org.shanoir.ng.utils;
 
 @FunctionalInterface
-public interface EqualCheckInterface <T> {
+public interface EqualCheckInterface<T> {
     boolean check(T a, T b);
 }

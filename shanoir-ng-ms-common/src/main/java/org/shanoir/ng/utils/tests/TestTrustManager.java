@@ -24,9 +24,9 @@ public class TestTrustManager implements X509TrustManager {
 	}
 	
 	@Override
-	public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+	public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
 	
 	@Override
-	public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+	public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
 }
 

@@ -1,6 +1,6 @@
 package org.shanoir.uploader.model.rest;
 
-public class Investigator implements Comparable<Investigator>{
+public class Investigator implements Comparable<Investigator> {
 	
 	private Long id;
 	

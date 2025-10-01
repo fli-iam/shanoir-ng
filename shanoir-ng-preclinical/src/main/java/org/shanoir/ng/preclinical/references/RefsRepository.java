@@ -16,6 +16,5 @@ package org.shanoir.ng.preclinical.references;
 
 import org.springframework.data.repository.CrudRepository;
 
-public interface RefsRepository extends CrudRepository<Reference, Long>, RefsRepositoryCustom{
-
+public interface RefsRepository extends CrudRepository<Reference, Long>, RefsRepositoryCustom {
 }

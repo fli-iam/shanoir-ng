@@ -34,7 +34,7 @@ public class Cardinality {
 			isMultiplier = true;
 			number = 1;	
 		} else {
-			if (strCopy.contains("n")){
+			if (strCopy.contains("n")) {
 				isMultiplier = true;
 				strCopy = strCopy.replace("n", "");
 			} else {
@@ -70,6 +70,14 @@ public class Cardinality {
 		return obj != null && obj instanceof Cardinality 
 			&& ((Cardinality) obj).isMultiplier() == this.isMultiplier()
 			&& ((Cardinality) obj).getNumber() == this.getNumber();
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 17;
+		result = 31 * result + number;
+		result = 31 * result + (isMultiplier ? 1 : 0);
+		return result;
 	}
 
 	@Override

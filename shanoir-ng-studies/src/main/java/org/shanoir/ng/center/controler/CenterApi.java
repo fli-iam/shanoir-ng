@@ -93,7 +93,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
-	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
+	public ResponseEntity<List<CenterDTO>> findCentersByStudy(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns id and name for all the centers")

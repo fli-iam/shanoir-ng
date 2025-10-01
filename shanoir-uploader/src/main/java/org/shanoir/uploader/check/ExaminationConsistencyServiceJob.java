@@ -148,10 +148,10 @@ public class ExaminationConsistencyServiceJob {
                     }
                 }
                 logger.info(studies.size() + " DICOM study (examination) of"
-                    + " subject: " + importJob.getSubjectName()
-                    + ", studyDate: " + importJob.getStudy().getStudyDate()
-                    + " checked for consistency of "
-                    + numberOfInstances + " DICOM instances (images)");
+                        + " subject: " + importJob.getSubjectName()
+                        + ", studyDate: " + importJob.getStudy().getStudyDate()
+                        + " checked for consistency of "
+                        + numberOfInstances + " DICOM instances (images)");
             }
         }
         return true;
@@ -187,7 +187,7 @@ public class ExaminationConsistencyServiceJob {
             }
         } else {
             logger.error("Serie: " + serie.getSeriesDescription()
-                + ", DICOM instance not found locally: " + instanceFilePath);
+                    + ", DICOM instance not found locally: " + instanceFilePath);
             throw new FileNotFoundException();
         }
         return numberOfInstances;

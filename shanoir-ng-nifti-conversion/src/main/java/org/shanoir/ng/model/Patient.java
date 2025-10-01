@@ -58,7 +58,7 @@ public class Patient {
 	private Subject subject;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() {}
+	public Patient() { }
 
 	public Patient(final Attributes attributes) {
 		this.patientID = attributes.getString(Tag.PatientID);

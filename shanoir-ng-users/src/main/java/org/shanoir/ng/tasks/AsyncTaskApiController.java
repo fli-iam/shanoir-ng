@@ -81,6 +81,6 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 		UserSseEmitter emitter = new UserSseEmitter(userId);
 		emitters.add(emitter);
 		emitter.onCompletion(() -> emitters.remove(emitter));
-		return new ResponseEntity<>(emitter,HttpStatus.OK);
+		return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 }

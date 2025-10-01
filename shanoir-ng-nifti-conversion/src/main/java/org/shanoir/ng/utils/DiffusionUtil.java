@@ -194,7 +194,7 @@ public final class DiffusionUtil {
 	 *            the file
 	 */
 	private static void writeBval(final double[] bval, final File file) {
-		try (final FileWriter wri = new FileWriter(file)){
+		try (final FileWriter wri = new FileWriter(file)) {
 			final String bvalString = DiffusionUtil.bvalToString(bval);
 			wri.write(bvalString);
 		} catch (Exception e) {
@@ -211,7 +211,7 @@ public final class DiffusionUtil {
 	 *            the file
 	 */
 	private static void writeBvec(final double[][] bvec, final File file) {
-		try (FileWriter wri = new FileWriter(file)){
+		try (FileWriter wri = new FileWriter(file)) {
 			wri.write(DiffusionUtil.bvecToString(bvec));
 		} catch (Exception e) {
 			LOG.error(e.getMessage());

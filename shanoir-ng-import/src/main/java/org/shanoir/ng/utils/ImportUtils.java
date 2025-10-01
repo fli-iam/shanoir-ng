@@ -200,7 +200,7 @@ public class ImportUtils {
 			}
 			File[] children = fileToZip.listFiles();
 			for (File childFile : children) {
-				zipFile(childFile, (first? "" : fileName + "/") + childFile.getName(), zipOut, false);
+				zipFile(childFile, (first ? "" : fileName + "/") + childFile.getName(), zipOut, false);
 			}
 			return;
 		}
@@ -372,7 +372,7 @@ public class ImportUtils {
 	public static String readableFileSize(long size) {
 		if (size <= 0)
 			return "0";
-		final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+		final String[] units = new String[] {"B", "kB", "MB", "GB", "TB"};
 		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
 		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + units[digitGroups];
 	}

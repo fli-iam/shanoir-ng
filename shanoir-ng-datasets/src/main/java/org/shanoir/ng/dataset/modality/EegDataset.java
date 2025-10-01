@@ -62,7 +62,7 @@ public class EegDataset extends Dataset {
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<Event> events;
 
-	public EegDataset() {}
+	public EegDataset() { }
 
 	public EegDataset(Dataset other) {
 		super(other);

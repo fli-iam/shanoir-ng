@@ -137,7 +137,7 @@ public class DicomJsonUtils {
             String propertyName = properties.getString(l);
             Object property = child.get(propertyName);
             if (property instanceof JSONObject) {
-                if (parent.has(propertyName) && !JSONUtils.equals((JSONObject)property, parent.getJSONObject(propertyName))) {
+                if (parent.has(propertyName) && !JSONUtils.equals((JSONObject) property, parent.getJSONObject(propertyName))) {
                     parent.remove(propertyName);
                 }                
             }

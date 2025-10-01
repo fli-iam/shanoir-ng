@@ -123,7 +123,7 @@ public interface StudyCardApi {
 	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
+	@PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
 	ResponseEntity<List<StudyCard>> searchStudyCards(
 			@Parameter(description = "study ids", required = true) @RequestBody IdList studyIds);	
 	
@@ -135,7 +135,7 @@ public interface StudyCardApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateStudyCard(
 			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(description = "study card to update", required = true) @RequestBody StudyCard studyCard,

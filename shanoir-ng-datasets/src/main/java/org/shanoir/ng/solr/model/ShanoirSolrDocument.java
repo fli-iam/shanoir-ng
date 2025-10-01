@@ -110,10 +110,10 @@ public class ShanoirSolrDocument {
 	@Field
 	private String username;
 
-	public ShanoirSolrDocument () {		
+	public ShanoirSolrDocument() {
 	}
 	
-	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
+	public ShanoirSolrDocument(String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
 			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username, Integer sortingIndex) {

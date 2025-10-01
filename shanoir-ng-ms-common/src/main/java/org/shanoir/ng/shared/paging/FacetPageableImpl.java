@@ -113,7 +113,7 @@ public class FacetPageableImpl implements FacetPageable {
 	public void setFacetOrder(String facetOrder) {
 		try {
 			this.facetOrder = FacetOrder.valueOf(facetOrder);			
-		} catch (IllegalArgumentException e) {}
+		} catch (IllegalArgumentException e) { }
 	}
 
 	@Override

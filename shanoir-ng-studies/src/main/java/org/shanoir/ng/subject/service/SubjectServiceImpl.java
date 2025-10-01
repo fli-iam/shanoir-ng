@@ -386,7 +386,7 @@ public class SubjectServiceImpl implements SubjectService {
 		sSOld.setSubjectStudyTags(subjectStudyTagsOld);
 	}
 
-	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException{
+	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.
 					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,

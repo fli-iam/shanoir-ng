@@ -113,7 +113,7 @@ public class Serie implements Cloneable {
 	private List<Dataset> datasets;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Serie() {}
+	public Serie() { }
 
 	public Serie(Attributes attributes) {
 		seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);

@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author yyao
  *
  */
-public class StudyCenterDecorator implements StudyCenterMapper{
+public class StudyCenterDecorator implements StudyCenterMapper {
 	
 	@Autowired
 	private StudyCenterMapper delegate;

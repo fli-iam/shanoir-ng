@@ -23,11 +23,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 /**
  * Service managing ShanoirEvents
  * @author fli
@@ -109,7 +104,7 @@ public class ShanoirEventsService {
 	 * Deletes everyday events older than 1 year.
 	 */
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
-	private void deletePeriodically( ) {
+	private void deletePeriodically() {
 		Date now = new Date();
 		Long nowMinusOneYear = now.getTime() - DateUtils.MILLIS_PER_DAY * 361;
 		repository.deleteByLastUpdateBefore(new Date(nowMinusOneYear));
@@ -145,7 +140,7 @@ public class ShanoirEventsService {
     }
 
 	@Scheduled(fixedDelay = 30000)
-	private void keepConnectionAlive( ) {
+	private void keepConnectionAlive() {
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
             try {
@@ -164,7 +159,7 @@ public class ShanoirEventsService {
 		return repository.findByIdAndUserId(taskId, userId);
 	}
 
-	public Page<ShanoirEvent> findByStudyId(final Pageable pageable,Long studyId, String searchStr, String searchField) {
+	public Page<ShanoirEvent> findByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) {
 		Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
 		return events;
 	}

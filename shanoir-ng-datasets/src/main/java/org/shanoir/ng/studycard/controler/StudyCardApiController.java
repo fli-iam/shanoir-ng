@@ -253,7 +253,7 @@ public class StudyCardApiController implements StudyCardApi {
         // Update solr metadata
         try {
             solrService.updateDatasetsAsync(datasetIds);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error("Solr update failed for datasets {}", datasetIds, e);
         }
 

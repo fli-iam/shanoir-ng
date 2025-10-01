@@ -43,7 +43,7 @@ public class DatasetUtils {
 		DatasetMetadata originMetadata = new DatasetMetadata();
 		Dataset dataset = null;
 			
-		switch(type) {
+		switch (type) {
 			case DatasetType.Names.Generic:
 				dataset = new CalibrationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);

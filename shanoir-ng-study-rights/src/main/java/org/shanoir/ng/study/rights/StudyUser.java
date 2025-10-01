@@ -65,7 +65,7 @@ public class StudyUser implements StudyUserInterface {
 	private String userName;
 
 	@ElementCollection
-	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
+	@CollectionTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"))
 	@Column(name = "center_id")
 	private List<Long> centerIds;
 

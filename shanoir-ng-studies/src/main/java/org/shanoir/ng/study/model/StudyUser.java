@@ -79,7 +79,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/** Type of the relationship. */
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Fetch(FetchMode.JOIN)
-	@CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
+	@CollectionTable(name = "study_user_study_user_rights", joinColumns = @JoinColumn(name = "study_user_id"))
 	private List<Integer> studyUserRights;
 	
 	/** User name. Duplicate: master record in ms users. */

@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  */
 @Service
-public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> implements UniqueConstraintManager<T> {
+public abstract class UniqueConstraintManagerImpl<T extends AbstractEntity> implements UniqueConstraintManager<T> {
 	
 	@Autowired
 	protected FindByRepository<T> repository;
@@ -58,7 +58,7 @@ public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> imp
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique
 				if (field.isAnnotationPresent(Unique.class)) {
-					String getterName = "get"+StringUtils.capitalize(field.getName());
+					String getterName = "get" + StringUtils.capitalize(field.getName());
 					try {
 						Method getter = entity.getClass().getMethod(getterName);
 						Object value = getter.invoke(entity);

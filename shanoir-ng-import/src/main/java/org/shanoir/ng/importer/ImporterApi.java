@@ -121,7 +121,7 @@ public interface ImporterApi {
             throws RestServiceException;
 
     @Operation(summary = "Import one DICOM .zip file", description = "Import DICOM .zip file already uploaded", tags = {
-        "Import one DICOM .zip file",})
+        "Import one DICOM .zip file"})
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),

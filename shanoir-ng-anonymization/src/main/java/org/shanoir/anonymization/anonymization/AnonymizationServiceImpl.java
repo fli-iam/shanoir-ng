@@ -300,7 +300,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		// check for patient name elements
 		for (int i = 0; i < patientNameArrayAttr.length; i++) {
 			String patientNamePart = patientNameArrayAttr[i];
-			if(checkTagContainsValuePHI(tagInt, value, patientNamePart)) {
+			if (checkTagContainsValuePHI(tagInt, value, patientNamePart)) {
 				return "X";
 			}
 		}
@@ -490,7 +490,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				&& UIDs.get(attributes.getString(tagInt)) != null) {
 			value = UIDs.get(attributes.getString(tagInt));
 			// We log only concerning the studyInstanceUID
-			if(Tag.StudyInstanceUID == tagInt) {
+			if (Tag.StudyInstanceUID == tagInt) {
 				LOG.debug("Existing StudyInstanceUID reused: {}", value);
 			}
 		} else {
@@ -502,7 +502,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				LOG.error(e.getMessage());
 			}
 			value = newUID;
-			if(Tag.StudyInstanceUID == tagInt) {
+			if (Tag.StudyInstanceUID == tagInt) {
 				LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
 			}
 			UIDs.put(attributes.getString(tagInt), value);

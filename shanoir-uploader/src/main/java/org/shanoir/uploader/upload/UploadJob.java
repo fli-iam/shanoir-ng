@@ -71,8 +71,8 @@ public class UploadJob {
 		this.uploadState = state;
 	}
 
-	@XmlElementWrapper(name="series")
-	@XmlElement(name="serie")
+	@XmlElementWrapper(name = "series")
+	@XmlElement(name = "serie")
 	public Collection<SerieTreeNode> getSeries() {
 		return series;
 	}

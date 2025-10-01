@@ -7,7 +7,7 @@ import org.mapstruct.ReportingPolicy;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubjectMapper {
 
 	List<Subject> EchoTimeDTOListToEchoTimeList(

@@ -56,7 +56,7 @@ public class ShanoirExec {
 
 		String[] cmd = null;
 
-		if(dcm2niiPath.contains("dcm2niix")){
+		if (dcm2niiPath.contains("dcm2niix")) {
 			cmd = new String[22];
 			cmd[0] = "dcm2niix";
 			//BIDS sidecar
@@ -97,19 +97,19 @@ public class ShanoirExec {
 
 			// verbose
 			cmd[19] = "-v";
-			if(LOG.isDebugEnabled()){
+			if (LOG.isDebugEnabled()) {
 				cmd[20] = "y";
-			}else{
+			} else {
 				cmd[20] = "n";
 			}
 
 			//inputFolder
 			cmd[21] = inputFolder;
 
-		}else{
-			if(is4D){
+		} else {
+			if (is4D) {
 				cmd = new String[26];
-			}else{
+			} else {
 				cmd = new String[24];
 			}
 
@@ -159,13 +159,13 @@ public class ShanoirExec {
 			cmd[21] = "-r";
 			cmd[22] = "n";
 
-			if(is4D){
+			if (is4D) {
 				// create 4D volumes
 				cmd[23] = "-4";
 				cmd[24] = "y";
 				// list of dicom images to be converted
 				cmd[25] = inputFolder;
-			}else{
+			} else {
 				// list of dicom images to be converted
 				cmd[23] = inputFolder;
 			}
@@ -196,9 +196,9 @@ public class ShanoirExec {
 		LOG.debug("mcverterExec : {}", mcverterPath);
 
 		String[] cmd = null;
-		if(is4D){
+		if (is4D) {
 			cmd = new String[10];
-		}else{
+		} else {
 			cmd = new String[9];
 		}
 		cmd[0] = mcverterPath;
@@ -217,16 +217,16 @@ public class ShanoirExec {
 		// naming format outpufile
 		cmd[6] = "-F";
 		//Due to modification on format for latest version change the format
-		if(mcverterPath!=null && mcverterPath.contains("2.0")){
+		if (mcverterPath != null && mcverterPath.contains("2.0")) {
 			cmd[7] = "'-PatientName,-PatientId,-SeriesDate,-SeriesTime,-StudyId,-StudyDescription,+SeriesNumber,-SequenceName,-SeriesDescription,+ProtocolName'";
-		}else{
+		} else {
 			cmd[7] = "-PatientName|-PatientId|-SeriesDate|-SeriesTime|-StudyId|-StudyDescription|+SeriesNumber|-SequenceName|-SeriesDescription|+ProtocolName";
 		}
 
 		// Input folder
 		cmd[8] = inputFolder;
 
-		if(is4D){
+		if (is4D) {
 			cmd[9] = "-d";
 		}
 
@@ -241,7 +241,7 @@ public class ShanoirExec {
 		String newImageName = fileToConvert.replace(".img", ".nii.gz");
 		File imgFile = new File(fileToConvert);
 
-		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + fileToConvert + " -o " + newImageName};
+		String[] command = {"/bin/bash", "-c", "animaConvertImage -i " + fileToConvert + " -o " + newImageName};
 		String result = this.exec(command);
 		LOG.error(result);
 		return true;

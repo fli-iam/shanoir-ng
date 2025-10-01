@@ -33,7 +33,7 @@ public class MegDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = 8986396467410158683L;
 
-	public MegDataset() {}
+	public MegDataset() { }
 
 	public MegDataset(Dataset other) {
 		super(other);
