@@ -1,0 +1,135 @@
+<div #formContainer class="content-component detail">
+    <form *ngIf="form" [formGroup]="executionForm" class="max-content" novalidate [class.disabled]="footerState.loading">
+        <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (cancel)="goToView()" (back)="goBack()"></form-footer>
+
+        <h2 class="header command-zone" *ngIf="mode === 'view'" i18n="View execution template|Title@@executiontemplateDetailViewTitle">Execution template</h2>
+        <h2 class="header command-zone" *ngIf="mode === 'edit'" i18n="Edit execution template|Title@@executiontemplateDetailEditTitle">Edit execution template</h2>
+        <h2 class="header command-zone" *ngIf="mode === 'create'" i18n="Create execution template|Title@@executiontemplateDetailCreateTitle">Create execution template</h2>
+
+        <fieldset>
+            <ol>
+                <li>
+                    <label i18n="Execution template detail|Study label@@centerDetailName">Study</label>
+                    <span class="right-col">{{ studyName }}</span>
+                </li>
+                <li>
+                    <label i18n="Execution template detail|Name label@@centerDetailName">Name</label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else nameEdit">{{ executionTemplate.name }}</ng-container>
+                        <ng-template #nameEdit>
+                            <input type="text" id="name" formControlName="name"/>
+                            <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n>Name is required.</label>
+                            <label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n>Name length must be between 2 and 200.</label>
+                            <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n>Name should be unique.</label>
+                        </ng-template>
+                    </span>
+                </li>
+                <li>
+                    <label>Priority<tool-tip>Order of pipeline executions in case of multiple relevant templates. Lower priority = executed first.</tool-tip></label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else priorityEdit">{{ executionTemplate.priority }}</ng-container>
+                        <ng-template #priorityEdit>
+                            <input type="number" id="priority" formControlName="priority" min="1"/>
+                            <label *ngIf="form.get('priority')?.hasError('uniqueInStudyControl')" class="form-validation-alert" i18n>Priority must be unique</label>
+                            <label *ngIf="hasError('priority', ['required'])" class="form-validation-alert" i18n>Priority is required.</label>
+                        </ng-template>
+                    </span>
+                </li>
+                <li>
+                    <label>Filter combination<tool-tip>Example: ((1 OR 2) AND 3) OR (1 AND 2) OR 3. It can be only 'AND' and 'OR' for operating every parameters with respectively 'AND' or 'OR' operator. If empty, 'AND' by default.</tool-tip></label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else filterEdit">{{ executionTemplate.filterCombination }}</ng-container>
+                        <ng-template #filterEdit>
+                            <input type="text" id="filterCombination" formControlName="filterCombination"/>
+                            <label *ngIf="hasError('filterCombination', ['filterCombinationControl'])" class="form-validation-alert" i18n>Filter combination needs to be semantically correct.</label>
+                        </ng-template>
+                    </span>
+                </li>
+                <li>
+                    <label>Pipeline</label>
+                    <span class="right-col">
+                        <ng-container *ngIf="mode === 'view'; else pipelineEdit">{{ executionTemplate.pipelineName }}</ng-container>
+                        <ng-template #pipelineEdit>
+                            <select-box [optionArr]="pipelineNames" formControlName="pipelineName" (selectionchange)="onPipelineUpdate()"></select-box>
+                            <label *ngIf="hasError('pipelineName', ['required'])" class="form-validation-alert" i18n>Pipeline is required.</label>
+                        </ng-template>
+                    </span>
+                </li>
+                <span *ngIf="pipeline">
+                    <h3>Pipeline parameters</h3>
+                    <li>
+                        <label>Execution Name<tool-tip>The name displayed in the tree. It will be completed with the date time and the exam id relative to the execution occurrence.</tool-tip></label>
+                        <span class="right-col">
+                            <ng-container *ngIf="mode === 'view'; else execNameEdit" style="width: 300px;">{{ pipelineParameters['execution_name'] }}</ng-container>
+                            <ng-template #execNameEdit>
+                                <input style="width: 300px;" type="text" id="execution_name" formControlName="execution_name" (input)="onParameterUpdate('execution_name')"/>
+                                <label *ngIf="hasError('execution_name', ['required'])" class="form-validation-alert" i18n>Execution name is required.</label>
+                                <label *ngIf="hasError('execution_name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n>Execution name length must be between 2 and 100.</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <hr style="border: none; height: 1px; background-color: #5f0f4e; width: 30%;" *ngIf="(pipelineParameters | keyvalue).length >= 6">
+                    <li *ngIf="(pipelineParameters | keyvalue).length >= 6">
+                        <ng-container *ngFor="let parameter of pipeline.parameters">
+                            <li *ngIf="parameter.name !== 'executable'">
+                                <label>{{ parameter.name }}{{parameter.type !== 'Boolean' ? '*' : '' }}<tool-tip>{{'Regular expression to filter among the selected datasets. ' + parameter.description}}</tool-tip></label>
+                                <span class="right-col" *ngIf="parameter.type !== 'Boolean'">
+                                    <ng-container *ngIf="mode === 'view'; else specParamEdit1" style="width: 300px;">{{ pipelineParameters[parameter.name] }}</ng-container>
+                                    <ng-template #specParamEdit1>
+                                       <input id="{{parameter.name}}" [formControlName]="parameter.name + '_value'" (input)="onParameterUpdate(parameter.name + '_value')"/>
+                                    </ng-template>
+                                </span>
+                                <span class="right-col" *ngIf="parameter.type === 'Boolean'">
+                                    <ng-container *ngIf="mode === 'view'; else specParamEdit2" style="width: 300px;">{{ pipelineParameters[parameter.name] }}</ng-container>
+                                    <ng-template #specParamEdit2>
+                                       <checkbox id="{{parameter.name}}" [formControlName]="parameter.name + '_value'" (onChange)="onParameterUpdate(parameter.name + '_value')"/>
+                                    </ng-template>
+                                </span>
+                            </li>
+                            <li *ngIf="parameter.name !== 'executable' && parameter.type !== 'Boolean'">
+                                <label>Group for {{parameter.name}}<tool-tip>From which object level the datasets are coming from. Number of executions will be relative to the lower level. Lower = examination -> 1 exec in total (acquisition filters not taken in account), lower = acquisition / dataset -> 1 exec per acquisition / dataset </tool-tip></label>
+                                <span class="right-col">
+                                    <input [id]="'pipelineParameters[' + parameter.name + '_dataset]'" type="radio" [formControlName]="parameter.name + '_group'" value="dataset" (change)="onParameterUpdate(parameter.name + '_group')" [ngClass]="{'disabled-radio': mode === 'view'}"/>Dataset(s)
+                                    <input [id]="'pipelineParameters[' + parameter.name + '_acquisition]'" type="radio" [formControlName]="parameter.name + '_group'" value="acquisition" (change)="onParameterUpdate(parameter.name + '_group')" [ngClass]="{'disabled-radio': mode === 'view'}"/>Acquisition(s)
+                                    <input [id]="'pipelineParameters[' + parameter.name + '_examination]'" type="radio" [formControlName]="parameter.name + '_group'" value="examination" (change)="onParameterUpdate(parameter.name + '_group')" [ngClass]="{'disabled-radio': mode === 'view'}"/>Examination(s)
+                                </span>
+                            </li>
+                        <hr style="border: none; height: 1px; background-color: #5f0f4e; width: 30%;">
+                        </ng-container>
+                    </li>
+                    <li>
+                        <label>Processing type</label>
+                        <span class="right-col">
+                            <ng-container *ngIf="mode === 'view'; else processingTypeEdit">{{ pipelineParameters['processing_type'] }}</ng-container>
+                            <ng-template #processingTypeEdit>
+                                <select-box id="processing_type" [optionArr]="processingType" formControlName="processing_type" (selectionchange)="onParameterUpdate('processing_type')"/>
+                               <label *ngIf="hasError('processing_type', ['required'])" class="form-validation-alert" i18n>Processing type is required.</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label>Dataset export format<tool-tip>Choose format for exported datasets.</tool-tip></label>
+                        <span class="right-col">
+                            <input id="nii" type="radio" formControlName="export_format" name="export_format" value="nii" (change)="onParameterUpdate('export_format')" [ngClass]="{'disabled-radio': mode === 'view'}"/>NIfTI
+                            <input id="dicom" type="radio" formControlName="export_format" name="export_format" value="dcm" (change)="onParameterUpdate('export_format')" [ngClass]="{'disabled-radio': mode === 'view'}"/>DICOM
+                        </span>
+                    </li>
+                    <li>
+                        <label>Nifti converter<tool-tip>Converter for DICOM to NIfTI.</tool-tip></label>
+                        <span  class="right-col" *ngIf="pipelineParameters['export_format'] === 'nii'">
+                            <ng-container *ngIf="mode === 'view'; else niftiConverterEdit">{{ getConverterLabel(pipelineParameters['converter']) }}</ng-container>
+                            <ng-template #niftiConverterEdit>
+                                <select-box formControlName="converter" [options]="niftiConverters" (selectionchange)="onParameterUpdate('converter')"></select-box>
+                                <label *ngIf="hasError('converter', ['requiredIfTypeIsNii'])" class="form-validation-alert" i18n>Nifti converter is required.</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                </span>
+                <li *ngIf="id">
+                    <h3>Execution template filters</h3>
+                    <span class="right-col"><execution-template-filter-list [templateId]="executionTemplate.id" [templateName]="executionTemplate.name"></execution-template-filter-list></span>
+                </li>
+            </ol>
+        </fieldset>
+    </form>
+</div>

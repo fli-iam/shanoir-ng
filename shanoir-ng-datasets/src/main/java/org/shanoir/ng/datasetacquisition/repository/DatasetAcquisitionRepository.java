@@ -44,6 +44,10 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 	List<DatasetAcquisition> findBySourceId(Long sourceId);
 	DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
+	@Query(value = "SELECT id FROM dataset_acquisition acq " +
+			"WHERE acq.examination_id = ?1", nativeQuery = true)
+	List<Long> findIdsByExaminationId(Long examinationId);
+
 	@Query("""
 		SELECT DISTINCT
 			da.id              AS id,

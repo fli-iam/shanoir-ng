@@ -79,6 +79,8 @@ require()
             VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
             VIP_URL_HOST)           match "$name" '^([a-z0-9.-]+)$'                     ;;
             VIP_CLIENT_SECRET)      ;;
+            SHANOIR_SHUTDOWN_HOUR)      ;;
+            SHANOIR_CONTINUANCE_HOUR)      ;;
             *)
                 error "unknown var: $name"
                 ;;

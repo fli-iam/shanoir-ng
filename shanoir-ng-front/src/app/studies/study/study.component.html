@@ -55,7 +55,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
                     <span class="tags">Tags</span>
                 </li>
-				<ng-container *ngIf="mode == 'view'">
+                <li [class.active]="activeTab == 'executions'" [routerLink]="'.'" [fragment]="'executions'" replaceUrl="true">
+                    <span class="executions">Executions</span>
+                </li>
+                <ng-container *ngIf="mode == 'view'">
                     <li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
@@ -408,6 +411,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                    [eventHistory]="openHistory"
                    [study]="study">
                 </study-history>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
+                <legend>Execution templates</legend>
+                <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
             </fieldset>
 		</form>
 	</div>

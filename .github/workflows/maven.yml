@@ -48,6 +48,8 @@ jobs:
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        SHANOIR_CONTINUANCE_HOUR: 5
+        SHANOIR_SHUTDOWN_HOUR: 2
         VIP_URL_SCHEME: https
         VIP_URL_HOST: vip
         VIP_CLIENT_SECRET: SECRET

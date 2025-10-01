@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,7 +41,7 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { Observable, race } from 'rxjs';
-import { take } from 'rxjs/operators';
+import {map, take} from 'rxjs/operators';
 import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
@@ -81,7 +81,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     constructor(
             private route: ActivatedRoute,
-            private qualityCardService: QualityCardService, 
+            private qualityCardService: QualityCardService,
             private studyService: StudyService,
             private examinationService: ExaminationService,
             private studyRightsService: StudyRightsService,
@@ -115,13 +115,13 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
         this.fetchStudies();
-        return Promise.resolve();  
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -169,7 +169,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             });
         }
     }
-    
+
     private fetchStudies(): Promise<void | IdName[]> {
         return this.studyService.findStudyIdNamesIcanAdmin()
             .then(studies => this.studies = studies);
@@ -202,7 +202,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     apply() {
         this.confirmService.confirm(
-            'Apply Quality Card', 
+            'Apply Quality Card',
             `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
         ).then(accept => {
             if (accept) {
@@ -237,7 +237,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
                     this.performTest();
                 }
             }
-        });    
+        });
     }
 
     openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
@@ -249,8 +249,8 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = race([
-            modalRef.instance.test, 
-            modalRef.instance.close.map(() => 'cancel')
+            modalRef.instance.test,
+            modalRef.instance.close.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();

@@ -18,7 +18,6 @@ import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-// import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
@@ -32,7 +31,6 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { AppComponent } from './app.component';
-// import { routing } from './app.routing';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { EventTypePipe } from './async-tasks/event.pipe';
 import { TaskService } from './async-tasks/task.service';
@@ -148,14 +146,12 @@ import { SubjectListComponent } from './subjects/subject-list/subject-list.compo
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
-// import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
-// import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { StudyRightsService } from './studies/shared/study-rights.service';
 import { RouterModule } from '@angular/router';
 import { LoaderComponent } from './shared/loader/loader.component';
@@ -213,9 +209,7 @@ import { AnimalExaminationListComponent }      from './preclinical/examination/l
 import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
-// import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-// import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
@@ -277,7 +271,13 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
+import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
+import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
+import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
 import { SizePipe } from './shared/utils/size.pipe';
+import { ExecutionTemplateFilterListComponent } from "./vip/execution-template/filter/execution-template-filter-list.component";
+import { ExecutionTemplateFilterComponent } from "./vip/execution-template/filter/execution-template-filter.component";
+import { ExecutionTemplateFilterService } from "./vip/execution-template/filter/execution-template-filter.service";
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { DuaService } from './dua/shared/dua.service';
 import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe";
@@ -463,7 +463,14 @@ import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe
         DoubleAwesomeComponent,
         MetadataNodeComponent,
         SizePipe,
-        DUAAssistantComponent
+        MetadataNodeComponent,
+        ExecutionTemplateListComponent,
+        ExecutionTemplateComponent,
+        SizePipe,
+        DUAAssistantComponent,
+        ExecutionTemplateComponent,
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -478,6 +485,10 @@ import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe
         RouterModule,
         ClipboardModule,
         LocalDateFormatPipe
+    ],
+    exports: [
+        TableComponent,
+        FormFooterComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -566,6 +577,8 @@ import { LocalDateFormatPipe } from "./shared/localLanguage/localDateFormat.pipe
         SessionService,
         ShanoirEventService,
         TreeService,
+        ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         DuaService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())

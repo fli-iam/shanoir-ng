@@ -26,7 +26,7 @@ public interface ExecutionMonitoringService {
 	/**
 	 * Update an execution monitoring.
 	 *
-	 * @param executionMonitoring the entity to update.
+	 * @param executionMonitoring
 	 * @return updated execution monitoring.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -47,4 +47,12 @@ public interface ExecutionMonitoringService {
 	 * @param event
 	 */
 	void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
+
+	/**
+	 * Get a vipIdentifier from an execution monitoring id
+	 *
+	 * @param id
+	 * @return String monitoring id
+	 */
+	String getVipIdentifierFromMonitoringId(Long id);
 }
