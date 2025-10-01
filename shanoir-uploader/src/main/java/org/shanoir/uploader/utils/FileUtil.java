@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.dcm4che3.data.Attributes;
