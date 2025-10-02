@@ -156,7 +156,6 @@ public class RabbitMQSubjectServiceTest {
 
     @Test
     public void testUpdateSubjectStudyFail() throws IOException {
-
         // WHEN the call fails
         String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
 
@@ -164,9 +163,8 @@ public class RabbitMQSubjectServiceTest {
         assertNull(name);
     }
 
-    // TODO: complete these
     @Test
     public void testManageParticipants() {
-
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

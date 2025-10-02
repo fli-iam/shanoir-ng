@@ -215,7 +215,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- See https://checkstyle.org/checks/misc/index.html -->
     <module name="ArrayTypeStyle"/>
     <!-- <module name="FinalParameters"/> -->
-    <!-- <module name="TodoComment"/> -->
+    <module name="TodoComment"/>
     <module name="UpperEll"/>
 
     <!-- https://checkstyle.org/filters/suppressionxpathfilter.html -->

@@ -140,7 +140,6 @@ public class StudyApiControllerTest {
         given(studySecurityService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
     }
 
-    // TODO: manage keycloak token
     // @Test
     public void addMember() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
@@ -148,7 +147,6 @@ public class StudyApiControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    // TODO: manage keycloak token
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void deleteStudyTest() throws Exception {

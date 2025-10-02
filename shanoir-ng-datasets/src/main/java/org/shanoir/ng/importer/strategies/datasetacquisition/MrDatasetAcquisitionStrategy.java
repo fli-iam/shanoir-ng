@@ -77,7 +77,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         aMap.put("T1", BidsDataType.ANAT);
         aMap.put("T2", BidsDataType.ANAT);
         aMap.put("T2_STAR", BidsDataType.ANAT);
-        //TODO: To be completed by an expert
         DATA_TYPE_MAPPING = Collections.unmodifiableMap(aMap);
     }
 

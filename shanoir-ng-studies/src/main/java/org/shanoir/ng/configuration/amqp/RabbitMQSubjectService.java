@@ -110,7 +110,6 @@ public class RabbitMQSubjectService {
             subStud.setSubject(subject);
             Study study = studyRepository.findById(studyId).orElseThrow();
 
-            // TODO: ask
             subStud.setSubjectType(SubjectType.PATIENT);
             subStud.setPhysicallyInvolved(true);
             subStud.setStudy(study);
