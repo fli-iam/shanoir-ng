@@ -27,9 +27,9 @@ import java.util.List;
  */
 public class EDFParserResult {
 
-    EDFHeader header;
-    EDFSignal signal;
-    List<EDFAnnotation> annotations;
+    private EDFHeader header;
+    private EDFSignal signal;
+    private List<EDFAnnotation> annotations;
 
     public EDFHeader getHeader() {
         return header;
@@ -41,5 +41,17 @@ public class EDFParserResult {
 
     public List<EDFAnnotation> getAnnotations() {
         return annotations;
+    }
+
+    public void setHeader(EDFHeader header) {
+        this.header = header;
+    }
+
+    public void setSignal(EDFSignal signal) {
+        this.signal = signal;
+    }
+
+    public void setAnnotations(List<EDFAnnotation> annotations) {
+        this.annotations = annotations;
     }
 }

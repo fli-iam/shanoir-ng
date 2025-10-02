@@ -36,38 +36,38 @@ public class ShanoirEventLight {
 
     /** ID of the event, normally generated BEFORE arriving here **/
     @Id
-    protected Long id;
+    private Long id;
 
     /** See EventType **/
-    protected String eventType;
+    private String eventType;
 
     /** ID of the concerned object **/
-    protected String objectId;
+    private String objectId;
 
     /** user ID creating the event **/
-    protected Long userId;
+    private Long userId;
 
     /** Message of the event, can be informative, or display an error **/
     @JdbcTypeCode(Types.LONGVARCHAR)
-    protected String message;
+    private String message;
 
     /** Creation date, automatically generated **/
     @CreationTimestamp
     @Column(updatable = false)
-    protected Date creationDate;
+    private Date creationDate;
 
     /** Last update date, automatically generated **/
     @UpdateTimestamp
-    protected Date lastUpdate;
+    private Date lastUpdate;
 
     /** Status, can be either 0 (created), 1 (success) or -1 (in error) **/
-    protected int status;
+    private int status;
 
     /** The progress of the event. */
-    protected Float progress;
+    private Float progress;
 
     /** The study ID of the event */
-    protected Long studyId;
+    private Long studyId;
 
     @Transient
     private Boolean hasReport;

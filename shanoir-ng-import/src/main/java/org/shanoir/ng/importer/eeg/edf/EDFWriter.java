@@ -52,28 +52,28 @@ public final class EDFWriter {
         DecimalFormat shortFormatter = new DecimalFormat(SHORT_DECIMAL_FORMAT, dfs);
         DecimalFormat longFormatter = new DecimalFormat(LONG_DECIMAL_FORMAT, dfs);
 
-        ByteBuffer bb = ByteBuffer.allocate(header.bytesInHeader);
-        putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.idCode);
-        putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.subjectID);
-        putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.recordingID);
-        putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.startDate);
-        putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.startTime);
-        putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.bytesInHeader);
-        putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.formatVersion);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.numberOfRecords);
-        putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.durationOfRecords, longFormatter);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.numberOfChannels);
+        ByteBuffer bb = ByteBuffer.allocate(header.getBytesInHeader());
+        putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.getIdCode());
+        putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.getSubjectID());
+        putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.getRecordingID());
+        putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.getStartDate());
+        putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.getStartTime());
+        putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.getBytesInHeader());
+        putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.getFormatVersion());
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.getNumberOfRecords());
+        putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.getDurationOfRecords(), longFormatter);
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.getNumberOfChannels());
 
-        putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.channelLabels);
-        putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.transducerTypes);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.dimensions);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.minInUnits, shortFormatter);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.maxInUnits, shortFormatter);
-        putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.digitalMin);
-        putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.digitalMax);
-        putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.prefilterings);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.numberOfSamples);
-        putIntoBuffer(bb, header.reserveds);
+        putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.getChannelLabels());
+        putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.getTransducerTypes());
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.getDimensions());
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.getMinInUnits(), shortFormatter);
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.getMaxInUnits(), shortFormatter);
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.getDigitalMin());
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.getDigitalMax());
+        putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.getPrefilterings());
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.getNumberOfSamples());
+        putIntoBuffer(bb, header.getReserveds());
 
         outputStream.write(bb.array());
     }

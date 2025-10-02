@@ -218,33 +218,33 @@ public class EDFAnnotationFileHeaderBuilder {
         assert durationOfRecord > 0;
 
         EDFHeader header = new EDFHeader();
-        header.idCode = createStringWithSpaces(String.valueOf(0), EDFConstants.IDENTIFICATION_CODE_SIZE);
-        header.subjectID = createStringWithSpaces(buildPatientString(), EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE);
-        header.recordingID = recordingId != null ? recordingId : createStringWithSpaces(buildRecordingString(), EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE);
+        header.setIdCode(createStringWithSpaces(String.valueOf(0), EDFConstants.IDENTIFICATION_CODE_SIZE));
+        header.setSubjectID(createStringWithSpaces(buildPatientString(), EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE));
+        header.setRecordingID(recordingId != null ? recordingId : createStringWithSpaces(buildRecordingString(), EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE));
 
-        header.startDate = startDate != null ? startDate : simpleDateFormat.format(new Date());
-        header.startDate = appendSpacesToString(header.startDate, EDFConstants.START_DATE_SIZE - header.startDate.length());
+        header.setStartDate(startDate != null ? startDate : simpleDateFormat.format(new Date()));
+        header.setStartDate(appendSpacesToString(header.getStartDate(), EDFConstants.START_DATE_SIZE - header.getStartDate().length()));
 
-        header.startTime = startTime != null ? startTime : simpleTimeFormat.format(new Date());
-        header.startTime = appendSpacesToString(header.startTime, EDFConstants.START_TIME_SIZE - header.startTime.length());
+        header.setStartTime(startTime != null ? startTime : simpleTimeFormat.format(new Date()));
+        header.setStartTime(appendSpacesToString(header.getStartTime(), EDFConstants.START_TIME_SIZE - header.getStartTime().length()));
 
-        header.formatVersion = createStringWithSpaces("", EDFConstants.DATA_FORMAT_VERSION_SIZE);
-        header.numberOfRecords = numberOfRecords != null ? numberOfRecords : 1;
-        header.durationOfRecords = durationOfRecord;
-        header.numberOfChannels = numberOfChannels != null ? numberOfChannels : 1;
-        header.bytesInHeader = EDFConstants.HEADER_SIZE_RECORDING_INFO
-                + header.numberOfChannels * EDFConstants.HEADER_SIZE_PER_CHANNEL;
+        header.setFormatVersion(createStringWithSpaces("", EDFConstants.DATA_FORMAT_VERSION_SIZE));
+        header.setNumberOfRecords(numberOfRecords != null ? numberOfRecords : 1);
+        header.setDurationOfRecords(durationOfRecord);
+        header.setNumberOfChannels(numberOfChannels != null ? numberOfChannels : 1);
+        header.setBytesInHeader(EDFConstants.HEADER_SIZE_RECORDING_INFO
+                + header.getNumberOfChannels() * EDFConstants.HEADER_SIZE_PER_CHANNEL);
 
-        header.channelLabels = channelLabels;
-        header.transducerTypes = transducerTypes;
-        header.dimensions = dimensions;
-        header.minInUnits = minInUnits;
-        header.maxInUnits = maxInUnits;
-        header.digitalMin = digitalMin;
-        header.digitalMax = digitalMax;
-        header.prefilterings = prefilterings;
-        header.numberOfSamples = numberOfSamples;
-        header.reserveds = reserveds;
+        header.setChannelLabels(channelLabels);
+        header.setTransducerTypes(transducerTypes);
+        header.setDimensions(dimensions);
+        header.setMinInUnits(minInUnits);
+        header.setMaxInUnits(maxInUnits);
+        header.setDigitalMin(digitalMin);
+        header.setDigitalMax(digitalMax);
+        header.setPrefilterings(prefilterings);
+        header.setNumberOfSamples(numberOfSamples);
+        header.setReserveds(reserveds);
 
         return header;
     }

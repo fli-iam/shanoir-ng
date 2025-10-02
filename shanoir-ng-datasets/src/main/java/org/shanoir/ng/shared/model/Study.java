@@ -34,9 +34,9 @@ import java.util.Set;
 public class Study extends IdName {
 
     @Id
-    protected Long id;
+    private Long id;
 
-    protected String name;
+    private String name;
 
     @ManyToMany
     @JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
@@ -46,7 +46,7 @@ public class Study extends IdName {
      * Linked tags.
      */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Tag> tags;
+    private List<Tag> tags;
 
     /** Relations between the subjects and the study. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

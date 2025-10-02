@@ -156,7 +156,7 @@ public class BIDSServiceImpl implements BIDSService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    DatasetSecurityService datasetSecurityService;
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private WADODownloaderService downloader;
@@ -164,9 +164,9 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {

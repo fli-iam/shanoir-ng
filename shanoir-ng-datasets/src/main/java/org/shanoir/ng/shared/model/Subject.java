@@ -44,9 +44,9 @@ import jakarta.validation.constraints.NotNull;
 public class Subject extends IdName {
 
     @Id
-    protected Long id;
+    private Long id;
 
-    protected String name;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "study_id")

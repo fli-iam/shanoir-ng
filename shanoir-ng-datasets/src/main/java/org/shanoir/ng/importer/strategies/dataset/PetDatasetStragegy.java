@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
 
     @Autowired
-    DatasetExpressionContext datasetExpressionContext;
+    private DatasetExpressionContext datasetExpressionContext;
 
     @Override
     public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,

@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 public class RabbitMqNiftiConversionService {
 
     @Autowired
-    NIfTIConverterService converterService;
+    private NIfTIConverterService converterService;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMqNiftiConversionService.class);
 

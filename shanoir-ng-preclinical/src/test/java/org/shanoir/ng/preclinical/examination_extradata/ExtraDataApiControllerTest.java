@@ -111,7 +111,7 @@ public class ExtraDataApiControllerTest {
     private ExtraDataEditableByManager editableOnlyValidator;
 
     @TempDir
-    public static File tempFolder;
+    private static File tempFolder;
 
     @BeforeAll
     public static void beforeClass() {

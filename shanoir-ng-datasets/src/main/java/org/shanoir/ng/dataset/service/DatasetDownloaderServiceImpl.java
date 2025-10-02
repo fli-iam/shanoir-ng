@@ -82,19 +82,19 @@ public class DatasetDownloaderServiceImpl {
     protected static final String CONVERSION_FAILED_ERROR_MSG = "Nifti conversion failed, you may try to select another one.";
 
     @Autowired
-    DatasetService datasetService;
+    private DatasetService datasetService;
 
     @Autowired
-    protected WADODownloaderService downloader;
+    private WADODownloaderService downloader;
 
     @Autowired
-    protected SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @Autowired
-    protected StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @Autowired
-    protected RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     protected ShanoirEventService eventService;

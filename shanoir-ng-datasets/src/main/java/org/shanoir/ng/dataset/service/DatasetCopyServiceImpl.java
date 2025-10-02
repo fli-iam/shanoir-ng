@@ -48,16 +48,21 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Autowired
     private StudyService studyService;
+
     @Autowired
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
+
     @Autowired
     private ExaminationRepository examinationRepository;
+
     @Autowired
     private DatasetRepository datasetRepository;
+
     @Autowired
     private SubjectRepository subjectRepository;
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 

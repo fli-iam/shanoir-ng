@@ -35,8 +35,9 @@ import org.shanoir.ng.shared.exception.ShanoirImportException;
  */
 public class BrainVisionReaderTest {
 
-    BrainVisionReader reader;
-    File vhdrFile = new File("./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.vhdr");
+    private BrainVisionReader reader;
+
+    private File vhdrFile = new File("./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.vhdr");
 
     @Test
     public void testReadChannels() throws ShanoirImportException {

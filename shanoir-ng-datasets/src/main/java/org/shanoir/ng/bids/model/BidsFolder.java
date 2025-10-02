@@ -30,7 +30,7 @@ public class BidsFolder extends BidsElement {
         super(path);
     }
 
-    List<BidsElement> elements;
+    private List<BidsElement> elements;
 
     /**
      * @return the elements

@@ -64,25 +64,25 @@ public class AccessRequestApiController implements AccessRequestApi {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
-    AccessRequestService accessRequestService;
+    private AccessRequestService accessRequestService;
 
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    StudyUserRightsRepository studyUserRightsRepository;
+    private StudyUserRightsRepository studyUserRightsRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 

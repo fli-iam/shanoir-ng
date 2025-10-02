@@ -65,7 +65,7 @@ public class BrukerApiController implements BrukerApi {
     private String brukerFolder;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)

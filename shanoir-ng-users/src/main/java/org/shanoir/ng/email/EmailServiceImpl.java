@@ -111,7 +111,7 @@ public class EmailServiceImpl implements EmailService {
     private String shanoirServerAddress;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMM d yyyy");
 

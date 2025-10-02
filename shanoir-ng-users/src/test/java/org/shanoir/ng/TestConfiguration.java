@@ -25,6 +25,6 @@ public class TestConfiguration {
 
     // Rabbit template is always mocked here
     @MockBean
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
 }

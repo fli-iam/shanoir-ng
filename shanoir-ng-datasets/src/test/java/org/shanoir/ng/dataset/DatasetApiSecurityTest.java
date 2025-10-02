@@ -88,14 +88,15 @@ public class DatasetApiSecurityTest {
     private DatasetApi api;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
+
     @MockBean
-    CreateStatisticsService createStatisticsService;
+    private CreateStatisticsService createStatisticsService;
 
     @MockBean
     private StudyUserRightsRepository rightsRepository;
 
-    MockHttpServletResponse response;
+    private MockHttpServletResponse response;
 
     @MockBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;

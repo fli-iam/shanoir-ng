@@ -77,16 +77,16 @@ public class ExaminationApiSecurityTest {
     private ExaminationApi api;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     @MockBean
-    ExaminationRepository examinationRepository;
+    private ExaminationRepository examinationRepository;
 
     @MockBean
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @MockBean
-    StudyUserRightsRepository studyUserRightsRepository;
+    private StudyUserRightsRepository studyUserRightsRepository;
 
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;

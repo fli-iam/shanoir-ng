@@ -43,7 +43,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 public class AsyncTaskApiController implements AsyncTaskApi {
 
     @Autowired
-    ShanoirEventsService taskService;
+    private ShanoirEventsService taskService;
 
     public static final List<UserSseEmitter> EMITTERS = Collections.synchronizedList(new ArrayList<>());
 

@@ -37,7 +37,6 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -52,22 +51,19 @@ import org.springframework.util.CollectionUtils;
 public class StudySecurityService {
 
     @Autowired
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @Autowired
-    SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @Autowired
-    StudyUserRepository studyUserRepository;
+    private StudyUserRepository studyUserRepository;
 
     @Autowired
-    SubjectStudyRepository subjectStudyRepository;
+    private DataUserAgreementRepository dataUserAgreementRepository;
 
     @Autowired
-    DataUserAgreementRepository dataUserAgreementRepository;
-
-    @Autowired
-    StudyTagRepository studyTagRepository;
+    private StudyTagRepository studyTagRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(StudySecurityService.class);
 

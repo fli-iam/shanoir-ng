@@ -102,7 +102,7 @@ public class ImporterManagerService {
     private DatasetsCreatorService datasetsCreatorService;
 
     @Autowired
-    StudyUserRightsRepository studyUserRightRepo;
+    private StudyUserRightsRepository studyUserRightRepo;
 
     @Value("${shanoir.import.directory}")
     private String importDir;

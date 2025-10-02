@@ -34,16 +34,16 @@ public class Dataset {
     private List<DiffusionGradient> diffusionGradients;
 
     @JsonProperty("repetitionTimes")
-    public Set<Double> repetitionTimes;
+    private Set<Double> repetitionTimes;
 
     @JsonProperty("inversionTimes")
-    public Set<Double> inversionTimes;
+    private Set<Double> inversionTimes;
 
     @JsonProperty("echoTimes")
-    public Set<EchoTime> echoTimes;
+    private Set<EchoTime> echoTimes;
 
     @JsonProperty("flipAngles")
-    public Set<Double> flipAngles;
+    private Set<Double> flipAngles;
 
     @JsonProperty("firstImageSOPInstanceUID")
     private String firstImageSOPInstanceUID;

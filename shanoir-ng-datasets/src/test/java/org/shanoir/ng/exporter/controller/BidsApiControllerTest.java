@@ -50,13 +50,13 @@ public class BidsApiControllerTest {
     private static final String REQUEST_PATH_EXPORT = REQUEST_PATH + "/exportBIDS/studyId/1";
 
     @MockBean
-    BIDSService bidsService;
+    private BIDSService bidsService;
 
     @MockBean
-    BidsDeserializer bidsDeserializer;
+    private BidsDeserializer bidsDeserializer;
 
     @MockBean
-    StudyRepository studyRepo;
+    private StudyRepository studyRepo;
 
     @Autowired
     private MockMvc mvc;

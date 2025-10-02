@@ -78,10 +78,10 @@ public class ExaminationServiceSecurityTest {
     private StudyUserRightsRepository rightsRepository;
 
     @MockBean
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;

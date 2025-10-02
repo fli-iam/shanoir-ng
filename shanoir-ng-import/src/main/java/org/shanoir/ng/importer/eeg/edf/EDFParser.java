@@ -67,24 +67,24 @@ public final class EDFParser {
         try {
             EDFHeader header = new EDFHeader();
             EDFParserResult result = new EDFParserResult();
-            result.header = header;
+            result.setHeader(header);
 
-            header.idCode = ParseUtils.readASCIIFromStream(is, EDFConstants.IDENTIFICATION_CODE_SIZE);
-            if (!header.idCode.trim().equals("0")) {
+            header.setIdCode(ParseUtils.readASCIIFromStream(is, EDFConstants.IDENTIFICATION_CODE_SIZE));
+            if (!header.getIdCode().trim().equals("0")) {
                 throw new EDFParserException();
             }
-            header.subjectID = ParseUtils.readASCIIFromStream(is, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE);
-            header.recordingID = ParseUtils.readASCIIFromStream(is, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE);
-            header.startDate = ParseUtils.readASCIIFromStream(is, EDFConstants.START_DATE_SIZE);
-            header.startTime = ParseUtils.readASCIIFromStream(is, EDFConstants.START_TIME_SIZE);
-            header.bytesInHeader = Integer.parseInt(ParseUtils.readASCIIFromStream(is, EDFConstants.HEADER_SIZE).trim());
-            header.formatVersion = ParseUtils.readASCIIFromStream(is, EDFConstants.DATA_FORMAT_VERSION_SIZE);
-            header.numberOfRecords = Integer.parseInt(
-                    ParseUtils.readASCIIFromStream(is, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE).trim());
-            header.durationOfRecords = Double.parseDouble(
-                    ParseUtils.readASCIIFromStream(is, EDFConstants.DURATION_DATA_RECORDS_SIZE).trim());
-            header.numberOfChannels = Integer.parseInt(
-                    ParseUtils.readASCIIFromStream(is, EDFConstants.NUMBER_OF_CHANELS_SIZE).trim());
+            header.setSubjectID(ParseUtils.readASCIIFromStream(is, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE));
+            header.setRecordingID(ParseUtils.readASCIIFromStream(is, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE));
+            header.setStartDate(ParseUtils.readASCIIFromStream(is, EDFConstants.START_DATE_SIZE));
+            header.setStartTime(ParseUtils.readASCIIFromStream(is, EDFConstants.START_TIME_SIZE));
+            header.setBytesInHeader(Integer.parseInt(ParseUtils.readASCIIFromStream(is, EDFConstants.HEADER_SIZE).trim()));
+            header.setFormatVersion(ParseUtils.readASCIIFromStream(is, EDFConstants.DATA_FORMAT_VERSION_SIZE));
+            header.setNumberOfRecords(Integer.parseInt(
+                    ParseUtils.readASCIIFromStream(is, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE).trim()));
+            header.setDurationOfRecords(Double.parseDouble(
+                    ParseUtils.readASCIIFromStream(is, EDFConstants.DURATION_DATA_RECORDS_SIZE).trim()));
+            header.setNumberOfChannels(Integer.parseInt(
+                    ParseUtils.readASCIIFromStream(is, EDFConstants.NUMBER_OF_CHANELS_SIZE).trim()));
 
             parseChannelInformation(is, result);
 
@@ -108,21 +108,21 @@ public final class EDFParser {
             EDFSignal signal = new EDFSignal();
             EDFHeader header = result.getHeader();
 
-            signal.unitsInDigit = new Double[header.numberOfChannels];
-            for (int i = 0; i < signal.unitsInDigit.length; i++) {
-                signal.unitsInDigit[i] = (header.maxInUnits[i] - header.minInUnits[i])
-                        / (header.digitalMax[i] - header.digitalMin[i]);
+            signal.setUnitsInDigit(new Double[header.getNumberOfChannels()]);
+            for (int i = 0; i < signal.getUnitsInDigit().length; i++) {
+                signal.getUnitsInDigit()[i] = (header.getMaxInUnits()[i] - header.getMinInUnits()[i])
+                        / (header.getDigitalMax()[i] - header.getDigitalMin()[i]);
             }
 
-            signal.digitalValues = new short[header.numberOfChannels][];
-            signal.valuesInUnits = new double[header.numberOfChannels][];
-            for (int i = 0; i < header.numberOfChannels; i++) {
-                signal.digitalValues[i] = new short[header.numberOfRecords * header.numberOfSamples[i]];
-                signal.valuesInUnits[i] = new double[header.numberOfRecords * header.numberOfSamples[i]];
+            signal.setDigitalValues(new short[header.getNumberOfChannels()][]);
+            signal.setValuesInUnits(new double[header.getNumberOfChannels()][]);
+            for (int i = 0; i < header.getNumberOfChannels(); i++) {
+                signal.getDigitalValues()[i] = new short[header.getNumberOfRecords() * header.getNumberOfSamples()[i]];
+                signal.getValuesInUnits()[i] = new double[header.getNumberOfRecords() * header.getNumberOfSamples()[i]];
             }
 
             int samplesPerRecord = 0;
-            for (int nos : header.numberOfSamples) {
+            for (int nos : header.getNumberOfSamples()) {
                 samplesPerRecord += nos;
             }
 
@@ -130,22 +130,22 @@ public final class EDFParser {
                 ByteBuffer bytebuf = ByteBuffer.allocate(samplesPerRecord * 2);
                 bytebuf.order(ByteOrder.LITTLE_ENDIAN);
 
-                for (int i = 0; i < header.numberOfRecords; i++) {
+                for (int i = 0; i < header.getNumberOfRecords(); i++) {
                     bytebuf.rewind();
                     ch.read(bytebuf);
                     bytebuf.rewind();
-                    for (int j = 0; j < header.numberOfChannels; j++) {
-                        for (int k = 0; k < header.numberOfSamples[j]; k++) {
-                            int s = header.numberOfSamples[j] * i + k;
-                            signal.digitalValues[j][s] = bytebuf.getShort();
-                            signal.valuesInUnits[j][s] = signal.digitalValues[j][s] * signal.unitsInDigit[j];
+                    for (int j = 0; j < header.getNumberOfChannels(); j++) {
+                        for (int k = 0; k < header.getNumberOfSamples()[j]; k++) {
+                            int s = header.getNumberOfSamples()[j] * i + k;
+                            signal.getDigitalValues()[j][s] = bytebuf.getShort();
+                            signal.getValuesInUnits()[j][s] = signal.getDigitalValues()[j][s] * signal.getUnitsInDigit()[j];
                         }
                     }
                 }
 
-                result.annotations = parseAnnotation(header, signal);
+                result.setAnnotations(parseAnnotation(header, signal));
 
-                result.signal = signal;
+                result.setSignal(signal);
             }
         } catch (IOException e) {
             throw new EDFParserException(e);
@@ -154,13 +154,13 @@ public final class EDFParser {
 
     private static List<EDFAnnotation> parseAnnotation(EDFHeader header, EDFSignal signal) {
 
-        if (!header.formatVersion.startsWith("EDF+")) {
+        if (!header.getFormatVersion().startsWith("EDF+")) {
             return Collections.emptyList();
         }
 
         int annotationIndex = -1;
-        for (int i = 0; i < header.numberOfChannels; i++) {
-            if ("EDF Annotations".equals(header.channelLabels[i].trim())) {
+        for (int i = 0; i < header.getNumberOfChannels(); i++) {
+            if ("EDF Annotations".equals(header.getChannelLabels()[i].trim())) {
                 annotationIndex = i;
                 break;
             }
@@ -169,7 +169,7 @@ public final class EDFParser {
             return Collections.emptyList();
         }
 
-        short[] s = signal.digitalValues[annotationIndex];
+        short[] s = signal.getDigitalValues()[annotationIndex];
         byte[] b = new byte[s.length * 2];
         for (int i = 0; i < s.length * 2; i += 2) {
             b[i] = (byte) (s[i / 2] % 256);
@@ -223,47 +223,47 @@ public final class EDFParser {
     }
 
     private static void removeAnnotationSignal(EDFHeader header, EDFSignal signal, int annotationIndex) {
-        header.numberOfChannels--;
-        ParseUtils.removeElement(header.channelLabels, annotationIndex);
-        ParseUtils.removeElement(header.transducerTypes, annotationIndex);
-        ParseUtils.removeElement(header.dimensions, annotationIndex);
-        ParseUtils.removeElement(header.minInUnits, annotationIndex);
-        ParseUtils.removeElement(header.maxInUnits, annotationIndex);
-        ParseUtils.removeElement(header.digitalMin, annotationIndex);
-        ParseUtils.removeElement(header.digitalMax, annotationIndex);
-        ParseUtils.removeElement(header.prefilterings, annotationIndex);
-        ParseUtils.removeElement(header.numberOfSamples, annotationIndex);
-        ParseUtils.removeElement(header.reserveds, annotationIndex);
+        header.setNumberOfChannels(header.getNumberOfChannels() - 1);
+        ParseUtils.removeElement(header.getChannelLabels(), annotationIndex);
+        ParseUtils.removeElement(header.getTransducerTypes(), annotationIndex);
+        ParseUtils.removeElement(header.getDimensions(), annotationIndex);
+        ParseUtils.removeElement(header.getMinInUnits(), annotationIndex);
+        ParseUtils.removeElement(header.getMaxInUnits(), annotationIndex);
+        ParseUtils.removeElement(header.getDigitalMin(), annotationIndex);
+        ParseUtils.removeElement(header.getDigitalMax(), annotationIndex);
+        ParseUtils.removeElement(header.getPrefilterings(), annotationIndex);
+        ParseUtils.removeElement(header.getNumberOfSamples(), annotationIndex);
+        ParseUtils.removeElement(header.getReserveds(), annotationIndex);
 
-        ParseUtils.removeElement(signal.digitalValues, annotationIndex);
-        ParseUtils.removeElement(signal.unitsInDigit, annotationIndex);
-        ParseUtils.removeElement(signal.valuesInUnits, annotationIndex);
+        ParseUtils.removeElement(signal.getDigitalValues(), annotationIndex);
+        ParseUtils.removeElement(signal.getUnitsInDigit(), annotationIndex);
+        ParseUtils.removeElement(signal.getValuesInUnits(), annotationIndex);
     }
 
     private static void parseChannelInformation(InputStream is, EDFParserResult result) throws EDFParserException {
         try {
             EDFHeader header = result.getHeader();
-            int numberOfChannels = header.numberOfChannels;
-            header.channelLabels = ParseUtils
-                    .readBulkASCIIFromStream(is, EDFConstants.LABEL_OF_CHANNEL_SIZE, numberOfChannels);
-            header.transducerTypes = ParseUtils
-                    .readBulkASCIIFromStream(is, EDFConstants.TRANSDUCER_TYPE_SIZE, numberOfChannels);
-            header.dimensions = ParseUtils
-                    .readBulkASCIIFromStream(is, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, numberOfChannels);
-            header.minInUnits = ParseUtils
-                    .readBulkDoubleFromStream(is, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, numberOfChannels);
-            header.maxInUnits = ParseUtils
-                    .readBulkDoubleFromStream(is, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, numberOfChannels);
-            header.digitalMin = ParseUtils.readBulkIntFromStream(is, EDFConstants.DIGITAL_MIN_SIZE, numberOfChannels);
-            header.digitalMax = ParseUtils.readBulkIntFromStream(is, EDFConstants.DIGITAL_MAX_SIZE, numberOfChannels);
-            header.prefilterings = ParseUtils
-                    .readBulkASCIIFromStream(is, EDFConstants.PREFILTERING_SIZE, numberOfChannels);
-            header.numberOfSamples = ParseUtils
-                    .readBulkIntFromStream(is, EDFConstants.NUMBER_OF_SAMPLES_SIZE, numberOfChannels);
-            header.reserveds = new byte[numberOfChannels][];
-            for (int i = 0; i < header.reserveds.length; i++) {
-                header.reserveds[i] = new byte[EDFConstants.RESERVED_SIZE];
-                is.read(header.reserveds[i]);
+            int numberOfChannels = header.getNumberOfChannels();
+            header.setChannelLabels(ParseUtils
+                    .readBulkASCIIFromStream(is, EDFConstants.LABEL_OF_CHANNEL_SIZE, numberOfChannels));
+            header.setTransducerTypes(ParseUtils
+                    .readBulkASCIIFromStream(is, EDFConstants.TRANSDUCER_TYPE_SIZE, numberOfChannels));
+            header.setDimensions(ParseUtils
+                    .readBulkASCIIFromStream(is, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, numberOfChannels));
+            header.setMinInUnits(ParseUtils
+                    .readBulkDoubleFromStream(is, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, numberOfChannels));
+            header.setMaxInUnits(ParseUtils
+                    .readBulkDoubleFromStream(is, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, numberOfChannels));
+            header.setDigitalMin(ParseUtils.readBulkIntFromStream(is, EDFConstants.DIGITAL_MIN_SIZE, numberOfChannels));
+            header.setDigitalMax(ParseUtils.readBulkIntFromStream(is, EDFConstants.DIGITAL_MAX_SIZE, numberOfChannels));
+            header.setPrefilterings(ParseUtils
+                    .readBulkASCIIFromStream(is, EDFConstants.PREFILTERING_SIZE, numberOfChannels));
+            header.setNumberOfSamples(ParseUtils
+                    .readBulkIntFromStream(is, EDFConstants.NUMBER_OF_SAMPLES_SIZE, numberOfChannels));
+            header.setReserveds(new byte[numberOfChannels][]);
+            for (int i = 0; i < header.getReserveds().length; i++) {
+                header.getReserveds()[i] = new byte[EDFConstants.RESERVED_SIZE];
+                is.read(header.getReserveds()[i]);
             }
         } catch (IOException e) {
             throw new EDFParserException(e);

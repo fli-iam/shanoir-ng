@@ -46,7 +46,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 public class DuaDraftAPIController implements DuaDraftAPI {
 
     @Autowired
-    DuaDraftService duaDraftService;
+    private DuaDraftService duaDraftService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;

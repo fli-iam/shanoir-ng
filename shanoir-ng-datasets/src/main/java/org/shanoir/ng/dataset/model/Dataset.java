@@ -179,10 +179,9 @@ public abstract class Dataset extends AbstractEntity {
 
     @JsonIgnore
     @Transient
-    public String sopInstanceUID;
+    private String sopInstanceUID;
 
-    public Dataset() {
-    }
+    public Dataset() { }
 
     public Dataset(Dataset d) {
         this.creationDate = d.getCreationDate();

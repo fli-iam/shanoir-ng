@@ -25,26 +25,26 @@ package org.shanoir.ng.importer.eeg.edf;
  */
 public class EDFHeader {
 
-    String idCode = null;
-    String subjectID = null;
-    String recordingID = null;
-    String startDate = null;
-    String startTime = null;
-    int bytesInHeader = 0;
-    String formatVersion = null;
-    int numberOfRecords = 0;
-    double durationOfRecords = 0;
-    int numberOfChannels = 0;
-    String[] channelLabels = null;
-    String[] transducerTypes = null;
-    String[] dimensions = null;
-    Double[] minInUnits = null;
-    Double[] maxInUnits = null;
-    Integer[] digitalMin = null;
-    Integer[] digitalMax = null;
-    String[] prefilterings = null;
-    Integer[] numberOfSamples = null;
-    byte[][] reserveds = null;
+    private String idCode = null;
+    private String subjectID = null;
+    private String recordingID = null;
+    private String startDate = null;
+    private String startTime = null;
+    private int bytesInHeader = 0;
+    private String formatVersion = null;
+    private int numberOfRecords = 0;
+    private double durationOfRecords = 0;
+    private int numberOfChannels = 0;
+    private String[] channelLabels = null;
+    private String[] transducerTypes = null;
+    private String[] dimensions = null;
+    private Double[] minInUnits = null;
+    private Double[] maxInUnits = null;
+    private Integer[] digitalMin = null;
+    private Integer[] digitalMax = null;
+    private String[] prefilterings = null;
+    private Integer[] numberOfSamples = null;
+    private byte[][] reserveds = null;
 
     public String getIdCode() {
         return idCode;
@@ -125,5 +125,87 @@ public class EDFHeader {
     public byte[][] getReserveds() {
         return reserveds;
     }
+
+    public void setIdCode(String idCode) {
+        this.idCode = idCode;
+    }
+
+    public void setSubjectID(String subjectID) {
+        this.subjectID = subjectID;
+    }
+
+    public void setRecordingID(String recordingID) {
+        this.recordingID = recordingID;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setBytesInHeader(int bytesInHeader) {
+        this.bytesInHeader = bytesInHeader;
+    }
+
+    public void setFormatVersion(String formatVersion) {
+        this.formatVersion = formatVersion;
+    }
+
+    public void setNumberOfRecords(int numberOfRecords) {
+        this.numberOfRecords = numberOfRecords;
+    }
+
+    public void setDurationOfRecords(double durationOfRecords) {
+        this.durationOfRecords = durationOfRecords;
+    }
+
+    public void setNumberOfChannels(int numberOfChannels) {
+        this.numberOfChannels = numberOfChannels;
+    }
+
+    public void setChannelLabels(String[] channelLabels) {
+        this.channelLabels = channelLabels;
+    }
+
+    public void setTransducerTypes(String[] transducerTypes) {
+        this.transducerTypes = transducerTypes;
+    }
+
+    public void setDimensions(String[] dimensions) {
+        this.dimensions = dimensions;
+    }
+
+    public void setMinInUnits(Double[] minInUnits) {
+        this.minInUnits = minInUnits;
+    }
+
+    public void setMaxInUnits(Double[] maxInUnits) {
+        this.maxInUnits = maxInUnits;
+    }
+
+    public void setDigitalMin(Integer[] digitalMin) {
+        this.digitalMin = digitalMin;
+    }
+
+    public void setDigitalMax(Integer[] digitalMax) {
+        this.digitalMax = digitalMax;
+    }
+
+    public void setPrefilterings(String[] prefilterings) {
+        this.prefilterings = prefilterings;
+    }
+
+    public void setNumberOfSamples(Integer[] numberOfSamples) {
+        this.numberOfSamples = numberOfSamples;
+    }
+
+    public void setReserveds(byte[][] reserveds) {
+        this.reserveds = reserveds;
+    }
+
+
 
 }

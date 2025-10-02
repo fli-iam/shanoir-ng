@@ -24,6 +24,7 @@ import java.util.List;
 public abstract class OutputHandler {
 
     @Autowired
+    @SuppressWarnings("checkstyle:VisibilityModifier")
     protected ExecutionTrackingServiceImpl executionTrackingService;
 
     /**

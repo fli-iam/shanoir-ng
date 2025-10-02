@@ -60,7 +60,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Value("${vip.shanoir-vip-host}")
     private String shanoirUriSchemeLocal;
 
-    public static String shanoirUriScheme;
+    private static String shanoirUriScheme;
 
     private final String vipExecutionUri = "/executions";
 

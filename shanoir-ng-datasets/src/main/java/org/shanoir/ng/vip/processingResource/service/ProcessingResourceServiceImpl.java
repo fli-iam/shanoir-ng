@@ -33,10 +33,10 @@ import java.util.*;
 public class ProcessingResourceServiceImpl implements ProcessingResourceService {
 
     @Autowired
-    public ProcessingResourceRepository repository;
+    private ProcessingResourceRepository repository;
 
     @Autowired
-    public DatasetService datasetService;
+    private DatasetService datasetService;
 
     public String create(ExecutionMonitoring processing, List<Dataset> datasets) {
         List<ProcessingResource> processingResources = new ArrayList<>();

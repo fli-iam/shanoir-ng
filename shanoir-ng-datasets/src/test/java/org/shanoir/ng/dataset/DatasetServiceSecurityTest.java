@@ -100,7 +100,7 @@ public class DatasetServiceSecurityTest {
     private StudyUserRightsRepository rightsRepository;
 
     @MockBean
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @MockBean
     private ShanoirEventService shanoirEventService;
@@ -108,7 +108,7 @@ public class DatasetServiceSecurityTest {
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
-    StudyUser su1 = new StudyUser();
+    private StudyUser su1 = new StudyUser();
 
     @BeforeEach
     public void setup() {

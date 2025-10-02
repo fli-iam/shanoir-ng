@@ -83,9 +83,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ExaminationApiControllerTest {
 
     @TempDir
-    public File tempFolder;
+    private File tempFolder;
 
-    public String tempFolderPath;
+    private String tempFolderPath;
 
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
@@ -131,10 +131,10 @@ public class ExaminationApiControllerTest {
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    ExaminationRepository examRepo;
+    private ExaminationRepository examRepo;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {

@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DatasetFileUtilsTest {
 
     @TempDir
-    public File testFolder;
+    private File testFolder;
 
     @Test
     public void writeInputFileForExport() throws IOException {

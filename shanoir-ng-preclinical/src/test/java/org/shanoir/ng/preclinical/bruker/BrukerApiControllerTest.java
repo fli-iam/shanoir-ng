@@ -57,12 +57,12 @@ public class BrukerApiControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @TempDir
-    public File tempFolder;
+    private File tempFolder;
 
-    public static String tempFolderPath;
+    private static String tempFolderPath;
 
     @BeforeEach
     public void beforeClass() {

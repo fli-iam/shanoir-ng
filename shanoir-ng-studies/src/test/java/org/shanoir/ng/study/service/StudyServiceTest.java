@@ -104,7 +104,7 @@ public class StudyServiceTest {
     private ObjectMapper objectMapper;
 
     @TempDir
-    public File tempFolder;
+    private File tempFolder;
 
     @BeforeEach
     public void setup() {

@@ -81,7 +81,7 @@ public class DatasetAcquisitionServiceSecurityTest {
     private StudyUserRightsRepository rightsRepository;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     @MockBean
     private ShanoirEventService shanoirEventService;

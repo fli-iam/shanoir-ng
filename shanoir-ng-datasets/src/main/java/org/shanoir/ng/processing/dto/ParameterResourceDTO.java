@@ -23,7 +23,7 @@ public class ParameterResourceDTO {
     private GroupByEnum groupBy;
 
     private String exportFormat;
-    List<Long> datasetIds;
+    private List<Long> datasetIds;
 
     public String getParameter() {
         return parameter;

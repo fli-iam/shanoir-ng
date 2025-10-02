@@ -25,7 +25,7 @@ package org.shanoir.ng.bids.model;
 public class BidsFile extends BidsElement {
 
     /** The content of the bids file. */
-    String content;
+    private String content;
 
     public BidsFile(String absolutePath) {
         super(absolutePath);

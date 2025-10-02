@@ -39,10 +39,10 @@ public class RabbitMQEventService {
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQEventService.class);
 
     @Autowired
-    public ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
-    public ShanoirEventsService service;
+    private ShanoirEventsService service;
 
     @RabbitListener(queues = RabbitMQConfiguration.EXECUTION_MONITORING_TASK, containerFactory = "multipleConsumersFactory")
     @RabbitHandler

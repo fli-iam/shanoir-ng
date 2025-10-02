@@ -79,7 +79,7 @@ public class DatasetDownloaderServiceTest {
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
-    DatasetDownloaderServiceImpl datasetDownloaderService;
+    private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @MockBean
     private DatasetService datasetServiceMock;
@@ -103,7 +103,7 @@ public class DatasetDownloaderServiceTest {
     private ControllerSecurityService controllerSecurityService;
 
     @TempDir
-    public File tempDir;
+    private File tempDir;
 
     @MockBean
     private EegDatasetMapper eegDatasetMapper;

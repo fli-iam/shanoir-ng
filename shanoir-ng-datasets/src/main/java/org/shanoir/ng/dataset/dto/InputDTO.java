@@ -22,7 +22,7 @@ import java.util.List;
 public class InputDTO {
 
     @JsonProperty("series")
-    List<InputSerieDTO> series = new ArrayList<>();
+    private List<InputSerieDTO> series = new ArrayList<>();
 
     public List<InputSerieDTO> getSeries() {
         return series;

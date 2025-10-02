@@ -33,10 +33,10 @@ import java.util.Set;
 public class SecurityService {
 
     @Autowired
-    StudyUserRightsRepository rightsRepository;
+    private StudyUserRightsRepository rightsRepository;
 
     @Autowired
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     /**
      * Get study center rights for the current user as two separate variable.

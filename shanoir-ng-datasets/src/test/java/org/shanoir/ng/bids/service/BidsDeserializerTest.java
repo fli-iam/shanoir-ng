@@ -37,9 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BidsDeserializerTest {
 
     @TempDir
-    public File folder;
+    private File folder;
 
-    BidsDeserializer deserializer = new BidsDeserializer();
+    private BidsDeserializer deserializer = new BidsDeserializer();
 
     @Test
     public void testDeserialize() throws IOException {

@@ -20,7 +20,12 @@ package org.shanoir.ng.shared.exception;
  * @author msimon
  *
  */
-public class ImportErrorModelCode extends ErrorModelCode {
+public final class ImportErrorModelCode {
+
+    private ImportErrorModelCode() { }
+
+    /** Bad request */
+    public static final Integer BAD_REQUEST = 10;
 
     /** User has no right to perform an action */
     public static final Integer NO_RIGHT_FOR_ACTION = 11;

@@ -24,7 +24,7 @@ public class ImportSecurityService {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     /**
      * Check that the connected user has the given right for the given study.

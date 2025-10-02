@@ -82,7 +82,7 @@ public class DatasetAcquisitionApiSecurityTest {
     private BindingResult mockBindingResult;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     @MockBean
     private ExaminationRepository examinationRepository;

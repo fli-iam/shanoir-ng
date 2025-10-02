@@ -40,10 +40,10 @@ public class RabbitMQUserService {
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
 
     @Autowired
-    ShanoirEventsService eventsService;
+    private ShanoirEventsService eventsService;
 
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
     private ObjectMapper mapper;

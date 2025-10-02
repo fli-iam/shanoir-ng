@@ -22,25 +22,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Image {
 
     @JsonProperty("path")
-    public String path;
+    private String path;
 
     @JsonProperty("acquisitionNumber")
-    public int acquisitionNumber;
+    private int acquisitionNumber;
 
     @JsonProperty("echoTimes")
-    public Set<EchoTime> echoTimes;
+    private Set<EchoTime> echoTimes;
 
     @JsonProperty("repetitionTime")
-    public Double repetitionTime;
+    private Double repetitionTime;
 
     @JsonProperty("inversionTime")
-    public Double inversionTime;
+    private Double inversionTime;
 
     @JsonProperty("flipAngle")
-    public String flipAngle;
+    private String flipAngle;
 
     @JsonProperty("imageOrientationPatient")
-    public List<Double> imageOrientationPatient;
+    private List<Double> imageOrientationPatient;
 
     public String getPath() {
         return path;

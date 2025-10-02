@@ -51,7 +51,7 @@ public class EegImporterServiceTest {
 
     @InjectMocks
     @Spy
-    EegImporterService service = new EegImporterService();
+    private EegImporterService service = new EegImporterService();
 
     @Mock
     private ImporterMailService mailService;

@@ -23,9 +23,9 @@ public class SubjectDTO {
 
     private List<SubjectStudyDTO> subjectStudyList;
 
-    protected Long id;
+    private Long id;
 
-    protected String name;
+    private String name;
 
     public SubjectDTO() { };
 

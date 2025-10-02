@@ -46,7 +46,7 @@ public class ScheduledTasksTest {
     private UserService userService;
 
     @MockBean
-    KeycloakClient keycloakClient;
+    private KeycloakClient keycloakClient;
 
     @Autowired
     private ScheduledTasks scheduledTasks;

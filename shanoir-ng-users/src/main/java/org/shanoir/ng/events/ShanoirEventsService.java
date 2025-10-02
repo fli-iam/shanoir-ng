@@ -46,12 +46,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class ShanoirEventsService {
 
     @Autowired
-    ShanoirEventRepository repository;
-    @Autowired
-    ShanoirEventRepositoryCustom repositoryCustom;
+    private ShanoirEventRepository repository;
 
     @Autowired
-    UserRepository userRepository;
+    private ShanoirEventRepositoryCustom repositoryCustom;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 

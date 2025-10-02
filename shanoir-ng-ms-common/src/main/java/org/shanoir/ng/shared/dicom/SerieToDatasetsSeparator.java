@@ -35,13 +35,13 @@ public class SerieToDatasetsSeparator {
     private static final Logger LOG = LoggerFactory.getLogger(SerieToDatasetsSeparator.class);
 
     /** corresponding dicom tag. */
-    protected int acquisitionNumber = 0;
+    private int acquisitionNumber = 0;
 
     /** corresponding dicom tag. */
-    protected Set<EchoTime> echoTime = null;
+    private Set<EchoTime> echoTime = null;
 
     /** corresponding dicom tag. */
-    protected double[] imageOrientationPatient = null;
+    private double[] imageOrientationPatient = null;
 
     /**
      * Constructor with fields.

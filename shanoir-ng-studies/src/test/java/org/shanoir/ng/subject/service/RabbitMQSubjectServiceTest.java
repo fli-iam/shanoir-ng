@@ -56,19 +56,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMQSubjectServiceTest {
 
     @Mock
-    SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @Mock
-    SubjectService subjectService;
+    private SubjectService subjectService;
 
     @Mock
-    StudyRepository studyRepository;
+    private StudyRepository studyRepository;
 
     @Mock
-    SubjectStudyRepository subjectStudyRepository;
+    private SubjectStudyRepository subjectStudyRepository;
 
     @Mock
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @InjectMocks
     private RabbitMQSubjectService rabbitMQSubjectService;

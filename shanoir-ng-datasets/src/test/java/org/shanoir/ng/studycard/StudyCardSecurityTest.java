@@ -61,7 +61,7 @@ public class StudyCardSecurityTest {
     private StudyCardApiController  api;
 
     @MockBean
-    StudyRightsService commService;
+    private StudyRightsService commService;
 
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;

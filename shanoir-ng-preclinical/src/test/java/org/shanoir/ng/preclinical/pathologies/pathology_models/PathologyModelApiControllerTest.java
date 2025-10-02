@@ -85,7 +85,7 @@ public class PathologyModelApiControllerTest {
     private PathologyModelEditableByManager editableOnlyValidator;
 
     @TempDir
-    public File tempFolder;
+    private File tempFolder;
 
     @BeforeEach
     public void setup() throws ShanoirException {

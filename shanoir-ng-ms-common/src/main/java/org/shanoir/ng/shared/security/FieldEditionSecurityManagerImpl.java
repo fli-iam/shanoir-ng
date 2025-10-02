@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
 public abstract class FieldEditionSecurityManagerImpl<T extends AbstractEntity> implements FieldEditionSecurityManager<T> {
 
     @Autowired
-    public CrudRepository<T, Long> repository;
+    private CrudRepository<T, Long> repository;
 
     @Override
     public FieldErrorMap validate(final T entity) {

@@ -15,14 +15,12 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
-
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -37,10 +35,7 @@ import org.springframework.stereotype.Component;
 public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 
     @Autowired
-    DicomProcessing dicomProcessing;
-
-    @Autowired
-    DatasetExpressionContext datasetExpressionContext;
+    private DatasetExpressionContext datasetExpressionContext;
 
     @Override
     public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,

@@ -53,7 +53,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-    ProcessingResourceService processingResourceService;
+    private ProcessingResourceService processingResourceService;
 
     @Autowired
     private DatasetService datasetService;

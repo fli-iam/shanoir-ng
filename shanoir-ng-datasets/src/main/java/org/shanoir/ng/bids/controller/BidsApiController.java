@@ -60,13 +60,13 @@ public class BidsApiController implements BidsApi {
     private static final Logger LOG = LoggerFactory.getLogger(BidsApiController.class);
 
     @Autowired
-    BIDSService bidsService;
+    private BIDSService bidsService;
 
     @Autowired
-    BidsDeserializer bidsDeserializer;
+    private BidsDeserializer bidsDeserializer;
 
     @Autowired
-    StudyRepository studyRepo;
+    private StudyRepository studyRepo;
 
     private final HttpServletRequest request;
 

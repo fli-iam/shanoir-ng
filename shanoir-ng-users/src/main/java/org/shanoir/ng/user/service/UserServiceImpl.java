@@ -85,19 +85,19 @@ public class UserServiceImpl implements UserService {
     private AccessRequestRepository accessRequestRepository;
 
     @Autowired
-    ApplicationEventPublisher publisher;
+    private ApplicationEventPublisher publisher;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    AccessRequestService accessRequestService;
+    private AccessRequestService accessRequestService;
 
     @Override
     public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {

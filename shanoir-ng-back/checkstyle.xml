@@ -207,7 +207,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
     <module name="InterfaceIsType"/>
-    <!-- <module name="VisibilityModifier"/> -->
+    <module name="VisibilityModifier">
+      <property name="protectedAllowed" value="true"/>
+    </module>
 
     <!-- Miscellaneous other checks.                   -->
     <!-- See https://checkstyle.org/checks/misc/index.html -->

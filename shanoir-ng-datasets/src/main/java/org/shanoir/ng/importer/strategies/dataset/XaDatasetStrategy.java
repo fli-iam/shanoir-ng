@@ -36,10 +36,10 @@ import org.springframework.stereotype.Component;
 public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 
     @Autowired
-    DicomProcessing dicomProcessing;
+    private DicomProcessing dicomProcessing;
 
     @Autowired
-    DatasetExpressionContext datasetExpressionContext;
+    private DatasetExpressionContext datasetExpressionContext;
 
     @Override
     public DatasetsWrapper<XaDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,

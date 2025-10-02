@@ -39,13 +39,14 @@ import static org.mockito.BDDMockito.given;
 public class StudyUserProcessCommandTest {
 
     @Autowired
-    StudyUserUpdateService service;
+    private StudyUserUpdateService service;
 
     @MockBean
-    StudyUserRightsRepository studyUserRepository;
+    private StudyUserRightsRepository studyUserRepository;
 
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
     @Test
     public void processCommandsTest() {
         given(studyUserRepository.findAllById(Mockito.anyList())).willReturn(new ArrayList<>());

@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class MapSupplier implements Supplier<Map<String, String>> {
 
-    Map<String, String> map = new HashMap<>();
+    private Map<String, String> map = new HashMap<>();
 
     @Override
     public Map<String, String> get() {

@@ -45,16 +45,16 @@ public class RabbitMqExaminationService {
     private ExaminationRepository examRepo;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    ExaminationService examinationService;
+    private ExaminationService examinationService;
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
-    SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler

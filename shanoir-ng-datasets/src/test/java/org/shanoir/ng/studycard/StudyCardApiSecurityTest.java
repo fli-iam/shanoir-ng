@@ -94,7 +94,7 @@ public class StudyCardApiSecurityTest {
     private StudyUserRightsRepository rightsRepository;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
 
     @MockBean
     private ExaminationRepository examinationRepository;

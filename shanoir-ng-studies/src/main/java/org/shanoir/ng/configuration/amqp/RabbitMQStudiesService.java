@@ -70,7 +70,8 @@ public class RabbitMQStudiesService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
+
     /**
      * Receives a shanoirEvent as a json object, concerning an examination creation
      * @param commandArrStr the task as a json string.

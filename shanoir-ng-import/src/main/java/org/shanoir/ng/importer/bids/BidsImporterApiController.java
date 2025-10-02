@@ -85,7 +85,7 @@ public class BidsImporterApiController implements BidsImporterApi {
     private static final String CSV_SEPARATOR = "\t";
 
     @Autowired
-    ImporterApiController importer;
+    private ImporterApiController importer;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;

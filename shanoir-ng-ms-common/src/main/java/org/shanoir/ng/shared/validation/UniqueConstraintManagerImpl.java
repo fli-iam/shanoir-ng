@@ -39,9 +39,7 @@ import org.springframework.util.StringUtils;
 public abstract class UniqueConstraintManagerImpl<T extends AbstractEntity> implements UniqueConstraintManager<T> {
 
     @Autowired
-    protected FindByRepository<T> repository;
-
-
+    private FindByRepository<T> repository;
 
     /**
      * Validates what can't be done by Spring/Hibernate validation, in particular unique constraints

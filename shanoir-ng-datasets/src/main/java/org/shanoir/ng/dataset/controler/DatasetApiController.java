@@ -138,7 +138,7 @@ public class DatasetApiController implements DatasetApi {
     private WADODownloaderService downloader;
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -148,7 +148,7 @@ public class DatasetApiController implements DatasetApi {
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
-    protected DatasetDownloaderServiceImpl datasetDownloaderService;
+    private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
     private ObjectMapper objectMapper;

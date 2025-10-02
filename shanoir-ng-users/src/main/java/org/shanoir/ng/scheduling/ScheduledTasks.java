@@ -48,7 +48,7 @@ public class ScheduledTasks {
     private UserService userService;
 
     @Autowired
-    KeycloakClient keycloakClient;
+    private KeycloakClient keycloakClient;
 
     /**
      * Check users expiration date every day at 8am.

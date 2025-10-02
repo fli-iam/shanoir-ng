@@ -14,16 +14,13 @@
 
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.service.NIfTIConverterService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.util.Arrays;
 
-import org.springframework.web.client.RestTemplate;
+import org.shanoir.ng.service.NIfTIConverterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ShanoirExec {
@@ -32,9 +29,6 @@ public class ShanoirExec {
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
-
-    @Autowired
-    RestTemplate restTemplate;
 
     /**
      * Exec the dcm2nii command to convert Dicom files to Nifti files.

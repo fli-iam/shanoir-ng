@@ -81,7 +81,7 @@ public class ImporterServiceTest {
 
     @InjectMocks
     @Spy
-    ImporterService service = new ImporterService();
+    private ImporterService service = new ImporterService();
 
     @Mock
     private ExaminationService examinationService;
@@ -105,13 +105,13 @@ public class ImporterServiceTest {
     private ShanoirEventService taskService;
 
     @Mock
-    StudyUserRightsRepository studyUserRightRepo;
+    private StudyUserRightsRepository studyUserRightRepo;
 
     @Mock
-    QualityCardService qualityCardService;
+    private QualityCardService qualityCardService;
 
     @Mock
-    QualityService qualityService;
+    private QualityService qualityService;
 
     @Mock
     private DatasetAcquisitionRepository datasetAcquisitionRepository;

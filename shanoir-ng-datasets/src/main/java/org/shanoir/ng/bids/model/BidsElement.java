@@ -24,7 +24,7 @@ package org.shanoir.ng.bids.model;
 public abstract class BidsElement {
 
     /** Path of the Bids file. */
-    String path;
+    private String path;
 
     public BidsElement(String path) {
         this.path = path;

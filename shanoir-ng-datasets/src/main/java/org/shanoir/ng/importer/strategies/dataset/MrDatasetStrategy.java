@@ -52,10 +52,10 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
     private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
 
     @Autowired
-    DicomProcessing dicomProcessing;
+    private DicomProcessing dicomProcessing;
 
     @Autowired
-    DatasetExpressionContext datasetExpressionContext;
+    private DatasetExpressionContext datasetExpressionContext;
 
     @Autowired
     private EchoTimeMapper echoTimeMapper;

@@ -70,7 +70,7 @@ public class BidsServiceTest {
     private SubjectRepository subjectRepository;
 
     @Mock
-    DatasetSecurityService datasetSecurityService;
+    private DatasetSecurityService datasetSecurityService;
 
     @InjectMocks
     @Spy
@@ -79,12 +79,13 @@ public class BidsServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    String studyName = "STUDY";
+    private String studyName = "STUDY";
 
-    Examination exam = ModelsUtil.createExamination();
-    Subject subject = new Subject();
+    private Examination exam = ModelsUtil.createExamination();
 
-    public static String tempFolderPath;
+    private Subject subject = new Subject();
+
+    private static String tempFolderPath;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -167,4 +168,3 @@ public class BidsServiceTest {
         }
     }
 }
-

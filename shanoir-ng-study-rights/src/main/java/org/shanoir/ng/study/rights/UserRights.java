@@ -23,7 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 public class UserRights {
 
-    Map<Long, StudyUser> studyRights = new HashMap<>();
+    private Map<Long, StudyUser> studyRights = new HashMap<>();
 
     public UserRights(List<StudyUser> studyUsers) {
         if (studyUsers != null) {

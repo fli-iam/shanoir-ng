@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 public class AccessRequestServiceImpl implements AccessRequestService {
 
     @Autowired
-    AccessRequestRepository accessRequestRepository;
+    private AccessRequestRepository accessRequestRepository;
 
     @Override
     public Optional<AccessRequest> findById(Long id) {

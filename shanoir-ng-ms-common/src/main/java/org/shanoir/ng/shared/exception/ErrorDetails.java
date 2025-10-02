@@ -23,7 +23,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
  */
 public class ErrorDetails {
 
-    FieldErrorMap fieldErrors = null;
+    private FieldErrorMap fieldErrors = null;
 
 
     /**

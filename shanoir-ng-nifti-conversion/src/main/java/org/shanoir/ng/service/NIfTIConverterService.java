@@ -63,7 +63,7 @@ public class NIfTIConverterService {
     /** Output files mapped by series UID. */
     private HashMap<String, List<String>> outputFiles = new HashMap<>();
 
-    Random rand = new Random();
+    private Random rand = new Random();
 
     public void brukerToDicomExec(String inputFolder, String outputFolder) {
         shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);

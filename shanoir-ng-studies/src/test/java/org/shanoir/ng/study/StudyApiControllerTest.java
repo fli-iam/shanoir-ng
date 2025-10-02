@@ -116,9 +116,9 @@ public class StudyApiControllerTest {
     private RelatedDatasetService relatedDatasetService;
 
     @TempDir
-    public static File tempFolder;
+    private static File tempFolder;
 
-    public static String tempFolderPath;
+    private static String tempFolderPath;
 
     @BeforeAll
     public static void beforeAll() {

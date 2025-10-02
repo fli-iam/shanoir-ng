@@ -56,25 +56,25 @@ public class DatasetSecurityService {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
-    DatasetRepository datasetRepository;
+    private DatasetRepository datasetRepository;
 
     @Autowired
-    DatasetAcquisitionRepository datasetAcquisitionRepository;
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     @Autowired
-    StudyCardRepository studyCardRepository;
+    private StudyCardRepository studyCardRepository;
 
     @Autowired
-    QualityCardRepository qualityCardRepository;
+    private QualityCardRepository qualityCardRepository;
 
     @Autowired
-    ExaminationRepository examinationRepository;
+    private ExaminationRepository examinationRepository;
 
     @Autowired
-    SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @Autowired
-    StudyRightsService commService;
+    private StudyRightsService commService;
 
     @Autowired
     private StudyInstanceUIDHandler studyInstanceUIDHandler;

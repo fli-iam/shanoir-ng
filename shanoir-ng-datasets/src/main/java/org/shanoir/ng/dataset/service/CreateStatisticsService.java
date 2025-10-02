@@ -44,8 +44,10 @@ import jakarta.persistence.StoredProcedureQuery;
 
 @Service
 public class CreateStatisticsService {
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
+
     @PersistenceContext
     private EntityManager entityManager;
     private static final String ZIP = ".zip";

@@ -85,13 +85,13 @@ public class AccessRequestApiControllerTest {
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    VIPUserService vipUserService;
+    private VIPUserService vipUserService;
 
     @Autowired
     private ObjectMapper mapper;
 
     @MockBean
-    StudyUserRightsRepository studyUserRightsRepository;
+    private StudyUserRightsRepository studyUserRightsRepository;
 
     private User user = new User();
 

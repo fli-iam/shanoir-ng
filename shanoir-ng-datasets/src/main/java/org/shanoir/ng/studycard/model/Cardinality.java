@@ -22,9 +22,9 @@ package org.shanoir.ng.studycard.model;
  */
 public class Cardinality {
 
-    int number;
+    private int number;
 
-    boolean isMultiplier;
+    private boolean isMultiplier;
 
     public static final Cardinality ONE = new Cardinality(1);
 
@@ -86,5 +86,3 @@ public class Cardinality {
     }
 
 }
-
-

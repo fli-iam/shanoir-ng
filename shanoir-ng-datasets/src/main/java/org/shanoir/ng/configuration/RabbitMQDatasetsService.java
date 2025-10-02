@@ -119,7 +119,7 @@ public class RabbitMQDatasetsService {
     private ExaminationService examinationService;
 
     @Autowired
-    public ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
     private ExaminationRepository examinationRepository;
@@ -137,7 +137,7 @@ public class RabbitMQDatasetsService {
     private StudyService studyService;
 
     @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
