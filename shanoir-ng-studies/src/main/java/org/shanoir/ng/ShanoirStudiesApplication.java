@@ -31,7 +31,9 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
         servers = @Server(url = "/shanoir-ng/studies", description = "Studies"),
         security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
 )
-public class ShanoirStudiesApplication {
+public final class ShanoirStudiesApplication {
+
+    private ShanoirStudiesApplication() { }
 
     public static void main(String[] args) {
         SpringApplication.run(ShanoirStudiesApplication.class, args);

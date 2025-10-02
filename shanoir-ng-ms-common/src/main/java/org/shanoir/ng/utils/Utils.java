@@ -39,7 +39,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author jlouis
  */
-public class Utils {
+public final class Utils {
+
+    private Utils() { }
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 

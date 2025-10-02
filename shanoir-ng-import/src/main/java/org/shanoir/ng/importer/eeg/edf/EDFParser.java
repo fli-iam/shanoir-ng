@@ -36,7 +36,9 @@ import java.util.List;
  *
  * For information about EDF or EDF+ see http://www.edfplus.info/
  */
-public class EDFParser {
+public final class EDFParser {
+
+    private EDFParser() { }
 
     /**
      * Parse the InputStream which should be at the start of an EDF-File. The

@@ -48,7 +48,9 @@ import org.json.JSONObject;
  * @author mkain
  *
  */
-public class DicomJsonUtils {
+public final class DicomJsonUtils {
+
+    private DicomJsonUtils() { }
 
     public static final String STUDY_INSTANCE_UID = "0020000D";
     public static final String SERIE_INSTANCE_UID = "0020000E";

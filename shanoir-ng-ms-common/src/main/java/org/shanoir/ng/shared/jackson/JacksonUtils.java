@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public class JacksonUtils {
+public final class JacksonUtils {
+
+    private JacksonUtils() { }
 
     public static String serialize(Object obj) throws JsonProcessingException {
         SimpleModule module = new SimpleModule();

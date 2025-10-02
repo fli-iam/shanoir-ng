@@ -57,7 +57,8 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetAcquisitionMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
-        int nbOk = 0; int total = 0;
+        int nbOk = 0;
+        int total = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             total++;
             String valueFromDb;

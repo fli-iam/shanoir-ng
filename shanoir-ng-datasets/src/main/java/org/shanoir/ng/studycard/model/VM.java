@@ -22,7 +22,7 @@ import org.dcm4che3.data.Tag;
  * distinct existing values :
  * 1, 1-n, 1-8, 2-n, 3-3n, 2, 4, 1-2, 1-3, 2-2n, 3, 6, 16, 1-n1, 1-32, 1-99, 3-n
  */
-public class VM {
+public final class VM {
 
     private int min;
 
@@ -600,5 +600,3 @@ public class VM {
         else return new VM("1");
     }
 }
-
-

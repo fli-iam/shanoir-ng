@@ -28,6 +28,8 @@ import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
  */
 public final class AnestheticModelUtil {
 
+    private AnestheticModelUtil() { }
+
     // Anesthetic data
     public static final Long ANESTHETIC_ID = 1L;
     public static final String ANESTHETIC_NAME = "Gas Iso. 2% Ket. 25%";

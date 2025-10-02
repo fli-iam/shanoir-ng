@@ -25,6 +25,8 @@ import org.shanoir.ng.preclinical.references.Reference;
  */
 public final class ReferenceModelUtil {
 
+    private ReferenceModelUtil() { }
+
     // Reference data
     public static final Long REFERENCE_ID = 1L;
     public static final String REFERENCE_CATEGORY = "subject";

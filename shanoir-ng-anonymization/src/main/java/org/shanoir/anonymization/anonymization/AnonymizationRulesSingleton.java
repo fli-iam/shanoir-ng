@@ -30,7 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AnonymizationRulesSingleton {
+public final class AnonymizationRulesSingleton {
 
     /**
      * Logger

@@ -25,6 +25,8 @@ import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
  */
 public final class ContrastAgentModelUtil {
 
+    private ContrastAgentModelUtil() { }
+
     // ContrastAgent data
     public static final Long AGENT_GADO_ID = 1L;
     public static final String AGENT_GADO_MANUFACTURED_NAME = "Gadolinium";

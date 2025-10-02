@@ -21,7 +21,10 @@ package org.shanoir.ng.utils;
  * @author jlouis
  * @author mkain
  */
-public class ImportUtils {
+public final class ImportUtils {
+
+    private ImportUtils() { }
+
     /**
      * Convert a String with a wildcard to a regular expression.
      *

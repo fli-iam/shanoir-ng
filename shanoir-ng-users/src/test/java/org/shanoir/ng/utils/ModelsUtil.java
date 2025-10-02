@@ -28,6 +28,8 @@ import org.shanoir.ng.user.model.User;
  */
 public final class ModelsUtil {
 
+    private ModelsUtil() { }
+
     // Role data
     public static final Long ADMIN_ROLE_ID = 1L;
     public static final String ADMIN_ROLE_DISPLAY_NAME = "admin";

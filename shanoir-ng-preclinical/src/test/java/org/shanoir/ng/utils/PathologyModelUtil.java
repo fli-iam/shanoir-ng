@@ -26,6 +26,8 @@ import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPatholo
  */
 public final class PathologyModelUtil {
 
+    private PathologyModelUtil() { }
+
     // Pathology data
     public static final Long PATHOLOGY_ID = 1L;
     public static final String PATHOLOGY_NAME = "Stroke";

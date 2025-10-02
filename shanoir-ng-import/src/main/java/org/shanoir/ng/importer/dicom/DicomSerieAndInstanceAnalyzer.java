@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
  * @author mkain
  *
  */
-public class DicomSerieAndInstanceAnalyzer {
+public final class DicomSerieAndInstanceAnalyzer {
+
+    private DicomSerieAndInstanceAnalyzer() { }
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 

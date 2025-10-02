@@ -17,7 +17,9 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class DicomUtils {
+public final class DicomUtils {
+
+    private DicomUtils() { }
 
     public static String referencedFileIDToPath(String rootFilePath, String[] referencedFileIDArray) throws FileNotFoundException {
         StringBuilder stringBuilder = new StringBuilder();

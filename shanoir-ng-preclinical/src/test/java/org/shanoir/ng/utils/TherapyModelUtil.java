@@ -26,6 +26,8 @@ import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
  */
 public final class TherapyModelUtil {
 
+    private TherapyModelUtil() { }
+
     // Therapy data
     public static final Long THERAPY_BEAIN_ID = 1L;
     public static final String THERAPY_NAME_BRAIN = "Brainectomy";

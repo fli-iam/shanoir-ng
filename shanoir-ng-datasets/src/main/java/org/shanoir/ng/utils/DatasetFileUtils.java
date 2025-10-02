@@ -48,7 +48,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.mail.MessagingException;
 
-public class DatasetFileUtils {
+public final class DatasetFileUtils {
+
+    private DatasetFileUtils() { }
 
     private static final String UNDERSCORE = "_";
 

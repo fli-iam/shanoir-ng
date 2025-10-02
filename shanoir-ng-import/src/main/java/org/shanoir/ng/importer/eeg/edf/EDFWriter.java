@@ -31,7 +31,9 @@ import java.text.DecimalFormatSymbols;
  * This class is capable of writing EDF+ data structures. Changed for fixing
  * issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
  */
-public class EDFWriter {
+public final class EDFWriter {
+
+    private EDFWriter() { }
 
     public static final String SHORT_DECIMAL_FORMAT = "#0.0";
     public static final String LONG_DECIMAL_FORMAT = "#0.0####";

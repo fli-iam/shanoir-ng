@@ -24,7 +24,9 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  *
  * @author jlouis
  */
-public class Utils {
+public final class Utils {
+
+    private Utils() { }
 
     /**
      * Convert Iterable to List

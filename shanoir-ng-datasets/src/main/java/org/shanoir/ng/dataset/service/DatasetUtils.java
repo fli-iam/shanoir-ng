@@ -28,7 +28,9 @@ import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetfile.DatasetFile;
 
-public class DatasetUtils {
+public final class DatasetUtils {
+
+    private DatasetUtils() { }
 
     /**
      * Reads all dataset files depending on the format attached to one dataset.

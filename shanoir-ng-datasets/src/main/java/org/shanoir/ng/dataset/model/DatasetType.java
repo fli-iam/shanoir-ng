@@ -35,7 +35,10 @@ public enum DatasetType {
     XA(Names.XA);
 
     // this is a hack to use the enum as string values in @JsonSubTypes as it takes no java expressions
-    public class Names {
+    public final class Names {
+
+        private Names() { }
+
         public static final String CALIBRATION = "Calibration";
         public static final String CT = "Ct";
         public static final String EEG = "Eeg";

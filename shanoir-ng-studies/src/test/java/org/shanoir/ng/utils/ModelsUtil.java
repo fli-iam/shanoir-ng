@@ -38,6 +38,8 @@ import org.shanoir.ng.subject.model.Subject;
  */
 public final class ModelsUtil {
 
+    private ModelsUtil() { }
+
     // Acquisition equipment data
     public static final String ACQ_EQPT_SERIAL_NUMBER = "123456789";
 

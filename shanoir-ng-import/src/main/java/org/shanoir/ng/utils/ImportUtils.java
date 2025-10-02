@@ -49,7 +49,9 @@ import org.springframework.web.multipart.MultipartFile;
  * @author jlouis
  * @author mkain
  */
-public class ImportUtils {
+public final class ImportUtils {
+
+    private ImportUtils() { }
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 

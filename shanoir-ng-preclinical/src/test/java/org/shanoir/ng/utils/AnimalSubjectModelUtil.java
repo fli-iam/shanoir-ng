@@ -29,6 +29,8 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 public final class AnimalSubjectModelUtil {
 
+    private AnimalSubjectModelUtil() { }
+
     // References data
     public static final String REF_CATEGORY = "subject";
     public static final String REF_TYPE_SPECIE = "specie";

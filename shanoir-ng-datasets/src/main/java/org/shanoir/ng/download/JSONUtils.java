@@ -21,7 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class JSONUtils {
+public final class JSONUtils {
+
+    private JSONUtils() { }
 
     /**
      * Determine if two JSONObjects are similar.

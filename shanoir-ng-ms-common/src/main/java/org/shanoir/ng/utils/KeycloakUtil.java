@@ -38,6 +38,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  */
 public final class KeycloakUtil {
 
+    private KeycloakUtil() { }
+
     private static final String PREFERRED_USERNAME = "preferred_username";
 
     private static final String CAN_IMPORT_FROM_PACS = "canImportFromPACS";

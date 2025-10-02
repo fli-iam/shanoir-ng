@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.service;
 
-import org.shanoir.ng.dataset.modality.*;
-import org.shanoir.ng.dataset.model.*;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
@@ -26,7 +24,10 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 
 
-public class DatasetAcquisitionUtils {
+public final class DatasetAcquisitionUtils {
+
+    private DatasetAcquisitionUtils() { }
+
     public static DatasetAcquisition copyDatasetAcquisitionFromDatasetAcquisition(DatasetAcquisition other) {
 
         String type = other.getType();

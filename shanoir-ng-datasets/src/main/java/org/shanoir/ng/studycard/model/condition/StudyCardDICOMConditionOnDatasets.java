@@ -74,7 +74,9 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
      */
     public <T> boolean fulfilled(ExaminationAttributes<T> examinationAttributes, StringBuffer errorMsg) {
         if (examinationAttributes == null) throw new IllegalArgumentException("dicomAttributes can not be null");
-        int nbOk = 0; int total = 0; int nbUnknown = 0;
+        int nbOk = 0;
+        int total = 0;
+        int nbUnknown = 0;
         for (T acqId : examinationAttributes.getAcquisitionIds()) {
             AcquisitionAttributes<T> acqAttributes = examinationAttributes.getAcquisitionAttributes(acqId);
             for (T datasetId : acqAttributes.getDatasetIds()) {
@@ -104,7 +106,9 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
      */
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, ExaminationAttributes<Long> examinationAttributesCache, WADODownloaderService downloader, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("acquisitions can not be null");
-        int nbOk = 0; int total = 0; int nbUnknown = 0;
+        int nbOk = 0;
+        int total = 0;
+        int nbUnknown = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (!examinationAttributesCache.has(acquisition.getId())) {
                 examinationAttributesCache.addAcquisitionAttributes(acquisition.getId(), new AcquisitionAttributes<Long>());
@@ -141,7 +145,9 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
 
     public <T> boolean fulfilled(AcquisitionAttributes<T> acqAttributes, StringBuffer errorMsg) {
         if (acqAttributes == null) throw new IllegalArgumentException("dicomAttributes can not be null");
-        int nbOk = 0; int total = 0; int nbUnknown = 0;
+        int nbOk = 0;
+        int total = 0;
+        int nbUnknown = 0;
         for (T datasetId : acqAttributes.getDatasetIds()) {
             total++;
             boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();

@@ -21,7 +21,9 @@ import java.util.Map;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.springframework.beans.BeanUtils;
 
-public class ListDependencyUpdate {
+public final class ListDependencyUpdate {
+
+    private ListDependencyUpdate() { }
 
     /**
      * Updates oldValues by : deleting entities that don't exist in newValues,

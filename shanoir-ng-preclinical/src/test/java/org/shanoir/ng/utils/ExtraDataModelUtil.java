@@ -27,6 +27,7 @@ import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalDat
  */
 public final class ExtraDataModelUtil {
 
+    private ExtraDataModelUtil() { }
 
     public static final Long EXAMINATION_ID = 1L;
     public static final Long EXTRADATA_ID = 1L;
