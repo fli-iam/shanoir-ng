@@ -27,6 +27,7 @@ import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import {TaskService} from "../../../async-tasks/task.service";
 import {Task} from "../../../async-tasks/task.model";
+import {dateFormat} from "../../localLanguage/localDate.abstract";
 
 @Component({
     selector: 'shanoir-table',
@@ -659,12 +660,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
                             for (let entry of page.content) {
-                                csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                                csvStr = this.setValuesForCsvExport(csvStr, entry)
                             }
                         });
                     } else if (getPage instanceof Page) {
                         for (let entry of getPage.content) {
-                            csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                            csvStr = this.setValuesForCsvExport(csvStr, entry)
                         }
                         return Promise.resolve();
                     }
@@ -677,6 +678,42 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
             });
         }
+    }
+
+
+    private setValuesForCsvExport(csvStr: string, entry: any) {
+        csvStr += '\n' + this.columnDefs.map(col => {
+            let value = TableComponent.getCellValue(entry, col) || '';
+            if (this.isValidDate(value)) {
+                const dateObj = new Date(value);
+                value = this.formatDate(dateObj, dateFormat);
+            }
+
+            return `"${value}"`;
+        }).join(',');
+
+        return csvStr;
+    }
+
+    private isValidDate(value: any): boolean {
+        if (!value) return false;
+        const date = new Date(value);
+        return !isNaN(date.getTime());
+    }
+
+    private formatDate(date: Date, formatStr: string): string {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = String(date.getFullYear());
+
+        return formatStr
+            .replace('dd', dd)
+            .replace('MM', mm)
+            .replace('yyyy', yyyy)
+            .replace('jj', dd)
+            .replace('tt', dd)
+            .replace('aaaa', yyyy)
+            .replace('jjjj', yyyy);
     }
 
     deploy(i: number) {
