@@ -15,15 +15,16 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Coil } from '../../coils/shared/coil.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
+import { Field } from '../../shared/reflect/field.decorator';
 
 
 export class StudyCard extends Entity {
 
-    id: number;
-    name: string;
-    study: Study;
-    acquisitionEquipment: AcquisitionEquipment;
-    rules: StudyCardRule[] = [];
+    @Field() id: number;
+    @Field() name: string;
+    @Field() study: Study;
+    @Field() acquisitionEquipment: AcquisitionEquipment;
+    @Field() rules: StudyCardRule[] = [];
 }
 
 

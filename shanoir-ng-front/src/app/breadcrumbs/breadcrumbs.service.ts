@@ -27,15 +27,14 @@ export class BreadcrumbsService implements OnDestroy {
 
     private popFoundedStepIndex: number;
     public currentStepIndex: number;
-    private nextLabel: string;
-    private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
-    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
+    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE' | 'FOCUS'}> = new BehaviorSubject({steps: this.steps});
+    private nextPrefill: { field: string; value: any; readOnly: boolean; }[] = [];
 
     constructor(
         private router: Router,
-        private locationStrategy: LocationStrategy,
+        locationStrategy: LocationStrategy,
         private titleService: Title) {
 
         locationStrategy.onPopState((event: PopStateEvent) => {
@@ -46,7 +45,6 @@ export class BreadcrumbsService implements OnDestroy {
                     break;
                 }
             }
-            // this.saveSession();
         });
 
         this.subscriptions.push(router.events.subscribe(event => {
@@ -69,21 +67,19 @@ export class BreadcrumbsService implements OnDestroy {
                     locationStrategy.replaceState(this.steps[this.popFoundedStepIndex].timestamp, 'todo', this.router.url, '');
                 } else {
                     this.removeStepsAfter(this.currentStepIndex);
-                    this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
+                    this.steps.push(new Step(null, this.router.url, timestamp));
                     this.onUpdateSteps.next({steps: this.steps, operation: 'ADD'});
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
-                    titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
                 }
-                if (this.nextMilestone) this.processMilestone();
-                this.nextMilestone = false;
-                this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                // this.saveSession();
+                this.nextPrefill.forEach(prefill => {
+                    this.currentStep.addPrefilled(prefill.field, prefill.value, prefill.readOnly);
+                });
+                this.nextPrefill = [];
             }
         }));
-        // this.loadSession();
     }
 
     ngOnDestroy(): void {
@@ -98,21 +94,20 @@ export class BreadcrumbsService implements OnDestroy {
         for (let i=index+1; i<this.steps.length; i++) {
             this.steps[i].disabled = true;
         }
-        this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
+        this.onUpdateSteps.next({steps: this.steps, operation: 'FOCUS'});
     }
 
     public nameStep(label: string) {
-        this.nextLabel = label;
-        // this.saveSession();
+        setTimeout(() => {
+            this.currentStep.label = label;
+            this.titleService.setTitle('Shanoir' + (label ? ' - ' + label : ''));
+        });
     }
 
     public markMilestone() {
-        this.nextMilestone = true;
-        // this.saveSession();
-    }
-
-    public resetMilestone() {
-        this.nextMilestone = false;
+        setTimeout(() => {
+            this.processMilestone();
+        });
     }
 
     public currentStepAsMilestone(label?: string) {
@@ -177,40 +172,6 @@ export class BreadcrumbsService implements OnDestroy {
         return false;
     }
 
-    // public saveSession() {
-    //     let stepsJSON = [];
-    //     for(let step of this.steps) {
-    //         stepsJSON.push(step.save())
-    //     }
-
-    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({
-    //         steps: stepsJSON,
-    //         popFoundedStepIndex: this.popFoundedStepIndex,
-    //         replace: this.replace,
-    //         currentStepIndex: this.currentStepIndex,
-    //         nextLabel: this.nextLabel,
-    //         nextMilestone: this.nextMilestone }));
-    // }
-
-    // public loadSession() {
-    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
-    //     if(json == null) {
-    //         return;
-    //     }
-    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
-    //     this.replace = json.replace;
-    //     this.currentStepIndex = json.currentStepIndex;
-    //     this.nextLabel = json.nextLabel;
-    //     this.nextMilestone = json.nextMilestone;
-    //     this.steps = [];
-    //     for(let step of json.steps) {
-    //         this.steps.push(Step.load(step));
-    //     }
-
-    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
-    //     this.ignoreNavigationEnd = true;
-    // }
-
     public findImportMode(): ImportMode {
         for (let i=this.currentStepIndex; i>=0; i--) {
             if (this.steps[i].importStart) return this.steps[i].importMode;
@@ -218,10 +179,13 @@ export class BreadcrumbsService implements OnDestroy {
         return null;
     }
 
+    public addNextStepPrefilled(field: string, value: any, readOnly: boolean = false) {
+        this.nextPrefill.push({ field, value, readOnly });
+    }
+
 }
 
 export class Step {
-
     constructor(
         public label: string,
         public route: string,
@@ -233,7 +197,7 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: { field: string, value: SuperPromise<any>}[] = [];
 
-    private resolvedPrefilledValues: { [field: string]: any } = {};
+    private resolvedPrefilledData: { [field: string]: {value: any, readonly?: boolean} } = {};
 
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
@@ -242,6 +206,8 @@ export class Step {
     public data: any = {};
     public importStart: boolean = false;
     public importMode: ImportMode;
+
+    public uniqueId: number = Math.floor(Math.random() * 1000000);
 
     private onSave(): Subject<any> {
         this.subscribers++;
@@ -275,35 +241,48 @@ export class Step {
         return this.prefilled.filter(obj => obj.field == field).length > 0;
     }
 
-    public addPrefilled(field: string, value: any) {
+    public addPrefilled(field: string, value: any, readOnly: boolean = false) {
         const found = this.prefilled.find(obj => obj.field === field);
-
         if (found) {
-            this.resolvedPrefilledValues[field] = value;
-            return found.value.resolve(value);
+            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
+            found.value.resolve(value);
         } else {
-            const superPro = new SuperPromise();
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
             this.prefilled.push({ field, value: superPro });
-            this.resolvedPrefilledValues[field] = value;
+            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
             superPro.resolve(value);
-            return superPro;
         }
     }
 
-    public async getPrefilledValue(field: string): Promise<any> {
+    public getPrefilled(field: string): Promise<{value: any, readonly?: boolean}> {
         const found = this.prefilled.find(obj => obj.field === field);
-
         if (found) {
             return SuperPromise.timeoutPromise().then(() => {
-                return this.resolvedPrefilledValues[field];
+                return this.resolvedPrefilledData[field];
             });
         } else {
-            const superPro = new SuperPromise();
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
             this.prefilled.push({ field, value: superPro });
             return superPro;
         }
     }
 
+    public removePrefilled(field: string) {
+        const found = this.prefilled.find(obj => obj.field === field);
+        if (found) {
+            this.prefilled = this.prefilled.filter(obj => obj.field !== field);
+            delete this.resolvedPrefilledData[field];
+        }
+    }
+
+
+    public getPrefilledKeys(): string[] {
+        return Object.entries(this.resolvedPrefilledData).map(([key, value]) => key);
+    }
+
+    getPrefilledValue(field: string): Promise<any> {
+        return this.getPrefilled(field).then(res => res?.value);
+    }
 
     public resetWait() {
         this.waitStep = null;

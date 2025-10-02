@@ -329,31 +329,14 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectOld.setSubjectType(subjectNew.getSubjectType());
 		subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
 		subjectOld.setQualityTag(subjectNew.getQualityTag());
+		subjectOld.setStudy(subjectNew.getStudy());
 		List<SubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
 		if (subjectStudyListNew != null) {
-			if (subjectStudyListNew.isEmpty()) {
+			if (subjectStudyListNew.isEmpty() && subjectNew.getStudy() == null) {
 				throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());
 			} 
-			if (subjectStudyListNew.size() > 1) {
-				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
-			}
-			SubjectStudy sSNew = subjectStudyListNew.get(0);
-			for (SubjectStudy sSOld : subjectOld.getSubjectStudyList()) {
-				if (sSNew.getStudy().getId().equals(sSOld.getStudy().getId())) {
-					sSOld.setSubjectStudyIdentifier(sSNew.getSubjectStudyIdentifier());
-					sSOld.setSubjectType(sSNew.getSubjectType());
-					sSOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
-					// keep new values in subject table up-to-date with subject study
-					subjectOld.setStudyIdentifier(sSNew.getSubjectStudyIdentifier());
-					subjectOld.setSubjectType(sSNew.getSubjectType());
-					subjectOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
-					subjectOld.setQualityTag(sSNew.getQualityTag());
-					// map values from new to old subject study tag list
-					mapSubjectStudyTagListToSubjectStudyTagList(sSOld, sSNew);
-					// map values from new to new subject tags structure
-					mapSubjectStudyTagListToSubjectTagList(subjectOld, sSNew);
-					break;
-				}
+			if (subjectStudyListNew.size() > 1 && subjectNew.getStudy() == null) {
+				subjectNew.setStudy(subjectStudyListNew.get(0).getStudy());
 			}
 		}
 		return subjectOld;

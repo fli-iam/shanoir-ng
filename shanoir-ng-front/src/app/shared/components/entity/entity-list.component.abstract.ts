@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -31,8 +31,9 @@ import { EntityService } from './entity.abstract.service';
 import { TreeService } from 'src/app/studies/study/tree.service';
 
 @Directive()
-export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
+export abstract class EntityListComponent<T extends Entity> implements OnInit, OnDestroy {
 
+    @Input() embedded: boolean = false;
     abstract table: TableComponent;
     columnDefs: ColumnDefinition[];
     customActionDefs: any[];
@@ -75,8 +76,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
-        this.breadcrumbsService.markMilestone();
-        this.breadcrumbsService.nameStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');
+    }
+    
+    ngOnInit(): void {
+        if (!this.embedded) {
+            this.breadcrumbsService.markMilestone();
+            this.breadcrumbsService.nameStep(capitalizeFirstLetter(this.ROUTING_NAME) + ' list');
+        }
     }
 
     private computeOptions() {

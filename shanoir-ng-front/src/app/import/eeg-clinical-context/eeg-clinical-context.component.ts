@@ -194,11 +194,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return newSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step) {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
-    }
-
-    private getPrefilledExam(): Examination {
+    protected getPrefilledExamination(): Examination {
         let newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
@@ -214,11 +210,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return newExam;
     }
 
-    protected fillCreateAcqEqStep(step: Step) {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledAcqEqt());
-    }
-
-    private getPrefilledAcqEqt(): AcquisitionEquipment {
+    protected getPrefilledAcquisitionEquipment(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         return acqEpt;

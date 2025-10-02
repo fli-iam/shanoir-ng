@@ -74,8 +74,8 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
 
     private openCreateAcqEquip = (center: Center) => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.breadcrumbsService.addNextStepPrefilled('entity.center', center, true);
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
-            this.breadcrumbsService.currentStep.addPrefilled('center', center);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     center.acquisitionEquipments.push(entity as AcquisitionEquipment);

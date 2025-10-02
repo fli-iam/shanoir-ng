@@ -90,9 +90,6 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             private confirmService: ConfirmDialogService) {
         super(route, 'quality-card');
 
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
 
         this.subscriptions.push(this.activatedRoute.params.subscribe(

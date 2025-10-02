@@ -12,16 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { ExtensionRequestInfo } from './extension-request-info.model';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { User } from '../shared/user.model';
-import { UserService } from '../shared/user.service';
 import { Subscription } from 'rxjs';
 import * as AppUtils from '../../utils/app.utils';
+import { UserService } from '../shared/user.service';
+import { ExtensionRequestInfo } from './extension-request-info.model';
 
 @Component({
     selector: 'extensionRequest',
@@ -37,7 +35,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     isDateValid: boolean = true;
     userId: number;
     selectedDateNormal: string = '';
-    private infoSubscription: Subscription;
+    private subscriptions: Subscription[] = [];
     requestSent: boolean = false;
     errorMessage: string;
 
@@ -91,8 +89,18 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
             'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]]
             });
 
-        this.infoSubscription = this.extensionRequestForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
+        this.subscriptions.push(
+            this.extensionRequestForm.valueChanges.subscribe(data => this.onValueChanged(data)),
+            this.extensionRequestForm.get('extensionDate').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.extensionDate = value;
+            }),
+            this.extensionRequestForm.get('extensionMotivation').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.extensionMotivation = value;
+            }),
+            this.extensionRequestForm.get('email').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.email = value;
+            })
+        );
         this.onValueChanged(); // (re)set validation messages now
     }
 
@@ -124,6 +132,6 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.infoSubscription) this.infoSubscription.unsubscribe();
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 }

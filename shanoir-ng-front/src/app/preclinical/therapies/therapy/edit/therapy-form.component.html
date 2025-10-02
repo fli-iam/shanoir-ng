@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name" [(ngModel)]="therapy.name"/>
+									<input type="text" id="name" formControlName="name"/>
 									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit therapy|Name required error@@therapyDetailNameRequiredError">Name is required!</label>
         							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit therapy|Name unique error@@therapyDetailNameUniqueError">Name should be unique!</label>
 								</ng-template>
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{TherapyType.getLabel(therapy.therapyType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="therapyType" [(ngModel)]="therapy.therapyType" [options]="TherapyType.options">
+                                    <select-box formControlName="therapyType" [options]="TherapyType.options">
                                     </select-box>
 									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
 								</ng-template>
@@ -74,7 +74,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{therapy?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="therapy.comment"></textarea>
+									<textarea rows="4" id="comment" formControlName="comment"></textarea>
 								</ng-template>
 							</span>
 

@@ -50,7 +50,7 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
         let colDef: ColumnDefinition[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
             {headerName: "Dose", field: "dose", type: "number"},
-            {headerName: "Dose Unit", field: "dose_unit.value"},
+            {headerName: "Dose Unit", field: "doseUnit.value"},
             {headerName: "Injection interval", field: "injectionInterval"},
             {headerName: "Injection site", field: "injectionSite"},
             {headerName: "Injection type", field: "injectionType"},

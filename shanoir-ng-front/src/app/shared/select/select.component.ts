@@ -37,7 +37,6 @@ import { GlobalService } from '../services/global.service';
     selector: 'select-box',
     templateUrl: 'select.component.html',
     styleUrls: ['select.component.css'],
-    //changeDetection: ChangeDetectionStrategy.,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -58,6 +57,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
     @Input() pipe: PipeTransform;
+    @Input() validateChange: (any) => Promise<boolean>;
     public displayedOptions: Option<any>[] = [];
     @ViewChild('input', { static: false }) textInput: ElementRef;
     @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
@@ -94,7 +94,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() newRoute: string;
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
-    @Output() onAddClick = new EventEmitter();
+    @Output() onAddClick: EventEmitter<any> = new EventEmitter();
     @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
     readonly LIST_LENGTH: number = 16;
@@ -309,13 +309,18 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     public onUserSelectedOptionIndex(index: number) {
-        this.searchText = null;
-        this.element.nativeElement.focus();
-        this.selectedOptionIndex = index;
-        this.close();
-        this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
-        this.userChange.emit(this.selectedOption ? this.selectedOption.value : null);
-        this.selectOption.emit(this.selectedOption);
+        let promise: Promise<boolean> = this.validateChange ? this.validateChange(this.selectedOption?.value) : Promise.resolve(true);
+        promise.then(valid => {
+            if (valid) {
+                this.searchText = null;
+                this.element.nativeElement.focus();
+                this.selectedOptionIndex = index;
+                this.close();
+                this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
+                this.userChange.emit(this.selectedOption ? this.selectedOption.value : null);
+                this.selectOption.emit(this.selectedOption);
+            }
+        });
     }
 
     public isOptionSelected(option: Option<any>) {
