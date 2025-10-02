@@ -21,7 +21,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.data.VR;
-import org.dcm4che3.io.DicomEncodingOptions;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.media.DicomDirReader;
 import org.dcm4che3.media.DicomDirWriter;
@@ -44,8 +43,6 @@ public class DicomDirGeneratorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomDirGeneratorService.class);
 
-    private DicomEncodingOptions encOpts = DicomEncodingOptions.DEFAULT;
-
     private FilesetInfo fsInfo = new FilesetInfo();
 
     private boolean checkDuplicate = false;
@@ -65,8 +62,8 @@ public class DicomDirGeneratorService {
     private void createDicomDir(File file) throws IOException {
         DicomDirWriter.createEmptyDirectory(file, UIDUtils.createUIDIfNull(fsInfo.getFilesetUID()),
                 fsInfo.getFilesetID(), fsInfo.getDescriptorFile(), fsInfo.getDescriptorFileCharset());
-        in = out = DicomDirWriter.open(file);
-        out.setEncodingOptions(encOpts);
+        out = DicomDirWriter.open(file);
+        in = out;
     }
 
     private int addReferenceTo(File f, File dicomDir) throws IOException {
@@ -124,7 +121,8 @@ public class DicomDirGeneratorService {
 
         if (studyInstanceUID != null) {
             if (pid == null) {
-                dataset.setString(Tag.PatientID, VR.LO, pid = studyInstanceUID);
+                pid = studyInstanceUID;
+                dataset.setString(Tag.PatientID, VR.LO, pid);
                 prompt = prompt == 'F' ? 'P' : 'p';
             }
             Attributes patRec = in.findPatientRecord(pid);

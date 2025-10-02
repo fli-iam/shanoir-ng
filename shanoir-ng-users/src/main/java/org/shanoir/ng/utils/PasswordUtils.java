@@ -176,8 +176,10 @@ public final class PasswordUtils {
      * @return password index.
      */
     private static int getNextIndex(final SecureRandom rnd, final char[] pwd) {
-        int index = rnd.nextInt(PASSWORD_MIN_LENGTH);
-        while (pwd[index = rnd.nextInt(PASSWORD_MIN_LENGTH)] != 0);
+        int index;
+        do {
+            index = rnd.nextInt(PASSWORD_MIN_LENGTH);
+        } while (pwd[index] != 0);
         return index;
     }
 
