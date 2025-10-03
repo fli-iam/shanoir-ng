@@ -165,7 +165,7 @@ public class UploadServiceJob {
 			 */
 			setTempDirIdAndStartImport(tempDirId, importJob);	
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
-				org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
+					org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
 			importJob.setTimestamp(System.currentTimeMillis());
 			nominativeDataImportJobManager.writeImportJob(importJob);

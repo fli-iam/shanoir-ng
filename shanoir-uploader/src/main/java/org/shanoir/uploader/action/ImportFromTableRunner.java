@@ -118,8 +118,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		int i = 1;
 		csvWriter = new ImportFromTableCSVWriter();
 		logger.info("\r\n**********************************\r\n"
-			+ "Starting Excel mass import...\r\n"
-			+ "**********************************");
+				+ "Starting Excel mass import...\r\n"
+				+ "**********************************");
 		for (ImportJob importJob : importJobs.values()) {
 			importFromTableWindow.progressBar.setString("Preparing import " + i + "/" + this.importJobs.size());
 			importFromTableWindow.progressBar.setValue(100*i/this.importJobs.size() + 1);
@@ -130,13 +130,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				String modality = importJob.getDicomQuery().getModality();
 				String importJobIdentifier = "[Line: " + i + ", patientName: " + Utils.sha256(patientName) + ", patientID: " + Utils.sha256(patientID) + ", studyDate: " + studyDate +  ", modality: " + modality + "]";
 				logger.info("\r\n------------------------------------------------------\r\n"
-					+ "Starting importJob " + importJobIdentifier + "\r\n"
-					+ "------------------------------------------------------");
+						+ "Starting importJob " + importJobIdentifier + "\r\n"
+						+ "------------------------------------------------------");
 				boolean resultOneJob = importData(importJob, studyREST, acquisitionEquipments, csvWriter);
 				resultAllJobs = resultOneJob && resultAllJobs;
 				logger.info("\r\n------------------------------------------------------\r\n"
-					+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
-					+ "------------------------------------------------------");
+						+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
+						+ "------------------------------------------------------");
 			} catch(Exception exception) {
 				logger.error(exception.getMessage(), exception);
 			}
@@ -155,8 +155,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importFromTableWindow.uploadButton.setEnabled(false);
 		}
 		logger.info("\r\n**********************************\r\n"
-			+ "Finished Excel mass import...\r\n"
-			+ "**********************************");
+				+ "Finished Excel mass import...\r\n"
+				+ "**********************************");
 		return null;
 	}
 
@@ -185,11 +185,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("DICOM Patient selected: " + importJob.getPatient().toString());
 		logger.info("DICOM Study selected: " + importJob.getStudy().toString());
 		Patient newPatient = ImportUtils.adjustPatientWithPatientVerification(
-			importJob.getPatient(),
-			patientVerification.getFirstName(),
-			patientVerification.getLastName(),
-			patientVerification.getBirthName(),
-			patientVerification.getBirthDate());
+				importJob.getPatient(),
+				patientVerification.getFirstName(),
+				patientVerification.getLastName(),
+				patientVerification.getBirthName(),
+				patientVerification.getBirthDate());
 		importJob.setPatient(newPatient);
 		Subject subject = ImportUtils.createSubjectFromPatient(newPatient, pseudonymizer, identifierCalculator);
 		importJob.setSubject(subject);
@@ -225,7 +225,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				// Check if study card configured in Excel: use it (user knows best), no DICOM info necessary
 				if (importJob.getStudyCardName() != null && !importJob.getStudyCardName().isEmpty()) {
 					Optional<StudyCard> scOpt = studyCards.stream().filter(
-						element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
+							element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
 					if (scOpt.isPresent()) {
 						studyCard = scOpt.get();
 						logger.info("Matching study card found in study by name from table: " + studyCard.getName());
@@ -241,8 +241,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						if (ImportUtils.flagStudyCardCompatible(studyCardIt, equipmentDicom)) {
 							studyCard = studyCardIt;
 							logger.info("Matching study card found in study: " + studyCard.getName()
-								+ " via manufacturer model name: " + equipmentDicom.getManufacturerModelName()
-								+ " and device serial number: " + equipmentDicom.getDeviceSerialNumber());
+									+ " via manufacturer model name: " + equipmentDicom.getManufacturerModelName()
+									+ " and device serial number: " + equipmentDicom.getDeviceSerialNumber());
 							break;
 						}
 					}
@@ -336,12 +336,12 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
 			SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, equipment);
 		if (subjectREST == null) {
-				line[6] = "Error with subject";
-				csvWriter.addExaminationLine(false, line);
-				importJob.setUploadState(UploadState.ERROR);
-				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
-				logger.error(importJob.getErrorMessage());
-				return false;
+			line[6] = "Error with subject";
+			csvWriter.addExaminationLine(false, line);
+			importJob.setUploadState(UploadState.ERROR);
+			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
+			logger.error(importJob.getErrorMessage());
+			return false;
 		}
 		importJob.setSubjectName(subjectREST.getName());
 
@@ -352,15 +352,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
 			if (examinations != null && !examinations.isEmpty()) {
 				List<Examination> examinationsFilteredByStudy = examinations.parallelStream()
-					.filter(e -> e.getStudyId().equals(studyREST.getId()))
-					.collect(Collectors.toList());
+						.filter(e -> e.getStudyId().equals(studyREST.getId()))
+						.collect(Collectors.toList());
 				for (Iterator<Examination> iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 					Examination examination = (Examination) iterator.next();
 					// Existing exam found with the same study date: stop importJob and take next one
 					Date examinationDate = examination.getExaminationDate();
 					LocalDate examinationLocalDate = examinationDate.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+							.atZone(ZoneId.systemDefault())
+							.toLocalDate();
 					if (examinationLocalDate.equals(studyDate)) {
 						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
 						csvWriter.addExaminationLine(false, line);
@@ -413,8 +413,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		String manufacturerModelName = equipmentDicom.getManufacturerModelName();
 		String deviceSerialNumber = equipmentDicom.getDeviceSerialNumber();
 		if (manufacturerName == null || manufacturerName.isBlank()
-			|| manufacturerModelName == null || manufacturerModelName.isBlank()
-			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
+				|| manufacturerModelName == null || manufacturerModelName.isBlank()
+				|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
 			importJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
 			return null;

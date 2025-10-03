@@ -1,7 +1,6 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -589,7 +588,7 @@ public class ShanoirUploaderServiceClient {
 					return importJob;
 				} else {
 					logger.error("Error in uploadDicom: "
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 					throw new Exception("Error in uploadDicom");
 				}
 			}
@@ -671,7 +670,7 @@ public class ShanoirUploaderServiceClient {
 					return studyCreated;
 				} else {
 					logger.error("Error in createStudy: with study " + study.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -692,7 +691,7 @@ public class ShanoirUploaderServiceClient {
 					return studyCardCreated;
 				} else {
 					logger.error("Error in createStudyCard: with study " + studyCard.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -734,7 +733,7 @@ public class ShanoirUploaderServiceClient {
 					return center;
 				} else {
 					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName() 
-						+ " (status code: " + code	+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code	+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -755,7 +754,7 @@ public class ShanoirUploaderServiceClient {
 					return equipmentCreated;
 				} else {
 					logger.error("Error in createEquipment: with equipment " + equipment.getSerialNumber()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -792,7 +791,7 @@ public class ShanoirUploaderServiceClient {
 					return manufacturerCreated;
 				} else {
 					logger.error("Error in createManufacturer: with manufacturer " + manufacturer.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);			
@@ -813,7 +812,7 @@ public class ShanoirUploaderServiceClient {
 					return manufacturerModelCreated;
 				} else {
 					logger.error("Error in createManufacturerModel: with manufacturerModel " + manufacturerModel.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);			
@@ -852,7 +851,7 @@ public class ShanoirUploaderServiceClient {
 					return subjectDTOCreated;
 				} else {
 					logger.error("Error in createSubject: with subject " + subject.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+							+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -957,9 +956,9 @@ public class ShanoirUploaderServiceClient {
 	public Attributes getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
-			+ "/" + examinationUID
-			+ "/series/" +  seriesInstanceUID
-			+ "/instances/" + sopInstanceUID);
+				+ "/" + examinationUID
+				+ "/series/" +  seriesInstanceUID
+				+ "/instances/" + sopInstanceUID);
 		URL url = b.build().toURL();
 		try (CloseableHttpResponse response = httpService.getDicom(url.toString())) {
 			long stopTime = System.currentTimeMillis();
@@ -984,8 +983,8 @@ public class ShanoirUploaderServiceClient {
 				}
 			} else {
 				logger.error("Error in getDicomInstance: status code: "
-					+ code + ", message: "
-					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+						+ code + ", message: "
+						+ apiResponseMessages.getOrDefault(code, "unknown status code"));
 				throw new Exception("Error in getDicomFile");
 			}
 		}

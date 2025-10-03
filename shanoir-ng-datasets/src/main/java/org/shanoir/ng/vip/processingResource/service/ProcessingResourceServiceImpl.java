@@ -79,10 +79,8 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
                     case DATASET:
                         entityId = ds.getId();
                         break;
-                }
-
-                if (entityId == null) {
-                    throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
+                    default:
+                        throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
                 }
 
                 datasetsByEntityId.putIfAbsent(entityId, new ArrayList<>());

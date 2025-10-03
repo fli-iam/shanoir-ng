@@ -39,8 +39,7 @@ public class UploadJobManager {
 			uploadFolderPath
 			+ File.separatorChar
 			+ UPLOAD_JOB_XML);
-		logger.debug("UploadJobManager initialized with file: "
-			+ this.uploadJobFile.getAbsolutePath());
+		logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
 	}
 	
 	/**
@@ -49,8 +48,7 @@ public class UploadJobManager {
 	 */
 	public UploadJobManager(final File uploadJobFile) {
 		this.uploadJobFile = uploadJobFile;
-		logger.debug("UploadJobManager initialized with file: "
-			+ this.uploadJobFile.getAbsolutePath());
+		logger.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
 	}
 	
 	/* (non-Javadoc)
