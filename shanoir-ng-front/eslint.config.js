@@ -35,8 +35,6 @@ module.exports = tseslint.config(
       "no-prototype-builtins": "off",
       "no-useless-escape": "off",
       "no-empty": "off",
-      "no-irregular-whitespace": "off",
-      "no-self-assign": "off",
       "no-extra-boolean-cast": "off",
       "no-var": "off",
       "prefer-const": "off",

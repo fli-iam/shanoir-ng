@@ -111,7 +111,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     get qualityCard(): QualityCard { return this.entity; }
-    set qualityCard(qc: QualityCard) { this.entity = qc; }
+    set qualityCard(qc: QualityCard) { this.entity = qc; }
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);

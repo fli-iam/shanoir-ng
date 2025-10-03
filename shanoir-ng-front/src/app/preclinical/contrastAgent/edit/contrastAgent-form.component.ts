@@ -61,7 +61,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     get agent(): ContrastAgent { return this.entity; }
-    set agent(agent: ContrastAgent) { this.entity = agent; }
+    set agent(agent: ContrastAgent) { this.entity = agent; }
 
     getService(): EntityService<ContrastAgent> {
         return this.contrastAgentsService;
