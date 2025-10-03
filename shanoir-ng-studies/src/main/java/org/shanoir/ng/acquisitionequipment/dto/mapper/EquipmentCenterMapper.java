@@ -16,14 +16,9 @@ package org.shanoir.ng.acquisitionequipment.dto.mapper;
 
 import java.util.List;
 
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.Named;
 import org.shanoir.ng.acquisitionequipment.dto.CenterDTO;
 import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 
 /**
