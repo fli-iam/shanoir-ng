@@ -26,7 +26,7 @@ import { AccessRequest } from './access-request.model';
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
-    getEntityInstance(entity?: AccessRequest): AccessRequest {
+    getEntityInstance(): AccessRequest {
         return new AccessRequest();
     }
 

@@ -50,7 +50,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    isAnestheticUnique: Boolean = true;
+    isAnestheticUnique: boolean = true;
     names: Reference[];
     units: Reference[];
 

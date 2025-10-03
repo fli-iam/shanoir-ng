@@ -125,7 +125,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return this.datasetAcquisitions;
         });
 
-        Promise.all([filteredAcquisitionsPromise, studycardPromise]).then(([acquisitions, studycards]) => {
+        Promise.all([filteredAcquisitionsPromise, studycardPromise]).then(([, studycards]) => {
             if (Array.isArray(studycards)) {
                 this.studyCards = studycards;
                 this.updateOptions();
@@ -149,7 +149,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
     }
 
 
-    getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<DatasetAcquisition>> {
+    getPage(pageable: FilterablePageable): Promise<Page<DatasetAcquisition>> {
         return Promise.resolve(this.browserPaging.getPage(pageable));
     }
 
@@ -238,7 +238,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
         this.updateOptions();
     }
 
-    isCompatible(equipmentId: number): Boolean {
+    isCompatible(equipmentId: number): boolean {
         if (this.studycard) {
             return this.studycard.acquisitionEquipment?.id == equipmentId;
         } else {

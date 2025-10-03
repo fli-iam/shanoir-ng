@@ -149,7 +149,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return form;
     }
 
-    private getManufModels(manufModelId?: number): void {
+    private getManufModels(): void {
         this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
     }
@@ -160,7 +160,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
+        this.router.navigate(['/manufacturer-model/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     this.entity.manufacturerModel = entity as ManufacturerModel;
@@ -172,13 +172,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
         this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(value => {
+            form.get('manufacturerModel').valueChanges.subscribe(() => {
                 form.get('serialNumber').updateValueAndValidity();
             })
         );
     }
 
-    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
+    private manufAndSerialUnicityValidator = (): ValidationErrors | null => {
         if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
                 && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
@@ -206,7 +206,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         try {
             const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
             return exists ? { unique: true } : null;
-        } catch (error) {
+        } catch {
             return null;
         }
     }

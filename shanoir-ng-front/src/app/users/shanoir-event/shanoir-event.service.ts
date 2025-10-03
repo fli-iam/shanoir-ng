@@ -26,7 +26,7 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
             .then(this.mapPage);
     }
 
-    getEntityInstance(entity?: ShanoirEvent): ShanoirEvent {
+    getEntityInstance(): ShanoirEvent {
         return new ShanoirEvent();
     }
 }

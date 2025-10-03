@@ -39,7 +39,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
     @Input() examination_id:number;
     @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
   
     fileToUpload: File = null;
     @Output() bloodGasDataReady = new EventEmitter();

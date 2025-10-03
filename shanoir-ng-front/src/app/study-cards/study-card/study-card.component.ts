@@ -227,7 +227,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     importRules() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
+        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Select study-card';
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
@@ -265,7 +265,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create']).then(() => {
             this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
             if (this.centers.length == 1) {
                 this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);

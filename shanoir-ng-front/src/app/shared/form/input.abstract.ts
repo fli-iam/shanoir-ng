@@ -23,10 +23,9 @@ export abstract class AbstractInput<T> implements ControlValueAccessor {
     @Input() mode: Mode;
     model: T;
     disabled: boolean = false;
-    propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
     
-    constructor() {}
 
     writeValue(obj: any): void {
         if (obj) this.model = obj;

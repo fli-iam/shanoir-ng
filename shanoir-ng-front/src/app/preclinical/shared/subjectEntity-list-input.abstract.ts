@@ -30,12 +30,12 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 @ModesAware
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
     @Output() onEvent = new EventEmitter();
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
     public toggleForm: boolean = false;
     public createMode: boolean = false;
     public selectedEntity: T;
@@ -146,7 +146,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         }
     }
 
-    public onRowClick(entity: T) {
+    public onRowClick() {
         // do nothing to avoid wrong route
     }
 }

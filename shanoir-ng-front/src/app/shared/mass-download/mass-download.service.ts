@@ -124,7 +124,7 @@ export class MassDownloadService {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                     return this.openAltModal(inputIds).then(ret => {
                         if (ret != 'cancel' && ret.datasets) {
-                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(error => {
+                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(() => {
                                 if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
                                     this.dialogService.error('Too many datasets', 'You are trying to download '
                                         + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
@@ -249,7 +249,7 @@ export class MassDownloadService {
                     throw error;
                 }
             });
-        }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+        }).catch(() => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -593,7 +593,7 @@ export class MassDownloadService {
                     return this.getFolderHandle().then(parentFolderHandle => {
                         return parentFolderHandle.getFileHandle(this.REPORT_FILENAME).then(fileHandle => {
                             return fileHandle.getFile().then(file => {
-                                return file.text().then(text => {
+                                return file.text().then(() => {
                                     report.nbError = 0;
                                     let noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
                                     task.status = 2;

@@ -42,7 +42,7 @@ export type Mode =  "view" | "edit" | "create";
 export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListComponent<AnestheticIngredient> {
     
     @Input() mode:Mode ;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() anesthetic: Anesthetic;
     public toggleFormAI: boolean = false;
     public createAIMode: boolean = false;
@@ -104,7 +104,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         }
     }
         
-    refreshDisplay(cancel:boolean){
+    refreshDisplay() {
         this.toggleFormAI = false;
         this.createAIMode = false;
         this.generateAnestheticName();
@@ -119,7 +119,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     'Delete', 'Are you sure you want to delete preclinical-anesthetic-ingredient n° ' + entity.id + ' ?'
                 ).then(res => {
                     if (res) {
-                        this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then((response) => {
+                        this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then(() => {
                             this.getAnestheticIngredient(selectedIngredient)
                             this.onDelete.next({entity: selectedIngredient});
                             let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array

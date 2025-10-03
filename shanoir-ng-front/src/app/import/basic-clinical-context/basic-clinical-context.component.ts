@@ -11,20 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, OnDestroy} from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
-import {AcquisitionEquipment} from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import {Step} from '../../breadcrumbs/breadcrumbs.service';
-import {Center} from '../../centers/shared/center.model';
-import {Examination} from '../../examinations/shared/examination.model';
-import {preventInitialChildAnimations, slideDown} from '../../shared/animations/animations';
-import {IdName} from '../../shared/models/id-name.model';
-import {ImagedObjectCategory} from '../../subjects/shared/imaged-object-category.enum';
-import {SubjectStudy} from '../../subjects/shared/subject-study.model';
-import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
-import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
-import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Center } from '../../centers/shared/center.model';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { Examination } from '../../examinations/shared/examination.model';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { IdName } from '../../shared/models/id-name.model';
+import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
+import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
+import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 
 
 @Component({
@@ -95,7 +94,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return eq1 && eq2 && eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
-    protected fillCreateSubjectStep(step: Step) {
+    protected fillCreateSubjectStep() {
         let s: Subject = this.getPrefilledSubject();
         this.breadcrumbsService.currentStep.addPrefilled("entity", s);
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
@@ -125,7 +124,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return newSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step) {
+    protected fillCreateExaminationStep() {
         let exam: Examination = this.getPrefilledExam();
         this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
         this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
@@ -143,12 +142,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
-    protected fillCreateAcqEqStep(step: Step) {
+    protected fillCreateAcqEqStep() {
         let acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
         this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
     }
@@ -156,7 +155,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
-        acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
+        acqEpt.serialNumber = this.getFirstSelectedSerie()?.equipment?.deviceSerialNumber;
         return acqEpt;
     }
 

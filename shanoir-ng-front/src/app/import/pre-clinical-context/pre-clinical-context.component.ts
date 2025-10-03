@@ -13,7 +13,7 @@
  */
 import { Component, OnDestroy } from '@angular/core';
 
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
@@ -22,11 +22,10 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -111,14 +110,17 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return '/preclinical-examination/create';
     }
 
-    protected fillCreateSubjectStep(step: Step) {
+    protected fillCreateSubjectStep() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+    }
 
+    protected fillCreateAcqEqStep() { 
+        return;
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
@@ -144,7 +146,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return newPreclinicalSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step): void {
+    protected fillCreateExaminationStep(): void {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
@@ -160,7 +162,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }

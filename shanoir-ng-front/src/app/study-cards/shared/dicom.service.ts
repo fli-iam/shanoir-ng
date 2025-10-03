@@ -24,7 +24,7 @@ export class DicomService {
 
     private tagRequested: boolean = false;
     private tagPromiseResolve: (value?: DicomTag[] | PromiseLike<DicomTag[]>) => void;
-    private tagPromise: Promise<DicomTag[]> = new Promise((resolve, reject) => this.tagPromiseResolve = resolve);
+    private tagPromise: Promise<DicomTag[]> = new Promise(resolve => this.tagPromiseResolve = resolve);
 
     constructor(private http: HttpClient) {}
 

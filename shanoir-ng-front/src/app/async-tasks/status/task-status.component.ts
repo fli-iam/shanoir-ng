@@ -67,7 +67,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
                 let reportArray: [];
                 try {
                     reportArray = JSON.parse(this.task.report);
-                } catch (e) {}
+                } catch {}
                 if (reportArray && Array.isArray(reportArray)) {
                     this.report = new BrowserPaging(reportArray, this.reportColumns);
                     if (this.tableRefresh) this.tableRefresh();

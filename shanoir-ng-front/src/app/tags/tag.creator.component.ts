@@ -54,9 +54,6 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
         this.onColorChange();
     }
 
-    ngOnChanges() {
-    }
-
     focus() {
         setTimeout(() => this.input.nativeElement.focus());
     }

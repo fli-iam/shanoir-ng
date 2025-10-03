@@ -47,8 +47,8 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
     @Output() onTouch = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     modelArray: any[];
     selectedOptions: Option<any>[] = [];
     @Input() columnDefs: ColumnDefinition[] = [];

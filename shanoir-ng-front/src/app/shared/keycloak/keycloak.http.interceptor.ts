@@ -48,7 +48,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {
-                        this.keycloakService.getToken().then((token: string) => {
+                        this.keycloakService.getToken().then(() => {
                             authReq = this.setAuthHeader(authReq);
                             observer.next();
                             observer.complete();

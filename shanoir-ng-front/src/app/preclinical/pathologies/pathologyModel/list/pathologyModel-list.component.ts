@@ -87,10 +87,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     
     openInformationDialog = (model:PathologyModel) => {
         this.confirmDialogService
-            .confirm('Download Specifications', 'No specifications have been found for '+model.name)
-            .then(res => {
-                
-            })
+            .inform('Download Specifications', 'No specifications have been found for ' + model.name);
     }
     
     

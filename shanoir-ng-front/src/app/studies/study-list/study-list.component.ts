@@ -133,7 +133,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 let volume = volumes.get(study.id);
                 if(volume) {
                     (study as Study).totalSize = volume.total;
-                    let sizesByLabel = new Map<String, number>()
+                    let sizesByLabel = new Map<string, number>()
                     if (volume.volumeByFormat) {
                         for (let sizeByFormat of volume.volumeByFormat) {
                             if (sizeByFormat.size > 0) {

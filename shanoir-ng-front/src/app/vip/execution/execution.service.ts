@@ -23,7 +23,7 @@ import {IdName} from "../../shared/models/id-name.model";
 @Injectable()
 export class ExecutionService {
 
-  executionUrl: String = AppUtils.BACKEND_API_VIP_EXEC_URL;
+  executionUrl: string = AppUtils.BACKEND_API_VIP_EXEC_URL;
 
   constructor(protected httpClient: HttpClient) {}
 

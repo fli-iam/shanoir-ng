@@ -24,7 +24,6 @@ export class DatasetProcessingDTOService {
 
     private datasetProcessingService: DatasetProcessingService;
 
-    constructor() {}
 
     setDatasetProcessingService(datasetProcessingService: DatasetProcessingService) {
         this.datasetProcessingService = datasetProcessingService;

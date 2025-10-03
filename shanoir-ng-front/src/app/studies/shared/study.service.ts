@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
@@ -55,7 +55,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getEntityInstance() { return new Study(); }
 
-    get(id: number, mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
+    get(id: number, _mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
         return this.http.get<any>(this.API_URL + '/' + id
             + (withStorageVolume ? '?withStorageVolume=true' : ''))
             .toPromise()
@@ -189,8 +189,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
         const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
-        let params: HttpParams = new HttpParams();
-        //params
         return AppUtils.downloadBlob(endpoint);
     }
 

@@ -42,7 +42,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     @Input() protocol_id: number;
     @Output() closing = new EventEmitter();
     @Output() agentChange = new EventEmitter();
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() isStandalone: boolean = true;
     agentNames: Reference[] = [];
     sites: Enum[] = [];

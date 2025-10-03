@@ -41,7 +41,7 @@ export class Study extends Entity {
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     profile: Profile;
-    detailedSizes: Map<String, number> = null;
+    detailedSizes: Map<string, number> = null;
     totalSize: number;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];

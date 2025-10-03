@@ -94,14 +94,14 @@ export class BrukerUploadComponent {
                         this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
                 		this.uploadProgress = 5;
-            		}, (err: String) => {
+            		}, (err: string) => {
                         this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
                         this.uploadProgress = 4;
                         this.setArchiveStatus('error');
             	});
 
                 },
-                (err: String) => {
+                () => {
                     this.archive = '';
                     this.uploadProgress = 2;
                 	this.setArchiveStatus('error');

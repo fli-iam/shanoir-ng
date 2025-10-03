@@ -178,8 +178,8 @@ export class ExecutionComponent implements OnInit {
                     if (this.isAFile(parameter)) {
                         // If we have a file, we try to set up the adapted dataset
                         // We try to find all adapted datasets
-                        let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
-                        let nameFilter: RegExp = new RegExp(exp);
+                        // let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
+                        // let nameFilter: RegExp = new RegExp(exp);
 
                         let paramDatasets: DatasetLight[] = [];
 

@@ -34,9 +34,6 @@ import { Study } from './study.model';
 @Injectable()
 export class StudyDTOService {
 
-    constructor(
-    ) {}
-
     /**
      * Convert from DTO to Entity
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
@@ -166,9 +163,9 @@ export class StudyDTOService {
         return entity;
     }
 
-    static studyStorageVolumeDTOToDetailedSizes(dto: StudyStorageVolumeDTO): Map<String, number> {
+    static studyStorageVolumeDTOToDetailedSizes(dto: StudyStorageVolumeDTO): Map<string, number> {
         let datasetSizes = dto;
-        let sizesByLabel = new Map<String, number>()
+        let sizesByLabel = new Map<string, number>()
 
         for(let sizeByFormat of datasetSizes.volumeByFormat){
             if(sizeByFormat.size > 0){

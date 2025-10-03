@@ -97,7 +97,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
             (executionMonitoring: ExecutionMonitoring) => {
                 this.setExecutionMonitoring(executionMonitoring);
-            }, (error) => {
+            }, () => {
                 // 404 : if it's not found then it's not execution monitoring !
                 this.resetExecutionMonitoring();
             }

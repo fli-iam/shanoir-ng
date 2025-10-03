@@ -243,8 +243,6 @@ export class DUAAssistantComponent implements OnDestroy {
     protected generatePDF(): void {
         const element = this.pdfContent.nativeElement;
 
-        let originalHtml: string | null = null;
-        originalHtml = element.innerHTML;
         this.insertPageBreaks(element);
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -263,8 +261,6 @@ export class DUAAssistantComponent implements OnDestroy {
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
                 let position = 0;
                 while (position < pdfHeight) {
-                    const remainingHeight = pdfHeight - position;
-                    const pageContentHeight = Math.min(pageHeight, remainingHeight);
                     pdf.addImage(imgData, 'JPEG', 0, -position, pdfWidth, pdfHeight);
                     position += pageHeight;
                     if (position < pdfHeight) pdf.addPage();

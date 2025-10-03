@@ -45,9 +45,6 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
     }
     
     getColumnDefs(): ColumnDefinition[] {
-        function castToString(id: number) {
-            return String(id);
-        };
         let colDef: ColumnDefinition[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
             {headerName: "Dose", field: "dose", type: "number"},

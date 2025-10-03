@@ -40,8 +40,8 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     tags: Tag[];
     @Input() availableTags: Tag[];
     tagOptions: Option<Tag>[] = [];
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     @Output() onChange: EventEmitter<Tag[]> = new EventEmitter<Tag[]>();
 
     writeValue(obj: any): void {

@@ -39,7 +39,7 @@ export class Task extends Entity {
 
     debugTs: number = Date.now();
     id: number;
-    completeId: BigInt;
+    completeId: bigint;
     creationDate: Date;
     lastUpdate: Date;
     report: string;

@@ -22,7 +22,7 @@ import {Pipeline} from "../../models/pipeline";
 @Injectable()
 export class PipelineService {
 
-    pipelineUrl: String = AppUtils.BACKEND_API_VIP_PIPE_URL;
+    pipelineUrl: string = AppUtils.BACKEND_API_VIP_PIPE_URL;
 
     constructor(protected httpClient: HttpClient) {
     }

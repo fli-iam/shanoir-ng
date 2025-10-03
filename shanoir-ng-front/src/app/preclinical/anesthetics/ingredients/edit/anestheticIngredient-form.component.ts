@@ -166,7 +166,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
 
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
-            .subscribe(ingredient =>{
+            .subscribe(() =>{
                 if (this.onEvent.observers.length > 0) {
                     this.onEvent.emit(this.ingredient);
                 }
@@ -191,7 +191,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         if (params && params[1]) reftype = params[1];
 
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(success => {
+        this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 if (reftype == 'ingredient'){
                     this.names.push(entity as Reference);

@@ -37,8 +37,8 @@ export class PetProtocolComponent implements ControlValueAccessor {
     public protocol: PetProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     writeValue(obj: any): void {
         this.protocol = obj;

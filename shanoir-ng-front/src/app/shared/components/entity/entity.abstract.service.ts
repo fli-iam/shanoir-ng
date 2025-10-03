@@ -111,7 +111,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         })
     }
 
-    get(id: number | BigInt, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
+    get(id: number | bigint, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
         return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
             .then(entity => this.mapEntity(entity, null, mode));
@@ -128,11 +128,11 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             .toPromise();
     }
 
-    protected mapEntity = (entity: any, quickResult?: T, mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T, _mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
+    protected mapEntityList = (entities: any[], _quickResult?: T[]): Promise<T[]> => {
         return Promise.resolve(entities?.map(entity => this.toRealObject(entity)) || []);
     }
 

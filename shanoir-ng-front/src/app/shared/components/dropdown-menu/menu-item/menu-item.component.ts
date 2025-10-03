@@ -42,9 +42,6 @@ export class MenuItemComponent {
 
     public closeAll: () => void;
 
-    constructor() {
-    }
-
     ngAfterViewInit() {
         let doHasChildren: boolean = false;
         this.itemMenus.forEach((itemMenu, index) => {
@@ -55,7 +52,7 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = setTimeout(() => {
+        setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;
@@ -75,7 +72,7 @@ export class MenuItemComponent {
         })
     }
 
-    public close(callback: () => void = () => {}) {
+    public close(callback: () => void = () => { return; }) {
         if (this.hasChildren) {
             this.closeChildren(() => {
                 this.overflow = true;
@@ -87,7 +84,7 @@ export class MenuItemComponent {
         }
     }
 
-    private closeOpenedAmong(menus: QueryList<MenuItemComponent>, callback: () => void = () => {}) {
+    private closeOpenedAmong(menus: QueryList<MenuItemComponent>, callback: () => void = () => { return; }) {
         let toBeClosed: MenuItemComponent[] = [];
         menus.forEach((menu: MenuItemComponent, index: number) => {
             if (index!= 0 && menu.hasChildren && menu.opened) {
@@ -106,7 +103,7 @@ export class MenuItemComponent {
         }
     }
 
-    public closeChildren(callback: () => void = () => {}) {
+    public closeChildren(callback: () => void = () => { return;}) {
         this.closeOpenedAmong(this.itemMenus, callback);
     }
 

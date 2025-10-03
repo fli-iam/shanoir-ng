@@ -22,8 +22,6 @@ import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition
 /** This was separated from the rest of the service to prevent a circular dependency warning from angular. */
 export abstract class StudyCardDTOServiceAbstract {
 
-    constructor() {}
-    
     static isCoil(assigmentField: string): boolean {
         return assigmentField?.toLowerCase().includes('coil');
     }

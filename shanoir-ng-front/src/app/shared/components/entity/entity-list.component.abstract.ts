@@ -105,7 +105,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private completeCustomActions(): void {
         if (this.new) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-solid fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
+                title: "New",awesome: "fa-solid fa-plus", action: () => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }
@@ -184,14 +184,14 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     /**
      * Can be overriden to enable/disable the edit button for this item
      */
-    protected canEdit(item: T): boolean {
+    protected canEdit(_item: T): boolean {
         return true;
     }
 
     /**
      * Can be overriden to enable/disable the delete button for this item
      */
-    protected canDelete(item: T): boolean {
+    protected canDelete(_item: T): boolean {
         return true;
     }
 

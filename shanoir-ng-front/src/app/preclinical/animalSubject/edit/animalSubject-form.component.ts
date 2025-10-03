@@ -227,7 +227,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.studies = studies;
                 // this.updateStudiesList();
             })
-            .catch((error) => {
+            .catch(() => {
                 // TODO: display error
                 console.error("error getting study list!");
         });
@@ -296,7 +296,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'subjectType': [this.preclinicalSubject.subject.subjectType, Validators.required],
         });
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(() => {
                 this.onChangeImagedObjectCategory(subjectForm);
             })
         );
@@ -339,7 +339,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (category && reftype) this.router.navigate(['/preclinical-reference/create'], { queryParams: {category: category, reftype: reftype } });
     }
 
-    goToEdit(id?: number): void {
+    goToEdit(): void {
         super.goToEdit(this.preclinicalSubject.id);
     }
 
@@ -419,7 +419,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
         this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
-            .then(subject => {
+            .then(() => {
                 let entity:any;
                 if (this.preclinicalSubject.animalSubject) {
                     this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);

@@ -20,9 +20,6 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 @Injectable()
 export class ConfirmDialogService {
-    
-    constructor() {
-    }
 
     public confirm(title: string, message?: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);

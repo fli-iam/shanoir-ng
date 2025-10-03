@@ -47,8 +47,6 @@ export class DatepickerComponent implements ControlValueAccessor {
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
 
-    constructor() { }
-
     onModelChange(dateStr: string) {
         if (this.dateString == dateStr) return;
         this.dateString = dateStr;

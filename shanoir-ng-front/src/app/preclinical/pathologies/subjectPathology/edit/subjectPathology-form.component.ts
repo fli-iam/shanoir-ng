@@ -43,7 +43,7 @@ import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract
 export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathology> {
 
     @Input() preclinicalSubject: PreclinicalSubject;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input('toggleForm') toggleForm: boolean;
     @Input() subjectpathoSelected: SubjectPathology;
     @Output() onEvent = new EventEmitter();

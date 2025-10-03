@@ -25,7 +25,7 @@ export class ImportBrukerService {
 
     constructor(private http: HttpClient) { }
 
-     postFile(fileToUpload: File): Observable<String> {
+     postFile(fileToUpload: File): Observable<string> {
         const endpoint = PreclinicalUtils.PRECLINICAL_API_BRUKER_UPLOAD;
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
@@ -34,7 +34,7 @@ export class ImportBrukerService {
             .post(endpoint, formData, options);
     }
     
-    importDicomFile(filePath: String): Observable<ImportJob> {
+    importDicomFile(filePath: string): Observable<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath);
     }
     

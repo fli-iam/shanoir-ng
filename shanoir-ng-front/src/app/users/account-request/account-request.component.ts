@@ -14,7 +14,7 @@
 
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
@@ -80,7 +80,7 @@ export class AccountRequestComponent {
         this.form.get('accountRequestInfo').updateValueAndValidity();
     }
 
-    private validateARInfo = (control: AbstractControl): ValidationErrors | null => {
+    private validateARInfo = (): ValidationErrors | null => {
         if (!this.infoValid) {
             return { invalid: true}
         }
@@ -93,7 +93,7 @@ export class AccountRequestComponent {
         if (this.function) this.user.accountRequestInfo.function = this.function;
         this.loading = true;
         this.userService.requestAccount(this.user)
-            .then((res) => {
+            .then(() => {
                  this.requestSent = true;
             }, (err) => {
                 if (err?.error?.details?.fieldErrors?.email != null) {

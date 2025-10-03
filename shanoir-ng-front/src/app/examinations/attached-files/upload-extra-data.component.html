@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<span [ngSwitch]="mode">
 					<button i18n="uploadExtraData detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
 					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
-					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
+					<!-- <button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="uploadExtraData detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Save<i class="far fa-save"></i></button>
-					</ng-template>
+					</ng-template> -->
 				</span>
 			</div>
         </div>

@@ -38,7 +38,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     @Input() studies:  IdName[];
     public studyOptions: Option<number>[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
-    public canModify: Boolean = false;
+    public canModify: boolean = false;
     examinationStudyId = null;
 
     constructor(
@@ -83,7 +83,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     }
 
     uploadFileToActivity() {
-        this.examinationService.postFile(this.fileToUpload, this.examination.id).then(data => {
+        this.examinationService.postFile(this.fileToUpload, this.examination.id).then(() => {
             this.consoleService.log('info', 'File "' + this.fileToUpload.name + '" has been sucessfully uploaded to examination ' + this.examination.id);
         });
       }
@@ -99,21 +99,4 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
             this.location.back();
         }
     }
-
-    create(): void {
-        
-    }
-
-    add(): void {
-      
-    }
-
-    edit(): void {
-        
-    }
-
-    update(): void {
-
-    }
-
 }

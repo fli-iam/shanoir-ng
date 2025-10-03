@@ -82,7 +82,7 @@ export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> i
                         this.node.open();
                     });
                 }
-            }).catch((e) => {
+            }).catch(() => {
                 this.loading = false;
             });
     }

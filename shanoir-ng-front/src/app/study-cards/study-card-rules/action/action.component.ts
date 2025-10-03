@@ -45,7 +45,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     private computeAssignmentOptionsSubscription: Subscription;
     private assignmentChangeSubscription: Subscription;
 
-    onChangeField(field: string) {
+    onChangeField() {
         this.computeAssignmentOptions();
         this.assignment.value = null;
         this.valueTouched = false;

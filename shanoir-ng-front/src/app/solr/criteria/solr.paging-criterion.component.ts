@@ -48,7 +48,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     hasChecked: boolean = false;
     filterText: string;
     loaded: boolean = false;
-    loadedPromise: Promise<void> = new Promise((resolve, reject) => this.loadedPromiseResolve = resolve);
+    loadedPromise: Promise<void> = new Promise((resolve) => this.loadedPromiseResolve = resolve);
     private loadedPromiseResolve: () => void;
     loading: boolean = false;
     @Output() onChange: EventEmitter<string[]> = new EventEmitter();
@@ -61,8 +61,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     filterTimeout: number = 0;
     private hash: string;
 
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     constructor(private router: Router) {}
 

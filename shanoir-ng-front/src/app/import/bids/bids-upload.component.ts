@@ -16,14 +16,13 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
-import { ImportJob } from '../shared/dicom-data.model';
-import { ImportService } from '../shared/import.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { Study } from '../../studies/shared/study.model';
-import { Option } from '../../shared/select/select.component';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { slideDown } from '../../shared/animations/animations';
+import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { ImportService } from '../shared/import.service';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -108,7 +107,7 @@ export class BidsUploadComponent {
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id)
-            .then((importJob: ImportJob) => {
+            .then(() => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
             }).catch(error => {

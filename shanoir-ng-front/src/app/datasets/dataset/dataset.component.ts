@@ -120,7 +120,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             return this.dicomArchiveService.importFromZip(blobReponse.body)
-                .then(response => {
+                .then(() => {
                     return this.dicomArchiveService.extractFileDirectoryStructure()
                         .then(response => {
                             return this.initPapaya(response);

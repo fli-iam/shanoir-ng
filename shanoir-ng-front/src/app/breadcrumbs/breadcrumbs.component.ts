@@ -93,7 +93,7 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     }
 
     @HostListener('window:resize', ['$event'])
-    onResize(event) {
+    onResize() {
         this.onResizeEnd.fire();
     }
 

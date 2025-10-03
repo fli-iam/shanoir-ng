@@ -31,8 +31,6 @@ export class PapayaComponent implements OnInit, OnDestroy {
     private loading: boolean = false;
     protected error: boolean = false;
 
-    constructor() { }
-
     ngOnInit() {
         papayaContainers = [];
         papaya.Container.startPapaya();

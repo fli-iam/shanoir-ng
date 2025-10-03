@@ -106,7 +106,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     goToAddPathology(){
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-pathology/create']).then(success => {
+        this.router.navigate(['/preclinical-pathology/create']).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 this.pathologies.push(entity as Pathology);
                 this.entity.pathology = entity as Pathology;

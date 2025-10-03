@@ -60,7 +60,7 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise();
     }
 
-    getPage(pageable: Pageable, name: String):  Promise<Page<Subject>> {
+    getPage(pageable: Pageable, name: string):  Promise<Page<Subject>> {
         let params = { 'params': pageable.toParams() };
         params['params']['name'] = name;
         return this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params).toPromise();

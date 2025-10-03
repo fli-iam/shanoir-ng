@@ -78,7 +78,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
                 this.studies = [];
                 this.studyOptions = [];
                 this.confirmDialogService.error("No public study","No public studies available for the moment. If you want to join a private study, please ask the study manager to add you directly.")
-                .then(value => this.goBack());
+                .then(() => this.goBack());
             }
         });
     }
@@ -121,7 +121,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     acceptRequest() {
         this.accessRequestService.resolveRequest(this.accessRequest.id, true)
-            .then(value => {
+            .then(() => {
                 this.userService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
             }).then(() => {
@@ -131,7 +131,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
     
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => {
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(() => {
             this.userService.decreaseAccessRequests();
             this.goBack();
         });

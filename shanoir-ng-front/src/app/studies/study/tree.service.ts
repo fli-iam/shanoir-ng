@@ -186,7 +186,7 @@ export class TreeService {
     removeCurrentNode() {
         if (this.selectedNode?.parent) {
             const route: string = this.selectedNode.route;
-            Object.entries(this.selectedNode.parent).forEach((entry, index) => {
+            Object.entries(this.selectedNode.parent).forEach((entry, ) => {
                 if (Array.isArray(entry[1])) {
                     let i: number = entry[1].findIndex(node => node.route == route);
                     entry[1].splice(i, 1);
@@ -373,7 +373,6 @@ export class TreeService {
     }
 
     private findDatasetChain(bottomChain: DatasetForChain): Promise<DatasetForChain> {
-        let childDatasetPromise: Promise<Dataset>;
         if (!bottomChain) return Promise.reject('cannot have null or undefined as input');
         return this.datasetService.get(bottomChain.id).then(ds => {
             if (ds.hasProcessing) {
