@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -37,12 +37,12 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
     standalone: false
 })
 @ModesAware
-export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
+export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges{
 
     @Input() anesthetic: Anesthetic;
-    @Input('toggleForm') toggleForm: boolean = true;
+    @Input() toggleForm: boolean = true;
     @Input() ingredientSelected: AnestheticIngredient;
-    @Output() onEvent = new EventEmitter();
+    @Output() event = new EventEmitter();
     @Input() createAIMode: boolean;
     names: Reference[];
     units: Reference[];
@@ -104,10 +104,10 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.toggleForm = true;
         }else if(this.toggleForm==true){
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }else{
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }
         this.createAIMode = creation;
     }
@@ -157,8 +157,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.anesthetic.ingredients = [];
         }
         this.anesthetic.ingredients.push(this.ingredient);
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.ingredient);
+        if (this.event.observers.length > 0) {
+            this.event.emit(this.ingredient);
         }
         this.toggleForm = false;
         this.ingredient = new AnestheticIngredient();
@@ -167,8 +167,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
             .subscribe(() =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.ingredient);
+                if (this.event.observers.length > 0) {
+                    this.event.emit(this.ingredient);
                 }
             });
         this.toggleForm = false;

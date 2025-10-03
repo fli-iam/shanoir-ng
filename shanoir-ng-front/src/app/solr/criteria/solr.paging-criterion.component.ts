@@ -51,7 +51,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     loadedPromise: Promise<void> = new Promise((resolve) => this.loadedPromiseResolve = resolve);
     private loadedPromiseResolve: () => void;
     loading: boolean = false;
-    @Output() onChange: EventEmitter<string[]> = new EventEmitter();
+    @Output() userChange: EventEmitter<string[]> = new EventEmitter();
     private _open: boolean = false;
     currentPage: FacetResultPage;
     maxPage: number = Infinity ;
@@ -131,7 +131,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.displayedFacets.forEach(fac => fac.checked = false);
         this.hasChecked = false;
         this.propagateChange([]);
-        this.onChange.emit([]);
+        this.userChange.emit([]);
     }
 
     clearFilter() {
@@ -149,7 +149,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.updateHasChecked();
         let selectedValues: string[] = this.selectedFacets.map(facet => facet.value);
         this.propagateChange(selectedValues);
-        this.onChange.emit(selectedValues);
+        this.userChange.emit(selectedValues);
     }
 
     updateHasChecked() {

@@ -13,7 +13,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 import {Study} from "../../../studies/shared/study.model";
 import * as AppUtils from "../../../utils/app.utils";
@@ -31,7 +31,7 @@ import {SolrDocument} from "../../../solr/solr.document.model";
     styleUrls: ['dataset-copy-dialog.component.css'],
     standalone: false
 })
-export class DatasetCopyDialogComponent {
+export class DatasetCopyDialogComponent implements OnInit {
     title: string;
     message: string;
     studies: Study[];

@@ -14,7 +14,7 @@
 
 import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
-import { ComponentRef, Injectable } from '@angular/core';
+import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
@@ -563,11 +563,11 @@ export class MassDownloadService {
         return this.waitForEnd(modalRef);
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
+    private waitForEnd(modalRef: ComponentRef<{ go: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<any | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = race([
             modalRef.instance.go,
-            modalRef.instance.close.pipe(map(() => 'cancel'))
+            modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();

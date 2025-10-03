@@ -30,7 +30,7 @@ import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.ser
 export class EquipmentNodeComponent extends TreeNodeAbstractComponent<AcquisitionEquipmentNode> implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
-    @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
+    @Output() equipmentDelete: EventEmitter<void> = new EventEmitter();
     detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
@@ -54,7 +54,7 @@ export class EquipmentNodeComponent extends TreeNodeAbstractComponent<Acquisitio
         this.equipmentService.get(this.node.id).then(entity => {
             this.equipmentService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onEquipmentDelete.emit();
+                    this.equipmentDelete.emit();
                 }
             });
         })

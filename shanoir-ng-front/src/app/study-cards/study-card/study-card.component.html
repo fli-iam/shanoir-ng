@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
                 (delete)="delete()"
 				(edit)="goToEdit()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()">
 				<button *ngIf="mode != 'view'"
 						type="button"
@@ -108,7 +108,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										[(ngModel)]="studyCard.acquisitionEquipment"
 										(userChange)="onChangeAcqEq()"
 										[options]="acquisitionEquipments"
-										(onNewClick)="createAcqEq()">
+										(newClick)="createAcqEq()">
 								</select-box>
 							</ng-template>
 						</span>

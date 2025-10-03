@@ -42,7 +42,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    @Output() onTouch = new EventEmitter();
+    @Output() touch = new EventEmitter();
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
     modelArray: any[];
@@ -138,7 +138,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         }
     }
 

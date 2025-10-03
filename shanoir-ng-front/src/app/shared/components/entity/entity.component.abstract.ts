@@ -15,17 +15,15 @@ import { Location } from '@angular/common';
 import {
     Directive,
     ElementRef,
-    EventEmitter,
     HostListener,
     Input,
     OnChanges,
     OnDestroy,
-    Output,
     SimpleChanges,
     ViewChild
 } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute , Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
@@ -52,7 +50,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     @Input() mode: Mode;
     @Input() id: number; // if not given via url
     @Input() entityInput: T; // if id not given via url
-    @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
     protected subscriptions: Subscription[] = [];

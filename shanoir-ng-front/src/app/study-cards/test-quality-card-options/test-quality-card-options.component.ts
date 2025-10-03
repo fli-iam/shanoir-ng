@@ -29,7 +29,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
 
     @Input() nbExaminations: number;
     @Output() test: EventEmitter<Interval> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup
     @ViewChild('window') window: ElementRef;
 
@@ -72,7 +72,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])

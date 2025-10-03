@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
@@ -36,7 +36,7 @@ import { NotificationsService } from './shared/notifications/notifications.servi
     standalone: false
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
     @ViewChild('console') consoleComponenent: ConsoleComponent;

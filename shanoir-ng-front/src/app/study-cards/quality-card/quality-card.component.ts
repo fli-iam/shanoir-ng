@@ -11,11 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ComponentRef, ViewChild } from '@angular/core';
+import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, race } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
@@ -248,11 +248,11 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         return this.waitForEnd(modalRef);
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
+    private waitForEnd(modalRef: ComponentRef<{ test: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<Interval | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = race([
             modalRef.instance.test, 
-            modalRef.instance.close.map(() => 'cancel')
+            modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { menuAnimDur, menuSlideRight } from '../../animations/animations';
@@ -28,7 +28,7 @@ import { MenuItemComponent } from './menu-item/menu-item.component';
     animations: [menuSlideRight],
     standalone: false
 })
-export class DropdownMenuComponent implements OnChanges, OnDestroy {
+export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewInit {
 
     @Input() label: string;
     @Input() awesome: string;

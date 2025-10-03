@@ -13,7 +13,7 @@
  */
 
 import { Location } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -32,7 +32,7 @@ import { UserService } from '../shared/user.service';
     standalone: false
 })
 
-export class AccountRequestComponent {
+export class AccountRequestComponent implements OnInit {
 
     public user: User;
     public form: UntypedFormGroup;

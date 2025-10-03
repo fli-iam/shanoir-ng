@@ -33,7 +33,7 @@ import { DownloadInputIds } from '../mass-download.service';
 export class DownloadSetupAltComponent implements OnInit {
 
     @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
@@ -114,7 +114,7 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])

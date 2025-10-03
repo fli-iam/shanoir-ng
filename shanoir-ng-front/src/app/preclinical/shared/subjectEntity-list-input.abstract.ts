@@ -33,7 +33,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     @Input() canModify: boolean = false;
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
-    @Output() onEvent = new EventEmitter();
+    @Output() event = new EventEmitter();
     protected propagateChange: (any) => void = () => { return; };
     protected propagateTouched = () => { return; };
     public toggleForm: boolean = false;
@@ -107,7 +107,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         if (subjectEntity && create) {
             this.addEntity(subjectEntity);
         }
-        this.onEvent.emit("create");
+        this.event.emit("create");
         this.table.refresh();
     }
 
@@ -129,7 +129,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
                  entity.splice(entity.indexOf(item), 1);
             }
         }
-        this.onEvent.emit("delete");
+        this.event.emit("delete");
         this.onDelete.next({entity: item});
         this.table.refresh();
     }

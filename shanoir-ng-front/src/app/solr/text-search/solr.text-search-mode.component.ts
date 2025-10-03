@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Output, SimpleChanges, OnChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { slideDown } from '../../shared/animations/animations';
@@ -31,10 +31,10 @@ import { slideDown } from '../../shared/animations/animations';
     standalone: false
 })
 
-export class SolrTextSearchModeComponent implements ControlValueAccessor {
+export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChanges {
 
     showInfo: boolean = false;
-    @Output() onChange: EventEmitter<boolean> = new EventEmitter();
+    @Output() userChange: EventEmitter<boolean> = new EventEmitter();
     expertMode: boolean = false;
     protected propagateChange: (any) => void = () => { return; };
     protected propagateTouched = () => { return; };
@@ -53,7 +53,7 @@ export class SolrTextSearchModeComponent implements ControlValueAccessor {
 
     onExpertModeUserChange() {
         this.onExpertModeChange();
-        this.onChange.emit(this.expertMode);
+        this.userChange.emit(this.expertMode);
     }
 
     writeValue(value: boolean): void {

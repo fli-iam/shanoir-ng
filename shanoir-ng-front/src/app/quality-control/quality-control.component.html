@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <td>
                 <span>
                     Check at import
-                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
+                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (userChange)="updateQualityCard(qualityCard)"></checkbox>
                 </span>
             </td>
             <td>

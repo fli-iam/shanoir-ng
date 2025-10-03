@@ -1,4 +1,4 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, Input, ViewChild, OnInit} from '@angular/core';
 
 import {ColumnDefinition} from "../../shared/components/table/column.definition.type";
 import {ShanoirEvent} from "../../users/shanoir-event/shanoir-event.model";
@@ -14,7 +14,7 @@ import {StudyUser} from "../shared/study-user.model";
     styleUrls: ['./study-history.component.css'],
     standalone: false
 })
-export class StudyHistoryComponent {
+export class StudyHistoryComponent implements OnInit {
 
     @ViewChild('table', {static: false}) table: TableComponent;
     @Input() study: Study;
@@ -57,6 +57,7 @@ export class StudyHistoryComponent {
     constructor(
         private shanoirEventService: ShanoirEventService
     ) {}
+    
     ngOnInit() {
         this.eventHistory.then( () => this.getPage);
     }
