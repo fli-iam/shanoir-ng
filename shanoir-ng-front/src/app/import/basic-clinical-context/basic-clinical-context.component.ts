@@ -113,7 +113,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
-        if (this.patient.patientSex) {
+        if (this.patient?.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
                 newSubject.sex = this.patient.patientSex;
             }
