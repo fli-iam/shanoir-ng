@@ -117,7 +117,10 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+    }
 
+    protected fillCreateAcqEqStep() { 
+        return;
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
@@ -159,7 +162,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }

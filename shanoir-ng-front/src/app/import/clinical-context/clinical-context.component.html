@@ -126,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>The center equipment may not be not compatible with the imported data !</strong>
-            <strong> selected : {{acquisitionEquipment.serialNumber}}</strong>
+            <strong> selected : {{acquisitionEquipment?.serialNumber}}</strong>
             <ng-container *ngIf="importedEquipmentDataStr">
                 <br/>Your archive contains this data :
                 <code>{{importedEquipmentDataStr}}</code>
