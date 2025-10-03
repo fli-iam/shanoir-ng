@@ -162,9 +162,4 @@ public class RabbitMQSubjectServiceTest {
         // THEN a message is logged and null is sent
         assertNull(name);
     }
-
-    @Test
-    public void testManageParticipants() {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
 }
