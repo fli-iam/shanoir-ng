@@ -18,6 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';

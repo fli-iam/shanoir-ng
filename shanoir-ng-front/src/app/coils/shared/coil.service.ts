@@ -13,11 +13,12 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import * as AppUtils from '../../utils/app.utils';
-import { Coil, CoilDTO } from './coil.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { HttpClient } from '@angular/common/http';
+
+import { Coil, CoilDTO } from './coil.model';
 
 @Injectable()
 export class CoilService extends EntityService<Coil> {

@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { DatasetService } from '../../datasets/shared/dataset.service';
 
-import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+
 
 @Component({
     selector: 'dataset-acquisition-node',

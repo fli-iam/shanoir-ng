@@ -11,21 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, Input, ViewChild, ViewContainerRef, OnChanges} from '@angular/core'
+import {Component, ViewChild} from '@angular/core'
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
-
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
-import { ServiceLocator } from '../../../utils/locator.service';
-import { ConsoleService } from '../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
 

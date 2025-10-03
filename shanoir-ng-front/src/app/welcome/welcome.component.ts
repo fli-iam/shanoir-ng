@@ -9,6 +9,7 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
+
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { ImagesUrlUtil } from "../shared/utils/images-url.util";
 import { StudyType } from "../studies/shared/study-type.enum";

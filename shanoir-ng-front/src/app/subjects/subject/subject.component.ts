@@ -18,6 +18,11 @@ import * as shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
@@ -28,15 +33,8 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
-import {StudyLight} from "../../studies/shared/study.dto";
 import {Tag} from "../../tags/tag.model";
-import {SubjectStudy} from "../shared/subject-study.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {SubjectType} from "../shared/subject.types";
 import {isDarkColor} from "../../utils/app.utils";
 
 @Component({
@@ -316,7 +314,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             studyListStr += studiesNames;
         }
         studyListStr += '\n\nWarning: this action deletes ALL datasets ';
-        (entity.subjectStudyList.length > 0) ? studyListStr += 'from ALL studies listed above.' : studyListStr += 'from this subject.';
+        if (entity.subjectStudyList.length > 0) {
+            studyListStr += 'from ALL studies listed above.';
+        } else {
+            studyListStr += 'from this subject.';
+        }
         return Promise.resolve(studyListStr);
     }
 

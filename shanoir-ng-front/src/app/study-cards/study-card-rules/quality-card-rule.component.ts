@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardCondition } from '../shared/study-card.model';
+
 import { ShanoirMetadataField } from './action/action.component';
-import { FormGroup } from '@angular/forms';
 
 
 @Component({

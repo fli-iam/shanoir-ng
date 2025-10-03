@@ -14,12 +14,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { CardNode } from '../../tree/tree.model';
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from "../shared/study-card.service";
-import { TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({

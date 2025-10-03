@@ -12,6 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ViewChild } from '@angular/core';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -20,8 +23,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {Study} from "../../studies/shared/study.model";
 
 
 @Component({

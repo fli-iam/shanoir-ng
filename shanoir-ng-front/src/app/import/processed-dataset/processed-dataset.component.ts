@@ -14,9 +14,9 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';

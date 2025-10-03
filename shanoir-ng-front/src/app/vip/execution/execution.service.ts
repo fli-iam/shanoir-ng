@@ -15,11 +15,10 @@
 import {Injectable} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {Observable} from "rxjs";
+
 import * as AppUtils from "../../utils/app.utils";
-import {Execution} from "../models/execution";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
-import {Id} from "../../shared/models/id.model";
 
 @Injectable()
 export class ExecutionService {

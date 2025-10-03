@@ -1,11 +1,12 @@
 import {Injectable, OnDestroy} from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import * as AppUtils from "../../utils/app.utils";
-import { HttpClient } from "@angular/common/http";
-import {ShanoirEvent} from "./shanoir-event.model";
 import {Page, Pageable} from "../../shared/components/table/pageable.model";
-import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
-import {DatasetAcquisitionDTO} from "../../dataset-acquisitions/shared/dataset-acquisition.dto";
+
+import {ShanoirEvent} from "./shanoir-event.model";
+
 
 @Injectable()
 export class ShanoirEventService extends EntityService<ShanoirEvent> implements OnDestroy {

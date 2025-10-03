@@ -18,17 +18,20 @@ import { ComponentRef, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
+
 import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
 import { ShanoirError } from '../models/error.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';
+
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';

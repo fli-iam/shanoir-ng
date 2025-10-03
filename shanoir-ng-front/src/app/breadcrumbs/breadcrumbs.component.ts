@@ -12,12 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { BreadcrumbsService, Step } from './breadcrumbs.service';
 import { Subject, Subscription } from 'rxjs';
-import { WaitBurstEnd } from '../utils/wait-burst-end';
 import { take } from 'rxjs/operators';
+
+import { WaitBurstEnd } from '../utils/wait-burst-end';
+
+import { BreadcrumbsService, Step } from './breadcrumbs.service';
 
 @Component({
     selector: 'breadcrumbs',

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
+import { capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
 import { Option } from "../../shared/select/select.component";
 
 export enum ImagedObjectCategory {

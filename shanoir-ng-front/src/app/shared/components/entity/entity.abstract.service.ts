@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+
 import { Entity } from './entity.abstract';
 
 @Injectable()
@@ -179,11 +180,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             + ('0' + date.getDate()).slice(-2);
     }
 
-    public arrayFrom404(error: HttpErrorResponse) {
-        e => {
-            if (e.status == 404) return [];
-            else throw e;
-        }
+    public arrayFrom404(e: HttpErrorResponse) {
+        if (e.status == 404) return [];
+        else throw e;
     }
 
 }

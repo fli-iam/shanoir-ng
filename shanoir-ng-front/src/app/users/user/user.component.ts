@@ -19,6 +19,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';

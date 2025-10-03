@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -19,6 +19,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';

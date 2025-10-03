@@ -14,7 +14,6 @@
  */
 
 import { Injectable, ApplicationRef, Injector } from '@angular/core';
-import { Subject } from 'rxjs';
 
 type msgType = 'error' | 'warn' | 'info';
 class Message { 

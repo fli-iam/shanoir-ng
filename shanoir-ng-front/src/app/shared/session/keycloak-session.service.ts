@@ -13,7 +13,9 @@
  */
 
 import { Injectable } from '@angular/core';
+
 import { KeycloakService } from '../keycloak/keycloak.service';
+
 import { KeycloakSession } from './keycloak-session.model';
 
 @Injectable()

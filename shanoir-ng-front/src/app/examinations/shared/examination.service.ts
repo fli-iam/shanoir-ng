@@ -17,10 +17,12 @@ import { Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';

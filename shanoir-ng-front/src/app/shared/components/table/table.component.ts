@@ -13,9 +13,9 @@
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
-
 import { Router } from "@angular/router";
 import * as shajs from 'sha.js';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
@@ -23,10 +23,10 @@ import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import {TaskService} from "../../../async-tasks/task.service";
+
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
-import {TaskService} from "../../../async-tasks/task.service";
-import {Task} from "../../../async-tasks/task.model";
 
 @Component({
     selector: 'shanoir-table',

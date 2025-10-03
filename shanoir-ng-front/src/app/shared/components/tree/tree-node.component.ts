@@ -24,10 +24,11 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 const noop = () => {
 };

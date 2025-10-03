@@ -19,7 +19,6 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 import { BidsElement } from '../model/bidsElement.model'
 import * as AppUtils from '../../utils/app.utils';
 import { GlobalService } from '../../shared/services/global.service';
-import { StudyService } from '../../studies/shared/study.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';

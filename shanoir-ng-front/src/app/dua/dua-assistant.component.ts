@@ -19,11 +19,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Subscription } from 'rxjs';
+
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyService } from '../studies/shared/study.service';
+
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
 

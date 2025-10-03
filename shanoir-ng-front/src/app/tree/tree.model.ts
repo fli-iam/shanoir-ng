@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ElementRef } from "@angular/core";
 import { ExaminationDatasetAcquisitionDTO } from "../dataset-acquisitions/shared/dataset-acquisition.dto";
 import { DatasetAcquisition } from "../dataset-acquisitions/shared/dataset-acquisition.model";
 import { DatasetProcessing } from "../datasets/shared/dataset-processing.model";
@@ -74,7 +73,11 @@ export abstract class ShanoirNode {
     }
 
     set opened(opened: boolean) {
-        opened ? this.open() : this.close();
+        if (opened) {
+            this.open();
+        } else {
+            this.close();
+        }
     }
 
     get route(): string {

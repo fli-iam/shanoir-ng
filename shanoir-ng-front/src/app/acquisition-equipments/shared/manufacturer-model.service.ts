@@ -18,8 +18,9 @@ import { HttpClient } from '@angular/common/http';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ManufacturerModel } from './manufacturer-model.model';
 import {Entity} from "../../shared/components/entity/entity.abstract";
+
+import { ManufacturerModel } from './manufacturer-model.model';
 
 @Injectable()
 export class ManufacturerModelService extends EntityService<ManufacturerModel> {

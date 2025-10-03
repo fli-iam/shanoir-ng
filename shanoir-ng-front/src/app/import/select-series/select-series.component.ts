@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { Router } from '@angular/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';

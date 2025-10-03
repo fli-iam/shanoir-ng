@@ -12,11 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
-import * as AppUtils from '../../utils/app.utils';
-import { DuaDocument } from './dua-document.model';
+
 import { StudyService } from 'src/app/studies/shared/study.service';
+
+import * as AppUtils from '../../utils/app.utils';
+
+import { DuaDocument } from './dua-document.model';
 
 
 @Injectable()

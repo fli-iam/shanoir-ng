@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { StudyCard } from '../shared/study-card.model';
-import { StudyCardListComponent } from './study-card-list.component';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { ActivatedRoute } from '@angular/router';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+
+import { StudyCardListComponent } from './study-card-list.component';
 
 
 

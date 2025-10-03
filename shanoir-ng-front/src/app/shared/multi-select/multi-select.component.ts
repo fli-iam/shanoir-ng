@@ -13,6 +13,7 @@
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
 import { Option } from '../select/select.component';
 

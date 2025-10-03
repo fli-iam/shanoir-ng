@@ -13,14 +13,16 @@
  */
 import { Injectable } from '@angular/core';
 
+import { CoilService } from 'src/app/coils/shared/coil.service';
+import { Coil } from 'src/app/coils/shared/coil.model';
+
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+
 import { DicomService } from './dicom.service';
 import { QualityCardDTO } from './quality-card.dto.model';
 import { QualityCard, QualityCardRule } from './quality-card.model';
 import { DicomTag, Operation, StudyCardCondition } from './study-card.model';
-import { CoilService } from 'src/app/coils/shared/coil.service';
-import { Coil } from 'src/app/coils/shared/coil.model';
 import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTOServiceAbstract } from './study-card.dto.abstract';
 

@@ -14,6 +14,7 @@
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
 import { Study } from '../../studies/shared/study.model';
+
 import { StudyCardDTO } from './study-card.dto.model';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 

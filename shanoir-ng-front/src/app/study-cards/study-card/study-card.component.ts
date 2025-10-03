@@ -14,7 +14,10 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -36,8 +39,6 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-card',

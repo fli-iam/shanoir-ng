@@ -15,6 +15,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectPathology }    from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';
 import { PathologyModelService } from '../../pathologyModel/shared/pathologyModel.service';
@@ -28,7 +31,6 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract";
 
 @Component({

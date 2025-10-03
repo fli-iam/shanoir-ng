@@ -14,12 +14,12 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { AccessRequest } from "../../users/access-request/access-request.model";
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';

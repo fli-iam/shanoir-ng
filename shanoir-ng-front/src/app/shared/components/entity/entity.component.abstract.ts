@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Location } from '@angular/common';
-
 import {
     Directive,
     ElementRef,
@@ -26,12 +25,12 @@ import {
     ViewChild
 } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute , Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
-import { Router } from '@angular/router';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ConsoleService } from '../../console/console.service';
@@ -39,6 +38,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 

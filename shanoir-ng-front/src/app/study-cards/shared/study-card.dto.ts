@@ -15,10 +15,11 @@ import { Injectable } from '@angular/core';
 
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { DicomService } from './dicom.service';
-import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
+
+import { DicomService } from './dicom.service';
+import { DicomTag, StudyCard } from './study-card.model';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCardDTOServiceAbstract } from './study-card.dto.abstract';
 

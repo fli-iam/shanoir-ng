@@ -13,6 +13,7 @@
  */
 
 import { Component, ViewChild, ElementRef, Output, EventEmitter, Input } from '@angular/core';
+
 import { ImagesUrlUtil } from '../../utils/images-url.util';
 
 

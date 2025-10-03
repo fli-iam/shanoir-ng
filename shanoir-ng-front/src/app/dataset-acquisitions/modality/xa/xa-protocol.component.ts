@@ -13,9 +13,11 @@
  */
 import {Component, forwardRef, Input} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+
 import {Mode} from '../../../shared/components/entity/entity.component.abstract';
-import {XaProtocol} from './xa-protocol.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+
+import {XaProtocol} from './xa-protocol.model';
 
 
 @Component({

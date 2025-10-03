@@ -15,9 +15,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-import { ServiceLocator } from './locator.service';
 import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
+
+import { TaskState, TaskStatus } from '../async-tasks/task.model';
+
+import { ServiceLocator } from './locator.service';
 
 
 // Base urls

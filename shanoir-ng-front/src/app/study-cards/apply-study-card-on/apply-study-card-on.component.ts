@@ -13,6 +13,8 @@
  */
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -30,7 +32,6 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { Location } from '@angular/common';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({

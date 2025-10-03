@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core';
+import {Input, Output, ViewChild, Component, EventEmitter} from '@angular/core';
 
 import { PreclinicalSubject } from '../animalSubject/shared/preclinicalSubject.model';
 import { ModesAware } from "../shared/mode/mode.decorator";

@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import {formatDate} from "@angular/common";
 
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
+import {QualityTag} from "../../study-cards/shared/quality-card.model";
+import {SimpleStudy, Study} from "../../studies/shared/study.model";
+
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import {Sex, SubjectType} from './subject.types';
-import {formatDate} from "@angular/common";
-import {QualityTag} from "../../study-cards/shared/quality-card.model";
-import {SimpleStudy, Study} from "../../studies/shared/study.model";
 
 
 @Injectable()

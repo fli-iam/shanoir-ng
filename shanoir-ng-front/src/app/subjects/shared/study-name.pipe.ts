@@ -14,8 +14,9 @@
 
 import { Pipe, PipeTransform } from "@angular/core";
 
-import { SubjectStudy } from "./subject-study.model";
 import { IdName } from "../../shared/models/id-name.model";
+
+import { SubjectStudy } from "./subject-study.model";
 
 @Pipe({
     name: "studyNamePipe",

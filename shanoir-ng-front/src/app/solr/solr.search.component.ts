@@ -12,16 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { formatDate } from '@angular/common';
-import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren , AfterViewChecked } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-
-import { AfterViewChecked } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
@@ -36,16 +35,16 @@ import { MassDownloadService } from '../shared/mass-download/mass-download.servi
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
-import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
-import { SolrService } from "./solr.service";
-import { Clipboard } from '@angular/cdk/clipboard';
 import {StudyService} from "../studies/shared/study.service";
 import {Study} from "../studies/shared/study.model";
 import {ServiceLocator} from "../utils/locator.service";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import {dateDisplay} from "../shared/./localLanguage/localDate.abstract";
+
+import { SolrService } from "./solr.service";
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];

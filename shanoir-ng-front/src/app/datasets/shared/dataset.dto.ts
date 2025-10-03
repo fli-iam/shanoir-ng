@@ -16,7 +16,6 @@ import { Injectable, Injector } from '@angular/core';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
-import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -24,6 +23,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { Tag } from "../../tags/tag.model";
 import { Channel, EegDataset, Event } from '../dataset/eeg/dataset.eeg.model';
 import { EchoTime, FlipAngle, InversionTime, MrDataset, MrDatasetNature, MrQualityProcedureType, RepetitionTime } from '../dataset/mr/dataset.mr.model';
+
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';

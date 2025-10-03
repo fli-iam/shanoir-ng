@@ -14,11 +14,13 @@
 
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable } from "@angular/core";
+import { Observable } from 'rxjs';
+
 import * as AppUtils from '../../utils/app.utils';
+
 import { ImportJob, DicomQuery } from './dicom-data.model';
 import { EegImportJob } from './eeg-data.model';
 import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class ImportService {

@@ -1,8 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
+
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
 import {Pipeline} from 'src/app/vip/models/pipeline';
+
 import {ExecutionDataService} from '../execution.data-service';
+
 import {PipelineService} from "./pipeline/pipeline.service";
 
 @Component({

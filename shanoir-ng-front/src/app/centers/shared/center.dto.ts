@@ -16,6 +16,7 @@ import { Injectable } from '@angular/core';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { StudyCenter, StudyCenterDTO } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
+
 import { Center } from './center.model';
 
 @Injectable()

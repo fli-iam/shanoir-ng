@@ -13,8 +13,8 @@
  */
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
-
 import { Router } from '@angular/router';
+
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { ConsoleComponent } from './shared/console/console.component';
@@ -26,7 +26,6 @@ import { StudyService } from './studies/shared/study.service';
 import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
-import { Observable } from 'rxjs';
 import { NotificationsService } from './shared/notifications/notifications.service';
 
 @Component({

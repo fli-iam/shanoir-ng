@@ -13,11 +13,13 @@
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
+
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
+import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { TaskState } from "../../async-tasks/task.model";
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';

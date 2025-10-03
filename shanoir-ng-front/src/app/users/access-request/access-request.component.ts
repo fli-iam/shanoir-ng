@@ -13,17 +13,20 @@
  */
 
 import { Component } from '@angular/core';
-import { UserService } from '../shared/user.service'
-import { AccessRequest } from './access-request.model'
 import { UntypedFormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { IdName } from 'src/app/shared/models/id-name.model';
+
+import { UserService } from '../shared/user.service'
 import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ActivatedRoute } from '@angular/router';
+
+import { AccessRequest } from './access-request.model'
 import { AccessRequestService } from './access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { Study } from 'src/app/studies/shared/study.model';
+
 
 @Component({
     selector: 'access-request',
@@ -119,7 +122,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     acceptRequest() {
         this.accessRequestService.resolveRequest(this.accessRequest.id, true)
             .then(value => {
-                this.userService.decreaseAccessRequests;
+                this.userService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
             }).then(() => {
                 window.location.hash="members";
@@ -129,7 +132,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     
     refuseRequest() {
         this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => {
-            this.userService.decreaseAccessRequests;
+            this.userService.decreaseAccessRequests();
             this.goBack();
         });
     }

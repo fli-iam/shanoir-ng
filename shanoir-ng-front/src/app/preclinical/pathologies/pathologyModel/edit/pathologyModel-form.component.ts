@@ -16,6 +16,8 @@ import { Component } from '@angular/core';
 import {  Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
@@ -24,7 +26,6 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({

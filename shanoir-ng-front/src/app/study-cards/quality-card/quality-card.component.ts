@@ -14,7 +14,14 @@
 import { Component, ComponentRef, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, race } from 'rxjs';
+import { take } from 'rxjs/operators';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
@@ -36,13 +43,8 @@ import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import { Observable, race } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { Selection } from 'src/app/studies/study/tree.service';
+
 
 @Component({
     selector: 'quality-card',

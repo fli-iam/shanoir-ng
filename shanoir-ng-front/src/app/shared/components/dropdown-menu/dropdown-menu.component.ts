@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 
 import { menuAnimDur, menuSlideRight } from '../../animations/animations';
 import { GlobalService } from '../../services/global.service';
+
 import { MenuItemComponent } from './menu-item/menu-item.component';
 
 // @dynamic
