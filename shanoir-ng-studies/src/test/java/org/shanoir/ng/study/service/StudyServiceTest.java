@@ -1,13 +1,13 @@
 /**
-$ * Shanoir NG - Import, manage and share neuroimaging data
+ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -64,259 +64,255 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study service test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudyServiceTest {
 
-	private static final Long STUDY_ID = 1L;
-	private static final String UPDATED_STUDY_NAME = "test";
-	private static final Long USER_ID = 1L;
+    private static final Long STUDY_ID = 1L;
+    private static final String UPDATED_STUDY_NAME = "test";
+    private static final Long USER_ID = 1L;
 
-	@Mock
-	private StudyRepository studyRepository;
+    @Mock
+    private StudyRepository studyRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
-	private StudyServiceImpl studyService;
+    private StudyServiceImpl studyService;
 
-	@Mock
-	private StudyUserRepository studyUserRepository;
-	
-	@Mock
-	private StudyCenterRepository studyCenterRepository;
+    @Mock
+    private StudyUserRepository studyUserRepository;
 
-	@Mock
-	private StudyUserUpdateBroadcastService studyUserCom;
-	
-	@Mock
-	private DataUserAgreementService dataUserAgreementService;
-	
-	@Mock
-	private StudyMapper studyMapperMock;
-	
-	@Mock
-	private ObjectMapper objectMapper;
+    @Mock
+    private StudyCenterRepository studyCenterRepository;
 
-	@TempDir
-	public File tempFolder;
+    @Mock
+    private StudyUserUpdateBroadcastService studyUserCom;
 
-	@BeforeEach
-	public void setup() {
-	    ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
+    @Mock
+    private DataUserAgreementService dataUserAgreementService;
 
-		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
-		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy(1L));
-	}
+    @Mock
+    private StudyMapper studyMapperMock;
 
-	@Test
-	public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
-		final Study newStudy = ModelsUtil.createStudy();
-		final StudyUser studyUser = new StudyUser();
-		studyUser.setUserId(USER_ID);
-		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
-		newStudy.getStudyUserList().add(studyUser);
-		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
+    @Mock
+    private ObjectMapper objectMapper;
 
-		studyService.deleteById(STUDY_ID);
+    @TempDir
+    private File tempFolder;
 
-		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.any(Study.class));
-	}
+    @BeforeEach
+    public void setup() {
+        ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
 
-	@Test
-	public void findByIdTest() throws AccessDeniedException {
-		final Study study = studyService.findById(STUDY_ID);
-		Assertions.assertNotNull(study);
-		Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
+        given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
+        given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy(1L));
+    }
 
-		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+    @Test
+    public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
+        final Study newStudy = ModelsUtil.createStudy();
+        final StudyUser studyUser = new StudyUser();
+        studyUser.setUserId(USER_ID);
+        studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
+        newStudy.getStudyUserList().add(studyUser);
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
 
-	@Test
-	public void findByIdWithAccessRightTest() throws AccessDeniedException {
-		final Study newStudy = ModelsUtil.createStudy();
-		final StudyUser studyUser = new StudyUser();
-		studyUser.setUserId(USER_ID);
-		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_DOWNLOAD));
-		newStudy.getStudyUserList().add(studyUser);
-		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
+        studyService.deleteById(STUDY_ID);
 
-		final Study study = studyService.findById(STUDY_ID);
-		Assertions.assertNotNull(study);
-		Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
+        Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.any(Study.class));
+    }
 
-		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+    @Test
+    public void findByIdTest() throws AccessDeniedException {
+        final Study study = studyService.findById(STUDY_ID);
+        Assertions.assertNotNull(study);
+        Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
-	@Test
-	public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
-		studyService.create(createStudy());
-		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
-	}
+        Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateTest() throws ShanoirException, IOException {
-		// Also test protocol file path
-		File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
+    @Test
+    public void findByIdWithAccessRightTest() throws AccessDeniedException {
+        final Study newStudy = ModelsUtil.createStudy();
+        final StudyUser studyUser = new StudyUser();
+        studyUser.setUserId(USER_ID);
+        studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_DOWNLOAD));
+        newStudy.getStudyUserList().add(studyUser);
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
 
-		protocol.getParentFile().mkdirs();
-		protocol.createNewFile();
-		Study dbStudy = ModelsUtil.createStudy();
-		dbStudy.setId(1L);
-		dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
-		Study updatedStudy = createStudy();
-		updatedStudy.setId(1L);
-		updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
+        final Study study = studyService.findById(STUDY_ID);
+        Assertions.assertNotNull(study);
+        Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
-		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
+        Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-		updatedStudy.setId(1L);
-		given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
-		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
-		
-		final Study returnedStudy = studyService.update(updatedStudy);
-		Assertions.assertNotNull(returnedStudy);
-		Assertions.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
-		assertNotNull(returnedStudy.getProtocolFilePaths());
-		assertEquals(1, returnedStudy.getProtocolFilePaths().size());
-		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
-		// Check that the file was deleted
-		assertFalse(protocol.exists());
-		//Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateStudyUsersTest() throws ShanoirException {
-		Study existing = createStudy();
-		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
-		
-		Study updated = createStudy();
-		updated.setStudyUserList(new ArrayList<StudyUser>());
-		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
-		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
-		
-		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(existing));
-		given(studyUserRepository.findById(1L)).willReturn(Optional.of(existing.getStudyUserList().get(0)));
-		given(studyUserRepository.findById(2L)).willReturn(Optional.of(existing.getStudyUserList().get(1)));
-		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
-		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
-		given(studyUserRepository.saveAll(in)).willReturn(out);
-		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
+    @Test
+    public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
+        studyService.create(createStudy());
+        Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+    }
 
-		studyService.update(updated);
-	}
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateTest() throws ShanoirException, IOException {
+        // Also test protocol file path
+        File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void testUpdateStudyUsersNoDUA() {
-		// We delete the DUA from the old study
-		Study existing = createStudy();
-		existing.setDataUserAgreementPaths(Collections.singletonList("test"));
-		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		StudyUser suToBeDeleted = createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE);
+        protocol.getParentFile().mkdirs();
+        protocol.createNewFile();
+        Study dbStudy = ModelsUtil.createStudy();
+        dbStudy.setId(1L);
+        dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
+        Study updatedStudy = createStudy();
+        updatedStudy.setId(1L);
+        updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
 
-		existing.getStudyUserList().add(suToBeDeleted);
-		
-		Study updated = createStudy();
-		updated.setStudyUserList(new ArrayList<StudyUser>());
-		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, false, StudyUserRight.CAN_DOWNLOAD));
-		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
 
-		updated.getStudyUserList().add(suToBeAdded);
-				
-		given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
-		given(studyUserRepository.findById(2L)).willReturn(Optional.of(suToBeDeleted));
+        updatedStudy.setId(1L);
+        given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
+        given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
 
-		studyService.updateStudyUsers(existing, updated);
-		
-		Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, 2L);
-		
-		for (StudyUser su : updated.getStudyUserList()) {
-			// all are now confirmed
-			assertTrue(su.isConfirmed());
-			if (su.getId() == null) {
-				assertEquals(suToBeAdded, su);
-			}
-			else if (su.getId().equals("1L")) {
-				assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
-				assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
-			}
-			else if (su.getId().equals("2L")) {
-				//This su should have been deleted
-				fail("This study user with id 2 should have been removed");
-			}
-		}
-	}
+        final Study returnedStudy = studyService.update(updatedStudy);
+        Assertions.assertNotNull(returnedStudy);
+        Assertions.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
+        assertNotNull(returnedStudy.getProtocolFilePaths());
+        assertEquals(1, returnedStudy.getProtocolFilePaths().size());
+        assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
+        // Check that the file was deleted
+        assertFalse(protocol.exists());
+        //Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void testUpdateStudyUsersAddDUA() {
-		// In this method, a new DUA is added
-		Study existing = createStudy();
-		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
-		
-		Study updated = createStudy();
-		updated.setDataUserAgreementPaths(Collections.singletonList("truc"));
-		updated.setStudyUserList(new ArrayList<StudyUser>());
-		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
-		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);
-		updated.getStudyUserList().add(suToBeAdded);
-		
-		given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateStudyUsersTest() throws ShanoirException {
+        Study existing = createStudy();
+        existing.setStudyUserList(new ArrayList<StudyUser>());
+        existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
 
-		studyService.updateStudyUsers(existing, updated);
-		for (StudyUser su : updated.getStudyUserList()) {
-			// all are now not confirmed
-			assertFalse(su.isConfirmed());
-			if (su.getId() == null) {
-				assertEquals(suToBeAdded, su);
-			}
-			else if (su.getId().equals(1L)) {
-				assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
-				assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
-			}
-			else if (su.getId().equals(2L)) {
-				//This su should have been deleted
-				fail("This study user with id 2 should have been removed");
-			}
-		}
-	}
+        Study updated = createStudy();
+        updated.setStudyUserList(new ArrayList<StudyUser>());
+        updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
+        updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 
-	private Study createStudy() {
-		final Study study = new Study();
-		study.setId(STUDY_ID);
-		study.setName(UPDATED_STUDY_NAME);
-		study.setStudyCenterList(new ArrayList<>());
-		study.setStudyUserList(new ArrayList<>());
-		study.setSubjectStudyList(new ArrayList<>());
-		return study;
-	}
-	
-	private StudyUser createStudyUsers(Long suId, Long userId, Study study, boolean confirmed, StudyUserRight... rights) {
-		StudyUser studyUser = new StudyUser();
-		studyUser.setId(suId);
-		studyUser.setStudy(study);
-		studyUser.setUserId(userId);
-		studyUser.setConfirmed(confirmed);
-		List<StudyUserRight> studyUserRights = new ArrayList<>();
-		for (StudyUserRight right : rights) {
-			studyUserRights.add(right);
-		}
-		studyUser.setStudyUserRights(studyUserRights);
-		return studyUser;
-	}
-	
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(existing));
+        given(studyUserRepository.findById(1L)).willReturn(Optional.of(existing.getStudyUserList().get(0)));
+        given(studyUserRepository.findById(2L)).willReturn(Optional.of(existing.getStudyUserList().get(1)));
+        List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
+        List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
+        given(studyUserRepository.saveAll(in)).willReturn(out);
+        given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
+
+        studyService.update(updated);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void testUpdateStudyUsersNoDUA() {
+        // We delete the DUA from the old study
+        Study existing = createStudy();
+        existing.setDataUserAgreementPaths(Collections.singletonList("test"));
+        existing.setStudyUserList(new ArrayList<StudyUser>());
+        existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        StudyUser suToBeDeleted = createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE);
+
+        existing.getStudyUserList().add(suToBeDeleted);
+
+        Study updated = createStudy();
+        updated.setStudyUserList(new ArrayList<StudyUser>());
+        updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, false, StudyUserRight.CAN_DOWNLOAD));
+        StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
+
+        updated.getStudyUserList().add(suToBeAdded);
+
+        given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+        given(studyUserRepository.findById(2L)).willReturn(Optional.of(suToBeDeleted));
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, 2L);
+
+        for (StudyUser su : updated.getStudyUserList()) {
+            // all are now confirmed
+            assertTrue(su.isConfirmed());
+            if (su.getId() == null) {
+                assertEquals(suToBeAdded, su);
+            } else if (su.getId().equals("1L")) {
+                assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
+                assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
+            } else if (su.getId().equals("2L")) {
+                //This su should have been deleted
+                fail("This study user with id 2 should have been removed");
+            }
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void testUpdateStudyUsersAddDUA() {
+        // In this method, a new DUA is added
+        Study existing = createStudy();
+        existing.setStudyUserList(new ArrayList<StudyUser>());
+        existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+
+        Study updated = createStudy();
+        updated.setDataUserAgreementPaths(Collections.singletonList("truc"));
+        updated.setStudyUserList(new ArrayList<StudyUser>());
+        updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
+        StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);
+        updated.getStudyUserList().add(suToBeAdded);
+
+        given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+
+        studyService.updateStudyUsers(existing, updated);
+        for (StudyUser su : updated.getStudyUserList()) {
+            // all are now not confirmed
+            assertFalse(su.isConfirmed());
+            if (su.getId() == null) {
+                assertEquals(suToBeAdded, su);
+            } else if (su.getId().equals(1L)) {
+                assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
+                assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
+            } else if (su.getId().equals(2L)) {
+                //This su should have been deleted
+                fail("This study user with id 2 should have been removed");
+            }
+        }
+    }
+
+    private Study createStudy() {
+        final Study study = new Study();
+        study.setId(STUDY_ID);
+        study.setName(UPDATED_STUDY_NAME);
+        study.setStudyCenterList(new ArrayList<>());
+        study.setStudyUserList(new ArrayList<>());
+        study.setSubjectStudyList(new ArrayList<>());
+        return study;
+    }
+
+    private StudyUser createStudyUsers(Long suId, Long userId, Study study, boolean confirmed, StudyUserRight... rights) {
+        StudyUser studyUser = new StudyUser();
+        studyUser.setId(suId);
+        studyUser.setStudy(study);
+        studyUser.setUserId(userId);
+        studyUser.setConfirmed(confirmed);
+        List<StudyUserRight> studyUserRights = new ArrayList<>();
+        for (StudyUserRight right : rights) {
+            studyUserRights.add(right);
+        }
+        studyUser.setStudyUserRights(studyUserRights);
+        return studyUser;
+    }
+
 }

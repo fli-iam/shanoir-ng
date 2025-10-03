@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.dicom;
 
 import org.dcm4che3.data.Attributes;
@@ -16,7 +30,9 @@ import org.slf4j.LoggerFactory;
  * @author mkain
  *
  */
-public class DicomSerieAndInstanceAnalyzer {
+public final class DicomSerieAndInstanceAnalyzer {
+
+    private DicomSerieAndInstanceAnalyzer() { }
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
@@ -32,7 +48,7 @@ public class DicomSerieAndInstanceAnalyzer {
 
     private static final String SEMI_COLON = ";";
 
-    private static final String isSpectroscopy = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
+    private static final String IS_SPECTROSCOPY = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
 
     /**
      * By default raw data storage and sub-types are ignored.
@@ -108,7 +124,7 @@ public class DicomSerieAndInstanceAnalyzer {
             return true;
         }
         if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)) { // before private attribute used by Siemens
-            final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
+            final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = IS_SPECTROSCOPY.split(SEMI_COLON);
             for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
                 final String tag = item.split(DOUBLE_EQUAL)[0];
                 final String value = item.split(DOUBLE_EQUAL)[1];

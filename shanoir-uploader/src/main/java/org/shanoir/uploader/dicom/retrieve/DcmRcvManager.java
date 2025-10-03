@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.dicom.retrieve;
 
 import java.io.File;
@@ -23,68 +37,68 @@ import org.weasis.dicom.tool.DicomListener;
  * and running, first to be more efficient and second to prepare for DICOM push
  * from outside, what requires one DICOM SCP server up and running all time as
  * long as ShUp has been started.
- * 
+ *
  * @author mkain
  *
  */
 public class DcmRcvManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DcmRcvManager.class);
-	
-	private static final String PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE = "1.3.12.2.1107.5.9.1";
+    private static final Logger LOG = LoggerFactory.getLogger(DcmRcvManager.class);
 
-	private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
+    private static final String PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE = "1.3.12.2.1107.5.9.1";
 
-	/**
-	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
-	 * We store all images in folders by StudyInstanceUID / SeriesInstanceUID /
-	 * SOPInstanceUID (as image file name). This allows us to support at the same
-	 * time with one ShUp (up and running) to receive push images for an exam/study or
-	 * to search in the pacs and download another exam.
-	 */
-	private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
-	
-	public static final String DICOM_FILE_SUFFIX = ".dcm";
-	
-	public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
-		logger.info("DICOM SCP server (mini-pacs) configured locally with params:"
-				+ " AET title: " + configBean.getLocalDicomServerAETCalling()
-				+ ", AET host: " + configBean.getLocalDicomServerHost()
-				+ ", AET port: " + configBean.getLocalDicomServerPort());
-		DicomNode scpNode = new DicomNode(configBean.getLocalDicomServerAETCalling(), configBean.getLocalDicomServerHost(), configBean.getLocalDicomServerPort());
-		AdvancedParams params = new AdvancedParams();
-		params.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
+    private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
+
+    /**
+     * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
+     * We store all images in folders by StudyInstanceUID / SeriesInstanceUID /
+     * SOPInstanceUID (as image file name). This allows us to support at the same
+     * time with one ShUp (up and running) to receive push images for an exam/study or
+     * to search in the pacs and download another exam.
+     */
+    private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
+
+    public static final String DICOM_FILE_SUFFIX = ".dcm";
+
+    public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
+        LOG.info("DICOM SCP server (mini-pacs) configured locally with params:"
+                + " AET title: " + configBean.getLocalDicomServerAETCalling()
+                + ", AET host: " + configBean.getLocalDicomServerHost()
+                + ", AET port: " + configBean.getLocalDicomServerPort());
+        DicomNode scpNode = new DicomNode(configBean.getLocalDicomServerAETCalling(), configBean.getLocalDicomServerHost(), configBean.getLocalDicomServerPort());
+        AdvancedParams params = new AdvancedParams();
+        params.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
         ConnectOptions connectOptions = new ConnectOptions();
-		// 0 is unlimited below
+        // 0 is unlimited below
         connectOptions.setMaxOpsInvoked(0);
         connectOptions.setMaxOpsPerformed(0);
-		params.setConnectOptions(connectOptions);
-		URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
-		ListenerParams lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL);
-		startSCPServer(workFolderPath, scpNode, lParams);
-	}
-	
-	/**
-	 * Start, when running up ShanoirUploader only one internal mini-pacs,
-	 * that is listening all time: to allow c-moves (DICOM push) all the
-	 * time from outside into this folder and split now by studyDate and
-	 * StudyInstanceUID and support query/c-move as well.
-	 * 
-	 * @param folderPath
-	 */
-	private void startSCPServer(final String workFolderPath, DicomNode scpNode, ListenerParams lParams) {
-		try {
-			File storageDir = new File(workFolderPath);
-			DicomListener listener = new DicomListener(storageDir);
-		    listener.start(scpNode, lParams);
-			StoreSCP storeSCP = listener.getStoreSCP();
-	        logger.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
-			TransferCapability tc = storeSCP.getApplicationEntity().getTransferCapabilityFor(PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE, Role.SCP);
-			String[] ts = tc.getTransferSyntaxes();
-			logger.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
-		} catch (Exception e) {
-			logger.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
-		}		
-	}
-	
+        params.setConnectOptions(connectOptions);
+        URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
+        ListenerParams lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL);
+        startSCPServer(workFolderPath, scpNode, lParams);
+    }
+
+    /**
+     * Start, when running up ShanoirUploader only one internal mini-pacs,
+     * that is listening all time: to allow c-moves (DICOM push) all the
+     * time from outside into this folder and split now by studyDate and
+     * StudyInstanceUID and support query/c-move as well.
+     *
+     * @param folderPath
+     */
+    private void startSCPServer(final String workFolderPath, DicomNode scpNode, ListenerParams lParams) {
+        try {
+            File storageDir = new File(workFolderPath);
+            DicomListener listener = new DicomListener(storageDir);
+            listener.start(scpNode, lParams);
+            StoreSCP storeSCP = listener.getStoreSCP();
+            LOG.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
+            TransferCapability tc = storeSCP.getApplicationEntity().getTransferCapabilityFor(PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE, Role.SCP);
+            String[] ts = tc.getTransferSyntaxes();
+            LOG.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
+        } catch (Exception e) {
+            LOG.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
+        }
+    }
+
 }

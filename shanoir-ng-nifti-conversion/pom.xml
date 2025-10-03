@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <name>shanoir-ng-nifti-conversion</name>
     <description>Shanoir-NG nifti conversion Microservice</description>
-  
+
     <properties>
         <dcm4che.version>5.14.1</dcm4che.version>
     </properties>
@@ -77,10 +77,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </exclusions>
         </dependency>
     </dependencies>
-  
+
     <build>
         <plugins>
-            <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error: 
+            <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error:
             no main manifest attribute, in /shanoir-ng-nifti-converter.jar -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>

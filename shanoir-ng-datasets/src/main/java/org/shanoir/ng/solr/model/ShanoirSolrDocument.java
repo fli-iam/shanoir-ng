@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,376 +30,376 @@ import java.util.List;
  *
  */
 public class ShanoirSolrDocument {
-	
-	/** An id of type string and distinct from datasetId is preferable for Solr **/
-	@Id
-	@Field
-	private String id;
-	
-	@Field
-	private	Long datasetId;
-	
-	@Field
-	private	String datasetName;
-	
-	// DatasetModalityType: MR, CT, PET etc..
-	@Field
-	private	String datasetType;
-	
-	// T1, T2, Diff, etc..
-	@Field
-	private String datasetNature;
-	
-	@Field
-	private Date datasetCreationDate;
 
-	@Field
-	private Long examinationId;
+    /** An id of type string and distinct from datasetId is preferable for Solr **/
+    @Id
+    @Field
+    private String id;
 
-	@Field
-	private String examinationComment;
+    @Field
+    private    Long datasetId;
 
-	@Field
-	private Date examinationDate;
+    @Field
+    private    String datasetName;
 
-	@Field
-	private String acquisitionEquipmentName;
+    // DatasetModalityType: MR, CT, PET etc..
+    @Field
+    private    String datasetType;
 
-	@Field
-	private String subjectName;
+    // T1, T2, Diff, etc..
+    @Field
+    private String datasetNature;
 
-	@Field
-	private String subjectType;
+    @Field
+    private Date datasetCreationDate;
 
-	@Field
-	private Long subjectId;
+    @Field
+    private Long examinationId;
 
-	@Field
-	private Integer sortingIndex;
+    @Field
+    private String examinationComment;
 
-	@Field
-	private String studyName;
-	
-	@Field
-	private Long studyId;
-	
-	@Field
-	private String centerName;
+    @Field
+    private Date examinationDate;
 
-	@Field
-	private Long centerId;
+    @Field
+    private String acquisitionEquipmentName;
 
-	@Field
-	private Double sliceThickness;
-	
-	@Field
-	private Double pixelBandwidth;
-	
-	@Field
-	private Double magneticFieldStrength;
-	
-	@Field
-	private List<String> tags;
+    @Field
+    private String subjectName;
 
-	@Field
-	private boolean processed;
+    @Field
+    private String subjectType;
 
-	@Field
-	private Date importDate;
+    @Field
+    private Long subjectId;
 
-	@Field
-	private String username;
+    @Field
+    private Integer sortingIndex;
 
-	public ShanoirSolrDocument () {		
-	}
-	
-	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
-			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
-			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-			Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username, Integer sortingIndex) {
-		this.id = id;
-		this.datasetId = datasetId;
-		this.datasetName = datasetName;
-		this.datasetType = datasetType;
-		this.datasetNature = datasetNature;
-		this.datasetCreationDate = datasetCreationDate;
-		this.examinationId = examinationId;
-		this.examinationComment = examinationComment;
-		this.examinationDate = examinationDate;
-		this.acquisitionEquipmentName = acquisitionEquipmentName;
-		this.subjectName = subjectName;
-		this.subjectType = subjectType;
-		this.subjectId = subjectId;
-		this.sortingIndex = sortingIndex;
-		this.studyName = studyName;
-		this.studyId = studyId;
-		this.centerName = centerName;
-		this.centerId = centerId;
-		this.sliceThickness = sliceThickness;
-		this.pixelBandwidth = pixelBandwidth;
-		this.magneticFieldStrength = magneticFieldStrength;
-		this.processed = processed;
-		this.importDate = importDate;
-		this.username = username;
-	}
+    @Field
+    private String studyName;
 
-	public String getId() {
-		return this.id;
-	}
-	
-	public void setId(String id) {
-		this.id = id;
-	}
+    @Field
+    private Long studyId;
 
-	/**
-	 * @return the datasetId
-	 */
-	public Long getDatasetId() {
-		return datasetId;
-	}
+    @Field
+    private String centerName;
 
-	/**
-	 * @param datasetId the datasetId to set
-	 */
-	public void setDatasetId(Long datasetId) {
-		this.datasetId = datasetId;
-	}
+    @Field
+    private Long centerId;
 
-	/**
-	 * @return the datasetName
-	 */
-	public String getDatasetName() {
-		return datasetName;
-	}
+    @Field
+    private Double sliceThickness;
 
-	/**
-	 * @param datasetName the datasetName to set
-	 */
-	public void setDatasetName(String datasetName) {
-		this.datasetName = datasetName;
-	}
+    @Field
+    private Double pixelBandwidth;
 
-	/**
-	 * @return the datasetType
-	 */
-	public String getDatasetType() {
-		return datasetType;
-	}
+    @Field
+    private Double magneticFieldStrength;
 
-	/**
-	 * @param datasetType the datasetType to set
-	 */
-	public void setDatasetType(String datasetType) {
-		this.datasetType = datasetType;
-	}
+    @Field
+    private List<String> tags;
 
-	/**
-	 * @return the datasetNature
-	 */
-	public String getDatasetNature() {
-		return datasetNature;
-	}
+    @Field
+    private boolean processed;
 
-	/**
-	 * @param datasetNature the datasetNature to set
-	 */
-	public void setDatasetNature(String datasetNature) {
-		this.datasetNature = datasetNature;
-	}
+    @Field
+    private Date importDate;
 
-	/**
-	 * @return the datasetCreationDate
-	 */
-	public Date getDatasetCreationDate() {
-		return datasetCreationDate;
-	}
+    @Field
+    private String username;
 
-	/**
-	 * @param datasetCreationDate the datasetCreationDate to set
-	 */
-	public void setDatasetCreationDate(Date datasetCreationDate) {
-		this.datasetCreationDate = datasetCreationDate;
-	}
+    public ShanoirSolrDocument() {
+    }
 
-	public Long getExaminationId() {
-		return examinationId;
-	}
+    public ShanoirSolrDocument(String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
+            Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
+            String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
+            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username, Integer sortingIndex) {
+        this.id = id;
+        this.datasetId = datasetId;
+        this.datasetName = datasetName;
+        this.datasetType = datasetType;
+        this.datasetNature = datasetNature;
+        this.datasetCreationDate = datasetCreationDate;
+        this.examinationId = examinationId;
+        this.examinationComment = examinationComment;
+        this.examinationDate = examinationDate;
+        this.acquisitionEquipmentName = acquisitionEquipmentName;
+        this.subjectName = subjectName;
+        this.subjectType = subjectType;
+        this.subjectId = subjectId;
+        this.sortingIndex = sortingIndex;
+        this.studyName = studyName;
+        this.studyId = studyId;
+        this.centerName = centerName;
+        this.centerId = centerId;
+        this.sliceThickness = sliceThickness;
+        this.pixelBandwidth = pixelBandwidth;
+        this.magneticFieldStrength = magneticFieldStrength;
+        this.processed = processed;
+        this.importDate = importDate;
+        this.username = username;
+    }
 
-	public void setExaminationId(Long examinationId) {
-		this.examinationId = examinationId;
-	}
+    public String getId() {
+        return this.id;
+    }
 
-	/**
-	 * @return the examinationComment
-	 */
-	public String getExaminationComment() {
-		return examinationComment;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param examinationComment the examinationComment to set
-	 */
-	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
-	}
+    /**
+     * @return the datasetId
+     */
+    public Long getDatasetId() {
+        return datasetId;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public Date getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @param datasetId the datasetId to set
+     */
+    public void setDatasetId(Long datasetId) {
+        this.datasetId = datasetId;
+    }
 
-	/**
-	 * @param examinationDate the examinationDate to set
-	 */
-	public void setExaminationDate(Date examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @return the datasetName
+     */
+    public String getDatasetName() {
+        return datasetName;
+    }
 
-	public String getAcquisitionEquipmentName() {
-		return acquisitionEquipmentName;
-	}
+    /**
+     * @param datasetName the datasetName to set
+     */
+    public void setDatasetName(String datasetName) {
+        this.datasetName = datasetName;
+    }
 
-	public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
-		this.acquisitionEquipmentName = acquisitionEquipmentName;
-	}
+    /**
+     * @return the datasetType
+     */
+    public String getDatasetType() {
+        return datasetType;
+    }
 
-	/**
-	 * @return the subjectName
-	 */
-	public String getSubjectName() {
-		return subjectName;
-	}
+    /**
+     * @param datasetType the datasetType to set
+     */
+    public void setDatasetType(String datasetType) {
+        this.datasetType = datasetType;
+    }
 
-	/**
-	 * @param subjectName the subjectName to set
-	 */
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    /**
+     * @return the datasetNature
+     */
+    public String getDatasetNature() {
+        return datasetNature;
+    }
 
-	public String getSubjectType() {
-		return subjectType;
-	}
+    /**
+     * @param datasetNature the datasetNature to set
+     */
+    public void setDatasetNature(String datasetNature) {
+        this.datasetNature = datasetNature;
+    }
 
-	public void setSubjectType(String subjectType) {
-		this.subjectType = subjectType;
-	}
+    /**
+     * @return the datasetCreationDate
+     */
+    public Date getDatasetCreationDate() {
+        return datasetCreationDate;
+    }
 
-	/**
-	 * @return the studyName
-	 */
-	public String getStudyName() {
-		return studyName;
-	}
+    /**
+     * @param datasetCreationDate the datasetCreationDate to set
+     */
+    public void setDatasetCreationDate(Date datasetCreationDate) {
+        this.datasetCreationDate = datasetCreationDate;
+    }
 
-	/**
-	 * @param studyName the studyName to set
-	 */
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
-	
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getExaminationId() {
+        return examinationId;
+    }
 
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setExaminationId(Long examinationId) {
+        this.examinationId = examinationId;
+    }
 
-	public String getCenterName() {
-		return centerName;
-	}
+    /**
+     * @return the examinationComment
+     */
+    public String getExaminationComment() {
+        return examinationComment;
+    }
 
-	public void setCenterName(String centerName) {
-		this.centerName = centerName;
-	}
+    /**
+     * @param examinationComment the examinationComment to set
+     */
+    public void setExaminationComment(String examinationComment) {
+        this.examinationComment = examinationComment;
+    }
 
-	public Double getSliceThickness() {
-		return sliceThickness;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public Date getExaminationDate() {
+        return examinationDate;
+    }
 
-	public void setSliceThickness(Double sliceThickness) {
-		this.sliceThickness = sliceThickness;
-	}
+    /**
+     * @param examinationDate the examinationDate to set
+     */
+    public void setExaminationDate(Date examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	public Double getPixelBandwidth() {
-		return pixelBandwidth;
-	}
+    public String getAcquisitionEquipmentName() {
+        return acquisitionEquipmentName;
+    }
 
-	public void setPixelBandwidth(Double pixelBandwidth) {
-		this.pixelBandwidth = pixelBandwidth;
-	}
+    public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
+        this.acquisitionEquipmentName = acquisitionEquipmentName;
+    }
 
-	public Double getMagneticFieldStrength() {
-		return magneticFieldStrength;
-	}
+    /**
+     * @return the subjectName
+     */
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public void setMagneticFieldStrength(Double magneticFieldStrength) {
-		this.magneticFieldStrength = magneticFieldStrength;
-	}
-	
-	public List<String> getTags() {
-		return tags;
-	}
+    /**
+     * @param subjectName the subjectName to set
+     */
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public void setTags(List<String> tags) {
-		this.tags = tags;
-	}
+    public String getSubjectType() {
+        return subjectType;
+    }
 
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    public void setSubjectType(String subjectType) {
+        this.subjectType = subjectType;
+    }
 
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    /**
+     * @return the studyName
+     */
+    public String getStudyName() {
+        return studyName;
+    }
 
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    /**
+     * @param studyName the studyName to set
+     */
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    /**
+     * @param studyId the studyId to set
+     */
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public String getCenterName() {
+        return centerName;
+    }
 
-	public boolean isProcessed() {
-		return processed;
-	}
+    public void setCenterName(String centerName) {
+        this.centerName = centerName;
+    }
 
-	public void setProcessed(boolean processed) {
-		this.processed = processed;
-	}
+    public Double getSliceThickness() {
+        return sliceThickness;
+    }
 
-	public Date getImportDate() {
-		return importDate;
-	}
+    public void setSliceThickness(Double sliceThickness) {
+        this.sliceThickness = sliceThickness;
+    }
 
-	public void setImportDate(Date importDate) {
-		this.importDate = importDate;
-	}
+    public Double getPixelBandwidth() {
+        return pixelBandwidth;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public void setPixelBandwidth(Double pixelBandwidth) {
+        this.pixelBandwidth = pixelBandwidth;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public Double getMagneticFieldStrength() {
+        return magneticFieldStrength;
+    }
+
+    public void setMagneticFieldStrength(Double magneticFieldStrength) {
+        this.magneticFieldStrength = magneticFieldStrength;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public Long getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
+
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
+
+    public Long getCenterId() {
+        return centerId;
+    }
+
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+
+    public Date getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(Date importDate) {
+        this.importDate = importDate;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

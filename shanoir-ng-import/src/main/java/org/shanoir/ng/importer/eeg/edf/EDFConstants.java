@@ -1,4 +1,4 @@
-/*
+/**
  * (The MIT license)
  *
  * Copyright (c) 2012 MIPT (mr.santak@gmail.com)
@@ -25,10 +25,9 @@ import java.nio.charset.Charset;
 /**
  * This class contains constants for the EDF/EDF+ specification.
  */
-class EDFConstants {
+public final class EDFConstants {
 
-    private EDFConstants() {
-    }
+    private EDFConstants() { }
 
     static final Charset CHARSET = Charset.forName("ASCII");
 

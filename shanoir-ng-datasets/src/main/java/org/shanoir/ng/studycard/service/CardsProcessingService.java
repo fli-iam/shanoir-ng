@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -52,33 +52,33 @@ import org.springframework.web.client.RestClientException;
 
 @Service
 public class CardsProcessingService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(CardsProcessingService.class);
-	
-	@Autowired
-	private StudyService studyService;
 
-	@Autowired
+    private static final Logger LOG = LoggerFactory.getLogger(CardsProcessingService.class);
+
+    @Autowired
+    private StudyService studyService;
+
+    @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
-	@Autowired
+    @Autowired
     private WADODownloaderService downloader;
 
-	@Autowired
-	private SubjectService subjectService;
+    @Autowired
+    private SubjectService subjectService;
 
     @Autowired
     private ShanoirEventService eventService;
 
 
-	/**
-	 * Apply study card on given acquisitions
-	 * 
-	 * @param studyCard
-	 * @param acquisitions
-	 * @throws PacsException 
-	 */
-	public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
+    /**
+     * Apply study card on given acquisitions
+     *
+     * @param studyCard
+     * @param acquisitions
+     * @throws PacsException
+     */
+    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
@@ -89,28 +89,28 @@ public class CardsProcessingService {
         if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
             datasetAcquisitionService.update(acquisitions);
         }
-    }	
+    }
 
     /**
-	 * Study cards for quality control: apply on entire exam.
-	 *
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException
-	 */
-	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
+     * Study cards for quality control: apply on entire exam.
+     *
+     * @param studyCard
+     * @throws MicroServiceCommunicationException
+     */
+    public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
+        if (examination == null) throw new IllegalArgumentException("examination can't be null");
         LOG.debug("Quality check for examination " + examination.getId() + " started");
-		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
-		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
-		    QualityCardResult result = new QualityCardResult();
+        if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
+        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
+            QualityCardResult result = new QualityCardResult();
             if (updateTags) {
                 List<Subject> subjects = subjectService.get(examination.getStudy().getId());
                 resetSubjects(subjects);
                 try {
                     subjectService.update(subjects);
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
             if (acquisitions != null && !acquisitions.isEmpty()) {
@@ -122,33 +122,33 @@ public class CardsProcessingService {
                 }
                 LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
             }
-			if (updateTags) {
-			    try {
-			        subjectService.update(result.getUpdatedSubjects());
-			    } catch (EntityNotFoundException e) {
+            if (updateTags) {
+                try {
+                    subjectService.update(result.getUpdatedSubjects());
+                } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
-			    }
-			}
+                }
+            }
             LOG.info("Quality check for examination " + examination.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
             return result;
-		} else {
-			throw new RestClientException("Quality card used with emtpy rules.");
-		}
-	}
+        } else {
+            throw new RestClientException("Quality card used with emtpy rules.");
+        }
+    }
 
-	/**
-	 * Study cards for quality control: apply on entire study.
-	 * 
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
-	 */
-	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
+    /**
+     * Study cards for quality control: apply on entire study.
+     *
+     * @param studyCard
+     * @throws MicroServiceCommunicationException
+     */
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
         Study study = studyService.findById(qualityCard.getStudyId());
-        if (study == null ) throw new IllegalArgumentException("study can't be null");
+        if (study == null) throw new IllegalArgumentException("study can't be null");
         if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
         if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
             if (updateTags) { // first reset subject studies
@@ -157,7 +157,7 @@ public class CardsProcessingService {
                 resetSubjects(study.getSubjectList());
                 try {
                     subjectService.update(study.getSubjectList());
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             QualityCardResult result = new QualityCardResult();
             AtomicInteger i = new AtomicInteger(0);
@@ -186,17 +186,17 @@ public class CardsProcessingService {
                     i.incrementAndGet();
                 });
             } catch (StreamExceptionWrapper e) {
-                throw (MicroServiceCommunicationException)(e.getCause());
+                throw (MicroServiceCommunicationException) (e.getCause());
             }
             if (updateTags) { // update subject studies
-			    try {
+                try {
                     event.setMessage("setting quality subject tags");
                     eventService.publishEvent(event);
-			        subjectService.update(result.getUpdatedSubjects());
-			    } catch (EntityNotFoundException e) {
+                    subjectService.update(result.getUpdatedSubjects());
+                } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
-			    }	    
-			}
+                }
+            }
             event.setProgress(1f);
             event.setStatus(1);
             event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
@@ -210,7 +210,7 @@ public class CardsProcessingService {
             eventService.publishEvent(event);
             throw new RestClientException("Quality card used with emtpy rules.");
         }
-	}
+    }
 
     private void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
         if (examinations != null) {
@@ -223,7 +223,7 @@ public class CardsProcessingService {
                     Hibernate.initialize(examination.getSubject().getStudy());
                 }
                 if (examination.getDatasetAcquisitions() != null) {
-                    for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                    for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
                         if (acquisition.getDatasets() != null) {
                             for (Dataset dataset : acquisition.getDatasets()) {
                                 if (dataset.getDatasetExpressions() != null) {
@@ -256,24 +256,24 @@ public class CardsProcessingService {
     }
 
     /**
-	 * Study cards for quality control: apply on entire study.
-	 *
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException
-	 */
-	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
+     * Study cards for quality control: apply on entire study.
+     *
+     * @param studyCard
+     * @throws MicroServiceCommunicationException
+     */
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
         return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
-	}
+    }
 
         /**
-	 * Study cards for quality control: apply on entire study.
-	 *
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException
-	 */
-	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {
+     * Study cards for quality control: apply on entire study.
+     *
+     * @param studyCard
+     * @throws MicroServiceCommunicationException
+     */
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {
         return applyQualityCardOnStudy(qualityCard, false, start, stop);
-	}
+    }
 
     private void resetSubjects(List<Subject> subjects) {
         if (subjects != null) {

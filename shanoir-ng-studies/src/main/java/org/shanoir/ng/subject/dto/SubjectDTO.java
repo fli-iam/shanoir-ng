@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,211 +32,211 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 public class SubjectDTO {
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String identifier;
+    private String identifier;
 
-	@JsonSerialize(using = LocalDateSerializer.class)
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	private LocalDate birthDate;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
-	private HemisphericDominance languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-	private HemisphericDominance manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-	private ImagedObjectCategory imagedObjectCategory;
+    private ImagedObjectCategory imagedObjectCategory;
 
-	private Sex sex;
+    private Sex sex;
 
-	private List<SubjectStudyDTO> subjectStudyList;
-	
-	private boolean preclinical;
+    private List<SubjectStudyDTO> subjectStudyList;
 
-	private Long studyId;
+    private boolean preclinical;
 
-	private boolean physicallyInvolved;
+    private Long studyId;
 
-	private SubjectType subjectType;
+    private boolean physicallyInvolved;
 
-	private List<TagDTO> tags;
+    private SubjectType subjectType;
 
-	private String studyIdentifier;
+    private List<TagDTO> tags;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private String studyIdentifier;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the identifier
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param identifier the identifier to set
-	 */
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * @return the identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * @return the birthDate
-	 */
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    /**
+     * @param identifier the identifier to set
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	/**
-	 * @param birthDate the birthDate to set
-	 */
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    /**
+     * @return the birthDate
+     */
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	/**
-	 * @return the languageHemisphericDominance
-	 */
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
+    /**
+     * @param birthDate the birthDate to set
+     */
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	/**
-	 * @param languageHemisphericDominance the languageHemisphericDominance to set
-	 */
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
+    /**
+     * @return the languageHemisphericDominance
+     */
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return languageHemisphericDominance;
+    }
 
-	/**
-	 * @return the manualHemisphericDominance
-	 */
-	public HemisphericDominance getManualHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
+    /**
+     * @param languageHemisphericDominance the languageHemisphericDominance to set
+     */
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        this.languageHemisphericDominance = languageHemisphericDominance;
+    }
 
-	/**
-	 * @param manualHemisphericDominance the manualHemisphericDominance to set
-	 */
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		this.manualHemisphericDominance = manualHemisphericDominance;
-	}
+    /**
+     * @return the manualHemisphericDominance
+     */
+    public HemisphericDominance getManualHemisphericDominance() {
+        return manualHemisphericDominance;
+    }
 
-	/**
-	 * @return the imagedObjectCategory
-	 */
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    /**
+     * @param manualHemisphericDominance the manualHemisphericDominance to set
+     */
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        this.manualHemisphericDominance = manualHemisphericDominance;
+    }
 
-	/**
-	 * @param imagedObjectCategory the imagedObjectCategory to set
-	 */
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    /**
+     * @return the imagedObjectCategory
+     */
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	/**
-	 * @return the sex
-	 */
-	public Sex getSex() {
-		return sex;
-	}
+    /**
+     * @param imagedObjectCategory the imagedObjectCategory to set
+     */
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
-	/**
-	 * @param sex the sex to set
-	 */
-	public void setSex(Sex sex) {
-		this.sex = sex;
-	}
+    /**
+     * @return the sex
+     */
+    public Sex getSex() {
+        return sex;
+    }
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudyDTO> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    /**
+     * @param sex the sex to set
+     */
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
 
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    /**
+     * @return the subjectStudyList
+     */
+    public List<SubjectStudyDTO> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @param subjectStudyList the subjectStudyList to set
+     */
+    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-	
-	public List<TagDTO> getTags() {
-		return tags;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setTags(List<TagDTO> tags) {
-		this.tags = tags;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public boolean isPhysicallyInvolved() {
-		return physicallyInvolved;
-	}
+    public List<TagDTO> getTags() {
+        return tags;
+    }
 
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
-		this.physicallyInvolved = physicallyInvolved;
-	}
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
 
-	public SubjectType getSubjectType() {
-		return subjectType;
-	}
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
 
-	public void setSubjectType(SubjectType subjectType) {
-		this.subjectType = subjectType;
-	}
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
 
-	public String getStudyIdentifier() {
-		return studyIdentifier;
-	}
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
 
-	public void setStudyIdentifier(String studyIdentifier) {
-		this.studyIdentifier = studyIdentifier;
-	}
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public String getStudyIdentifier() {
+        return studyIdentifier;
+    }
+
+    public void setStudyIdentifier(String studyIdentifier) {
+        this.studyIdentifier = studyIdentifier;
+    }
 
 }
