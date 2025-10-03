@@ -36,7 +36,7 @@ export enum CoordSystems {
 
 } export namespace CoordSystems {
     
-    export function all(): Array<CoordSystems> {
+    export function all(): CoordSystems[] {
         return allOfEnum<CoordSystems>(CoordSystems);
     }
 

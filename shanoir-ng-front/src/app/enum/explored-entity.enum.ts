@@ -25,7 +25,7 @@ export enum ExploredEntity {
 
 } export namespace ExploredEntity {
     
-    export function all(): Array<ExploredEntity> {
+    export function all(): ExploredEntity[] {
         return allOfEnum<ExploredEntity>(ExploredEntity);
     }
 

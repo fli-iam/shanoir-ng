@@ -24,9 +24,9 @@ export interface Pipeline {
      * true if the user who requested the pipeline can execute it
      */
     canExecute?: boolean;
-    parameters?: Array<PipelineParameter>;
+    parameters?: PipelineParameter[];
     /**
      * the properties (as keys) and their values that describe the pipeline. The properties used must be listed in the \"supportedPipelineProperties\" of the \"getPlatformProperties\" method.
      */
-    properties: { [key: string]: string; };
+    properties: Record<string, string>;
 }

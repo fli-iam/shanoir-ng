@@ -30,7 +30,7 @@ export enum StudyUserRight {
         { value: StudyUserRight.CAN_ADMINISTRATE, label: "Can edit the study parameters" },
     ];
     
-    export function all(): Array<StudyUserRight> {
+    export function all(): StudyUserRight[] {
         return allOfEnum<StudyUserRight>(StudyUserRight);
     }
 

@@ -32,7 +32,7 @@ export enum MrSequenceApplication {
 
 } export namespace MrSequenceApplication {
     
-    export function all(): Array<MrSequenceApplication> {
+    export function all(): MrSequenceApplication[] {
         return allOfEnum<MrSequenceApplication>(MrSequenceApplication);
     }
 

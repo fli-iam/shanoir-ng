@@ -42,14 +42,12 @@ export type Report = {
     studyId?: number,
     status?: 'QUEUED' | 'ERROR' | 'SUCCESS',
     startTime: number,
-    list?: {
-        [key: number]: {
+    list?: Record<number, {
             status: 'QUEUED' | 'ERROR' | 'SUCCESS',
             error?: any,
             errorTime?: number
             zipSize?: string,
-        }
-    }
+        }>
     nbSuccess?: number;
     nbError?: number;
     duration?: number;
@@ -78,8 +76,7 @@ export class MassDownloadService {
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
     readonly REPORT_FILENAME: string = 'downloadReport.json';
     winOs: boolean;
-    // @ts-ignore
-    public advancedDownloadCompat: boolean = !!window.showDirectoryPicker;
+    public advancedDownloadCompat: boolean = !!(window as any).showDirectoryPicker;
 
     constructor(
         private datasetService: DatasetService,
@@ -478,8 +475,7 @@ export class MassDownloadService {
         const options = {
             mode: 'readwrite'
         };
-        // @ts-ignore
-        return window.showDirectoryPicker(options);
+        return (window as any).showDirectoryPicker(options);
     }
 
     private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
@@ -548,8 +544,7 @@ export class MassDownloadService {
     }
 
     private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
-        // @ts-ignore
-        if (window.showDirectoryPicker) { // test compatibility
+        if (!!(window as any).showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
             modalRef.instance.totalSize = totalSize;
@@ -582,8 +577,7 @@ export class MassDownloadService {
     }
 
     retry(task: Task): Promise<void> {
-        // @ts-ignore
-        if (!window.showDirectoryPicker) {
+        if (!(window as any).showDirectoryPicker) {
             throw new Error(this.BROWSER_COMPAT_ERROR_MSG);
         }
         let report: Report = this.getReportFromTask(task);

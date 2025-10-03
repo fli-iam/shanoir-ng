@@ -14,22 +14,22 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
-      // "@angular-eslint/directive-selector": [
-      //   "error",
-      //   {
-      //     type: "attribute",
-      //     prefix: "app",
-      //     style: "camelCase",
-      //   },
-      // ],
-      // "@angular-eslint/component-selector": [
-      //   "error",
-      //   {
-      //     type: "element",
-      //     prefix: "app",
-      //     style: "kebab-case",
-      //   },
-      // ],
+      "@angular-eslint/directive-selector": [
+        "error",
+        {
+          type: "attribute",
+          //prefix: "app",
+          style: "camelCase",
+        },
+      ],
+      "@angular-eslint/component-selector": [
+        "error",
+        {
+          type: "element",
+          //prefix: "app",
+          style: "kebab-case",
+        },
+      ],
 
       // Core ESLint rules - turn off common errors
       "no-prototype-builtins": "off",
@@ -49,16 +49,9 @@ module.exports = tseslint.config(
       "@typescript-eslint/no-namespace": "off", // ?
       "@typescript-eslint/no-wrapper-object-types": "off",
       "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-duplicate-enum-values": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off",
-      "@typescript-eslint/prefer-as-const": "off",
-      "@typescript-eslint/consistent-indexed-object-style": "off",
-      "@typescript-eslint/array-type": "off",
-      "@typescript-eslint/consistent-generic-constructors": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/consistent-type-assertions": "off",
-      "@typescript-eslint/class-literal-property-style": "off",
+      "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
+      "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
       
       // Angular ESLint rules - turn off common errors
       "@angular-eslint/no-empty-lifecycle-method": "off",

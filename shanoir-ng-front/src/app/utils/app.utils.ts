@@ -321,7 +321,7 @@ export function pad(n, width, z?): string {
 * order, until it finds one where predicate returns true. If such an element is found,
 * findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
 */
-export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+export function findLastIndex<T>(array: T[], predicate: (value: T, index: number, obj: T[]) => boolean): number {
     let l = array.length;
     while (l--) {
         if (predicate(array[l], l, array))
@@ -365,8 +365,8 @@ export class GetValuesPipe implements PipeTransform {
     }
 }
 
-export function allOfEnum<T>(enumClass): Array<T> {
-    let list: Array<T> = [];
+export function allOfEnum<T>(enumClass): T[] {
+    let list: T[] = [];
     for (let key in enumClass) {
         if (!(enumClass[key] instanceof Function)) list.push(enumClass[key]);
     }

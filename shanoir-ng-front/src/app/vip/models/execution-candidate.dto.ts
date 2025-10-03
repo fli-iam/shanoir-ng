@@ -4,7 +4,7 @@ export class ExecutionCandidateDto {
 
     name: string;
     pipelineIdentifier: string;
-    inputParameters: { [key: string]: any; };
+    inputParameters: Record<string, any>;
     datasetParameters: DatasetParameterDTO[];
     studyIdentifier: number;
     outputProcessing: string;

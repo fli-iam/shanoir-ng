@@ -46,8 +46,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     ];
     report: BrowserPaging<any>;
     reportActions: any = [{title: "Download as csv", awesome: "fa-solid fa-download", action: () => this.downloadReport()}];
-    // @ts-ignore
-    browserCompatible: boolean = window.showDirectoryPicker;
+    browserCompatible: boolean = !!(window as any).showDirectoryPicker;
     loading: boolean = false;
 
     constructor(

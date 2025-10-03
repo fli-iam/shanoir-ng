@@ -89,7 +89,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                     if(!params.data.subject){
                         return "";
                     }
-                    let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory> params.data.subject.imagedObjectCategory;
+                    let imagedObjectCat: ImagedObjectCategory = params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
                     }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_ANIMAL) {

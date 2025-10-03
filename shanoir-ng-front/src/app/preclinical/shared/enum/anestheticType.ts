@@ -21,7 +21,7 @@ export enum AnestheticType {
 
 } export namespace AnestheticType {
     
-    export function all(): Array<AnestheticType> {
+    export function all(): AnestheticType[] {
         return allOfEnum<AnestheticType>(AnestheticType);
     }
 

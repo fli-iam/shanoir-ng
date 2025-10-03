@@ -36,7 +36,7 @@ export enum DatasetType {
   Xa = 'Xa'
 } export namespace DatasetType {
 
-  export function all(): Array<DatasetType> {
+  export function all(): DatasetType[] {
       return allOfEnum<DatasetType>(DatasetType);
   }
 

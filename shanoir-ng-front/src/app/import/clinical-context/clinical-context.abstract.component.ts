@@ -612,11 +612,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     get importedCenterDataStr(): string {
-        return null;
+        return;
     }
 
     get importedEquipmentDataStr(): string {
-        return null;
+        return;
     }
 
     get valid(): boolean {

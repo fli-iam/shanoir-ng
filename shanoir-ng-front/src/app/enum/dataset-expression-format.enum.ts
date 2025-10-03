@@ -38,7 +38,7 @@ export enum DatasetExpressionFormat {
 
 } export namespace DatasetExpressionFormat {
 
-    export function all(): Array<DatasetExpressionFormat> {
+    export function all(): DatasetExpressionFormat[] {
         return allOfEnum<DatasetExpressionFormat>(DatasetExpressionFormat);
     }
 

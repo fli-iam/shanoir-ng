@@ -26,7 +26,7 @@ export enum ContrastAgent {
 
 } export namespace ContrastAgent {
     
-    export function all(): Array<ContrastAgent> {
+    export function all(): ContrastAgent[] {
         return allOfEnum<ContrastAgent>(ContrastAgent);
     }
 

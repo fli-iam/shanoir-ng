@@ -24,7 +24,7 @@ export enum ProcessedDatasetType {
 
 } export namespace ProcessedDatasetType {
 
-    export function all(): Array<ProcessedDatasetType> {
+    export function all(): ProcessedDatasetType[] {
         return allOfEnum<ProcessedDatasetType>(ProcessedDatasetType);
     }
 

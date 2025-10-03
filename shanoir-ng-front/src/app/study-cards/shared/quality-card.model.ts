@@ -57,7 +57,7 @@ export enum QualityTag {
 
 } export namespace QualityTag {
     
-    export function all(): Array<QualityTag> {
+    export function all(): QualityTag[] {
         return allOfEnum<QualityTag>(QualityTag);
     }
 

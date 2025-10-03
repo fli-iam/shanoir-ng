@@ -29,7 +29,7 @@ export enum DatasetModalityType {
 
 } export namespace DatasetModalityType {
 
-    export function all(): Array<DatasetModalityType> {
+    export function all(): DatasetModalityType[] {
         return allOfEnum<DatasetModalityType>(DatasetModalityType);
     }
 

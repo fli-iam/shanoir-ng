@@ -23,7 +23,7 @@ export enum TherapyType {
 
 } export namespace TherapyType {
     
-    export function all(): Array<TherapyType> {
+    export function all(): TherapyType[] {
         return allOfEnum<TherapyType>(TherapyType);
     }
 
