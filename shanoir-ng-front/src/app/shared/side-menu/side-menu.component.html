@@ -15,9 +15,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="instance"><span class="instance-frame"><span class="instance-name"></span></span></div>
 <div class="logo">
     <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
-        <img [src]="shanoirLogoUrl" />
+        <img [src]="shanoirLogoUrl" alt="Shanoir logo"/>
     </a>
-    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" />
+    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
 </div>
 
 <div *ngIf="isAuthenticated()" class="user">
