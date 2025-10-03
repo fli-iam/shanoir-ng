@@ -95,6 +95,18 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
         });
     }
 
+    protected fillCreateAcqEqStep() {
+        return;
+    }
+
+    protected fillCreateSubjectStep() {
+        return;
+    }
+
+    protected fillCreateExaminationStep() {
+        return;
+    }
+
     protected reloadSavedData(): Promise<void> {
         if (this.importDataService.contextBackup(this.stepTs)) {
             this.reloading = true;

@@ -3,9 +3,7 @@ package org.shanoir.ng.examination.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.slf4j.Logger;
@@ -16,12 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {

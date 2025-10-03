@@ -142,7 +142,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
@@ -155,7 +155,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         const acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
-        acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
+        acqEpt.serialNumber = this.getFirstSelectedSerie()?.equipment?.deviceSerialNumber;
         return acqEpt;
     }
 
