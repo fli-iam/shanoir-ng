@@ -398,7 +398,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 });
                 this.getEquipmentOptions(this.center);
             }
-            let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
+            const subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
                 this.subjects = subjects ? subjects : [];
                 this.subjects?.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
             });
@@ -711,3 +711,4 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 }
+
