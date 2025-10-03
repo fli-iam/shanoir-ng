@@ -75,7 +75,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     get anesthetic(): Anesthetic { return this.entity; }
-    set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
+    set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
     getService(): EntityService<Anesthetic> {
         return this.anestheticService;

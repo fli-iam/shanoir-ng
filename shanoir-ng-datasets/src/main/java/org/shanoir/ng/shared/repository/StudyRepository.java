@@ -15,12 +15,10 @@ package org.shanoir.ng.shared.repository;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * @author yyao

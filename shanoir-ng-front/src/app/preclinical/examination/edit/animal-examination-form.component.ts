@@ -179,10 +179,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     private updateExam(): void{
         this.examination.subject = new Subject();
-        if (this.examination.subject){
-            this.examination.subject.id = this.examination.subject.id;
-            this.examination.subject.name = this.examination.subject.name;
-        }
     }
 
     private getCenters(): void {
