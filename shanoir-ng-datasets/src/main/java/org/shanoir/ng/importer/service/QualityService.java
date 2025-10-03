@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 
@@ -29,7 +43,7 @@ public class QualityService {
 
     @Autowired
     private WADODownloaderService downloader;
-    
+
 
     public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
         LOG.info("Checking quality at import for examination : " + importJob.getExaminationId());
@@ -40,10 +54,10 @@ public class QualityService {
         } else {
             LOG.info("Quality cards loaded from ShUp");
         }
-        
+
         if (!hasQualityChecksAtImport(qualityCards)) {
             return new QualityCardResult();
-        }     
+        }
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
@@ -53,7 +67,7 @@ public class QualityService {
         for (QualityCard qualityCard : qualityCards) {
             // In case multiple quality cards are used with different roles, we check them all
             if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
+                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));
             }
         }
         return qualityResult;
@@ -73,13 +87,13 @@ public class QualityService {
     }
 
     public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
-        if(importJob.getQualityTag() == null) {
+        if (importJob.getQualityTag() == null) {
             return new QualityCardResult();
         }
         QualityCardResult qualityCardResult = new QualityCardResult();
         QualityCardResultEntry qualityCardResultEntry = new QualityCardResultEntry();
         qualityCardResultEntry.setTagSet(importJob.getQualityTag());
-        qualityCardResultEntry.setMessage("Tag "+ importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
+        qualityCardResultEntry.setMessage("Tag " + importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
         qualityCardResult.add(qualityCardResultEntry);
         return qualityCardResult;
     }

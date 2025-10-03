@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,104 +40,104 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * COntrast agents service test.
- * 
+ *
  * @author sloury
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class ContrastAgentServiceTest {
 
-	private static final Long AGENT_ID = 1L;
-	private static final String UPDATED_AGENT_DATA = "SuperGadolinium";
+    private static final Long AGENT_ID = 1L;
+    private static final String UPDATED_AGENT_DATA = "SuperGadolinium";
 
-	@Mock
-	private ContrastAgentRepository agentsRepository;
+    @Mock
+    private ContrastAgentRepository agentsRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private ContrastAgentServiceImpl agentsService;
-	
-	private RefsServiceImpl refsService;
-	
-		
-	
-	@BeforeEach
-	public void setup() {
-		given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
-		given(agentsRepository.findById(AGENT_ID)).willReturn(Optional.of(ContrastAgentModelUtil.createContrastAgentGado()));
-		given(agentsRepository.save(Mockito.any(ContrastAgent.class))).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
-	}
+    @InjectMocks
+    private ContrastAgentServiceImpl agentsService;
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		agentsService.deleteById(AGENT_ID);
+    private RefsServiceImpl refsService;
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
 
-	@Test
-	public void findAllTest() {
-		final List<ContrastAgent> agents = agentsService.findAll();
-		Assertions.assertNotNull(agents);
-		Assertions.assertTrue(agents.size() == 1);
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findAll();
-	}
+    @BeforeEach
+    public void setup() {
+        given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
+        given(agentsRepository.findById(AGENT_ID)).willReturn(Optional.of(ContrastAgentModelUtil.createContrastAgentGado()));
+        given(agentsRepository.save(Mockito.any(ContrastAgent.class))).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
+    }
 
-	@Test
-	public void findByIdTest() {
-		final ContrastAgent agent = agentsService.findById(AGENT_ID);
-		Assertions.assertNotNull(agent);
-		Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        agentsService.deleteById(AGENT_ID);
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	@Test
-	public void findByNameTest() {
-		final ContrastAgent agent = agentsService.findById(AGENT_ID);
-		Assertions.assertNotNull(agent);
-		Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
+        Mockito.verify(agentsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	
+    @Test
+    public void findAllTest() {
+        final List<ContrastAgent> agents = agentsService.findAll();
+        Assertions.assertNotNull(agents);
+        Assertions.assertTrue(agents.size() == 1);
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		agentsService.save(createContrastAgent());
+        Mockito.verify(agentsRepository, Mockito.times(1)).findAll();
+    }
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
-	}
+    @Test
+    public void findByIdTest() {
+        final ContrastAgent agent = agentsService.findById(AGENT_ID);
+        Assertions.assertNotNull(agent);
+        Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final ContrastAgent updatedAgent = agentsService.update(createContrastAgent());
-		Assertions.assertNotNull(updatedAgent);
-		Assertions.assertTrue(UPDATED_AGENT_DATA.equals(updatedAgent.getManufacturedName()));
+        Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
-	}
+    @Test
+    public void findByNameTest() {
+        final ContrastAgent agent = agentsService.findById(AGENT_ID);
+        Assertions.assertNotNull(agent);
+        Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
+
+        Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+
+
+
+    @Test
+    public void saveTest() throws ShanoirException {
+        agentsService.save(createContrastAgent());
+
+        Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
+    }
+
+    @Test
+    public void updateTest() throws ShanoirException {
+        final ContrastAgent updatedAgent = agentsService.update(createContrastAgent());
+        Assertions.assertNotNull(updatedAgent);
+        Assertions.assertTrue(UPDATED_AGENT_DATA.equals(updatedAgent.getManufacturedName()));
+
+        Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
+    }
 
 /*
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirException {
-		pathologiesService.updateFromShanoirOld(createPathology());
+    @Test
+    public void updateFromShanoirOldTest() throws ShanoirException {
+        pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
 */
-	private ContrastAgent createContrastAgent() {
-		final ContrastAgent agent = new ContrastAgent();
-		agent.setId(AGENT_ID);
-		agent.setName(ReferenceModelUtil.createReferenceContrastAgentGado());
-		agent.setManufacturedName(UPDATED_AGENT_DATA);
-		return agent;
-	}
-	
+    private ContrastAgent createContrastAgent() {
+        final ContrastAgent agent = new ContrastAgent();
+        agent.setId(AGENT_ID);
+        agent.setName(ReferenceModelUtil.createReferenceContrastAgentGado());
+        agent.setManufacturedName(UPDATED_AGENT_DATA);
+        return agent;
+    }
+
 }

@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.solr.runner;
 
 import java.io.IOException;
@@ -40,7 +54,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
         SolrClient solrClient = new HttpSolrClient.Builder(solrUrl).build();
         SolrQuery q = new SolrQuery("*:*");
         q.setRows(0);  // don't actually request any data
-	    long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
+        long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
         try {
             while (true) {
                 try {
@@ -64,7 +78,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
             }
         } catch (InterruptedException ignored) {
             LOG.info("Solr index not checked (thread interrupted)");
-        } catch (SolrServerException|IOException e) {
+        } catch (SolrServerException | IOException e) {
             LOG.error("Failed to check the Solr index", e);
         }
     }

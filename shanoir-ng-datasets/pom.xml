@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C) 
-	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/ 
-	This program is free software: you can redistribute it and/or modify it under 
-	the terms of the GNU General Public License as published by the Free Software 
-	Foundation, either version 3 of the License, or (at your option) any later 
-	version. You should have received a copy of the GNU General Public License 
+<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C)
+	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/
+	This program is free software: you can redistribute it and/or modify it under
+	the terms of the GNU General Public License as published by the Free Software
+	Foundation, either version 3 of the License, or (at your option) any later
+	version. You should have received a copy of the GNU General Public License
 	along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -19,7 +19,7 @@
 		<version>3.4.0</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
-	
+
 	<artifactId>shanoir-ng-datasets</artifactId>
 	<packaging>jar</packaging>
 
@@ -28,7 +28,7 @@
 
 	<properties>
 		<solrj.version>9.4.1</solrj.version>
-		<spring.data.solr.version>4.3.15</spring.data.solr.version>		
+		<spring.data.solr.version>4.3.15</spring.data.solr.version>
 	</properties>
 
 	<dependencies>
@@ -114,7 +114,7 @@
 		    <artifactId>solr-solrj</artifactId>
 		    <version>${solrj.version}</version>
 		</dependency>
-		
+
 		<!-- Spring Data Solr dependency: legacy dependency -->
 		<!-- Usage of SolrTemplate + SolrCrudRepository removed, only remains for SolrResultPage for facet search -->
 		<dependency>
@@ -122,7 +122,7 @@
 		    <artifactId>spring-data-solr</artifactId>
 		    <version>${spring.data.solr.version}</version>
 		</dependency>
-		
+
 		<!-- Orika dependency for deep copy -->
 		<dependency>
 			<groupId>ma.glasnost.orika</groupId>
@@ -140,7 +140,7 @@
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-datasets.jar as Spring Boot executable: Avoid 
+			<!-- Package shanoir-ng-datasets.jar as Spring Boot executable: Avoid
 				error: no main manifest attribute, in /shanoir-ng-datasets.jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

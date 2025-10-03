@@ -1,4 +1,4 @@
-/*
+/**
  * (The MIT license)
  *
  * Copyright (c) 2012 - 2015 Wolfgang Halbeisen (halbeisen.wolfgang@gmail.com) and Codemart (beniamin.oniga@codemart.ro, lia.domide@codemart.ro)
@@ -110,8 +110,8 @@ public class EDFWriter {
     }
 
     /**
-     * Convert data signals from two dimensions format ( {channels} {time,
-     * samples} ) to one dimension format ( channels {samples for each channel}
+     * Convert data signals from two dimensions format ({channels} {time,
+     * samples} ) to one dimension format (channels {samples for each channel}
      * grouped by time )
      *
      * @param digitalValues The signals data in two dimensions format

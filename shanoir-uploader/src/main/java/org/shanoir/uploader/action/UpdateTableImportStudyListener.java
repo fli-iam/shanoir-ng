@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 
@@ -17,10 +31,10 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateTableImportStudyListener implements ItemListener {
 
-    private static Logger logger = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
 
     private final ImportFromTableWindow window;
-    
+
     private final ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     public UpdateTableImportStudyListener(ShanoirUploaderServiceClient shanoirUploaderServiceClient, ImportFromTableWindow window) {
@@ -45,22 +59,22 @@ public class UpdateTableImportStudyListener implements ItemListener {
             List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
             for (Study study : studies) {
                 if (studyCards != null) {
-					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
-					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
-						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						// filter all study cards related to the selected study
-						if (study.getId().equals(studyCard.getStudyId())) {
-							studyCardsStudy.add(studyCard);
+                    List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
+                    for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+                        StudyCard studyCard = (StudyCard) itStudyCards.next();
+                        // filter all study cards related to the selected study
+                        if (study.getId().equals(studyCard.getStudyId())) {
+                            studyCardsStudy.add(studyCard);
                         }
                     }
-					study.setStudyCards(studyCardsStudy);
+                    study.setStudyCards(studyCardsStudy);
                     study.setCompatible(Boolean.FALSE);
-				}
+                }
                 window.studyCB.addItem(study);
-			}
+            }
             window.studyCB.setSelectedItem(studies.get(0));
         } catch (Exception e) {
-            logger.error("Could not correctly retrieve studies and study cards: ", e);
+            LOG.error("Could not correctly retrieve studies and study cards: ", e);
             this.window.displayError("Something went wrong when loading study and study cards, please retry later.");
         }
     }

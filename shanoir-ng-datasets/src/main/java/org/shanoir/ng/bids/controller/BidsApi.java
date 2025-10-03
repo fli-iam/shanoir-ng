@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 
 package org.shanoir.ng.bids.controller;
 
@@ -32,8 +46,8 @@ public interface BidsApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studyId/{studyId}/studyName/{studyName}")
     ResponseEntity<Void> generateBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
     @Operation(summary = "refreshBids", description = "Refresh the BIDS structure for a given study ID and study name")
     @ApiResponses(value = {
@@ -44,8 +58,8 @@ public interface BidsApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "refreshBids/studyId/{studyId}/studyName/{studyName}")
     ResponseEntity<BidsElement>  refreshBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
     @Operation(summary = "exportBIDSBySubjectId", description = "If exists, returns a zip file of the BIDS structure corresponding to the given study id and path")
     @ApiResponses(value = {
@@ -57,18 +71,18 @@ public interface BidsApi {
     @GetMapping(value = "/exportBIDS/studyId/{studyId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     void exportBIDSFile(
-    		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException;
+            @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException;
 
-	@Operation(summary = "getBids", description = "If exists, returns a BIDSElement structure corresponding to the given study id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "BidsElement"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no dataset found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/bidsStructure/studyId/{studyId}", produces = { "application/json" })
-	ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws RestServiceException, IOException;
+    @Operation(summary = "getBids", description = "If exists, returns a BIDSElement structure corresponding to the given study id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "BidsElement"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/bidsStructure/studyId/{studyId}", produces = { "application/json" })
+    ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+            throws RestServiceException, IOException;
 
 }

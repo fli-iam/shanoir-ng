@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
@@ -38,7 +52,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope("prototype")
 public class ProcessedDatasetImporterService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetImporterService.class);
 
     private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
@@ -67,7 +81,7 @@ public class ProcessedDatasetImporterService {
 
     /**
      * Create a processed dataset dataset associated with a dataset processing.
-     * 
+     *
      * @param importJob
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
@@ -107,14 +121,14 @@ public class ProcessedDatasetImporterService {
                 datasetFile.setPath(location.toUri().toString());
             }
             expression.setDatasetFiles(Collections.singletonList(datasetFile));
-            
+
             dataset = datasetService.create(dataset);
             solrService.indexDataset(dataset.getId());
 
             event.setStatus(ShanoirEvent.SUCCESS);
-            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
-                    "Successfully created processed dataset [" + dataset.getId() + "] " +
-                    "for subject [" + importJob.getSubjectName() + "]");
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
+                    + "Successfully created processed dataset [" + dataset.getId() + "] "
+                    + "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
             return dataset;
@@ -146,7 +160,7 @@ public class ProcessedDatasetImporterService {
 
     /**
      * Check ProcessedDatasetImportJob.
-     * 
+     *
      * @param job
      * @param event
      * @return
@@ -159,8 +173,8 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        if (job.getDatasetProcessing().getInputDatasets() == null ||
-                job.getDatasetProcessing().getInputDatasets().isEmpty()) {
+        if (job.getDatasetProcessing().getInputDatasets() == null
+                || job.getDatasetProcessing().getInputDatasets().isEmpty()) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Processing input dataset(s) missing.");
             event.setProgress(-1f);
@@ -174,7 +188,7 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        for(Dataset input : job.getDatasetProcessing().getInputDatasets()){
+        for (Dataset input : job.getDatasetProcessing().getInputDatasets()) {
             Long studyId = datasetService.getStudyId(input);
             if (studyId != null && !studyId.equals(job.getStudyId())) {
                 event.setStatus(ShanoirEvent.ERROR);
