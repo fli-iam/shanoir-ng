@@ -62,7 +62,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
-    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
+    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
     getService(): EntityService<ExaminationAnesthetic> {
         return this.examAnestheticService;

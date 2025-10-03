@@ -56,7 +56,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     get physioData(): PhysiologicalData { return this.entity; }
-    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
 
     // Note: should be getService(): EntityService<PhysiologicalData> {
     getService(): EntityService<any> {

@@ -49,7 +49,7 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     }
 
     get reference(): Reference { return this.entity; }
-    set reference(reference: Reference) { this.entity = reference; }
+    set reference(reference: Reference) { this.entity = reference; }
 
     getService(): EntityService<Reference> {
         return this.referenceService;
