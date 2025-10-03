@@ -117,7 +117,10 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+    }
 
+    protected fillCreateAcqEqStep() { 
+        return;
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {

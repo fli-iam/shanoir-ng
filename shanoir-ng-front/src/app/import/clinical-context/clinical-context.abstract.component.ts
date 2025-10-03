@@ -488,6 +488,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.subject, this.examination, null, null, null, null, null, null);
     }
 
+    protected abstract fillCreateSubjectStep();
+
+    protected abstract fillCreateExaminationStep();
+
+    protected abstract fillCreateAcqEqStep();
+
     public openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(() => {
@@ -524,6 +530,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(() => {
+            this.fillCreateAcqEqStep();
             this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
@@ -545,9 +552,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createSubjectRoute: string = this.getCreateSubjectRoute();
         this.router.navigate([createSubjectRoute]).then(() => {
+            this.fillCreateSubjectStep();
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
                     let sub: Subject;
                     if (entity instanceof Subject) {
                         sub = entity;
@@ -564,6 +571,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let currentStep: Step = this.breadcrumbsService.currentStep;
         let createExamRoute: string = this.getCreateExamRoute();
         this.router.navigate([createExamRoute]).then(() => {
+            this.fillCreateExaminationStep();
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
