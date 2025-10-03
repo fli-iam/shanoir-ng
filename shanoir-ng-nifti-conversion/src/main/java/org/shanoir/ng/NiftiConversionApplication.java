@@ -30,8 +30,6 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class NiftiConversionApplication {
 
-    private NiftiConversionApplication() { }
-
     public static void main(String[] args) {
         SpringApplication.run(NiftiConversionApplication.class, args);
     }

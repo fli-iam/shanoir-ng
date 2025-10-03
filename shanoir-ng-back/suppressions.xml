@@ -24,4 +24,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
   <suppress checks="Header" files="org/shanoir/ng/importer/eeg/edf/.*\.java"/>
   <suppress checks="Header" files="org/shanoir/ng/importer/eeg/brainvision/.*\.java"/>
   <suppress checks="FinalClass" files=".*Application\.java"/>
+  <suppress checks="HideUtilityClassConstructor" files=".*Application\.java"/>
 </suppressions>
