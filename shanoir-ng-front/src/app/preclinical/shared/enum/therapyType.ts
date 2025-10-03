@@ -23,7 +23,7 @@ export enum TherapyType {
 
 } export namespace TherapyType {
     
-    export function all(): Array<TherapyType> {
+    export function all(): TherapyType[] {
         return allOfEnum<TherapyType>(TherapyType);
     }
 
@@ -31,5 +31,5 @@ export enum TherapyType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<TherapyType>[] = all().map(prop => new Option<TherapyType>(prop, getLabel(prop)));
+    export const options: Option<TherapyType>[] = all().map(prop => new Option<TherapyType>(prop, getLabel(prop)));
 }

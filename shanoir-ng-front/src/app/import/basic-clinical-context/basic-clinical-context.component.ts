@@ -11,21 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, OnDestroy} from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
-import {AcquisitionEquipment} from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import {Step} from '../../breadcrumbs/breadcrumbs.service';
-import {Center} from '../../centers/shared/center.model';
-import {Examination} from '../../examinations/shared/examination.model';
-import {preventInitialChildAnimations, slideDown} from '../../shared/animations/animations';
-import {IdName} from '../../shared/models/id-name.model';
-import {ImagedObjectCategory} from '../../subjects/shared/imaged-object-category.enum';
-import {SubjectStudy} from '../../subjects/shared/subject-study.model';
-import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
-import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
-import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
-import {SimpleStudy} from "../../studies/shared/study.model";
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Center } from '../../centers/shared/center.model';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { Examination } from '../../examinations/shared/examination.model';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { IdName } from '../../shared/models/id-name.model';
+import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
+import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
+import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 
 
 @Component({
@@ -54,17 +52,17 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     importData(timestamp: number): Promise<any> {
-        let importJob = this.buildImportJob(timestamp);
+        const importJob = this.buildImportJob(timestamp);
         return this.importService.startImportJob(importJob);
     }
 
     protected buildImportJob(timestamp: number): ImportJob {
-        let importJob = new ImportJob();
-        let context = this.importDataService.contextData;
+        const importJob = new ImportJob();
+        const context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
 
         this.patient.subject = new SimpleSubject(context.subject);
-        let filteredPatient: PatientDicom = this.patient;
+        const filteredPatient: PatientDicom = this.patient;
         filteredPatient.studies = this.patient.studies.map(study => {
             study.series = study.series.filter(serie => serie.selected);
             return study;
@@ -96,8 +94,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return eq1 && eq2 && eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
-    protected fillCreateSubjectStep(step: Step) {
-        let s: Subject = this.getPrefilledSubject();
+    protected fillCreateSubjectStep() {
+        const s: Subject = this.getPrefilledSubject();
         this.breadcrumbsService.currentStep.addPrefilled("entity", s);
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
@@ -110,10 +108,10 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     private getPrefilledSubject(): Subject {
-        let subjectStudy = new SubjectStudy();
+        const subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        let newSubject = new Subject();
+        const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
@@ -126,14 +124,14 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return newSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step) {
-        let exam: Examination = this.getPrefilledExam();
+    protected fillCreateExaminationStep() {
+        const exam: Examination = this.getPrefilledExam();
         this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
         this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
     }
 
     private getPrefilledExam(): Examination {
-        let newExam = new Examination();
+        const newExam = new Examination();
         newExam.preclinical = false;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
@@ -144,20 +142,20 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
-    protected fillCreateAcqEqStep(step: Step) {
-        let acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
+    protected fillCreateAcqEqStep() {
+        const acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
         this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {
-        let acqEpt = new AcquisitionEquipment();
+        const acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
-        acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
+        acqEpt.serialNumber = this.getFirstSelectedSerie()?.equipment?.deviceSerialNumber;
         return acqEpt;
     }
 
@@ -178,8 +176,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected getFirstSelectedPatient(): PatientDicom {
-        for(let patient of this.importDataService.patients){
-            for(let study of patient.studies){
+        for(const patient of this.importDataService.patients){
+            for(const study of patient.studies){
                 if (study.selected) return patient;
             }
         }
@@ -188,8 +186,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected getFirstSelectedSerie(): SerieDicom {
         if (!this.patient) return null;
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return serie;
             }
         }
@@ -198,7 +196,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
-        for (let study of this.patient.studies) {
+        for (const study of this.patient.studies) {
             if(study.selected) return study;
         }
         return null;

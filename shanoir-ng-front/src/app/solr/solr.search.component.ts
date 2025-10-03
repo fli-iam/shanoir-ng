@@ -11,21 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Clipboard } from '@angular/cdk/clipboard';
 import { formatDate } from '@angular/common';
-import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService } from '../datasets/shared/dataset.service';
-import { slideDown } from '../shared/animations/animations';
-import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-
-import { AfterViewChecked } from "@angular/core";
 import { environment } from "../../environments/environment";
+import { TaskState } from '../async-tasks/task.model';
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { ExecutionDataService } from '../vip/execution.data-service';
+import { DatasetService } from '../datasets/shared/dataset.service';
+import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
+import { slideDown } from '../shared/animations/animations';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -36,19 +37,16 @@ import { MassDownloadService } from '../shared/mass-download/mass-download.servi
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
+import { Study } from "../studies/shared/study.model";
+import { StudyService } from "../studies/shared/study.service";
+import { ServiceLocator } from "../utils/locator.service";
+import { ExecutionDataService } from '../vip/execution.data-service';
+
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
-import { Clipboard } from '@angular/cdk/clipboard';
-import {StudyService} from "../studies/shared/study.service";
-import {Study} from "../studies/shared/study.model";
-import {ServiceLocator} from "../utils/locator.service";
-import { TaskState } from '../async-tasks/task.model';
-import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
-import {dateDisplay} from "../shared/./localLanguage/localDate.abstract";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
-const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -114,7 +112,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             this.studies = studies;
         });
 
-        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        const input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
             // TODO
         }
@@ -161,8 +159,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
             'importStartDate': [this.solrRequest.importStartDate, [DatepickerComponent.validator]],
@@ -188,16 +185,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }
         return false;
     }
 
-    dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
+    dateOrderValidator = (): ValidationErrors | null => {
         this.solrRequest.datasetStartDate = this.form?.get('startDate')?.value;
         this.solrRequest.datasetEndDate = this.form?.get('endDate')?.value;
         this.solrRequest.importStartDate = this.form?.get('importStartDate')?.value;
@@ -218,7 +215,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private loadState() {
-        let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+        const savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
         this.solrRequest = savedRequest;
     }
 
@@ -315,8 +312,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.form.valid) {
             this.saveState();
             this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
-            let facetPagingTmp: Map<String, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
-            let search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+            const facetPagingTmp: Map<string, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
+            const search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
@@ -348,13 +345,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private buildFacetPageable(updatedFacetName?: string): Map<string, FacetPageable> {
-        let map = new Map();
+        const map = new Map();
         if (!this.firstPageLoaded) { // dig into criterion save states before they load to avoid unneeded requests
             TextualFacetNames.forEach(facetName => {
-                let hash: string = SolrPagingCriterionComponent.getHash(facetName, this.router.url);
-                let prefStr: string = localStorage.getItem(hash);
+                const hash: string = SolrPagingCriterionComponent.getHash(facetName, this.router.url);
+                const prefStr: string = localStorage.getItem(hash);
                 if (prefStr) {
-                    let pref: FacetPreferences = JSON.parse(prefStr);
+                    const pref: FacetPreferences = JSON.parse(prefStr);
                     if (pref.open) {
                         map.set(facetName, new FacetPageable(1, SolrPagingCriterionComponent.PAGE_SIZE, pref.sortMode ? pref.sortMode : 'INDEX'));
                     }
@@ -402,7 +399,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then((deleted) => {
+                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -417,7 +414,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                                 + ' and ask him to grant you the administrator role in the study.');
                         }
                         if(reason?.status == 422) {
-                            let warn = 'At least on of the selected dataset is linked to other entities, it was not deleted.';
+                            const warn = 'At least on of the selected dataset is linked to other entities, it was not deleted.';
                             this.consoleService.log('warn', warn);
                             return false;
                         } else throw Error(reason);
@@ -429,21 +426,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     protected openApplyStudyCard = () => {
         this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
             if (this.role != 'admin') {
-                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq =>
+                const nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq =>
                     !this.rights?.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
                 );
-                let studies: Set<string> = new Set();
+                const studies: Set<string> = new Set();
                 nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
                 if (nonAdminAcqs.length > 0) {
                     this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
                         + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
                 } else {
-                    this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                    this.router.navigate(['study-card/apply-on-datasets']).then(() => {
                         this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
                     });
                 }
             } else {
-                this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                this.router.navigate(['study-card/apply-on-datasets']).then(() => {
                     this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
                 });
             }
@@ -453,7 +450,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private getCommonColumnDefs() {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "Processed", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
@@ -503,7 +500,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
+        const columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         if (this.role == 'admin') {
             columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog});
         } else if (this.role == 'expert') {
@@ -513,7 +510,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     getSelectionColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
+        const columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
@@ -524,7 +521,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     getCustomActionsDefs(): any[] {
-        let customActionDefs:any = [];
+        const customActionDefs:any = [];
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
@@ -538,7 +535,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     getSelectionCustomActionsDefs(): any[] {
-        let customActionDefs:any = [];
+        const customActionDefs:any = [];
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-snowplow", action: () => {
                 this.selectedDatasetIds = new Set();
@@ -566,7 +563,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
         let downloadable = true;
         selection.forEach((datasetid) => {
-            let selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
+            const selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
             let studyId
             if (selected) {
                 studyId = selected.studyId;
@@ -589,8 +586,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectedStudies = [];
         this.selectedLines = [];
         this.hasCopyRight = false;
-        for (let page of this.contentPage) {
-            for (let line of page.content) {
+        for (const page of this.contentPage) {
+            for (const line of page.content) {
                 if (this.selectedDatasetIds.has(Number(line.datasetId))) {
                     this.selectedLines.push(line);
                     if (!this.selectedStudies.includes(line.studyId)) {
@@ -623,7 +620,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     initExecutionMode() {
         this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
-            let studyId = datasets[0]?.studyId;
+            const studyId = datasets[0]?.studyId;
 
             if (!this.hasAdminRight(studyId)) {
                 this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on study [' + studyId + '] that you don\'t administrate.');
@@ -645,7 +642,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     copyToStudy() {
-        let modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
+        const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
         modalRef.instance.title = "Copy of datasets to study";
         modalRef.instance.studies = this.studies;
         modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);

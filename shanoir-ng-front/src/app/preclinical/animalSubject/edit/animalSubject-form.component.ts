@@ -16,19 +16,25 @@ import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+
 import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
-import {SimpleStudy, Study} from '../../../studies/shared/study.model';
+import { Study} from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { ReverseSubjectNode } from '../../../tree/tree.model';
-import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
 import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';
@@ -39,15 +45,9 @@ import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/li
 import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import {isDarkColor} from "../../../utils/app.utils";
 
 
@@ -121,7 +121,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     }
 
-    public GetModes(): any { return (<any>this).Modes; }
+    public GetModes(): any { return (this as any).Modes; }
 
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
@@ -146,8 +146,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     // subjectStudy
                     if (ps.subject.subjectStudyList && ps.subject.subjectStudyList.length > 0){
                         this.subjectStudyList = [];
-                        for (let ss of ps.subject.subjectStudyList) {
-                            let newSubjectStudy: SubjectStudy = this.copySubjectStudy(ss);
+                        for (const ss of ps.subject.subjectStudyList) {
+                            const newSubjectStudy: SubjectStudy = this.copySubjectStudy(ss);
                             this.subjectStudyList.push(newSubjectStudy);
                         }
                         ps.subject.subjectStudyList = this.subjectStudyList;
@@ -227,7 +227,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.studies = studies;
                 // this.updateStudiesList();
             })
-            .catch((error) => {
+            .catch(() => {
                 // TODO: display error
                 console.error("error getting study list!");
         });
@@ -235,7 +235,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
 
     copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
-    	let fixedSubjectStudy = new SubjectStudy();
+    	const fixedSubjectStudy = new SubjectStudy();
     	fixedSubjectStudy.id = subjectStudy.id;
     	fixedSubjectStudy.studyIdentifier = subjectStudy.studyIdentifier;
     	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
@@ -249,9 +249,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     getStudyById(id: number): Study{
     	if (this.studies && this.studies.length > 0){
-    		for (let s of this.studies){
+    		for (const s of this.studies){
     			if (s.id === id){
-    				let study: Study = new Study();
+    				const study: Study = new Study();
     				study.id = s.id;
     				study.name = s.name;
     				return study;
@@ -262,7 +262,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
 	copySubject(s: Subject): Subject{
-		let subject = new Subject();
+		const subject = new Subject();
 		subject.id = s.id;
 		subject.name = s.name;
 		return subject;
@@ -275,8 +275,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     buildForm(): UntypedFormGroup {
-        let animal: boolean = this.animalSelected();
-        let subjectForm = this.formBuilder.group({
+        const animal: boolean = this.animalSelected();
+        const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
             'name': [this.preclinicalSubject.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
@@ -296,7 +296,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'subjectType': [this.preclinicalSubject.subject.subjectType, Validators.required],
         });
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(() => {
                 this.onChangeImagedObjectCategory(subjectForm);
             })
         );
@@ -304,7 +304,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
-        let newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
+        const newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
         if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             formGroup.get('specie').setValidators([Validators.required]);
             formGroup.get('strain').setValidators([Validators.required]);
@@ -339,7 +339,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (category && reftype) this.router.navigate(['/preclinical-reference/create'], { queryParams: {category: category, reftype: reftype } });
     }
 
-    goToEdit(id?: number): void {
+    goToEdit(): void {
         super.goToEdit(this.preclinicalSubject.id);
     }
 
@@ -389,21 +389,21 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             let entity: any;
             this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
             if (entity) {
-                for (let therapy of entity) {
+                for (const therapy of entity) {
                     this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                 }
             } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
-                for (let therapy of this.preclinicalSubject.therapies) {
+                for (const therapy of this.preclinicalSubject.therapies) {
                     this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                 }
             }
             this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
             if (entity) {
-                for (let pathology of entity) {
+                for (const pathology of entity) {
                     this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                 }
             } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                for (let pathology of this.preclinicalSubject.pathologies) {
+                for (const pathology of this.preclinicalSubject.pathologies) {
                     this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                 }
             }
@@ -419,7 +419,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
         this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
-            .then(subject => {
+            .then(() => {
                 let entity:any;
                 if (this.preclinicalSubject.animalSubject) {
                     this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
@@ -427,37 +427,37 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 // Create, Update, Delete therapies and pathologies from breadcrumb cache
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToCreate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-                    for (let therapy of entity) {
+                    for (const therapy of entity) {
                         this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToUpdate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
-                    for (let therapy of entity) {
+                    for (const therapy of entity) {
                         this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.therapiesComponent.getEntityName() + "ToDelete")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.therapiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
-                    for (let therapy of entity) {
+                    for (const therapy of entity) {
                         this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToCreate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToCreate").then(res => entity = res);
-                    for (let pathology of entity) {
+                    for (const pathology of entity) {
                         this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToUpdate").then(res => entity = res);
-                    for (let pathology of entity) {
+                    for (const pathology of entity) {
                         this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
                 if (this.breadcrumbsService.currentStep.isPrefilled(this.pathologiesComponent.getEntityName() + "ToDelete")) {
                     this.breadcrumbsService.currentStep.getPrefilledValue(this.pathologiesComponent.getEntityName() + "ToDelete").then(res => entity = res);
-                    for (let pathology of entity) {
+                    for (const pathology of entity) {
                         this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
@@ -467,13 +467,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     sortReferences() {
     if (this.references){
-        let speciesToSet: Reference[] = [];
-        let biotypesToSet: Reference[] = [];
-        let strainsToSet: Reference[] = [];
-        let providersToSet: Reference[] = [];
-        let stabulationsToSet: Reference[] = [];
+        const speciesToSet: Reference[] = [];
+        const biotypesToSet: Reference[] = [];
+        const strainsToSet: Reference[] = [];
+        const providersToSet: Reference[] = [];
+        const stabulationsToSet: Reference[] = [];
 
-        for (let ref of this.references) {
+        for (const ref of this.references) {
             switch (ref.reftype) {
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_SPECIE:
                     speciesToSet.push(ref);
@@ -504,7 +504,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }
@@ -522,8 +522,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     getHash(stringToBeHashed: string): string {
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, this.HASH_LENGTH);
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 

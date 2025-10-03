@@ -13,6 +13,7 @@
  */
 
 import { Component } from '@angular/core';
+
 import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({

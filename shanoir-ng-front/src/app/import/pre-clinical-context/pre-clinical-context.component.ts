@@ -13,7 +13,7 @@
  */
 import { Component, OnDestroy } from '@angular/core';
 
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
@@ -22,12 +22,10 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
-import {SimpleStudy} from "../../studies/shared/study.model";
 
 
 @Component({
@@ -68,9 +66,9 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     importData(timestamp: number): Promise<any> {
-        let context = this.importDataService.contextData;
-        let contextImportJob = this.importDataService.archiveUploaded;
-        let importJob = new ImportJob();
+        const context = this.importDataService.contextData;
+        const contextImportJob = this.importDataService.archiveUploaded;
+        const importJob = new ImportJob();
         importJob.patients = new Array<PatientDicom>();
 
         this.patient.subject = new SimpleSubject(context.subject);
@@ -112,21 +110,24 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return '/preclinical-examination/create';
     }
 
-    protected fillCreateSubjectStep(step: Step) {
+    protected fillCreateSubjectStep() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+    }
 
+    protected fillCreateAcqEqStep() { 
+        return;
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
-        let subjectStudy = new SubjectStudy();
+        const subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        let newSubject = new Subject();
+        const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
@@ -134,8 +135,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
             }
         }
         newSubject.subjectStudyList = [];
-        let newPreclinicalSubject = new PreclinicalSubject();
-        let newAnimalSubject = new AnimalSubject();
+        const newPreclinicalSubject = new PreclinicalSubject();
+        const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
         newSubject.preclinical = true;
@@ -145,12 +146,12 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return newPreclinicalSubject;
     }
 
-    protected fillCreateExaminationStep(step: Step): void {
+    protected fillCreateExaminationStep(): void {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
     }
 
     private getPrefilledExam(): Examination {
-        let newExam = new Examination();
+        const newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
@@ -161,7 +162,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
@@ -183,8 +184,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getFirstSelectedSerie(): SerieDicom {
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return serie;
             }
         }
@@ -192,8 +193,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getFirstSelectedStudy(): StudyDicom {
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return study;
             }
         }
@@ -205,7 +206,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     get valid(): boolean {
-        let context = this.getContext();
+        const context = this.getContext();
         return (
             context.study
             && !!context.center
