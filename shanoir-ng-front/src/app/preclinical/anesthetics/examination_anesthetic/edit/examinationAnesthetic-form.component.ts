@@ -72,7 +72,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.examAnestheticService.getExaminationAnesthetics(this.id).then(examAnesthetics => {
             if (examAnesthetics && examAnesthetics.length > 0) {
                 //Should be only one
-                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
                 examAnesthetic.internal_id = examAnesthetic.id;
                 return examAnesthetic;
             }
@@ -146,7 +146,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }
@@ -157,7 +157,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getAnestheticById(anesthetic: any): Anesthetic {
         if (anesthetic) {
-            for (let anest of this.anesthetics) {
+            for (const anest of this.anesthetics) {
                 if (anesthetic.id == anest.id) {
                     return anest;
                 }

@@ -62,7 +62,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
             this.studyOptions = [];
             if (this.studies) {
                 this.studies.forEach(study => {
-                    let option: Option<number> = new Option<number>(study.id, study.name);
+                    const option: Option<number> = new Option<number>(study.id, study.name);
                     this.studyOptions.push(option);
                 })
             }

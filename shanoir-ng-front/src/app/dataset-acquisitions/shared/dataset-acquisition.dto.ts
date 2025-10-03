@@ -52,7 +52,7 @@ export class DatasetAcquisitionDTOService {
     public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {
         if (!result) result = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
         DatasetAcquisitionDTOService.mapSyncFields(dto, result);
-        let promises = [];
+        const promises = [];
         if(dto.acquisitionEquipmentId > 0){
             promises.push(this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq));
         }else{
@@ -70,12 +70,12 @@ export class DatasetAcquisitionDTOService {
      */
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
-        for (let dto of dtos ? dtos : []) {
-            let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
+        for (const dto of dtos ? dtos : []) {
+            const entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if ((dto as DatasetAcquisitionDatasetsDTO).datasets) {
                 entity.datasets = (dto as DatasetAcquisitionDatasetsDTO).datasets.map(dsdto => {
-                    let simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
+                    const simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
                     DatasetDTOService.mapSyncFields(dsdto, simpleDataset);
                     return simpleDataset;
                 });
@@ -86,7 +86,7 @@ export class DatasetAcquisitionDTOService {
             this.acqEqService.getAll(),
             this.studyService.getStudiesNames()
         ]).then(([acqs, studies]) => {
-            for (let entity of result) {
+            for (const entity of result) {
                 if (entity.acquisitionEquipment) entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment.id);
                 if (entity.examination && entity.examination.study) entity.examination.study = studies.find(study => study.id == entity.examination.study.id);
             }

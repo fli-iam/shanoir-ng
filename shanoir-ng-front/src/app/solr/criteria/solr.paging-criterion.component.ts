@@ -74,7 +74,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     goToPage(pageNumber: number): Promise<void> {
-        let pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
+        const pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
         this.loading = true;
         return this.getPage(pageable, this.facetName).then(page => {
             this.loadPage(page);
@@ -147,7 +147,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
             this.selectedFacets = this.selectedFacets.filter(sel => sel.value != facet.value);
         }
         this.updateHasChecked();
-        let selectedValues: string[] = this.selectedFacets.map(facet => facet.value);
+        const selectedValues: string[] = this.selectedFacets.map(facet => facet.value);
         this.propagateChange(selectedValues);
         this.userChange.emit(selectedValues);
     }
@@ -160,7 +160,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         // wait till the user has stopped typing for 500ms before querying
         if (this.filterTimeout <= 0) {
             this.filterTimeout = 500;
-            let everySecondHandler = setInterval(() => {
+            const everySecondHandler = setInterval(() => {
                 this.filterTimeout -= 100;
                 if (this.filterTimeout <= 0) {
                     clearInterval(everySecondHandler);
@@ -199,12 +199,12 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.loadedPromise.then(() => {
             this.selectedFacets = [];
             selectedFacetValues?.forEach(val => {
-                let displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
+                const displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
                 if (displayed) {
                     this.selectedFacets.push(displayed);
                     displayed.checked = true;
                 } else {
-                    let facetField: FacetField = new FacetField();
+                    const facetField: FacetField = new FacetField();
                     facetField.checked = true;
                     facetField.field = { name: this.facetName };
                     facetField.key = { name: this.facetName };
@@ -232,17 +232,17 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     static getHash(facetName: string, routerUrl: string): string {
-        let username: string = KeycloakService.auth.authz.tokenParsed.name;
-        let stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, 30);
+        const username: string = KeycloakService.auth.authz.tokenParsed.name;
+        const stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, 30);
         return hex;
     }
 
     reloadSettings() {
-        let prefStr: string = localStorage.getItem(this.hash);
+        const prefStr: string = localStorage.getItem(this.hash);
         if (prefStr) {
-            let pref: FacetPreferences = JSON.parse(prefStr);
+            const pref: FacetPreferences = JSON.parse(prefStr);
             if (pref.open) {
                 this._open = true;
             }
@@ -251,7 +251,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     saveSettings() {
-        let pref: FacetPreferences = new FacetPreferences();
+        const pref: FacetPreferences = new FacetPreferences();
         pref.open = this.open;
         pref.sortMode = this.sortMode;
         localStorage.setItem(this.hash, JSON.stringify(pref));

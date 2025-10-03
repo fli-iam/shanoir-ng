@@ -46,12 +46,9 @@ module.exports = tseslint.config(
       ],
 
       // Core ESLint rules - turn off common errors
-      "no-prototype-builtins": "off",
       "no-useless-escape": "off",
       "no-empty": "off",
       "no-extra-boolean-cast": "off",
-      "no-var": "off",
-      "prefer-const": "off",
       "no-empty-pattern": "off",
 
       // TypeScript ESLint rules - turn off common errors

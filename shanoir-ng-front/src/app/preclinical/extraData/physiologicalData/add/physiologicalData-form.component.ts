@@ -81,7 +81,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
-    	for (let ex of extradatas) {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype == "Physiological data"){
     			return this.physioData;
@@ -112,7 +112,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.physioData.filename= this.fileToUpload.name;
-    	let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
+    	const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
     	physioDataFile.filename = this.fileToUpload.name;
     	physioDataFile.physiologicalDataFile = this.fileToUpload;
     	physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
@@ -139,7 +139,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     changePhysio(){
-        let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
+        const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
         physioDataFile.filename = this.physioData.filename;
         physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
         physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;

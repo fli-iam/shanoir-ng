@@ -133,7 +133,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
-        let params = new HttpParams()
+        const params = new HttpParams()
             .set("studyNameInRegExp", studyNameInRegExp)
             .set("studyNameOutRegExp", studyNameOutRegExp)
             .set("subjectNameInRegExp", subjectNameInRegExp)
@@ -176,7 +176,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
-        let result: Dataset[] = [];
+        const result: Dataset[] = [];
         if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }

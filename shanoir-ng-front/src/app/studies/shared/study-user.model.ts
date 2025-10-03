@@ -37,7 +37,7 @@ export class StudyUser {
     }
 
     public static completeMember(studyUser: StudyUser, users: User[]) {
-        let user: User = users.find(u => u.id == studyUser.userId);
+        const user: User = users.find(u => u.id == studyUser.userId);
         if (user) studyUser.user = user;
     }
 }

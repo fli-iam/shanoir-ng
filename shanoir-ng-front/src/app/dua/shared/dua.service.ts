@@ -34,7 +34,7 @@ export class DuaService {
     }
 
     create(entity: DuaDocument, email: string): Promise<string> {
-        let arg: any = {duaDraft: entity, email: email};
+        const arg: any = {duaDraft: entity, email: email};
         return this.http.post(this.API_URL, this.stringify(arg), {responseType: 'text'}).toPromise();
     }
 
@@ -54,7 +54,7 @@ export class DuaService {
     }
 
     protected toRealObject(entity: DuaDocument): DuaDocument {
-        let trueObject = Object.assign(new DuaDocument(), entity);
+        const trueObject = Object.assign(new DuaDocument(), entity);
         return trueObject;
     }
 }

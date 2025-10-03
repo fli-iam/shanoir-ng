@@ -47,11 +47,11 @@ export class WelcomeComponent implements OnInit {
     }
 
     addSchemaToDOM(): void {
-        let script = this._renderer2.createElement('script');
+        const script = this._renderer2.createElement('script');
         script.type = `application/ld+json`;
 
         let datasetStr: string = "";
-        let shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
+        const shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
         this.studies?.forEach( study => {
 
@@ -185,8 +185,8 @@ export class WelcomeComponent implements OnInit {
 	}
 
 	@HostListener('window:scroll', ['$event']) onWindowScroll(e) {
-		let scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
-		let end = this.showMore?.nativeElement?.offsetTop;
+		const scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
+		const end = this.showMore?.nativeElement?.offsetTop;
 		if (scroll > end && this.studies.length > this.show) this.increaseShow();
 	}
 }

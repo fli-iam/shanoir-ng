@@ -110,7 +110,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     private getManufById(id: number): Manufacturer {
-        for (let manuf of this.manufs) {
+        for (const manuf of this.manufs) {
             if (id == manuf.id) {
                 return manuf;
             }
@@ -123,7 +123,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     openNewManuf() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {

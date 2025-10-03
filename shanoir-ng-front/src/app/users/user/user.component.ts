@@ -92,8 +92,8 @@ export class UserComponent extends EntityComponent<User> {
         if (user.extensionRequestDemand && user.extensionRequestInfo) {
             user.expirationDate = user.extensionRequestInfo.extensionDate;
         }
-        let studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
-            let studyUserList: StudyUser[] = [];
+        const studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+            const studyUserList: StudyUser[] = [];
             this.studies = [];
             studies.forEach(s => {
                 s.studyUserList.forEach(su => {
@@ -105,7 +105,7 @@ export class UserComponent extends EntityComponent<User> {
             });
             user.studyUserList = studyUserList;
         });
-        let rolesPromise = this.getRoles().then(() => {
+        const rolesPromise = this.getRoles().then(() => {
             user.role = this.getRoleById(user.role.id);
         });
         return Promise.all([studyUsersPromise, rolesPromise]).then();
@@ -145,7 +145,7 @@ export class UserComponent extends EntityComponent<User> {
 
     buildForm(): UntypedFormGroup {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
-        let userForm = this.formBuilder.group({
+        const userForm = this.formBuilder.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
@@ -164,7 +164,7 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     getRoleById(id: number): Role {
-        for (let role of this.roles) {
+        for (const role of this.roles) {
             if (id == role.id) {
                 return role;
             }
@@ -190,9 +190,9 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     save(): Promise<User> {
-        let a: Promise<any>[] = [];
+        const a: Promise<any>[] = [];
         a.push(super.save());
-        for (let item of this.studyToDelete) {
+        for (const item of this.studyToDelete) {
             a.push(this.studyService.deleteUserFromStudy(item.id, this.entity.id));
         }
         return Promise.all([a]).then(() => {

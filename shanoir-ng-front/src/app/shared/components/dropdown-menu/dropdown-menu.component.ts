@@ -103,7 +103,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewIni
 
     public closeChildren(callback: () => void = () => { return; }) {
         if (!this.itemMenus) return;
-        let menusToClose: MenuItemComponent[] = [];
+        const menusToClose: MenuItemComponent[] = [];
         this.itemMenus.forEach((itemMenu, index) => {
             if (index != 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
                 menusToClose.push(itemMenu);
@@ -113,7 +113,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewIni
             callback();
             return;
         } else {
-            for (let itemMenu of menusToClose) {
+            for (const itemMenu of menusToClose) {
                 itemMenu.close(() => {
                     subMenusRemaining--;
                     if (subMenusRemaining == 0) {

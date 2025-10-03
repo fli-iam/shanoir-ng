@@ -130,13 +130,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     private initPapaya(dataFiles: any): Promise<any[]> {
-        let buffs = [];
+        const buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
             buffs.push(dataFiles.files[key].async("arraybuffer"));
         });
-        let promiseOfList = Promise.all(buffs);
+        const promiseOfList = Promise.all(buffs);
         return promiseOfList.then((values) => {
-            let params: object[] = [];
+            const params: object[] = [];
             params['binaryImages'] = [values];
             return params;
         });

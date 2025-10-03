@@ -48,7 +48,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     }
 
     protected mapEntity = (entity: any): Promise<DatasetAcquisition> => {
-        let result: DatasetAcquisition = this.getEntityInstance(entity);
+        const result: DatasetAcquisition = this.getEntityInstance(entity);
         this.dsAcqDtoService.toDatasetAcquisition(entity, result);
         return Promise.resolve(result);
     }
@@ -63,7 +63,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
             .toPromise()
             .then((page: Page<DatasetAcquisitionDTO>) => {
                 if (!page) return null;
-                let immediateResult: DatasetAcquisition[] = [];
+                const immediateResult: DatasetAcquisition[] = [];
                 this.dsAcqDtoService.toDatasetAcquisitions(page.content, immediateResult);
                 return Page.transType<DatasetAcquisition>(page, immediateResult);
             });
@@ -85,7 +85,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     }
 
     public stringify(entity: DatasetAcquisition) {
-        let dto = new DatasetAcquisitionDTO(entity);
+        const dto = new DatasetAcquisitionDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

@@ -98,13 +98,13 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     goToProcessing() {
-        let allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
+        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
         this.processingService.setDatasets(new Set(allSelectedNodes?.map(n => n.id)));
         this.router.navigate(['pipelines']);
     }
 
     downloadSelected() {
-        let allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
+        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
         if (allSelectedNodes.find(node => !node.canDownload)) {
             this.dialogService.error('error', 'Sorry, you don\'t have the right to download all the datasets you have selected');
         } else {
@@ -130,8 +130,8 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     openInViewer() {
-        let studies: Set<string> = new Set();
-        let series: Set<string> = new Set();
+        const studies: Set<string> = new Set();
+        const series: Set<string> = new Set();
         if (this.selectedExaminationNodes?.length > 0) {
             this.selectedExaminationNodes.forEach(exam => studies.add('1.4.9.12.34.1.8527.' + exam.id));
         }
@@ -148,8 +148,8 @@ export class StudyTreeComponent implements OnDestroy {
 
     onSelectedChange(study: StudyNode) {
         let dsNodes: DatasetNode[] = [];
-        let acqNodes: DatasetAcquisitionNode[] = [];
-        let examNodes: ExaminationNode[] = [];
+        const acqNodes: DatasetAcquisitionNode[] = [];
+        const examNodes: ExaminationNode[] = [];
         if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
             study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
@@ -198,7 +198,7 @@ export class StudyTreeComponent implements OnDestroy {
                 let nodesFound: DatasetNode[] = ds.selected ? [ds] : [];
                 // get selected datasets from this node's processings datasets
                 if (ds.processings && ds.processings != 'UNLOADED') {
-                    let foundInProc: DatasetNode[] = ds.processings
+                    const foundInProc: DatasetNode[] = ds.processings
                             .map(proc => this.searchSelectedInDatasetNodes(proc.datasets))
                             .reduce((allFromProc, oneProc) => allFromProc.concat(oneProc), []);
                             nodesFound = nodesFound.concat(foundInProc);

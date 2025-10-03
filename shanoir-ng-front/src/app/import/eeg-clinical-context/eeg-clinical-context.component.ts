@@ -59,7 +59,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         this.coordSystemOptions = CoordSystems.options;
         // Check for position to know if we have to display systemCoord or not
         this.hasPosition = false;
-        for (let dataset of this.importDataService.eegImportJob.datasets) {
+        for (const dataset of this.importDataService.eegImportJob.datasets) {
             if (dataset.coordinatesSystem == "true") {
                 this.hasPosition = true;
             }
@@ -95,19 +95,19 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     private getEventContexts(): EventContext[] {
-        let context = [];
-        let contextDict = {};
-        for (let dataset of this.importDataService.eegImportJob.datasets) {
+        const context = [];
+        const contextDict = {};
+        for (const dataset of this.importDataService.eegImportJob.datasets) {
             if (!contextDict[dataset.name]) {
                 contextDict[dataset.name] = {};
             }
-            for (let event of dataset.events) {
+            for (const event of dataset.events) {
                 if (contextDict[dataset.name][event.description]) {
                     // Update the context value
                     contextDict[dataset.name][event.description].number += 1;
                 } else {
                     // Create the context value
-                    let cont: EventContext = new EventContext();
+                    const cont: EventContext = new EventContext();
                     cont.number = 1;
                     cont.description = event.description;
                     cont.dataset_name = dataset.name;
@@ -129,7 +129,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     get valid(): boolean {
-        let context = this.getContext();
+        const context = this.getContext();
         return (
             !!context.study
             && !!context.center
@@ -145,13 +145,13 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     public importData(timestamp: number): Promise<any> {
-        let importJob = new EegImportJob();
+        const importJob = new EegImportJob();
         importJob.datasets = [];
-        let context = this.importDataService.contextData as EegContextData;
-        let importJobContext = this.importDataService.eegImportJob;
+        const context = this.importDataService.contextData as EegContextData;
+        const importJobContext = this.importDataService.eegImportJob;
 
-        for (let dataset of importJobContext.datasets) {
-            let datasetToSet = new EegDatasetDTO();
+        for (const dataset of importJobContext.datasets) {
+            const datasetToSet = new EegDatasetDTO();
             datasetToSet.channels = dataset.channels;
             datasetToSet.name = dataset.name;
             datasetToSet.files = dataset.files;
@@ -180,10 +180,10 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getPrefilledSubject(): Subject {
-        let subjectStudy = new SubjectStudy();
+        const subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        let newSubject = new Subject();
+        const newSubject = new Subject();
         newSubject.subjectStudyList = [];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
@@ -195,7 +195,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     private getPrefilledExam(): Examination {
-        let newExam = new Examination();
+        const newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
@@ -215,14 +215,14 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     private getPrefilledAcqEqt(): AcquisitionEquipment {
-        let acqEpt = new AcquisitionEquipment();
+        const acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         return acqEpt;
     }
 
     private findEegDate() {
         this.importDataService.eegImportJob?.datasets?.find(eegds => {
-            let event: Event = eegds.events?.find(event => !!event.date);
+            const event: Event = eegds.events?.find(event => !!event.date);
             if (event) {
                 this.firstDate = new Date(event.date);
                 return true;

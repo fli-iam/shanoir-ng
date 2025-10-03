@@ -45,7 +45,7 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
     }
     
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
             {headerName: "Dose", field: "dose", type: "number"},
             {headerName: "Dose Unit", field: "dose_unit.value"},

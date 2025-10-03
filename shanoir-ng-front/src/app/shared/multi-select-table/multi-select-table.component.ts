@@ -64,8 +64,8 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
@@ -132,7 +132,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     }
 
     onSelectOption(id: number) {
-        let option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
+        const option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
@@ -144,7 +144,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
 
     onRemoveItem(item: any) {
         this.modelArray = this.modelArray?.filter(one => one.id != item.id);
-        let removed: Option<any> = this.options?.find(option => option.value?.id == item.id);
+        const removed: Option<any> = this.options?.find(option => option.value?.id == item.id);
         if (removed) removed.disabled = false;
         this.selectedOptions = this.selectedOptions?.filter(option => option.value?.id != item.id);
         this.browserPaging.setItems(this.modelArray);

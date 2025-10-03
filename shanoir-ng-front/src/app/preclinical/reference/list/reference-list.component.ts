@@ -55,7 +55,7 @@ export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Re
     }
     
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Category", field: "category"},
             {headerName: "Type", field: "reftype"},
             {headerName: "Value", field: "value"}     

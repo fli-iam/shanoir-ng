@@ -78,16 +78,16 @@ export class MetadataComponent implements OnDestroy {
             if (!data) {
                 return;
             }
-            let metadata = Object.entries(data[0]);
+            const metadata = Object.entries(data[0]);
             metadata.forEach(entry => {
 
-                let met = new DicomMetadata();
+                const met = new DicomMetadata();
 
-                let group = entry[0].toString().substring(0,4);
-                let element = entry[0].toString().substring(4);
+                const group = entry[0].toString().substring(0,4);
+                const element = entry[0].toString().substring(4);
                 met.tag = group + ',' + element;
 
-                let code = parseInt(entry[0], 16);
+                const code = parseInt(entry[0], 16);
                 met.keyword = tags.find(tag => tag.code == code)?.label;
 
                 met.value = entry[1]['Value']?.toString()

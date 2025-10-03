@@ -87,7 +87,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
 
     ngOnInit(): void {
         const studyCardId: number = parseInt(this.activatedRoute.snapshot.paramMap.get('id'));
-        let datasetIds: number[] = Array.from(this.breadcrumbsService.currentStep.data.datasetIds || []);
+        const datasetIds: number[] = Array.from(this.breadcrumbsService.currentStep.data.datasetIds || []);
         let acquisitionPromise: Promise<DatasetAcquisition[]>;
         let studycardPromise: Promise<StudyCard[] | StudyCard>;
         if (datasetIds?.length > 0) {
@@ -101,15 +101,15 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return;
         }
 
-        let rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
+        const rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
 
         this.status = this.breadcrumbsService.currentStep.data.status ? this.breadcrumbsService.currentStep.data.status : 'default';
         if (this.breadcrumbsService.currentStep.data.showIncompatibles != undefined) {
             this.showIncompatibles = this.breadcrumbsService.currentStep.data.showIncompatibles;
         }
 
-        let filteredAcquisitionsPromise: Promise<DatasetAcquisition[]> = Promise.all([acquisitionPromise, rightsPromise]).then(([acquisitions, rights]) => {
-            let nonAdminAcquisitions: DatasetAcquisition[] = this.keycloakService.isUserAdmin() ? [] : acquisitions?.filter(acq =>
+        const filteredAcquisitionsPromise: Promise<DatasetAcquisition[]> = Promise.all([acquisitionPromise, rightsPromise]).then(([acquisitions, rights]) => {
+            const nonAdminAcquisitions: DatasetAcquisition[] = this.keycloakService.isUserAdmin() ? [] : acquisitions?.filter(acq =>
                 !rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
             );
             this.nonAdminStudies = new Set();
@@ -180,7 +180,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", disableSorting: true },
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
@@ -210,7 +210,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
     }
 
     getCustomActionsDefs(): any[] {
-        let customActionDefs:any = [];
+        const customActionDefs:any = [];
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.unSelectAll(), disabledIfNoSelected: true},
             {title: "Select all", awesome: "fa-solid fa-square", action: () => this.selectAll()},
@@ -222,7 +222,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
         if (!acqEqpt) return "";
         else if (!acqEqpt.manufacturerModel) return String(acqEqpt.id);
         else {
-            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            const manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                 + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber
         }
@@ -267,7 +267,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             this.studycardOptions = [];
             this.studyCards.forEach(sc => {
                 if (sc) {
-                    let option: Option<StudyCard> = new Option(sc, sc.name);
+                    const option: Option<StudyCard> = new Option(sc, sc.name);
                     option.compatible = this.datasetAcquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
                     if (option.compatible || this.showIncompatibles) {
                         this.studycardOptions.push(option);

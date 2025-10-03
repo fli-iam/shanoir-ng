@@ -100,7 +100,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
                 .then(examinations => {
                     this.node.examinations = [];
                     if (examinations) {
-                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        const sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                             return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
                         })
                         if (sortedExaminations) {

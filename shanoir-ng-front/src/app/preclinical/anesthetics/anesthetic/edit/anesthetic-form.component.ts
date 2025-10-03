@@ -181,12 +181,12 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.subscriptions.push(
             this.onSave.subscribe(response => {
                 if (this.ingredientsToDelete) {
-                    for (let ingredient of this.ingredientsToDelete) {
+                    for (const ingredient of this.ingredientsToDelete) {
                         this.ingredientService.deleteAnestheticIngredient(response.id, ingredient.id);
                     }
                 }
                 if (this.ingredientsToCreate) {
-                    for (let ingredient of this.ingredientsToCreate) {
+                    for (const ingredient of this.ingredientsToCreate) {
                         this.ingredientService.createAnestheticIngredient(response.id, ingredient).subscribe();
                     }
                 }
@@ -197,7 +197,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
 
     onChangeType() {
-        let generatedName = '';
+        const generatedName = '';
         this.refreshName(generatedName);
     }
 
@@ -207,7 +207,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }
 
         if (this.anesthetic && this.anesthetic.ingredients) {
-            for (let ingredient of this.anesthetic.ingredients) {
+            for (const ingredient of this.anesthetic.ingredients) {
                 let strIngredient = '';
                 strIngredient = strIngredient.concat(ingredient.name.value.substring(0, 3)).concat('. ');
                 if (ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));

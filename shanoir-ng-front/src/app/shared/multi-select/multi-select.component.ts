@@ -57,8 +57,8 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
@@ -119,7 +119,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     }
 
     onSelectOption(e: any) {
-        let option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
+        const option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;

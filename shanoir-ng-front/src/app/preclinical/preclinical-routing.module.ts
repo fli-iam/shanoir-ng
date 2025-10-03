@@ -39,7 +39,7 @@ import { AnestheticIngredientFormComponent } from './anesthetics/ingredients/edi
 import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/list/anestheticIngredient-list.component';
 
 
-let routes : Routes = [
+const routes : Routes = [
     {
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 

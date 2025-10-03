@@ -34,5 +34,5 @@ export enum BidsDataType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<BidsDataType>[] = all().map(prop => new Option<BidsDataType>(prop, getLabel(prop)));
+    export const options: Option<BidsDataType>[] = all().map(prop => new Option<BidsDataType>(prop, getLabel(prop)));
 }

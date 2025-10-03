@@ -53,7 +53,7 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
     }
 
     deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
-        let warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+        const warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
 
         this.consoleService.log('warn', warn);
         return Promise.resolve(false);

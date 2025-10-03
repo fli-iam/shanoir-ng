@@ -130,11 +130,11 @@ export class ExecutionComponent implements OnInit {
                 if (this.isAFile(parameter)) {
                     this.fileInputs.push(parameter);
                 }
-                let validators: ValidatorFn[] = [];
+                const validators: ValidatorFn[] = [];
                 if (!parameter.isOptional && parameter.type != ParameterType.Boolean && parameter.type != ParameterType.File) {
                     validators.push(Validators.required);
                 }
-                let control = new UntypedFormControl(parameter.defaultValue, validators);
+                const control = new UntypedFormControl(parameter.defaultValue, validators);
                 if (parameter.name != "executable") {
                     this.executionForm.addControl(parameter.name, control);
                 }
@@ -160,7 +160,7 @@ export class ExecutionComponent implements OnInit {
 
         this.datasetsPromise.then(() => {
 
-            let availableDatasets: DatasetLight[] = Array.from(this.selectedDatasets);
+            const availableDatasets: DatasetLight[] = Array.from(this.selectedDatasets);
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
@@ -181,7 +181,7 @@ export class ExecutionComponent implements OnInit {
                         // let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
                         // let nameFilter: RegExp = new RegExp(exp);
 
-                        let paramDatasets: DatasetLight[] = [];
+                        const paramDatasets: DatasetLight[] = [];
 
                         availableDatasets.forEach(dataset => {
                             paramDatasets.push(dataset);
@@ -203,7 +203,7 @@ export class ExecutionComponent implements OnInit {
 
         this.isSubmitted = true;
 
-        let exec = this.initExecutionCandidate();
+        const exec = this.initExecutionCandidate();
         this.executionService.createExecution(exec).then(
             monitoring => {
                 this.router.navigate([`/dataset-processing/details/${monitoring.id}`]);
@@ -216,7 +216,7 @@ export class ExecutionComponent implements OnInit {
     }
 
     private initExecutionCandidate() {
-        let candidate = new ExecutionCandidateDto();
+        const candidate = new ExecutionCandidateDto();
         candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         candidate.pipelineIdentifier = this.pipeline.identifier
         candidate.studyIdentifier = [...this.selectedDatasets][0].studyId;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
@@ -231,7 +231,7 @@ export class ExecutionComponent implements OnInit {
             parameter => {
                 if (this.isAFile(parameter)) {
                     // File type parameters (i.e. datasets)
-                    let dto = new DatasetParameterDTO();
+                    const dto = new DatasetParameterDTO();
                     dto.name = parameter.name;
                     dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
                     dto.exportFormat = this.exportFormat;

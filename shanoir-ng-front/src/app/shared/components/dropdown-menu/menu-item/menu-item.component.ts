@@ -85,7 +85,7 @@ export class MenuItemComponent implements AfterViewInit {
     }
 
     private closeOpenedAmong(menus: QueryList<MenuItemComponent>, callback: () => void = () => { return; }) {
-        let toBeClosed: MenuItemComponent[] = [];
+        const toBeClosed: MenuItemComponent[] = [];
         menus.forEach((menu: MenuItemComponent, index: number) => {
             if (index!= 0 && menu.hasChildren && menu.opened) {
                 toBeClosed.push(menu);
@@ -93,7 +93,7 @@ export class MenuItemComponent implements AfterViewInit {
         });
         let remaining: number = toBeClosed.length;
         if (remaining == 0) callback();
-        for (let menu of toBeClosed) {
+        for (const menu of toBeClosed) {
             menu.close(() => {
                 remaining--;
                 if (remaining == 0) {

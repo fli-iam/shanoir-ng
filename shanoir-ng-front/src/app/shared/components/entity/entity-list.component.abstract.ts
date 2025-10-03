@@ -82,7 +82,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     private computeOptions() {
-        let options = this.getOptions();
+        const options = this.getOptions();
         if (options.edit != undefined) this.edit = options.edit;
         if (options.view != undefined) this.view = options.view;
         if (options.delete != undefined) this.delete = options.delete;
@@ -119,8 +119,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        let dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
-        let dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
+        const dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
+        const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
             + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
 
         let promise: Promise<string>;
@@ -225,7 +225,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

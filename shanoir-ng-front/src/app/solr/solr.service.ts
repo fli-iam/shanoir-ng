@@ -45,7 +45,7 @@ export class SolrService {
 
     public getFacet(facetName: string, pageable: FacetPageable, mainRequest: SolrRequest): Promise<FacetResultPage> {
         // we can't set paxe size to 0, it would set it to default value (20)
-        let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
+        const fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         mainRequest.facetPaging = new Map();
         mainRequest.facetPaging.set(facetName, pageable);
         return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })
@@ -54,7 +54,7 @@ export class SolrService {
                 if (solrResPage.facetResultPages?.[0]) {
                     return solrResPage.facetResultPages[0];
                 } else {
-                    let reconstructed: FacetResultPage = new FacetResultPage();
+                    const reconstructed: FacetResultPage = new FacetResultPage();
                     reconstructed.number = pageable.pageNumber;
                     reconstructed.size = 0;
                     reconstructed.numberOfElements = 0;
@@ -77,7 +77,7 @@ export class SolrService {
         return JSON.stringify(solrRequest, (key, value) => {
             // write a Map as a key value object
             if(value instanceof Map) {
-                let res: any = {};
+                const res: any = {};
                 value.forEach((v, k) => res[k] = v);
                 return res;
             } else if (key.endsWith('Date') && value == 'invalid') {

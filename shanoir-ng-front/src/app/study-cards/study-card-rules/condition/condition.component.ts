@@ -77,7 +77,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             private formBuilder: UntypedFormBuilder) {}
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'values': new FormArray(this.condition.values?.map(val => {
                 return this.buildValueControl(val);
             })),
@@ -86,9 +86,9 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     private buildValueControl(value: string | Coil) {
-        let validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
-        let type: TagType = this.condition?.dicomTag?.type;
-        let vm: VM = this.condition?.dicomTag?.vm;
+        const validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
+        const type: TagType = this.condition?.dicomTag?.type;
+        const vm: VM = this.condition?.dicomTag?.vm;
         if (['Double', 'Float'].includes(type)) {
             validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         } else if (['Integer', 'Long'].includes(type)) {
@@ -133,10 +133,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         if (this.mode != 'view') {
             this.dicomService.getDicomTags().then(tags => {
                 this.tagOptions = [];
-                for (let tag of tags) {
-                    let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
-                    let cardinality: string = this.buildCadinalityLabel(tag.vm);
-                    let label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
+                for (const tag of tags) {
+                    const hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
+                    const cardinality: string = this.buildCadinalityLabel(tag.vm);
+                    const label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
                     this.tagOptions.push(new Option<DicomTag>(tag, label));
                 }
             });
@@ -198,14 +198,14 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.conditionChangeSubscription.unsubscribe();
                 this.conditionChangeSubscription = null;
             }
-            let conditionField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.condition.shanoirField);
+            const conditionField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.condition.shanoirField);
             if (this.mode == 'view') {
                 this.fieldLabel = conditionField?.label;
                 if (conditionField && conditionField.options) {
                     this.conditionChangeSubscription = conditionField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
                             this.condition.values?.forEach(value => {
-                                let valueOption: Option<any> = opts.find(opt => {
+                                const valueOption: Option<any> = opts.find(opt => {
                                     return opt.value == value 
                                         || (opt.value.id && value['id'] && opt.value.id == value['id'])
                                 });
@@ -225,7 +225,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                         this.shanoirFieldOptions = opts?.map(opt => opt.clone());
                         if (opts && opts.length > 0) {
                             this.condition.values?.forEach(value => {
-                                let valueOption: Option<any> = opts.find(opt => {
+                                const valueOption: Option<any> = opts.find(opt => {
                                     return opt.value == value
                                         || (opt.value.id && value['id'] && opt.value.id == value['id'])
                                 });
@@ -326,7 +326,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     private filterOperations() {
         if (this.condition.scope == 'StudyCardDICOMConditionOnDatasets') { // DICOM fields
             if (this.condition?.dicomTag) {
-                let type: TagType = this.condition.dicomTag.type;
+                const type: TagType = this.condition.dicomTag.type;
                 if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
                     this.operations.forEach(op => {
                         if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
@@ -389,7 +389,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         }
         // unselect disabled option
         if (this.condition.operation) {
-            let selectOperation: Option<Operation> = this.operations.find(op => op.value == this.condition.operation);
+            const selectOperation: Option<Operation> = this.operations.find(op => op.value == this.condition.operation);
             if (selectOperation?.disabled) {
                 this.condition.operation = null;
             } 
@@ -433,7 +433,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription = null;
         }
         if (this.condition.scope != 'StudyCardDICOMConditionOnDatasets') {
-            let conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
+            const conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {
                     this.shanoirFieldOptions = opts?.map(opt => opt.clone());

@@ -48,13 +48,13 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     getAllAdvanced(): { quick: Promise<T[]>, complete: Promise<T[]> } {
-        let res = {quick: null, complete: null};
+        const res = {quick: null, complete: null};
         res.complete = new Promise((resolve, reject) => {
             res.quick = this.http.get<any[]>(this.API_URL)
                 .toPromise()
                 .then((all) => {
-                    let quickRes: T[] = [];
-                    let mapPromise = this.mapEntityList(all, quickRes);
+                    const quickRes: T[] = [];
+                    const mapPromise = this.mapEntityList(all, quickRes);
                     res.complete = mapPromise
                     resolve(mapPromise);
                     return quickRes;
@@ -69,8 +69,8 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     deleteWithConfirmDialog(name: string, entity: Entity, studyListStr?: string): Promise<boolean> {
-        let dialogTitle : string = 'Delete ' + name;
-        let dialogMsg : string = 'Are you sure you want to finally delete the ' + name
+        const dialogTitle : string = 'Delete ' + name;
+        const dialogMsg : string = 'Are you sure you want to finally delete the ' + name
             + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
 
         return this.confirmDialogService
@@ -145,9 +145,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     protected toRealObject(entity: any): T {
-        let trueObject = Object.assign(this.getEntityInstance(entity), entity);
+        const trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
-            let value = entity[key];
+            const value = entity[key];
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);

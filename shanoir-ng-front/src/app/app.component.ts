@@ -91,7 +91,7 @@ export class AppComponent implements OnInit {
 
     private duaAlert() {
         this.studyService.getMyDUA().then(dua => {
-            let hasDUA: boolean = dua && dua.length > 0;
+            const hasDUA: boolean = dua && dua.length > 0;
             if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
                 this.keycloakSessionService.hasBeenAskedDUA = true;
                 if (this.router.url != '/dua' && this.router.url != '/home') {

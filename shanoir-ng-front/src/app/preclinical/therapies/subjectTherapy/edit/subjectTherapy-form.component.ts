@@ -169,14 +169,14 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     loadSubjectTherapyAttributesForSelect(selectedTherapy: SubjectTherapy) {
         this.subjectTherapy = selectedTherapy;
         if (this.therapies) {
-            for (let therapy of this.therapies) {
+            for (const therapy of this.therapies) {
                 if (selectedTherapy.therapy && selectedTherapy.therapy.id == therapy.id) {
                     this.subjectTherapy.therapy = therapy;
                 }
             }
         }
         if (this.units) {
-            for (let unit of this.units) {
+            for (const unit of this.units) {
                 if (selectedTherapy.dose_unit && selectedTherapy.dose_unit.id == unit.id) {
                     this.subjectTherapy.dose_unit = unit;
                 }

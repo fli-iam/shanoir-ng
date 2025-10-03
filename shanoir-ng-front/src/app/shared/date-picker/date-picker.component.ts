@@ -80,7 +80,7 @@ export class DatepickerComponent implements ControlValueAccessor {
 
     public static inFutureValidator = (control: AbstractControl): ValidationErrors | null => {
         if (control.value != 'invalid') {
-            let date: Date = control.value;
+            const date: Date = control.value;
             if (date && date.getTime && date.getTime() < Date.now()) return { future: true }
         }
         return null;

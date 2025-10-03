@@ -37,9 +37,9 @@ export class PagerComponent implements OnChanges {
 
 
     private refreshPagerList() {
-        let nbLinks = 7; // Must be odd
-        let half = (Math.floor(nbLinks / 2));
-        let list: number[] = [];
+        const nbLinks = 7; // Must be odd
+        const half = (Math.floor(nbLinks / 2));
+        const list: number[] = [];
         if (this.currentPage < half + 2) {
             if (this.nbPages < nbLinks) {
                 for (let i = 1; i < nbLinks && i <= this.nbPages; i++) {

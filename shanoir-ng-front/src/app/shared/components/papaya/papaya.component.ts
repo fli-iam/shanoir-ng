@@ -14,8 +14,8 @@
 
 import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy, OnChanges } from "@angular/core";
 
-declare var papaya: any;
-declare var papayaContainers: any[];
+declare let papaya: any;
+declare let papayaContainers: any[];
 
 @Component({
     selector: "papaya",

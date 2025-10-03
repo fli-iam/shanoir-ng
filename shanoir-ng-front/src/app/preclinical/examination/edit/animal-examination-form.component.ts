@@ -157,7 +157,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     buildForm(): UntypedFormGroup {
-        let numericRegex = /\-?\d*\.?\d{1,2}/;
+        const numericRegex = /\-?\d*\.?\d{1,2}/;
 
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
@@ -217,7 +217,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     public save(): Promise<Examination> {
         return super.save().then(result => {
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
             }
             return result;
@@ -337,7 +337,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        const contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 
@@ -373,7 +373,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
     }

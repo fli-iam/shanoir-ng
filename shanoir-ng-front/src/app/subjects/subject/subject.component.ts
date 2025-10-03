@@ -159,7 +159,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     buildForm(): UntypedFormGroup {
-        let subjectForm = this.formBuilder.group({
+        const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
             'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix])).concat([this.notEmptyValidator()])],
@@ -273,8 +273,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     getHash(stringToBeHashed: string): string {
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, this.HASH_LENGTH);
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 
@@ -285,7 +285,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private setSubjectBirthDateToFirstOfJanuary(): void {
-        let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
+        const newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
     }
 
@@ -328,7 +328,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
 
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }

@@ -54,7 +54,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Id", field: "id" },
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : "",
@@ -132,13 +132,13 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                .then(examAnesthetics => {
                if (examAnesthetics && examAnesthetics.length > 0) {
                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                    const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
                     this.examAnestheticsService.deleteAnesthetic(examAnesthetic);
                }
         });
         this.extradataService.getExtraDatas(examinationId).then(extradatas => {
             if(extradatas && extradatas.length > 0){
-            	for (let data of extradatas) {
+            	for (const data of extradatas) {
             		this.extradataService.deleteExtradata(data).then(() => { return; });
             	}
             }

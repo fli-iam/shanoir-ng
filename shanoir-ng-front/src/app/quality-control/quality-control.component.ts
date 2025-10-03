@@ -105,10 +105,10 @@ export class QualityControlComponent implements OnChanges {
     }
 
     downloadReport(qualityCard: QualityCard) {
-        let browserPaging: BrowserPaging<any> = this.pagings.get(qualityCard?.id);
+        const browserPaging: BrowserPaging<any> = this.pagings.get(qualityCard?.id);
         let csvStr: string = '';
         csvStr += browserPaging.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of browserPaging.items) {
+        for (const entry of browserPaging.items) {
             csvStr += '\n' + browserPaging.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {

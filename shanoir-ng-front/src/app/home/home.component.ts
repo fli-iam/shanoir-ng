@@ -69,7 +69,7 @@ export class HomeComponent {
             this.notifications = null;
             if (duas) {
                 this.notifications = duas.slice(0, 10);
-                for (let dua of duas) {
+                for (const dua of duas) {
                     if (dua.isChallenge) {
                         this.challengeDua = dua;
                         return;
@@ -104,7 +104,7 @@ export class HomeComponent {
             if (studies) {
                 this.allStudies = studies;
                 this.studies = studies.slice(0, 8);
-                for (let study of studies) {
+                for (const study of studies) {
                     if (study.challenge) {
                         this.challengeStudies.push(study);
                     }

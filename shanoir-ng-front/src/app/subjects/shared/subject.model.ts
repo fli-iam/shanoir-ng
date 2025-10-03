@@ -45,7 +45,7 @@ export class Subject extends Entity {
     study: Study;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
-        let subject = new Subject();
+        const subject = new Subject();
         subject.id = id;
         subject.name = name;
         subject.identifier = identifier;

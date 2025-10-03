@@ -45,7 +45,7 @@ export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterCo
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

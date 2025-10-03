@@ -78,7 +78,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasData {
-    	for (let ex of extradatas) {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype != "Physiological data"){
     			return ex as BloodGasData;
@@ -108,7 +108,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.bloodGasData.filename= this.fileToUpload.name;
-    	let bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
+    	const bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
     	bloodGasDataFile.filename = this.fileToUpload.name;
     	bloodGasDataFile.bloodGasDataFile = this.fileToUpload;
     	if(!this.isStandalone){

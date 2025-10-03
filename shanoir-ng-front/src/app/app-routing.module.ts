@@ -100,7 +100,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { TestComponent } from './utils/dev/test.component';
 
-let routes: Routes = [
+const routes: Routes = [
     {
         path: '',
         redirectTo: '/welcome',

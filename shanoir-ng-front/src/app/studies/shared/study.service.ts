@@ -240,8 +240,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     public stringify(entity: Study) {
-        let dto = new StudyDTO(entity);
-        let test = JSON.stringify(dto, (key, value) => {
+        const dto = new StudyDTO(entity);
+        const test = JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
         return test;
@@ -263,7 +263,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }
@@ -275,14 +275,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getStudiesStorageVolume(ids: number[]): Promise<Map<number, StudyStorageVolumeDTO>> {
         // separate cached and uncached volumes
-        let cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+        const cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
         ids.forEach(id => {
             if (this.studyVolumesCache.has(id)) {
                 cachedVolumes.set(id, this.studyVolumesCache.get(id));
             }
         });
         ids = ids.filter(id => !cachedVolumes.has(id));
-        let rets: Promise<Map<number, StudyStorageVolumeDTO>>[] = [];
+        const rets: Promise<Map<number, StudyStorageVolumeDTO>>[] = [];
         if (cachedVolumes.size > 0) rets.push(Promise.resolve(cachedVolumes));
 
         if (ids.length > 0) { // fetch volumes from server
@@ -302,7 +302,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         // aggregate results
         return Promise.all(rets).then(results => {
-            let totalVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+            const totalVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
             results?.forEach(result => {
                 result.forEach((val, key) => totalVolumes.set(key, val));
             });

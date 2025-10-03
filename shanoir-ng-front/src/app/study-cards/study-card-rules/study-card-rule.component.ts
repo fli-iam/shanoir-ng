@@ -89,7 +89,7 @@ export class StudyCardRuleComponent implements OnChanges {
     }
 
     addNewCondition() {
-        let cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
+        const cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.userChange.emit(this.rule);
@@ -106,7 +106,7 @@ export class StudyCardRuleComponent implements OnChanges {
     }
     
     deleteAction(index: number) {
-        let fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
+        const fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
         if (fieldOption) fieldOption.disabled = false;
         this.rule.assignments.splice(index, 1);
         this.userChange.emit(this.rule);

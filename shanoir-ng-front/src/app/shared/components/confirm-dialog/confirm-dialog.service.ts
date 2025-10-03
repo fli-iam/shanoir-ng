@@ -23,7 +23,7 @@ export class ConfirmDialogService {
 
     public confirm(title: string, message?: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openConfirm(title, message, buttons).then(answer => {
             ref.destroy();
             return answer;
@@ -32,7 +32,7 @@ export class ConfirmDialogService {
 
     public choose(title: string, message?: string, buttons?: {yes: string, no: string, cancel?: string}): Promise<'yes' | 'no' | false> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openChoose(title, message, buttons).then(answer => {
             ref.destroy();
             return answer;
@@ -41,7 +41,7 @@ export class ConfirmDialogService {
 
     public inform(title: string, message?: string, button?: string): Promise<boolean> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openInfo(title, message, button).then(answer => {
             ref.destroy();
             return answer;
@@ -50,7 +50,7 @@ export class ConfirmDialogService {
 
     public error(title: string, message?: string, link?: string): Promise<boolean> {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openError(title, message, link).then(answer => {
             ref.destroy();
             return answer;

@@ -57,7 +57,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {

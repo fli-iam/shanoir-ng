@@ -61,7 +61,7 @@ export class SubjectService extends EntityService<Subject> {
     }
 
     getPage(pageable: Pageable, name: string):  Promise<Page<Subject>> {
-        let params = { 'params': pageable.toParams() };
+        const params = { 'params': pageable.toParams() };
         params['params']['name'] = name;
         return this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params).toPromise();
     }
@@ -89,7 +89,7 @@ export class SubjectService extends EntityService<Subject> {
     }
 
     public stringify(entity: Subject) {
-        let dto = new SubjectDTO(entity);
+        const dto = new SubjectDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

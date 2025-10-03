@@ -57,7 +57,7 @@ export class QualityCardService extends EntityService<QualityCard> {
     }
 
     public stringify(entity: QualityCard) {
-        let dto = new QualityCardDTO(entity);
+        const dto = new QualityCardDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

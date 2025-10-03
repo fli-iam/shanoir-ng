@@ -169,21 +169,21 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     loadSubjectPathologyAttributesForSelect(selectedPatho: SubjectPathology) {
         this.subjectPathology = selectedPatho;
         if (this.pathologies) {
-            for (let patho of this.pathologies) {
+            for (const patho of this.pathologies) {
                 if (selectedPatho.pathology && selectedPatho.pathology.id == patho.id) {
                     this.subjectPathology.pathology = patho;
                 }
             }
         }
         if (this.models) {
-            for (let model of this.models) {
+            for (const model of this.models) {
                 if (selectedPatho.pathologyModel && selectedPatho.pathologyModel.id == model.id) {
                     this.subjectPathology.pathologyModel = model;
                 }
             }
         }
         if (this.locations) {
-            for (let location of this.locations) {
+            for (const location of this.locations) {
                 if (selectedPatho.location && selectedPatho.location.id == location.id) {
                     this.subjectPathology.location = location;
                 }
@@ -204,7 +204,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if (this.subjectPathology && this.subjectPathology.pathology) {
             this.modelsDisplay = [];
             if (this.models){
-            	for (let model of this.models) {
+            	for (const model of this.models) {
                 	if (this.subjectPathology.pathology.id == model.pathology.id) {
                     	this.modelsDisplay.push(model);
                 	}

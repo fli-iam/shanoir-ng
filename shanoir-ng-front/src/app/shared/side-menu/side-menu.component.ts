@@ -61,7 +61,7 @@ export class SideMenuComponent {
             this.userId = KeycloakService.auth.userId;
         }
 
-        let storedState = sessionStorage.getItem(this.sessionKey);
+        const storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 

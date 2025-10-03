@@ -125,7 +125,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         this.ingredient = ingredientSelected;
 
         if(this.units){
-            for (let unit of this.units) {
+            for (const unit of this.units) {
                 if(ingredientSelected.concentration_unit){
                     if (ingredientSelected.concentration_unit.id == unit.id) {
                         this.ingredient.concentration_unit = unit;
@@ -134,7 +134,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                 }
         }
         if(this.names){
-                for (let name of this.names) {
+                for (const name of this.names) {
                     if(ingredientSelected.name){
                         if (ingredientSelected.name.id == name.id) {
                             this.ingredient.name = name;
@@ -190,7 +190,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         if (params && params[0]) category = params[0];
         if (params && params[1]) reftype = params[1];
 
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 if (reftype == 'ingredient'){

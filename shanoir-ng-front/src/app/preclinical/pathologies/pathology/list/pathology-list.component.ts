@@ -58,7 +58,7 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
         function castToString(id: number) {
             return String(id);
         };
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "ID", field: "id", type: "number", cellRenderer: function (params: any) {
                 return castToString(params.data.id);
             }},

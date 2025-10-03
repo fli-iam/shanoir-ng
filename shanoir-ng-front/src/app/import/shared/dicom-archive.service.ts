@@ -15,7 +15,7 @@
 import { Injectable } from '@angular/core';
 
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 @Injectable()
 export class DicomArchiveService {
@@ -39,7 +39,7 @@ export class DicomArchiveService {
 	}
 
 	extractFileDirectoryStructure(): Promise<any>{
-		var zip = new JSZip();
+		const zip = new JSZip();
 		return zip.loadAsync(this.fileReader.result);
 	}
 }

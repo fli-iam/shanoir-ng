@@ -123,7 +123,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.acqEquip.center) {
             // Clean center
-            let centerSelected: Center = new Center();
+            const centerSelected: Center = new Center();
             centerSelected.id = this.acqEquip.center.id;
             centerSelected.name = this.acqEquip.center.name;
             this.acqEquip.center = centerSelected;
@@ -135,12 +135,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
@@ -159,7 +159,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
@@ -188,7 +188,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
-        let valueStr: string = control.value;
+        const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
             return { spaces: true }
         }

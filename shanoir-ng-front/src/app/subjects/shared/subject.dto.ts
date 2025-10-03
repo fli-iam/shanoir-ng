@@ -48,8 +48,8 @@ export class SubjectDTOService {
     public toEntityList(dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
-                let entity = new Subject();
+            for (const dto of dtos) {
+                const entity = new Subject();
                 SubjectDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -60,7 +60,7 @@ export class SubjectDTOService {
     static mapSyncFields(dto: SubjectDTO, entity: Subject): Subject {
         entity.id = dto.id;
         entity.examinations = dto.examinations ? dto.examinations.map(examId => {
-            let exam: Examination = new Examination();
+            const exam: Examination = new Examination();
             exam.id = examId.id;
             return exam;
         }) : null;
@@ -89,7 +89,7 @@ export class SubjectDTOService {
     }
 
     static tagDTOToTag(tagDTO: any): Tag {
-        let tag: Tag = new Tag();
+        const tag: Tag = new Tag();
         tag.id = tagDTO.id;
         tag.name = tagDTO.name;
         tag.color = tagDTO.color;
@@ -133,7 +133,7 @@ export class SubjectDTO {
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
         this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
+            const dto = new SubjectStudyDTO(ss);
             dto.subject = null;
             return dto;
         }) : null;

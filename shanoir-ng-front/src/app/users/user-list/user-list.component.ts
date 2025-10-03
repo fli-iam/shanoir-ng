@@ -53,9 +53,9 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
     }
 
     getEntities(eager: boolean = false): Promise<User[]> {
-        let userPromise: Promise<User[]> = this.userService.getAll();
+        const userPromise: Promise<User[]> = this.userService.getAll();
         // get the study-users
-        let allPromise: Promise<User[]> = Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
+        const allPromise: Promise<User[]> = Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
             users.forEach(user => {
                 user.studyUserList = [];
                 studies.forEach(study => user.studyUserList.push(...
@@ -78,7 +78,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {headerName: "Username", field: "username" },
             {headerName: "First Name", field: "firstName" },
             {headerName: "Last Name", field: "lastName" },

@@ -70,7 +70,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     }
 
     getEntities(): Promise<SubjectTherapy[]> {
-        let subjectTherapies: SubjectTherapy[] = [];
+        const subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
             if (this.breadcrumbsService.currentStep.isPrefilled("entity") && this.breadcrumbsService.currentStep.isPrefilled("TherapyToCreate") && !this.breadcrumbsService.currentStep.isPrefilled("TherapyToUpdate")) {
                 this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
@@ -115,7 +115,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     // }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", cellRenderer: function(params: any) {

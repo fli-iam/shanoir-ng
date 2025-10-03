@@ -38,7 +38,7 @@ export class ImportComponent {
     }
 
     getImportMode(): ImportMode | '' {
-        let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
+        const lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;
         }

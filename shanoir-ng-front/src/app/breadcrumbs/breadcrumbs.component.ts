@@ -102,9 +102,9 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     }
 
     private _checkWidth() {
-        let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-        let listWidth: number = this.elementRef.nativeElement.scrollWidth;
-        let nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
+        const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+        const listWidth: number = this.elementRef.nativeElement.scrollWidth;
+        const nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
         if (!this.nbDisplayedSteps) this.nbDisplayedSteps = nbSteps;
         let end: Promise<void>;
         if (listWidth > componentWidth) { // if overflow, reduce
@@ -123,8 +123,8 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return Promise.resolve();
         this.nbDisplayedSteps++;
         return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
-            let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-            let listWidth: number = this.elementRef.nativeElement.scrollWidth;
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, finally reduce
                 this.nbDisplayedSteps--;
                 return this.onViewChecked.pipe(take(1)).toPromise();
@@ -138,8 +138,8 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         if (this.nbDisplayedSteps <= 0) return Promise.resolve();
         this.nbDisplayedSteps--;
         return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
-            let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-            let listWidth: number = this.elementRef.nativeElement.scrollWidth;
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, reduce again
                 return this.reduceUntilFit();
             } else {

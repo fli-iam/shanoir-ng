@@ -117,7 +117,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
 
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
-            let date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
+            const date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }
