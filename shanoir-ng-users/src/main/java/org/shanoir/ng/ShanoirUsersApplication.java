@@ -24,7 +24,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
-public final class ShanoirUsersApplication {
+public class ShanoirUsersApplication {
 
     private ShanoirUsersApplication() { }
 

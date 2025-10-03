@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 @OpenAPIDefinition
 @EnableWebMvc
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
-public final class NiftiConversionApplication {
+public class NiftiConversionApplication {
 
     private NiftiConversionApplication() { }
 
