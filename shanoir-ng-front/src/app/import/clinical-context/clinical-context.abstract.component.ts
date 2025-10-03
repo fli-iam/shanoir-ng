@@ -403,7 +403,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.subjects = subjects ? subjects : [];
                 this.subjects?.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
             });
-            let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+            this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
                 this.study.tags = tags ? tags : [];
             });
             return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
