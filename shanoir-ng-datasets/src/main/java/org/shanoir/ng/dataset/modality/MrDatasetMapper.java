@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
