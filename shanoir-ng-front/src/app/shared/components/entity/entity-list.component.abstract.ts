@@ -121,7 +121,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected openDeleteConfirmDialog = (entity: T) => {
         const dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
         const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
-            + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
+            + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
         let promise: Promise<string>;
         if (this.getOnDeleteConfirmMessage) {

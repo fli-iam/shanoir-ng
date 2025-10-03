@@ -547,7 +547,7 @@ export class MassDownloadService {
     }
 
     private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
-        if (!!(window as any).showDirectoryPicker) { // test compatibility
+        if ((window as any).showDirectoryPicker) { // test compatibility
             const modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
             modalRef.instance.totalSize = totalSize;

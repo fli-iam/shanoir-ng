@@ -38,7 +38,7 @@ export class DatasetProcessingDTOService {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
         const promises: Promise<any>[] = [];
-        return Promise.all(promises).then(([]) => {
+        return Promise.all(promises).then(() => {
             return result;
         });
     }

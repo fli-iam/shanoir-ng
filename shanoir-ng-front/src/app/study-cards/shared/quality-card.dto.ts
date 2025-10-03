@@ -48,7 +48,7 @@ export class QualityCardDTOService {
             this.studyService.get(dto.studyId).then(study => result.study = study),
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
             this.coilService.getAll().then(coils => this.completeCoils(result, coils))
-        ]).then(([]) => {
+        ]).then(() => {
             return result;
         });
     }

@@ -56,7 +56,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     downloadState: TaskState = new TaskState();
     dateDisplay = dateDisplay;
     datasetIds: Promise<number[]> = new Promise(() => { return; });

@@ -126,7 +126,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
         this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
         return Promise.resolve().then(() => {
-            if (!!this.prefilledStudy) {
+            if (this.prefilledStudy) {
                 this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
                 this.study = this.prefilledStudy;
                 this.datasetProcessing.studyId = this.study?.id;
@@ -134,7 +134,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return this.fetchStudies();
             }
         }).then(() => {
-            if (!!this.prefilledSubject) {
+            if (this.prefilledSubject) {
                 this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
                 this.subject = this.prefilledSubject;
                 return this.fetchDatasets();

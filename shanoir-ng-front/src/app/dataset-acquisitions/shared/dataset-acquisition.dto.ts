@@ -59,7 +59,7 @@ export class DatasetAcquisitionDTOService {
             result.acquisitionEquipment = new AcquisitionEquipment();
         }
         promises.push( this.studyService.get(dto.examination.studyId).then(study => result.examination.study = study));
-        return Promise.all(promises).then(([]) => {
+        return Promise.all(promises).then(() => {
             return result;
         });
     }

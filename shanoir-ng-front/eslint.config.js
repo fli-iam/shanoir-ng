@@ -45,12 +45,6 @@ module.exports = tseslint.config(
         },
       ],
 
-      // Core ESLint rules - turn off common errors
-      "no-useless-escape": "off",
-      "no-empty": "off",
-      "no-extra-boolean-cast": "off",
-      "no-empty-pattern": "off",
-
       // TypeScript ESLint rules - turn off common errors
       "@typescript-eslint/no-explicit-any": "off", // 
       "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }], // allow unused function args starting with _

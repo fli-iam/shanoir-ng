@@ -65,13 +65,7 @@ export class DUASigningComponent implements OnChanges {
 
     refuse() {
         const confirmMsg: string = 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.';
-        this.confirmService.confirm('Warning !', confirmMsg).then(response => {
-            if (response) {
-
-            } else {
-
-            }
-        });
+        this.confirmService.confirm('Warning !', confirmMsg);
     }
 
     dlDua() {

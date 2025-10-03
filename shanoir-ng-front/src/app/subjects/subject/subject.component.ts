@@ -55,7 +55,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;

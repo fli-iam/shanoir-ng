@@ -48,7 +48,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
             dto.acquisitionEquipmentId ? this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq) : null,
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
             this.coilService.getAll().then(coils => this.completeCoils(result, coils))
-        ]).then(([]) => {
+        ]).then(() => {
             return result;
         });
     }
