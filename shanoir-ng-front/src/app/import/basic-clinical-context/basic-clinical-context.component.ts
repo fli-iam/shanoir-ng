@@ -25,7 +25,6 @@ import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 
-
 @Component({
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',

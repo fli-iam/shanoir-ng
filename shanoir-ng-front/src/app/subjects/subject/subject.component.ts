@@ -36,7 +36,6 @@ import { SubjectService } from '../shared/subject.service';
 import {Tag} from "../../tags/tag.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 import {isDarkColor} from "../../utils/app.utils";
-import {SubjectDTO} from "../shared/subject.dto";
 
 @Component({
     selector: 'subject-detail',

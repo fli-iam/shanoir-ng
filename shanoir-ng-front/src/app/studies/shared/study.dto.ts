@@ -18,8 +18,6 @@ import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';

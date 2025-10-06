@@ -21,7 +21,7 @@ import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
-import {Subject} from "../../subjects/shared/subject.model";
+import { Subject } from "../../subjects/shared/subject.model";
 
 export class Study extends Entity {
     clinical: boolean;
