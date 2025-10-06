@@ -123,7 +123,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
-        let studyListStr = this.getOnDeleteConfirmMessage(entity);
+        const studyListStr = this.getOnDeleteConfirmMessage(entity);
         this.confirmDialogService
             .confirm(
                 dialogTitle,

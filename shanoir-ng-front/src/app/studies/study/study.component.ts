@@ -169,8 +169,8 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         this.study.subjects = this.study.subjects.sort(
             function(a: Subject, b:Subject) {
-                let aname = a.studyIdentifier ? a.studyIdentifier : a.name;
-                let bname = b.studyIdentifier ? b.studyIdentifier : b.name;
+                const aname = a.studyIdentifier ? a.studyIdentifier : a.name;
+                const bname = b.studyIdentifier ? b.studyIdentifier : b.name;
                 return aname.localeCompare(bname);
             });
 

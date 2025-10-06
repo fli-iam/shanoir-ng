@@ -208,7 +208,7 @@ export abstract class SubjectNode extends ShanoirNode {
         super(parent, id, label);
         if (!tags) tags = [];
         else tags = tags.map(t => {
-            let tag: Tag = new Tag();
+            const tag: Tag = new Tag();
             tag.id = t.id;
             tag.color = t.color;
             tag.name = t.name;
