@@ -16,13 +16,13 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-
 import { slideDown } from '../../../shared/animations/animations';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'reference-form',
@@ -49,7 +49,7 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     }
 
     get reference(): Reference { return this.entity; }
-    set reference(reference: Reference) { this.entity = reference; }
+    set reference(reference: Reference) { this.entity = reference; }
 
     getService(): EntityService<Reference> {
         return this.referenceService;
@@ -94,8 +94,8 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     }
 
     loadSmth() {
-        let category = this.route.snapshot.queryParams['category'];
-        let reftype = this.route.snapshot.queryParams['reftype'];
+        const category = this.route.snapshot.queryParams['category'];
+        const reftype = this.route.snapshot.queryParams['reftype'];
         if (category) {
             this.reference.category = category;
             this.isEditableCategory = false;
@@ -128,7 +128,7 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     
 
     isValueInArray(value: string, array: string[]): boolean {
-        for (let search in array) {
+        for (const search in array) {
             if (search == value) return true;
         }
         return false;

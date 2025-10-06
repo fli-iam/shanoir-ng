@@ -16,14 +16,11 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {Step} from "../../breadcrumbs/breadcrumbs.service";
-import {Subject} from "../../subjects/shared/subject.model";
-import {SubjectStudy} from "../../subjects/shared/subject-study.model";
-import {ImagedObjectCategory} from "../../subjects/shared/imaged-object-category.enum";
 
 @Component({
     selector: 'manufacturer-detail',

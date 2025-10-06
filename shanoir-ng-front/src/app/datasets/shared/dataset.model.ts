@@ -15,13 +15,14 @@ import { CardinalityOfRelatedSubjects } from '../../enum/cardinality-of-related-
 import { ExploredEntity } from '../../enum/explored-entity.enum';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { DatasetProcessing } from './dataset-processing.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { DatasetType } from './dataset-type.model';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
 import {Tag} from "../../tags/tag.model";
+
+import { DatasetType } from './dataset-type.model';
+import { DatasetProcessing } from './dataset-processing.model';
 
 export abstract class Dataset extends Entity {
 

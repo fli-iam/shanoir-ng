@@ -16,6 +16,7 @@ import { Id } from '../../shared/models/id.model';
 import { SimpleStudyDTO } from '../../studies/shared/study.dto.model';
 import { QualityTag } from '../../study-cards/shared/quality-card.model';
 import { SubjectStudyTagDTO, Tag } from '../../tags/tag.model';
+
 import { SubjectStudy } from './subject-study.model';
 import { SubjectType } from './subject.types';
 

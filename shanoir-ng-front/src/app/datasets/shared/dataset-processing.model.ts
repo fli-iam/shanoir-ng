@@ -14,6 +14,7 @@
 
 import { Entity } from "../../shared/components/entity/entity.abstract";
 import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
+
 import { Dataset } from "./dataset.model";
 
 export class DatasetProcessing extends Entity {

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { BehaviorSubject, Subject, Subscription } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
 export class Queue {
@@ -27,8 +27,8 @@ export class Queue {
     waitForTurn(): Promise<() => void> {
         const stop: Subject<any> = new Subject<any>();
         const ticket: number = this._nextTicket++;
-        return new Promise((resolve, reject) => {
-            const sub: Subscription = this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
+        return new Promise((resolve) => {
+            this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
                 if (calledTicket == ticket) {
                     stop.next();
                     stop.complete();

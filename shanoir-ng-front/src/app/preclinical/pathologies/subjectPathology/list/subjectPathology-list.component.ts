@@ -14,12 +14,13 @@
 
 import {Component} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectPathology } from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 
@@ -68,7 +69,7 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     }
 
     getEntities(): Promise<SubjectPathology[]> {
-        let subjectPathologies: SubjectPathology[] = [];
+        const subjectPathologies: SubjectPathology[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
             if (this.breadcrumbsService.currentStep.isPrefilled("entity") && this.breadcrumbsService.currentStep.isPrefilled("PathologyToCreate") && !this.breadcrumbsService.currentStep.isPrefilled("PathologyToUpdate")) {
                 this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
@@ -92,7 +93,7 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     }
 
      getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             { headerName: "Pathology", field: "pathology.name" },
             { headerName: "PathologyModel", field: "pathologyModel.name" },
             { headerName: "Location", field: "location.value" },

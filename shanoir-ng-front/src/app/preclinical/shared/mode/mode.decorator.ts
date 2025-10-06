@@ -14,6 +14,6 @@
 
 import { Modes } from './mode.enum';
 
-export function ModesAware(constructor: Function) {
+export function ModesAware(constructor) { // file will be deleted in another PR
     constructor.prototype.Modes = Modes;
 }

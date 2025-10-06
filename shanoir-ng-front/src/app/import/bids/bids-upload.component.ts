@@ -14,15 +14,15 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
-import { ImportJob } from '../shared/dicom-data.model';
-import { ImportService } from '../shared/import.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { Study } from '../../studies/shared/study.model';
-import { Option } from '../../shared/select/select.component';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { slideDown } from '../../shared/animations/animations';
+import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { ImportService } from '../shared/import.service';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -53,11 +53,11 @@ export class BidsUploadComponent {
     Promise.all([this.studyService.getAll(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
-                for (let study of allStudies) {
-                    let studyOption: Option<Study> = new Option(study, study.name);
+                for (const study of allStudies) {
+                    const studyOption: Option<Study> = new Option(study, study.name);
                     if (study.studyCenterList) {
-                        for (let studyCenter of study.studyCenterList) {
-                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id);
+                        for (const studyCenter of study.studyCenterList) {
+                            const center: Center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
                                 studyCenter.center = center;
                             }
@@ -82,8 +82,8 @@ export class BidsUploadComponent {
     public onSelectStudy() {
         this.centerOptions = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
-            for (let studyCenter of this.study.studyCenterList) {
-                let centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
+            for (const studyCenter of this.study.studyCenterList) {
+                const centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
                 this.centerOptions.push(centerOption);
             }
         }
@@ -104,10 +104,10 @@ export class BidsUploadComponent {
     private uploadToServer(file: any) {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id)
-            .then((importJob: ImportJob) => {
+            .then(() => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
             }).catch(error => {
