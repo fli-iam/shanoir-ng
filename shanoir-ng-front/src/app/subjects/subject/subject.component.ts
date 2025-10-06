@@ -11,13 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
@@ -28,10 +33,9 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import {Tag} from "../../tags/tag.model";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
+import {isDarkColor} from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',
@@ -41,16 +45,17 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
     standalone: false
 })
 
-export class SubjectComponent extends EntityComponent<Subject> {
+export class SubjectComponent extends EntityComponent<Subject> implements OnDestroy {
 
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    isAlreadyAnonymized: boolean = false;
+    selectedStudy: IdName;
+    //isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
@@ -58,6 +63,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     hasDownloadRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
+    tags: Tag[] = [];
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -72,11 +78,17 @@ export class SubjectComponent extends EntityComponent<Subject> {
         new Option<string>('O', 'Other'),
     ];
 
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
+    ];
+
     constructor(private route: ActivatedRoute,
-            private subjectService: SubjectService,
-            private studyService: StudyService,
-            private downloadService: MassDownloadService,
-            private studyRightsService: StudyRightsService) {
+                private subjectService: SubjectService,
+                private studyService: StudyService,
+                private downloadService: MassDownloadService,
+                private studyRightsService: StudyRightsService) {
 
         super(route, 'subject');
     }
@@ -97,17 +109,21 @@ export class SubjectComponent extends EntityComponent<Subject> {
     init() {
         super.init();
         if (this.mode == 'create') {
-            this.firstName = this.breadcrumbsService.currentStep.data.firstName;
-            this.lastName = this.breadcrumbsService.currentStep.data.lastName;
-            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
-	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( () => this.subject.subjectStudyList = []);
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
+
+            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
+            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
                 if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
                 this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
             }
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
-	        }
+            }
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
@@ -138,52 +154,67 @@ export class SubjectComponent extends EntityComponent<Subject> {
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
         return Promise.resolve();
     }
 
     buildForm(): UntypedFormGroup {
-        let subjectForm = this.formBuilder.group({
+        const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
-            'isAlreadyAnonymized': [],
+            'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
             'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix])).concat([this.notEmptyValidator()])],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [this.subject.subjectStudyList, [Validators.required]],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
+            'studyIdentifier': [this.subject.studyIdentifier],
+            'physicallyInvolved': [this.subject.physicallyInvolved],
+            'tags': [this.subject.tags],
+            'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
+            'subjectType': [this.subject.subjectType, Validators.required],
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
         this.subscriptions.push(
-            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
-                this.isAlreadyAnonymized = false;
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(() => {
+                this.subject.isAlreadyAnonymized = false;
                 this.updateFormControl(subjectForm);
             })
         );
         this.subscriptions.push(
-            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
+            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(() => {
                 this.updateFormControl(subjectForm);
             })
         );
         if (!this.subject.name && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
         }
+
         return subjectForm;
     }
 
+    public onSelectStudy() {
+        this.studyService.get(this.selectedStudy?.id).then( study => {
+            this.subject.study = study;
+            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
+                this.subject.study.tags = tags ? tags : [];
+            })
+        });
+    }
+
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
-      return (c: AbstractControl): { [key: string]: boolean } | null => {
-        if (forbiddenValues.indexOf(c.value) !== -1) {
-          return { 'subjectNamePrefix': true };
-        }
-        return null;
-      };
+        return (c: AbstractControl): Record<string, boolean> | null => {
+            if (forbiddenValues.indexOf(c.value) !== -1) {
+                return { 'subjectNamePrefix': true };
+            }
+            return null;
+        };
     }
 
     private notEmptyValidator(): ValidatorFn {
-        return (c: AbstractControl): { [key: string]: boolean } | null => {
+        return (c: AbstractControl): Record<string, boolean> | null => {
             if (!c.value || c.value.trim().length < 2) {
                 return { 'notEmptyValidator': true };
             }
@@ -192,7 +223,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
                 formGroup.get('lastName').setValidators(this.nameValidators);
@@ -215,6 +246,8 @@ export class SubjectComponent extends EntityComponent<Subject> {
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
         }
+        this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
+        this.subject.subjectStudyList = null;
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
@@ -230,7 +263,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     private generateSubjectIdentifier(): string {
         let hash;
-        if (this.humanSelected() && !this.isAlreadyAnonymized) {
+        if (this.humanSelected() && !this.subject.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
         }
         else {
@@ -240,8 +273,8 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     getHash(stringToBeHashed: string): string {
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, this.HASH_LENGTH);
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 
@@ -252,7 +285,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private setSubjectBirthDateToFirstOfJanuary(): void {
-        let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
+        const newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
     }
 
@@ -261,9 +294,9 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     public toggleAnonymised() {
-        if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
+        if (this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
-        } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
+        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
             this.subject.name = this.subjectNamePrefix;
         }
     }
@@ -274,10 +307,35 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
-        const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
-        studyListStr += studiesNames;
-        studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
+        let studyListStr : string = "";
+        if (entity.subjectStudyList.length > 0) {
+            studyListStr = "\n\nThis subject belongs to the studies: \n- ";
+            const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
+            studyListStr += studiesNames;
+        }
+        studyListStr += '\n\nWarning: this action deletes ALL datasets ';
+        if (entity.subjectStudyList.length > 0) {
+            studyListStr += 'from ALL studies listed above.';
+        } else {
+            studyListStr += 'from this subject.';
+        }
         return Promise.resolve(studyListStr);
     }
+
+    ngOnDestroy() {
+        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
+        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
+
+        for (const subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
+    }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
+    }
+
+    protected readonly dateDisplay = dateDisplay;
 }

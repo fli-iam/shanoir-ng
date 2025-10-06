@@ -19,15 +19,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
-import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.dataset.modality.BidsDataset;
+import org.shanoir.ng.dataset.modality.EegDataSetDescription;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
+import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -44,22 +48,15 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +136,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private StudyRepository studyRepo;
 
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+	private SubjectRepository subjectRepository;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -238,8 +235,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
 		// Get the list of subjects
-		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudy_Id(studyId);
-		return subjectStudies.stream().map(SubjectStudy::getSubject).collect(Collectors.toList());
+		List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
+		return subjects;
 	}
 
 	/**
@@ -503,7 +500,7 @@ public class BIDSServiceImpl implements BIDSService {
 			fileName += fileSuffix;
 
 			try {
-			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
+				Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
 				// Use link to avoid file duplication
 				deleteIfExists(pathToGo.toAbsolutePath().toString());
 				Files.createLink(pathToGo, srcFile.toPath());
@@ -760,9 +757,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 		buffer = new StringBuilder();
 		buffer.append("{\n")
-		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
-		.append("\"EEGCoordinateUnits\": ").append("\"" + DatasetApiController.CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
-		.append("}");
+				.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
+				.append("\"EEGCoordinateUnits\": ").append("\"" + DatasetApiController.CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
+				.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 

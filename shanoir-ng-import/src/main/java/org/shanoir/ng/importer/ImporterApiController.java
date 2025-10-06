@@ -31,7 +31,6 @@ import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
 import org.shanoir.ng.importer.model.*;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -698,9 +697,10 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
 			@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
-			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
+		LOG.warn("Multiple examination import.");
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -723,7 +723,7 @@ public class ImporterApiController implements ImporterApi {
 			File subjectFolder = subjectFolders[0];
 			File[] examinationsFolders = subjectFolder.listFiles();
 
-			String subjectName = studyName + "_" + subjectFolder.getName();
+			String subjectName = subjectFolder.getName();
 			Subject subject = null;
 
 			// Sort examination folders by alphabetical order
@@ -754,15 +754,9 @@ public class ImporterApiController implements ImporterApi {
 
 				// Create subject only once.
 				if (subject == null) {
-
-					// Create subject
 					// Update birth date to 1st of january of the year
 					LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
-					subject = ImportUtils.createSubject(subjectName, updateBirthdate, patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
-
-					LOG.debug("We found a subject " + subjectName);
-
-					// Create subject
+					subject = ImportUtils.createSubject(subjectName, studyId, studyName, updateBirthdate, patient.getPatientSex(), 1);
 					Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 					if (subjectId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject could not be created, please check data", null));
@@ -776,20 +770,25 @@ public class ImporterApiController implements ImporterApi {
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
 					equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
 					if (equipmentIdFromDicom != null) {
-						Properties props = new Properties();
-						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
-						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
-						props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
+						if (studyCardId != 0L) {
+							Properties props = new Properties();
+							props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
+							props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
+							props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
 
-						Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
-						if (newStudyCardId != null)  {
-							studyCardId = newStudyCardId;
+							Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
+							if (newStudyCardId != null) {
+								studyCardId = newStudyCardId;
+							}
 						}
 						job.setAcquisitionEquipmentId(equipmentIdFromDicom);
+					} else {
+						job.setAcquisitionEquipmentId(equipmentId);
 					}
 				}
 
-				job.setStudyCardId(studyCardId);
+				if (studyCardId != 0L)
+					job.setStudyCardId(studyCardId);
 
 				// STEP 4.2 Create examination
 				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());

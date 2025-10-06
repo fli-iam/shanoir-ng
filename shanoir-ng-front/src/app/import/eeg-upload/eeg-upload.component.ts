@@ -2,26 +2,27 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, ViewChild} from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { Component} from '@angular/core';
 import { Router } from '@angular/router';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { EegImportJob } from '../shared/eeg-data.model';
-import { TaskState } from 'src/app/async-tasks/task.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -33,7 +34,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     standalone: false
 })
 export class EegUploadComponent {
-    
+
     public archiveStatus: Status = 'none';
     protected extensionError: boolean;
     private modality: string;
@@ -41,11 +42,11 @@ export class EegUploadComponent {
     uploadState: TaskState = new TaskState();
 
     constructor(
-            private importService: ImportService, 
+            private importService: ImportService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
-        
+
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
@@ -68,7 +69,7 @@ export class EegUploadComponent {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
         this.modality = null;
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadEegFile(formData)
             .subscribe(

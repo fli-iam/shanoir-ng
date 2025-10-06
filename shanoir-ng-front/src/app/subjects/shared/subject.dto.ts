@@ -12,23 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import {formatDate} from "@angular/common";
 
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
+import {QualityTag} from "../../study-cards/shared/quality-card.model";
+import {SimpleStudy, Study} from "../../studies/shared/study.model";
+
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
-import { Sex } from './subject.types';
-import {formatDate} from "@angular/common";
+import {Sex, SubjectType} from './subject.types';
 
 
 @Injectable()
 export class SubjectDTOService {
-
-    constructor(
-    ) {}
 
     /**
      * Convert from DTO to Entity
@@ -48,8 +48,8 @@ export class SubjectDTOService {
     public toEntityList(dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
-                let entity = new Subject();
+            for (const dto of dtos) {
+                const entity = new Subject();
                 SubjectDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -60,7 +60,7 @@ export class SubjectDTOService {
     static mapSyncFields(dto: SubjectDTO, entity: Subject): Subject {
         entity.id = dto.id;
         entity.examinations = dto.examinations ? dto.examinations.map(examId => {
-            let exam: Examination = new Examination();
+            const exam: Examination = new Examination();
             exam.id = examId.id;
             return exam;
         }) : null;
@@ -77,11 +77,19 @@ export class SubjectDTOService {
         } else {
             entity.subjectStudyList = [];
         }
+        entity.studyIdentifier = dto.studyIdentifier;
+        entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
+        entity.subjectType = dto.subjectType;
+        entity.physicallyInvolved = dto.physicallyInvolved;
+        entity.tags = dto.tags;
+        entity.qualityTag = dto.qualityTag;
+        entity.study = new Study()
+        entity.study.id = dto.studyId;
         return entity;
     }
 
     static tagDTOToTag(tagDTO: any): Tag {
-        let tag: Tag = new Tag();
+        const tag: Tag = new Tag();
         tag.id = tagDTO.id;
         tag.name = tagDTO.name;
         tag.color = tagDTO.color;
@@ -103,13 +111,21 @@ export class SubjectDTO {
     selected: boolean = false;
     subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
+    studyIdentifier: string;
+    isAlreadyAnonymized: boolean = false;
+    subjectType: SubjectType;
+    physicallyInvolved: boolean;
+    tags: Tag[];
+    qualityTag: QualityTag;
+    study: SimpleStudy;
+    studyId: number;
 
     constructor(subject: Subject) {
         this.id = subject.id;
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        if (subject.birthDate) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
+        if (subject.birthDate && !isNaN(subject.birthDate.getTime())) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;
@@ -117,9 +133,16 @@ export class SubjectDTO {
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
         this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
+            const dto = new SubjectStudyDTO(ss);
             dto.subject = null;
             return dto;
         }) : null;
+        this.studyIdentifier = subject.studyIdentifier;
+        this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
+        this.subjectType = subject.subjectType;
+        this.physicallyInvolved = subject.physicallyInvolved;
+        this.tags = subject.tags;
+        this.qualityTag = subject.qualityTag;
+        this.study = new SimpleStudy(subject.study);
     }
 }

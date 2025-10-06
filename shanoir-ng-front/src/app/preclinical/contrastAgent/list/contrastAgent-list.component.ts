@@ -13,6 +13,9 @@
  */
 
 import {Component, Input, ViewChild} from '@angular/core'
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
 import { InjectionInterval } from "../../shared/enum/injectionInterval";
@@ -21,13 +24,11 @@ import { InjectionType } from "../../shared/enum/injectionType";
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'contrast-agent-list',
     templateUrl: 'contrastAgent-list.component.html',
     styleUrls: ['contrastAgent-list.component.css'],
-    providers: [ContrastAgentService],
     standalone: false
 })
 export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent<ContrastAgent>{

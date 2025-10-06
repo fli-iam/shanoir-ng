@@ -104,19 +104,19 @@ public class ImportDialog extends JDialog {
 	public JTextFieldMandatory mrExaminationCommentTF;
 
 	public JLabel mriCenterLabel;
-	public JLabel mriCenterText;
+	public JTextField mriCenterText;
 	public JLabel mriCenterAddressLabel;
-	public JLabel mriCenterAddressText;
+	public JTextField mriCenterAddressText;
 	public JLabel mriStationNameLabel;
 	public JLabel mriStationNameText;
 	public JLabel mriManufacturerLabel;
-	public JLabel mriManufacturerText;
+	public JTextField mriManufacturerText;
 	public JLabel mriManufacturersModelNameLabel;
-	public JLabel mriManufacturersModelNameText;
+	public JTextField mriManufacturersModelNameText;
 	public JLabel mriMagneticFieldStrengthLabel;
-	public JLabel mriMagneticFieldStrengthText;
+	public JTextField mriMagneticFieldStrengthText;
 	public JLabel mriDeviceSerialNumberLabel;
-	public JLabel mriDeviceSerialNumberText;
+	public JTextField mriDeviceSerialNumberText;
 
 	public JButton cancelButton;
 	public JButton exportButton;
@@ -125,8 +125,6 @@ public class ImportDialog extends JDialog {
 	public JLabel separatorSubjectStudyCardLabel;
 	public JLabel separatorSubjectLabel;
 	public JSeparator separatorSubject;
-	public JLabel separatorSubjectStudyRelLabel;
-	public JSeparator separatorSubjectStudyRel;
 	public JLabel separatorMrExaminationLabel;
 	public JSeparator separatorMrExamination;
 	
@@ -175,7 +173,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 0;
 		dicomPanel.add(mriCenterLabel, dicomPanelGBC);
 
-		mriCenterText = new JLabel("");
+		mriCenterText = new JTextField(15);
 		mriCenterText.setFont(font);
 		mriCenterText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.gridx = 1;
@@ -188,7 +186,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 1;
 		dicomPanel.add(mriCenterAddressLabel, dicomPanelGBC);
 
-		mriCenterAddressText = new JLabel("");
+		mriCenterAddressText = new JTextField(15);
 		mriCenterAddressText.setFont(font);
 		mriCenterAddressText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.gridx = 1;
@@ -216,7 +214,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 0;
 		dicomPanel.add(mriManufacturerLabel, dicomPanelGBC);
 
-		mriManufacturerText = new JLabel("");
+		mriManufacturerText = new JTextField(15);
 		mriManufacturerText.setFont(font);
 		mriManufacturerText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
@@ -231,7 +229,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 1;
 		dicomPanel.add(mriManufacturersModelNameLabel, dicomPanelGBC);
 
-		mriManufacturersModelNameText = new JLabel("");
+		mriManufacturersModelNameText = new JTextField(15);
 		mriManufacturersModelNameText.setFont(font);
 		mriManufacturersModelNameText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
@@ -246,7 +244,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 2;
 		dicomPanel.add(mriMagneticFieldStrengthLabel, dicomPanelGBC);
 
-		mriMagneticFieldStrengthText = new JLabel("");
+		mriMagneticFieldStrengthText = new JTextField(4);
 		mriMagneticFieldStrengthText.setFont(font);
 		mriMagneticFieldStrengthText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
@@ -261,7 +259,7 @@ public class ImportDialog extends JDialog {
 		dicomPanelGBC.gridy = 3;
 		dicomPanel.add(mriDeviceSerialNumberLabel, dicomPanelGBC);
 
-		mriDeviceSerialNumberText = new JLabel("");
+		mriDeviceSerialNumberText = new JTextField(15);
 		mriDeviceSerialNumberText.setFont(font);
 		mriDeviceSerialNumberText.setHorizontalAlignment(SwingConstants.LEFT);
 		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
@@ -314,6 +312,7 @@ public class ImportDialog extends JDialog {
 
 		studyCB = new JComboBoxMandatory();
 		studyCB.setBackground(Color.WHITE);
+		studyCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
@@ -323,6 +322,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyCB, importDialogGBC);
 		studyCB.addItemListener(importStudyAndStudyCardCBIL);
+		AutoCompleteDecorator.decorate(studyCB);
 
 		studyCardLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardLabel") + " *");
 		studyCardLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -433,7 +433,7 @@ public class ImportDialog extends JDialog {
 
 		existingSubjectsCB = new JComboBox();
 		existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.existingSubjectsTooltip"));
+		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.autoFillTooltip"));
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
@@ -528,29 +528,6 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectPersonalCommentTextArea, importDialogGBC);
 
-		/**
-		 * Subject / Study
-		 */
-		separatorSubjectStudyRelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.subjectStudySeparator"));
-		separatorSubjectStudyRelLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		separatorSubjectStudyRelLabel.setOpaque(true);
-		separatorSubjectStudyRelLabel.setFont(new Font("Cracked", Font.BOLD, 14));
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 15;
-		importDialogGBC.gridwidth = 1;
-		formPanel.add(separatorSubjectStudyRelLabel, importDialogGBC);
-
-		separatorSubjectStudyRel = new JSeparator();
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 15;
-		importDialogGBC.weightx = 1;
-		importDialogGBC.gridwidth = 3;
-		formPanel.add(separatorSubjectStudyRel, importDialogGBC);
-		
 		subjectStudyIdentifierLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectStudyIdentifierLabel"));
 		subjectStudyIdentifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -558,7 +535,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectStudyIdentifierLabel, importDialogGBC);
 
@@ -570,7 +547,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(subjectStudyIdentifierTF, importDialogGBC);
 
@@ -581,7 +558,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectIsPhysicallyInvolvedLabel, importDialogGBC);
 
@@ -590,7 +567,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(subjectIsPhysicallyInvolvedCB, importDialogGBC);
 
@@ -600,7 +577,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(subjectTypeLabel, importDialogGBC);
 
@@ -611,7 +588,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(subjectTypeCB, importDialogGBC);
 
@@ -627,14 +604,14 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(separatorMrExaminationLabel, importDialogGBC);
 
 		separatorMrExamination = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
 		formPanel.add(separatorMrExamination, importDialogGBC);
@@ -646,7 +623,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationExistingExamLabel, importDialogGBC);
 
@@ -656,7 +633,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(mrExaminationExistingExamCB, importDialogGBC);
 
@@ -666,7 +643,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationNewExamLabel, importDialogGBC);
 
@@ -675,7 +652,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(mrExaminationNewExamCB, importDialogGBC);
 
@@ -689,7 +666,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationCenterLabel, importDialogGBC);
 
@@ -699,7 +676,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(mrExaminationCenterCB, importDialogGBC);
 
@@ -710,7 +687,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationExamExecutiveLabel, importDialogGBC);
 
@@ -720,7 +697,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(mrExaminationExamExecutiveCB, importDialogGBC);
 
@@ -730,7 +707,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(mrExaminationDateLabel, importDialogGBC);
 
@@ -749,7 +726,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add((Component) mrExaminationDateDP, importDialogGBC);
 
@@ -760,7 +737,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
 		formPanel.add(mrExaminationCommentLabel, importDialogGBC);
@@ -770,7 +747,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(mrExaminationCommentTF, importDialogGBC);
 
@@ -778,7 +755,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 1;
 		formPanel.add(cancelButton, importDialogGBC);
 
@@ -789,7 +766,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 2;
 		formPanel.add(exportButton, importDialogGBC);
 		exportButton.addActionListener(importFinishAL);

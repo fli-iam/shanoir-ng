@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
@@ -39,7 +38,7 @@ export class ImportComponent {
     }
 
     getImportMode(): ImportMode | '' {
-        let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
+        const lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;
         }

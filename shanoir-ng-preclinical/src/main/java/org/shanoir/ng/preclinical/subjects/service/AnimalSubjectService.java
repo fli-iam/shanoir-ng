@@ -79,10 +79,10 @@ public interface AnimalSubjectService {
 
 	Long getIdBySubjectId(long subjectId);
 
-
-	boolean isSubjectNameAlreadyUsed(String name);
+	boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId);
 
     Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
 
 	List<AnimalSubject> findBySubjectIds(List<Long> subjectIds);
+
 }

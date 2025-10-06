@@ -13,8 +13,11 @@
  */
 
 import { Component } from '@angular/core';
-import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import {AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -26,9 +29,8 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import { Selection } from 'src/app/studies/study/tree.service';
+
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -74,6 +76,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.updateAcquEq();
     }
 
+    init() {
+        super.init();
+        if (this.mode == 'create') {
+            this.breadcrumbsService.currentStep.getPrefilledValue("center").then( res => this.acqEquip.center = res);
+        }
+    }
+
     initEdit(): Promise<void> {
         this.getManufModels();
         return Promise.all([
@@ -84,26 +93,37 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    async initCreate(): Promise<void> {
+    initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
         this.prefill();
         if (this.centersFromStudyCard == null) {
-            this.centerService.getCentersNames().then(centers => this.centers = centers);
+            this.centerService.getCentersNames().then(centers => {
+                this.centers = centers
+            });
         }
         else {
             this.centers = this.centersFromStudyCard;
         }
         this.getManufModels();
+        return Promise.resolve();
     }
 
     private prefill() {
-        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
-        this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
-        if (this.nonEditableCenter) {
-            this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
-        } else if (this.acqEquip.center) {
+        if (this.breadcrumbsService.currentStep.isPrefilled('sc_center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('sc_center').then(res => {
+                this.centersFromStudyCard = res;
+                this.nonEditableCenter = true;
+            });
+        }
+        if (this.breadcrumbsService.currentStep.isPrefilled('center')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => {
+                this.acqEquip.center = res;
+            });
+        }
+        // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
+        if (this.acqEquip.center) {
             // Clean center
-            let centerSelected: Center = new Center();
+            const centerSelected: Center = new Center();
             centerSelected.id = this.acqEquip.center.id;
             centerSelected.name = this.acqEquip.center.name;
             this.acqEquip.center = centerSelected;
@@ -115,13 +135,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
+        const form: UntypedFormGroup = this.formBuilder.group({
+            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
         });
@@ -129,7 +149,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return form;
     }
 
-    private getManufModels(manufModelId?: number): void {
+    private getManufModels(): void {
         this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
     }
@@ -139,11 +159,11 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/manufacturer-model/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+                    this.entity.manufacturerModel = entity as ManufacturerModel;
                 })
             );
         });
@@ -152,13 +172,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
         this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(value => {
+            form.get('manufacturerModel').valueChanges.subscribe(() => {
                 form.get('serialNumber').updateValueAndValidity();
             })
         );
     }
 
-    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
+    private manufAndSerialUnicityValidator = (): ValidationErrors | null => {
         if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
                 && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
@@ -168,11 +188,27 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
-        let valueStr: string = control.value;
+        const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
             return { spaces: true }
         }
         return null;
+    }
+
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
+        if (!control.parent) return null;
+
+        const serialNumber = control.value;
+        const manufacturerModel = control.parent.get('manufacturerModel')?.value;
+
+        if (!serialNumber || !manufacturerModel) return null;
+
+        try {
+            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+            return exists ? { unique: true } : null;
+        } catch {
+            return null;
+        }
     }
 
     save(): Promise<AcquisitionEquipment> {

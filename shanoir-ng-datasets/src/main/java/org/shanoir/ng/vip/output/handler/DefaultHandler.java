@@ -11,6 +11,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.model.Study;
@@ -40,6 +41,9 @@ import java.util.regex.Pattern;
 @Service
 @Order(1)
 public class DefaultHandler extends OutputHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
+
     @Value("${vip.result-file-name}")
     private String resultFileName;
 
@@ -61,8 +65,8 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
-
+    @Autowired
+	private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {
@@ -71,12 +75,9 @@ public class DefaultHandler extends OutputHandler {
 
     @Override
     public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring monitoring) throws ResultHandlerException {
-
         try {
-
             List<File> outputFiles = new ArrayList<>();
             File resultJson = null;
-
             for(File file : resultFiles){
                 if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
@@ -87,18 +88,15 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
+            List<Dataset> inputDatasets = new ArrayList<>(monitoring.getInputDatasets());
 
             if(inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
-
             if(outputFiles.isEmpty()){
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
-
             DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
-
             executionTrackingService.completeTracking(monitoring, newProcessing);
         } catch (Exception e) {
             importerService.createFailedJob(parent.getPath());
@@ -106,12 +104,9 @@ public class DefaultHandler extends OutputHandler {
         }
     }
 
-
     private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
         List<String> candidates = new ArrayList<>();
-
         candidates.add(tarName);
-
         if (resultJson == null) {
             LOG.info("No result JSON found in archive.");
         } else if (resultJson.length() == 0) {
@@ -146,7 +141,6 @@ public class DefaultHandler extends OutputHandler {
             }
         }
         List<Dataset> datasets = new ArrayList<>();
-
         for (String name : candidates) {
             datasets.addAll(getDatasetFromFilename(name));
         }
@@ -204,7 +198,7 @@ public class DefaultHandler extends OutputHandler {
             }
 
             processedDataset.setDatasetType(DatasetType.Generic.name());
-            importerService.createProcessedDataset(processedDataset);
+            processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
         }
@@ -225,4 +219,5 @@ public class DefaultHandler extends OutputHandler {
         processing = datasetProcessingService.create(processing);
         return processing;
     }
+
 }

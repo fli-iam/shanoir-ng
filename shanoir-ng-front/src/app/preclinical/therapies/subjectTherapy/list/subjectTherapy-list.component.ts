@@ -14,6 +14,8 @@
 
 import {Component} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
@@ -21,7 +23,6 @@ import { TherapyType } from "../../../shared/enum/therapyType";
 import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 @Component({
@@ -69,13 +70,16 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     }
 
     getEntities(): Promise<SubjectTherapy[]> {
-        let subjectTherapies: SubjectTherapy[] = [];
+        const subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
-            // Initialize from breadcrumbs cache if existing
-            let ts: SubjectTherapy[];
-            if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies != null) {
-                ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies;
-                this.preclinicalSubject.therapies = ts;
+            if (this.breadcrumbsService.currentStep.isPrefilled("entity") && this.breadcrumbsService.currentStep.isPrefilled("TherapyToCreate") && !this.breadcrumbsService.currentStep.isPrefilled("TherapyToUpdate")) {
+                this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
+                    this.preclinicalSubject = res;
+                })
+            } else if (this.breadcrumbsService.currentStep.isPrefilled("TherapyToUpdate")) {
+                this.breadcrumbsService.currentStep.getPrefilledValue("TherapyToUpdate").then(res => {
+                    this.preclinicalSubject = res as PreclinicalSubject;
+                })
             } else if (this.preclinicalSubject.animalSubject.id) {
                 return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
                     this.preclinicalSubject.therapies = st;
@@ -89,8 +93,29 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return Promise.resolve(subjectTherapies);
     }
 
+    // getEntities(): Promise<SubjectTherapy[]> {
+    //     let subjectTherapies: SubjectTherapy[] = [];
+    //     if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
+    //         // Initialize from breadcrumbs cache if existing
+    //         let ts: SubjectTherapy[];
+    //         if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies != null) {
+    //             ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies;
+    //             this.preclinicalSubject.therapies = ts;
+    //         } else if (this.preclinicalSubject.animalSubject.id) {
+    //             return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
+    //                 this.preclinicalSubject.therapies = st;
+    //                 return st;
+    //             });
+    //         } else {
+    //             this.preclinicalSubject.therapies = [];
+    //         }
+    //         return Promise.resolve(this.preclinicalSubject.therapies);
+    //     }
+    //     return Promise.resolve(subjectTherapies);
+    // }
+
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", cellRenderer: function(params: any) {

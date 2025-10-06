@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ElementRef } from "@angular/core";
 import { ExaminationDatasetAcquisitionDTO } from "../dataset-acquisitions/shared/dataset-acquisition.dto";
 import { DatasetAcquisition } from "../dataset-acquisitions/shared/dataset-acquisition.model";
 import { DatasetProcessing } from "../datasets/shared/dataset-processing.model";
@@ -74,7 +73,11 @@ export abstract class ShanoirNode {
     }
 
     set opened(opened: boolean) {
-        opened ? this.open() : this.close();
+        if (opened) {
+            this.open();
+        } else {
+            this.close();
+        }
     }
 
     get route(): string {
@@ -207,7 +210,7 @@ export abstract class SubjectNode extends ShanoirNode {
         if (!tags) tags = [];
         else tags = tags.map(t => t.clone());
         if (qualityTag) {
-            let tag: Tag = new Tag();
+            const tag: Tag = new Tag();
             tag.id = -1;
             if (qualityTag == QualityTag.VALID) {
                 tag.name = 'Valid';
@@ -287,7 +290,7 @@ export class ExaminationNode extends ShanoirNode {
     protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';
 
     public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ExaminationNode {
-        let node: ExaminationNode = new ExaminationNode(
+        const node: ExaminationNode = new ExaminationNode(
             parent,
             exam.id,
             new ExaminationPipe().transform(exam),
@@ -297,7 +300,8 @@ export class ExaminationNode extends ShanoirNode {
             canDownload,
             exam.preclinical
         );
-        node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
+        node.datasetAcquisitions = UNLOADED;
+        //exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -321,7 +325,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
     protected readonly routeBase = '/dataset-acquisition/details/';
 
     public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetAcquisitionNode {
-        let node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
+        const node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
             parent,
             dsAcq.id,
             dsAcq.name,
@@ -329,7 +333,8 @@ export class DatasetAcquisitionNode extends ShanoirNode {
             canDelete,
             canDownload
         );
-        node.datasets = dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
+        node.datasets = UNLOADED;
+        // dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -364,7 +369,7 @@ export class DatasetNode extends ShanoirNode {
     protected readonly routeBase = '/dataset/details/';
 
     public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetNode {
-        let node: DatasetNode = new DatasetNode(
+        const node: DatasetNode = new DatasetNode(
             parent,
             dataset.id,
             dataset.name,
@@ -377,8 +382,9 @@ export class DatasetNode extends ShanoirNode {
             dataset.inPacs,
             null
         );
-        node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
-        let metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
+        node.processings = UNLOADED;
+        //dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
+        const metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
         node.metadata = metadataNode;
         return node;
     }
@@ -392,7 +398,8 @@ export class ProcessingNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public canDownload: boolean
     ) {
         super(parent, id, label);
     }
@@ -401,14 +408,14 @@ export class ProcessingNode extends ShanoirNode {
     protected readonly routeBase = '/dataset-processing/details/';
 
     public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ProcessingNode {
-        let node: ProcessingNode = new ProcessingNode(
+        const node: ProcessingNode = new ProcessingNode(
             parent,
             processing.id,
             processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            null,
-            canDelete
+            UNLOADED,
+            canDelete,
+            canDownload
         );
-        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete, canDownload)) : [];
         return node;
     }
 }

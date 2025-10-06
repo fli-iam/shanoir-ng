@@ -19,14 +19,16 @@ import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.utils.Utils;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.UniquePatientTreeSelectionModel;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 
 	private String filePathDicomDir;
+
+	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
@@ -89,7 +93,16 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				File selectedRootDir = fileChooser.getSelectedFile();
 				if (selectedRootDir.isDirectory()) {
 					try {
-						List<Patient> patients = ImportUtils.getPatientsFromDir(selectedRootDir, true);
+						boolean dicomDirGenerated = false;
+						File dicomDirFile = new File(selectedRootDir, ShUpConfig.DICOMDIR);
+						if (!dicomDirFile.exists()) {
+							logger.info("No DICOMDIR found: generating one.");
+							dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
+							dicomDirGenerated = true;
+							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+						}
+						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 						fillMediaWithPatients(media, patients);
 						filePathDicomDir = selectedRootDir.toString();
 					} catch (Exception e) {
@@ -102,9 +115,9 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		// when the query button is clicked
 		} else if (event.getSource().getClass() == JButton.class) {
 			logger.info("Querying DICOM server with query parameters: "
-					+ mainWindow.patientNameTF.getText() + " "
-					+ mainWindow.patientIDTF.getText() + " "
-					+ mainWindow.birthDate.toString() + " "
+					+ Utils.sha256(mainWindow.patientNameTF.getText()) + " "
+					+ Utils.sha256(mainWindow.patientIDTF.getText()) + " "
+					+ Utils.sha256(mainWindow.birthDate.toString()) + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString() + " "
 					+ mainWindow.modality);
@@ -187,6 +200,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		}
 		// set values for display in the GUI tree
 		mainWindow.dicomTree = new DicomTree(media);
+		// set custom selection model to avoid multiple patients selection
+		mainWindow.dicomTree.setSelectionModel(new UniquePatientTreeSelectionModel(mainWindow.dicomTree));		
 		// expand entire JTree after creation
 		for (int i = 0; i < mainWindow.dicomTree.getRowCount(); i++) {
 			mainWindow.dicomTree.expandRow(i);

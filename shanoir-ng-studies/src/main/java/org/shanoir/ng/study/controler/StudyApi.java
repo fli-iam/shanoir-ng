@@ -201,7 +201,7 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateStudy(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description = "study to update", required = true) @RequestBody Study study, BindingResult result)
@@ -389,6 +389,19 @@ public interface StudyApi {
 	@GetMapping(value = "/statistics/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
 	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
-		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
-	
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+
+
+	@Operation(summary = "", description = "If exists, returns a list of Study corresponding to the given right for current user")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/studyUser/right/{right}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+	ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
+			@Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException;
+
+
 }

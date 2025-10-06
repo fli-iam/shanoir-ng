@@ -13,17 +13,17 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { Enum } from '../../shared/utils/enum';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Option } from '../../shared/select/select.component';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
@@ -110,7 +110,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     private getManufById(id: number): Manufacturer {
-        for (let manuf of this.manufs) {
+        for (const manuf of this.manufs) {
             if (id == manuf.id) {
                 return manuf;
             }
@@ -123,11 +123,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     openNewManuf() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/manufacturer/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
+                    this.entity.manufacturer = entity as Manufacturer;
                 })
             );
         });

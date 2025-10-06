@@ -16,6 +16,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ContrastAgent }    from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
 import { Reference }   from '../../reference/shared/reference.model';
@@ -26,13 +28,11 @@ import { EnumUtils } from "../../shared/enum/enumUtils";
 import { slideDown } from '../../../shared/animations/animations';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'contrast-agent-form',
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
-    providers: [ContrastAgentService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
@@ -42,7 +42,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     @Input() protocol_id: number;
     @Output() closing = new EventEmitter();
     @Output() agentChange = new EventEmitter();
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() isStandalone: boolean = true;
     agentNames: Reference[] = [];
     sites: Enum[] = [];
@@ -62,7 +62,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     get agent(): ContrastAgent { return this.entity; }
-    set agent(agent: ContrastAgent) { this.entity = agent; }
+    set agent(agent: ContrastAgent) { this.entity = agent; }
 
     getService(): EntityService<ContrastAgent> {
         return this.contrastAgentsService;
@@ -160,7 +160,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }

@@ -17,7 +17,6 @@ import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
@@ -47,7 +46,6 @@ public class QualityUtils {
 
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		ExaminationData examinationData = new ExaminationData();
-		SubjectStudy subjectStudy = new SubjectStudy();
 		final File importJobDir = new File(importJob.getWorkFolder());
 		List<QualityCard> qualityCards = new ArrayList<>();
 		
@@ -90,9 +88,7 @@ public class QualityUtils {
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
 		examinationData.setStudyId(importJob.getStudyId());
-		// Set an Id to the subjectStudy to retrieve the qualityTag
-		subjectStudy.setId(importJob.getSubject().getId());
-		examinationData.setSubjectStudy(subjectStudy);
+		examinationData.setSubjectId(importJob.getSubject().getId());
 
 		try {
 			qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);

@@ -6,8 +6,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
+import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
+import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +95,110 @@ public class FileUtil {
 				}
 			} catch (IOException e) {
 				logger.error("IO Exception" , e);
+			}
+		}
+	}
+
+	// public static void deleteFolder(File folder) {
+	// 	if (folder.isDirectory()) {
+	// 		for (File file : folder.listFiles()) {
+	// 			deleteFolder(file);
+	// 		}
+	// 	}
+	// 	if (!folder.delete()) {
+	// 		logger.error("Error deleting file: " + folder.getAbsolutePath());
+	// 	}
+	// }
+
+	public static void cleanTempFolders(File workFolder, String studyInstanceUID) {
+		File tempStudyInstanceUIDFolder = new File(workFolder, studyInstanceUID);
+		if (tempStudyInstanceUIDFolder.exists()) {
+			tempStudyInstanceUIDFolder.delete();
+			logger.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
+		}
+	}
+
+	public static void readAndCopyDicomFilesToUploadFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
+			final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
+		for (Serie serie : selectedSeries) {
+			List<String> fileNamesForSerie = new ArrayList<String>();
+			final String seriesInstanceUID = serie.getSeriesInstanceUID();
+			File serieFolder = new File(workFolder
+				+ File.separator + studyInstanceUID
+				+ File.separator + seriesInstanceUID);
+			if (serieFolder.exists()) {
+				List<Instance> instances = new ArrayList<>();
+				File[] serieFiles = serieFolder.listFiles();
+				for (int i = 0; i < serieFiles.length; i++) {
+					String dicomFileName = serieFiles[i].getName();
+					fileNamesForSerie.add(dicomFileName);
+					File sourceFileFromPacs = serieFiles[i];
+					try (DicomInputStream dIS = new DicomInputStream(sourceFileFromPacs)) { // keep try to finally close input stream
+						Attributes attributes = dIS.readDataset();
+						if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+							Instance instance = new Instance(attributes);
+							instances.add(instance);						
+							File destSerieFolder = new File(uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
+							if (!destSerieFolder.exists())
+								destSerieFolder.mkdirs();
+							File destDicomFile = new File(destSerieFolder, dicomFileName);
+							Files.copy(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							sourceFileFromPacs.delete();
+						}
+					}
+				}
+				serie.setInstances(instances);
+				if (!instances.isEmpty()) {
+					instances.sort(new InstanceNumberSorter());
+					logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+				} else {
+					logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+					serie.setIgnored(true);
+					serie.setSelected(false);
+				}
+				downloadOrCopyReport.append("Download: serie "
+					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+					+ serie.getSeriesDescription()
+					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
+				if (serie.getInstances().size() != fileNamesForSerie.size()) {
+					downloadOrCopyReport.append("Error: Download: serie "
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription()
+						+ " downloaded with " + fileNamesForSerie.size()
+						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
+				}
+				if (serie.getNumberOfSeriesRelatedInstances() != null
+					&& serie.getNumberOfSeriesRelatedInstances().intValue() != 0
+					&& serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
+					logger.warn("Download: serie "
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription()
+						+ " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
+						+ ") != " + serie.getInstances().size()
+					);
+				}
+				retrievedDicomFiles.addAll(fileNamesForSerie);
+				logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
+						+ " was successful.\n\n");
+			} else {
+				downloadOrCopyReport.append("Error: Download: serie "
+					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+				 	+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
+				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
+						+ " has failed.\n\n");
+			}
+		}
+	}
+
+	public static void deleteFolderDownloadFromDicomServer(File workFolder, String studyInstanceUID, List<Serie> selectedSeries) throws IOException {
+		if (selectedSeries != null && !selectedSeries.isEmpty()) {
+			File studyFolder = new File(workFolder + File.separator + studyInstanceUID);
+			try (Stream<Path> walk = Files.walk(studyFolder.toPath())) {
+				walk.sorted(Comparator.reverseOrder())
+					.map(Path::toFile)
+					.forEach(File::delete);
 			}
 		}
 	}

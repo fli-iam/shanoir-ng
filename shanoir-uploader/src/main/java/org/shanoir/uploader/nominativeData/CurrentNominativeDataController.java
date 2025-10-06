@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -21,6 +22,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -52,71 +54,85 @@ public class CurrentNominativeDataController {
 		currentNominativeDataModel.addObserver(cuw);
 		processWorkFolder(workFolderFilePath);
 
-		cuw.table.addMouseListener(new MouseAdapter() {
-			public DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
+		DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
 
+		// Set the action when delete completed uploads button is clicked
+		JButton deleteAllButton = cuw.frame.deleteFinishedUploads;
+		
+		deleteAllButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int rows = cuw.table.getRowCount();
+				String message = cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
+				UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.cancel"));
+				UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.no"));
+				UIManager.put("OptionPane.okButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.ok"));
+				UIManager.put("OptionPane.yesButtonText", cuw.frame.resourceBundle
+						.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.yes"));
+				if (JOptionPane.showConfirmDialog(null, message,
+						cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.title"), 1)
+						== JOptionPane.YES_OPTION) {
+					boolean uploadsToDelete = false;
+					for (int i = 0; i < rows; i++) {
+						String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
+						if (uploadState.equals(cuw.finishedUploadState)
+								|| uploadState.equals(cuw.checkOKUploadState)) {
+							DeleteDirectory dt = new DeleteDirectory();
+							dt.delete((String) model.getValueAt(i, 0));
+							uploadsToDelete = true;
+						}
+					}
+					if (uploadsToDelete) {
+						String mess = cuw.frame.resourceBundle
+								.getString("shanoir.uploader.currentUploads.Action.deleteAll.succeeded.message");
+						JOptionPane.showMessageDialog(new JFrame(), mess,
+								cuw.frame.resourceBundle.getString(
+										"shanoir.uploader.currentUploads.Action.deleteAll.succeeded.title"),
+								JOptionPane.INFORMATION_MESSAGE);
+					}
+					try {
+						processWorkFolder(workFolderFilePath);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+
+		JTableHeader header = cuw.table.getTableHeader();
+		
+		cuw.table.addMouseListener(new MouseAdapter() {
             @Override
 			public void mouseClicked(MouseEvent e) {
-				int row = cuw.table.getSelectedRow();
-				int col = cuw.table.getSelectedColumn();
-				int rows = cuw.table.getRowCount();
-				// Last row and last column: delete all imports whatever their status
-				if (col == cuw.deleteColumn && row == rows - 1) {
-					String message = cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
-					UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.cancel"));
-					UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.no"));
-					UIManager.put("OptionPane.okButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.ok"));
-					UIManager.put("OptionPane.yesButtonText", cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.yes"));
-					if (JOptionPane.showConfirmDialog(null, message,
-							cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.title"), 1)
-							== JOptionPane.YES_OPTION) {
-						boolean uploadsToDelete = false;
-						for (int i = 0; i < rows; i++) {
-							String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
-							if (uploadState.equals(cuw.finishedUploadState)
-									|| uploadState.equals(cuw.errorUploadState)) {
-								DeleteDirectory dt = new DeleteDirectory();
-								dt.delete((String) model.getValueAt(i, 0));
-								uploadsToDelete = true;
-							}
-						}
-						if (uploadsToDelete) {
-							String mess = cuw.frame.resourceBundle
-									.getString("shanoir.uploader.currentUploads.Action.deleteAll.succeeded.message");
-							JOptionPane.showMessageDialog(new JFrame(), mess,
-									cuw.frame.resourceBundle.getString(
-											"shanoir.uploader.currentUploads.Action.deleteAll.succeeded.title"),
-									JOptionPane.INFORMATION_MESSAGE);
-						}
-						try {
-							processWorkFolder(workFolderFilePath);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					}
+				// Get the selected row from the model and not the view (sorted) row
+				int viewRow = cuw.table.getSelectedRow();
+				int modelRow = cuw.table.convertRowIndexToModel(viewRow);
+				int col = header.columnAtPoint(e.getPoint());
 				// delete one import: ready (to gain disk space) or finished
-				} else if (col == cuw.deleteColumn && row != -1) {
-					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+				if (col == cuw.deleteColumn) {
+					String uploadState = (String) cuw.table.getModel().getValueAt(modelRow, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
-							|| uploadState.equals(cuw.readyUploadState)) {
+							|| uploadState.equals(cuw.checkOKUploadState)
+							|| uploadState.equals(cuw.checkKOUploadState)
+							|| uploadState.equals(cuw.readyUploadState)
+							|| uploadState.equals(cuw.errorUploadState)) {
 						try {
-							showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}					
+							showDeleteConfirmationDialog(workFolderFilePath, cuw, modelRow);
+						} catch (IOException eIO) {
+							logger.error(eIO.getMessage(), eIO);
+						}				
 					}
 				// start the import or try reimporting an exam with status "ERROR"
-				} else if (col == cuw.importColumn && row != -1) {
-					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+				} else if (col == cuw.importColumn) {
+					String uploadState = (String) cuw.table.getModel().getValueAt(modelRow, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
-						String importJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
+						String importJobFilePath = (String) cuw.table.getModel().getValueAt(modelRow, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
 						File importJobFile = new File(importJobFilePath);
-						importJobManager = new NominativeDataImportJobManager(importJobFile); // Or uploadJobManager ? or dedicated importJobManager
+						importJobManager = new NominativeDataImportJobManager(importJobFile);
 						ImportJob importJob = importJobManager.readImportJob();
 						cuw.frame.getImportDialogOpener().openImportDialog(importJob, importJobFile.getParentFile());
 					}
@@ -133,7 +149,7 @@ public class CurrentNominativeDataController {
 					final CurrentUploadsWindowTable cuw, int row) throws IOException {
 				String message = cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.message")
-						+ (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + "?";
+						+ " " + (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + " ?";
 				UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.cancel"));
 				UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
@@ -245,9 +261,7 @@ public class CurrentNominativeDataController {
 					importJob.setUploadPercentage((String) uploadState.toString());
 				}
 				return importJob;
-			} //else {
-			// 	logger.error("Folder found in workFolder without upload-job.xml.");
-			// }
+			}
 		} else {
 			logger.error("Folder " + folder.getName() + " found in workFolder without import-job.json.");
 		}
@@ -300,15 +314,9 @@ public class CurrentNominativeDataController {
 
 			if (value instanceof String) {
  				String string = (String) value;
- 				if (row != cuw.rowsNb - 1) {
- 					setText(getDeleteHTML(string));
- 					setToolTipText(cuw.frame.resourceBundle
- 							.getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
- 				} else {
- 					setText(getDeleteAllHTML(string));
-					setToolTipText(cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
-				}
+ 				setText(getDeleteHTML(string));
+ 				setToolTipText(cuw.frame.resourceBundle
+ 						.getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
 			}
 			return tableCellRendererComponent;
 		}
@@ -322,15 +330,6 @@ public class CurrentNominativeDataController {
 			sb.append("</html>");
 			return sb.toString();
 		}
-
-		private String getDeleteAllHTML(String string) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html>");
-			sb.append("<span style=\"color: purple;\"><b>");
-			sb.append(string);
-			sb.append("</b></span>");
-			sb.append("</html>");
-			return sb.toString();
-		}
 	}
+
 }

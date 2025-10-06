@@ -18,6 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
@@ -53,7 +54,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     get coil(): Coil { return this.entity; }
-    set coil(coil: Coil) { this.entity = coil; }
+    set coil(coil: Coil) { this.entity = coil; }
 
     getService(): EntityService<Coil> {
         return this.coilService;
@@ -62,7 +63,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromCoil(this.coil);
     }
-    
+
     initView(): Promise<void> {
         return this.centerService.getAll().then(centers => {
             this.coil.center = centers.find(center => center.id == this.coil.center.id);
@@ -85,7 +86,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        this.prefilledCenter = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+        this.breadcrumbsService.currentStep.getPrefilledValue('center').then(res => this.prefilledCenter = res);
         let centerPromise: Promise<void>;
         if (this.prefilledCenter) {
             this.coil.center = this.prefilledCenter;
@@ -96,7 +97,7 @@ export class CoilComponent extends EntityComponent<Coil> {
                 this.centers = centers;
             });
         }
-        this.prefilledManuf = this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel');
+        this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel').then(res => this.prefilledManuf = res);
         if (this.prefilledManuf) {
             this.coil.manufacturerModel = this.prefilledManuf;
             this.manufModels = [this.prefilledManuf];
@@ -105,7 +106,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
@@ -141,25 +142,24 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     openNewCenter() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/center/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as Coil).center = entity as Center;
+                    this.entity.center = entity as Center;
                 })
             );
         });
     }
 
     openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/acquisition-equipment/create']).then(() => {
             this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    let currentCoil: Coil = currentStep.entity as Coil;
-                    currentCoil.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);
-                    currentCoil.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    this.entity.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    this.entity.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);
                 })
             );
         });

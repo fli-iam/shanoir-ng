@@ -16,7 +16,8 @@ import { Router } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
 
@@ -30,7 +31,7 @@ import { DatasetProcessingService } from "../shared/dataset-processing.service";
 export class ProcessingNodeComponent extends TreeNodeAbstractComponent<ProcessingNode> implements OnChanges {
 
     @Input() input: ProcessingNode | DatasetProcessing;
-    @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
+    @Output() processingDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
             private router: Router,
@@ -47,6 +48,8 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -72,9 +75,23 @@ export class ProcessingNodeComponent extends TreeNodeAbstractComponent<Processin
         this.processingService.get(this.node.id).then(entity => {
             this.processingService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onProcessingDelete.emit();
+                    this.processingDelete.emit();
                 }
             });
         })
+    }
+
+    loadOutputDatasets() {
+        if (this.node.datasets == UNLOADED) {
+            this.loading = true;
+            this.processingService.getOutputDatasets(this.node.id).then(datasets => {
+                this.node.datasets = datasets.map(d => DatasetNode.fromDataset(d, true, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+                this.contentLoaded.resolve();
+            });
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 }

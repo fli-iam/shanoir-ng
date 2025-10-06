@@ -12,9 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, ViewChild} from '@angular/core';
+import {Component, ViewChild, OnInit} from '@angular/core';
 import {UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {formatDate} from "@angular/common";
+
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
+import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import {Option} from '../../shared/select/select.component';
 import {EntityComponent} from '../../shared/components/entity/entity.component.abstract';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
@@ -28,12 +34,9 @@ import {Subject} from '../../subjects/shared/subject.model';
 import {EntityService} from '../../shared/components/entity/entity.abstract.service';
 import {TableComponent} from '../../shared/components/table/table.component';
 import {ColumnDefinition} from '../../shared/components/table/column.definition.type';
-import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
 import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
-import {formatDate} from "@angular/common";
-import { Selection } from 'src/app/studies/study/tree.service';
+import {dateDisplay} from "../../shared/localLanguage/localDate.abstract";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -42,7 +45,7 @@ import { Selection } from 'src/app/studies/study/tree.service';
     standalone: false
 })
 
-export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
+export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> implements OnInit {
 
     @ViewChild('inputDatasetsTable', {static: false}) inputDatasetsTable: TableComponent;
     @ViewChild('outputDatasetsTable', {static: false}) outputDatasetsTable: TableComponent;
@@ -60,6 +63,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public executionMonitoring: ExecutionMonitoring;
     prefilledStudy: Study;
     prefilledSubject: Subject;
+
 
     constructor(
             private route: ActivatedRoute,
@@ -93,7 +97,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
             (executionMonitoring: ExecutionMonitoring) => {
                 this.setExecutionMonitoring(executionMonitoring);
-            }, (error) => {
+            }, () => {
                 // 404 : if it's not found then it's not execution monitoring !
                 this.resetExecutionMonitoring();
             }
@@ -107,7 +111,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     initEdit(): Promise<void> {
         this.fetchStudies().then(() => {
             this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
-            let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
+            const subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
             this.fetchSubjects().then(() => {
                 this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
             }).then(() => {
@@ -119,10 +123,10 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        this.prefilledStudy = this.breadcrumbsService.currentStep.getPrefilledValue('study');
-        this.prefilledSubject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
+        this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
+        this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
         return Promise.resolve().then(() => {
-            if (!!this.prefilledStudy) {
+            if (this.prefilledStudy) {
                 this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
                 this.study = this.prefilledStudy;
                 this.datasetProcessing.studyId = this.study?.id;
@@ -130,7 +134,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return this.fetchStudies();
             }
         }).then(() => {
-            if (!!this.prefilledSubject) {
+            if (this.prefilledSubject) {
                 this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
                 this.subject = this.prefilledSubject;
                 return this.fetchDatasets();
@@ -189,7 +193,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         if (!this.study?.id) return Promise.resolve();
         return this.studyService.findSubjectsByStudyId(this.study.id).then(subjects => {
             this.subjectOptions = subjects?.map(sub => {
-                let subject: Subject = new Subject();
+                const subject: Subject = new Subject();
                 subject.id = sub.id;
                 subject.name = sub.name;
                 subject.identifier = sub.identifier;
@@ -201,7 +205,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     fetchDatasets(): Promise<void> {
         if (!this.study?.id || !this.subject?.id) return Promise.resolve();
         return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
-            for (let dataset of datasets) {
+            for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
@@ -209,7 +213,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     buildForm(): UntypedFormGroup {
-        let formGroup: UntypedFormGroup = this.formBuilder.group({
+        const formGroup: UntypedFormGroup = this.formBuilder.group({
             'study': [{value: this.study?.id, disabled: !!this.prefilledStudy}, Validators.required],
             'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.study)}, Validators.required],
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
@@ -259,7 +263,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stdout.log";
+        const filename = this.executionMonitoring.name + ".stdout.log";
 
         this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -272,7 +276,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stderr.log";
+        const filename = this.executionMonitoring.name + ".stderr.log";
 
         this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -280,7 +284,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private downloadLogIntoBrowser(response: string, filename: string){
-        let blob = new Blob([response], {
+        const blob = new Blob([response], {
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
@@ -292,27 +296,29 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public getDuration(){
 
-        let start = this.executionMonitoring?.startDate;
-        let end = this.executionMonitoring?.endDate;
+        const start = this.executionMonitoring?.startDate;
+        const end = this.executionMonitoring?.endDate;
 
         if(!start || !end){
             return "";
         }
 
-        let duration = end - start;
+        const duration = end - start;
 
         if(duration <= 0){
             return "";
         }
 
-        let milliseconds = Math.floor((duration % 1000));
-        let seconds = Math.floor((duration / 1000) % 60);
-        let minutes = Math.floor((duration / (1000 * 60)) % 60);
-        let hours = Math.floor((duration / (1000 * 60 * 60)));
+        const milliseconds = Math.floor((duration % 1000));
+        const seconds = Math.floor((duration / 1000) % 60);
+        const minutes = Math.floor((duration / (1000 * 60)) % 60);
+        const hours = Math.floor((duration / (1000 * 60 * 60)));
 
         return String(hours).padStart(2, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +
             String(seconds).padStart(2, "0") + "." +
             String(milliseconds).padStart(3, "0")
     }
+
+    protected readonly dateDisplay = dateDisplay;
 }

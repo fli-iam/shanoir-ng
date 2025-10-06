@@ -2,17 +2,12 @@ package org.shanoir.ng.processing.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.solr.common.util.Pair;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -25,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -40,8 +34,6 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
 
-    @Autowired
-    private WADODownloaderService downloader;
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
     @Autowired
@@ -76,11 +68,16 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
-            for (Dataset dataset : processing.getInputDatasets()) {
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
+            List<Dataset> inputs = processing.getInputDatasets();
+            List<Dataset> outputs = processing.getOutputDatasets();
+            Map<Long, String> inputsDownloadName = getDatasetDownloadName(inputs);
+            Map<Long, String> outputsDownloadName = getDatasetDownloadName(outputs);
+
+            for (Dataset dataset : inputs) {
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
             }
-            for (Dataset dataset : processing.getOutputDatasets()) {
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId);
+            for (Dataset dataset : outputs) {
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
             }
         }
         if(!filesByAcquisitionId.isEmpty()){

@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
+import { Subscription } from 'rxjs';
+
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'download-setup',
@@ -33,8 +35,9 @@ import { Subscription } from 'rxjs';
 export class DownloadSetupComponent implements OnInit, OnDestroy {
 
     @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
+    @Input() totalSize?: number;
     form: UntypedFormGroup;
     loading: boolean;
     loaded: boolean = false;
@@ -107,7 +110,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
 
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'converter': [{value: this.converter}],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
@@ -127,7 +130,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
 
     downloadNow() {
-        let setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
+        const setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
         setup.nbQueues = this.form.get('nbQueues').value;
         setup.unzip = this.form.get('unzip').value;
         setup.subjectFolders = this.form.get('subjectFolders').value;
@@ -141,7 +144,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])
@@ -152,7 +155,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
-        for (let dataset of datasets) {
+        for (const dataset of datasets) {
             if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
                 return true;
             }
@@ -161,7 +164,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

@@ -15,5 +15,5 @@ import { Entity } from "../../shared/components/entity/entity.abstract";
 
 export class Manufacturer extends Entity {
     id: number;
-    name: String;
+    name: string;
 }

@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
 				(edit)="goToEdit()"
 				(back)="goBack()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 			></form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -121,11 +121,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-							{{examination.examinationDate | date: 'dd/MM/yyyy'}}
+							{{examination.examinationDate | localDateFormatPipe}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
-							<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
 							<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 						</ng-template>
 					</span>
@@ -177,7 +177,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-							disabled (click)="instAssessment()">
+							disabled>
 								<i class="fas fa-plus-square"></i>
 								new Instrument Based Assessment
 							</button>
@@ -237,4 +237,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 	</div>
 </form>
-
+</div>

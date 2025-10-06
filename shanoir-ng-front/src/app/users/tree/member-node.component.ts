@@ -13,10 +13,12 @@
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
 
