@@ -122,19 +122,34 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label>
                                     Financement *
                                 </label>
-                                <textarea class="right-col" formControlName="funding"></textarea>
+                                <span class="right-col">
+                                    <textarea class="right-col" formControlName="funding"></textarea>
+                                    <div class="form-validation-alert" *ngIf="form.get('funding')?.hasError('maxlength') && form.get('funding')?.touched">
+                                        Maximum 1000 characters
+                                    </div>
+                                </span>
                             </li>
                             <li>
                                 <label>
                                     Remerciements *
                                 </label>
-                                <textarea class="right-col" formControlName="thanks"></textarea>
+                                <span class="right-col">
+                                    <textarea class="right-col" formControlName="thanks"></textarea>
+                                    <div class="form-validation-alert" *ngIf="form.get('thanks')?.hasError('maxlength') && form.get('thanks')?.touched">
+                                        Maximum 1000 characters
+                                    </div>
+                                </span>
                             </li>
                             <li>
                                 <label>
                                     Articles à citer *
                                 </label>
-                                <textarea class="right-col" formControlName="papers"></textarea>
+                                <span class="right-col">
+                                    <textarea class="right-col" formControlName="papers"></textarea>
+                                    <div class="form-validation-alert" *ngIf="form.get('papers')?.hasError('maxlength') && form.get('papers')?.touched">
+                                        Maximum 1000 characters
+                                    </div>
+                                </span>
                             </li>
                         </ol>
                     </form>
