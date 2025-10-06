@@ -56,7 +56,7 @@
     <div *ngFor="let parameter of fileInputs" class="parent-div">
         <input type="hidden" [(ngModel)]="datasetsByParam[parameter.name]"/>
         <b>{{parameter.name}} :</b>
-           <select-box placeholder="Available datasets" (onAddClick)="addDatasetFromParam($event, parameter.name)" [options]="datasetsOptions">
+           <select-box placeholder="Available datasets" (addClick)="addDatasetFromParam($event, parameter.name)" [options]="datasetsOptions">
            </select-box>
         <table>
             <tr>

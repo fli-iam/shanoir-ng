@@ -17,6 +17,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+
 import { ImportMode } from '../import/import.component';
 import {SuperPromise} from "../utils/super-promise";
 
@@ -233,7 +234,7 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: { field: string, value: SuperPromise<any>}[] = [];
 
-    private resolvedPrefilledValues: { [field: string]: any } = {};
+    private resolvedPrefilledValues: Record<string, any> = {};
 
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
