@@ -1,5 +1,6 @@
 package org.shanoir.ng.vip.execution.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -90,7 +91,10 @@ public class ExecutionServiceImpl implements ExecutionService {
         ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidate, inputDatasets);
         executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.VALID);
 
+        LOG.error("Token VIP creation");
         VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
+        LOG.error("Token VIP exec" + createdExecution.toString());
+
         executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.SENT);
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
@@ -223,6 +227,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), candidate));
 
         dto.setInputValues(getInputValues(executionMonitoring, candidate));
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            LOG.error("Token candidate : " + objectMapper.writeValueAsString(candidate));
+            LOG.error("Token VIP DTO : " + objectMapper.writeValueAsString(dto));
+        } catch (Exception e){
+            LOG.error(e.getMessage());
+        }
 
         return createExecution(dto)
                 .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
@@ -288,6 +300,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      * @return ExecutionDTO
      */
     private Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
+        LOG.error("Token headers : " + utils.getUserHttpHeaders());
 
         return webClient.post()
                 .uri(vipExecutionUri)

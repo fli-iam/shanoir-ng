@@ -82,9 +82,13 @@ public class PlannedExecutionRunner {
     protected synchronized void manageExecutionsQueue() {
         if (running) return;
         running = true;
+        LOG.error("Token Loop");
+
 
         try {
             while (!executionsQueue.isEmpty()) {
+
+                LOG.error("Token Queue");
 
                 // Sort by priority ascending
                 executionsQueue.sort(Comparator.comparingInt(exec -> exec.getTemplate().getPriority()));
@@ -92,6 +96,7 @@ public class PlannedExecutionRunner {
                 // Find next runnable execution
                 ExecutionInQueue next = null;
                 for (ExecutionInQueue candidate : executionsQueue) {
+                    LOG.error("Token Involvement");
                     List<Long> candidateData = plannedExecutionServiceImpl.getInvolvedData(candidate);
                     if (Collections.disjoint(candidateData, involvedDatasetIds)) {
                         next = candidate;
@@ -111,6 +116,8 @@ public class PlannedExecutionRunner {
                     //Execution in executor submission has to be final
                     ExecutionInQueue execution = next;
 
+                    LOG.error("Token Submission");
+
                     // Submit execution
                     executor.submit(() -> {
                         transactionRunner.runInTransaction(em ->
@@ -127,6 +134,8 @@ public class PlannedExecutionRunner {
                 }
             }
         } finally {
+            LOG.error("Token Thread Stop");
+
             running = false;
             LOG.info("Auto executions for newly imported DICOM ended.");
         }
@@ -134,6 +143,8 @@ public class PlannedExecutionRunner {
 
     public synchronized void addToExecutionsQueue(ExecutionInQueue executionInQueue) {
         executionsQueue.add(executionInQueue);
+        LOG.error("Token 5");
+
         manageExecutionsQueue();
     }
 
@@ -149,13 +160,20 @@ public class PlannedExecutionRunner {
     private void threadExecution(ExecutionTemplate template, Long objectId, String executionLevel, List<Long> plannedExecutionToRemoveWithAcquisitionId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
+        LOG.error("Token Thread start");
+
         try {
             ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
+            LOG.error("Token candidate" + candidate.toString());
 
             if(Objects.nonNull(candidate)) {
                 IdName monitoringIdName = executionService.createExecution(candidate, datasetRepository.findByIdIn(candidate.getDatasetParameters().stream().map(DatasetParameterDTO::getDatasetIds).flatMap(List::stream).collect(Collectors.toList())));
+                LOG.error("Token idName" + monitoringIdName.getName() + monitoringIdName.getId());
+
                 String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
 
+
+                LOG.error("Token VipIdentifier" + vipIdentifier);
                 ExecutionStatus status = ExecutionStatus.RUNNING;
 
                 while (Objects.equals(status, ExecutionStatus.RUNNING)) {
