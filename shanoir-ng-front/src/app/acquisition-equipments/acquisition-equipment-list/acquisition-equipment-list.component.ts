@@ -13,17 +13,16 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {ShanoirError} from "../../shared/models/error.model";
-import {Center} from "../../centers/shared/center.model";
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -66,10 +65,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Center equipment", field: "name", cellRenderer: function (params: any) {
-                    let acqEquip: AcquisitionEquipment = params.data;
+                    const acqEquip: AcquisitionEquipment = params.data;
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
@@ -83,7 +82,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
             },
             {
                 headerName: "Modality", field: "manufacturerModel.datasetModalityType", cellRenderer: function (params: any) {
-                    let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
+                    const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
                     if (mod) return DatasetModalityType.getLabel(mod);
                 }
             },
@@ -112,8 +111,8 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     }
 
     openCreateCoil(acqEquip: AcquisitionEquipment) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/coil/create'], ).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/coil/create'], ).then(() => {
             this.breadcrumbsService.currentStep.addPrefilled('center', acqEquip.center);
             this.breadcrumbsService.currentStep.addPrefilled('manufacturerModel', acqEquip.manufacturerModel);
             currentStep.waitFor(this.breadcrumbsService.currentStep);

@@ -125,7 +125,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <card-node
                     *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
                     [input]="studycard"
-                    (onCardDelete)="onStudyCardDelete(i)"
+                    (cardDelete)="onStudyCardDelete(i)"
                     [withMenu]="withMenu"
                     detailsPath="study-card/details"
             >

@@ -14,26 +14,29 @@
 
 import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
-import { ComponentRef, Injectable } from '@angular/core';
+import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
+
 import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
 import { ShanoirError } from '../models/error.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';
+
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 export type Report = {
     taskId: number,
@@ -42,14 +45,12 @@ export type Report = {
     studyId?: number,
     status?: 'QUEUED' | 'ERROR' | 'SUCCESS',
     startTime: number,
-    list?: {
-        [key: number]: {
+    list?: Record<number, {
             status: 'QUEUED' | 'ERROR' | 'SUCCESS',
             error?: any,
             errorTime?: number
             zipSize?: string,
-        }
-    }
+        }>
     nbSuccess?: number;
     nbError?: number;
     duration?: number;
@@ -78,8 +79,7 @@ export class MassDownloadService {
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
     readonly REPORT_FILENAME: string = 'downloadReport.json';
     winOs: boolean;
-    // @ts-ignore
-    public advancedDownloadCompat: boolean = !!window.showDirectoryPicker;
+    public advancedDownloadCompat: boolean = !!(window as any).showDirectoryPicker;
 
     constructor(
         private datasetService: DatasetService,
@@ -124,7 +124,7 @@ export class MassDownloadService {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                     return this.openAltModal(inputIds).then(ret => {
                         if (ret != 'cancel' && ret.datasets) {
-                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(error => {
+                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(() => {
                                 if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
                                     this.dialogService.error('Too many datasets', 'You are trying to download '
                                         + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
@@ -145,7 +145,7 @@ export class MassDownloadService {
 
     // This method is used to download in
     private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
-        let task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
+        const task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
@@ -155,11 +155,11 @@ export class MassDownloadService {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                let downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, converter);
+                const downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, converter);
 
-                let endPromise: SuperPromise<void> = new SuperPromise();
+                const endPromise: SuperPromise<void> = new SuperPromise();
 
-                let errorFunction = error => {
+                const errorFunction = error => {
                     task.lastUpdate = new Date();
                     task.status = -1;
                     task.message = 'error while downloading : ' + (error?.message || error?.toString() || 'see logs');
@@ -180,7 +180,7 @@ export class MassDownloadService {
 
                 const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
                     flowSubscription.unsubscribe();
-                    let duration: number = Date.now() - start;
+                    const duration: number = Date.now() - start;
                     task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
                     task.lastUpdate = new Date();
                     task.status = state.status;
@@ -209,7 +209,7 @@ export class MassDownloadService {
     private _downloadDatasets(setup: DownloadSetup, downloadState?: TaskState, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
         if (!setup?.datasets) throw new Error('datasets can\'t be null here');
         if (setup.datasets.length == 0) return;
-        let datasetIds = setup.datasets.map(ds => ds.id); // copy array
+        const datasetIds = setup.datasets.map(ds => ds.id); // copy array
         let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
         if (parentHandle) {
             directoryHandlePromise = Promise.resolve(parentHandle);
@@ -227,9 +227,9 @@ export class MassDownloadService {
                     task.lastUpdate = new Date();
                     this.notificationService.pushLocalTask(task);
                     const start: number = Date.now();
-                    let ids = [...setup.datasets.map(ds => ds.id)];
+                    const ids = [...setup.datasets.map(ds => ds.id)];
                     if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, setup);
-                    let promises: Promise<void>[] = [];
+                    const promises: Promise<void>[] = [];
                     for (let queueIndex = 0; queueIndex < setup.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
                             this.recursiveSave(ids.shift(), setup, parentFolderHandle, ids, report, task)
@@ -249,7 +249,7 @@ export class MassDownloadService {
                     throw error;
                 }
             });
-        }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+        }).catch(() => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -291,7 +291,7 @@ export class MassDownloadService {
             report.list[id].zipSize = getSizeStr(blob?.size);
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
             // Check ERRORS file in zip
-            let zip: any = new JSZip();
+            const zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(blob).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -381,8 +381,8 @@ export class MassDownloadService {
     }
 
     private buildShortExtractedFilePath(dataset: Dataset, fileIndex: number, fileName: string, setup: DownloadSetup): string {
-            let fileNameSplit: string[] = fileName.split('.');
-            let extension: string =  fileNameSplit.pop();
+            const fileNameSplit: string[] = fileName.split('.');
+            const extension: string =  fileNameSplit.pop();
             return this.buildShortFoldersPath(dataset, setup)
                 + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '')
                 + fileIndex + '.' + extension;
@@ -403,7 +403,7 @@ export class MassDownloadService {
                 + '/';
         }
         if (setup.acquisitionFolders && !dataset.hasProcessing) { 
-            let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
+            const acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
                 || dataset.datasetAcquisition.protocol?.originMetadata?.name 
                 || dataset.datasetAcquisition.type + '_acquisition';
             str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
@@ -478,8 +478,7 @@ export class MassDownloadService {
         const options = {
             mode: 'readwrite'
         };
-        // @ts-ignore
-        return window.showDirectoryPicker(options);
+        return (window as any).showDirectoryPicker(options);
     }
 
     private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
@@ -503,12 +502,12 @@ export class MassDownloadService {
 
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        const contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
     private initReport(datasetIds: number[], taskId: number, folderName: string, setup: DownloadSetup): Report {
-        let report: Report = {
+        const report: Report = {
             taskId: taskId,
             folderName: folderName,
             startTime: Date.now(),
@@ -534,7 +533,7 @@ export class MassDownloadService {
     }
 
     private _createTask(message: string, status: TaskStatus = 2): Task {
-        let task: Task = new Task();
+        const task: Task = new Task();
         task.id = Date.now();
         task.creationDate = new Date();
         task.lastUpdate = task.creationDate;
@@ -548,9 +547,8 @@ export class MassDownloadService {
     }
 
     private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
-        // @ts-ignore
-        if (window.showDirectoryPicker) { // test compatibility
-            let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
+        if ((window as any).showDirectoryPicker) { // test compatibility
+            const modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
             modalRef.instance.totalSize = totalSize;
             return this.waitForEnd(modalRef);
@@ -560,16 +558,16 @@ export class MassDownloadService {
     }
 
     private openAltModal(inputIds: DownloadInputIds): Promise<DownloadSetup | 'cancel'> {
-        let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
+        const modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
         modalRef.instance.inputIds = inputIds;
         return this.waitForEnd(modalRef);
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
-        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
-        let result: Observable<any> = race([
+    private waitForEnd(modalRef: ComponentRef<{ go: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<any | 'cancel'> {
+        const resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        const result: Observable<any> = race([
             modalRef.instance.go,
-            modalRef.instance.close.pipe(map(() => 'cancel'))
+            modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();
@@ -582,11 +580,10 @@ export class MassDownloadService {
     }
 
     retry(task: Task): Promise<void> {
-        // @ts-ignore
-        if (!window.showDirectoryPicker) {
+        if (!(window as any).showDirectoryPicker) {
             throw new Error(this.BROWSER_COMPAT_ERROR_MSG);
         }
-        let report: Report = this.getReportFromTask(task);
+        const report: Report = this.getReportFromTask(task);
         let msg: string = 'Please now select the directory of the download you want to resume or retry. ';
         if (report) msg += 'Recorded directory name : ' + report.folderName;
 
@@ -596,15 +593,15 @@ export class MassDownloadService {
                     return this.getFolderHandle().then(parentFolderHandle => {
                         return parentFolderHandle.getFileHandle(this.REPORT_FILENAME).then(fileHandle => {
                             return fileHandle.getFile().then(file => {
-                                return file.text().then(text => {
+                                return file.text().then(() => {
                                     report.nbError = 0;
-                                    let noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
+                                    const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
                                     task.status = 2;
                                     task.sessionId = this.sessionService.sessionId;
                                     this.notificationService.pushLocalTask(task);
 
                                     this.datasetService.getByIds(new Set(noSuccessIds)).then(datasets =>{
-                                        let setup: DownloadSetup = new DownloadSetup(report.format);
+                                        const setup: DownloadSetup = new DownloadSetup(report.format);
                                         setup.nbQueues = report.nbQueues;
                                         setup.converter = report.converter;
                                         setup.unzip = report.unzip;

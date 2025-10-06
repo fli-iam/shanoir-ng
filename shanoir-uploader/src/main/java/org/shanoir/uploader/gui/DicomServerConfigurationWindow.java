@@ -20,10 +20,10 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.shanoir.uploader.action.DicomServerConfigurationListener;
-import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.shanoir.uploader.action.DicomServerConfigurationListener;
+import org.shanoir.uploader.dicom.IDicomServerClient;
 
 /**
  * The DICOM Server Configuration window of the ShanoirUploader.
@@ -157,7 +157,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 		addItem(configurationPanel, echoButton, 0, 11, 1, GridBagConstraints.EAST);
 		configureButton = new JButton(
 				resourceBundle.getString("shanoir.uploader.configurationMenu.dicomServer.configureButton"));
-		addItem(configurationPanel, configureButton, 1, 11, 1, GridBagConstraints.WEST);
+		addItem(configurationPanel, configureButton, 2, 11, 1, GridBagConstraints.WEST);
 
 		// listener
 		dSCL = new DicomServerConfigurationListener(this, dicomServerClient);

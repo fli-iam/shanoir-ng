@@ -41,7 +41,7 @@ export class Execution {
     /**
      * Represents the input as a key/value object. The types should respect the parameters of the pipeline used for the execution.
      */
-    inputValues: { [key: string]: any; };
+    inputValues: Record<string, any>;
     /**
      * TODO : parameterResources
      */

@@ -15,6 +15,7 @@ import { ManufacturerModel } from '../../acquisition-equipments/shared/manufactu
 import { Center } from '../../centers/shared/center.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Id } from '../../shared/models/id.model';
+
 import { CoilType } from './coil-type.enum';
 
 

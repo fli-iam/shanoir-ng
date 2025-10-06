@@ -19,11 +19,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Subscription } from 'rxjs';
+
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyService } from '../studies/shared/study.service';
+
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
 
@@ -63,10 +65,10 @@ export class DUAAssistantComponent implements OnDestroy {
             private studyService: StudyService) {
         this.subscriptions.push(this.route.params.subscribe(
             params => {
-                let studyIdStr: string = params['studyId'];
-                let studyId: number = studyIdStr ? parseInt(studyIdStr) : null;
-                let duaId: string = params['id'];
-                let mode: Mode = this.route.snapshot.data['mode'];
+                const studyIdStr: string = params['studyId'];
+                const studyId: number = studyIdStr ? parseInt(studyIdStr) : null;
+                const duaId: string = params['id'];
+                const mode: Mode = this.route.snapshot.data['mode'];
                 this.init(mode, duaId, studyId);
             })
         );
@@ -82,7 +84,7 @@ export class DUAAssistantComponent implements OnDestroy {
         if (this.mode == 'create') {
             this.dua = new DuaDocument();
             this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
-                let study = studies.find(s => s.id == studyId);
+                const study = studies.find(s => s.id == studyId);
                 this.dua.studyId = studyId;
                 this.studyName = study.name;
                 this.dua.studyName = study.name;
@@ -100,7 +102,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     protected buildForm(dua?: DuaDocument) {
-        let controls: any = {
+        const controls: any = {
             'url': [dua?.url, [Validators.required]],
             'funding': [dua?.funding, [Validators.required]],
             'thanks': [dua?.thanks, [Validators.required]],
@@ -113,7 +115,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     protected onSubmit() {
-        let dua: DuaDocument = DuaDocument.buildInstance(
+        const dua: DuaDocument = DuaDocument.buildInstance(
             this.studyId,
             this.studyName,
             this.form.get('url')?.value,
@@ -157,10 +159,10 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     hasError(fieldName: string, errors?: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
             if (errors) {
-                for (let errorName of errors) {
+                for (const errorName of errors) {
                     if (formError[errorName]) return true;
                 }
             } else {
@@ -241,8 +243,6 @@ export class DUAAssistantComponent implements OnDestroy {
     protected generatePDF(): void {
         const element = this.pdfContent.nativeElement;
 
-        let originalHtml: string | null = null;
-        originalHtml = element.innerHTML;
         this.insertPageBreaks(element);
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -261,8 +261,6 @@ export class DUAAssistantComponent implements OnDestroy {
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
                 let position = 0;
                 while (position < pdfHeight) {
-                    const remainingHeight = pdfHeight - position;
-                    const pageContentHeight = Math.min(pageHeight, remainingHeight);
                     pdf.addImage(imgData, 'JPEG', 0, -position, pdfWidth, pdfHeight);
                     position += pageHeight;
                     if (position < pdfHeight) pdf.addPage();
@@ -289,7 +287,7 @@ export class DUAAssistantComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

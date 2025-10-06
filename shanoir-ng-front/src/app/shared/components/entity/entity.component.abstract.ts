@@ -12,26 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Location } from '@angular/common';
-
 import {
     Directive,
     ElementRef,
-    EventEmitter,
     HostListener,
     Input,
     OnChanges,
     OnDestroy,
-    Output,
     SimpleChanges,
     ViewChild
 } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
-import { Router } from '@angular/router';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ConsoleService } from '../../console/console.service';
@@ -39,6 +36,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 
@@ -52,7 +50,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     @Input() mode: Mode;
     @Input() id: number; // if not given via url
     @Input() entityInput: T; // if id not given via url
-    @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
     protected subscriptions: Subscription[] = [];
@@ -105,7 +102,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
-            let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
+            const userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
             if (!this.showTreeByDefault
                 && this.treeService.treeOpened
                 && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
@@ -178,7 +175,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                     throw Error('mode has to be set!');
             }
         }
-        let choosePromise: Promise<void> = choose();
+        const choosePromise: Promise<void> = choose();
         Promise.all([this.entityPromise, choosePromise]).then(() => {
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
         });
@@ -319,9 +316,9 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for (let errorName of errors) {
+            for (const errorName of errors) {
                 if (formError[errorName]) return true;
             }
         }
@@ -376,8 +373,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
-            for (let managedField of this.onSubmitValidatedFields) {
-                let fieldControl: AbstractControl = this.form.get(managedField);
+            for (const managedField of this.onSubmitValidatedFields) {
+                const fieldControl: AbstractControl = this.form.get(managedField);
                 if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
                 fieldControl.updateValueAndValidity({emitEvent: false});
                 if (!fieldControl.valid) fieldControl.markAsTouched();
@@ -401,7 +398,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                 //&& this.form.get(controlFieldName).pristine
             ) {
-                let ret = {};
+                const ret = {};
                 ret[constraintName] = true;
                 return ret;
             }
@@ -448,8 +445,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
-        let currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
-        let replace: boolean = this.breadcrumbsService.currentStep && (
+        const currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
+        const replace: boolean = this.breadcrumbsService.currentStep && (
             currentRoute == this.entityRoutes.getRouteToEdit(id)
             || currentRoute == this.entityRoutes.getRouteToCreate()
             // Create route can be contained in incoming route (more arguments for example)
@@ -466,7 +463,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
         }
-        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
+        const replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
         this.router.navigate([this.entityRoutes.getRouteToEdit(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
@@ -494,7 +491,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     ngOnDestroy() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
 
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

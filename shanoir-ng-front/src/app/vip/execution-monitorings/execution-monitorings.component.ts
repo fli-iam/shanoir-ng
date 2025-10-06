@@ -1,12 +1,15 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
+
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 import { TableComponent } from 'src/app/shared/components/table/table.component';
+
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ExecutionMonitoring } from '../models/execution-monitoring.model';
+
 import { ExecutionMonitoringService } from './execution-monitoring.service';
 
 @Component({
