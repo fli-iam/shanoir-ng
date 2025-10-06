@@ -149,14 +149,12 @@ import { SubjectListComponent } from './subjects/subject-list/subject-list.compo
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
-// import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
-// import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
 import { CenterNodeComponent } from './centers/tree/center-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
@@ -213,9 +211,7 @@ import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-nod
 import { SubjectNodeComponent } from './subjects/tree/subject-node.component';
 import { MemberNodeComponent } from './users/tree/member-node.component';
 import { ReplaceSpacePipe } from './utils/pipes';
-// import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-// import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';

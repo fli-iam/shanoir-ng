@@ -52,10 +52,8 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 
 import { Selection } from './tree.service';
-import { Tag } from 'src/app/tags/tag.model';
 import {AcquisitionEquipmentService} from "../../acquisition-equipments/shared/acquisition-equipment.service";
-import {StudyCard} from "../../study-cards/shared/study-card.model";
-import * as AppUtils from "../../utils/app.utils";
+import {ExecutionDataService} from "../../vip/execution.data-service";
 
 @Component({
     selector: 'study-detail',
@@ -328,7 +326,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public async hasDeleteRight(): Promise<boolean> {
         return false;
-        /* 
+        /*
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
@@ -565,7 +563,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        const newStudy: boolean = !this.study?.id; 
+        const newStudy: boolean = !this.study?.id;
         return super.save(() => {
             const uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
