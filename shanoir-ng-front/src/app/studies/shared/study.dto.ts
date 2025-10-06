@@ -186,7 +186,7 @@ export class StudyDTOService {
     }
 
     static dtoToSubject(dtoSubject: SubjectDTO): Subject {
-        let subject: Subject = new Subject();
+        const subject: Subject = new Subject();
         subject.name = dtoSubject.name;
         subject.imagedObjectCategory = dtoSubject.imagedObjectCategory;
         subject.birthDate = dtoSubject.birthDate;
@@ -299,7 +299,7 @@ export class StudyDTO {
         }) : null;
         this.subjects = study.subjects ? study.subjects.map(su => {
             su.study = study;
-            let dto = new SubjectDTO(su);
+            const dto = new SubjectDTO(su);
             dto.study = null;
             return dto;
         }) : null;

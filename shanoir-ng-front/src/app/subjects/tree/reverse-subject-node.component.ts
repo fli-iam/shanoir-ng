@@ -13,11 +13,8 @@
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { Tag } from 'src/app/tags/tag.model';
-
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 

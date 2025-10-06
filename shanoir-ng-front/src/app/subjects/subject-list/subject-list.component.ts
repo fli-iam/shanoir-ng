@@ -95,7 +95,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     getOnDeleteConfirmMessage(entity: Subject): string {
-        let subjectDTO = (entity as SubjectDTO);
+        const subjectDTO = (entity as SubjectDTO);
         let studyListStr : string = "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subjectDTO.studyId).name;
         studyListStr += "\n\nAttention: this action deletes all datasets from that study.";
         return studyListStr;

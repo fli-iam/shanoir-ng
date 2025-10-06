@@ -420,7 +420,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        let studyListStr = this.getOnDeleteConfirmMessage(entity);
+        const studyListStr = this.getOnDeleteConfirmMessage(entity);
         this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
             if (deleted) {
                 if (this.treeService.treeOpened && this.treeService.treeAvailable) {
