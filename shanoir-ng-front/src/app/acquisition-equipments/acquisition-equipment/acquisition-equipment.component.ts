@@ -218,7 +218,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             map(exists => (exists ? { unique: true } : null)),
             catchError(() => of(null))
         );
-    };
+    }
 
     save(): Promise<AcquisitionEquipment> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
