@@ -13,7 +13,9 @@
  */
 
 import { Injectable } from '@angular/core';
+
 import { Enum } from "../../../shared/utils/enum";
+
 import { AnestheticType } from "./anestheticType";
 import { InjectionType } from "./injectionType";
 import { InjectionInterval } from "./injectionInterval";
@@ -27,8 +29,8 @@ export class EnumUtils {
    //  protected static enumUtils : EnumUtils;
   
     getEnumArrayFor(enumName:string): Enum[] {
-        let enumArray:Enum[] = [];
-        var enumIs = null;
+        const enumArray:Enum[] = [];
+        let enumIs = null;
         switch(enumName) { 
            case 'AnestheticType': {
               enumIs = AnestheticType;
@@ -60,9 +62,9 @@ export class EnumUtils {
            } 
         }
         if(enumIs){
-            var keys = Object.keys(enumIs);
-            for (var i = 0; i < keys.length; i = i+2) {
-                var enumVar: Enum = new Enum();
+            const keys = Object.keys(enumIs);
+            for (let i = 0; i < keys.length; i = i+2) {
+                const enumVar: Enum = new Enum();
                 enumVar.key = keys[i];
                 enumVar.value = enumIs[keys[i]];
                 enumArray.push(enumVar);
@@ -72,7 +74,7 @@ export class EnumUtils {
     }
     
     getEnumValue(enumArray:Enum[],key:any): string{
-        for(let current of enumArray){
+        for(const current of enumArray){
             if(current.key == key) return current.value;
         }
         return '';

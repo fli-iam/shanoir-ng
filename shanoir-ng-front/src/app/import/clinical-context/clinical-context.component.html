@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="studycard"
                         (userChange)="onSelectStudyCard()"
                         [viewRoute]="'/study-card/details/' + studycard?.id"
-                        (onUserClear)="onClearStudyCard()"
+                        (userClear)="onClearStudyCard()"
                         [viewDisabled]="!studycard"
                         [options]="studycardOptions"
                         [disabled]="loading">
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
+                        (newClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
             </span>
@@ -118,7 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
+                        (newClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
             </span>
@@ -126,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>The center equipment may not be not compatible with the imported data !</strong>
-            <strong> selected : {{acquisitionEquipment.serialNumber}}</strong>
+            <strong> selected : {{acquisitionEquipment?.serialNumber}}</strong>
             <ng-container *ngIf="importedEquipmentDataStr">
                 <br/>Your archive contains this data :
                 <code>{{importedEquipmentDataStr}}</code>

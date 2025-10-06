@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { AcquisitionEquipment } from './acquisition-equipment.model';
-
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {ShanoirError} from "../../shared/models/error.model";
 import {StudyCard} from "../../study-cards/shared/study-card.model";
+
+import { AcquisitionEquipment } from './acquisition-equipment.model';
 import {ManufacturerModel} from "./manufacturer-model.model";
 
 @Injectable()
@@ -65,7 +65,7 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
             equipments => {
-                for (let equipment of equipments) {
+                for (const equipment of equipments) {
                     if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
                 }
             }

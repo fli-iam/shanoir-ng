@@ -13,6 +13,7 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { FooterState } from './footer-state.model';
 
 @Component({
@@ -30,7 +31,7 @@ export class FormFooterComponent {
     @Output() private create: EventEmitter<void> = new EventEmitter<void>();
     @Output() private update: EventEmitter<void> = new EventEmitter<void>();
     @Output() private edit: EventEmitter<void> = new EventEmitter<void>();
-    @Output() private cancel: EventEmitter<void> = new EventEmitter<void>();
+    @Output() private dismiss: EventEmitter<void> = new EventEmitter<void>();
     @Output() private back: EventEmitter<void> = new EventEmitter<void>();
     @Output() private delete: EventEmitter<void> = new EventEmitter<void>();
     
@@ -61,7 +62,7 @@ export class FormFooterComponent {
     }
 
     onCancel(): void {
-        this.cancel.emit();
+        this.dismiss.emit();
     }
 
     onBack(): void {

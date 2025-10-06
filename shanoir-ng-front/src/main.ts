@@ -4,14 +4,14 @@
 
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
-import { AppModule } from './app/app.module';
-import { environment } from './environments/environment';
-import { KeycloakService } from './app/shared/keycloak/keycloak.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import localeDe from '@angular/common/locales/de';
 import localeEs from '@angular/common/locales/es';
+
+import { KeycloakService } from './app/shared/keycloak/keycloak.service';
+import { environment } from './environments/environment';
+import { AppModule } from './app/app.module';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeDe);
