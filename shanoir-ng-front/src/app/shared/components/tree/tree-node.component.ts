@@ -20,17 +20,15 @@ import {
     OnChanges,
     Output,
     SimpleChanges,
-    ViewChild,
+    ViewChild, AfterViewInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
-
-const noop = () => {
-};
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     provide: NG_VALUE_ACCESSOR,
@@ -46,7 +44,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     standalone: false
 })
 
-export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
+export class TreeNodeComponent implements ControlValueAccessor, OnChanges, AfterViewInit {
 
     @Input() label: string;
     @Input() pictoUrl: string;
@@ -75,8 +73,8 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Output() chkbxChange = new EventEmitter();
     @Output() firstOpen = new EventEmitter();
     @Output() buttonClick = new EventEmitter();
-    private onTouchedCallback: () => void = noop;
-    private onChangeCallback: (_: any) => void = noop;
+    private onTouchedCallback: () => void = () => { return; };
+    private onChangeCallback: (_: any) => void = () => { return; };
 
     constructor(private cdr: ChangeDetectorRef) {
     }

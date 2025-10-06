@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Subject } from "rxjs";
 
 /**
  * For example, helps wait for a resize event, that is triggered multiple time (forming a burst) at each resize, to end.

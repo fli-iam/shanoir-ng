@@ -12,9 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
@@ -31,7 +33,7 @@ import { DownloadInputIds } from '../mass-download.service';
 export class DownloadSetupAltComponent implements OnInit {
 
     @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
@@ -96,7 +98,7 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'converter': [{value: this.converter}],
         });
@@ -112,7 +114,7 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])
@@ -124,7 +126,7 @@ export class DownloadSetupAltComponent implements OnInit {
 
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
-        for (let dataset of datasets) {
+        for (const dataset of datasets) {
             if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
                 return true;
             }
