@@ -54,6 +54,7 @@ import { StudyService } from '../shared/study.service';
 import { Selection } from './tree.service';
 import {AcquisitionEquipmentService} from "../../acquisition-equipments/shared/acquisition-equipment.service";
 import {ExecutionDataService} from "../../vip/execution.data-service";
+import {StudyCard} from "../../study-cards/shared/study-card.model";
 
 @Component({
     selector: 'study-detail',
@@ -415,41 +416,35 @@ export class StudyComponent extends EntityComponent<Study> {
     removeCenterFromStudy(centerId: number): void {
         // Before removing center, warn the user if a study card uses it
         // center -> get studies.acquisition_equipment -> get dataset.study_card(acquisition_equipment.id)
-        let studyCardNames: string;
-        this.acqEqService.getAllByCenter(centerId).then(acqEqs => {
-            console.log("center id = ", centerId);
-            acqEqs.map(acqEq => {
-                console.log("acqEq : ", acqEq);
-                console.log("acqEq.id : ", acqEq.id);
-                this.studyCardService.getAllForAcqEq(acqEq.id).then(studyCard => {
-                    if (studyCard != null) {
-                        console.log("study card avant = ", studyCard);
-                        studyCard = studyCard.filter(sc => sc.study.id == this.study.id);
-                        console.log("study card apres = ", studyCard);
-
-                        if (studyCard.length > 0) {
-                            studyCardNames = studyCard.map(sc => sc.name).join('\n- ');
-
-                        }
-                    }
-                })
-                this.confirmDialogService
-                    .confirm(
-                        'Delete center',
-                        'Are you sure you want to delete this center, it is link to study card '
-                        + studyCardNames
-                    ).then(res => {
-                    if (res) {
-                        if (!this.study.studyCenterList) return;
-                        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
-                        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-                        this.form.get('studyCenterList').markAsDirty();
-                        this.form.get('studyCenterList').updateValueAndValidity();
-                    }
-                })
+        console.log("center id = ", centerId);
+        let studyCardNames: string[]=[];
+        let studyCardToRemove: StudyCard[]=[];
+        this.studyCardService.getAllForStudy(this.study.id).then( studyCards => {
+            studyCards.forEach(sc => {
+                if (sc.acquisitionEquipment.center.id == centerId) {
+                    studyCardNames.push(sc.name);
+                    studyCardToRemove.push(sc);
+                }
+            })
+        }).then( () => {
+            console.log("studyCardNames = " , studyCardNames);
+            this.confirmDialogService
+                .confirm(
+                    'Delete center',
+                    'Are you sure you want to delete this center, it is link to study card(s) : '
+                    + studyCardNames.join(', ')
+                    + '\nRemoving the center will delete the associated study card(s).'
+                ).then(res => {
+                if (res) {
+                    studyCardToRemove.forEach(sc => this.studyCardService.delete(sc.id));
+                    if (!this.study.studyCenterList) return;
+                    this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
+                    this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
+                    this.form.get('studyCenterList').markAsDirty();
+                    this.form.get('studyCenterList').updateValueAndValidity();
+                }
             })
         })
-
     }
 
     isMe(user: User): boolean {
