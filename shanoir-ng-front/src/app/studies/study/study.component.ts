@@ -417,8 +417,8 @@ export class StudyComponent extends EntityComponent<Study> {
         // Before removing center, warn the user if a study card uses it
         // center -> get studies.acquisition_equipment -> get dataset.study_card(acquisition_equipment.id)
         console.log("center id = ", centerId);
-        let studyCardNames: string[]=[];
-        let studyCardToRemove: StudyCard[]=[];
+        const studyCardNames: string[]=[];
+        const studyCardToRemove: StudyCard[]=[];
         this.studyCardService.getAllForStudy(this.study.id).then( studyCards => {
             studyCards.forEach(sc => {
                 if (sc.acquisitionEquipment.center.id == centerId) {
