@@ -111,7 +111,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService,
+            protected downloadService: MassDownloadService,
             private acqEqService: AcquisitionEquipmentService
             ) {
         super(route, 'study');
