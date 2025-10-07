@@ -1,65 +1,65 @@
 package org.shanoir.uploader.model.dto;
 
 public class SubjectStudyDTO {
-	
-	private Long id;
 
-	private Long StudyId;
+    private Long id;
 
-	private boolean physicallyInvolved;
+    private Long studyId;
 
-	private String subjectStudyIdentifier;
+    private boolean physicallyInvolved;
 
-	private String subjectType;
-	
-	public SubjectStudyDTO(Long id, Long studyId, boolean physicallyInvolved, String subjectStudyIdentifier,
-			String subjectType) {
-		super();
-		this.id = id;
-		StudyId = studyId;
-		this.physicallyInvolved = physicallyInvolved;
-		this.subjectStudyIdentifier = subjectStudyIdentifier;
-		this.subjectType = subjectType;
-	}
+    private String subjectStudyIdentifier;
 
-	public Long getId() {
-		return id;
-	}
+    private String subjectType;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public SubjectStudyDTO(Long id, Long studyId, boolean physicallyInvolved, String subjectStudyIdentifier,
+            String subjectType) {
+        super();
+        this.id = id;
+        this.studyId = studyId;
+        this.physicallyInvolved = physicallyInvolved;
+        this.subjectStudyIdentifier = subjectStudyIdentifier;
+        this.subjectType = subjectType;
+    }
 
-	public boolean isPhysicallyInvolved() {
-		return physicallyInvolved;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
-		this.physicallyInvolved = physicallyInvolved;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getSubjectStudyIdentifier() {
-		return subjectStudyIdentifier;
-	}
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
 
-	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
-		this.subjectStudyIdentifier = subjectStudyIdentifier;
-	}
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
 
-	public String getSubjectType() {
-		return subjectType;
-	}
+    public String getSubjectStudyIdentifier() {
+        return subjectStudyIdentifier;
+    }
 
-	public void setSubjectType(String subjectType) {
-		this.subjectType = subjectType;
-	}
+    public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
+        this.subjectStudyIdentifier = subjectStudyIdentifier;
+    }
 
-	public Long getStudyId() {
-		return StudyId;
-	}
+    public String getSubjectType() {
+        return subjectType;
+    }
 
-	public void setStudyId(Long studyId) {
-		StudyId = studyId;
-	}
+    public void setSubjectType(String subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
 }

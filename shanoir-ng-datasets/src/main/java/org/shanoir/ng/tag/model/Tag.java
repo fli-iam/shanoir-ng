@@ -16,85 +16,85 @@ import org.shanoir.ng.shared.model.Subject;
 @Entity
 public class Tag {
 
-	@Id
-	private Long id;
-	
-	private String name;
+    @Id
+    private Long id;
 
-	private String color;
+    private String name;
 
-	@JsonIgnore
-	@ManyToOne
-	@JoinColumn(name = "study_id")
-	private Study study;
+    private String color;
 
-	@JsonIgnore
-	@ManyToMany(mappedBy = "tags")
-	private Set<Subject> subjects = new HashSet<>();
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    private Study study;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    @JsonIgnore
+    @ManyToMany(mappedBy = "tags")
+    private Set<Subject> subjects = new HashSet<>();
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the color
-	 */
-	public String getColor() {
-		return color;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param color the color to set
-	 */
-	public void setColor(String color) {
-		this.color = color;
-	}
+    /**
+     * @return the color
+     */
+    public String getColor() {
+        return color;
+    }
 
-	/**
-	 * @return the study
-	 */
-	public Study getStudy() {
-		return study;
-	}
+    /**
+     * @param color the color to set
+     */
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-	/**
-	 * @param study the study to set
-	 */
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    /**
+     * @return the study
+     */
+    public Study getStudy() {
+        return study;
+    }
 
-	public Set<Subject> getSubjects() {
-		return subjects;
-	}
+    /**
+     * @param study the study to set
+     */
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public void setSubjects(Set<Subject> subjects) {
-		this.subjects = subjects;
-	}
+    public Set<Subject> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(Set<Subject> subjects) {
+        this.subjects = subjects;
+    }
 
 }

@@ -30,7 +30,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
     }
 
     private Pair<List<ShanoirEvent>, Long> find(Long studyId, Pageable pageable, String searchStr, String searchField) {
-        
+
         String queryEndStr = "from ShanoirEvent as e ";
         int nbPreParams = 1;
         int searchStrIndex = -1;
@@ -85,7 +85,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
                     queryStr += "e." + order.getProperty();
                 }
                 queryStr += " " + order.getDirection() + " ";
-                isort ++;
+                isort++;
             }
             queryStr += ", e.creationDate desc";
         }

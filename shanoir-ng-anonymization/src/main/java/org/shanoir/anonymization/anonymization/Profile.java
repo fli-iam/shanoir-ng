@@ -5,26 +5,26 @@ import java.util.Map;
 
 public class Profile {
 
-	private Integer profileColumn;
-	
-	private Map<String, String> anonymizationMap;
+    private Integer profileColumn;
 
-	public Profile(Integer profileColumn) {
-		super();
-		this.profileColumn = profileColumn;
-		anonymizationMap = new HashMap<>();
-	}
+    private Map<String, String> anonymizationMap;
 
-	public Integer getProfileColumn() {
-		return profileColumn;
-	}
+    public Profile(Integer profileColumn) {
+        super();
+        this.profileColumn = profileColumn;
+        anonymizationMap = new HashMap<>();
+    }
 
-	public Map<String, String> getAnonymizationMap() {
-		return anonymizationMap;
-	}
+    public Integer getProfileColumn() {
+        return profileColumn;
+    }
 
-	public void setAnonymizationMap(Map<String, String> anonymizationMap) {
-		this.anonymizationMap = anonymizationMap;
-	}
+    public Map<String, String> getAnonymizationMap() {
+        return anonymizationMap;
+    }
+
+    public void setAnonymizationMap(Map<String, String> anonymizationMap) {
+        this.anonymizationMap = anonymizationMap;
+    }
 
 }

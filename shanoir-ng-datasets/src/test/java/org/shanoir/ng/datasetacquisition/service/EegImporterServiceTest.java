@@ -57,7 +57,7 @@ public class EegImporterServiceTest {
     public void setUp() throws IOException {
         exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
-        exam.setId(1l);
+        exam.setId(1L);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
     }
 

@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 public class OFSEPSeqIdProcessingTest {
-    
+
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
 
@@ -56,12 +56,12 @@ public class OFSEPSeqIdProcessingTest {
         attr.setDouble(Tag.ImageOrientationPatient, VR.DS, this.getDsOrientation());
 
         JSONObject vol1 = new JSONObject()
-            .put("orientation", this.getMatchingVolumeOrientation())
-            .put("id", "volume_1");
+                .put("orientation", this.getMatchingVolumeOrientation())
+                .put("id", "volume_1");
 
         JSONObject vol2 = new JSONObject()
-            .put("orientation", this.getMatchingVolumeOrientation())
-            .put("id", "volume_2");
+                .put("orientation", this.getMatchingVolumeOrientation())
+                .put("id", "volume_2");
 
         JSONObject serie = new JSONObject()
                 .put("id", 1L)
@@ -72,8 +72,8 @@ public class OFSEPSeqIdProcessingTest {
         assertEquals("volume_1", volume.get("id"));
     }
 
-    private double[] getDsOrientation(){
-        return new double[]{1.0,0.0,6.12303176911e-17,6.12303176911e-17,0.0,-1.0};
+    private double[] getDsOrientation() {
+        return new double[]{1.0, 0.0, 6.12303176911e-17, 6.12303176911e-17, 0.0, -1.0};
     }
 
     private JSONArray getMatchingVolumeOrientation() throws JSONException {

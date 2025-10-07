@@ -40,7 +40,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
         SolrClient solrClient = new HttpSolrClient.Builder(solrUrl).build();
         SolrQuery q = new SolrQuery("*:*");
         q.setRows(0);  // don't actually request any data
-	    long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
+        long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
         try {
             while (true) {
                 try {
@@ -64,7 +64,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
             }
         } catch (InterruptedException ignored) {
             LOG.info("Solr index not checked (thread interrupted)");
-        } catch (SolrServerException|IOException e) {
+        } catch (SolrServerException | IOException e) {
             LOG.error("Failed to check the Solr index", e);
         }
     }

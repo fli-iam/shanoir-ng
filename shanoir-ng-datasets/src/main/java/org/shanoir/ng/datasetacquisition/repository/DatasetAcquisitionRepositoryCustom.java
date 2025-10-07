@@ -8,8 +8,8 @@ import org.springframework.data.util.Pair;
 import java.util.List;
 
 public interface DatasetAcquisitionRepositoryCustom {
-	
-	Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable);
 
-	List<DatasetAcquisition> findByStudyCardIdAndStudyCenterOrStudyIdIn(Long studyCardId, Iterable<Pair<Long, Long>> studyCenters, Iterable<Long> studyIds);
+    Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable);
+
+    List<DatasetAcquisition> findByStudyCardIdAndStudyCenterOrStudyIdIn(Long studyCardId, Iterable<Pair<Long, Long>> studyCenters, Iterable<Long> studyIds);
 }
