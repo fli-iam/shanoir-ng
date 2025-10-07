@@ -15,73 +15,73 @@ import org.shanoir.ng.user.model.User;
 @Entity
 public class AccessRequest extends AbstractEntity {
 
-	private static final long serialVersionUID = 4662874539537675259L;
-	
-	public static final int APPROVED = 1;
-	
-	public static final int REFUSED = -1;
+    private static final long serialVersionUID = 4662874539537675259L;
 
-	public static final int ON_DEMAND = 0;
+    public static final int APPROVED = 1;
 
-	private String studyName;
+    public static final int REFUSED = -1;
 
-	private Long studyId;
-	
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private User user;
-	
-	private String motivation;
+    public static final int ON_DEMAND = 0;
 
-	/** 0: unresolved
-	 *  1: accepted
-	 * -1:  refused
-	 */
-	private int status;
+    private String studyName;
 
-	/**
-	 * @return the motivation
-	 */
-	public String getMotivation() {
-		return motivation;
-	}
+    private Long studyId;
 
-	/**
-	 * @param motivation the motivation to set
-	 */
-	public void setMotivation(String motivation) {
-		this.motivation = motivation;
-	}
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-	public User getUser() {
-		return user;
-	}
+    private String motivation;
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    /** 0: unresolved
+     *  1: accepted
+     * -1:  refused
+     */
+    private int status;
 
-	public int getStatus() {
-		return status;
-	}
+    /**
+     * @return the motivation
+     */
+    public String getMotivation() {
+        return motivation;
+    }
 
-	public void setStatus(int status) {
-		this.status = status;
-	}
+    /**
+     * @param motivation the motivation to set
+     */
+    public void setMotivation(String motivation) {
+        this.motivation = motivation;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public String getStudyName() {
-		return studyName;
-	}
+    public int getStatus() {
+        return status;
+    }
 
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public String getStudyName() {
+        return studyName;
+    }
+
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 }

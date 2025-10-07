@@ -44,9 +44,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionServiceImpl.class);
 
     @Value("${vip.shanoir-vip-host}")
-    private String SHANOIR_URI_SCHEME_LOCAL;
+    private String shanoirUriSchemeLocal;
 
-    public static String SHANOIR_URI_SCHEME;
+    public static String shanoirUriScheme;
 
     private final String vipExecutionUri = "/executions";
 
@@ -79,19 +79,19 @@ public class ExecutionServiceImpl implements ExecutionService {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
-        SHANOIR_URI_SCHEME = ((SHANOIR_URI_SCHEME_LOCAL.endsWith("-datasets") ? SHANOIR_URI_SCHEME_LOCAL.replace("-datasets","") : SHANOIR_URI_SCHEME_LOCAL) + ":/").replaceAll("-","");
+        shanoirUriScheme = ((shanoirUriSchemeLocal.endsWith("-datasets") ? shanoirUriSchemeLocal.replace("-datasets", "") : shanoirUriSchemeLocal) + ":/").replaceAll("-", "");
     }
 
     public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
         ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidate, inputDatasets);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.VALID);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
 
         VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.SENT);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
-    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
         List<Long> datasetsIds = new ArrayList<>();
         for (DatasetParameterDTO param : parameters) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -149,7 +149,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException {
 
-        if(attempts >= 3){
+        if (attempts >= 3) {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
@@ -235,7 +235,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      * Get location of exec results as URI
      */
     private String getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
-        return SHANOIR_URI_SCHEME + resultLocation
+        return shanoirUriScheme + resultLocation
                 + "?token=" + KeycloakUtil.getToken()
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
@@ -245,9 +245,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Get input values of exec as URI
      */
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
-        return SHANOIR_URI_SCHEME + entityName
+        return shanoirUriScheme + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken

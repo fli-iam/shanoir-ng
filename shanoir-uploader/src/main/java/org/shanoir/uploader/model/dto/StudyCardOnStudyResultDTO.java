@@ -2,64 +2,64 @@ package org.shanoir.uploader.model.dto;
 
 public class StudyCardOnStudyResultDTO {
 
-	private String subjectName;
-	
-	private String examinationDate;
-	
-	private String examinationComment;
-	
-	private String resultExaminationLevel;
-	
-	private String resultAcquisitionLevel;
-	
-	private String resultDatasetLevel;
+    private String subjectName;
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    private String examinationDate;
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    private String examinationComment;
 
-	public String getExaminationDate() {
-		return examinationDate;
-	}
+    private String resultExaminationLevel;
 
-	public void setExaminationDate(String examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    private String resultAcquisitionLevel;
 
-	public String getExaminationComment() {
-		return examinationComment;
-	}
+    private String resultDatasetLevel;
 
-	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public String getResultExaminationLevel() {
-		return resultExaminationLevel;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public void setResultExaminationLevel(String resultExaminationLevel) {
-		this.resultExaminationLevel = resultExaminationLevel;
-	}
+    public String getExaminationDate() {
+        return examinationDate;
+    }
 
-	public String getResultAcquisitionLevel() {
-		return resultAcquisitionLevel;
-	}
+    public void setExaminationDate(String examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	public void setResultAcquisitionLevel(String resultAcquisitionLevel) {
-		this.resultAcquisitionLevel = resultAcquisitionLevel;
-	}
+    public String getExaminationComment() {
+        return examinationComment;
+    }
 
-	public String getResultDatasetLevel() {
-		return resultDatasetLevel;
-	}
+    public void setExaminationComment(String examinationComment) {
+        this.examinationComment = examinationComment;
+    }
 
-	public void setResultDatasetLevel(String resultDatasetLevel) {
-		this.resultDatasetLevel = resultDatasetLevel;
-	}
-	
+    public String getResultExaminationLevel() {
+        return resultExaminationLevel;
+    }
+
+    public void setResultExaminationLevel(String resultExaminationLevel) {
+        this.resultExaminationLevel = resultExaminationLevel;
+    }
+
+    public String getResultAcquisitionLevel() {
+        return resultAcquisitionLevel;
+    }
+
+    public void setResultAcquisitionLevel(String resultAcquisitionLevel) {
+        this.resultAcquisitionLevel = resultAcquisitionLevel;
+    }
+
+    public String getResultDatasetLevel() {
+        return resultDatasetLevel;
+    }
+
+    public void setResultDatasetLevel(String resultDatasetLevel) {
+        this.resultDatasetLevel = resultDatasetLevel;
+    }
+
 }

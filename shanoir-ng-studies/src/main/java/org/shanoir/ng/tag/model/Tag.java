@@ -24,88 +24,88 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Tag extends HalEntity {
 
-	private String name;
+    private String name;
 
-	private String color;
+    private String color;
 
-	@JsonIgnore
-	@ManyToOne
-	@JoinColumn(name = "study_id")
-	private Study study;
-	
-	// to be removed later
-	@JsonIgnore
-	@OneToMany(mappedBy = "tag", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private List<SubjectStudyTag> subjectStudyTags;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    private Study study;
 
-	@JsonIgnore
-	@ManyToMany(mappedBy = "tags")
-	private Set<Subject> subjects = new HashSet<>();
+    // to be removed later
+    @JsonIgnore
+    @OneToMany(mappedBy = "tag", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<SubjectStudyTag> subjectStudyTags;
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    @JsonIgnore
+    @ManyToMany(mappedBy = "tags")
+    private Set<Subject> subjects = new HashSet<>();
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the color
-	 */
-	public String getColor() {
-		return color;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param color the color to set
-	 */
-	public void setColor(String color) {
-		this.color = color;
-	}
+    /**
+     * @return the color
+     */
+    public String getColor() {
+        return color;
+    }
 
-	/**
-	 * @return the study
-	 */
-	public Study getStudy() {
-		return study;
-	}
+    /**
+     * @param color the color to set
+     */
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-	/**
-	 * @param study the study to set
-	 */
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    /**
+     * @return the study
+     */
+    public Study getStudy() {
+        return study;
+    }
 
-	public List<SubjectStudyTag> getSubjectStudyTags() {
-		return subjectStudyTags;
-	}
+    /**
+     * @param study the study to set
+     */
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
-		if (this.subjectStudyTags != null) {
-			this.subjectStudyTags.clear();
-			if (subjectStudyTags != null) {
-				this.subjectStudyTags.addAll(subjectStudyTags);
-			}			
-		} else {
-			this.subjectStudyTags = subjectStudyTags;
-		}
-	}
+    public List<SubjectStudyTag> getSubjectStudyTags() {
+        return subjectStudyTags;
+    }
 
-	public Set<Subject> getSubjects() {
-		return subjects;
-	}
+    public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
+        if (this.subjectStudyTags != null) {
+            this.subjectStudyTags.clear();
+            if (subjectStudyTags != null) {
+                this.subjectStudyTags.addAll(subjectStudyTags);
+            }
+        } else {
+            this.subjectStudyTags = subjectStudyTags;
+        }
+    }
 
-	public void setSubjects(Set<Subject> subjects) {
-		this.subjects = subjects;
-	}
+    public Set<Subject> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(Set<Subject> subjects) {
+        this.subjects = subjects;
+    }
 
 }

@@ -29,16 +29,17 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 @ConditionalOnProperty(name = "vip.enabled", havingValue = "true")
-public class VIPUserServiceImpl implements VIPUserService{
+public class VIPUserServiceImpl implements VIPUserService {
     private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
-	/**
+    /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(VIPUserServiceImpl.class);
 
     @Value("${vip.uri}")
-    private String vip_uri;
+    private String vipUri;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -75,15 +76,15 @@ public class VIPUserServiceImpl implements VIPUserService{
         HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
-            ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(this.vipUri, HttpMethod.POST, entity, Void.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-            	LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
+                LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
             }
             return user;
         } catch (Exception e) {
             // Do not fail when an error occures
-        	LOG.error("Could not communicate with VIP instance to create user", e);
-        	return user;
+            LOG.error("Could not communicate with VIP instance to create user", e);
+            return user;
         }
     }
 }

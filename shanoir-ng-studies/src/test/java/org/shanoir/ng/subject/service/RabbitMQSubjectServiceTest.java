@@ -41,118 +41,118 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class RabbitMQSubjectServiceTest {
 
-	@Mock
-	SubjectRepository subjectRepository;
+    @Mock
+    SubjectRepository subjectRepository;
 
-	@Mock
-	SubjectService subjectService;
+    @Mock
+    SubjectService subjectService;
 
-	@Mock
-	StudyRepository studyRepository;
+    @Mock
+    StudyRepository studyRepository;
 
-	@Mock
-	SubjectStudyRepository subjectStudyRepository;
-	
-	@Mock
-	ObjectMapper mapper;
+    @Mock
+    SubjectStudyRepository subjectStudyRepository;
 
-	@InjectMocks
-	private RabbitMQSubjectService rabbitMQSubjectService;
+    @Mock
+    ObjectMapper mapper;
 
-	private Long studyId = 1L;
+    @InjectMocks
+    private RabbitMQSubjectService rabbitMQSubjectService;
 
-	private Long subjectId = 1L;
+    private Long studyId = 1L;
 
-	private Subject subject = new Subject();
+    private Long subjectId = 1L;
 
-	private Study study = new Study();
+    private Subject subject = new Subject();
 
-	private IdName idName = new IdName(studyId, subjectId.toString());
+    private Study study = new Study();
 
-	private String studyName = "studyname";
-	
-	@BeforeEach
-	public void init() {
-		subject.setId(subjectId);
-		subject.setSubjectStudyList(new ArrayList<>());
-		study.setId(studyId);
-		study.setName(studyName);
-	}
-	
-	@Test
-	public void testGetSubjetsForStudy() throws JsonProcessingException {
-		SimpleSubjectDTO dto = new SimpleSubjectDTO();
-		String ident="subjectIdentifier";
-		dto.setIdentifier(ident);
-		Mockito.when(mapper.writeValueAsString(Mockito.any())).thenReturn(ident);
+    private IdName idName = new IdName(studyId, subjectId.toString());
 
-		// GIVEN a study ID, retrieve all associated subjects
-		String result = rabbitMQSubjectService.getSubjectsForStudy(studyId.toString());
-		assertNotNull(result);
-		assertTrue(result.contains(ident));
-	}
+    private String studyName = "studyname";
 
-	@Test
-	public void testGetSubjetsForStudyFail() throws JsonProcessingException {
-		assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
-		// GIVEN a study ID, retrieve all associated subjects
-		rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
-		});
-	}
+    @BeforeEach
+    public void init() {
+        subject.setId(subjectId);
+        subject.setSubjectStudyList(new ArrayList<>());
+        study.setId(studyId);
+        study.setName(studyName);
+    }
 
-	@Test
-	public void testUpdateSubjectStudyExisting() throws IOException {
-		SubjectStudy susu = new SubjectStudy();
-		susu.setStudy(study);
-		susu.setSubject(subject);
+    @Test
+    public void testGetSubjetsForStudy() throws JsonProcessingException {
+        SimpleSubjectDTO dto = new SimpleSubjectDTO();
+        String ident="subjectIdentifier";
+        dto.setIdentifier(ident);
+        Mockito.when(mapper.writeValueAsString(Mockito.any())).thenReturn(ident);
 
-		// GIVEN a studyID and a subjectID
-		subject.setSubjectStudyList(Collections.singletonList(susu));
-		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
-		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
-		// WHEN the subjectStudy already exists
-		String message = "{id: 1, name: \"1L\"}";
-		String name = rabbitMQSubjectService.updateSubjectStudy(message);
-		
-		// THEN nothing is created
-		Mockito.verifyNoInteractions(subjectStudyRepository);
-		assertEquals(name, studyName);
-	}
+        // GIVEN a study ID, retrieve all associated subjects
+        String result = rabbitMQSubjectService.getSubjectsForStudy(studyId.toString());
+        assertNotNull(result);
+        assertTrue(result.contains(ident));
+    }
 
-	@Test
-	public void testUpdateSubjectStudyCreating() throws IOException {
-		SubjectStudy susu = new SubjectStudy();
-		susu.setStudy(study);
-		susu.setSubject(subject);
+    @Test
+    public void testGetSubjetsForStudyFail() throws JsonProcessingException {
+        assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
+        // GIVEN a study ID, retrieve all associated subjects
+        rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
+        });
+    }
 
-		// GIVEN a studyID and a subjectID
-		subject.setSubjectStudyList(Collections.emptyList());
-		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
-		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
-		Mockito.when(studyRepository.findById(studyId)).thenReturn(Optional.of(study));
+    @Test
+    public void testUpdateSubjectStudyExisting() throws IOException {
+        SubjectStudy susu = new SubjectStudy();
+        susu.setStudy(study);
+        susu.setSubject(subject);
 
-		// WHEN the subjectStudy does not exists
-		String message = "{id: 1, name: \"1L\"}";
-		String name = rabbitMQSubjectService.updateSubjectStudy(message);
-		
-		// THEN a new subejctStudy is created
-		Mockito.verify(subjectStudyRepository).save(Mockito.any(SubjectStudy.class));
-		assertEquals(name, studyName);
-	}
+        // GIVEN a studyID and a subjectID
+        subject.setSubjectStudyList(Collections.singletonList(susu));
+        Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
+        Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
+        // WHEN the subjectStudy already exists
+        String message = "{id: 1, name: \"1L\"}";
+        String name = rabbitMQSubjectService.updateSubjectStudy(message);
 
-	@Test
-	public void testUpdateSubjectStudyFail() throws IOException {
+        // THEN nothing is created
+        Mockito.verifyNoInteractions(subjectStudyRepository);
+        assertEquals(name, studyName);
+    }
 
-		// WHEN the call fails
-		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
-		
-		// THEN a message is logged and null is sent
-		assertNull(name);
-	}
+    @Test
+    public void testUpdateSubjectStudyCreating() throws IOException {
+        SubjectStudy susu = new SubjectStudy();
+        susu.setStudy(study);
+        susu.setSubject(subject);
 
-	// TODO: complete these
-	@Test
-	public void testManageParticipants() {
-		
-	}
+        // GIVEN a studyID and a subjectID
+        subject.setSubjectStudyList(Collections.emptyList());
+        Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
+        Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
+        Mockito.when(studyRepository.findById(studyId)).thenReturn(Optional.of(study));
+
+        // WHEN the subjectStudy does not exists
+        String message = "{id: 1, name: \"1L\"}";
+        String name = rabbitMQSubjectService.updateSubjectStudy(message);
+
+        // THEN a new subejctStudy is created
+        Mockito.verify(subjectStudyRepository).save(Mockito.any(SubjectStudy.class));
+        assertEquals(name, studyName);
+    }
+
+    @Test
+    public void testUpdateSubjectStudyFail() throws IOException {
+
+        // WHEN the call fails
+        String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
+
+        // THEN a message is logged and null is sent
+        assertNull(name);
+    }
+
+    // TODO: complete these
+    @Test
+    public void testManageParticipants() {
+
+    }
 }

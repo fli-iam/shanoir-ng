@@ -1,81 +1,81 @@
 package org.shanoir.uploader.model.rest;
 
 public class ManufacturerModel {
-	
-	private Long id;
-	
-	private String datasetModalityType;
 
-	private Double magneticField;
+    private Long id;
 
-	private Manufacturer manufacturer;
+    private String datasetModalityType;
 
-	private String name;
+    private Double magneticField;
 
-	public Long getId() {
-		return id;
-	}
+    private Manufacturer manufacturer;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String name;
 
-	/**
-	 * @return the magneticField
-	 */
-	public Double getMagneticField() {
-		return magneticField;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	@Override
-	public String toString() {
-		return manufacturer.toString() + " " + name + " (" + magneticField + ")";
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param magneticField
-	 *            the magneticField to set
-	 */
-	public void setMagneticField(Double magneticField) {
-		this.magneticField = magneticField;
-	}
+    /**
+     * @return the magneticField
+     */
+    public Double getMagneticField() {
+        return magneticField;
+    }
 
-	/**
-	 * @return the manufacturer
-	 */
-	public Manufacturer getManufacturer() {
-		return manufacturer;
-	}
+    @Override
+    public String toString() {
+        return manufacturer.toString() + " " + name + " (" + magneticField + ")";
+    }
 
-	/**
-	 * @param manufacturer
-	 *            the manufacturer to set
-	 */
-	public void setManufacturer(Manufacturer manufacturer) {
-		this.manufacturer = manufacturer;
-	}
+    /**
+     * @param magneticField
+     *            the magneticField to set
+     */
+    public void setMagneticField(Double magneticField) {
+        this.magneticField = magneticField;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the manufacturer
+     */
+    public Manufacturer getManufacturer() {
+        return manufacturer;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param manufacturer
+     *            the manufacturer to set
+     */
+    public void setManufacturer(Manufacturer manufacturer) {
+        this.manufacturer = manufacturer;
+    }
 
-	public String getDatasetModalityType() {
-		return datasetModalityType;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	public void setDatasetModalityType(String datasetModalityType) {
-		this.datasetModalityType = datasetModalityType;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDatasetModalityType() {
+        return datasetModalityType;
+    }
+
+    public void setDatasetModalityType(String datasetModalityType) {
+        this.datasetModalityType = datasetModalityType;
+    }
 
 }

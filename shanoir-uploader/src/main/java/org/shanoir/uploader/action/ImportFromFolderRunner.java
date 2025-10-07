@@ -41,7 +41,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private static final String DICOMDIR = "DICOMDIR";
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
 
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
@@ -189,7 +189,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         }
 /**
- * 
+ *
         Study study = new Study();
         study.setId(importTodo.getParent().getStudy().getId());
         study.setName(importTodo.getParent().getStudy().getName());

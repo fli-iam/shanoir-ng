@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,7 +29,7 @@ import jakarta.persistence.PostLoad;
 
 /**
  * Manufacturer.
- * 
+ *
  * @author msimon
  *
  */
@@ -38,38 +38,38 @@ import jakarta.persistence.PostLoad;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Manufacturer extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -4761707953959168601L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -4761707953959168601L;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	@Length(min = 2, max = 200)
-	private String name;
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    @Length(min = 2, max = 200)
+    private String name;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "manufacturer/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "manufacturer/" + getId());
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

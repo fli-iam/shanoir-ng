@@ -35,21 +35,21 @@ import org.springframework.stereotype.Service;
 /*
  * This scheduled service iterates over all import job folders within
  * the workFolder and searches for import jobs, state FINISHED.
- * 
+ *
  * For performance reasons, especially on the limit network bandwith
  * in the hospital, this job only runs, when no UploadServiceJob is
  * running, see LOCK.
- * 
+ *
  * When the timestamp is older than 2 hours the DICOMWeb API of
  * the server is used to verify, that all local images have well
  * arrived on the server and that the examination is complete.
  * If all is perfect, that state moves to CHECK_OK or CHECK_KO.
- * 
+ *
  * DICOM tags and the binary pixel data are compared instance/image
  * by instance/image.
- * 
+ *
  * When the check runs on instance-by-instance after each
- * 
+ *
  */
 @Service
 public class ExaminationConsistencyServiceJob {
@@ -57,14 +57,14 @@ public class ExaminationConsistencyServiceJob {
     private static final Logger logger = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
 
     private static final long THIRTY_MIN_IN_MILLIS = 30 * 60 * 1000;
-    
+
     private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 
-   	@Autowired
-	private CurrentNominativeDataController currentNominativeDataController;
+       @Autowired
+    private CurrentNominativeDataController currentNominativeDataController;
 
     @Autowired
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     @Scheduled(fixedRate = THIRTY_MIN_IN_MILLIS)
     public void execute() throws Exception {
@@ -75,21 +75,21 @@ public class ExaminationConsistencyServiceJob {
                 logger.info("ExaminationConsistencyServiceJob started...");
                 UploadServiceJob.LOCK.lock();
                 File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-                processWorkFolder(workFolder, currentNominativeDataController);    
+                processWorkFolder(workFolder, currentNominativeDataController);
                 UploadServiceJob.LOCK.unlock();
                 logger.info("ExaminationConsistencyServiceJob ended...");
             }
         }
-	}
+    }
 
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws Exception {
         final List<File> folders = Util.listFolders(workFolder);
-		logger.debug("Found " + folders.size() + " folders in work folder.");
-		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			final File importJobFolder = (File) foldersIt.next();
-			final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-			// file could be missing in case of downloadOrCopy ongoing
-			if (importJobFile.exists()) {
+        logger.debug("Found " + folders.size() + " folders in work folder.");
+        for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
+            final File importJobFolder = (File) foldersIt.next();
+            final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+            // file could be missing in case of downloadOrCopy ongoing
+            if (importJobFile.exists()) {
                 // if the check.on.server flag has been activated after, do not check on previous
                 // already imported folders, as they do not contain any DICOM anymore
                 if (importJobFolder.listFiles().length > 1) {
@@ -122,9 +122,9 @@ public class ExaminationConsistencyServiceJob {
                         }
                     }
                 } // do nothing, keep already imported untouched
-			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
-			}
+            } else {
+                logger.error("Folder found in workFolder without import-job.json.");
+            }
         }
     }
 
@@ -148,10 +148,10 @@ public class ExaminationConsistencyServiceJob {
                     }
                 }
                 logger.info(studies.size() + " DICOM study (examination) of"
-                    + " subject: " + importJob.getSubjectName()
-                    + ", studyDate: " + importJob.getStudy().getStudyDate()
-                    + " checked for consistency of "
-                    + numberOfInstances + " DICOM instances (images)");
+                        + " subject: " + importJob.getSubjectName()
+                        + ", studyDate: " + importJob.getStudy().getStudyDate()
+                        + " checked for consistency of "
+                        + numberOfInstances + " DICOM instances (images)");
             }
         }
         return true;
@@ -179,7 +179,7 @@ public class ExaminationConsistencyServiceJob {
                     } else {
                         deleteInstanceFileAndSerieFolder(importJobFolder, instanceFile);
                         numberOfInstances++;
-                    }   
+                    }
                 } else {
                     throw new Exception("Serie: " + serie.getSeriesDescription()
                         + ", DICOM instance not found on server: " + instance.getSopInstanceUID());
@@ -187,7 +187,7 @@ public class ExaminationConsistencyServiceJob {
             }
         } else {
             logger.error("Serie: " + serie.getSeriesDescription()
-                + ", DICOM instance not found locally: " + instanceFilePath);
+                    + ", DICOM instance not found locally: " + instanceFilePath);
             throw new FileNotFoundException();
         }
         return numberOfInstances;

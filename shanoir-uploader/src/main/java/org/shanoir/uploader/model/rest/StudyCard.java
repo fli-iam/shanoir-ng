@@ -4,117 +4,117 @@ import org.shanoir.uploader.ShUpConfig;
 
 public class StudyCard {
 
-	private Long id;
-	
-	/** The acquisition equipment id. */
-	private Long acquisitionEquipmentId;
+    private Long id;
 
-	/**
-	 * Real object, searched and set with infos from other microservice.
-	 */
-	private AcquisitionEquipment acquisitionEquipment;
+    /** The acquisition equipment id. */
+    private Long acquisitionEquipmentId;
 
-	/** The center id of the study card. */
-	private Long centerId;
+    /**
+     * Real object, searched and set with infos from other microservice.
+     */
+    private AcquisitionEquipment acquisitionEquipment;
 
-	/** A studycard might be disabled */
-	private boolean disabled;
+    /** The center id of the study card. */
+    private Long centerId;
 
-	/** The name of the study card. */
-	private String name;
+    /** A studycard might be disabled */
+    private boolean disabled;
 
-	/** The nifti converter id of the study card. */
-	private Long niftiConverterId;
+    /** The name of the study card. */
+    private String name;
 
-	/** The study for which is defined the study card. */
-	private Long studyId;
-	
-	private Boolean compatible;
-	
-	public Boolean getCompatible() {
-		return compatible;
-	}
+    /** The nifti converter id of the study card. */
+    private Long niftiConverterId;
 
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
-	}
+    /** The study for which is defined the study card. */
+    private Long studyId;
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    private Boolean compatible;
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Boolean getCompatible() {
+        return compatible;
+    }
 
-	public boolean isDisabled() {
-		return disabled;
-	}
+    public void setCompatible(Boolean compatible) {
+        this.compatible = compatible;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public Long getNiftiConverterId() {
-		return niftiConverterId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public boolean isDisabled() {
+        return disabled;
+    }
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public AcquisitionEquipment getAcquisitionEquipment() {
-		return acquisitionEquipment;
-	}
+    public Long getNiftiConverterId() {
+        return niftiConverterId;
+    }
 
-	public void setAcquisitionEquipment(AcquisitionEquipment acquisitionEquipment) {
-		this.acquisitionEquipment = acquisitionEquipment;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;
-	}
+    public AcquisitionEquipment getAcquisitionEquipment() {
+        return acquisitionEquipment;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setAcquisitionEquipment(AcquisitionEquipment acquisitionEquipment) {
+        this.acquisitionEquipment = acquisitionEquipment;
+    }
 
-	public void setNiftiConverterId(Long niftiConverterId) {
-		this.niftiConverterId = niftiConverterId;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-	
-	public String toString() {
-		String displayString = this.getName();
-		if (acquisitionEquipment != null) {
-			displayString = displayString + " (" + acquisitionEquipment.toString() + ")";
-		} else {
-			displayString = displayString + " (missing equipment)";
-		}
-		if (compatible != null && compatible) {
-			return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + displayString;
-		} else {
-			return displayString;
-		}
-	}
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setNiftiConverterId(Long niftiConverterId) {
+        this.niftiConverterId = niftiConverterId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public String toString() {
+        String displayString = this.getName();
+        if (acquisitionEquipment != null) {
+            displayString = displayString + " (" + acquisitionEquipment.toString() + ")";
+        } else {
+            displayString = displayString + " (missing equipment)";
+        }
+        if (compatible != null && compatible) {
+            return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + displayString;
+        } else {
+            return displayString;
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 }

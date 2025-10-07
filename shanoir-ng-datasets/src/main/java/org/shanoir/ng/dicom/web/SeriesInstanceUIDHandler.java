@@ -45,7 +45,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
-    @Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
     public void clearAcquisitionIdToSeriesInstanceUIDCache() {
         acquisitionUIDToSeriesInstanceUIDCache.clear();
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
@@ -60,10 +60,10 @@ public class SeriesInstanceUIDHandler {
                 seriesInstanceUID = findSeriesInstanceUID(acquisition);
                 if (seriesInstanceUID != null) {
                     String existing = acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
-					if (existing == null) {
-						LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
-						LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
-					}
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
+                    }
                 }
             }
         }
