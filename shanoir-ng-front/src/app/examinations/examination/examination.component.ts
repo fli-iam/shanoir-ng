@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -19,6 +19,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -30,12 +31,10 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import {ExaminationNode} from "../../tree/tree.model";
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 import {Subject} from "../../subjects/shared/subject.model";
-import {SubjectStudy} from "../../subjects/shared/subject-study.model";
 
 @Component({
     selector: 'examination-detail',
@@ -49,7 +48,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public centers: IdName[];
     public studies: IdName[];
-    public subjects: SubjectWithSubjectStudy[];
+    public subjects: Subject[];
     files: File[] = [];
     public inImport: boolean;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
@@ -57,10 +56,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     downloadState: TaskState = new TaskState();
-
-    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    dateDisplay = dateDisplay;
+    datasetIds: Promise<number[]> = new Promise(() => { return; });
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
@@ -234,7 +233,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
         this.form.markAsDirty();
@@ -243,9 +242,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public save(): Promise<Examination> {
         return super.save( () => {
-            let uploads: Promise<void>[] = [];
+            const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
             return Promise.all(uploads).then(() => null);
@@ -268,8 +267,12 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     ngOnDestroy() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
 
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
+    }
+
+    downloadFile(file) {
+        this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }
 }

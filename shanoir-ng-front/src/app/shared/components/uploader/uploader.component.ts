@@ -13,6 +13,7 @@
  */
 
 import { Component, ViewChild, ElementRef, Output, EventEmitter, Input } from '@angular/core';
+
 import { ImagesUrlUtil } from '../../utils/images-url.util';
 
 
@@ -29,6 +30,9 @@ export class UploaderComponent {
     @Input() loading: boolean = false;
     @Input() disabled: boolean = false;
     @Input() error: boolean = false;
+    @Input() accept: string;
+    @Input() noFilename: boolean;
+    @Input() label: string;
     readonly ImagesUrlUtil = ImagesUrlUtil;
     filename: string;
     

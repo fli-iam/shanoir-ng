@@ -13,6 +13,7 @@
  */
 
 import { Pipe, PipeTransform } from "@angular/core";
+
 import * as AppUtils from '../../utils/app.utils';
 
 @Pipe({

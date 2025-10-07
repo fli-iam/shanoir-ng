@@ -64,7 +64,7 @@ public class DefaultHandler extends OutputHandler {
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
-    
+
     @Autowired
 	private ProcessedDatasetImporterService processedDatasetImporterService;
 
@@ -88,7 +88,8 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
+            List<Dataset> inputDatasets = new ArrayList<>(monitoring.getInputDatasets());
+
             if(inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }

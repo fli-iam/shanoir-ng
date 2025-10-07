@@ -85,9 +85,6 @@ public class RabbitMQConfiguration {
 	/** Update / create a study user to users MS. */
 	public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
-	/** Queue to notify when a subject / study is updated / deleted. */
-	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
-
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
@@ -98,7 +95,7 @@ public class RabbitMQConfiguration {
 	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
 	/** Subject name updated => notify dataset MS to change database. */
-	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
+	public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 	
 	/** Center name updated => notify dataset MS to change database. */
 	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
@@ -145,6 +142,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
+
+	/** Queue to send dua draft by mail */
+	public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -302,11 +302,6 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
 	}
-
-	@Bean
-	public static Queue subjectStudyQueue() {
-		return new Queue(SUBJECT_STUDY_QUEUE, true);
-	}
 	
 	@Bean
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {
@@ -349,7 +344,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
-		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
+		return new Queue(SUBJECT_UPDATE_QUEUE, true);
 	}
 
 	@Bean
@@ -375,7 +370,12 @@ public class RabbitMQConfiguration {
 	public static Queue acquisitionEquipementUpdateQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
 	}
-	
+
+	@Bean
+	public static Queue duaDraftMailQueue() {
+		return new Queue(DUA_DRAFT_MAIL_QUEUE, true);
+	}
+
 	@Bean
 	public static Queue examinationCreationQueue() {
 		return new Queue(EXAMINATION_CREATION_QUEUE, true);

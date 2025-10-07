@@ -47,8 +47,7 @@ public interface StudyMapper {
 	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
 	@Named("study.simple")
-	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
-		@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+	@Mappings({ @Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
 		@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
 		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
 		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})

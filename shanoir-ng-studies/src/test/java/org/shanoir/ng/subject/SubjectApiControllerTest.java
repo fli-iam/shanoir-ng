@@ -16,7 +16,6 @@ package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -25,12 +24,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
@@ -92,7 +91,7 @@ public class SubjectApiControllerTest {
 	private ShanoirEventService eventService;
 
 	@BeforeEach
-	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException, ShanoirException {
 		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new SubjectDTO()));
 		doNothing().when(subjectServiceMock).deleteById(1L);

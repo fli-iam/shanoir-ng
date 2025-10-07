@@ -14,7 +14,6 @@
 package org.shanoir.ng.shared.repository;
 
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
-import org.shanoir.ng.shared.model.Center;
 import org.springframework.data.repository.CrudRepository;
 
 /**

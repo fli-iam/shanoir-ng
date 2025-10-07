@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
 				(edit)="goToEdit()"
                 (delete) = "delete()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()"
 			>
 				<button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate | localDateFormatPipe}}
                                 </a>
                             </ng-template>
                         </span>
@@ -131,7 +131,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Acquisition start time</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.acquisitionStartTime | date: 'dd/MM/yyyy HH:mm:ss'}}
+								{{datasetAcquisition.acquisitionStartTime | localDateFormatPipe : true}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" formControlName="startTime" [(ngModel)]="datasetAcquisition.acquisitionStartTime" />

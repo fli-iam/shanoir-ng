@@ -11,20 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { Tag } from 'src/app/tags/tag.model';
+
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
+import {Subject} from "../../subjects/shared/subject.model";
+
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
 import {
@@ -32,8 +35,7 @@ import {
     StudyDTO,
     StudyDTOService,
     StudyLight,
-    StudyStorageVolumeDTO,
-    SubjectWithSubjectStudyDTO
+    StudyStorageVolumeDTO
 } from './study.dto';
 import { Study } from './study.model';
 
@@ -46,14 +48,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService, 
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService,
             private downloadService: SingleDownloadService) {
         super(http);
     }
 
     getEntityInstance() { return new Study(); }
 
-    get(id: number, mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
+    get(id: number, _mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
         return this.http.get<any>(this.API_URL + '/' + id
             + (withStorageVolume ? '?withStorageVolume=true' : ''))
             .toPromise()
@@ -66,7 +68,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
           return typeResult;
         });
     }
-    
+
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
         .toPromise()
@@ -116,14 +118,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
-    findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise().then(this.mapSubjectWithSubjectStudyList);
+    findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
+        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+            .toPromise().then(this.mapSubjectList);
     }
 
-    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
-            .toPromise().then(this.mapSubjectWithSubjectStudyList);
+    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<Subject[]> {
+        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
+            .toPromise().then(this.mapSubjectList);
     }
 
     private findStudiesIcanAdmin(): Promise<Study[]> {
@@ -187,8 +189,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
         const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
-        let params: HttpParams = new HttpParams();
-        //params
         return AppUtils.downloadBlob(endpoint);
     }
 
@@ -240,8 +240,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     public stringify(entity: Study) {
-        let dto = new StudyDTO(entity);
-        let test = JSON.stringify(dto, (key, value) => {
+        const dto = new StudyDTO(entity);
+        const test = JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
         return test;
@@ -257,13 +257,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if (dtos) return this.studyDTOService.toEntityList(dtos, result);
     }
 
-    private mapSubjectWithSubjectStudyList = (dtos: SubjectWithSubjectStudyDTO[], result?: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> => {
+    private mapSubjectList = (dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]> => {
         if (result == undefined) result = [];
-        if (dtos) return this.studyDTOService.toSubjectWithSubjectStudyList(dtos, result);
+        if (dtos) return this.studyDTOService.toSubjectList(dtos, result);
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }
@@ -275,14 +275,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getStudiesStorageVolume(ids: number[]): Promise<Map<number, StudyStorageVolumeDTO>> {
         // separate cached and uncached volumes
-        let cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+        const cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
         ids.forEach(id => {
             if (this.studyVolumesCache.has(id)) {
                 cachedVolumes.set(id, this.studyVolumesCache.get(id));
             }
         });
         ids = ids.filter(id => !cachedVolumes.has(id));
-        let rets: Promise<Map<number, StudyStorageVolumeDTO>>[] = [];
+        const rets: Promise<Map<number, StudyStorageVolumeDTO>>[] = [];
         if (cachedVolumes.size > 0) rets.push(Promise.resolve(cachedVolumes));
 
         if (ids.length > 0) { // fetch volumes from server
@@ -302,7 +302,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         // aggregate results
         return Promise.all(rets).then(results => {
-            let totalVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+            const totalVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
             results?.forEach(result => {
                 result.forEach((val, key) => totalVolumes.set(key, val));
             });
@@ -319,5 +319,10 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/tags/' + studyId)
             .toPromise()
             .then(dtos => dtos?.map(dto => StudyDTOService.tagDTOToTag(dto)));
+    }
+
+    getStudiesByRight(right: StudyUserRight): Promise<number[]> {
+        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right)
+            .toPromise();
     }
 }

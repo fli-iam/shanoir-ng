@@ -12,6 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ViewChild } from '@angular/core';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -20,7 +23,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -33,6 +35,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private examinationService: ExaminationService,
@@ -40,6 +43,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Examination> {
@@ -53,7 +57,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
@@ -88,13 +92,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     canEdit(ex: Examination): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            ex.subjectStudy &&
-			ex.subjectStudy.subjectStudy &&
-			ex.subjectStudy.subjectStudy.study &&
-            ex.subjectStudy.subjectStudy.study.studyUserList &&
-            ex.subjectStudy.subjectStudy.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(ex.study.id);
     }
 
     canDelete(exam: Examination): boolean {

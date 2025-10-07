@@ -13,18 +13,20 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+
 import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { Observable } from 'rxjs';
 import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
@@ -131,7 +133,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
-        let params = new HttpParams()
+        const params = new HttpParams()
             .set("studyNameInRegExp", studyNameInRegExp)
             .set("studyNameOutRegExp", studyNameOutRegExp)
             .set("subjectNameInRegExp", subjectNameInRegExp)
@@ -174,7 +176,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
-        let result: Dataset[] = [];
+        const result: Dataset[] = [];
         if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }

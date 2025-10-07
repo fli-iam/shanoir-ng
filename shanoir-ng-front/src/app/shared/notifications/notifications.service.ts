@@ -13,13 +13,14 @@
  */
 import { Injectable } from '@angular/core';
 import { EventSourcePolyfill } from 'ng-event-source';
-
 import { BehaviorSubject, Observable } from 'rxjs';
+
+import { SuperTimeout } from 'src/app/utils/super-timeout';
+
 import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';
 import * as AppUtils from '../../utils/app.utils';
 import { KeycloakService } from '../keycloak/keycloak.service';
-import { SuperTimeout } from 'src/app/utils/super-timeout';
 import { SessionService } from '../services/session.service';
 
 @Injectable()
@@ -96,9 +97,9 @@ export class NotificationsService {
     }
 
     updateStatusVars() {
-        let tmpTasksInProgress = [];
-        let tmpTasksInWait = [];
-        for (let task of this.allTasks) {
+        const tmpTasksInProgress = [];
+        const tmpTasksInWait = [];
+        for (const task of this.allTasks) {
             if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5)) {
                 if (!this.sessionService.isActive(task.sessionId)) {
                     task.status = -1;
@@ -107,13 +108,13 @@ export class NotificationsService {
             }
             if (!task.hideFromMenu) {
                 if (task.status == -1 && task.lastUpdate) {
-                    let freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
+                    const freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                     if (freshError) {
                         this.freshTimeouts[task.id]?.triggerNow();
                         this.pushToFreshError(task);
                     }
                 } else if (task.status == 1 || task.status == 3) {
-                    let freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
+                    const freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                     if (freshDone) {
                         this.freshTimeouts[task.id]?.triggerNow();
                         this.pushToFreshCompleted(task);
@@ -178,8 +179,8 @@ export class NotificationsService {
                 });
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
-                    let task: Task = this.taskService.toRealObject(JSON.parse(message.data));
-                    let existingTask = this.tasks.find(t => t.completeId == task.completeId);
+                    const task: Task = this.taskService.toRealObject(JSON.parse(message.data));
+                    const existingTask = this.tasks.find(t => t.completeId == task.completeId);
                     if (existingTask) {
                         existingTask.updateWith(task);
                     } else {
@@ -205,7 +206,7 @@ export class NotificationsService {
     }
 
     private createOrUpdateTask(task: Task) {
-        let existingTask: Task = this.newLocalTasksQueue.find(t => t.id == task.id);
+        const existingTask: Task = this.newLocalTasksQueue.find(t => t.id == task.id);
         if (existingTask) {
             existingTask.updateWith(task);
         } else {
@@ -226,12 +227,12 @@ export class NotificationsService {
     }
 
     private readLocalTasks() {
-        let storageTasksStr: string = localStorage.getItem(this.storageKey);
+        const storageTasksStr: string = localStorage.getItem(this.storageKey);
         this.lastLocalStorageRead = Date.now();
         let storageTasks: Task[] = [];
         if (storageTasksStr) {
             storageTasks = JSON.parse(storageTasksStr).map(task => {
-                let newTask: Task = Object.assign(new Task(), task);
+                const newTask: Task = Object.assign(new Task(), task);
                 newTask.creationDate = new Date(task.creationDate as string);
                 newTask.lastUpdate = new Date(task.lastUpdate as string);
                 return newTask;
@@ -240,7 +241,7 @@ export class NotificationsService {
             });
         }
         storageTasks.forEach(stTask => {
-            let existingTask: Task = this.localTasks.find(t => t.id == stTask.id);
+            const existingTask: Task = this.localTasks.find(t => t.id == stTask.id);
             if (existingTask) {
                 stTask.updateWith(existingTask);
             }
@@ -252,7 +253,7 @@ export class NotificationsService {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue.map(nlt => {
-            let existing: Task = this.localTasks.find(lt => lt.id == nlt.id);
+            const existing: Task = this.localTasks.find(lt => lt.id == nlt.id);
             if (existing) {
                 return existing.updateWith(nlt);
             } else {
@@ -274,8 +275,8 @@ export class NotificationsService {
     }
 
     private serializeTasks(tasks: Task[]): string {
-        let tasksToStore: Task[] = [].concat(tasks);
-        let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
+        const tasksToStore: Task[] = [].concat(tasks);
+        const str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
         return str;
     }
 

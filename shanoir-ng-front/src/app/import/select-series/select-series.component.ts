@@ -12,15 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { Router } from '@angular/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-
 
 @Component({
     selector: 'select-series',
@@ -89,14 +88,14 @@ export class SelectSeriesComponent {
         }
     }
 
-    onStudyCheckChange(checked: boolean, study: StudyDicom, patient: PatientDicom) {
+    onStudyCheckChange(checked: boolean, study: StudyDicom) {
         study.selected = checked;
         if (study.series) study.series.forEach(serie => serie.selected = checked)
 
         this.onPatientUpdate();
     }
 
-    onSerieCheckChange(study: StudyDicom, patient: PatientDicom) {
+    onSerieCheckChange(study: StudyDicom) {
         if (study.series) {
             let nbChecked: number = 0;
             study.series.forEach(serie => {
@@ -121,12 +120,12 @@ export class SelectSeriesComponent {
     }
 
     private initPapaya(serie: SerieDicom): Promise<any[]> {
-        let listOfPromises = serie.images.map((image) => {
+        const listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
-        let promiseOfList = Promise.all(listOfPromises);
+        const promiseOfList = Promise.all(listOfPromises);
         return promiseOfList.then((values) => {
-            let params: any[] = [];
+            const params: any[] = [];
             params['binaryImages'] = [values];
             return params;
         });
@@ -135,8 +134,8 @@ export class SelectSeriesComponent {
     get valid(): boolean {
         if (!this.patients || this.patients.length == 0) return false;
         let studiesNb = 0;
-        for (let patient of this.patients) {
-            for (let study of patient.studies) {
+        for (const patient of this.patients) {
+            for (const study of patient.studies) {
                 if(study.selected){
                   studiesNb += 1;
                 }
@@ -158,5 +157,4 @@ export class SelectSeriesComponent {
             console.log('patients', this.patients);
         }
     }
-
 }

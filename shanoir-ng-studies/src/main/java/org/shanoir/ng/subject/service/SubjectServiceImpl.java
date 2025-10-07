@@ -16,16 +16,17 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -39,10 +40,12 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -77,6 +80,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+
+	@Autowired
+	private TagRepository tagRepository;
 	
 	@Autowired
 	private StudyRepository studyRepository;
@@ -99,9 +105,6 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
 	
-	@Autowired
-	private ShanoirEventService eventService;
-	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
@@ -111,15 +114,12 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
-
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
 		if (subject.get().isPreclinical())
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
-
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
-
 	}
 
 	@Override
@@ -166,14 +166,12 @@ public class SubjectServiceImpl implements SubjectService {
 		return names;
 	}
 
-    @Override
-	public Subject findByData(final String name) {
-		return subjectRepository.findByName(name);
-	}
-
 	@Override
+	@Transactional
 	public Subject findById(final Long id) {
-		return subjectRepository.findById(id).orElse(null);
+		Subject subject = subjectRepository.findById(id).orElse(null);
+		Hibernate.initialize(subject.getTags());
+		return subject;
 	}
 
 	@Override
@@ -182,44 +180,12 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
-	public Subject create(final Subject subject) {
-		if (subject.getSubjectStudyList() != null) {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				subjectStudy.setSubject(subject);
-			}
-		}
+	@Transactional
+	public Subject create(Subject subject) throws ShanoirException {
+		subject = mapSubjectStudyListToSubject(subject);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
-		}
-		return subjectDb;
-	}
-	
-	@Override
-	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
-		if (subject.getSubjectStudyList() != null) {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				subjectStudy.setSubject(subject);
-			}
-		}
-		// the first 3 numbers are the center code, search for highest existing subject with center code
-		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
-		String commonNameCenter = formatterCenter.format(centerId);
-		int maxCommonNameNumber = 0;
-		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
-		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
-			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
-			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
-		}
-		maxCommonNameNumber += 1;
-		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
-		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
-		subject.setName(subjectName);
-		Subject subjectDb = subjectRepository.save(subject);
-		try {
-			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
+			updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -228,80 +194,203 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	@Transactional
-	public Subject update(final Subject subject) throws ShanoirException {
-		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
-		if (subjectDb == null) {
-			throw new EntityNotFoundException(Subject.class, subject.getId());
+	public Subject createAutoIncrement(Subject subject, final Long centerId) throws ShanoirException {
+		subject = mapSubjectStudyListToSubject(subject);
+		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
+		String subjectNameCenterPrefix = formatterCenter.format(centerId);
+		int maxSubjectNameNumber = 0;
+		Subject subjectMaxFoundByCenter = findSubjectFromCenterCode(subjectNameCenterPrefix);
+		if (subjectMaxFoundByCenter != null) { // subjects for centerId exist already
+			String maxNameToIncrement = subjectMaxFoundByCenter.getName().substring(subjectNameCenterPrefix.length());
+			maxSubjectNameNumber = Integer.parseInt(maxNameToIncrement);
 		}
-		if (!subjectDb.getName().equals(subject.getName())) {
-			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
+		maxSubjectNameNumber += 1;
+		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
+		String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
+		subject.setName(subjectName);
+		Subject subjectDb = subjectRepository.save(subject);
+		try {
+			updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
-		updateSubjectValues(subjectDb, subject);
-
-		Subject newSubject = subjectRepository.save(subjectDb);
-		updateSubjectName(subjectMapper.subjectToSubjectDTO(newSubject));
-		return newSubject;
-	}
-
-	/*
-	 * Update some values of template to save them in database.
-	 * Intentially this update method does not modify the pseudonymus
-	 * hash values, that are only added by createSubject to avoid any
-	 * maniplation.
-	 *
-	 * @param templateDb template found in database.
-	 * @param template template with new values.
-	 * @return database template with new values.
-	 */
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
-		subjectDb.setName(subject.getName());
-		subjectDb.setIdentifier(subject.getIdentifier());
-		subjectDb.setSex(subject.getSex());
-		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
-		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
-		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
-		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
-
-		if (subject.getSubjectStudyList() != null) {
-			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
-
-			// Supprimer les associations obsolètes
-			List<SubjectStudy> toRemove = new ArrayList<>();
-			for (SubjectStudy oldSS : subjectStudyListDb) {
-				boolean stillPresent = subjectStudyListNew.stream().anyMatch(newSS ->
-						newSS.getStudy().getId().equals(oldSS.getStudy().getId())
-				);
-				if (!stillPresent) {
-					toRemove.add(oldSS);
-				}
-			}
-			subjectStudyListDb.removeAll(toRemove);
-
-			// Ajouter les nouvelles associations manquantes
-			for (SubjectStudy newSS : subjectStudyListNew) {
-				boolean alreadyExists = subjectStudyListDb.stream().anyMatch(existingSS ->
-						existingSS.getStudy().getId().equals(newSS.getStudy().getId())
-				);
-				if (!alreadyExists) {
-					newSS.setSubject(subjectDb);
-					if (newSS.getSubjectStudyTags() == null) {
-						newSS.setSubjectStudyTags(new ArrayList<>());
-					}
-					subjectStudyListDb.add(newSS);
-				}
-			}
-		}
-
 		return subjectDb;
 	}
 
-	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
+	/**
+	 * This method maps subject_study objects (old versions of e.g. ShUp)
+	 * to the new structure subject.study_id or maps the new structure of
+	 * subject.study_id to subject study, as still required by some code.
+	 * This method will be removed entirely after all clients have been
+	 * migrated and all dependencies on subject_study will be removed.
+	 * 
+	 * @param subject
+	 * @return
+	 * @throws ShanoirException
+	 */
+	private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
+		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+		// Old versions of ShUp will still send subject study objects, and no studyId in subject
+		if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
+			if (subjectStudyList.size() > 1) {
+				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
+			}
+			SubjectStudy subjectStudy = subjectStudyList.get(0);
+			subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
+			subjectStudy.setSubject(subject);
+		// New code from Angular will be without subject study, but tree requires it still
+		} else {
+			SubjectStudy subjectStudy = new SubjectStudy();
+			subjectStudy.setStudy(subject.getStudy());
+			subjectStudy.setSubject(subject);
+			subjectStudy.setSubjectType(subject.getSubjectType());
+			subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
+			subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
+			List<SubjectStudyTag> subjectStudyTagList = new ArrayList<>();
+			if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+			    Set<Tag> managedTags = new HashSet<>();
+				List<Long> tagIds = subject.getTags().stream()
+						.map(Tag::getId)
+						.collect(Collectors.toList());
+				Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+			    managedTagsIt.forEach(managedTags::add);
+				subject.setTags((managedTags));
+				for (Tag managedTag : managedTags) {
+					SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+					subjectStudyTag.setTag(managedTag);
+					subjectStudyTag.setSubjectStudy(subjectStudy);
+					subjectStudyTagList.add(subjectStudyTag);
+				}
+			}
+			subjectStudy.setSubjectStudyTags(subjectStudyTagList);
+			List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
+			subjectStudyListNew.add(subjectStudy);
+			subject.setSubjectStudyList(subjectStudyListNew);
+		}
+		return subject;
+	}
+
+	private Subject mapSubjectStudyAttributesToSubject(Subject subject, SubjectStudy subjectStudy) {
+		subject.setStudy(subjectStudy.getStudy());
+		subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+		subject.setSubjectType(subjectStudy.getSubjectType());
+		subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+		subject.setQualityTag(subjectStudy.getQualityTag());
+		mapSubjectStudyTagListToSubjectTagList(subject, subjectStudy);
+		return subject;
+	}
+
+	private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
+		Set<Tag> tags;
+		if (subject.getTags() == null) {
+			tags = new HashSet<Tag>();
+		} else {
+			tags = subject.getTags();
+		}
+		tags.clear(); // always update with new state
+		if (subjectStudy.getSubjectStudyTags() != null) {
+			subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
+				Optional<Tag> tagOpt = tagRepository.findById(st.getTag().getId());
+				if (tagOpt.isPresent()) {
+					Tag tag = tagOpt.get();
+					tags.add(tag);
+				}
+			});
+		}
+		subject.setTags(tags);
+	}
+
+	@Override
+	@Transactional
+	public Subject update(final Subject subjectNew) throws ShanoirException {
+		Subject subjectOld = subjectRepository.findById(subjectNew.getId()).orElse(null);
+		if (subjectOld == null) {
+			throw new EntityNotFoundException(Subject.class, subjectNew.getId());
+		}
+		Hibernate.initialize(subjectOld.getTags());
+		if (!subjectOld.getName().equals(subjectNew.getName())) {
+			throw new ShanoirException("You can not update the subject name.", HttpStatus.FORBIDDEN.value());
+		}
+		subjectOld = updateSubjectValues(subjectOld, subjectNew);
+		subjectOld = subjectRepository.save(subjectOld);
+		updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectOld));
+		return subjectOld;
+	}
+
+	private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) throws ShanoirException {
+		// We can not update subject name, birth date, identifier and pseudonymus hash values
+		subjectOld.setSex(subjectNew.getSex());
+		subjectOld.setManualHemisphericDominance(subjectNew.getManualHemisphericDominance());
+		subjectOld.setLanguageHemisphericDominance(subjectNew.getLanguageHemisphericDominance());
+		subjectOld.setImagedObjectCategory(subjectNew.getImagedObjectCategory());
+		subjectOld.setUserPersonalCommentList(subjectNew.getUserPersonalCommentList());
+		// We can not update the study: attention: created exams contain study id
+		subjectOld.setStudyIdentifier(subjectNew.getStudyIdentifier());
+		subjectOld.setSubjectType(subjectNew.getSubjectType());
+		subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
+		subjectOld.setQualityTag(subjectNew.getQualityTag());
+		List<SubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
+		if (subjectStudyListNew != null) {
+			if (subjectStudyListNew.isEmpty()) {
+				throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());
+			} 
+			if (subjectStudyListNew.size() > 1) {
+				throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
+			}
+			SubjectStudy sSNew = subjectStudyListNew.get(0);
+			for (SubjectStudy sSOld : subjectOld.getSubjectStudyList()) {
+				if (sSNew.getStudy().getId().equals(sSOld.getStudy().getId())) {
+					sSOld.setSubjectStudyIdentifier(sSNew.getSubjectStudyIdentifier());
+					sSOld.setSubjectType(sSNew.getSubjectType());
+					sSOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
+					// keep new values in subject table up-to-date with subject study
+					subjectOld.setStudyIdentifier(sSNew.getSubjectStudyIdentifier());
+					subjectOld.setSubjectType(sSNew.getSubjectType());
+					subjectOld.setPhysicallyInvolved(sSNew.isPhysicallyInvolved());
+					subjectOld.setQualityTag(sSNew.getQualityTag());
+					// map values from new to old subject study tag list
+					mapSubjectStudyTagListToSubjectStudyTagList(sSOld, sSNew);
+					// map values from new to new subject tags structure
+					mapSubjectStudyTagListToSubjectTagList(subjectOld, sSNew);
+					break;
+				}
+			}
+		}
+		return subjectOld;
+	}
+
+	public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
+		List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
+		if (subjectStudyTagsOld == null) {
+			subjectStudyTagsOld = new ArrayList<>();
+		}
+		Set<Long> newTagIds = sSNew.getSubjectStudyTags() == null
+				? Collections.emptySet()
+				: sSNew.getSubjectStudyTags().stream()
+					.map(sst -> sst.getTag().getId())
+					.collect(Collectors.toSet());
+		subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
+		if (sSNew.getSubjectStudyTags() != null) {
+			for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
+				boolean alreadyExists = subjectStudyTagsOld.stream()
+						.anyMatch(old -> old.getTag().getId().equals(sst.getTag().getId()));
+				if (!alreadyExists) {
+					SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
+					Optional<Tag> tag = tagRepository.findById(sst.getTag().getId());
+					subjectStudyTag.setTag(tag.get());
+					subjectStudyTag.setSubjectStudy(sSOld);
+					subjectStudyTagsOld.add(subjectStudyTag);
+				}
+			}
+		}
+		sSOld.setSubjectStudyTags(subjectStudyTagsOld);
+	}
+
+	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.
-					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(subject));
-			// If an error happens, an exception will be thrown
+					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
+					objectMapper.writeValueAsString(subjectDTO));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");

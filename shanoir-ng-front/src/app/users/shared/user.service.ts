@@ -13,14 +13,16 @@
  */
 
 import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
-import { User } from './user.model';
-import { HttpClient } from '@angular/common/http';
 import { AccessRequest } from '../../users/access-request/access-request.model'
-import { Subject } from 'rxjs';
-import { BACKEND_API_STUDY_DELETE_USER } from "../../utils/app.utils";
+
+import { User } from './user.model';
+
 
 
 @Injectable()

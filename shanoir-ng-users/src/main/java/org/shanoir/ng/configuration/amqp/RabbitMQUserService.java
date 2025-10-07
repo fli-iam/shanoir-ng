@@ -15,10 +15,12 @@
 package org.shanoir.ng.configuration.amqp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
@@ -128,6 +130,23 @@ public class RabbitMQUserService {
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+		}
+	}
+
+	/**
+	 * Receives an study user report as a json object, thus send a mail to study manager to notice him
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+	@RabbitHandler
+	public void receiveDuaDraft(String duaDraftStr) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+		try {
+			DuaDraftWrapper mail = mapper.readValue(duaDraftStr, DuaDraftWrapper.class);
+			this.emailService.notifyDuaDraftCreation(mail);
+		} catch (Exception e) {
+			LOG.error("Something went wrong deserializing the dua draft event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the dua draft event.", e);
 		}
 	}
 }

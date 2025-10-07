@@ -14,7 +14,6 @@
 
 import { Reference } from '../../reference/shared/reference.model';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
-import {Subject} from "../../../subjects/shared/subject.model";
 import {ImagedObjectCategory} from "../../../subjects/shared/imaged-object-category.enum";
 import {Sex} from "../../../subjects/shared/subject.types";
 
