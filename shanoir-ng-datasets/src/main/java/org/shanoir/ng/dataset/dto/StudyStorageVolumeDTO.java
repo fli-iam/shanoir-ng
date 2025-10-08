@@ -12,11 +12,11 @@ public class StudyStorageVolumeDTO {
 
     public StudyStorageVolumeDTO(List<VolumeByFormatDTO> volumeByFormat, Long extraDataSize) {
         this.volumeByFormat = volumeByFormat;
-        if (volumeByFormat != null){
+        if (volumeByFormat != null) {
             volumeByFormat.forEach(dto -> this.total += dto.getSize());
         }
         this.extraDataSize = extraDataSize;
-        if (extraDataSize != null){
+        if (extraDataSize != null) {
             this.total += extraDataSize;
         }
 

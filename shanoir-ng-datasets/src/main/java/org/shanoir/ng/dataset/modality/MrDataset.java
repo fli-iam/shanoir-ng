@@ -86,7 +86,7 @@ public class MrDataset extends Dataset {
 	@Transient
 	private LocalDateTime lastImageAcquisitionTime;
 
-	public MrDataset() {}
+	public MrDataset() { }
 
 	public MrDataset(Dataset d) {
 		super(d);

@@ -80,7 +80,7 @@ public class StudyInstanceUIDHandler {
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
 	}
 
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
 	public void clearExaminationIdToStudyInstanceUIDCache() {
 		examinationUIDToStudyInstanceUIDCache.clear();
 		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");

@@ -202,7 +202,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		StudyDTO dto = studyMapper.studyToStudyDTODetailed(study);
-		if(withStorageVolume){
+		if (withStorageVolume) {
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -266,7 +266,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
 		StudyStorageVolumeDTO dto = studyService.getDetailedStorageVolume(studyId);
-		if(dto == null){
+		if (dto == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 							"Error while fetching study datasets storage volume details.", null)
@@ -356,7 +356,7 @@ public class StudyApiController implements StudyApi {
 			return;
 		}
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
 			response.setContentType(request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath()));
 		    response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
@@ -371,7 +371,7 @@ public class StudyApiController implements StudyApi {
 			throws RestServiceException {
 		try {
 			String parentDir = dataDir + "/study-" + studyId;
-			Path path = Paths.get( parentDir);
+			Path path = Paths.get(parentDir);
 			Files.createDirectories(path);
 			LOG.info("path: {}", path.getFileName());
 			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
@@ -476,7 +476,7 @@ public class StudyApiController implements StudyApi {
 			return;
 		}
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
 			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
@@ -484,7 +484,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> deleteStudyUser (
+	public ResponseEntity<Void> deleteStudyUser(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
 		studyService.removeStudyUserFromStudy(studyId, userId);

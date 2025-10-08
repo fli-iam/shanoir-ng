@@ -27,13 +27,13 @@ public class SubjectDTO {
 	
 	protected String name;
 	
-	public SubjectDTO(){};
+	public SubjectDTO() { };
 	
 	/**
 	 * @param id
 	 * @param name
 	 */
-	public SubjectDTO (Long id, String name) {
+	public SubjectDTO(Long id, String name) {
 		this.setId(id);
 		this.setName(name);
 	}

@@ -33,7 +33,7 @@ import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring", uses = { ExaminationMapper.class })
 @DecoratedWith(DatasetAcquisitionDecorator.class)
-@MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
+@MapperConfig(mappingInheritanceStrategy = MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionMapper {
 
 	

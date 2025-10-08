@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  */
 @Service
-public abstract class FieldEditionSecurityManagerImpl <T extends AbstractEntity> implements FieldEditionSecurityManager<T> {
+public abstract class FieldEditionSecurityManagerImpl<T extends AbstractEntity> implements FieldEditionSecurityManager<T> {
 	
 	@Autowired
 	public CrudRepository<T, Long> repository;

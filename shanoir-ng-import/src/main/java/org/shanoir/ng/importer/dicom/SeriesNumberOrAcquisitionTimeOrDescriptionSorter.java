@@ -40,7 +40,7 @@ public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Compara
 					return 1;
 				}
 			}
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return orderByAcquisitionTime(s1, s2);
 		}
 	}

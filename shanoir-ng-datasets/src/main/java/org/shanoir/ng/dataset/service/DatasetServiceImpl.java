@@ -13,14 +13,16 @@
  */
 package org.shanoir.ng.dataset.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.ListUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
@@ -63,9 +65,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Dataset service implementation.
@@ -197,7 +199,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		for(Long id : ids){
+		for (Long id : ids) {
 			this.deleteById(id);
 		}
 	}
@@ -306,7 +308,7 @@ public class DatasetServiceImpl implements DatasetService {
 		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
 		Map<Long, List<Long>> studyUserCenters = new HashMap<>();
 		for (StudyUser studyUser : studyUsers) {
-			if (! CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+			if (!CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 				hasRestrictions = true;
 				studyUserCenters.put(studyUser.getStudyId(), studyUser.getCenterIds());
 			}
@@ -324,8 +326,8 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		datasets = datasets.stream().filter(ds ->
-						studyUserCenters.get(ds.getStudyId()) != null &&
-								studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+						studyUserCenters.get(ds.getStudyId()) != null
+								&& studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
 				.collect(Collectors.toList());
 		int size = datasets.size();
 
@@ -345,7 +347,7 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
 		List<VolumeByFormatDTO> sizesByFormat = new ArrayList<>();
 
-		for(Object[] result : results){
+		for (Object[] result : results) {
 			sizesByFormat.add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
 		}
 
@@ -358,11 +360,11 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Object[]> results = repository.findExpressionSizesTotalByStudyIdGroupByFormat(studyIds);
 		Map<Long, List<VolumeByFormatDTO>> sizesByFormatAndStudy = new HashMap<>();
 
-		for(Long id : studyIds){
+		for (Long id : studyIds) {
 			sizesByFormatAndStudy.putIfAbsent(id, new ArrayList<>());
 		}
 
-		for(Object[] result : results){
+		for (Object[] result : results) {
 			Long studyId = (Long) result[0];
 			sizesByFormatAndStudy.get(studyId).add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[1]), (Long) result[2]));
 		}
@@ -407,7 +409,7 @@ public class DatasetServiceImpl implements DatasetService {
 		try {
 			int total = datasets.size();
 			updateEvent(0f, event, studyId);
-			for (List<Long> partition : ListUtils.partition(datasets, 1000)){
+			for (List<Long> partition : ListUtils.partition(datasets, 1000)) {
 				datasetTransactionalService.deletePartitionOfNiftis(partition, total, event).get();
 			}
 			updateEvent(1f, event, studyId);
@@ -434,7 +436,7 @@ public class DatasetServiceImpl implements DatasetService {
 			LOG.error("Could not properly delete niftis: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Deleting nifti for study: " + id + ": Error. " + e.getMessage());
-		} else if(Objects.nonNull(id)){
+		} else if (Objects.nonNull(id)) {
 			event.setMessage("Deleting nifti for study: " + id);
 		}
 		shanoirEventService.publishEvent(event);
@@ -454,7 +456,7 @@ public class DatasetServiceImpl implements DatasetService {
 		if (dataset.getDatasetProcessing() != null) {
 			return dataset.getDatasetProcessing().getStudyId();
 		}
-		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
+		if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
 		try {
@@ -472,9 +474,9 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @return
 	 */
 	@Override
-	public Examination getExamination(Dataset dataset){
+	public Examination getExamination(Dataset dataset) {
 		DatasetAcquisition acquisition = this.getAcquisition(dataset);
-		if(acquisition != null){
+		if (acquisition != null) {
 			return acquisition.getExamination();
 		}
 		return null;
@@ -482,13 +484,13 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public DatasetAcquisition getAcquisition(Dataset dataset) {
-		if(dataset.getDatasetAcquisition() != null){
+		if (dataset.getDatasetAcquisition() != null) {
 			return dataset.getDatasetAcquisition();
 		}
-		if(dataset.getDatasetProcessing().getInputDatasets() != null){
-			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+		if (dataset.getDatasetProcessing().getInputDatasets() != null) {
+			for (Dataset ds : dataset.getDatasetProcessing().getInputDatasets()) {
 				DatasetAcquisition acq = this.getAcquisition(ds);
-				if(acq != null){
+				if (acq != null) {
 					return acq;
 				}
 			}

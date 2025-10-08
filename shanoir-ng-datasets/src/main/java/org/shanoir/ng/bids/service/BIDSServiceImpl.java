@@ -276,7 +276,7 @@ public class BIDSServiceImpl implements BIDSService {
 		List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
 
 		// Create session folder only if there is multiple exmainations
-		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
+		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1);
 		File sessionFile = null;
 		try {
 
@@ -387,7 +387,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private String getSessionLabel(Examination examination) {
 		String label = "" + examination.getId();
-		if(!StringUtils.isBlank(examination.getComment())){
+		if (!StringUtils.isBlank(examination.getComment())) {
 			label += examination.getComment();
 		}
 
@@ -453,10 +453,10 @@ public class BIDSServiceImpl implements BIDSService {
 					// Add the file to the scans.tsv reference
 					File scansTsvFile = getScansFile(workDir, subjectName);
 					for (File fileResult : newFiles) {
-						String buffer = fileResult.getParentFile().getName() + File.separator + fileResult.getName() + TABULATION +
-								format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()) + TABULATION +
-								dataset.getDatasetAcquisition().getExamination().getId() +
-								NEW_LINE;
+						String buffer = fileResult.getParentFile().getName() + File.separator + fileResult.getName() + TABULATION
+								+ format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()) + TABULATION
+								+ dataset.getDatasetAcquisition().getExamination().getId()
+								+ NEW_LINE;
 
 						Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.getBytes(), StandardOpenOption.APPEND);
 					}
@@ -591,7 +591,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private void deleteIfExists(String filePath) {
 		File file = new File(filePath);
-		if(file.exists()) {
+		if (file.exists()) {
 			file.delete();
 		}
 	}
@@ -813,7 +813,7 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
-	private String formatLabel(String label){
+	private String formatLabel(String label) {
 		return label.replaceAll("[^a-zA-Z0-9]+", "");
 	}
 

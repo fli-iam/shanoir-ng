@@ -157,9 +157,9 @@ public class InitialStartupState implements State {
 				if (profileDir.exists()) {
 					logger.info("Profile migration: deletion of old profile: " + profileDir.getAbsolutePath());
 					Files.walk(profileDir.toPath())
-				      .sorted(Comparator.reverseOrder())
-				      .map(Path::toFile)
-				      .forEach(File::delete);
+						.sorted(Comparator.reverseOrder())
+						.map(Path::toFile)
+							.forEach(File::delete);
 				}
 			}
 			logger.info("Deletion of old profiles.properties.");
@@ -255,8 +255,8 @@ public class InitialStartupState implements State {
 		// as we consider the new code has always right and these files are never edited manually
 		// by the installing user: advantage new added endpoints are always considered
 		if (propertiesFile.exists()
-			&& !fileName.equals(ShUpConfig.PROFILES_PROPERTIES)
-			&& !fileName.equals(ShUpConfig.ENDPOINT_PROPERTIES)) {
+				&& !fileName.equals(ShUpConfig.PROFILES_PROPERTIES)
+				&& !fileName.equals(ShUpConfig.ENDPOINT_PROPERTIES)) {
 			// do nothing
 		} else {
 			Util.copyFileFromJar(fileName, propertiesFile);

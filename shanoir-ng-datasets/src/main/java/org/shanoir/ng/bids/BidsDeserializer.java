@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFile;
@@ -56,7 +57,7 @@ public class BidsDeserializer {
 				fileElement = new BidsFile(file.getAbsolutePath());
 				if (fileElement.getPath().endsWith(".tsv") || fileElement.getPath().endsWith(".json") || fileElement.getPath().endsWith("README")) {
 					String content = String.join("\n", Files.readAllLines(Paths.get(file.getAbsolutePath())));
-					((BidsFile)fileElement).setContent(content);
+					((BidsFile) fileElement).setContent(content);
 				}
 			}
 			if (folderElement.getElements() == null) {

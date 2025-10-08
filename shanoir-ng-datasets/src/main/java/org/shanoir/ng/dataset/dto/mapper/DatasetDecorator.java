@@ -64,10 +64,10 @@ public abstract class DatasetDecorator implements DatasetMapper {
 		Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
 			public DatasetDTO apply(Dataset entity) {
 				if (entity instanceof MrDataset) {
-					return mrMapper.datasetToDatasetDTO((MrDataset)entity);
+					return mrMapper.datasetToDatasetDTO((MrDataset) entity);
 				}
 				else if (entity instanceof EegDataset) {
-					return eegMapper.datasetToDatasetDTO((EegDataset)entity);
+					return eegMapper.datasetToDatasetDTO((EegDataset) entity);
 				}
 				else {
 					return defaultMapper.datasetToDatasetDTO(entity);

@@ -188,7 +188,7 @@ public class CenterServiceImpl implements CenterService {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
 	
-	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+	private boolean updateName(IdName idName) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(idName));

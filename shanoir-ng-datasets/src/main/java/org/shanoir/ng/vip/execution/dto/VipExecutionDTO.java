@@ -21,7 +21,7 @@ public class VipExecutionDTO {
     private Long endDate;
     private String resultsLocation;
 
-    public VipExecutionDTO() {}
+    public VipExecutionDTO() { }
 
     public VipExecutionDTO(String identifier, ExecutionStatus status) {
         this.identifier = identifier;

@@ -53,7 +53,7 @@ public class RabbitMQUserService {
 	@RabbitListener(bindings = @QueueBinding(
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+					autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
@@ -65,9 +65,9 @@ public class RabbitMQUserService {
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = "*.event",
-			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+			value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+	        	autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 	)
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		LOG.info("Receiving event: " + eventAsString);

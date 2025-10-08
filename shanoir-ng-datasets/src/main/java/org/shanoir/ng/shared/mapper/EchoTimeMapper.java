@@ -28,7 +28,7 @@ import org.shanoir.ng.shared.model.EchoTime;
  *
  */
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EchoTimeMapper {
 
 	

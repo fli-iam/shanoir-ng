@@ -57,19 +57,19 @@ public class DicomDirToModelService {
 			// patient level
 			List<Patient> patients = new ArrayList<Patient>();
 			Attributes patientRecord = dicomDirReader.findPatientRecord();
-			while(patientRecord != null) {
+			while (patientRecord != null) {
 				Patient patient = new Patient(patientRecord);
 				patients.add(patient);
 				// study level
 				List<Study> studies = new ArrayList<Study>();
 				Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
-				while(studyRecord != null) {
+				while (studyRecord != null) {
 					Study study = new Study(studyRecord);
 					studies.add(study);
 					// serie level
 					List<Serie> series = new ArrayList<Serie>();
 					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
-					while(serieRecord != null) {
+					while (serieRecord != null) {
 						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
@@ -101,7 +101,7 @@ public class DicomDirToModelService {
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
 			List<Instance> instances = new ArrayList<Instance>();
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
-			while(instanceRecord != null) {
+			while (instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
 				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
 					instances.add(instance);

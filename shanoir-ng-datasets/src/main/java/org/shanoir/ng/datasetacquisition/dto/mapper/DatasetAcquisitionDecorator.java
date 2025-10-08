@@ -77,13 +77,13 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 	
 	private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
 		if (datasetAcquisition.getType().equals("Mr")) {
-        	datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());
+        	datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition) datasetAcquisition).getMrProtocol());
         } else if (datasetAcquisition.getType().equals("Pet")) {
-        	datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition)datasetAcquisition).getPetProtocol());
+        	datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition) datasetAcquisition).getPetProtocol());
         } else if (datasetAcquisition.getType().equals("Ct")) {
-        	datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition)datasetAcquisition).getCtProtocol());
+        	datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition) datasetAcquisition).getCtProtocol());
         } else if (datasetAcquisition.getType().equals("Xa")) {
-        	datasetAcquisitionDTO.setProtocol(((XaDatasetAcquisition)datasetAcquisition).getXaProtocol());
+        	datasetAcquisitionDTO.setProtocol(((XaDatasetAcquisition) datasetAcquisition).getXaProtocol());
         }
 	}
 }

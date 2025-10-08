@@ -27,7 +27,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "scope", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DatasetAssignment.class, name = "Dataset"),

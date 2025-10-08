@@ -197,7 +197,7 @@ public class BidsImporterService {
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
 			public boolean accept(File arg0, String name) {
 				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
-			}});
+			} });
 		
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
 		
@@ -268,7 +268,7 @@ public class BidsImporterService {
 			dsFile.setPacs(false);
 			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
 			files.add(dsFile);
-			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+			if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file
 				//JSONParser json = new JSONParser(new FileReader(importedFile));
 				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
@@ -299,7 +299,7 @@ public class BidsImporterService {
 		event.setStatus(ShanoirEvent.SUCCESS);
 
 		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-				+" Successfully created datasets for subject [" + importJob.getSubjectName()
+				+ " Successfully created datasets for subject [" + importJob.getSubjectName()
 				+ "] in examination [" + examination.getId() + "]");
 		event.setProgress(1f);
 		eventService.publishEvent(event);

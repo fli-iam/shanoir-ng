@@ -98,7 +98,7 @@ public class Subject {
 
 	@Override
 	public String toString() {
-		return "Subject [id=" + id + ", birthDate=" + birthDate + ", name=" + name + ", sex=" + sex + ", identifier="
+		return "Subject [id=" + id + ", birthDate=" + birthDate + ", name = " + name + ", sex=" + sex + ", identifier="
 				+ identifier + ", pseudonymusHashValues=" + pseudonymusHashValues + "]";
 	}
 

@@ -112,9 +112,9 @@ public class ProcessedDatasetImporterService {
             solrService.indexDataset(dataset.getId());
 
             event.setStatus(ShanoirEvent.SUCCESS);
-            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
-                    "Successfully created processed dataset [" + dataset.getId() + "] " +
-                    "for subject [" + importJob.getSubjectName() + "]");
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
+                    + "Successfully created processed dataset [" + dataset.getId() + "] "
+                    + "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
             return dataset;
@@ -159,8 +159,8 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        if (job.getDatasetProcessing().getInputDatasets() == null ||
-                job.getDatasetProcessing().getInputDatasets().isEmpty()) {
+        if (job.getDatasetProcessing().getInputDatasets() == null
+                || job.getDatasetProcessing().getInputDatasets().isEmpty()) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Processing input dataset(s) missing.");
             event.setProgress(-1f);
@@ -174,7 +174,7 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        for(Dataset input : job.getDatasetProcessing().getInputDatasets()){
+        for (Dataset input : job.getDatasetProcessing().getInputDatasets()) {
             Long studyId = datasetService.getStudyId(input);
             if (studyId != null && !studyId.equals(job.getStudyId())) {
                 event.setStatus(ShanoirEvent.ERROR);

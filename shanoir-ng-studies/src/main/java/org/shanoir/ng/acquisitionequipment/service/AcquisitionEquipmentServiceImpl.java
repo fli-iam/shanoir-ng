@@ -110,7 +110,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return newDbAcEq;
 	}
 
-	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
+	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException {
 		try {
 			String datasetAcEqName =
 					equipment.getManufacturerModel().getManufacturer().getName() + " - "

@@ -36,7 +36,7 @@ public class JSONUtils {
             if (!(o2 instanceof JSONObject)) {
                 return false;
             }
-            if (!o1.names().equals(((JSONObject)o2).names())) {
+            if (!o1.names().equals(((JSONObject) o2).names())) {
                 return false;
             }
             JSONArray names1 = o1.names();
@@ -44,22 +44,22 @@ public class JSONUtils {
                 String name = names1.getString(i);
                 Object valueThis = o1.get(name);
                 Object valueOther = o2.get(name);
-                if(valueThis == valueOther) {
+                if (valueThis == valueOther) {
                     continue;
                 }
-                if(valueThis == null) {
+                if (valueThis == null) {
                     return false;
                 }
                 if (valueThis instanceof JSONObject) {
-                    if (!(valueOther instanceof JSONObject) || !equals((JSONObject)valueThis, (JSONObject)valueOther)) {
+                    if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
                         return false;
                     }
                 } else if (valueThis instanceof JSONArray) {
-                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
+                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
                         return false;
                     }
                 } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                    if (!isNumberSimilar((Number)valueThis, (Number)valueOther)) {
+                    if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                         return false;
                     };
                 } else if (!valueThis.equals(valueOther)) {
@@ -91,22 +91,22 @@ public class JSONUtils {
         for (int i = 0; i < len; i += 1) {
             Object valueThis = o1.get(i);
             Object valueOther = o2.get(i);
-            if(valueThis == valueOther) {
+            if (valueThis == valueOther) {
                 continue;
             }
-            if(valueThis == null) {
+            if (valueThis == null) {
                 return false;
             }
             if (valueThis instanceof JSONObject) {
-                if (!(valueOther instanceof JSONObject) || !equals((JSONObject)valueThis, (JSONObject)valueOther)) {
+                if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
                     return false;
                 }
             } else if (valueThis instanceof JSONArray) {
-                if (!(valueOther instanceof JSONArray) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
+                if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
                     return false;
                 }
             } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                if (!isNumberSimilar((Number)valueThis, (Number)valueOther)) {
+                if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                     return false;
                 }
             } else if (!valueThis.equals(valueOther)) {
@@ -138,10 +138,10 @@ public class JSONUtils {
         }
         // if the classes are the same and implement Comparable
         // then use the built in compare first.
-        if(l.getClass().equals(r.getClass()) && l instanceof Comparable) {
+        if (l.getClass().equals(r.getClass()) && l instanceof Comparable) {
             @SuppressWarnings({ "rawtypes", "unchecked" })
-            int compareTo = ((Comparable)l).compareTo(r);
-            return compareTo==0;
+            int compareTo = ((Comparable) l).compareTo(r);
+            return compareTo == 0;
         }
         // BigDecimal should be able to handle all of our number types that we support through
         // documentation. Convert to BigDecimal first, then use the Compare method to
@@ -166,18 +166,18 @@ public class JSONUtils {
         if (val == null) {
             return defaultValue;
         }
-        if (val instanceof BigDecimal){
+        if (val instanceof BigDecimal) {
             return (BigDecimal) val;
         }
-        if (val instanceof BigInteger){
+        if (val instanceof BigInteger) {
             return new BigDecimal((BigInteger) val);
         }
-        if (val instanceof Double || val instanceof Float){
-            if (!numberIsFinite((Number)val)) {
+        if (val instanceof Double || val instanceof Float) {
+            if (!numberIsFinite((Number) val)) {
                 return defaultValue;
             }
             if (exact) {
-                return new BigDecimal(((Number)val).doubleValue());
+                return new BigDecimal(((Number) val).doubleValue());
             } else {
                 // use the string constructor so that we maintain "nice" values for doubles and floats
                 // the double constructor will translate doubles to "exact" values instead of the likely
@@ -186,7 +186,7 @@ public class JSONUtils {
             }
         }
         if (val instanceof Long || val instanceof Integer
-                || val instanceof Short || val instanceof Byte){
+                || val instanceof Short || val instanceof Byte) {
             return new BigDecimal(((Number) val).longValue());
         }
         // don't check if it's a string in case of unchecked Number subclasses

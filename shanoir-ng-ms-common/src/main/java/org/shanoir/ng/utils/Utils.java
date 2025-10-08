@@ -170,7 +170,7 @@ public class Utils {
 
             // 2. "Walk" => iterate over the source file
             Path pp = Paths.get(sourceDirPath);
-            try(Stream<Path> walker = Files.walk(pp)) {
+            try (Stream<Path> walker = Files.walk(pp)) {
 
                 // 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
                 walker.filter(path -> !path.toFile().isDirectory())

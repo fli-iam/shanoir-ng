@@ -80,8 +80,8 @@ public class DownloadOrCopyRunnable implements Runnable {
 			StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
 			ImportJob importJob = importJobs.get(studyInstanceUID);
 			downloadOrCopyReportPerStudy.append("DICOM study: ["
-				+ importJob.getStudy().getStudyDate() + "], "
-				+ importJob.getStudy().getStudyDescription() + "\n");
+					+ importJob.getStudy().getStudyDate() + "], "
+					+ importJob.getStudy().getStudyDescription() + "\n");
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
@@ -101,7 +101,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 				 */
 				for (Serie serie : selectedSeries) {
 					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), null,
-						importJob.getStudy(), serie, isFromPACS);
+							importJob.getStudy(), serie, isFromPACS);
 				}
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
@@ -155,10 +155,10 @@ public class DownloadOrCopyRunnable implements Runnable {
 			JScrollPane scrollPane = new JScrollPane(textArea);
 			scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
 			JOptionPane.showMessageDialog(
-				frame,
-				scrollPane,
-				"Download or copy report",
-				JOptionPane.INFORMATION_MESSAGE);
+					frame,
+					scrollPane,
+					"Download or copy report",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 }

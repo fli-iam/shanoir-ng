@@ -23,7 +23,7 @@ public class ShanoirUploader {
 	 * 
 	 * @param args
 	 */
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		initShanoirUploaderFolders();
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ShanoirUploaderSpringConfig.class);
 		displayAllBeans(ctx);
@@ -58,7 +58,7 @@ public class ShanoirUploader {
 
 	public static void displayAllBeans(ApplicationContext ctx) {
         String[] allBeanNames = ctx.getBeanDefinitionNames();
-        for(String beanName : allBeanNames) {
+        for (String beanName : allBeanNames) {
             System.out.println(beanName);
         }
     }

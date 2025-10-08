@@ -277,7 +277,7 @@ public class ExaminationApiController implements ExaminationApi {
 		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
 
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
 			response.setContentType(contentType);
 			response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());

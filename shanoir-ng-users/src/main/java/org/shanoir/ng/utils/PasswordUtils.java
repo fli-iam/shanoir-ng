@@ -77,7 +77,7 @@ public final class PasswordUtils {
 			boolean hasUpperCaseAlpha = false;
 			boolean hasNumeric = false;
 			boolean hasSpecialChar = false;
-			for (int i = 0 ; i < password.length() ; i++) {
+			for (int i = 0; i < password.length(); i++) {
 				final String c = String.valueOf(password.charAt(i));
 				if (LOWERCASE_ALPHA.contains(c)) {
 					hasLowerCaseAlpha = true;

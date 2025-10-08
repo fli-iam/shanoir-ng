@@ -110,7 +110,7 @@ public class Serie {
 	private List<Dataset> datasets;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Serie() {}
+	public Serie() { }
 
 	public Serie(Attributes attributes) {
 		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);

@@ -107,7 +107,7 @@ public class ExaminationAttributes<T> {
         StringBuilder sb = new StringBuilder();
         for (T acqId : acquisitionMap.keySet()) {
             sb.append("acquisition ").append(acqId).append("\n");
-            for(String line : acquisitionMap.get(acqId).toString().split("\n")) {
+            for (String line : acquisitionMap.get(acqId).toString().split("\n")) {
                 sb.append("\t").append(line).append("\n");
             }
         }

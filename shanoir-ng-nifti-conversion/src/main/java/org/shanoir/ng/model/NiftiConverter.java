@@ -4,7 +4,7 @@ public enum NiftiConverter {
 
 	DCM2NII_2008_03_31(1, "/opt/nifti-converters/dcm2nii_2008-03-31"),
 
-	MCVERTER_2_0_7 (2, "/opt/nifti-converters/mcverter_2.0.7"),
+	MCVERTER_2_0_7(2, "/opt/nifti-converters/mcverter_2.0.7"),
 
 	DCM2NII_2014_08_04(4, "/opt/nifti-converters/dcm2nii_2014-08-04"),
 

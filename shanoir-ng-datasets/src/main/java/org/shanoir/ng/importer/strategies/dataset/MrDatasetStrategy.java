@@ -165,7 +165,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		if (dataset.getRepetitionTimes() != null) {
 			List<Double> listRepetitionTime = new ArrayList<>(dataset.getRepetitionTimes());
 			mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.RepetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
-			for ( org.shanoir.ng.shared.model.RepetitionTime rt: mrDataset.getRepetitionTime()) {
+			for (org.shanoir.ng.shared.model.RepetitionTime rt: mrDataset.getRepetitionTime()) {
 				rt.setMrDataset(mrDataset);
 			}
 		}
@@ -173,7 +173,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		if (dataset.getInversionTimes() != null) {
 			List<Double> listInversionTime = new ArrayList<>(dataset.getInversionTimes());
 			mrDataset.getInversionTime().addAll(inversionTimeMapper.InversionTimeDTOListToInversionTimeList(listInversionTime));
-			for ( org.shanoir.ng.shared.model.InversionTime rt: mrDataset.getInversionTime()) {
+			for (org.shanoir.ng.shared.model.InversionTime rt: mrDataset.getInversionTime()) {
 				rt.setMrDataset(mrDataset);
 			}
 		}
@@ -181,7 +181,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		if (dataset.getFlipAngles() != null) {
 			List<String> listFlipAngle = new ArrayList<>(dataset.getFlipAngles());
 			mrDataset.getFlipAngle().addAll(flipAngleMapper.FlipAngleDTOListToFlipAngleList(listFlipAngle));
-			for ( org.shanoir.ng.shared.model.FlipAngle rt: mrDataset.getFlipAngle()) {
+			for (org.shanoir.ng.shared.model.FlipAngle rt: mrDataset.getFlipAngle()) {
 				rt.setMrDataset(mrDataset);
 			}
 		}

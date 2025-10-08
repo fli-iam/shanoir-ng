@@ -136,8 +136,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 		for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File arg0, String name) {
-				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble") ;
-			}})) {
+				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+			} })) {
 			String fileName = subjectFile.getName();
 			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
@@ -208,7 +208,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 								@Override
 								public boolean accept(File arg0, String name) {
 									return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
-								}}
+								}
+							}
 					)) {
 						importSession(dataTypeFile, importJob);
 					}

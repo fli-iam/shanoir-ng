@@ -63,22 +63,22 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
 		bidsService.exportAsBids(studyId, studyName);
 		return ResponseEntity.ok().build();
 	}
 
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
     	this.bidsService.deleteBidsFolder(studyId, studyName);
     	return this.getBIDSStructureByStudyId(studyId);
     }
 
 	@Override
     public void exportBIDSFile(
-    		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
     		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, 
 			HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
@@ -121,7 +121,7 @@ public class BidsApiController implements BidsApi {
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
 		try (InputStream is = new FileInputStream(zipFile);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setHeader("Content-Disposition", "attachment;filename = " + zipFile.getName());
 			response.setContentType(contentType);
 		    response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
@@ -168,7 +168,7 @@ public class BidsApiController implements BidsApi {
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
 			// 2. "Walk" => iterate over the source file
 			Path pp = Paths.get(sourceDirPath);
-			try(Stream<Path> walker = Files.walk(pp)) {
+			try (Stream<Path> walker = Files.walk(pp)) {
 				
 				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
 				walker.filter(path -> !path.toFile().isDirectory()).forEach(path -> {

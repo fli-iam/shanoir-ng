@@ -86,9 +86,9 @@ public class UploadData {
             return false;
         }
         UploadData uploadData = (UploadData) o;
-        return Objects.equals(this.base64Content, uploadData.base64Content) &&
-                Objects.equals(this.type, uploadData.type) &&
-                Objects.equals(this.md5, uploadData.md5);
+        return Objects.equals(this.base64Content, uploadData.base64Content)
+                && Objects.equals(this.type, uploadData.type)
+                && Objects.equals(this.md5, uploadData.md5);
     }
 
     @Override

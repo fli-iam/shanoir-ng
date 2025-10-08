@@ -41,8 +41,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
-
+public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(XaDatasetAcquisitionStrategy.class);

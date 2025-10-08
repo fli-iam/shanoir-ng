@@ -84,7 +84,7 @@ public final class Util {
 		objectMapper
 			.registerModule(new JavaTimeModule())
 			.registerModule(new Jdk8Module())
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
 	}
 
@@ -430,25 +430,25 @@ public final class Util {
 	public static boolean isHttpResponseValid(HttpResponse response) {
 		int code = response.getCode();
 		switch (code) {
-		case 200:
-			return true;
-		case 204:
-			return true;
-		case 401:
-			logger.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
-			return false;
-		case 403:
-			logger.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
-			return false;
-		case 404:
-			logger.warn("Error " + code + " : Rest Service is not reachable.");
-			return false;
-		case 500:
-			logger.warn("Error " + code + " : Rest Service is not reachable.");
-			return false;
-		default:
-			logger.warn("Error " + code + " : An error has occured.");
-			return false;
+			case 200:
+				return true;
+			case 204:
+				return true;
+			case 401:
+				logger.warn("Error " + code + " : Rest Service is reachable but you are not authorized to access it.");
+				return false;
+			case 403:
+				logger.warn("Error " + code + " : Rest Service is reachable but it is forbidden to access it.");
+				return false;
+			case 404:
+				logger.warn("Error " + code + " : Rest Service is not reachable.");
+				return false;
+			case 500:
+				logger.warn("Error " + code + " : Rest Service is not reachable.");
+				return false;
+			default:
+				logger.warn("Error " + code + " : An error has occured.");
+				return false;
 		}
 	}
 

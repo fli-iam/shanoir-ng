@@ -13,7 +13,7 @@ public class LocalDateSerializer extends StdSerializer<LocalDate> {
 
 	private static final long serialVersionUID = 2263372310114074453L;
 
-	public LocalDateSerializer(){
+	public LocalDateSerializer() {
         super(LocalDate.class);
     }
 

@@ -53,4 +53,25 @@ public class EchoTime {
 		return result;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)	
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EchoTime other = (EchoTime) obj;
+		if (echoNumber == null) {
+			if (other.echoNumber != null)
+				return false;
+		} else if (!echoNumber.equals(other.echoNumber))
+			return false;
+		if (echoTime == null) {
+			if (other.echoTime != null)
+				return false;
+		} else if (!echoTime.equals(other.echoTime))
+			return false;
+		return true;
+	}
 }

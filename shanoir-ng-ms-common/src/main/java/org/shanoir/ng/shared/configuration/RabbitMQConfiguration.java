@@ -183,10 +183,10 @@ public class RabbitMQConfiguration {
 	public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
 	/** Queue to get the study card from a equipment code. */
-	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
+	public static final String IMPORT_STUDY_CARD_QUEUE = "import-study-card-queue";
 
 	/** Queue to get an equipment id from a code. */
-	public static final String EQUIPMENT_FROM_CODE_QUEUE="equipment-from-code-queue";
+	public static final String EQUIPMENT_FROM_CODE_QUEUE = "equipment-from-code-queue";
 
 	/** Queue to create a study_user when subscribing to a study */
 	public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";

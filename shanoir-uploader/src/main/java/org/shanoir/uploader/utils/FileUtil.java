@@ -44,7 +44,7 @@ public class FileUtil {
 	public static void dirExistsWithCreate(String dirName) {
 		final File folder = new File(dirName);
 		if (!folder.exists()) {
-			if(!folder.mkdir()) {
+			if (!folder.mkdir()) {
 				logger.error("dirExistsWithCreate: error while creating directory " + dirName);
 			}
 		}
@@ -56,7 +56,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String readableFileSize(long size) {
-	    if(size <= 0) return "0";
+	    if (size <= 0) return "0";
 	    final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
 	    int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
 	    return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
@@ -124,8 +124,8 @@ public class FileUtil {
 			List<String> fileNamesForSerie = new ArrayList<String>();
 			final String seriesInstanceUID = serie.getSeriesInstanceUID();
 			File serieFolder = new File(workFolder
-				+ File.separator + studyInstanceUID
-				+ File.separator + seriesInstanceUID);
+					+ File.separator + studyInstanceUID
+					+ File.separator + seriesInstanceUID);
 			if (serieFolder.exists()) {
 				List<Instance> instances = new ArrayList<>();
 				File[] serieFiles = serieFolder.listFiles();
@@ -157,24 +157,24 @@ public class FileUtil {
 					serie.setSelected(false);
 				}
 				downloadOrCopyReport.append("Download: serie "
-					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-					+ serie.getSeriesDescription()
-					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription()
+						+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
 				if (serie.getInstances().size() != fileNamesForSerie.size()) {
 					downloadOrCopyReport.append("Error: Download: serie "
-						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-						+ serie.getSeriesDescription()
-						+ " downloaded with " + fileNamesForSerie.size()
-						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
+							+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+							+ serie.getSeriesDescription()
+							+ " downloaded with " + fileNamesForSerie.size()
+							+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
 				}
 				if (serie.getNumberOfSeriesRelatedInstances() != null
-					&& serie.getNumberOfSeriesRelatedInstances().intValue() != 0
-					&& serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
+						&& serie.getNumberOfSeriesRelatedInstances().intValue() != 0
+						&& serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
 					logger.warn("Download: serie "
-						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-						+ serie.getSeriesDescription()
-						+ " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
-						+ ") != " + serie.getInstances().size()
+							+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+							+ serie.getSeriesDescription()
+							+ " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
+							+ ") != " + serie.getInstances().size()
 					);
 				}
 				retrievedDicomFiles.addAll(fileNamesForSerie);
@@ -183,8 +183,8 @@ public class FileUtil {
 						+ " was successful.\n\n");
 			} else {
 				downloadOrCopyReport.append("Error: Download: serie "
-					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-				 	+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
 				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " has failed.\n\n");
@@ -198,7 +198,7 @@ public class FileUtil {
 			try (Stream<Path> walk = Files.walk(studyFolder.toPath())) {
 				walk.sorted(Comparator.reverseOrder())
 					.map(Path::toFile)
-					.forEach(File::delete);
+						.forEach(File::delete);
 			}
 		}
 	}

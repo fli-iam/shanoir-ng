@@ -146,12 +146,12 @@ public class Path implements OneOfGetPathResponse {
             return false;
         }
         Path path = (Path) o;
-        return Objects.equals(this.platformPath, path.platformPath) &&
-                Objects.equals(this.lastModificationDate, path.lastModificationDate) &&
-                Objects.equals(this.isDirectory, path.isDirectory) &&
-                Objects.equals(this.size, path.size) &&
-                Objects.equals(this.executionId, path.executionId) &&
-                Objects.equals(this.mimeType, path.mimeType);
+        return Objects.equals(this.platformPath, path.platformPath)
+                && Objects.equals(this.lastModificationDate, path.lastModificationDate)
+                && Objects.equals(this.isDirectory, path.isDirectory)
+                && Objects.equals(this.size, path.size)
+                && Objects.equals(this.executionId, path.executionId)
+                && Objects.equals(this.mimeType, path.mimeType);
     }
 
     @Override

@@ -440,9 +440,9 @@ public class DicomSEGAndSRImporterService {
 		 */
 		ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
 		// close calls to the outer stream, close the inner stream
-		try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
+		try (DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
 			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-			try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
+			try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
 				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
 			}
 		}

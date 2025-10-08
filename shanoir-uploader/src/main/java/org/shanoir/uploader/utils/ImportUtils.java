@@ -77,7 +77,7 @@ public class ImportUtils {
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
 			.registerModule(new Jdk8Module())
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
 	public static boolean addStudyToSubject(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
@@ -100,7 +100,7 @@ public class ImportUtils {
 	public static File createUploadFolder(final File workFolder, final String subjectIdentifier) {
 		final String timeStamp = Util.getCurrentTimeStampForFS();
 		final String folderName = workFolder.getAbsolutePath() + File.separator + subjectIdentifier
-		+ "_" + timeStamp;
+				+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();
 		return uploadFolder;
@@ -251,7 +251,7 @@ public class ImportUtils {
 			 * they come from a pacs or a local disk, so the below setReferencedFileID
 			 * is necessary, that import-from-pacs with ShUp run on the server.
 			 */
-			for(Instance instance : instances) {
+			for (Instance instance : instances) {
 				// do not change referencedFileID in case of import from disk
 				if (instance.getReferencedFileID() == null || instance.getReferencedFileID().length == 0) {
 					String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
@@ -294,7 +294,7 @@ public class ImportUtils {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
 			allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries, uploadFolder);
-			if(allFileNames != null && !allFileNames.isEmpty()) {
+			if (allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
 				logger.info(uploadFolder.getName() + ": error with download from PACS.");    
@@ -302,7 +302,7 @@ public class ImportUtils {
 			}
 		} else {
 			allFileNames = copyFilesToUploadFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
-			if(allFileNames != null) {
+			if (allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
 				logger.error("Error while copying file from CD/DVD/local file system.");
@@ -359,7 +359,7 @@ public class ImportUtils {
 				logger.error(e.getMessage(), e);
 				return null;
 			}
-			if(addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
+			if (addStudyToSubject(study, subjectREST, studyIdentifier, subjectType, isPhysicallyInvolved)) {
 				Long centerId = equipment.getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
@@ -457,7 +457,7 @@ public class ImportUtils {
 		studies.stream()
 			.filter(Study::isWithStudyCards)
 			.map(Study::getId)
-       		.forEach(idList.getIdList()::add);
+       			.forEach(idList.getIdList()::add);
 		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
 		return studyCards;
 	}
@@ -473,15 +473,15 @@ public class ImportUtils {
 
 	private static boolean checkEquipment(AcquisitionEquipment acquisitionEquipment, String manufacturerModelName, String deviceSerialNumber) {
 		if (acquisitionEquipment == null
-			|| acquisitionEquipment.getManufacturerModel() == null
-			|| acquisitionEquipment.getManufacturerModel().getName().isBlank()
-			|| acquisitionEquipment.getSerialNumber() == null
-			|| acquisitionEquipment.getSerialNumber().isBlank()) {
+				|| acquisitionEquipment.getManufacturerModel() == null
+				|| acquisitionEquipment.getManufacturerModel().getName().isBlank()
+				|| acquisitionEquipment.getSerialNumber() == null
+				|| acquisitionEquipment.getSerialNumber().isBlank()) {
 			return false;
 		}
 		if (acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
 			if (acquisitionEquipment.getSerialNumber().equalsIgnoreCase(deviceSerialNumber)
-				|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
+					|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
 				return true;
 			}
 		}
@@ -543,7 +543,7 @@ public class ImportUtils {
 	 */
 	public static AcquisitionEquipment findEquipmentInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturerModelName, String deviceSerialNumber) {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-			if(checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
+			if (checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
 				return acquisitionEquipment;
 			}
 		}
@@ -553,7 +553,7 @@ public class ImportUtils {
 	public static ManufacturerModel findManufacturerModelInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer, String manufacturerModelName) {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)
-				&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
+					&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
 				return acquisitionEquipment.getManufacturerModel();
 			}
 		}

@@ -243,7 +243,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 				HttpHeaders header = new HttpHeaders();
 				header.setContentType(MediaType.APPLICATION_PDF);
 				header.set(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=" + model.getFilename().replace(" ", "_"));
+						"attachment; filename = " + model.getFilename().replace(" ", "_"));
 
 				return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
 						.contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);

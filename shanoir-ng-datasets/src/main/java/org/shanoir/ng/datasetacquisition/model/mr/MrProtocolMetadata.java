@@ -35,7 +35,7 @@ import jakarta.persistence.InheritanceType;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="dtype",
+@DiscriminatorColumn(name = "dtype",
 		discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractEntity {
