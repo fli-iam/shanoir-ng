@@ -170,9 +170,9 @@ public class SelectionActionListener implements TreeSelectionListener {
 			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
 			if(mainWindow != null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
-				    "Study date could not be used for import: " + study.getStudyDescription(),
-				    "Data error",
-				    JOptionPane.ERROR_MESSAGE);
+						"Study date could not be used for import: " + study.getStudyDescription(),
+						"Data error",
+						JOptionPane.ERROR_MESSAGE);
 			}
 			return;
 		}

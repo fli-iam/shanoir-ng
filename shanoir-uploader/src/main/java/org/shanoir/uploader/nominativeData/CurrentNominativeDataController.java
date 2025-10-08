@@ -255,8 +255,8 @@ public class CurrentNominativeDataController {
 				if (uploadState.toString().equals(UploadState.FINISHED.toString())) {
 					importJob.setUploadPercentage(UploadState.FINISHED.toString());
 				} else if (uploadState.toString().equals(UploadState.START.toString())
-					|| uploadState.toString().equals(UploadState.START_AUTOIMPORT.toString())) {
-						importJob.setUploadPercentage(uploadPercentage);
+						|| uploadState.toString().equals(UploadState.START_AUTOIMPORT.toString())) {
+					importJob.setUploadPercentage(uploadPercentage);
 				} else {
 					importJob.setUploadPercentage((String) uploadState.toString());
 				}
