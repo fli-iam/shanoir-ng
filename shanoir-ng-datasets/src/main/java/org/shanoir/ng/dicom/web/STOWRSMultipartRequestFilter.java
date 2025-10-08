@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,8 @@ import jakarta.servlet.http.HttpServletRequest;
  * is used to send segmentations (SEG) to the Shanoir backend for storage.
  * 
  * 2) This request filter is used by Karnak or any other DICOM gateway to
- * import DICOM files into Shanoir.
+ * import DICOM files into Shanoir (file-by-file, eiter in one multipart
+ * request or multiple requests).
  * 
  * It might look weird to use a request filter for this purpose and not
  * manage this inside the standard REST controller. After two days of search
@@ -80,9 +82,14 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 
 	private static final String DICOM_MODALITY_PT = "PT";
 
+	private static final String DICOM_MODALITY_NM = "NM";
+
 	@Autowired
 	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 	
+	@Autowired
+	private DicomImporterService dicomImporterService;
+
     @Override
     public void doFilter(
 			ServletRequest request, 
@@ -126,7 +133,12 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 				}
 			} else if (DICOM_MODALITY_MR.equals(modality)
 					|| DICOM_MODALITY_CT.equals(modality)
-					|| DICOM_MODALITY_PT.equals(modality)) {
+					|| DICOM_MODALITY_PT.equals(modality)
+					|| DICOM_MODALITY_NM.equals(modality)) {
+				if(!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes, modality)) {
+					LOG.error("Error during import of DICOM MR/CT/PT/NM.");
+					throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
+				}
 			} else {
 				LOG.error("Not supported DICOM modality sent: {}", modality);
 				throw new ServletException("Not supported DICOM modality sent: " + modality);

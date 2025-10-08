@@ -58,7 +58,6 @@ public class Study extends IdName {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyTag> studyTags;
-	
 
 	/**
 	 * @return the tags
