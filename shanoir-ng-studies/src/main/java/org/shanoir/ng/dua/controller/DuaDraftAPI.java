@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 
 @Tag(name = "duaDraft", description = "the dua draft API")
@@ -46,7 +47,7 @@ public interface DuaDraftAPI {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#dua.duaDraft.studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
+			@Parameter(description = "dua draft to create", required = true) @Valid @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a dua draft")
@@ -59,7 +60,7 @@ public interface DuaDraftAPI {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> update(
 			@Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
-			@Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
+			@Parameter(description = "study to update", required = true) @Valid @RequestBody DuaDraftDTO dua, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the dua draft corresponding to the given id")

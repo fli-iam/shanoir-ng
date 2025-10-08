@@ -104,9 +104,9 @@ export class DUAAssistantComponent implements OnDestroy {
     protected buildForm(dua?: DuaDocument) {
         const controls: any = {
             'url': [dua?.url, [Validators.required]],
-            'funding': [dua?.funding, [Validators.required]],
-            'thanks': [dua?.thanks, [Validators.required]],
-            'papers': [dua?.papers, [Validators.required]],
+            'funding': [dua?.funding, [Validators.required, Validators.maxLength(1000)]],
+            'thanks': [dua?.thanks, [Validators.required, Validators.maxLength(1000)]],
+            'papers': [dua?.papers, [Validators.required, Validators.maxLength(1000)]],
         };
         if (this.mode == 'create') {
             controls['email'] = ['', [Validators.email]];
