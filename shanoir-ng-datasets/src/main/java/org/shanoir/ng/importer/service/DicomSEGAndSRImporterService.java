@@ -18,7 +18,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
-import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
@@ -35,6 +34,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -70,10 +70,6 @@ public class DicomSEGAndSRImporterService {
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
-	private static final String SEG = "SEG";
-
-	private static final String SR = "SR";
-
 	@Autowired
 	private ExaminationRepository examinationRepository;
 
@@ -105,29 +101,19 @@ public class DicomSEGAndSRImporterService {
 	private String dicomWebRS;
 	
 	@Transactional
-	public boolean importDicomSEGAndSR(InputStream inputStream) {
-		// DicomInputStream consumes the input stream to read the data
-		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
-			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
-			Attributes datasetAttributes = dIS.readDataset();
-			String modality = datasetAttributes.getString(Tag.Modality);
-			// check for modality: DICOM SEG or SR
-			if (SEG.equals(modality) || SR.equals(modality)) {
-				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-				Examination examination = modifyDicom(datasetAttributes);
-				Dataset dataset = findDataset(examination, datasetAttributes);
-				if (dataset == null) {
-					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-					return false;	
-				}
-				createDataset(modality, examination, dataset, datasetAttributes);
-				sendToPacs(metaInformationAttributes, datasetAttributes);
-			} else {
-				LOG.error("Error: importDicomSEGAndSR: other modality sent then SEG or SR.");
-				return false;
-			}
+	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality) {
+		// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
+		Examination examination = modifyDicom(datasetAttributes);
+		Dataset dataset = findDataset(examination, datasetAttributes);
+		if (dataset == null) {
+			LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+			return false;
+		}
+		try {
+			createDataset(modality, examination, dataset, datasetAttributes);
+			sendToPacs(metaInformationAttributes, datasetAttributes);
 		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("Error during import of DICOM SEG/SR.", e);
 			return false;
 		}
 		return true;
@@ -287,7 +273,7 @@ public class DicomSEGAndSRImporterService {
 	 */
 	private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
 		Dataset newMsOrSegDataset = null;
-		if (SEG.equals(modality)) {
+		if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
 			newMsOrSegDataset = new SegmentationDataset();
 		} else {
 			newMsOrSegDataset = new MeasurementDataset();

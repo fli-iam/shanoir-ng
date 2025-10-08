@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
+import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ public class SecurityConfiguration {
 	private MDCFilter mdcFilter;
 
 	@Autowired
-	private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
+	private STOWRSMultipartRequestFilter multipartRelatedRequestFilter;
 
 	/**
 	 * Defines the session authentication strategy.
