@@ -1,21 +1,16 @@
 package org.shanoir.ng.dataset.service;
 
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
@@ -30,8 +25,9 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
 
     @Autowired
     private DICOMWebService dicomWebService;
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAsyncService.class);
 

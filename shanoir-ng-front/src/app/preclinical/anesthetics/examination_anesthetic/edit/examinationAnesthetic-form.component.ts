@@ -13,8 +13,10 @@
  */
 
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
-import {  ActivatedRoute, ResolveEnd} from '@angular/router';
+import {  ActivatedRoute} from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -27,8 +29,6 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -62,7 +62,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
-    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
+    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
     getService(): EntityService<ExaminationAnesthetic> {
         return this.examAnestheticService;
@@ -72,7 +72,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.examAnestheticService.getExaminationAnesthetics(this.id).then(examAnesthetics => {
             if (examAnesthetics && examAnesthetics.length > 0) {
                 //Should be only one
-                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
                 examAnesthetic.internal_id = examAnesthetic.id;
                 return examAnesthetic;
             }
@@ -146,7 +146,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }
@@ -157,7 +157,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getAnestheticById(anesthetic: any): Anesthetic {
         if (anesthetic) {
-            for (let anest of this.anesthetics) {
+            for (const anest of this.anesthetics) {
                 if (anesthetic.id == anest.id) {
                     return anest;
                 }

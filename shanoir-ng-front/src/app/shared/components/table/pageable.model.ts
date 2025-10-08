@@ -21,13 +21,13 @@ export class Pageable {
     ) {}
 
     public toParams(): any {
-        let params: any = {
+        const params: any = {
             'page': this.pageNumber - 1,
             'size': this.pageSize
         };
         if (this.sort && this.sort.orders && this.sort.orders.length > 0) {
             params['sort'] = []
-            for (let order of this.sort.orders) {
+            for (const order of this.sort.orders) {
                 params['sort'].push(order.property + ',' + order.direction);
             }
         }
@@ -95,7 +95,7 @@ export class Page<T> {
     public totalPages: number = 0;
 
     static transType<U>(page: Page<any>, content: U[]): Page<U> {
-        let newPage: Page<U> = new Page<U>();
+        const newPage: Page<U> = new Page<U>();
         newPage.number = page.number;
         newPage.numberOfElements = page.numberOfElements;
         newPage.size = page.size;

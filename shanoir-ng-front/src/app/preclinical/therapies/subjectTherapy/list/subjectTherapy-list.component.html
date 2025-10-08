@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <div>
     <subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createMode"
-                [toggleForm]="toggleForm" [subTherapySelected]="selectedEntity" (onEvent)="refreshDisplayEntity($event[0], $event[1])" (onCancel)="toggleForm = false">
+                [toggleForm]="toggleForm" [subTherapySelected]="selectedEntity" (event)="refreshDisplayEntity($event[0], $event[1])" (dismiss)="toggleForm = false">
     </subject-therapy-form>
 </div>
 

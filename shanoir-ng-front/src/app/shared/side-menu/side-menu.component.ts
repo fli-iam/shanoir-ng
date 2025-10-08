@@ -19,6 +19,7 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 import { ConsoleService } from '../console/console.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+// eslint-disable-next-line import/no-unresolved
 import { VERSION } from '../../../environments/version';
 import { StudyService } from '../../studies/shared/study.service';
 import { environment } from '../../../environments/environment';
@@ -60,7 +61,7 @@ export class SideMenuComponent {
             this.userId = KeycloakService.auth.userId;
         }
 
-        let storedState = sessionStorage.getItem(this.sessionKey);
+        const storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 

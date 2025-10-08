@@ -13,8 +13,9 @@
  */
 
 import { Center } from '../../centers/shared/center.model';
-import { ManufacturerModel } from './manufacturer-model.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+
+import { ManufacturerModel } from './manufacturer-model.model';
 
 export class AcquisitionEquipment extends Entity {
     id: number;

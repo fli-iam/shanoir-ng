@@ -15,14 +15,12 @@
 import { Injectable } from '@angular/core';
 
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 @Injectable()
 export class DicomArchiveService {
 
 	private fileReader: FileReader = new FileReader();
-
-	constructor() {}
 
 	importFromZip(blob: Blob): Promise<any> {
 		this.fileReader.readAsArrayBuffer(blob);
@@ -41,7 +39,7 @@ export class DicomArchiveService {
 	}
 
 	extractFileDirectoryStructure(): Promise<any>{
-		var zip = new JSZip();
+		const zip = new JSZip();
 		return zip.loadAsync(this.fileReader.result);
 	}
 }

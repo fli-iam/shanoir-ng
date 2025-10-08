@@ -21,7 +21,7 @@ export enum AnestheticType {
 
 } export namespace AnestheticType {
     
-    export function all(): Array<AnestheticType> {
+    export function all(): AnestheticType[] {
         return allOfEnum<AnestheticType>(AnestheticType);
     }
 
@@ -29,5 +29,5 @@ export enum AnestheticType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
     
-    export var options: Option<AnestheticType>[] = all().map(prop => new Option<AnestheticType>(prop, getLabel(prop)));
+    export const options: Option<AnestheticType>[] = all().map(prop => new Option<AnestheticType>(prop, getLabel(prop)));
 }

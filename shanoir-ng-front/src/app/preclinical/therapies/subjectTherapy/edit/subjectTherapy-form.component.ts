@@ -12,9 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { SubjectTherapy }    from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -30,7 +32,6 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract";
 
 @Component({
@@ -40,15 +41,15 @@ import {dateDisplay} from "../../../../shared/./localLanguage/localDate.abstract
     standalone: false
 })
 @ModesAware
-export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>{
+export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy> implements OnChanges{
 
     @Input() preclinicalSubject: PreclinicalSubject;
-    @Input() canModify: Boolean = false;
-    @Input('toggleForm') toggleForm: boolean;
+    @Input() canModify: boolean = false;
+    @Input() toggleForm: boolean;
     @Input() subTherapySelected: SubjectTherapy;
-    @Output() onEvent = new EventEmitter();
-    @Output() onCreated = new EventEmitter();
-    @Output() onCancel = new EventEmitter();
+    @Output() event = new EventEmitter();
+    @Output() created = new EventEmitter();
+    @Output() canceled = new EventEmitter();
     @Input() createSTMode: boolean;
     therapies: Therapy[];
     units: Reference[];
@@ -131,10 +132,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             this.toggleForm = true;
         } else if (this.toggleForm == true) {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         } else {
             this.toggleForm = false;
-            this.onCancel.emit(false);
+            this.canceled.emit(false);
         }
         this.createSTMode = creation;
     }
@@ -168,14 +169,14 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     loadSubjectTherapyAttributesForSelect(selectedTherapy: SubjectTherapy) {
         this.subjectTherapy = selectedTherapy;
         if (this.therapies) {
-            for (let therapy of this.therapies) {
+            for (const therapy of this.therapies) {
                 if (selectedTherapy.therapy && selectedTherapy.therapy.id == therapy.id) {
                     this.subjectTherapy.therapy = therapy;
                 }
             }
         }
         if (this.units) {
-            for (let unit of this.units) {
+            for (const unit of this.units) {
                 if (selectedTherapy.dose_unit && selectedTherapy.dose_unit.id == unit.id) {
                     this.subjectTherapy.dose_unit = unit;
                 }
@@ -212,8 +213,8 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if(this.preclinicalSubject.therapies === undefined){
             this.preclinicalSubject.therapies = [];
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectTherapy, true]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectTherapy, true]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
@@ -223,8 +224,8 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if (!this.subjectTherapy) {
             return;
         }
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit([this.subjectTherapy, false]);
+        if (this.event.observers.length > 0) {
+            this.event.emit([this.subjectTherapy, false]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();

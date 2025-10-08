@@ -73,8 +73,8 @@ public class CurrentUploadsWindowTable implements Observer {
 
 		// Activate sorting for comparable content
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
-		sorter.setSortable(7, false);
-		sorter.setSortable(8, false);
+		sorter.setSortable(importColumn, false);
+		sorter.setSortable(deleteColumn, false);
 		table.setRowSorter(sorter);
 
 		initTable();
