@@ -13,14 +13,15 @@
  */
 
 import { Injectable } from '@angular/core';
-
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import * as AppUtils from '../../utils/app.utils';
-import { Manufacturer } from './manufacturer.model';
 import { HttpClient } from '@angular/common/http';
+
+import * as AppUtils from '../../utils/app.utils';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
 import {Entity} from "../../shared/components/entity/entity.abstract";
+
+import { Manufacturer } from './manufacturer.model';
 
 @Injectable()
 export class ManufacturerService extends EntityService<Manufacturer> {
@@ -35,7 +36,7 @@ export class ManufacturerService extends EntityService<Manufacturer> {
     getEntityInstance() { return new Manufacturer(); }
 
     deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
-        let warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+        const warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
 
         this.consoleService.log('warn', warn);
         return Promise.resolve(false);

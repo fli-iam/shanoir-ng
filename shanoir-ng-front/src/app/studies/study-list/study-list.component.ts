@@ -14,12 +14,12 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { AccessRequest } from "../../users/access-request/access-request.model";
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
@@ -57,7 +57,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getEntities(eager: boolean = false): Promise<Study[]> {
-        let earlyResult: Promise<Study[]> = Promise.all([
+        const earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData()
         ]).then(([studies, publicStudies]) => {
@@ -66,7 +66,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             studies = studies.concat(publicStudies
                 .filter(publicStudy => !studies.find(s => s.id == publicStudy.id))
                 .map(publicStudy => {
-                    let study: Study = new Study();
+                    const study: Study = new Study();
                     study.id = publicStudy.id;
                     study.downloadableByDefault = publicStudy.downloadableByDefault;
                     study.endDate = publicStudy.endDate;
@@ -84,12 +84,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 }));
             return studies;
         })
-        let allPromise: Promise<Study[]> = Promise.all([
+        const allPromise: Promise<Study[]> = Promise.all([
             earlyResult,
             this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
-                for (let accessRequest of accessRequests) {
+                for (const accessRequest of accessRequests) {
                     if (accessRequest.status == 0) {
                         studies.find(study => study.id == accessRequest.studyId).accessRequestedByCurrentUser = true;
                     }
@@ -107,7 +107,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     private fetchStorageVolumesByChunk(studies) {
         if (studies) {
             const chunkSize = 10;
-            let chunks: Study[][] = [];
+            const chunks: Study[][] = [];
             for (let i = 0; i < studies.length; i += chunkSize) {
                 const chunk = studies.slice(i, i + chunkSize);
                 chunks.push(chunk);
@@ -130,12 +130,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     private fetchStorageVolumes(studies: Study[]): Promise<void> {
         return this.studyService.getStudiesStorageVolume(studies?.map(s => s.id)).then(volumes => {
             studies.forEach(study => {
-                let volume = volumes.get(study.id);
+                const volume = volumes.get(study.id);
                 if(volume) {
                     (study as Study).totalSize = volume.total;
-                    let sizesByLabel = new Map<String, number>()
+                    const sizesByLabel = new Map<string, number>()
                     if (volume.volumeByFormat) {
-                        for (let sizeByFormat of volume.volumeByFormat) {
+                        for (const sizeByFormat of volume.volumeByFormat) {
                             if (sizeByFormat.size > 0) {
                                 sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                             }
@@ -151,7 +151,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "", type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
                 cellRenderer: ret => {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;

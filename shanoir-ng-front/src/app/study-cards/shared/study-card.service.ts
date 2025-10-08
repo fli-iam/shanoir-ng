@@ -14,9 +14,11 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+
 import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCard } from './study-card.model';
@@ -51,7 +53,7 @@ export class StudyCardService extends EntityService<StudyCard> {
     }
 
     public stringify(entity: StudyCard) {
-        let dto = new StudyCardDTO(entity);
+        const dto = new StudyCardDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

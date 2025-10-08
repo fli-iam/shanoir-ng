@@ -15,6 +15,7 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleCh
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";
@@ -29,7 +30,7 @@ import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.ser
 export class EquipmentNodeComponent extends TreeNodeAbstractComponent<AcquisitionEquipmentNode> implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
-    @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
+    @Output() equipmentDelete: EventEmitter<void> = new EventEmitter();
     detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
@@ -53,7 +54,7 @@ export class EquipmentNodeComponent extends TreeNodeAbstractComponent<Acquisitio
         this.equipmentService.get(this.node.id).then(entity => {
             this.equipmentService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onEquipmentDelete.emit();
+                    this.equipmentDelete.emit();
                 }
             });
         })

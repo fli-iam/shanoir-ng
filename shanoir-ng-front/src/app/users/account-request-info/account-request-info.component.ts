@@ -14,11 +14,15 @@
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
-import { Location } from '@angular/common';
+
 import { AccountRequestInfo } from './account-request-info.model';
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 
 @Component ({
     selector: 'account-request-info',
@@ -38,8 +42,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
     form: UntypedFormGroup;
-    onChange = (_: any) => {};
-    onTouch = () => {};
+    onChange: (any) => void = () => { return; };
+    onTouch: () => void = () => { return; };
     public studyOptions:  Option<number>[];
     studyName: string;
     presetStudyId: boolean
@@ -50,9 +54,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private location: Location,
                 private confirmDialogService: ConfirmDialogService) {
     }
-
-    setDisabledState?(isDisabled: boolean): void {
-    }
+    
     writeValue(obj: any): void {
         this.info = obj;
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
@@ -81,7 +83,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 } else {
                     this.studyOptions = [];
                     this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
-                    .then(result => this.location.back());
+                    .then(() => this.location.back());
                 }
             });
         }
@@ -114,9 +116,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }
