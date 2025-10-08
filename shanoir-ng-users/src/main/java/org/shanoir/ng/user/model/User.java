@@ -72,7 +72,7 @@ public class User extends HalEntity implements UserDetails {
 	@LocalDateAnnotations
 	private LocalDate creationDate;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	@NotBlank
 	@Column(unique = true)
 	@Unique
