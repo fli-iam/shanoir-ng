@@ -20,11 +20,9 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
-
 
 @Component({
     selector: 'clinical-context',
@@ -103,14 +101,10 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
         this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
         this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
     }
 
     private getPrefilledSubject(): Subject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient?.patientSex) {
@@ -118,9 +112,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         return newSubject;
     }
 

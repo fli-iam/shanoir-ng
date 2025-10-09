@@ -21,7 +21,6 @@ import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/precl
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
@@ -40,7 +39,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     private animalSubject: AnimalSubject = new AnimalSubject();
     private animalSubjectService: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
     patient: PatientDicom;
-    editSubjectStudy: boolean = false;
 
     postConstructor() {
         this.patient = this.importDataService.patients[0];
@@ -53,7 +51,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getSubjectList(studyId: number): Promise<Subject[]> {
-        this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
         } else {
@@ -119,14 +116,11 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
     }
 
-    protected fillCreateAcqEqStep() { 
+    protected fillCreateAcqEqStep() {
         return;
     }
 
     private getPrefilledSubject(): Subject | PreclinicalSubject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
@@ -134,13 +128,13 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [];
         const newPreclinicalSubject = new PreclinicalSubject();
         const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
         newSubject.preclinical = true;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;

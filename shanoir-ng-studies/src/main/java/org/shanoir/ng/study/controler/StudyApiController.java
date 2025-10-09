@@ -201,7 +201,8 @@ public class StudyApiController implements StudyApi {
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		StudyDTO dto = studyMapper.studyToStudyDTODetailed(study);
+
+		StudyDTO dto = studyMapper.studyToStudyDTO(study);
 		if(withStorageVolume){
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}

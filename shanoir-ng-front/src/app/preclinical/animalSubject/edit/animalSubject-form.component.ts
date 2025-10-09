@@ -31,7 +31,6 @@ import { Option } from '../../../shared/select/select.component';
 import { Study} from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { ReverseSubjectNode } from '../../../tree/tree.model';
@@ -81,7 +80,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     @Input() displayPathologyTherapy: boolean = true;
     @ViewChild('therapiesComponent', { static: false }) therapiesComponent: SubjectTherapiesListComponent;
     @ViewChild('pathologiesComponent', { static: false }) pathologiesComponent: SubjectPathologiesListComponent;
-    private subjectStudyList: SubjectStudy[] = [];
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
     selectedStudy : IdName;
@@ -143,15 +141,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 ]).then(([animalSubject, subject]) => {
                     ps.animalSubject = animalSubject;
                     ps.subject = subject;
-                    // subjectStudy
-                    if (ps.subject.subjectStudyList && ps.subject.subjectStudyList.length > 0){
-                        this.subjectStudyList = [];
-                        for (const ss of ps.subject.subjectStudyList) {
-                            const newSubjectStudy: SubjectStudy = this.copySubjectStudy(ss);
-                            this.subjectStudyList.push(newSubjectStudy);
-                        }
-                        ps.subject.subjectStudyList = this.subjectStudyList;
-                    }
                     return ps;
                 });
             });
@@ -233,20 +222,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
     }
 
-
-    copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
-    	const fixedSubjectStudy = new SubjectStudy();
-    	fixedSubjectStudy.id = subjectStudy.id;
-    	fixedSubjectStudy.studyIdentifier = subjectStudy.studyIdentifier;
-    	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
-    	fixedSubjectStudy.subject = this.copySubject(subjectStudy.subject);
-    	fixedSubjectStudy.study = subjectStudy.study;
-    	fixedSubjectStudy.subjectId = subjectStudy.subject.id;
-    	fixedSubjectStudy.studyId = subjectStudy.study.id;
-        fixedSubjectStudy.tags = subjectStudy.tags;
-    	return fixedSubjectStudy;
-    }
-
     getStudyById(id: number): Study{
     	if (this.studies && this.studies.length > 0){
     		for (const s of this.studies){
@@ -289,7 +264,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'therapies': [this.preclinicalSubject.therapies],
             'pathologies': [this.preclinicalSubject.pathologies],
             'study': [this.preclinicalSubject.subject.study, animal ? [Validators.required] : []],
-            'subjectStudyList': [],
             'studyIdentifier': [this.preclinicalSubject.subject.studyIdentifier],
             'physicallyInvolved': [this.preclinicalSubject.subject.physicallyInvolved],
             'tags': [this.preclinicalSubject.subject.tags],
@@ -417,7 +391,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             return;
         }
 
-        this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
             .then(() => {
                 let entity:any;

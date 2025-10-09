@@ -14,15 +14,14 @@
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
-import {Profile} from '../../shared/models/profile.model';
-
+import { Profile } from '../../shared/models/profile.model';
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
+import { Subject } from "../../subjects/shared/subject.model";
 
 export class Study extends Entity {
     clinical: boolean;
@@ -44,7 +43,7 @@ export class Study extends Entity {
     detailedSizes: Map<string, number> = null;
     totalSize: number;
     studyType: StudyType;
-    subjectStudyList: SubjectStudy[] = [];
+    subjects: Subject[] = [];
     studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];
     visibleByDefault: boolean = false;
@@ -54,7 +53,6 @@ export class Study extends Entity {
     tags: Tag[];
     studyTags: Tag[];
     description: string;
-
     license: string;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access

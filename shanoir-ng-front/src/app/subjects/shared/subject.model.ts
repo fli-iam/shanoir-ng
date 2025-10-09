@@ -13,13 +13,11 @@
  */
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { ImagedObjectCategory } from './imaged-object-category.enum';
+import {Sex, SubjectType} from './subject.types';
 import {Tag} from "../../tags/tag.model";
 import {QualityTag} from "../../study-cards/shared/quality-card.model";
 import {SimpleStudy, Study} from "../../studies/shared/study.model";
-
-import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudy } from './subject-study.model';
-import {Sex, SubjectType} from './subject.types';
 
 
 export class Subject extends Entity {
@@ -35,7 +33,6 @@ export class Subject extends Entity {
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
-    subjectStudyList: SubjectStudy[] = [];
     studyIdentifier: string;
     isAlreadyAnonymized: boolean = false;
     subjectType: SubjectType;
@@ -43,6 +40,7 @@ export class Subject extends Entity {
     tags: Tag[];
     qualityTag: QualityTag;
     study: Study;
+    studyId: number;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
         const subject = new Subject();
@@ -59,14 +57,12 @@ export class SimpleSubject {
     id: number;
     name: string;
     identifier: string;
-    subjectStudyList: SubjectStudy[];
     study: SimpleStudy;
 
     constructor(subject: Subject) {
         this.id = subject.id ? subject.id : null;
         this.name = subject.name;
         this.identifier = subject.studyIdentifier;
-        this.subjectStudyList = null;
         this.study = subject.study;
     }
 }
