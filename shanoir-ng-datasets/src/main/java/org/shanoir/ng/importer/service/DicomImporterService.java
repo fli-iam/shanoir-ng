@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -45,7 +46,7 @@ public class DicomImporterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomImporterService.class);
 
-   	private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
+    private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
 
     @Autowired
     private StudyService studyService;
@@ -54,14 +55,20 @@ public class DicomImporterService {
     private SubjectService subjectService;
 
     @Autowired
-	private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-   	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Transactional
-	public boolean importDicom(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality) throws RestServiceException, JsonProcessingException, AmqpException {
-   		Long studyId = datasetAttributes.getLong(Tag.ClinicalTrialProtocolID, 0L);
+    public boolean importDicom(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality)
+            throws RestServiceException, JsonProcessingException, AmqpException {
+        String deIdentificationMethod = datasetAttributes.getString(Tag.DeidentificationMethod);
+        if (!StringUtils.isNotBlank(deIdentificationMethod)) {
+            LOG.error("Only de-identified DICOM is allowed.");
+            return false;
+        }
+        Long studyId = datasetAttributes.getLong(Tag.ClinicalTrialProtocolID, 0L);
         Study study = studyService.findById(studyId);
         if (study == null) {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
@@ -71,12 +78,14 @@ public class DicomImporterService {
         Subject subject = subjectService.findByNameAndStudyId(subjectName, studyId);
         if (subject == null) {
             subject = new Subject();
-			subject.setName(subjectName);
-			subject.setStudy(study);
-			Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
-			if (subjectId == null) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
-			}
+            subject.setName(subjectName);
+            subject.setStudy(study);
+            Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE,
+                    objectMapper.writeValueAsString(subject));
+            if (subjectId == null) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
+            }
             LOG.info("Subject created with ID: {}, Name: {}", subjectId, subjectName);
         }
         return true;
