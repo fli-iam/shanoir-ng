@@ -1,6 +1,6 @@
 <div class="welcome-component">
 	<div class="header">
-		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()"/>
+		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub"/>
 		<div class="buttons">
 			<button class="left-icon alt" type="button" (click)="login()"><i class="fa-solid fa-right-to-bracket"></i>Sign in</button>
 			<button class="left-icon" type="button" (click)="toShanoir()"><i class="fa-solid fa-circle-info"></i>More info</button>
@@ -10,7 +10,7 @@
 		</div>
 	</div>
 	<div class="shanoir">
-		<img class="shanoir-logo" [src]="shanoirLogoUrl"/>
+		<img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
 		<div class="shanoir-text">
 			SHAring iN vivO Imaging Resources
 		</div>

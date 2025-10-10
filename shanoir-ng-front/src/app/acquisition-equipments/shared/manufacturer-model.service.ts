@@ -18,8 +18,9 @@ import { HttpClient } from '@angular/common/http';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ManufacturerModel } from './manufacturer-model.model';
 import {Entity} from "../../shared/components/entity/entity.abstract";
+
+import { ManufacturerModel } from './manufacturer-model.model';
 
 @Injectable()
 export class ManufacturerModelService extends EntityService<ManufacturerModel> {
@@ -46,13 +47,13 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
             .toPromise();
     }
 
-    getCenterManufacturerModelsNames(centerId:Number): Promise<IdName[]> {
+    getCenterManufacturerModelsNames(centerId:number): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
             .toPromise();
     }
 
     deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
-        let warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+        const warn = 'The ' + name + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
 
         this.consoleService.log('warn', warn);
         return Promise.resolve(false);

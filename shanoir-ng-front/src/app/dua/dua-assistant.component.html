@@ -68,7 +68,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </div>
                         <upload-file *ngIf="!converting" (fileChange)="onImageLoaded($event)" accept="image/*" label="Load logo file" [noFilename]="true"></upload-file>
                     </div>
-                    <img class="shanoir-logo" [src]="shanoirLogoUrl"/>
+                    <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
                 </div>
                 <h1>Accord d'Utilisation des Données</h1>
                 <p>

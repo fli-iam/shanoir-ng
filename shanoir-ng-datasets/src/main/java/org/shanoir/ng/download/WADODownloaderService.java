@@ -179,7 +179,9 @@ public class WADODownloaderService {
 	private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID ) {
 		String serieDescription = dataset.getUpdatedMetadata().getName();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-		String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+
+        dataset = dataset.getFirstRealInput();
+        String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 		String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
 		// Replace all forbidden characters.
 		name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");

@@ -1,5 +1,4 @@
 import {Entity} from "../../shared/components/entity/entity.abstract";
-import {Subject} from "../../subjects/shared/subject.model";
 
 export class FileEntity {
 
