@@ -1,9 +1,15 @@
 package org.shanoir.ng.importer.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
@@ -31,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Attention: All DICOM files are pseudonymized outside Shanoir, e.g. in
  * Karnak or elsewhere. We do not apply any additional pseudonymization
  * on the files here, even the contrary we fully rely on the DICOM info.
+ * A DeidentificationMethod needs to be present to continue with the import.
  * 
  * To map the Shanoir study, the DICOM attribute ClinicalTrialProtocolID
  * (0012,0020) is used. No new Shanoir study (research project) is created,
@@ -55,6 +62,9 @@ public class DicomImporterService {
     private SubjectService subjectService;
 
     @Autowired
+    private ExaminationService examinationService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -74,9 +84,37 @@ public class DicomImporterService {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
         }
+        Subject subject = manageSubject(datasetAttributes, study);
+        Examination examination = manageExamination(datasetAttributes, study, subject);
+        return true;
+    }
+
+    private Examination manageExamination(Attributes datasetAttributes, Study study, Subject subject) {
+        Examination examination = null;
+        LocalDate examinationDate = DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate));
+        String examinationComment = datasetAttributes.getString(Tag.StudyDescription);
+        List<Examination> examinations = examinationService.findBySubjectIdStudyId(subject.getId(), study.getId());
+        examinations = examinations.stream().filter(e -> e.getExaminationDate().equals(examinationDate)).toList();
+        if (examinations.size() == 1) {
+            examination = examinations.iterator().next();
+        } else { // Create new examination
+            examination = new Examination();
+            examination.setStudy(study);
+            examination.setSubject(subject);
+            examination.setExaminationDate(examinationDate);
+            examination.setComment(examinationComment);
+            // @todo: findOrCreateCenter
+            examination.setCenterId(null);
+            examination = examinationService.save(examination);
+        } // Avoid, that the examination creation makes RabbitMQ calls
+        return examination;
+    }
+
+    private Subject manageSubject(Attributes datasetAttributes, Study study)
+            throws JsonProcessingException, RestServiceException {
         String subjectName = datasetAttributes.getString(Tag.PatientName);
-        Subject subject = subjectService.findByNameAndStudyId(subjectName, studyId);
-        if (subject == null) {
+        Subject subject = subjectService.findByNameAndStudyId(subjectName, study.getId());
+        if (subject == null) { // Communicate with MS Studies here, only if not existing
             subject = new Subject();
             subject.setName(subjectName);
             subject.setStudy(study);
@@ -87,8 +125,8 @@ public class DicomImporterService {
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
             LOG.info("Subject created with ID: {}, Name: {}", subjectId, subjectName);
-        }
-        return true;
+        } // We need to assure here: subject created in ms studies + ms datasets
+        return subject;
     }
 
 }
