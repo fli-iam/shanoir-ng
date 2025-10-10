@@ -23,7 +23,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;

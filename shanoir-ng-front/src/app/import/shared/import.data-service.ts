@@ -13,18 +13,20 @@
  */
 
 import { Injectable } from '@angular/core';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Center } from '../../centers/shared/center.model';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { Study } from '../../studies/shared/study.model';
-import { ImportJob, PatientDicom } from './dicom-data.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { EegImportJob } from './eeg-data.model';
-import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import {Subject} from "../../subjects/shared/subject.model";
+
+import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
+import { EegImportJob } from './eeg-data.model';
+import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
 

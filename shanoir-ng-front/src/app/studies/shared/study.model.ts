@@ -17,12 +17,12 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
+import {Profile} from '../../shared/models/profile.model';
+
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
-import {Profile} from '../../shared/models/profile.model';
-import {StudyStorageVolumeDTO} from "./study.dto";
 
 export class Study extends Entity {
     clinical: boolean;
@@ -41,7 +41,7 @@ export class Study extends Entity {
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     profile: Profile;
-    detailedSizes: Map<String, number> = null;
+    detailedSizes: Map<string, number> = null;
     totalSize: number;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];
@@ -65,7 +65,7 @@ export class Study extends Entity {
 
     public static completeMembers(study: Study, users: User[]) {
         if (!study.studyUserList) return;
-        for (let studyUser of study.studyUserList) {
+        for (const studyUser of study.studyUserList) {
             StudyUser.completeMember(studyUser, users);
         }
     }
