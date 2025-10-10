@@ -14,6 +14,8 @@
 
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
@@ -22,7 +24,6 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
 import { ShanoirError } from '../../shared/models/error.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'center-list',
@@ -60,7 +61,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },
@@ -73,9 +74,9 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     }
 
     private openCreateAcqEquip = (center: Center) => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        const currentStep: Step = this.breadcrumbsService.currentStep;
         this.breadcrumbsService.addNextStepPrefilled('entity.center', center, true);
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     center.acquisitionEquipments.push(entity as AcquisitionEquipment);
@@ -88,7 +89,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         this.subscriptions.push(
             this.onDelete.subscribe(response => {
                 if (response.error && response.error instanceof ShanoirError && response.error.code == 422) {
-                    let msg: string  = this.buildDeleteErrMsg(response as {entity: Center, error: ShanoirError});
+                    const msg: string  = this.buildDeleteErrMsg(response as {entity: Center, error: ShanoirError});
                     this.consoleService.log('warn', msg);
                 }
             })
@@ -98,8 +99,8 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     private buildDeleteErrMsg(response: {entity: Center, error: ShanoirError}): string {
         let isLinkedWithEqpts: boolean = false;
         let isLinkedWithStudies: boolean = false;
-        let errDetails = response.error.details?.fieldErrors["delete"];
-        for (var errKey in errDetails) {
+        const errDetails = response.error.details?.fieldErrors["delete"];
+        for (const errKey in errDetails) {
             if (errDetails[errKey]["givenValue"] == "acquisitionEquipments") {
                 isLinkedWithEqpts = true;
             }

@@ -11,11 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../shared/reflect/field.decorator';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Option } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { allOfEnum } from '../../utils/app.utils';
+
 import { StudyCardCondition } from './study-card.model';
 
 
@@ -36,10 +37,10 @@ export class QualityCardRule {
     orConditions: boolean = false;
 
     static copy(rule: QualityCardRule): QualityCardRule {
-        let copy: QualityCardRule = new QualityCardRule();
+        const copy: QualityCardRule = new QualityCardRule();
         copy.tag = rule.tag;
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            const conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
             conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];
@@ -58,9 +59,9 @@ export enum QualityTag {
 
 } export namespace QualityTag {
     
-    export function all(): Array<QualityTag> {
+    export function all(): QualityTag[] {
         return allOfEnum<QualityTag>(QualityTag);
     }
 
-    export var options: Option<QualityTag>[] = all().map(prop => new Option<QualityTag>(prop, prop.toString()));
+    export const options: Option<QualityTag>[] = all().map(prop => new Option<QualityTag>(prop, prop.toString()));
 }

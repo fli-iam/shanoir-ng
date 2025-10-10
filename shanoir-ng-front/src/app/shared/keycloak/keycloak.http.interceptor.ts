@@ -14,10 +14,8 @@
 
 import { Injectable } from "@angular/core";
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { switchMap } from 'rxjs/operators';
+import { catchError , switchMap } from 'rxjs/operators';
 
 import { KeycloakService } from "./keycloak.service";
 
@@ -50,7 +48,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {
-                        this.keycloakService.getToken().then((token: string) => {
+                        this.keycloakService.getToken().then(() => {
                             authReq = this.setAuthHeader(authReq);
                             observer.next(null);
                             observer.complete();

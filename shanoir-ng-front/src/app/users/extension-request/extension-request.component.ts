@@ -15,10 +15,11 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { Subscription } from 'rxjs';
+
 import * as AppUtils from '../../utils/app.utils';
 import { UserService } from '../shared/user.service';
+
 import { ExtensionRequestInfo } from './extension-request-info.model';
 
 @Component({
@@ -54,7 +55,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     extensionRequest(): void {
         this.submit();
         this.userService.requestExtension(this.extensionRequestInfo)
-            .then((res) => {
+            .then(() => {
                 this.requestSent = true;
                 this.errorMessage = null;
             }).catch(exception => {
@@ -90,7 +91,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
             });
 
         this.subscriptions.push(
-            this.extensionRequestForm.valueChanges.subscribe(data => this.onValueChanged(data)),
+            this.extensionRequestForm.valueChanges.subscribe(() => this.onValueChanged()),
             this.extensionRequestForm.get('extensionDate').valueChanges.subscribe(value => {
                 this.extensionRequestInfo.extensionDate = value;
             }),
@@ -104,7 +105,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
         this.onValueChanged(); // (re)set validation messages now
     }
 
-    onValueChanged(data?: any) {
+    onValueChanged() {
         if (!this.extensionRequestForm) { return; }
         const form = this.extensionRequestForm;
         for (const field in this.formErrors) {
@@ -126,7 +127,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
 
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
-            let date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
+            const date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }

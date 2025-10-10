@@ -12,10 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { Center } from '../../centers/shared/center.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Id } from '../../shared/models/id.model';
+
 import { CoilType } from './coil-type.enum';
 
 

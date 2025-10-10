@@ -20,7 +20,7 @@ const FIELDS_KEY = Symbol("fields");
  * Decorator to mark a class property as a field.
  */
 export function Field(): PropertyDecorator {
-    return (target: Object, propertyKey: string | symbol) => {
+    return (target: object, propertyKey: string | symbol) => {
         const fields: string[] = Reflect.getMetadata(FIELDS_KEY, target) || [];
         fields.push(propertyKey as string);
         Reflect.defineMetadata(FIELDS_KEY, fields, target);

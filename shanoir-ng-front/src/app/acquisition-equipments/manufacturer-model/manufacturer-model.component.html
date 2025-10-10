@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
                 (delete)="delete()"
 				(edit)="goToEdit()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 			<span [ngSwitch]="mode">
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
+								<select-box formControlName="manufacturer" (newClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>

@@ -13,14 +13,15 @@
  */
 
 import { Component, forwardRef, Input } from '@angular/core';
-
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
+
 import { Mode } from 'src/app/shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
 import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 
@@ -46,8 +47,8 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
         view: false // Specify that we can't view a therapy
     };
     protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange = (_: any) => { return; };
+    protected propagateTouched = () => { return; };
     protected refreshTable: SuperPromise<(number?) => void> = new SuperPromise<(number?) => void>();
 
     constructor(
@@ -79,7 +80,7 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
     }
 
     private getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             { headerName: "Therapy", field: "therapy.name" },
             { headerName: "Type", field: "therapy.therapyType" },
             { headerName: "Dose", field: "dose" },
@@ -97,7 +98,7 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
     private completeCustomActions(): void {
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.customActionDefs = [{
-                title: "New", awesome: "fa-solid fa-plus", action: item => this.router.navigate(['/preclinical-subject-therapy/create'])
+                title: "New", awesome: "fa-solid fa-plus", action: () => this.router.navigate(['/preclinical-subject-therapy/create'])
             }];
         } else {
             this.customActionDefs = [];
@@ -111,7 +112,7 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
         this.propagateTouched();
     }
 
-    protected getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<SubjectTherapy>> {
+    protected getPage(pageable: FilterablePageable, _forceRefresh: boolean = false): Promise<Page<SubjectTherapy>> {
         return Promise.resolve(this.paging.getPage(pageable));
     }
 }

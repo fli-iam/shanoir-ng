@@ -13,8 +13,13 @@
  */
 
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
-import {  ActivatedRoute, ResolveEnd} from '@angular/router';
+import {  ActivatedRoute} from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
+import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
+import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -24,10 +29,6 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
-import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
-import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -59,7 +60,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
-    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
+    set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
     getService(): EntityService<ExaminationAnesthetic> {
         return this.examAnestheticService;
@@ -69,7 +70,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.examAnestheticService.getExaminationAnesthetics(this.id).then(examAnesthetics => {
             if (examAnesthetics && examAnesthetics.length > 0) {
                 //Should be only one
-                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
                 examAnesthetic.internalId = examAnesthetic.id;
                 return examAnesthetic;
             }
@@ -102,7 +103,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'anesthetic': [this.examinationAnesthetic.anesthetic],
             'injectionInterval': [this.examinationAnesthetic.injectionInterval],
             'injectionSite': [this.examinationAnesthetic.injectionSite],
@@ -113,7 +114,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             'endDate': [this.examinationAnesthetic.endDate]
         });
         this.subscriptions.push(
-            form.valueChanges.subscribe(value => {
+            form.valueChanges.subscribe(() => {
                 this.eaChange();
             })
         );
@@ -149,7 +150,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }
@@ -160,7 +161,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getAnestheticById(anesthetic: any): Anesthetic {
         if (anesthetic) {
-            for (let anest of this.anesthetics) {
+            for (const anest of this.anesthetics) {
                 if (anesthetic.id == anest.id) {
                     return anest;
                 }

@@ -102,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                 <!-- display a button -->
                 <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item) && col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
-                    <img *ngIf="col.img" src="{{col.img}}" />
+                    <img *ngIf="col.img" src="{{col.img}}" alt="image {{col.title}}"/>
                     <span *ngIf="col.awesome" class="awesome"><i [class]="col.awesome"></i></span>
                 </span>
 
@@ -153,13 +153,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- User defined buttons -->
         <span *ngFor="let command of customActionDefs" class="command-block">
             <button type="button" *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
-                <img *ngIf="command.img" src="{{command.img}}" />
+                <img *ngIf="command.img" src="{{command.img}}" alt="image {{command.title}}"/>
                 <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                 <span>{{command.title}}</span>
             </button>
             <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
                 {{ command.hasCopyRight }}
-                <img *ngIf="command.img" src="{{command.img}}" />
+                <img *ngIf="command.img" src="{{command.img}}" alt="image {{command.title}}"/>
                 <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                 <span>{{command.title}}</span>
             </button>

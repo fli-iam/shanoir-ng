@@ -21,8 +21,8 @@ export class Tag extends Entity {
     @Field() color: string;
     @Field() name: string;
 
-    public static makeTag(id: number, name: string, color: string, studyId: number): Tag {
-        let tag = new Tag();
+    public static makeTag(id: number, name: string, color: string): Tag {
+        const tag = new Tag();
         tag.id = id;
         tag.name = name;
         tag.color = color;
@@ -39,7 +39,7 @@ export class Tag extends Entity {
     }
 
     clone(): any {
-        let t: Tag = new Tag();
+        const t: Tag = new Tag();
         t.id = this.id;
         t.color = this.color;
         t.name = this.name;

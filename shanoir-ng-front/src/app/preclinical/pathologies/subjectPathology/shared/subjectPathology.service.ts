@@ -13,11 +13,13 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { SubjectPathology } from './subjectPathology.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HttpClient } from '@angular/common/http';
+
+import { SubjectPathology } from './subjectPathology.model';
 
 @Injectable()
 export class SubjectPathologyService extends EntityService<SubjectPathology>{

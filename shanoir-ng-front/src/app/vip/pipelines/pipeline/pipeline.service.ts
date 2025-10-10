@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {firstValueFrom, Observable} from "rxjs";
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { firstValueFrom } from "rxjs";
+
 import * as AppUtils from "../../../utils/app.utils";
-import {Pipeline} from "../../models/pipeline";
+import { Pipeline } from "../../models/pipeline";
 
 @Injectable()
 export class PipelineService {
 
-    pipelineUrl: String = AppUtils.BACKEND_API_VIP_PIPE_URL;
+    pipelineUrl: string = AppUtils.BACKEND_API_VIP_PIPE_URL;
 
     constructor(protected httpClient: HttpClient) {
     }
@@ -46,7 +47,7 @@ export class PipelineService {
      * @param property A pipeline property to filter the returned pipelines. It must listed in the \&quot;supportedPipelineProperties\&quot; of the getPlatformProperties method. All the returned pipelines must have this property set. Use also the \&quot;propertyValue\&quot; to filter on this property value.
      * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
      */
-    public listPipelines(): Promise<Array<Pipeline>> {
-        return firstValueFrom(this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`));
+    public listPipelines(): Promise<Pipeline[]> {
+        return firstValueFrom(this.httpClient.get<Pipeline[]>(`${this.pipelineUrl}`));
     }
 }

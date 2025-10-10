@@ -15,13 +15,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-import { ServiceLocator } from './locator.service';
 import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
+
+import { TaskState, TaskStatus } from '../async-tasks/task.model';
+
+import { ServiceLocator } from './locator.service';
 
 
 // Base urls
-let url = window.location;
+const url = window.location;
 export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
@@ -156,14 +158,14 @@ export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipelin
 
 export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
-declare var JSZip: any;
+declare let JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
     if (error.error && error.error.details) {
-        let fieldErrors = error.error.details.fieldErrors || '';
+        const fieldErrors = error.error.details.fieldErrors || '';
         if (fieldErrors[fieldName]) {
-            for (let fieldError of fieldErrors[fieldName]) {
+            for (const fieldError of fieldErrors[fieldName]) {
                 if (fieldError.code == 'unique') {
                     hasUniqueError = true;
                 }
@@ -178,10 +180,10 @@ export function browserDownloadFile(blob: Blob, filename: string) {
         // IE 10+
         window.navigator.msSaveBlob(blob, filename);
     } else {
-        var link = document.createElement('a');
+        const link = document.createElement('a');
         // Browsers that support HTML5 download attribute
         if (link.download !== undefined) {
-            var url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
             link.style.visibility = 'hidden';
@@ -218,7 +220,7 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
 
 export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    let obs: Observable<HttpEvent<Blob>> = http.get(
+    const obs: Observable<HttpEvent<Blob>> = http.get(
         url,
         {
             reportProgress: true,
@@ -232,15 +234,19 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state?: 
     });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
-            state = s
+            if (state) {
+                state.errors = s.errors;
+                state.progress = s.progress;
+                state.status = s.status;
+            }
             return s;
         });
     }));
 }
 
-export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
+export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    let obs: Observable<HttpEvent<Blob>> = http.post(
+    const obs: Observable<HttpEvent<Blob>> = http.post(
         url,
         formData,
         {
@@ -254,7 +260,11 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
     });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
-            state = s
+            if (state) {
+                state.errors = s.errors;
+                state.progress = s.progress;
+                state.status = s.status;
+            }
             return s;
         });
     }));
@@ -269,7 +279,7 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
             return Promise.resolve(task);
         }
         case HttpEventType.DownloadProgress: {
-            let total: number = (event as HttpProgressEvent).total;
+            const total: number = (event as HttpProgressEvent).total;
             task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
             if (total) task.progress /= total;
             return Promise.resolve(task);
@@ -280,7 +290,7 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
             if (blob && event.headers.get('Content-Type') == 'application/zip') {
                 //report.list[id].zipSize = getSizeStr(blob?.size);
                 // Check ERRORS file in zip
-                let zip: any = new JSZip();
+                const zip: any = new JSZip();
                 return zip.loadAsync(blob).then(dataFiles => {
                     if (dataFiles.files['ERRORS.json']) {
                         return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -302,7 +312,7 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
 
 export function getFilename(response: HttpResponse<any>): string {
     const prefix = 'attachment;filename=';
-    let contentDispHeader: string = response.headers.get('Content-Disposition');
+    const contentDispHeader: string = response.headers.get('Content-Disposition');
     return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
@@ -321,7 +331,7 @@ export function pad(n, width, z?): string {
 * order, until it finds one where predicate returns true. If such an element is found,
 * findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
 */
-export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+export function findLastIndex<T>(array: T[], predicate: (value: T, index: number, obj: T[]) => boolean): number {
     let l = array.length;
     while (l--) {
         if (predicate(array[l], l, array))
@@ -354,7 +364,7 @@ export class TimesPipe implements PipeTransform {
 })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
-        let ret = [];
+        const ret = [];
         map.forEach((val, key) => {
             ret.push({
                 key: key,
@@ -365,9 +375,9 @@ export class GetValuesPipe implements PipeTransform {
     }
 }
 
-export function allOfEnum<T>(enumClass): Array<T> {
-    let list: Array<T> = [];
-    for (let key in enumClass) {
+export function allOfEnum<T>(enumClass): T[] {
+    const list: T[] = [];
+    for (const key in enumClass) {
         if (!(enumClass[key] instanceof Function)) list.push(enumClass[key]);
     }
     return list;
@@ -416,10 +426,10 @@ function deepEquals(x, y) {
         return false;
     } else {
         for (const p in x) {
-            if (!x.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(x, p)) {
                 continue; // other properties were tested using x.constructor === y.constructor
             }
-            if (!y.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(y, p)) {
                 return false; // allows to compare x[ p ] and y[ p ] when set to undefined
             }
             if (x[p] === y[p]) {
@@ -433,7 +443,7 @@ function deepEquals(x, y) {
             }
         }
         for (const p in y) {
-            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+            if (Object.prototype.hasOwnProperty.call(y, p) && !Object.prototype.hasOwnProperty.call(x, p)) {
                 return false;
             }
         }
@@ -454,9 +464,9 @@ export function arraysEqual(array1: any[], array2: any[]) {
 
 export function isDarkColor(colorInp: string): boolean {
     colorInp = colorInp?.replace('#', '');
-    var r = parseInt(colorInp.substring(0, 2), 16); // hexToR
-    var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
-    var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
+    const r = parseInt(colorInp.substring(0, 2), 16); // hexToR
+    const g = parseInt(colorInp.substring(2, 4), 16); // hexToG
+    const b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
 }
 
@@ -470,8 +480,8 @@ export function getSizeStr(size: number): string {
         return "0 " + units[0];
     }
     const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-    let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
-    let unit: string = units[exponent];
+    const value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
+    const unit: string = units[exponent];
     return value + " " + unit;
 }
 

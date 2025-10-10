@@ -19,7 +19,7 @@ export enum InjectionType {
     INFUSION = "Infusion"
 }
 export namespace InjectionType {
-    export function all(): Array<InjectionType> {
+    export function all(): InjectionType[] {
         return allOfEnum<InjectionType>(InjectionType);
     }
 }

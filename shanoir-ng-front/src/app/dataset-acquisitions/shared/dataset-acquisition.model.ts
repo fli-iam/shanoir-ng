@@ -12,6 +12,7 @@
  * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { Examination } from '../../examinations/shared/examination.model';

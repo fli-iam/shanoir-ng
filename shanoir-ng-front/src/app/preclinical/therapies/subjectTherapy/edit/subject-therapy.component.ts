@@ -19,6 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Reference } from 'src/app/preclinical/reference/shared/reference.model';
 import { ReferenceService } from 'src/app/preclinical/reference/shared/reference.service';
 import { Frequency } from 'src/app/preclinical/shared/enum/frequency';
+
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';

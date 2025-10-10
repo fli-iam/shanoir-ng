@@ -19,7 +19,7 @@ export enum InjectionSite {
     INTRACEREBRAL = "Intracerebral"
 }
 export namespace InjectionSite {
-    export function all(): Array<InjectionSite> {
+    export function all(): InjectionSite[] {
         return allOfEnum<InjectionSite>(InjectionSite);
     }
 }

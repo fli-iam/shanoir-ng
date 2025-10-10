@@ -24,7 +24,7 @@ export enum Frequency {
 }
 
 export namespace Frequency {
-    export function all(): Array<Frequency> {
+    export function all(): Frequency[] {
         return allOfEnum<Frequency>(Frequency);
     }
 }

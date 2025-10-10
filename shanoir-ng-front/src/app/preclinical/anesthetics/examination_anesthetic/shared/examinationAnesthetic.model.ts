@@ -18,7 +18,7 @@ import { InjectionType } from "../../../shared/enum/injectionType";
 import { InjectionInterval } from "../../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../../shared/enum/injectionSite";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../../../shared/reflect/field.decorator';
 
 export class ExaminationAnesthetic extends Entity {
     @Field() id: number;

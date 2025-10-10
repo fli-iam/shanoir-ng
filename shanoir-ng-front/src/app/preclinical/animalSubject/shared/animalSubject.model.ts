@@ -13,6 +13,7 @@
  */
 
 import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { Entity } from "../../../shared/components/entity/entity.abstract";
 import { ImagedObjectCategory } from "../../../subjects/shared/imaged-object-category.enum";
 import { Sex } from "../../../subjects/shared/subject.types";

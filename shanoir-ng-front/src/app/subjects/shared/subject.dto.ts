@@ -12,25 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { formatDate } from "@angular/common";
 
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
+import { QualityTag } from "../../study-cards/shared/quality-card.model";
+import { Study} from "../../studies/shared/study.model";
+
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
-import {Sex, SubjectType} from './subject.types';
-import {formatDate} from "@angular/common";
-import {QualityTag} from "../../study-cards/shared/quality-card.model";
-import {SimpleStudy, Study} from "../../studies/shared/study.model";
+import { Sex, SubjectType } from './subject.types';
 
 
 @Injectable()
 export class SubjectDTOService {
-
-    constructor(
-    ) {}
 
     /**
      * Convert from DTO to Entity
@@ -50,8 +48,8 @@ export class SubjectDTOService {
     public toEntityList(dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
-                let entity = new Subject();
+            for (const dto of dtos) {
+                const entity = new Subject();
                 SubjectDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -62,7 +60,7 @@ export class SubjectDTOService {
     static mapSyncFields(dto: SubjectDTO, entity: Subject): Subject {
         entity.id = dto.id;
         entity.examinations = dto.examinations ? dto.examinations.map(examId => {
-            let exam: Examination = new Examination();
+            const exam: Examination = new Examination();
             exam.id = examId.id;
             return exam;
         }) : null;
@@ -91,7 +89,7 @@ export class SubjectDTOService {
     }
 
     static tagDTOToTag(tagDTO: any): Tag {
-        let tag: Tag = new Tag();
+        const tag: Tag = new Tag();
         tag.id = tagDTO.id;
         tag.name = tagDTO.name;
         tag.color = tagDTO.color;

@@ -13,9 +13,11 @@
  */
 import {Component, forwardRef, Input} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+
 import {Mode} from '../../../shared/components/entity/entity.component.abstract';
-import {CtProtocol} from './ct-protocol.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+
+import {CtProtocol} from './ct-protocol.model';
 
 
 @Component({
@@ -35,8 +37,8 @@ export class CtProtocolComponent implements ControlValueAccessor {
     public protocol: CtProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     writeValue(obj: any): void {
         this.protocol = obj;

@@ -11,10 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ComponentRef, ViewChild } from '@angular/core';
+import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, race } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
@@ -36,13 +43,8 @@ import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import { Observable, race } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { Selection } from 'src/app/studies/study/tree.service';
+
 
 @Component({
     selector: 'quality-card',
@@ -108,7 +110,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     get qualityCard(): QualityCard { return this.entity; }
-    set qualityCard(qc: QualityCard) { this.entity = qc; }
+    set qualityCard(qc: QualityCard) { this.entity = qc; }
 
     initView(): Promise<void> {
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
@@ -139,7 +141,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'name': [this.qualityCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.qualityCard.study, [Validators.required]],
             'toCheckAtImport': [this.qualityCard.toCheckAtImport, [Validators.required]],
@@ -238,16 +240,16 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
-        let modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
         modalRef.instance.nbExaminations = nbExaminations;
         return this.waitForEnd(modalRef);
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
-        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
-        let result: Observable<any> = race([
+    private waitForEnd(modalRef: ComponentRef<{ test: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<Interval | 'cancel'> {
+        const resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        const result: Observable<any> = race([
             modalRef.instance.test, 
-            modalRef.instance.close.map(() => 'cancel')
+            modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();
@@ -274,7 +276,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         if (!report) return;
         let csvStr: string = '';
         csvStr += report.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of report.items) {
+        for (const entry of report.items) {
             csvStr += '\n' + report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {

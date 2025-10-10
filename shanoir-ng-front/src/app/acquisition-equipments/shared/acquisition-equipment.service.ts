@@ -12,17 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { AcquisitionEquipment } from './acquisition-equipment.model';
-import { firstValueFrom } from 'rxjs';
+import { ShanoirError } from "../../shared/models/error.model";
+import { StudyCard } from "../../study-cards/shared/study-card.model";
 
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {ShanoirError} from "../../shared/models/error.model";
-import {StudyCard} from "../../study-cards/shared/study-card.model";
-import {ManufacturerModel} from "./manufacturer-model.model";
-import { error } from 'console';
+import { AcquisitionEquipment } from './acquisition-equipment.model';
+import { ManufacturerModel } from "./manufacturer-model.model";
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {

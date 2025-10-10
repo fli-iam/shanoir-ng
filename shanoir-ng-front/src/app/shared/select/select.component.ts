@@ -29,6 +29,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
+
 import { findLastIndex, arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
 
@@ -52,7 +53,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
-    @Output() onUserClear = new EventEmitter();
+    @Output() userClear = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -70,9 +71,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private optionChangeSubscription: Subscription;
     public way: 'up' | 'down' = 'down';
     public hideToComputeHeight: boolean = false;
-    private onTouchedCallback = () => {};
-    @Output() onTouch = new EventEmitter();
-    private onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    @Output() touch = new EventEmitter();
+    private onChangeCallback: (any) => void = () => { return; };
     public inputText: string;
     private _searchText: string = null;
     @Input() disabled: boolean = false;
@@ -92,9 +93,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() addHidden: boolean;
     @Input() viewRoute: string;
     @Input() newRoute: string;
-    @Output() onViewClick = new EventEmitter();
-    @Output() onNewClick = new EventEmitter();
-    @Output() onAddClick: EventEmitter<any> = new EventEmitter();
+    @Output() viewClick = new EventEmitter();
+    @Output() newClick = new EventEmitter();
+    @Output() addClick: EventEmitter<any> = new EventEmitter();
     @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
     readonly LIST_LENGTH: number = 16;
@@ -125,8 +126,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.color = item.backgroundColr;
                 this.options.push(newOption);
@@ -186,7 +187,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.searchText = null;
         this.inputValue = value;
         if (value && this.options?.length > 0) {
-            let index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
+            const index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
             if (index > -1) {
                 this.selectedOptionIndex = index;
             } else {
@@ -211,7 +212,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private set selectedOptionIndex(index: number) {
-        let previousOption: Option<any> = this.selectedOption;
+        const previousOption: Option<any> = this.selectedOption;
         if (index == -1) index = null;
         if (index != this._selectedOptionIndex) {
             this._selectedOptionIndex = index;
@@ -250,7 +251,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.displayableOptions.forEach(opt => {
                 if (!maxOption || !maxOption.label || !opt.label || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
                     this.hiddenOption.nativeElement.innerText = opt.label;
-                    let width: number = this.hiddenOption.nativeElement.offsetWidth;
+                    const width: number = this.hiddenOption.nativeElement.offsetWidth;
                     if (width > maxWidth) {
                         maxWidth = width;
                         maxOption = opt;
@@ -270,7 +271,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._searchText = null;
             this.filteredOptions = null;
         } else {
-            let trimmed = text.trim().toLowerCase();
+            const trimmed = text.trim().toLowerCase();
             if (trimmed == this._searchText) return;
             this._searchText = trimmed;
             if (this.searchText.length <= 0) {
@@ -304,12 +305,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public onUserSelectedOption(option: Option<any>, event) {
         event.stopPropagation();
         if (option.disabled) return;
-        let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
+        const index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
     }
     
     public onUserSelectedOptionIndex(index: number) {
-        let promise: Promise<boolean> = this.validateChange ? this.validateChange(this.selectedOption?.value) : Promise.resolve(true);
+        const promise: Promise<boolean> = this.validateChange ? this.validateChange(this.selectedOption?.value) : Promise.resolve(true);
         promise.then(valid => {
             if (valid) {
                 this.searchText = null;
@@ -375,10 +376,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.hideToComputeHeight = true;
         this.way = 'down'
         setTimeout(() => {
-            let listElt = this.element.nativeElement.querySelector('.list');
+            const listElt = this.element.nativeElement.querySelector('.list');
             if (!listElt) return;
-            let bottom = listElt.getBoundingClientRect().bottom;
-            let docHeight: number = document.body.clientHeight;
+            const bottom = listElt.getBoundingClientRect().bottom;
+            const docHeight: number = document.body.clientHeight;
             if (bottom > docHeight) this.way = 'up';
             this.hideToComputeHeight = false;
         });
@@ -440,10 +441,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private scrollDownByOne() {
         if (this.isOpen()) {
-            let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex + 1) : 0;
-            let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
+            const nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex + 1) : 0;
+            const nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
             if (nextIndex == -1) return;
-            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? nextIndex + 1 : 0;
+            const nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? nextIndex + 1 : 0;
             if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.LIST_LENGTH) {
                 this.firstScrollOptionIndex += nbSteps;
                 this.focusedOptionIndex = this.LIST_LENGTH - 1;
@@ -451,8 +452,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.focusedOptionIndex += nbSteps;
             }
         } else {
-            let nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex + 1 : 0;
-            let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
+            const nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex + 1 : 0;
+            const nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
             if (nextIndex == -1) return;
             else this.onUserSelectedOptionIndex(nextIndexStart + nextIndex);
         }
@@ -460,10 +461,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private scrollUpByOne() {
         if (this.isOpen()) {
-            let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex - 1) : 0;
-            let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
+            const nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex - 1) : 0;
+            const nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
             if (nextIndex == -1) return;
-            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? this.focusedOptionIndex + this.firstScrollOptionIndex - nextIndex : 0;
+            const nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? this.focusedOptionIndex + this.firstScrollOptionIndex - nextIndex : 0;
             if (this.scrollable && this.focusedOptionIndex - nbSteps < 0) {
                 this.firstScrollOptionIndex -= nbSteps;
                 this.focusedOptionIndex = 0;
@@ -471,8 +472,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.focusedOptionIndex -= nbSteps;
             }
         } else {
-            let nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex - 1 : 0;
-            let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
+            const nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex - 1 : 0;
+            const nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
             if (nextIndex == -1) return;
             else this.onUserSelectedOptionIndex(nextIndex);
         }
@@ -482,7 +483,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private scrollButtonTime: number;
 
     scrollButtonOn(way: 'down' | 'up') {
-        let now: number = Date.now();
+        const now: number = Date.now();
         this.scrollButtonTime = now;
         if (way == 'down') {
             if (this.firstScrollOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
@@ -519,7 +520,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public dragging: boolean = false;
     onDragStart(event) {
         this.dragging = true;
-        let img = new Image();
+        const img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
         event.dataTransfer.setDragImage(img, 0, 0);
         this.dragStartOffsetY = event.clientY - event.srcElement.getBoundingClientRect().top;
@@ -528,14 +529,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private lastDropY: number = 0;
     private lastScroll: number = 0;
     allowDrop(event) {
-        let dropY: number = event.clientY;
+        const dropY: number = event.clientY;
         if (dropY == this.lastDropY || (Date.now() - this.lastScroll) < 30) return;
         this.lastDropY = dropY;
         this.lastScroll = Date.now();
-        let listElt = this.element.nativeElement.querySelector('.list');
-        let listTop: number = listElt.getBoundingClientRect().top + 10;
-        let listHeight: number = listElt.getBoundingClientRect().height - 20;
-        let relativeDropY = Math.max(0, dropY - listTop - this.dragStartOffsetY);
+        const listElt = this.element.nativeElement.querySelector('.list');
+        const listTop: number = listElt.getBoundingClientRect().top + 10;
+        const listHeight: number = listElt.getBoundingClientRect().height - 20;
+        const relativeDropY = Math.max(0, dropY - listTop - this.dragStartOffsetY);
         
         this.firstScrollOptionIndex = 
         Math.min(
@@ -573,7 +574,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     onClear() {
-        this.onUserClear.emit(this.selectedOption);
+        this.userClear.emit(this.selectedOption);
         this.onTypeText(null);
     }
 
@@ -603,7 +604,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (!this.element.nativeElement.contains(event.relatedTarget) && !this.dragging) {
             this.close();
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         } 
     }
 
@@ -613,15 +614,15 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     } 
 
     clickView(): void {
-        if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
+        if(!this.viewDisabled && this.selectedOption) this.viewClick.emit(this.selectedOption.value);
     }
 
     clickNew(): void {
-        if(!this.newDisabled) this.onNewClick.emit();
+        if(!this.newDisabled) this.newClick.emit();
     }
 
     clickAdd(): void {
-        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.onAddClick.emit(this.selectedOption.value);
+        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.addClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {
@@ -629,7 +630,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public get length(): number {
-        let opt: Option<any>[] = this.displayableOptions;
+        const opt: Option<any>[] = this.displayableOptions;
         return opt ? opt.length : 0;
     }
 
@@ -663,7 +664,7 @@ export class Option<T> {
         public disabled: boolean = false) {}
 
     clone(): Option<T> {
-        let option: Option<T> = new Option(this.value, this.label, this.section);
+        const option: Option<T> = new Option(this.value, this.label, this.section);
         option.disabled = this.disabled;
         option.compatible = this.compatible;
         option.color = this.color;

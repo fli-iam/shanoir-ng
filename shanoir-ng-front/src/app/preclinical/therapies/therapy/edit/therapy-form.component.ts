@@ -15,9 +15,10 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Therapy } from '../shared/therapy.model';
@@ -34,7 +35,7 @@ import { TherapyService } from '../shared/therapy.service';
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     TherapyType = TherapyType;
-    public isTherapyUnique: Boolean = true;
+    public isTherapyUnique: boolean = true;
 
     constructor(
         private route: ActivatedRoute,

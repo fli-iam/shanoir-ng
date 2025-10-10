@@ -51,17 +51,17 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     importData(timestamp: number): Promise<any> {
-        let importJob = this.buildImportJob(timestamp);
+        const importJob = this.buildImportJob(timestamp);
         return this.importService.startImportJob(importJob);
     }
 
     protected buildImportJob(timestamp: number): ImportJob {
-        let importJob = new ImportJob();
-        let context = this.importDataService.contextData;
+        const importJob = new ImportJob();
+        const context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
 
         this.patient.subject = new SimpleSubject(context.subject);
-        let filteredPatient: PatientDicom = this.patient;
+        const filteredPatient: PatientDicom = this.patient;
         filteredPatient.studies = this.patient.studies.map(study => {
             study.series = study.series.filter(serie => serie.selected);
             return study;
@@ -94,9 +94,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected prefillSubject() {
-        let newSubject = new Subject();
+        const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
-        if (this.patient.patientSex) {
+        if (this.patient?.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
                 newSubject.sex = this.patient.patientSex;
             }
@@ -116,7 +116,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected getPrefilledExamination(): Examination {
-        let newExam = new Examination();
+        const newExam = new Examination();
         newExam.preclinical = false;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
@@ -127,15 +127,15 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
     protected getPrefilledAcquisitionEquipment(): AcquisitionEquipment {
-        let acqEpt = new AcquisitionEquipment();
+        const acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
-        acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
+        acqEpt.serialNumber = this.getFirstSelectedSerie()?.equipment?.deviceSerialNumber;
         return acqEpt;
     }
 
@@ -156,8 +156,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected getFirstSelectedPatient(): PatientDicom {
-        for(let patient of this.importDataService.patients){
-            for(let study of patient.studies){
+        for(const patient of this.importDataService.patients){
+            for(const study of patient.studies){
                 if (study.selected) return patient;
             }
         }
@@ -166,8 +166,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected getFirstSelectedSerie(): SerieDicom {
         if (!this.patient) return null;
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return serie;
             }
         }
@@ -176,7 +176,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
-        for (let study of this.patient.studies) {
+        for (const study of this.patient.studies) {
             if(study.selected) return study;
         }
         return null;

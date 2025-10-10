@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 import { Center } from '../../centers/shared/center.model';
@@ -78,15 +78,14 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        let centerPromise: Promise<void>;
-        centerPromise = this.centerService.getAll().then(centers => {
+        const centerPromise: Promise<void> = this.centerService.getAll().then(centers => {
             this.centers = centers;
         });
         return centerPromise;
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'manufacturerModel': [{value: this.coil.manufacturerModel, disabled: !this.coil.center}, [Validators.required]],
             'center': [this.coil.center, [Validators.required]],

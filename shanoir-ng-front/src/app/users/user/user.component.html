@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [state]="footerState"
             (save)="save()"
             (edit)="goToEdit()"
-            (cancel)="goToView()"
+            (dismiss)="goToView()"
             (back)="goBack()">
             <button type="submit" *ngIf="mode != 'create' && user.accountRequestDemand" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
                     class="Button">

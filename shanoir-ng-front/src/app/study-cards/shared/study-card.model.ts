@@ -37,15 +37,15 @@ export class StudyCardRule {
     orConditions: boolean = false;
 
     static copy(rule: StudyCardRule): StudyCardRule {
-        let copy: StudyCardRule = new StudyCardRule(rule.scope);
+        const copy: StudyCardRule = new StudyCardRule(rule.scope);
         copy.assignments = rule.assignments.map(ass => {
-            let assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
+            const assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
             assCopy.field = ass.field;
             assCopy.value = ass.value;
             return assCopy;
         });
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            const conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
             conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];

@@ -15,7 +15,7 @@
 import { AnestheticType } from "../../../shared/enum/anestheticType";
 import { AnestheticIngredient } from '../../ingredients/shared/anestheticIngredient.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { Field } from "src/app/shared/reflect/field.decorator";
+import { Field } from "../../../../shared/reflect/field.decorator";
 
 export class Anesthetic extends Entity{
     @Field() id: number;

@@ -17,6 +17,7 @@ import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { Reference } from '../../reference/shared/reference.model';
@@ -40,7 +41,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     @Input() protocol_id: number;
     @Output() closing = new EventEmitter();
     @Output() agentChange = new EventEmitter();
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() isStandalone: boolean = true;
     agentNames: Reference[] = [];
     sites: InjectionSite[] = [];
@@ -59,7 +60,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     get agent(): ContrastAgent { return this.entity; }
-    set agent(agent: ContrastAgent) { this.entity = agent; }
+    set agent(agent: ContrastAgent) { this.entity = agent; }
 
     getService(): EntityService<ContrastAgent> {
         return this.contrastAgentsService;
@@ -101,7 +102,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.agent.name, Validators.required],
             'manufacturedName': [this.agent.manufacturedName],
             'dose': [this.agent.dose],
@@ -114,7 +115,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         });
         this.subscriptions.push(
             form.valueChanges.subscribe(() => {
-                this.onAgentChange     
+                this.onAgentChange();
             })
         );
         return form;
@@ -163,7 +164,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }

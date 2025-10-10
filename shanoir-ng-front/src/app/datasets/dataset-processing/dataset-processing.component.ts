@@ -13,13 +13,15 @@
  */
 
 import { formatDate } from "@angular/common";
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
+
 import { Selection } from 'src/app/studies/study/tree.service';
 import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
+
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -43,7 +45,7 @@ import { DatasetService } from '../shared/dataset.service';
     standalone: false
 })
 
-export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
+export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> implements OnInit {
 
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
     public _subject: Subject;
@@ -102,7 +104,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
                 (executionMonitoring: ExecutionMonitoring) => {
                     this.setExecutionMonitoring(executionMonitoring);
-                }, (error) => {
+                }, () => {
                     // 404 : if it's not found then it's not execution monitoring !
                     this.resetExecutionMonitoring();
                 }
@@ -114,7 +116,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     initEdit(): Promise<void> {
         this.fetchStudies().then(() => {
             const firstDatasetId: number = this.datasetProcessing.inputDatasets?.[0]?.id;
-            if (!!firstDatasetId) {
+            if (firstDatasetId) {
                 Promise.all([
                     this.datasetService.get(this.datasetProcessing.inputDatasets?.[0]?.id),
                     this.fetchSubjects()
@@ -194,7 +196,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     get studyName(): string {
-        let studyOption = this.studyOptions?.find(opt => opt.value == this.datasetProcessing?.studyId);
+        const studyOption = this.studyOptions?.find(opt => opt.value == this.datasetProcessing?.studyId);
         return studyOption ? studyOption.label : '';
     }
 
@@ -202,7 +204,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         if (!this.datasetProcessing?.studyId) return Promise.resolve();
         return this.studyService.findSubjectsByStudyId(this.datasetProcessing.studyId).then(subjects => {
             this.subjectOptions = subjects?.map(sub => {
-                let subject: Subject = new Subject();
+                const subject: Subject = new Subject();
                 subject.id = sub.id;
                 subject.name = sub.name;
                 subject.identifier = sub.identifier;
@@ -214,7 +216,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     fetchDatasets(): Promise<void> {
         if (!this.datasetProcessing?.studyId || !this.subject?.id) return Promise.resolve();
         return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
-            for (let dataset of datasets) {
+            for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
@@ -222,7 +224,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     buildForm(): UntypedFormGroup {
-        let formGroup: UntypedFormGroup = this.formBuilder.group({
+        const formGroup: UntypedFormGroup = this.formBuilder.group({
             'studyId': [{value: this.datasetProcessing?.studyId , disabled: !!this.prefilledStudy}, Validators.required],
             'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.datasetProcessing?.studyId)}, Validators.required],
             'datasetProcessingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
@@ -262,13 +264,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         super.prefillProperties();
         this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
         this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
-        if (!!this.prefilledStudy) {
+        if (this.prefilledStudy) {
             this.studyOptions = [new Option(this.prefilledStudy.id, this.prefilledStudy.name)];
             this.datasetProcessing.studyId = this.prefilledStudy.id;
         } else {
             this.fetchStudies();
         }
-        if (!!this.prefilledSubject) {
+        if (this.prefilledSubject) {
             this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
             this.subject = this.prefilledSubject;
             this.fetchDatasets();
@@ -299,7 +301,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stdout.log";
+        const filename = this.executionMonitoring.name + ".stdout.log";
 
         this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -312,7 +314,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             return;
         }
 
-        let filename = this.executionMonitoring.name + ".stderr.log";
+        const filename = this.executionMonitoring.name + ".stderr.log";
 
         this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
@@ -320,7 +322,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private downloadLogIntoBrowser(response: string, filename: string){
-        let blob = new Blob([response], {
+        const blob = new Blob([response], {
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
@@ -332,23 +334,23 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public getDuration(){
 
-        let start = this.executionMonitoring?.startDate;
-        let end = this.executionMonitoring?.endDate;
+        const start = this.executionMonitoring?.startDate;
+        const end = this.executionMonitoring?.endDate;
 
         if(!start || !end){
             return "";
         }
 
-        let duration = end - start;
+        const duration = end - start;
 
         if(duration <= 0){
             return "";
         }
 
-        let milliseconds = Math.floor((duration % 1000));
-        let seconds = Math.floor((duration / 1000) % 60);
-        let minutes = Math.floor((duration / (1000 * 60)) % 60);
-        let hours = Math.floor((duration / (1000 * 60 * 60)));
+        const milliseconds = Math.floor((duration % 1000));
+        const seconds = Math.floor((duration / 1000) % 60);
+        const minutes = Math.floor((duration / (1000 * 60)) % 60);
+        const hours = Math.floor((duration / (1000 * 60 * 60)));
 
         return String(hours).padStart(2, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +

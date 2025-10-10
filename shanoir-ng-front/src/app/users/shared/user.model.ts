@@ -17,7 +17,7 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { Role } from '../../roles/role.model';
 import { StudyUser } from '../../studies/shared/study-user.model';
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../shared/reflect/field.decorator';
 
 export class User extends Entity {
     @Field() id: number;

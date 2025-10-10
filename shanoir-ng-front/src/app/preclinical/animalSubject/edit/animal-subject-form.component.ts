@@ -22,9 +22,9 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
@@ -187,7 +187,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
 	copySubject(s: Subject): Subject{
-		let subject = new Subject();
+		const subject = new Subject();
 		subject.id = s.id;
 		subject.name = s.name;
 		return subject;
@@ -200,7 +200,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     buildForm(): UntypedFormGroup {
-        let animal: boolean = this.animalSelected();
+        const animal: boolean = this.animalSelected();
         // Sub-group for subject properties
         const subjectGroup = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject?.imagedObjectCategory, [Validators.required]],
@@ -221,7 +221,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'stabulation': [this.preclinicalSubject.animalSubject?.stabulation, animal ? [Validators.required] : []]
         });
         // Main form with sub-groups
-        let subjectForm = this.formBuilder.group({
+        const subjectForm = this.formBuilder.group({
             'subject': subjectGroup,
             'animalSubject': animalSubjectGroup,
             'therapies': [this.preclinicalSubject.therapies],
@@ -229,7 +229,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
         // Subscribe to category changes to update validators
         this.subscriptions.push(
-            subjectGroup.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            subjectGroup.get('imagedObjectCategory').valueChanges.subscribe(() => {
                 this.onChangeImagedObjectCategory(subjectForm);
             })
         );
@@ -271,7 +271,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         const subjectGroup = formGroup.get('subject') as UntypedFormGroup;
         const animalSubjectGroup = formGroup.get('animalSubject') as UntypedFormGroup;
         
-        let newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
+        const newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
         const animalSubjectRequiredProperties: string[] = ['specie', 'strain', 'biotype', 'provider', 'stabulation'];
         const subjectRequiredProperties: string[] = ['sex'];
         
@@ -308,7 +308,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.navigateToAttributeCreateStep('/preclinical-reference/create', 'animalSubject.' + reftype, null, { queryParams: {category: category, reftype: reftype} });
     }
 
-    goToEdit(id?: number): void {
+    goToEdit(): void {
         super.goToEdit(this.preclinicalSubject.id);
     }
 
@@ -361,8 +361,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             return;
         }
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
-            .then(subject => {
-                let entity:any;
+            .then(() => {
                 if (this.preclinicalSubject.animalSubject) {
                     this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
                 }
@@ -372,13 +371,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     sortReferences() {
         if (this.references){
-            let speciesToSet: Reference[] = [];
-            let biotypesToSet: Reference[] = [];
-            let strainsToSet: Reference[] = [];
-            let providersToSet: Reference[] = [];
-            let stabulationsToSet: Reference[] = [];
+            const speciesToSet: Reference[] = [];
+            const biotypesToSet: Reference[] = [];
+            const strainsToSet: Reference[] = [];
+            const providersToSet: Reference[] = [];
+            const stabulationsToSet: Reference[] = [];
 
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 switch (ref.reftype) {
                     case PreclinicalUtils.PRECLINICAL_SUBJECT_SPECIE:
                         speciesToSet.push(ref);
@@ -409,7 +408,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     getReferenceById(reference: any): Reference {
         if (reference) {
-            for (let ref of this.references) {
+            for (const ref of this.references) {
                 if (reference.id == ref.id) {
                     return ref;
                 }
@@ -427,8 +426,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     getHash(stringToBeHashed: string): string {
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, this.HASH_LENGTH);
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 

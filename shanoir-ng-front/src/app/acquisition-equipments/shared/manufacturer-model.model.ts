@@ -14,9 +14,10 @@
  */
 
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { Manufacturer } from './manufacturer.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../shared/reflect/field.decorator';
+
+import { Manufacturer } from './manufacturer.model';
 
 export class ManufacturerModel extends Entity {
     @Field() id: number;

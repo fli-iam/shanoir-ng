@@ -18,7 +18,7 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { InstrumentBasedAssessment } from '../instrument-assessment/instrument.model';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../shared/reflect/field.decorator';
 
 
 export class Examination extends Entity {

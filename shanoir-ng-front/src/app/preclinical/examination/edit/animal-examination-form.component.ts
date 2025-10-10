@@ -12,9 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild, ElementRef, OnChanges, Input} from '@angular/core';
+import { Component, ViewChild, ElementRef} from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
@@ -34,15 +38,12 @@ import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.s
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
-import { Selection } from 'src/app/studies/study/tree.service';
 import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 import {Subject} from "../../../subjects/shared/subject.model";
 
@@ -117,8 +118,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if(this.examination && this.examination.subject && this.examination.subject.id ){
             this.animalSubjectService
                 .getAnimalSubject(this.examination.subject.id)
-                .then(animalSubject => this.animalSubjectId = animalSubject.id)
-                .catch((error) => {});
+                .then(animalSubject => this.animalSubjectId = animalSubject.id);
         }
         return Promise.resolve();
     }
@@ -137,9 +137,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if(this.examination && this.examination.subject && this.examination.subject.id){
             this.animalSubjectService
                 .getAnimalSubject(this.examination.subject.id)
-                .then(animalSubject => this.animalSubjectId = animalSubject.id)
-                .catch((error) => {});
-
+                .then(animalSubject => this.animalSubjectId = animalSubject.id);
         }
         return Promise.resolve();
     }
@@ -154,8 +152,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     buildForm(): UntypedFormGroup {
-        let numericRegex = /\-?\d*\.?\d{1,2}/;
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const numericRegex = /-?\d*\.?\d{1,2}/;
+        const form: UntypedFormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
@@ -166,7 +164,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
         this.subscriptions.push(
-            form.get('study').valueChanges.subscribe(value => {
+            form.get('study').valueChanges.subscribe(() => {
                 this.getSubjects();
             })
         );
@@ -215,7 +213,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     public save(): Promise<Examination> {
         return super.save().then(result => {
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
             }
             return result;
@@ -226,13 +224,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if (this.examAnesthetic) {
             this.examAnesthetic.examinationId = examinationId;
             if (this.examAnesthetic  && this.examAnesthetic.internalId) {
-                this.examAnestheticService.updateAnesthetic(examinationId, this.examAnesthetic)
-                    .then(examAnesthetic => {
-                    });
-            } else if (this.examAnesthetic.anesthetic ){
-                this.examAnestheticService.createAnesthetic(examinationId, this.examAnesthetic)
-                    .then(examAnesthetic => {
-                    });
+                this.examAnestheticService.updateAnesthetic(examinationId, this.examAnesthetic);
+            } else if (this.examAnesthetic.anesthetic ) {
+                this.examAnestheticService.createAnesthetic(examinationId, this.examAnesthetic);
             }
         }
     }
@@ -240,7 +234,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     addExtraDataToExamination(examinationId: number, isUpdate: boolean) {
         if (!examinationId) { return; }
         //Set the upload URL model
-        let uploadUrl: string = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL + "/" + PreclinicalUtils.PRECLINICAL_EXTRA_DATA + PreclinicalUtils.PRECLINICAL_UPLOAD_URL + "/";
         if (this.physioData) {
             this.physioData.examinationId = examinationId;
             //Create physio data
@@ -249,7 +242,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 .then(physioData => {
                 	if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.then(res => {
+                    	.then(() => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -261,7 +254,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.then(res => {
+                    	.then(() => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -278,7 +271,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.then(res => {
+                    		.then(() => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }
@@ -289,7 +282,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.then(res => {
+                    		.then(() => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }
@@ -340,7 +333,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        const contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 
@@ -376,7 +369,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
     }

@@ -20,7 +20,7 @@ export enum InjectionInterval {
 }
 
 export namespace InjectionInterval {
-    export function all(): Array<InjectionInterval> {
+    export function all(): InjectionInterval[] {
         return allOfEnum<InjectionInterval>(InjectionInterval);
     }
 }

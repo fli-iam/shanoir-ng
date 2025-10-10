@@ -11,10 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -36,8 +39,6 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-card',
@@ -46,7 +47,7 @@ import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
     animations: [slideDown],
     standalone: false
 })
-export class StudyCardComponent extends EntityComponent<StudyCard> {
+export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
 
     centers: IdName[] = [];
     public studies: IdName[] = [];
@@ -74,7 +75,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         super(route, 'study-card');
         coilService.getAll().then(coils => this.allCoils = coils);
         this.subscriptions.push(this.onSave.subscribe(() => {
-            let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+            const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
             if (studyIdforDUA) {
                 this.breadcrumbsService.currentStep.data.goDUA = undefined;
                 DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
@@ -118,7 +119,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     ngOnDestroy(): void {
-        let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+        const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
         if (studyIdforDUA) {
             this.breadcrumbsService.currentStep.data.goDUA = undefined;
             DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
@@ -127,7 +128,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
@@ -167,8 +168,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return this.acqEqService.getAllByStudy(studyId)
             .then(acqEqs => {
                 this.acquisitionEquipments = [];
-                for (let acqEq of acqEqs) {
-                    let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
+                for (const acqEq of acqEqs) {
+                    const option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
                     this.acquisitionEquipments.push(option);
                 }
             });
@@ -178,7 +179,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
                 if (this.studyCard.acquisitionEquipment) {
-                    let found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
+                    const found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
                     if (!found) this.studyCard.acquisitionEquipment = null;
                 }
             }).catch(err => {
@@ -221,14 +222,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     importRules() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Select study-card';
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
                     rules.forEach(rule => {
                         this.studyCard.rules.push(rule);
-                        let lastIndex: number = this.studyCard.rules.length - 1;
+                        const lastIndex: number = this.studyCard.rules.length - 1;
                         currentStep.data.rulesToAnimate.add(lastIndex);
                     });
                 })
@@ -259,7 +260,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     createAcqEq() {
-        let options: {propName: string, value: any}[] = [];
+        const options: {propName: string, value: any}[] = [];
         if (this.centers?.length > 0) {
             options.push({propName: 'centers', value: this.centers});
             if (this.centers?.length > 0) {

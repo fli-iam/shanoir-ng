@@ -12,7 +12,7 @@ const METADATA = {
     ENV: 'development',
 };
 
-export var process = { env: {
+export const process = { env: {
     'ENV': METADATA.ENV,
     'NODE_ENV': METADATA.ENV,
     'BACKEND_API_USERS_MS_URL': METADATA.BACKEND_API_USERS_MS_URL,

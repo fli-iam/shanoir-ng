@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(save)="save()"
 					(edit)="goToEdit()"
 					(delete) = "delete()"
-					(cancel)="goToView()"
+					(dismiss)="goToView()"
 					(back)="goBack()">
 				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
 			</form-footer>
@@ -251,7 +251,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</tool-tip>
 				</legend>
 				<ol>
-					<li *ngIf="mode != 'create'"><button class="left-icon normal" [routerLink]="'/dua/create/' + study.id"><i class="fa-solid fa-wand-magic-sparkles"></i>Open DUA assistant</button></li>
+					<li *ngIf="mode != 'create'"><button type="button" class="left-icon normal" [routerLink]="'/dua/create/' + study.id"><i class="fa-solid fa-wand-magic-sparkles"></i>Open DUA assistant</button></li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
 						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
@@ -284,7 +284,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" (userChange)="onTagListChange()" formControlName="tags"></tag-creator>
                 <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
@@ -301,7 +301,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box placeholder="Select a center ..." (onAddClick)="onCenterAdd($event)" [options]="centerOptions">
+							<select-box placeholder="Select a center ..." (addClick)="onCenterAdd($event)" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
@@ -395,7 +395,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" (userChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>

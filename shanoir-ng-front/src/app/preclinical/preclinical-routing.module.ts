@@ -13,8 +13,10 @@
  */
 
 import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
 
 import { AuthAdminOrExpertGuard } from '../shared/roles/auth-admin-or-expert-guard';
+
 import { AnestheticFormComponent } from './anesthetics/anesthetic/edit/anesthetic-form.component';
 import { AnestheticsListComponent } from './anesthetics/anesthetic/list/anesthetic-list.component';
 import { AnimalSubjectFormComponent } from './animalSubject/edit/animal-subject-form.component';
@@ -31,14 +33,13 @@ import { ReferenceFormComponent } from './reference/edit/reference-form.componen
 import { ReferencesListComponent } from './reference/list/reference-list.component';
 import { TherapyFormComponent } from './therapies/therapy/edit/therapy-form.component';
 import { TherapiesListComponent } from './therapies/therapy/list/therapy-list.component';
-
-import { NgModule } from '@angular/core';
 import { AnestheticIngredientFormComponent } from './anesthetics/ingredients/edit/anestheticIngredient-form.component';
 import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/list/anestheticIngredient-list.component';
 import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './importBruker/select-series/bruker-select-series.component';
 
-let routes : Routes = [
+
+const routes : Routes = [
     {
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 

@@ -15,6 +15,7 @@
 
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -101,7 +102,7 @@ import { ExecutionComponent } from './vip/execution/execution.component';
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from "./welcome/welcome.component";
 
-let routes: Routes = [
+const routes: Routes = [
     {
         path: '',
         redirectTo: '/welcome',

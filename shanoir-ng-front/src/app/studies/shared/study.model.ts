@@ -13,17 +13,18 @@
  */
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
+import { Profile } from '../../shared/models/profile.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
+import { Field } from '../../shared/reflect/field.decorator';
+
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
-import {Profile} from '../../shared/models/profile.model';
-import {StudyStorageVolumeDTO} from "./study.dto";
-import { Field } from 'src/app/shared/reflect/field.decorator';
+
 export class Study extends Entity {
     @Field() clinical: boolean;
     @Field() downloadableByDefault: boolean;
@@ -41,7 +42,7 @@ export class Study extends Entity {
     @Field() studyCenterList: StudyCenter[] = [];
     @Field() studyStatus: 'IN_PROGRESS' | 'FINISHED' = 'IN_PROGRESS';
     @Field() profile: Profile;
-    @Field() detailedSizes: Map<String, number> = null;
+    @Field() detailedSizes: Map<string, number> = null;
     totalSize: number;
     @Field() studyType: StudyType;
     @Field() subjectStudyList: SubjectStudy[] = [];
@@ -64,7 +65,7 @@ export class Study extends Entity {
 
     public static completeMembers(study: Study, users: User[]) {
         if (!study.studyUserList) return;
-        for (let studyUser of study.studyUserList) {
+        for (const studyUser of study.studyUserList) {
             StudyUser.completeMember(studyUser, users);
         }
     }

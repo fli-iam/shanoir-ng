@@ -12,27 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Location } from '@angular/common';
-
 import {
     Directive,
     ElementRef,
-    EventEmitter,
     HostListener,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
-    Output,
     SimpleChanges,
     ViewChild
 } from '@angular/core';
-import { AbstractControl, Form, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute, NavigationExtras } from '@angular/router';
+import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
-import { Router } from '@angular/router';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ConsoleService } from '../../console/console.service';
@@ -40,10 +37,10 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
+import { getDeclaredFields } from '../../reflect/field.decorator';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
-import { getDeclaredFields } from '../../reflect/field.decorator';
-import { Examination } from 'src/app/examinations/shared/examination.model';
 
 
 export type Mode = "view" | "edit" | "create";
@@ -56,7 +53,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @Input() id: number; // if not given via url
     @Input() entityInput: T; // if id not given via url
     @Input() embedded: boolean = false;
-    @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
     protected subscriptions: Subscription[] = [];
@@ -111,7 +107,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
         queueMicrotask(() => { // force it to be after child constructor, we need this.fetchEntity
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.activateTree(this.activatedRoute);
-            let userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
+            const userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
             if (!this.showTreeByDefault
                 && this.treeService.treeOpened
                 && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
@@ -165,7 +161,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    private wrapAsProxy<T extends Object>(object: T, form: FormGroup): T {
+    private wrapAsProxy<T extends object>(object: T, form: FormGroup): T {
         return new Proxy(object, {
             get: (target, prop, receiver) => {
                 if (prop === 'IS_PROXY') return true;
@@ -174,12 +170,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             },
             set: (target, prop, value, receiver) => {
                 const oldValue = Reflect.get(target, prop, receiver);
-                let isEqual = EntityComponent.deepEquals(oldValue, value);
+                const isEqual = EntityComponent.deepEquals(oldValue, value);
                 const ctrl = form.get(String(prop));
                 // If the new value is an entity and a sub formgroup is set, we have to wrap it as proxy too
                 if (ctrl && ctrl instanceof FormGroup) {
                     if (value instanceof Entity) {
-                        let wrapedValue = this.wrapAsProxy(value, form);
+                        const wrapedValue = this.wrapAsProxy(value, form);
                         const ok = Reflect.set(target, prop, wrapedValue, receiver); // set the value in the entity
                         if (!ok) return false;
                         EntityComponent.mapEntityToForm(value, ctrl); // map all sub properties
@@ -257,7 +253,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     throw Error('mode has to be set!');
             }
         }
-        let choosePromise: Promise<void> = choose();
+        const choosePromise: Promise<void> = choose();
         Promise.all([this.entityPromise, choosePromise]).then(() => {
             if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
         });
@@ -330,7 +326,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if (control instanceof FormGroup) {
                 this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
             } else { 
-                let sub: Subscription = control.valueChanges.subscribe(value => {
+                const sub: Subscription = control.valueChanges.subscribe(value => {
                     const declaredFields: string[] = getDeclaredFields(entity);
                     if (entity
                             && declaredFields.indexOf(key) >= 0
@@ -431,9 +427,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for (let errorName of errors) {
+            for (const errorName of errors) {
                 if (formError[errorName]) return true;
             }
         }
@@ -489,13 +485,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Maps the form values to the entity properties.
      * This method should be called after the form is built and before saving the entity.
      */
-    protected static mapFormToEntity<T extends Object>(entity: T, form: FormGroup) {
+    protected static mapFormToEntity<T extends object>(entity: T, form: FormGroup) {
         Object.keys(form.controls).forEach((control) => {
             const name = control as keyof T;
             const declaredFields: string[] = getDeclaredFields(entity);
             if (declaredFields.indexOf(name as string) >= 0) {
                 if (form.get(control) instanceof FormGroup && entity[name] instanceof Object) {
-                    EntityComponent.mapFormToEntity(entity[name], form.get(control) as FormGroup);
+                    EntityComponent.mapFormToEntity(entity[name] as object, form.get(control) as FormGroup);
                 } else {
                     entity[name] = form.get(control).value;
                 }
@@ -507,7 +503,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Maps the current entity properties to the form values.
      * Used to sync the form when the entity is updated outside of the form.
      */
-    protected static mapEntityToForm<T extends Object>(entity: T, form: FormGroup) {
+    protected static mapEntityToForm<T extends object>(entity: T, form: FormGroup) {
         if (form && entity) {
             const declaredFields: string[] = getDeclaredFields(entity);
             Object.keys(form.controls).forEach(control => {
@@ -515,8 +511,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 const name = control as keyof T;
                 if (entity[name] !== undefined) {
                     if (form.get(control) instanceof FormGroup && entity[name] instanceof Object) {
-                        EntityComponent.mapEntityToForm(entity[name], form.get(control) as FormGroup);
-                    } else if (!!form.get(control)) {
+                        EntityComponent.mapEntityToForm(entity[name] as object, form.get(control) as FormGroup);
+                    } else if (form.get(control)) {
                         form.get(control).setValue(entity[name], {emitEvent: false});
                     }
                 } else if (declaredFields.indexOf(name as string) !== -1) {
@@ -550,7 +546,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
-            for (let rawFieldName of this.onSubmitValidatedFields) {
+            for (const rawFieldName of this.onSubmitValidatedFields) {
                 const fieldPath: string[] = rawFieldName.split('.');
                 let fieldControl: AbstractControl = this.form;
                 fieldPath.forEach(pathPart => {
@@ -581,7 +577,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                 //&& this.form.get(controlFieldName).pristine
             ) {
-                let ret = {};
+                const ret = {};
                 ret[constraintName] = true;
                 return ret;
             }
@@ -609,8 +605,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.breadcrumbsService.addNextStepPrefilled('entity.' + readOnlyProp.propName, readOnlyProp.value, true);
             });
         } 
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        return this.router.navigate([route], extras).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        return this.router.navigate([route], extras).then(() => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
                 currentStep.addPrefilled('entity.' + attributeName, savedDependency);
                 // Then it will be used to automatically prefill the entity when going back to the current step.
@@ -625,13 +621,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Automatically prefill the entity properties with the values stored in the breadcrumbs service.
      */
     protected prefillProperties() {
-        const initializedProps = Object.keys(this.entity);
         this.breadcrumbsService.currentStep.getPrefilledKeys().forEach(key => {
             if (key.startsWith('entity.')) {
                 const propKey = key.substring(7); // remove 'entity.' prefix
-                const propValue = this.breadcrumbsService.currentStep.getPrefilled(key).then(res => {
+                this.breadcrumbsService.currentStep.getPrefilled(key).then(res => {
                     if (res?.value === undefined || res?.value === null) return;
-                    let propKeyParts: string[] = propKey.split('.');
+                    const propKeyParts: string[] = propKey.split('.');
                     let currentObj = this.entity;
                     let currentFormObj: FormGroup = this.form; 
                     const lastPart = propKeyParts.pop();
@@ -677,8 +672,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
-        let currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
-        let replace: boolean = this.breadcrumbsService.currentStep && (
+        const currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
+        const replace: boolean = this.breadcrumbsService.currentStep && (
             currentRoute == this.entityRoutes.getRouteToEdit(id)
             || currentRoute == this.entityRoutes.getRouteToCreate()
             // Create route can be contained in incoming route (more arguments for example)
@@ -695,7 +690,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
         }
-        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
+        const replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
         this.router.navigate([this.entityRoutes.getRouteToEdit(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
@@ -722,8 +717,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     ngOnDestroy() {
         this.breadcrumbsService.currentStep.addPrefilled("entity", this.entity);
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
+        for (const subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
         this.destroy$?.next();
         this.destroy$?.complete();

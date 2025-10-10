@@ -14,7 +14,7 @@
 
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../../../shared/reflect/field.decorator';
 
 export class Therapy extends Entity {
     @Field() id: number;

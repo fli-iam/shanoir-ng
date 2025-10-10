@@ -11,15 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../shared/reflect/field.decorator';
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { Tag } from "../../tags/tag.model";
+import { QualityTag } from "../../study-cards/shared/quality-card.model";
+import { SimpleStudy, Study } from "../../studies/shared/study.model";
+
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudy } from './subject-study.model';
-import {Sex, SubjectType} from './subject.types';
-import {Tag} from "../../tags/tag.model";
-import {QualityTag} from "../../study-cards/shared/quality-card.model";
-import {SimpleStudy, Study} from "../../studies/shared/study.model";
+import { Sex, SubjectType } from './subject.types';
 
 
 export class Subject extends Entity {
@@ -44,7 +45,7 @@ export class Subject extends Entity {
     @Field() study: Study;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
-        let subject = new Subject();
+        const subject = new Subject();
         subject.id = id;
         subject.name = name;
         subject.identifier = identifier;

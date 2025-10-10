@@ -17,6 +17,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+
 import { ImportMode } from '../import/import.component';
 import {SuperPromise} from "../utils/super-promise";
 
@@ -197,7 +198,7 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: { field: string, value: SuperPromise<any>}[] = [];
 
-    private resolvedPrefilledData: { [field: string]: {value: any, readonly?: boolean} } = {};
+    private resolvedPrefilledValues: Record<string, {value: any, readonly?: boolean}> = {};
 
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
@@ -244,12 +245,12 @@ export class Step {
     public addPrefilled(field: string, value: any, readOnly: boolean = false) {
         const found = this.prefilled.find(obj => obj.field === field);
         if (found) {
-            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
+            this.resolvedPrefilledValues[field] = {value: value, readonly: readOnly};
             found.value.resolve(value);
         } else {
             const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
             this.prefilled.push({ field, value: superPro });
-            this.resolvedPrefilledData[field] = {value: value, readonly: readOnly};
+            this.resolvedPrefilledValues[field] = {value: value, readonly: readOnly};
             superPro.resolve(value);
         }
     }
@@ -258,7 +259,7 @@ export class Step {
         const found = this.prefilled.find(obj => obj.field === field);
         if (found) {
             return SuperPromise.timeoutPromise().then(() => {
-                return this.resolvedPrefilledData[field];
+                return this.resolvedPrefilledValues[field];
             });
         } else {
             const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
@@ -271,13 +272,13 @@ export class Step {
         const found = this.prefilled.find(obj => obj.field === field);
         if (found) {
             this.prefilled = this.prefilled.filter(obj => obj.field !== field);
-            delete this.resolvedPrefilledData[field];
+            delete this.resolvedPrefilledValues[field];
         }
     }
 
 
     public getPrefilledKeys(): string[] {
-        return Object.entries(this.resolvedPrefilledData).map(([key, value]) => key);
+        return Object.entries(this.resolvedPrefilledValues).map(([key,]) => key);
     }
 
     getPrefilledValue(field: string): Promise<any> {

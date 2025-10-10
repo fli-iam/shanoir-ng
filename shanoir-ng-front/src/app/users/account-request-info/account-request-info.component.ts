@@ -14,12 +14,15 @@
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
-import { Location } from '@angular/common';
+
 import { AccountRequestInfo } from './account-request-info.model';
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component ({
     selector: 'account-request-info',
@@ -39,8 +42,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
     form: UntypedFormGroup;
-    onChange = (_: any) => {};
-    onTouch = () => {};
+    onChange: (any) => void = () => { return; };
+    onTouch: () => void = () => { return; };
     public studyOptions:  Option<number>[];
     studyName: string;
     presetStudyId: boolean;
@@ -53,7 +56,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private destroyRef: DestroyRef
             ) { }
 
-    setDisabledState?(isDisabled: boolean): void { }
+    setDisabledState?(_isDisabled: boolean): void { 
+        return; 
+    }
 
     writeValue(obj: any): void {
         this.info = obj;
@@ -83,7 +88,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 } else {
                     this.studyOptions = [];
                     this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
-                    .then(result => this.location.back());
+                    .then(() => this.location.back());
                 }
             });
         }
@@ -102,7 +107,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     onInfoChange() {
-        let info: AccountRequestInfo = new AccountRequestInfo();
+        const info: AccountRequestInfo = new AccountRequestInfo();
         info.contact = this.form.value.contact;
         info.function = this.form.value.function;
         info.institution = this.form.value.institution;
@@ -131,9 +136,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

@@ -29,7 +29,7 @@ export enum DatasetModalityType {
 
 } export namespace DatasetModalityType {
 
-    export function all(): Array<DatasetModalityType> {
+    export function all(): DatasetModalityType[] {
         return allOfEnum<DatasetModalityType>(DatasetModalityType);
     }
 
@@ -38,5 +38,5 @@ export enum DatasetModalityType {
         else return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
     }
 
-    export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
+    export const options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
 }

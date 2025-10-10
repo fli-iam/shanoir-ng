@@ -12,13 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from "../../../shared/reflect/field.decorator";
 import { Entity } from "../../../shared/components/entity/entity.abstract";
 import { SubjectDTO } from "../../../subjects/shared/subject.dto";
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
-import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
+import { SubjectTherapy } from "../../therapies/subjectTherapy/shared/subjectTherapy.model";
+
 import { AnimalSubject } from './animalSubject.model';
+
 
 export class PreclinicalSubject extends Entity {
     @Field() id: number;

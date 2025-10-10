@@ -15,6 +15,8 @@ import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
 import { ServiceLocator } from '../../../utils/locator.service';
@@ -26,9 +28,9 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '..//table/column.definition.type';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
-import { TreeService } from 'src/app/studies/study/tree.service';
 
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnInit, OnDestroy {
@@ -86,7 +88,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     }
 
     private computeOptions() {
-        let options = this.getOptions();
+        const options = this.getOptions();
         if (options.edit != undefined) this.edit = options.edit;
         if (options.view != undefined) this.view = options.view;
         if (options.delete != undefined) this.delete = options.delete;
@@ -109,7 +111,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     private completeCustomActions(): void {
         if (this.new) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-solid fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
+                title: "New",awesome: "fa-solid fa-plus", action: () => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }
@@ -123,9 +125,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        let dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
-        let dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
-            + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
+        const dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
+        const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
+            + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
         let promise: Promise<string>;
         if (this.getOnDeleteConfirmMessage) {
@@ -188,14 +190,14 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     /**
      * Can be overriden to enable/disable the edit button for this item
      */
-    protected canEdit(item: T): boolean {
+    protected canEdit(_item: T): boolean {
         return true;
     }
 
     /**
      * Can be overriden to enable/disable the delete button for this item
      */
-    protected canDelete(item: T): boolean {
+    protected canDelete(_item: T): boolean {
         return true;
     }
 
@@ -229,7 +231,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

@@ -14,7 +14,7 @@
 
 import { Pathology } from '../../pathology/shared/pathology.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '../../../../shared/reflect/field.decorator';
 
 export class PathologyModel extends Entity {
     @Field() id: number;

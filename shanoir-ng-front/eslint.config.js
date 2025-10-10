@@ -2,10 +2,24 @@
 const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
+const unusedImports = require("eslint-plugin-unused-imports");
+const importPlugin = require("eslint-plugin-import");
+
 
 module.exports = tseslint.config(
   {
     files: ["**/*.ts"],
+    plugins: {
+      "unused-imports": unusedImports,
+      "import": importPlugin,
+    },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: "./tsconfig.json",
+        },
+      },
+    },
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -14,62 +28,48 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
-      // "@angular-eslint/directive-selector": [
-      //   "error",
-      //   {
-      //     type: "attribute",
-      //     prefix: "app",
-      //     style: "camelCase",
-      //   },
-      // ],
-      // "@angular-eslint/component-selector": [
-      //   "error",
-      //   {
-      //     type: "element",
-      //     prefix: "app",
-      //     style: "kebab-case",
-      //   },
-      // ],
-
-      // Core ESLint rules - turn off common errors
-      "no-prototype-builtins": "off",
-      "no-useless-escape": "off",
-      "no-empty": "off",
-      "no-irregular-whitespace": "off",
-      "no-self-assign": "off",
-      "no-extra-boolean-cast": "off",
-      "no-var": "off",
-      "prefer-const": "off",
-      "no-empty-pattern": "off",
+      "@angular-eslint/directive-selector": [
+        "error",
+        {
+          type: "attribute",
+          //prefix: "app",
+          style: "camelCase",
+        },
+      ],
+      "@angular-eslint/component-selector": [
+        "error",
+        {
+          type: "element",
+          //prefix: "app",
+          style: "kebab-case",
+        },
+      ],
 
       // TypeScript ESLint rules - turn off common errors
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/no-inferrable-types": "off",
-      "@typescript-eslint/no-namespace": "off", // ?
-      "@typescript-eslint/no-wrapper-object-types": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/no-duplicate-enum-values": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off",
-      "@typescript-eslint/prefer-as-const": "off",
-      "@typescript-eslint/consistent-indexed-object-style": "off",
-      "@typescript-eslint/array-type": "off",
-      "@typescript-eslint/consistent-generic-constructors": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/consistent-type-assertions": "off",
-      "@typescript-eslint/class-literal-property-style": "off",
+      "@typescript-eslint/no-explicit-any": "off", // 
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }], // allow unused function args starting with _
+      "@typescript-eslint/no-inferrable-types": "off", // unjustified imo
+      "@typescript-eslint/no-namespace": "off", // useful for enum methods
+      "@typescript-eslint/consistent-generic-constructors": "off", // unjustified imo
+      "@typescript-eslint/consistent-type-definitions": "off", // unjustified imo
+
+      // Unused imports plugin
+      "unused-imports/no-unused-imports": "error",
       
-      // Angular ESLint rules - turn off common errors
-      "@angular-eslint/no-empty-lifecycle-method": "off",
-      "@angular-eslint/use-lifecycle-interface": "off",
-      "@angular-eslint/no-input-rename": "off",
-      "@angular-eslint/no-output-on-prefix": "off",
-      "@angular-eslint/prefer-inject": "off",
-      "@angular-eslint/prefer-standalone": "off",
-      "@angular-eslint/no-output-native": "off",
+      // Import plugin
+      "import/no-unresolved": "error",
+      "import/no-duplicates": "error",
+      "import/order": [
+        "warn",
+        {
+          "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always"
+        }
+      ],
+      
+      // Angular ESLint rules
+      "@angular-eslint/prefer-inject": "off", // heavy migration & not sure that is relevant
+      "@angular-eslint/prefer-standalone": "off", // should it be done later? Standalone is meant to be the standard. Heavy migration.
     },
   },
   {
@@ -79,12 +79,19 @@ module.exports = tseslint.config(
       ...angular.configs.templateAccessibility,
     ],
     rules: {
+      /* TODO */
       "@angular-eslint/template/eqeqeq": "off",
       "@angular-eslint/template/label-has-associated-control": "off",
       "@angular-eslint/template/click-events-have-key-events": "off",
-      "@angular-eslint/template/interactive-supports-focus": "off",
       "@angular-eslint/template/mouse-events-have-key-events": "off",
-      "@angular-eslint/template/alt-text": "off"
+      "@angular-eslint/template/interactive-supports-focus": "off",
     },
-  }
+  },
+  {
+    // Fix false positives in this file for dev env
+    files: ["src/app/shared/side-menu/side-menu.component.ts"],
+    rules: {
+      "import/no-unresolved": "off"
+    }
+  },
 );

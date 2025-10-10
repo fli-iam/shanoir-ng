@@ -27,7 +27,6 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 
 
-
 @Component({
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
@@ -62,7 +61,7 @@ export class SideMenuComponent {
             this.userId = KeycloakService.auth.userId;
         }
 
-        let storedState = sessionStorage.getItem(this.sessionKey);
+        const storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 

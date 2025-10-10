@@ -13,15 +13,14 @@
  */
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { ServiceLocator } from '../../../../utils/locator.service';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
@@ -41,13 +40,13 @@ export type Mode =  "view" | "edit" | "create";
 export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListComponent<AnestheticIngredient> {
     
     @Input() mode:Mode ;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() anesthetic: Anesthetic;
     public toggleFormAI: boolean = false;
     public createAIMode: boolean = false;
     public ingredientSelected : AnestheticIngredient;
-    @Output() onIngredientAdded = new EventEmitter();
-    @Output() onIngredientDeleted = new EventEmitter();
+    @Output() ingredientAdded = new EventEmitter();
+    @Output() ingredientDeleted = new EventEmitter();
     @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
 
     
@@ -87,7 +86,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
             let generatedName = '';
             if(this.anesthetic.anestheticType) generatedName = generatedName.concat(AnestheticType[this.anesthetic.anestheticType]).concat(' ');
             if(this.anesthetic.ingredients){
-                for(let ingredient of this.anesthetic.ingredients){
+                for(const ingredient of this.anesthetic.ingredients){
                     let strIngredient = '';
                     strIngredient = strIngredient.concat(ingredient.name.value.substring(0,3)).concat('. ');
                     if(ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
@@ -98,12 +97,12 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     }            
                 }
             }
-            this.onIngredientAdded.emit(this.anesthetic.ingredients);
+            this.ingredientAdded.emit(this.anesthetic.ingredients);
             
         }
     }
         
-    refreshDisplay(cancel:boolean){
+    refreshDisplay() {
         this.toggleFormAI = false;
         this.createAIMode = false;
         this.generateAnestheticName();
@@ -118,10 +117,10 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     'Delete', 'Are you sure you want to delete preclinical-anesthetic-ingredient n° ' + entity.id + ' ?'
                 ).then(res => {
                     if (res) {
-                        this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then((response) => {
+                        this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then(() => {
                             this.getAnestheticIngredient(selectedIngredient)
                             this.onDelete.next({entity: selectedIngredient});
-                            let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
+                            const index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
                             this.anesthetic.ingredients.splice(index, 1);
                             this.table.refresh();
                             this.consoleService.log('info', 'The preclinical-anesthetic-ingredient n° ' + entity.id + ' sucessfully deleted');
@@ -144,7 +143,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     }
 
     getAnestheticIngredient(ingredient: AnestheticIngredient): void {
-    	this.onIngredientDeleted.emit(ingredient);
+    	this.ingredientDeleted.emit(ingredient);
       	this.generateAnestheticName();
     }
     

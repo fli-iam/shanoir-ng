@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
 import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { slideDown } from '../../../shared/animations/animations';
-import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
@@ -72,9 +73,9 @@ export class BrukerUploadComponent {
         this.uploadProgress = 0;
     	// checkExtension
     	this.extensionError = false;
-    	let file:any = fileEvent.target.files;
-        let index:any = file[0].name.lastIndexOf(".");
-        let strsubstring: any = file[0].name.substring(index, file[0].name.length);
+    	const file:any = fileEvent.target.files;
+        const index:any = file[0].name.lastIndexOf(".");
+        const strsubstring: any = file[0].name.substring(index, file[0].name.length);
         if (strsubstring != '.zip') {
             this.extensionError = true;
             return;
@@ -93,14 +94,14 @@ export class BrukerUploadComponent {
                         this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
                 		this.uploadProgress = 5;
-            		}, (err: String) => {
+            		}, (err: string) => {
                         this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
                         this.uploadProgress = 4;
                         this.setArchiveStatus('error');
             	});
 
                 },
-                (err: String) => {
+                () => {
                     this.archive = '';
                     this.uploadProgress = 2;
                 	this.setArchiveStatus('error');
@@ -111,8 +112,8 @@ export class BrukerUploadComponent {
     public storeArchiveChanged(event: boolean) {
         // Get the name of the file to get
         if (event) {
-            let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
-            let archiveName  = '/tmp/bruker/convert/' + archiveFileName + '/' + this.archiveFolder + '/' + this.archive;
+            const archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
+            const archiveName  = '/tmp/bruker/convert/' + archiveFileName + '/' + this.archiveFolder + '/' + this.archive;
             this.importDataService.archiveUploaded.archive = archiveName;
         } else {
             this.importDataService.archiveUploaded.archive = undefined;

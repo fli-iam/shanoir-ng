@@ -19,6 +19,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -55,10 +56,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     downloadState: TaskState = new TaskState();
     dateDisplay = dateDisplay;
-    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    datasetIds: Promise<number[]> = new Promise(() => { return; });
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
@@ -132,7 +133,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     buildForm(): UntypedFormGroup {
-        let form: FormGroup = this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport || !this.examination.study}, Validators.required],
             'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
@@ -175,7 +176,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             if (this.entity.subject instanceof Subject) {
                 this.subjects = [this.entity.subject];
             } else {
-                let sub = new Subject();
+                const sub = new Subject();
                 sub.id = this.entity.subject.id;
                 sub.name = this.entity.subject.name;
                 this.subjects = [sub];
@@ -248,7 +249,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
         this.form.markAsDirty();
@@ -257,9 +258,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public save(): Promise<Examination> {
         return super.save( () => {
-            let uploads: Promise<void>[] = [];
+            const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
             return Promise.all(uploads).then(() => null);

@@ -39,7 +39,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class ExaminationServiceTest {
 	@InjectMocks
 	private ExaminationServiceImpl examinationService;
 	
-	@MockBean
+	@Mock
 	private StudyRightsService rightsService;
 
 	@Mock
