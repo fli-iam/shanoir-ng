@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
@@ -55,8 +56,8 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
                 if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
                     lineParts.set(1, newProcessing.getId().toString());
-                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
-                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
+                    lineParts.add(executionMonitoring.getStatus().toString());
+                    lineParts.add(newProcessing.getOutputDatasets().stream().map(Dataset::getName).collect(Collectors.joining(" / ")));
 
                     lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
                     retrievedLine = true;
@@ -185,7 +186,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         new File(trackingFilePrefixe).mkdirs();
         if(trackingFile.createNewFile()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
-                String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
+                String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Status,Results_file";
                 writer.write(headers);
             } catch (IOException e) {
                 LOG.error("An error occured while creating VIP tracking file", e);
