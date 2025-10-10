@@ -96,7 +96,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
 
-
 	/**
 	 * This method import a BIDS subject folder.
 	 */

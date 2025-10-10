@@ -97,6 +97,10 @@ public class SubjectService {
         return subjectRepository.findByStudy_Id(studyId);
     }
 
+    public Subject findByNameAndStudyId(String name, Long studyId) {
+        return subjectRepository.findByNameAndStudy_Id(name, studyId);
+    }
+
 	private void send(Object obj, String queue) throws MicroServiceCommunicationException {
 	    try {
 	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
