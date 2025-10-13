@@ -58,17 +58,19 @@ public class OutputService {
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
-        for (File archive : getArchivesToProcess(userImportDir)) {
-            File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+        if(userImportDir.exists()){
+            for (File archive : getArchivesToProcess(userImportDir)) {
+                File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
+                List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
-            for (OutputHandler outputHandler : outputHandlers) {
-                if (outputHandler.canProcess(monitoring)) {
-                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
-                    outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                for (OutputHandler outputHandler : outputHandlers) {
+                    if (outputHandler.canProcess(monitoring)) {
+                        LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
+                        outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                    }
                 }
+                deleteTemporaryDirectory(cacheFolder);
             }
-            deleteTemporaryDirectory(cacheFolder);
         }
 
         // Remove processed datasets from current execution monitoring
@@ -82,6 +84,7 @@ public class OutputService {
             FileUtils.deleteDirectory(userImportDir);
         } catch (IOException e) {
             LOG.error("I/O error while deleting cache dir [{}]", userImportDir.getAbsolutePath());
+            LOG.error(e.getCause().getMessage(), e);
         }
     }
 
