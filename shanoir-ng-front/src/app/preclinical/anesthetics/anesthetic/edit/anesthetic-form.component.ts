@@ -83,7 +83,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         });
         this.loadUnits();
         this.loadNames();
-        this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
             this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
@@ -104,7 +103,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         });
         this.loadUnits();
         this.loadNames();
-        this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
             this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
