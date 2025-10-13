@@ -67,6 +67,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    private studyFirstChange: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -119,6 +120,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     initEdit(): Promise<void> {
         this.getStudies();
+        this.getSubjects(this.examination.study?.id);
+        this.getCenters(this.examination.study?.id);
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -153,19 +156,22 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
                     this.fillSubjectsAndCentersWithPrefilled();
                     return;
                 }
-                this.examination.subject = null;
-                this.examination.center = null;
-                if (value?.id) {
-                    this.getSubjects(value.id);
-                    this.getCenters(value.id);
-                    if (form.get('subject').disabled) form.get('subject').enable();
-                    if (form.get('center').disabled) form.get('center').enable();
-                } else {
-                    this.centers = [];
-                    this.subjects = [];
-                    if (form.get('subject').enabled) form.get('subject').disable();
-                    if (form.get('center').enabled) form.get('center').disable();
+                if (!this.studyFirstChange) {
+                    this.examination.subject = null;
+                    this.examination.center = null;
+                    if (value?.id) {
+                        this.getSubjects(value.id);
+                        this.getCenters(value.id);
+                        if (form.get('subject').disabled) form.get('subject').enable();
+                        if (form.get('center').disabled) form.get('center').enable();
+                    } else {
+                        this.centers = [];
+                        this.subjects = [];
+                        if (form.get('subject').enabled) form.get('subject').disable();
+                        if (form.get('center').enabled) form.get('center').disable();
+                    }
                 }
+                this.studyFirstChange = false;
             })
         );
         return form;
