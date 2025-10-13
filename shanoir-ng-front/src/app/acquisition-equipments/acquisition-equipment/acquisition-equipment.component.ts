@@ -16,6 +16,9 @@ import { Component } from '@angular/core';
 import {AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -26,9 +29,8 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import { Selection } from 'src/app/studies/study/tree.service';
+
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -121,7 +123,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         // this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.acqEquip.center) {
             // Clean center
-            let centerSelected: Center = new Center();
+            const centerSelected: Center = new Center();
             centerSelected.id = this.acqEquip.center.id;
             centerSelected.name = this.acqEquip.center.name;
             this.acqEquip.center = centerSelected;
@@ -133,12 +135,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
@@ -147,7 +149,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return form;
     }
 
-    private getManufModels(manufModelId?: number): void {
+    private getManufModels(): void {
         this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
     }
@@ -157,8 +159,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/manufacturer-model/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     this.entity.manufacturerModel = entity as ManufacturerModel;
@@ -170,13 +172,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
         this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(value => {
+            form.get('manufacturerModel').valueChanges.subscribe(() => {
                 form.get('serialNumber').updateValueAndValidity();
             })
         );
     }
 
-    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
+    private manufAndSerialUnicityValidator = (): ValidationErrors | null => {
         if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
                 && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
@@ -186,7 +188,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
-        let valueStr: string = control.value;
+        const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
             return { spaces: true }
         }
@@ -204,7 +206,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         try {
             const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
             return exists ? { unique: true } : null;
-        } catch (error) {
+        } catch {
             return null;
         }
     }

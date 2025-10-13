@@ -39,7 +39,7 @@ export class Task extends Entity {
 
     debugTs: number = Date.now();
     id: number;
-    completeId: BigInt;
+    completeId: bigint;
     creationDate: Date;
     lastUpdate: Date;
     report: string;
@@ -104,10 +104,10 @@ export class Task extends Entity {
     private buildRoute(): string {
         if (this.eventType === 'importDataset.event' && this.status != -1) {
             if (this.message.lastIndexOf('examination [') != -1) {
-                let substring = this.message.match(/examination \[\d+\]/g)[0];
+                const substring = this.message.match(/examination \[\d+\]/g)[0];
                 return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             } else if (this.message.indexOf('dataset [') != -1) {
-                let substring = this.message.match(/dataset \[\d+\]/g)[0];
+                const substring = this.message.match(/dataset \[\d+\]/g)[0];
                 return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             }
         } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
@@ -127,13 +127,13 @@ export class Task extends Entity {
     }
 
     clone(): Task {
-        let clone: Task = new Task();
+        const clone: Task = new Task();
         this.FIELDS.forEach(fieldName => clone[fieldName] = this[fieldName]);
         return clone;
     }
 
     equals(task: Task) {
-        for (let fieldName of this.FIELDS) {
+        for (const fieldName of this.FIELDS) {
             if (task[fieldName] != this[fieldName]) return false;
         }
         return true;

@@ -15,10 +15,11 @@ import { Injectable } from '@angular/core';
 
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { DicomService } from './dicom.service';
-import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
+
+import { DicomService } from './dicom.service';
+import { DicomTag, StudyCard } from './study-card.model';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCardDTOServiceAbstract } from './study-card.dto.abstract';
 
@@ -47,16 +48,16 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
             dto.acquisitionEquipmentId ? this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq) : null,
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
             this.coilService.getAll().then(coils => this.completeCoils(result, coils))
-        ]).then(([]) => {
+        ]).then(() => {
             return result;
         });
     }
 
     private completeDicomTagNames(result: StudyCard, tags: DicomTag[]) {
         if (result.rules) {
-            for (let rule of result.rules) {
+            for (const rule of result.rules) {
                 if (rule.conditions) {
-                    for (let condition of rule.conditions) {
+                    for (const condition of rule.conditions) {
                         condition.dicomTag = tags.find(tag => !!condition.dicomTag && tag.code == condition.dicomTag.code);
                     }
                 }
@@ -66,9 +67,9 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
 
     private completeCoils(result: StudyCard, coils: Coil[]) {
         if (result.rules) {
-            for (let rule of result.rules) {
+            for (const rule of result.rules) {
                 if (rule.assignments) {
-                    for (let assigment of rule.assignments) {
+                    for (const assigment of rule.assignments) {
                         if (StudyCardDTOService.isCoil(assigment.field)) {
                             if (assigment.value instanceof Coil) assigment.value = coils.find(coil => coil.id == (assigment.value as Coil).id);
                         }
@@ -92,21 +93,21 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new StudyCard();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new StudyCard();
                 StudyCardDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
         }
         return Promise.all([
             this.studyService.getStudiesNames().then(studies => {
-                for (let entity of result) {
+                for (const entity of result) {
                     if (entity.study) 
                         entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.acqEqService.getAll().then(acqs => {
-                for (let entity of result) {
+                for (const entity of result) {
                     if (entity.acquisitionEquipment) 
                         entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
                 }

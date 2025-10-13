@@ -15,6 +15,7 @@
 
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -99,7 +100,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { TestComponent } from './utils/dev/test.component';
 
-let routes: Routes = [
+const routes: Routes = [
     {
         path: '',
         redirectTo: '/welcome',

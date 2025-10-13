@@ -19,9 +19,10 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
-import { Examination } from './examination.model';
 import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+
+import { Examination } from './examination.model';
 
 @Injectable()
 export class ExaminationDTOService {
@@ -38,7 +39,7 @@ export class ExaminationDTOService {
     public toEntity(dto: ExaminationDTO, result?: Examination): Promise<Examination> {
         if (!result) result = new Examination();
         ExaminationDTOService.mapSyncFields(dto, result);
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
         if (dto.centerId) promises.push(this.centerService.get(dto.centerId).then(center => result.center = center));
         return Promise.all(promises).then(() => result);
@@ -51,8 +52,8 @@ export class ExaminationDTOService {
     public toEntityList(dtos: ExaminationDTO[], result?: Examination[]): Promise<Examination[]> {
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new Examination();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new Examination();
                 ExaminationDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -61,7 +62,7 @@ export class ExaminationDTOService {
             this.studyService.getStudiesNames(),
             this.centerService.getCentersNames(),
         ]).then(([studies, centers]: [IdName[], IdName[]]) => {
-            for (let entity of result) {
+            for (const entity of result) {
                 if (entity.study) entity.study = studies.find(study => study.id == entity.study.id);
                 if (entity.center) entity.center = centers.find(center => center.id == entity.center.id);
             }

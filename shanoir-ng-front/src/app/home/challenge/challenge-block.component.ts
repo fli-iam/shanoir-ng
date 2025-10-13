@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, ViewChild } from '@angular/core';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { Component, Input } from '@angular/core';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'challenge-block',
