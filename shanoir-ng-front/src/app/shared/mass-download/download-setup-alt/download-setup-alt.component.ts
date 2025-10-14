@@ -21,7 +21,7 @@ import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
-import { DownloadInputIds } from '../mass-download.service';
+import {DownloadInputIds, MassDownloadService} from '../mass-download.service';
 
 @Component({
     selector: 'download-setup-alt',
@@ -60,6 +60,7 @@ export class DownloadSetupAltComponent implements OnInit {
 
     constructor(private formBuilder: UntypedFormBuilder,
                 globalService: GlobalService,
+                protected massDownloadService: MassDownloadService,
                 private datasetService: DatasetService) {
         globalService.onNavigate.subscribe(() => {
             this.cancel();
@@ -100,7 +101,7 @@ export class DownloadSetupAltComponent implements OnInit {
     private buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
-            'converter': [{value: this.converter}],
+            'converter': [{value: this.converter}, [this.massDownloadService.requiredIfTypeIsNii()]],
         });
         return formGroup;
     }
