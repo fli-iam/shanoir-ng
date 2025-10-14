@@ -90,8 +90,8 @@ export class CoilComponent extends EntityComponent<Coil> {
             'manufacturerModel': [{value: this.coil.manufacturerModel, disabled: !this.coil.center}, [Validators.required]],
             'center': [this.coil.center, [Validators.required]],
             'coilType': [this.coil.coilType],
-            'numberOfChannels': [this.coil.numberOfChannels],
-            'serialNumber': [this.coil.serialNumber]
+            'numberOfChannels': [this.coil.numberOfChannels, [Validators.pattern(/^[0-9]*$/)]],
+            'serialNumber': [this.coil.serialNumber],
         });
         this.subscriptions.push(
             form.valueChanges.subscribe((newValue: Coil) => {
