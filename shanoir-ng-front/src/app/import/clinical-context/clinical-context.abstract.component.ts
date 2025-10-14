@@ -94,7 +94,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return;
         }
         breadcrumbsService.nameStep('3. Context');
+        this.postConstructor();
     }
+
+    public postConstructor() {
+        return null;
+    };
 
     ngOnInit(): void {
         this.stepTs = this.breadcrumbsService.currentStep.timestamp;
