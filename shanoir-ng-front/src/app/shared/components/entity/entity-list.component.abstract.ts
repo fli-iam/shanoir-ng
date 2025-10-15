@@ -144,13 +144,15 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
-                        this.table.refresh().then(() => {
-                            if (this.ROUTING_NAME == 'examination') {
-                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
-                            } else {
-                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
-                            }
-                        });
+                        setTimeout(() => {
+                            this.table.refresh().then(() => {
+                                if (this.ROUTING_NAME == 'examination') {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                                } else {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
+                                }
+                            });
+                        }, 1000);
                         this.treeService.updateTree();
                     }).catch(reason => {
                         if (!reason){
