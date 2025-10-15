@@ -1,11 +1,13 @@
 package org.shanoir.ng.vip.executionMonitoring.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 import org.shanoir.ng.vip.executionMonitoring.dto.mapper.ExecutionMonitoringMapper;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.vip.executionMonitoring.service.ExecutionTrackingServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,9 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
     private ExecutionMonitoringRepository executionMonitoringRepository;
 
     @Autowired
+    private ExecutionTrackingServiceImpl executionTrackingService;
+
+    @Autowired
     private ExecutionMonitoringMapper mapper;
 
     public ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(Long executionMonitoringId) {
@@ -42,5 +47,10 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(mapper.executionMonitoringsToExecutionMonitoringDTOs(monitorings), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Void> getTrackingFile(String pipeLineName, HttpServletResponse response) throws RestServiceException {
+        executionTrackingService.downloadTrackingFile(pipeLineName, response);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
