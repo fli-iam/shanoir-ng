@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     (save)="save()"
                     (edit)="goToEdit()"
                     (delete) = "deleteBySubject(entity.subject)"
-                    (cancel)="goToView(entity.animalSubject.id)"
+                    (dismiss)="goToView(entity.animalSubject.id)"
                     (back)="goBack()">
             <button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="download()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
             </form-footer>
@@ -55,16 +55,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
                     <li>
                         <label i18n="Edit subject|Name label">Common name</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <ng-template [ngSwitchCase]="'view'">
-                                    {{preclinicalSubject?.subject?.name}}
-                            </ng-template>
-                            <ng-template ngSwitchDefault>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ('create') {
                                     <input type="text" id="name" formControlName="name"/>
                                     <label *ngIf="hasError('subject.name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
                                     <label *ngIf="hasError('subject.name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
                                     <label *ngIf="hasError('subject.name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-                                </ng-template>
+                                }
+                                @default {
+                                    {{preclinicalSubject?.subject?.name}}
+                                }
+                            }
                         </span>
                     </li>
                     <li *ngIf="animalSelected()" [@slideDown]="animalSelected()">
