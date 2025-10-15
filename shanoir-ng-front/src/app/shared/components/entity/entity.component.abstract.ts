@@ -761,7 +761,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if (c instanceof FormGroup) {
                 return {k, controls: this.mapFormControls(c)};
             } else {
-                return {k, valid: c.valid, errors: c.errors, value: c.value};
+                return {k, valid: c.valid, errors: c.errors, value: c.value, dirty: c.dirty, touched: c.touched};
             }
         });
     }

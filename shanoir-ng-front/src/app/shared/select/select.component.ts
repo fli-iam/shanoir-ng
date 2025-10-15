@@ -174,12 +174,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.inputValue = null;
             }
             if (index == -1) {
-                this.selectedOptionIndex = null;
+                this._selectedOptionIndex = null;
             } else {
-                this.selectedOptionIndex = index;
+                this._selectedOptionIndex = index;
             }
         } else {
-            this.selectedOptionIndex = null;
+            this._selectedOptionIndex = null;
         }
     }
 
