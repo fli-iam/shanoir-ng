@@ -84,11 +84,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             Map<Long, String> outputsDownloadName = getDatasetDownloadName(outputs);
 
             for (Dataset dataset : inputs) {
-                format = dataset.getName().endsWith(".dcm") ? "dcm" : "nii";
+                format = dataset.getName().endsWith(".nii") || dataset.getName().endsWith(".nii.gz") ? "nii" : "dcm";
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
             }
             for (Dataset dataset : outputs) {
-                format = dataset.getName().endsWith(".dcm") ? "dcm" : "nii";
+                format = dataset.getName().endsWith(".nii") || dataset.getName().endsWith(".nii.gz") ? "nii" : "dcm";
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
             }
         }
