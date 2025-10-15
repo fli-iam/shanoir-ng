@@ -486,14 +486,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * This method should be called after the form is built and before saving the entity.
      */
     protected static mapFormToEntity<T extends object>(entity: T, form: FormGroup) {
-        Object.keys(form.controls).forEach((control) => {
+        const declaredFields: string[] = getDeclaredFields(entity);
+        Object.keys(form.controls).forEach(control => {
             const name = control as keyof T;
-            const declaredFields: string[] = getDeclaredFields(entity);
             if (declaredFields.indexOf(name as string) >= 0) {
                 if (form.get(control) instanceof FormGroup && entity[name] instanceof Object) {
                     EntityComponent.mapFormToEntity(entity[name] as object, form.get(control) as FormGroup);
                 } else {
-                    entity[name] = form.get(control).value;
+                    // Here we don't want to trigger the proxy form update
+                    entity['GET_TARGET'][name] = form.get(control).value;
                 }
             }
         });

@@ -148,7 +148,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         });
         const examinationDateCtrl: AbstractControl = form.get('examinationDate');
         this.subscriptions.push(
-           examinationDateCtrl.valueChanges.subscribe(value => {
+            examinationDateCtrl.valueChanges.subscribe(value => {
                 if (value && this.inImport && examinationDateCtrl.enabled) examinationDateCtrl.disable();
             }),
             form.get('study').valueChanges.subscribe(value => {
@@ -263,7 +263,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public save(): Promise<Examination> {
-        return super.save( () => {
+        return super.save(() => {
             const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
             for (const file of this.files) {
