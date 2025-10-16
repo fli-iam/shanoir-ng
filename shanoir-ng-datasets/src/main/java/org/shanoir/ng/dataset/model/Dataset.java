@@ -417,6 +417,18 @@ public abstract class Dataset extends AbstractEntity {
 		return getDatasetAcquisition().getExamination().getCenterId();
 	}
 
+    /**
+     * @return The first original (non-derived) Dataset in the chain.
+     */
+    @JsonIgnore @Transient
+    public Dataset getFirstRealInput() {
+        if (this.datasetProcessing != null) {
+            return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();
+        } else {
+            return this;
+        }
+    }
+
 	/**
 	 * @return the subjectId
 	 */
