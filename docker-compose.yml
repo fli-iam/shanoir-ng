@@ -46,7 +46,6 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak:26.2.1"
     volumes:
       - keycloak-logs:/opt/keycloak/data/log
-      - ./docker-compose/keycloak/themes/shanoir-theme:/opt/keycloak/themes/shanoir-theme
     networks:
       - shanoir_ng_network
     ports:
