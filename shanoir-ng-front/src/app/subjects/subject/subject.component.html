@@ -223,7 +223,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </select-box>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-                                {{studies[0]?.name}}
+                                {{ studyNameForSubject() }}
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
