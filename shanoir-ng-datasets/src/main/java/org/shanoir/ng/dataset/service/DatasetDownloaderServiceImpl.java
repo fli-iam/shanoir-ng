@@ -198,9 +198,16 @@ public class DatasetDownloaderServiceImpl {
 		List<URL> pathURLs = new ArrayList<>();
 
 		if (dataset.getDatasetProcessing() != null) {
-			// DOWNLOAD PROCESSED DATASET
-			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+            // DOWNLOAD PROCESSED DATASET
+            if (Objects.equals("dcm", format)) {
+                // processed DICOM
+                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
+                List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
+            } else {
+                // processed NIfTI
+                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
+                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+            }
 		} else if (dataset instanceof EegDataset) {
 			// DOWNLOAD EEG
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, downloadResult);

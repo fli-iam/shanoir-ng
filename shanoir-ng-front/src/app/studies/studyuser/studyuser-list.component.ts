@@ -13,11 +13,16 @@
  */
 import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Center } from '../../centers/shared/center.model';
 
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { IdName } from 'src/app/shared/models/id-name.model';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+
+import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -28,10 +33,6 @@ import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 
 @Component({
     selector: 'studyuser-list',
@@ -70,8 +71,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     invitationFunction: string;
     newUser: User[] = [];
 
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
 
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
@@ -82,7 +83,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.studies && this.studies) {
             this.studyOptions = this.studies.map(study => {
-                let option: Option<Study> = new Option<Study>(study, study.name);
+                const option: Option<Study> = new Option<Study>(study, study.name);
                 option.disabled = !!this.studyUserList?.find(su => su.studyId == study.id || su.study?.id == study.id);
                 return option;
             });
@@ -172,7 +173,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onEditCenter(center: Center, su: StudyUser, selected: boolean) {
         if (!su.centers) su.centers = [];
-        let index: number = su.centers.findIndex(c => c.id == center.id)
+        const index: number = su.centers.findIndex(c => c.id == center.id)
         if (!su.centers.find(c => c.id == center.id) && selected) {
             su.centers.push(center);
         }
@@ -237,15 +238,15 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     addStudy(selectedStudy: Study, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         if (this.studyOptions) {
-            let option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
+            const option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
             if (option) option.disabled = true;
         }
 
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.study = selectedStudy;
             studyUser.receiveStudyUserReport = false;
             studyUser.receiveNewImportReport = false;
@@ -268,14 +269,14 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        let study = new IdName(this.study.id, this.study.name);
+        const study = new IdName(this.study.id, this.study.name);
         this.accessRequestService.inviteUser(this.invitationMail, this.invitationFunction, study).then(request => {
             if (!request) {
                 this.consoleService.log('info', "No user found with such email, an invitation was sent.");
             } else {
                 this.addUser(request.user);
             }
-        }).catch(exception =>  {
+        }).catch(() =>  {
             this.consoleService.log('error', "No user found with such login, please check the user information or use its email.");
         });
     }
@@ -291,12 +292,12 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (this.isMe(selectedUser)) {
             this.freshlyAddedMe = true;
         }
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
             this.pannelStudyUser = backedUpStudyUser;
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
             studyUser.userName = selectedUser.username;
             studyUser.receiveStudyUserReport = false;

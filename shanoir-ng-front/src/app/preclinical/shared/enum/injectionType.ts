@@ -13,6 +13,6 @@
  */
 
 export enum InjectionType {
-    BOLUS = <any> "Bolus",
-    INFUSION = <any> "Infusion"
+    BOLUS = "Bolus",
+    INFUSION = "Infusion"
 }

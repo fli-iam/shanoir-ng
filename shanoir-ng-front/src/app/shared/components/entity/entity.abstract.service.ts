@@ -12,16 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+
 import { Entity } from './entity.abstract';
-import {EntityComponent} from "./entity.component.abstract";
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
@@ -32,8 +32,6 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     protected subscriptions: Subscription[] = [];
-
-    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     constructor(
         protected http: HttpClient) {
@@ -50,13 +48,13 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     getAllAdvanced(): { quick: Promise<T[]>, complete: Promise<T[]> } {
-        let res = {quick: null, complete: null};
+        const res = {quick: null, complete: null};
         res.complete = new Promise((resolve, reject) => {
             res.quick = this.http.get<any[]>(this.API_URL)
                 .toPromise()
                 .then((all) => {
-                    let quickRes: T[] = [];
-                    let mapPromise = this.mapEntityList(all, quickRes);
+                    const quickRes: T[] = [];
+                    const mapPromise = this.mapEntityList(all, quickRes);
                     res.complete = mapPromise
                     resolve(mapPromise);
                     return quickRes;
@@ -71,9 +69,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     deleteWithConfirmDialog(name: string, entity: Entity, studyListStr?: string): Promise<boolean> {
-        let dialogTitle : string = 'Delete ' + name;
-        let dialogMsg : string = 'Are you sure you want to finally delete the ' + name
-            + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
+        const dialogTitle : string = 'Delete ' + name;
+        const dialogMsg : string = 'Are you sure you want to finally delete the ' + name
+            + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
         return this.confirmDialogService
             .confirm(
@@ -113,7 +111,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         })
     }
 
-    get(id: number | BigInt, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
+    get(id: number | bigint, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
         return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
             .then(entity => this.mapEntity(entity, null, mode));
@@ -130,11 +128,11 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             .toPromise();
     }
 
-    protected mapEntity = (entity: any, quickResult?: T, mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T, _mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
+    protected mapEntityList = (entities: any[], _quickResult?: T[]): Promise<T[]> => {
         return Promise.resolve(entities?.map(entity => this.toRealObject(entity)) || []);
     }
 
@@ -147,9 +145,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     protected toRealObject(entity: any): T {
-        let trueObject = Object.assign(this.getEntityInstance(entity), entity);
+        const trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
-            let value = entity[key];
+            const value = entity[key];
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);
@@ -182,11 +180,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             + ('0' + date.getDate()).slice(-2);
     }
 
-    public arrayFrom404(error: HttpErrorResponse) {
-        e => {
-            if (e.status == 404) return [];
-            else throw e;
-        }
+    public arrayFrom404(e: HttpErrorResponse) {
+        if (e.status == 404) return [];
+        else throw e;
     }
 
 }

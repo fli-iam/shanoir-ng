@@ -12,24 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
-
 import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
-
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
-
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -39,12 +37,12 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     standalone: false
 })
 @ModesAware
-export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
+export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges{
 
     @Input() anesthetic: Anesthetic;
-    @Input('toggleForm') toggleForm: boolean = true;
+    @Input() toggleForm: boolean = true;
     @Input() ingredientSelected: AnestheticIngredient;
-    @Output() onEvent = new EventEmitter();
+    @Output() event = new EventEmitter();
     @Input() createAIMode: boolean;
     names: Reference[];
     units: Reference[];
@@ -106,10 +104,10 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.toggleForm = true;
         }else if(this.toggleForm==true){
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }else{
             this.toggleForm = false;
-            this.onEvent.emit(null);
+            this.event.emit(null);
         }
         this.createAIMode = creation;
     }
@@ -127,7 +125,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         this.ingredient = ingredientSelected;
 
         if(this.units){
-            for (let unit of this.units) {
+            for (const unit of this.units) {
                 if(ingredientSelected.concentration_unit){
                     if (ingredientSelected.concentration_unit.id == unit.id) {
                         this.ingredient.concentration_unit = unit;
@@ -136,7 +134,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                 }
         }
         if(this.names){
-                for (let name of this.names) {
+                for (const name of this.names) {
                     if(ingredientSelected.name){
                         if (ingredientSelected.name.id == name.id) {
                             this.ingredient.name = name;
@@ -159,8 +157,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.anesthetic.ingredients = [];
         }
         this.anesthetic.ingredients.push(this.ingredient);
-        if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.ingredient);
+        if (this.event.observers.length > 0) {
+            this.event.emit(this.ingredient);
         }
         this.toggleForm = false;
         this.ingredient = new AnestheticIngredient();
@@ -168,9 +166,9 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
 
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
-            .subscribe(ingredient =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.ingredient);
+            .subscribe(() =>{
+                if (this.event.observers.length > 0) {
+                    this.event.emit(this.ingredient);
                 }
             });
         this.toggleForm = false;
@@ -192,8 +190,8 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         if (params && params[0]) category = params[0];
         if (params && params[1]) reftype = params[1];
 
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 if (reftype == 'ingredient'){
                     this.names.push(entity as Reference);

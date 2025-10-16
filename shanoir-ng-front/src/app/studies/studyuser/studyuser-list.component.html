@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<li *ngIf="mode != 'view' && studyOptions">
 		<label>List of studies</label>
 		<span class="right-col">
-			<select-box placeholder="Add a study ..." (onAddClick)="onStudyAdd($event)" [options]="studyOptions">
+			<select-box placeholder="Add a study ..." (addClick)="onStudyAdd($event)" [options]="studyOptions">
 			</select-box>
 		</span>
 	</li>
@@ -95,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
-									(onChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
 									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId())"
 								></checkbox>
 							</span>
@@ -106,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
-									(onChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -116,7 +116,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
-									(onChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -126,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
-									(onChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -140,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<checkbox
 								[mode]="mode == 'view' ? mode : 'edit'"
 								[ngModel]="!(pannelStudyUser.centers?.length > 0)"
-								(onChange)="onToggleAllCenters($event)"
+								(userChange)="onToggleAllCenters($event)"
 							></checkbox>
 						</li>
 					</ul>
@@ -151,7 +151,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="hasCenter(center, pannelStudyUser)"
-									(onChange)="onEditCenter(center, pannelStudyUser, $event)"
+									(userChange)="onEditCenter(center, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
