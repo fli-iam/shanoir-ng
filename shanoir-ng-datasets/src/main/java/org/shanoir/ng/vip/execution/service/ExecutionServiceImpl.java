@@ -1,5 +1,7 @@
 package org.shanoir.ng.vip.execution.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -198,7 +200,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), candidate));
 
         dto.setInputValues(getInputValues(executionMonitoring, candidate));
-
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            LOG.info("TEST : " + mapper.writeValueAsString(dto));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return createExecution(dto)
                 .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
                         new RuntimeException("HTTP Error while communicating with VIP :  - " + ex.getResponseBodyAsString()))
