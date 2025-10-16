@@ -45,7 +45,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
 
@@ -61,6 +60,7 @@ import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.service.rest.UpdateCheckerService;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.shanoir.uploader.utils.PropertiesUtil;
 import org.slf4j.Logger;
@@ -149,7 +149,6 @@ public class MainWindow extends JFrame {
 	public File shanoirUploaderFolder;
 
 	public ResourceBundle resourceBundle;
-	public ShUpConfig shanoirUploaderConfiguration;
 
 	public ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	
@@ -290,7 +289,7 @@ public class MainWindow extends JFrame {
 		mntmCheckUpdates.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				UpdatesWindow updatesW = new UpdatesWindow(resourceBundle, ShUpConfig.SHANOIR_UPLOADER_VERSION);
+				UpdateCheckerService.checkForUpdates(frame, resourceBundle);
 			}
 		});
 

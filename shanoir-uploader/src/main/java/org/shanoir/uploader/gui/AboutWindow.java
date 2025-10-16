@@ -33,7 +33,7 @@ public class AboutWindow extends JFrame {
 
 	String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail", "developers_shanoir@inria.fr");
 
-	String releasesUrl = ShUpConfig.endpointProperties.getProperty("github.releases");
+	String documentationUrl = ShUpConfig.endpointProperties.getProperty("github.wiki");
 
 	public AboutWindow(final ResourceBundle resourceBundle) {
 		// Create the frame.
@@ -82,15 +82,15 @@ public class AboutWindow extends JFrame {
 				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 10));
 		addItem(aboutPanel, versionLabel, 0, 3, 1, GridBagConstraints.CENTER);
 
-		JLabel releasesLabel = new JLabel("<html><div style='white-space: nowrap;'><a href=''>"
-				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.releases") + "</a></div></html>");
-		addItem(aboutPanel, releasesLabel, 0, 4, 1, GridBagConstraints.CENTER);
+		JLabel documentationLabel = new JLabel("<html><div style='white-space: nowrap;'><a href=''>"
+				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.documentation") + "</a></div></html>");
+		addItem(aboutPanel, documentationLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
-		releasesLabel.addMouseListener(new MouseAdapter() {
+		documentationLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     try {
-                        Desktop.getDesktop().browse(new URI(releasesUrl));
+                        Desktop.getDesktop().browse(new URI(documentationUrl));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
