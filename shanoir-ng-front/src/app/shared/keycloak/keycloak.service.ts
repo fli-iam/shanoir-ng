@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import Keycloak from "keycloak-js";
 
 import * as AppUtils from '../../utils/app.utils';
-import Keycloak from "keycloak-js";
 
 
 // The keycloak adapter supports two authentication methods : "login-required"
@@ -31,7 +31,7 @@ import Keycloak from "keycloak-js";
 //   checks the session cookie, generates the token and redirects to us.
 //   It is reliable but slower (because of the two redirections the
 //   authentication is performed twice and the SPA is loaded twice).
-const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
+const USE_LOGIN_REQUIRED = (window as any).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
 
 @Injectable()
 export class KeycloakService {
@@ -41,12 +41,7 @@ export class KeycloakService {
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
-    static init(): Promise<any> {
-
-        if (window.location.href.includes('/account-request')) {
-            return Promise.resolve();
-        }
-
+    static init(optionalAuth: boolean = false): Promise<any> {
         const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
@@ -83,8 +78,14 @@ export class KeycloakService {
                         keycloakAuth.onAuthLogout = maybe_redirect_to_login_page;
                         resolve(null);
                     } else {
-                        maybe_redirect_to_login_page();
-                        reject();
+                        if (optionalAuth) {
+                            // some pages can be accessible in a either authenticated or unauthenticated context
+                            KeycloakService.auth.loggedIn = false;
+                            resolve(null);
+                        } else {
+                            maybe_redirect_to_login_page();
+                            reject();
+                        }
                     }
                 })
                 .catch(() => {
@@ -104,7 +105,7 @@ export class KeycloakService {
                 if (KeycloakService.auth?.authz?.token) {
                     KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
-                        resolve(<string>KeycloakService.auth.authz.token);
+                        resolve(KeycloakService.auth.authz.token as string);
                     }).catch(() => {
                         reject();
                     });
@@ -117,7 +118,7 @@ export class KeycloakService {
     getRefreshToken(): Promise<string> {
         this.tokenPromise = new Promise<string>((resolve, reject) => {
             if (KeycloakService.auth.authz.token) {
-                resolve(<string>KeycloakService.auth.authz.refreshToken);
+                resolve(KeycloakService.auth.authz.refreshToken as string);
             } else {
                 reject();
             }

@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+
 import { DatasetProcessing } from './dataset-processing.model';
-import { HttpClient } from '@angular/common/http';
 import { DatasetProcessingDTOService, DatasetProcessingInDTO, DatasetProcessingOutDTO } from './dataset-processing.dto';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
@@ -71,7 +72,7 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     }
     
     public stringify(entity: DatasetProcessing) {
-        let dto = new DatasetProcessingOutDTO(entity);
+        const dto = new DatasetProcessingOutDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });

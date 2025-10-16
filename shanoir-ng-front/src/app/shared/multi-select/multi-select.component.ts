@@ -13,6 +13,7 @@
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
 import { Option } from '../select/select.component';
 
@@ -41,9 +42,9 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    @Output() onTouch = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    @Output() touch = new EventEmitter();
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     modelArray: any[];
     selectedOptions: Option<any>[] = [];
 
@@ -56,8 +57,8 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
@@ -118,7 +119,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     }
 
     onSelectOption(e: any) {
-        let option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
+        const option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
@@ -137,7 +138,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         }
     }
 

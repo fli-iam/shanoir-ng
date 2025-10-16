@@ -14,6 +14,8 @@
 
 import {Component} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
@@ -21,9 +23,7 @@ import { TherapyType } from "../../../shared/enum/therapyType";
 import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
-import {SubjectPathology} from "../../../pathologies/subjectPathology/shared/subjectPathology.model";
 
 @Component({
     selector: 'subject-therapy-list',
@@ -70,7 +70,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     }
 
     getEntities(): Promise<SubjectTherapy[]> {
-        let subjectTherapies: SubjectTherapy[] = [];
+        const subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
             if (this.breadcrumbsService.currentStep.isPrefilled("entity") && this.breadcrumbsService.currentStep.isPrefilled("TherapyToCreate") && !this.breadcrumbsService.currentStep.isPrefilled("TherapyToUpdate")) {
                 this.breadcrumbsService.currentStep.getPrefilledValue("entity").then(res => {
@@ -115,7 +115,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     // }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", cellRenderer: function(params: any) {

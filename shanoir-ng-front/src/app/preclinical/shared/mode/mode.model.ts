@@ -45,18 +45,6 @@ export class Mode {
         return this.state;
     }
     
-    createMode(){
-        this.state == Modes.create;
-    }
-    
-    editMode(){
-        this.state == Modes.edit;
-    }
-    
-    viewMode(){
-        this.state == Modes.view;
-    }
-    
     isViewMode(): boolean{
         if(this.state == Modes.view) return true;
         return false;

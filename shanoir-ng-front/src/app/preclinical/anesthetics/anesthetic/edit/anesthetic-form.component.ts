@@ -16,6 +16,8 @@ import { Component, ViewChild} from '@angular/core';
 import { Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Anesthetic }    from '../shared/anesthetic.model';
 import { AnestheticService } from '../shared/anesthetic.service';
@@ -25,7 +27,6 @@ import { AnestheticType } from "../../../shared/enum/anestheticType";
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
 import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { Enum } from "../../../../shared/utils/enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
@@ -33,9 +34,6 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Option } from '../../../../shared/select/select.component';
 
 @Component({
     selector: 'anesthetic-form',
@@ -52,7 +50,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    isAnestheticUnique: Boolean = true;
+    isAnestheticUnique: boolean = true;
     names: Reference[];
     units: Reference[];
 
@@ -77,7 +75,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     get anesthetic(): Anesthetic { return this.entity; }
-    set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
+    set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
     getService(): EntityService<Anesthetic> {
         return this.anestheticService;
@@ -183,12 +181,12 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.subscriptions.push(
             this.onSave.subscribe(response => {
                 if (this.ingredientsToDelete) {
-                    for (let ingredient of this.ingredientsToDelete) {
+                    for (const ingredient of this.ingredientsToDelete) {
                         this.ingredientService.deleteAnestheticIngredient(response.id, ingredient.id);
                     }
                 }
                 if (this.ingredientsToCreate) {
-                    for (let ingredient of this.ingredientsToCreate) {
+                    for (const ingredient of this.ingredientsToCreate) {
                         this.ingredientService.createAnestheticIngredient(response.id, ingredient).subscribe();
                     }
                 }
@@ -199,7 +197,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
 
     onChangeType() {
-        let generatedName = '';
+        const generatedName = '';
         this.refreshName(generatedName);
     }
 
@@ -209,7 +207,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }
 
         if (this.anesthetic && this.anesthetic.ingredients) {
-            for (let ingredient of this.anesthetic.ingredients) {
+            for (const ingredient of this.anesthetic.ingredients) {
                 let strIngredient = '';
                 strIngredient = strIngredient.concat(ingredient.name.value.substring(0, 3)).concat('. ');
                 if (ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));

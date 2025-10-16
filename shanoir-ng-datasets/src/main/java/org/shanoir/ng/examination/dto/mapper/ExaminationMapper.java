@@ -26,7 +26,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Mapper for examinations.

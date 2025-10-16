@@ -1,4 +1,5 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, Input, ViewChild, OnInit} from '@angular/core';
+
 import {ColumnDefinition} from "../../shared/components/table/column.definition.type";
 import {ShanoirEvent} from "../../users/shanoir-event/shanoir-event.model";
 import {ShanoirEventService} from "../../users/shanoir-event/shanoir-event.service";
@@ -6,7 +7,6 @@ import {Study} from "../shared/study.model";
 import {Page, Pageable} from "../../shared/components/table/pageable.model";
 import {TableComponent} from "../../shared/components/table/table.component";
 import {StudyUser} from "../shared/study-user.model";
-import {Examination} from "../../examinations/shared/examination.model";
 
 @Component({
     selector: 'study-history',
@@ -14,7 +14,7 @@ import {Examination} from "../../examinations/shared/examination.model";
     styleUrls: ['./study-history.component.css'],
     standalone: false
 })
-export class StudyHistoryComponent {
+export class StudyHistoryComponent implements OnInit {
 
     @ViewChild('table', {static: false}) table: TableComponent;
     @Input() study: Study;
@@ -32,8 +32,8 @@ export class StudyHistoryComponent {
             }
         },
         {headerName: 'ObjectId', field: 'objectId', route: function(params:ShanoirEvent) {
-                let event = params.eventType;
-                let id = params.objectId;
+                const event = params.eventType;
+                const id = params.objectId;
                 if (event.includes("create")) {
                     if (event.includes("Dataset") && !event.includes("Acquisition")) { return "/dataset/details/" + id; }
                     else if (event.includes("Examination")) { return "/examination/details/" + id; }
@@ -57,6 +57,7 @@ export class StudyHistoryComponent {
     constructor(
         private shanoirEventService: ShanoirEventService
     ) {}
+    
     ngOnInit() {
         this.eventHistory.then( () => this.getPage);
     }
@@ -65,8 +66,7 @@ export class StudyHistoryComponent {
         return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             page.content.forEach(item => {
                 if (this.users.get(item.userId) == undefined) {
-                    let studyUser : StudyUser;
-                    studyUser = this.study.studyUserList.find(user => user.userId == item.userId);
+                    const studyUser : StudyUser = this.study.studyUserList.find(user => user.userId == item.userId);
                     if (studyUser) {
                         this.users.set(item.userId, studyUser.userName);
                         item.username = studyUser.userName;
