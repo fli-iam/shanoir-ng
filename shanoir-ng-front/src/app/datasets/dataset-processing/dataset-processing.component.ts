@@ -128,15 +128,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res)
         ])
         .then(([study, subject]) => {
-            this.prefilledStudy = study;
-            this.prefilledSubject = subject;
-
-            this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
-            this.study = this.prefilledStudy;
+            this.study = study;
+            this.subject = subject;
             this.datasetProcessing.studyId = this.study?.id;
 
-            this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
-            this.subject = this.prefilledSubject;
+            this.studyOptions = [new Option(study, study.name)];
+            this.subjectOptions = [new Option(subject, subject.name)];
         })
         .then(() => this.fetchDatasets());
     }
