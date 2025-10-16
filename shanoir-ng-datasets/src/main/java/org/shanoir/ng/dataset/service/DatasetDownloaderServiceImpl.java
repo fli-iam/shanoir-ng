@@ -203,12 +203,10 @@ public class DatasetDownloaderServiceImpl {
                 // processed DICOM
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
                 List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
-            } else if (Objects.equals("nii", format)) {
+            } else {
                 // processed NIfTI
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
                 DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
-            } else {
-                downloadResult.update("Dataset format was not adapted to dataset download choosen", DatasetDownloadError.ERROR);
             }
 		} else if (dataset instanceof EegDataset) {
 			// DOWNLOAD EEG
