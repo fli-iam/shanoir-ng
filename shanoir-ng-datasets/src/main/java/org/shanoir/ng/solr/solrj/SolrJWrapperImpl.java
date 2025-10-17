@@ -429,51 +429,55 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	}
 
 	private Map<String, FacetPageable> cleanFacetPage(QueryResponse response, ShanoirSolrQuery shanoirQuery) {
-		Map<String, FacetPageable> filteredFacetPaging = new HashMap<>();
+		if(Objects.nonNull(shanoirQuery.getFacetPaging())) {
+			Map<String, FacetPageable> filteredFacetPaging = new HashMap<>();
 
-		for (Map.Entry<String, FacetPageable> entry : shanoirQuery.getFacetPaging().entrySet()) {
-			String facetName = entry.getKey();
-			FacetPageable pageableFacet = entry.getValue();
+			for (Map.Entry<String, FacetPageable> entry : shanoirQuery.getFacetPaging().entrySet()) {
+				String facetName = entry.getKey();
+				FacetPageable pageableFacet = entry.getValue();
 
-			FacetField facetField = response.getFacetField(facetName);
-			if (facetField == null) {
-				filteredFacetPaging.put(facetName, pageableFacet);
-				continue;
-			}
-
-			List<FacetField.Count> originalValues = facetField.getValues();
-			if (originalValues == null || originalValues.isEmpty()) {
-				filteredFacetPaging.put(facetName, pageableFacet);
-				continue;
-			}
-
-
-			List<FacetField.Count> renamedAndFilteredValues = new ArrayList<>();
-			for (FacetField.Count count : originalValues) {
-				if (count == null) continue;
-
-				String name = count.getName();
-				boolean isMissing = (name == null) || name.trim().isEmpty() || "(Missing)".equals(name.trim());
-
-				if (isMissing && count.getCount() == 0) {
+				FacetField facetField = response.getFacetField(facetName);
+				if (facetField == null) {
+					filteredFacetPaging.put(facetName, pageableFacet);
 					continue;
 				}
 
-				if (isMissing) {
-					renamedAndFilteredValues.add(new FacetField.Count(facetField, UNKNOWN, count.getCount()));
-				} else {
-					renamedAndFilteredValues.add(count);
+				List<FacetField.Count> originalValues = facetField.getValues();
+				if (originalValues == null || originalValues.isEmpty()) {
+					filteredFacetPaging.put(facetName, pageableFacet);
+					continue;
 				}
+
+
+				List<FacetField.Count> renamedAndFilteredValues = new ArrayList<>();
+				for (FacetField.Count count : originalValues) {
+					if (count == null) continue;
+
+					String name = count.getName();
+					boolean isMissing = (name == null) || name.trim().isEmpty() || "(Missing)".equals(name.trim());
+
+					if (isMissing && count.getCount() == 0) {
+						continue;
+					}
+
+					if (isMissing) {
+						renamedAndFilteredValues.add(new FacetField.Count(facetField, UNKNOWN, count.getCount()));
+					} else {
+						renamedAndFilteredValues.add(count);
+					}
+				}
+
+				try {
+					originalValues.clear();
+					originalValues.addAll(renamedAndFilteredValues);
+				} catch (RuntimeException ignored) {
+				}
+
+				filteredFacetPaging.put(facetName, pageableFacet);
 			}
-
-			try {
-				originalValues.clear();
-				originalValues.addAll(renamedAndFilteredValues);
-			} catch (RuntimeException ignored) {}
-
-			filteredFacetPaging.put(facetName, pageableFacet);
+			return filteredFacetPaging;
 		}
-		return filteredFacetPaging;
+		return null;
 	}
 
 	private void addUserFiltering(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
