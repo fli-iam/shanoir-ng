@@ -72,16 +72,12 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         })
     }
 
-    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel, currentId?: number): Observable<boolean> {
-        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).pipe(
-            map(equipments =>
-                equipments.some(eq =>
-                    eq.id !== currentId &&
-                    eq.serialNumber === serialNumber &&
-                    eq.manufacturerModel.id === manufacturerModel.id
-                )
-            ),
-            catchError(() => of(false))
-        );
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
+            equipments => {
+                for (const equipment of equipments) {
+                    if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
+                }
+            });
     }
 }

@@ -30,8 +30,9 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import {of, timer} from "rxjs";
-import {catchError, map, switchMap} from "rxjs/operators";
+import { of, timer } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
+import {Manufacturer} from "../shared/manufacturer.model";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -47,6 +48,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
+    private currentManufAndSerial: ManufacturerAndSerial;
     fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
@@ -85,6 +87,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initEdit(): Promise<void> {
+        this.currentManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames()
@@ -145,7 +148,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             'serialNumber': [
                 this.acqEquip.serialNumber,
                 {
-                    validators: [this.noSpacesStartAndEndValidator],
+                    validators: [this.noSpacesStartAndEndValidator, this.manufAndSerialUnicityValidator],
                     asyncValidators: [this.uniqueEquipmentValidator],
                     updateOn: 'change'
                 }
@@ -203,21 +206,21 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    private uniqueEquipmentValidator: AsyncValidatorFn = (control: AbstractControl) => {
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
         if (!control.parent) return of(null);
 
         const serialNumber = control.value;
-        const manufacturerModel = control.parent.get('manufacturerModel')?.value;
+        const manufacturerModel = control.parent.get('manufacturerModel')?.value as ManufacturerModel;
 
-        if (!serialNumber || !manufacturerModel) return of(null);
+        if (!serialNumber || !manufacturerModel) return null;
+        if (serialNumber == this.currentManufAndSerial?.serial && manufacturerModel.id == this.currentManufAndSerial?.manuf.id) return null;
 
-        const currentId = this.acqEquip?.id;
-
-        return timer(100).pipe(
-            switchMap(() => this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel, currentId)),
-            map(exists => (exists ? { unique: true } : null)),
-            catchError(() => of(null))
-        );
+        try {
+            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+            return exists ? { unique: true } : null;
+        } catch {
+            return null;
+        }
     }
 
     save(): Promise<AcquisitionEquipment> {
@@ -230,7 +233,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     onCenterChange() {
-        console.log("center change");
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
