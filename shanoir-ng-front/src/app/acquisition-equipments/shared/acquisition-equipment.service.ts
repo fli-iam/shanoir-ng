@@ -32,7 +32,9 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         super(http)
     }
 
-    getEntityInstance() { return new AcquisitionEquipment(); }
+    getEntityInstance() {
+        return new AcquisitionEquipment();
+    }
 
     getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
@@ -50,14 +52,21 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     delete(id: number): Promise<void> {
 
         return this.http.get<StudyCard[]>(AppUtils.BACKEND_API_STUDY_CARD_URL + '/byAcqEq/' + id).toPromise().then(cards => {
-            if (cards?.length == 1){
-                throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'}});
-            } else if (cards?.length > 1){
-                throw new ShanoirError({error: {
-                    code: 422,
-                    message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
-                    details: 'Study cards : ' + cards.map(card => card.id).join(', ')
-                }});
+            if (cards?.length == 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'
+                    }
+                });
+            } else if (cards?.length > 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
+                        details: 'Study cards : ' + cards.map(card => card.id).join(', ')
+                    }
+                });
             }
             return super.delete(id);
         })

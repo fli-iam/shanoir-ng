@@ -28,7 +28,7 @@ import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 
 export abstract class ShanoirNode {
-    
+
     abstract title: string;
     private _opened: boolean = false;
     private openPromise: Promise<void>;
@@ -301,7 +301,6 @@ export class ExaminationNode extends ShanoirNode {
             exam.preclinical
         );
         node.datasetAcquisitions = UNLOADED;
-        //exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;
     }
 }
