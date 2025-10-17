@@ -13,7 +13,7 @@
  */
 
 import { formatDate } from "@angular/common";
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
@@ -29,7 +29,6 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { dateDisplay } from "../../shared/localLanguage/localDate.abstract";
 import { Option } from '../../shared/select/select.component';
-import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from "../../utils/app.utils";
@@ -45,20 +44,18 @@ import { DatasetService } from '../shared/dataset.service';
     standalone: false
 })
 
-export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> implements OnInit {
+export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
 
-    public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
-    public _subject: Subject;
-    public studyOptions: Option<number>[] = [];
-    public subjectOptions: Option<Subject>[] = [];
-    public inputDatasetOptions: Option<Dataset>[] = [];
-    public outputDatasetOptions: Option<Dataset>[] = [];
-    public inputDatasetsColumnDefs: ColumnDefinition[];
-    public outputDatasetsColumnDefs: ColumnDefinition[];
-    public isExecutionMonitoring: boolean = false;
-    public executionMonitoring: ExecutionMonitoring;
-    prefilledStudy: Study;
-    prefilledSubject: Subject;
+    protected datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
+    private _subject: Subject;
+    protected studyOptions: Option<number>[] = [];
+    protected subjectOptions: Option<Subject>[] = [];
+    protected inputDatasetOptions: Option<Dataset>[] = [];
+    protected outputDatasetOptions: Option<Dataset>[] = [];
+    protected inputDatasetsColumnDefs: ColumnDefinition[];
+    protected outputDatasetsColumnDefs: ColumnDefinition[];
+    protected isExecutionMonitoring: boolean = false;
+    protected executionMonitoring: ExecutionMonitoring;
 
 
     constructor(
@@ -71,6 +68,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             ) {
 
         super(route, 'dataset-processing');
+        this.createColumnDefs();
     }
 
     get subject(): Subject { return this._subject; }
@@ -78,10 +76,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     set subject(subject: Subject) { 
         this._subject = subject;
         this.form.get('subject').setValue(subject);
-    }
-
-    ngOnInit(): void {
-        this.createColumnDefs();
     }
 
     get datasetProcessing(): DatasetProcessing { return this.entity; }
@@ -135,19 +129,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        return Promise.all([
-            this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res),
-            this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res)
-        ])
-        .then(([study, subject]) => {
-            this.study = study;
-            this.subject = subject;
-            this.datasetProcessing.studyId = this.study?.id;
-
-            this.studyOptions = [new Option(study, study.name)];
-            this.subjectOptions = [new Option(subject, subject.name)];
-        })
-        .then(() => this.fetchDatasets());
+        return Promise.resolve();
     }
 
     onStudyChange(newValue: number) {
@@ -237,25 +219,14 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     buildForm(): UntypedFormGroup {
         const formGroup: UntypedFormGroup = this.formBuilder.group({
-            'studyId': [{value: this.datasetProcessing?.studyId , disabled: !!this.prefilledStudy}, Validators.required],
-            'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.datasetProcessing?.studyId)}, Validators.required],
+            'studyId': [{value: this.datasetProcessing?.studyId}, Validators.required],
+            'subject': [{value: this.subject, disabled: (!this.datasetProcessing?.studyId)}, Validators.required],
             'datasetProcessingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
             'inputDatasets': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
             'outputDatasets': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
-        formGroup.get('studyId').valueChanges
-            .pipe(
-                distinctUntilChanged(),
-                takeUntil(this.destroy$)
-            ).subscribe(studyVal => {
-                if (!!this.prefilledSubject || !studyVal) {
-                    formGroup.get('subject').disable();
-                } else {
-                    formGroup.get('subject').enable();
-                }
-            });
         formGroup.get('subject').valueChanges
             .pipe(
                 distinctUntilChanged(),
@@ -274,18 +245,22 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     protected prefillProperties(): void {
         super.prefillProperties();
-        this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res);
-        this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res);
-        if (this.prefilledStudy) {
-            this.studyOptions = [new Option(this.prefilledStudy.id, this.prefilledStudy.name)];
-            this.datasetProcessing.studyId = this.prefilledStudy.id;
+        if (this.breadcrumbsService.currentStep.isPrefilled('study')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('study').then(prefilledStudy => {
+                this.form.get('studyId').disable();
+                this.datasetProcessing.studyId = prefilledStudy.id;
+                this.studyOptions = [new Option(prefilledStudy.id, prefilledStudy.name)];
+            });
         } else {
             this.fetchStudies();
         }
-        if (this.prefilledSubject) {
-            this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
-            this.subject = this.prefilledSubject;
-            this.fetchDatasets();
+        if (this.breadcrumbsService.currentStep.isPrefilled('subject')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(prefilledSubject => {
+                this.form.get('subject').disable();
+                this.subjectOptions = [new Option(prefilledSubject.id, prefilledSubject.name)];
+                this.subject = prefilledSubject;
+                this.fetchDatasets();
+            });
         }
     }
 

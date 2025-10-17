@@ -452,9 +452,9 @@ function deepEquals(x, y) {
 };
 
 export function objectsEqual(value1, value2) {
-    if (value1 == value2) return true;
-    else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+    if (value1 === value2) return true;
+    else if (value1 && value2 && value1.id && value2.id) return value1.id === value2.id;
+    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals === 'function' && typeof value2.equals === 'function') return value1.equals(value2);
     else return deepEquals(value1, value2);
 }
 
