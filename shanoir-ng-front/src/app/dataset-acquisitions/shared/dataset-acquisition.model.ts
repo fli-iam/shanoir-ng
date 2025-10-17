@@ -11,6 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { Examination } from '../../examinations/shared/examination.model';
@@ -20,20 +22,20 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 
 export abstract class DatasetAcquisition extends Entity {
 
-    id: number;
-    datasets: Dataset[];
-    studyCard: StudyCard;
-    acquisitionEquipment: AcquisitionEquipment;
-    examination: Examination;
-    rank: number;
-    softwareRelease: string;
-    sortingIndex: number;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
-    protocol: any;
-    name: string; // set in ExaminationDatasetAcquisitionDecorator.java
-    importDate: Date;
-    username: string;
-    copies: number[];
-    source: number;
-    acquisitionStartTime: Date;
+    @Field() id: number;
+    @Field() datasets: Dataset[];
+    @Field() studyCard: StudyCard;
+    @Field() acquisitionEquipment: AcquisitionEquipment;
+    @Field() examination: Examination;
+    @Field() rank: number;
+    @Field() softwareRelease: string;
+    @Field() sortingIndex: number;
+    @Field() type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
+    @Field() protocol: any;
+    @Field() name: string; // set in ExaminationDatasetAcquisitionDecorator.java
+    @Field() importDate: Date;
+    @Field() username: string;
+    @Field() copies: number[];
+    @Field() source: number;
+    @Field() acquisitionStartTime: Date;
 }

@@ -110,20 +110,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return '/preclinical-examination/create';
     }
 
-    protected fillCreateSubjectStep() {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
-        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
-        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
-        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
-    }
-
-    protected fillCreateAcqEqStep() { 
-        return;
-    }
-
-    private getPrefilledSubject(): Subject | PreclinicalSubject {
+    protected prefillSubject() {
         const subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
@@ -143,14 +130,18 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newSubject.study = this.study;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         newPreclinicalSubject.subject = newSubject;
-        return newPreclinicalSubject;
+        this.breadcrumbsService.addNextStepPrefilled('entity', newPreclinicalSubject);
+        this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
+        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
+        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
+        this.breadcrumbsService.addNextStepPrefilled('subjectStudyList', newSubject.subjectStudyList);
+        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
-    protected fillCreateExaminationStep(): void {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
-    }
-
-    private getPrefilledExam(): Examination {
+    protected getPrefilledExamination(): Examination {
         const newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
