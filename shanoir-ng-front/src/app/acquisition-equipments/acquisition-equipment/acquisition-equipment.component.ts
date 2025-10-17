@@ -29,9 +29,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import { of, timer } from "rxjs";
-import { catchError, map, switchMap } from "rxjs/operators";
-import {Manufacturer} from "../shared/manufacturer.model";
+import { of } from "rxjs";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -45,8 +43,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public centers: IdName[];
     public centersFromStudyCard;
     public datasetModalityTypeStr: string;
-    private nonEditableCenter: boolean = false;
-    private lastSubmittedManufAndSerial: ManufacturerAndSerial;
     private currentManufAndSerial: ManufacturerAndSerial;
     fromImport: string;
 
@@ -129,7 +125,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             'serialNumber': [
                 this.acqEquip.serialNumber,
                 {
-                    validators: [this.noSpacesStartAndEndValidator, this.manufAndSerialUnicityValidator],
+                    validators: [this.noSpacesStartAndEndValidator],
                     asyncValidators: [this.uniqueEquipmentValidator],
                     updateOn: 'change'
                 }

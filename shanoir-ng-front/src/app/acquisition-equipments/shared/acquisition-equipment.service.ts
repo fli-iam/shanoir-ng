@@ -17,8 +17,6 @@ import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { catchError, map } from "rxjs/operators";
-import { Observable, of } from "rxjs";
 import { ShanoirError } from "../../shared/models/error.model";
 import { StudyCard } from "../../study-cards/shared/study-card.model";
 
