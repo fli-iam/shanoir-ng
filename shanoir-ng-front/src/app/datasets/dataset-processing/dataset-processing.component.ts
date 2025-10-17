@@ -135,7 +135,19 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        return Promise.resolve();
+        return Promise.all([
+            this.breadcrumbsService.currentStep.getPrefilledValue('study').then(res => this.prefilledStudy = res),
+            this.breadcrumbsService.currentStep.getPrefilledValue('subject').then(res => this.prefilledSubject = res)
+        ])
+        .then(([study, subject]) => {
+            this.study = study;
+            this.subject = subject;
+            this.datasetProcessing.studyId = this.study?.id;
+
+            this.studyOptions = [new Option(study, study.name)];
+            this.subjectOptions = [new Option(subject, subject.name)];
+        })
+        .then(() => this.fetchDatasets());
     }
 
     onStudyChange(newValue: number) {

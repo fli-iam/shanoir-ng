@@ -266,6 +266,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             });
     }
 
+    studyNameForSubject() {
+        this.studies = this.studies.filter(s => s.id == this.entity.study.id);
+        return this.studies[0] ? this.studies[0].name : "";
+    }
+
     private generateSubjectIdentifier(): string {
         let hash;
         if (this.humanSelected() && !this.subject.isAlreadyAnonymized) {
