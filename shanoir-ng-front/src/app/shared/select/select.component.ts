@@ -116,14 +116,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
-            console.log('SelectBoxComponent ngOnChanges options', changes.options);
             if (!this.options) this.options = [];
             this.searchText = null;
             this.computeDisplayedOptions();
             this.initSelectedOption();
             this.computeMinWidth();
         } else if (changes.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
-            console.log('SelectBoxComponent ngOnChanges optionArr', changes.optionArr);
             if (!this.optionArr) this.optionArr = [];
             this.searchText = null;
             this.options = [];
@@ -179,6 +177,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this._selectedOptionIndex = null;
             } else {
                 this._selectedOptionIndex = index;
+                this.inputText = this.options[index].label;
             }
         } else {
             this._selectedOptionIndex = null;
@@ -186,7 +185,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     writeValue(value: any): void {
-        console.log('SelectBoxComponent writeValue', value);
         this.searchText = null;
         this.inputValue = value;
         if (value && this.options?.length > 0) {
