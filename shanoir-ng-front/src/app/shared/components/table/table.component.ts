@@ -13,9 +13,9 @@
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
-
 import { Router } from "@angular/router";
 import * as shajs from 'sha.js';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
@@ -23,10 +23,10 @@ import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import {TaskService} from "../../../async-tasks/task.service";
+
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
-import {TaskService} from "../../../async-tasks/task.service";
-import {Task} from "../../../async-tasks/task.model";
 
 @Component({
     selector: 'shanoir-table',
@@ -50,19 +50,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() browserSearch: boolean = true;
     @Input() collapseControls: boolean = false;
     @Input() editMode: boolean = false;
-    @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
-    @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() rowClick: EventEmitter<object> = new EventEmitter<object>();
+    @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
-    page: Page<Object>;
+    page: Page<object>;
     isLoading: boolean = false;
     maxResultsField: number;
     pageNumber: number;
-    lastSortedCol: Object = null;
+    lastSortedCol: any = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
@@ -116,7 +116,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
-        this.subscriptions.push(fromEvent(window, 'resize').subscribe( evt => {
+        this.subscriptions.push(fromEvent(window, 'resize').subscribe(() => {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
@@ -137,13 +137,13 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private checkCompactMode() {
-        let width: number = this.elementRef.nativeElement.offsetWidth;
+        const width: number = this.elementRef.nativeElement.offsetWidth;
         this.compactMode = width < 620;
     }
 
     private reloadPreviousState() {
-        let currentStep = this.breadcrumbsService.currentStep
-        let savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.hash] : null;
+        const currentStep = this.breadcrumbsService.currentStep
+        const savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.hash] : null;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
@@ -163,15 +163,15 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    get items(): Object[] {
+    get items(): any[] {
         return this.page ? this.page.content : [];
     }
 
 
-    sortBy(col: Object): void {
+    sortBy(col: any): void {
         if (col['disableSorting'] || col["type"] == "button") return;
-        let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
-        let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
+        const defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
+        const asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.lastSortedCol = col;
         this.lastSortedAsc = asc;
         this.goToPage(1);
@@ -185,7 +185,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
 
-    onRowClick(item: Object) {
+    onRowClick(item: any) {
         if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
@@ -194,15 +194,15 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.downloadStatsEvent.emit(item);
     }
 
-    public static getCellValue(item: Object, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellRenderer")) {
-            let params = new Object();
+    public static getCellValue(item: any, col: ColumnDefinition): any {
+        if (Object.prototype.hasOwnProperty.call(col, "cellRenderer")) {
+            const params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
         } else if (!col.field) {
             return null;
         } else {
-            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            const fieldValue = this.getFieldRawValue(item, col["field"]);
             if (fieldValue) {
                 return fieldValue;
             }
@@ -227,7 +227,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return date;
     }
 
-    public static getFieldRawValue(obj: Object, path: string): any {
+    public static getFieldRawValue(obj: any, path: string): any {
         if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
@@ -236,21 +236,21 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    getCellValue(item: Object, col: ColumnDefinition): any {
+    getCellValue(item: any, col: ColumnDefinition): any {
         return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
-    getFieldRawValue(obj: Object, path: string): any {
+    getFieldRawValue(obj: any, path: string): any {
         return TableComponent.getFieldRawValue(obj, path);
     }
 
     /**
      * Set the property value
      */
-    private setFieldRawValue(obj: Object, path: string, value: any) {
+    private setFieldRawValue(obj: any, path: string, value: any) {
         if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
@@ -263,7 +263,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Triggered when a field is edited
      */
-    onFieldEdit(obj: Object, col: Object, value: any) {
+    onFieldEdit(obj: any, col: any, value: any) {
         this.setFieldRawValue(obj, col['field'], value);
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
@@ -272,12 +272,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: ColumnDefinition): any {
-        let result: any = this.getCellValue(item, col);
+    renderCell(item: any, col: ColumnDefinition): any {
+        const result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
-            let date: Date = TableComponent.harmonizeToDate(result);
+            const date: Date = TableComponent.harmonizeToDate(result);
             let dateFormat;
             if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
             else dateFormat = {year: "numeric", month: "2-digit", day: "2-digit"};
@@ -292,15 +292,15 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     private static stringToDate(dateString: string): Date {
         if (!dateString) return null;
         dateString += '';
-        let split: string[] = dateString.split('-');
+        const split: string[] = dateString.split('-');
         if (split.length != 3) return null;
-        let splitNum: number[] = split.map(elt => parseInt(elt));
+        const splitNum: number[] = split.map(elt => parseInt(elt));
         if (splitNum.includes(NaN)) return null;
         return new Date(splitNum[2],splitNum[1],splitNum[0]);
     }
 
     getCellGraphics(item: any, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellGraphics")) {
+        if (Object.prototype.hasOwnProperty.call(col, "cellGraphics")) {
             return col["cellGraphics"](item);
         } else return null;
     }
@@ -310,7 +310,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      */
     isFieldBoolean(col: ColumnDefinition): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
-        let val = this.getCellValue(this.items[0], col);
+        const val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
@@ -350,7 +350,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Get a column type and format it to be used a dom element class
      */
     getColTypeStr(col: ColumnDefinition): string {
-        let type: string = this.getColType(col);
+        const type: string = this.getColType(col);
         return type != null ? "col-" + type : "";
     }
 
@@ -358,7 +358,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Get a cell type and format it to be used a dom element class
      */
     getCellTypeStr(col: ColumnDefinition): string {
-        let type: string = this.getColType(col);
+        const type: string = this.getColType(col);
         return type != null ? "cell-" + type : "";
     }
 
@@ -375,7 +375,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     goToPage(p: number, forceRefresh: boolean = false): Promise<Page<any>> {
         this.currentPage = p;
         this.isLoading = true;
-        let getPage: Page<any> | Promise<Page<any>> = this.getPage(this.getPageable(), forceRefresh)
+        const getPage: Page<any> | Promise<Page<any>> = this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
                 this.pageLoaded.emit(page);
@@ -412,6 +412,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Call to refresh from outside
      */
     public refresh(page?: number): Promise<Page<any>> {
+        if (page < 1) throw new Error('page must be >= 1');
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {
@@ -421,10 +422,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     private getPageable(): Pageable {
         this.saveState();
-        let orders: Order[] = [];
+        const orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
-                for (let orderBy of this.lastSortedCol['orderBy']) {
+                for (const orderBy of this.lastSortedCol['orderBy']) {
                     orders.push(new Order(this.lastSortedAsc ? 'ASC' : 'DESC', orderBy));
                 }
             } else {
@@ -448,7 +449,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private saveState() {
-        let currentStep = this.breadcrumbsService.currentStep
+        const currentStep = this.breadcrumbsService.currentStep
         if(currentStep) {
             if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
             this.breadcrumbsService.currentStep.data.tableState[this.hash] = {
@@ -465,7 +466,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     saveSettings() {
-        let pref: TablePreferences = new TablePreferences();
+        const pref: TablePreferences = new TablePreferences();
         pref.colWidths = this.columnDefs.map(col => { return {width: col.width, hidden: col.hidden}; });
         if (this.subRowsDefs) {
             pref.colWidths = pref.colWidths.concat(this.subRowsDefs.map(col => { return {width: col.width, hidden: col.hidden}; }));
@@ -475,9 +476,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     reloadSettings() {
-        let prefStr: string = localStorage.getItem(this.hash);
+        const prefStr: string = localStorage.getItem(this.hash);
         if (prefStr) {
-            let pref: TablePreferences = JSON.parse(prefStr);
+            const pref: TablePreferences = JSON.parse(prefStr);
             this.maxResults = pref.pageSize;
             this.columnDefs.forEach((col, i) => {
                 col.width = pref.colWidths[i]?.width;
@@ -518,9 +519,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    unSelectAll() {
-    }
-
     clearSelection() {
         this.selection = new Set();
         this.emitSelectionChange();
@@ -529,7 +527,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     computeSelectAll() {
         if (this.page && this.page.content) {
-            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
+            const selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
             if (selectedOnCurrentPage.length == this.page.content.length) {
                 this.selectAll = true;
             } else if (selectedOnCurrentPage.length == 0) {
@@ -545,7 +543,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.selectionChange.emit(this.selection);
     }
 
-    onSelectChange(item: Object, selected: boolean) {
+    onSelectChange(item: any, selected: boolean) {
         if (selected) {
             if (item['id']) this.selection.add(item['id']);
         } else {
@@ -555,7 +553,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.emitSelectionChange();
     }
 
-    isSelected(item: Object): boolean {
+    isSelected(item: any): boolean {
         if (!item['id']) {
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
@@ -564,7 +562,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getDefaultSorting() {
-        for (let col of this.columnDefs) {
+        for (const col of this.columnDefs) {
             if (col.defaultSortCol) {
                 this.lastSortedCol = col;
                 this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
@@ -574,7 +572,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     cellEditable(item, col) {
-        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
+        const colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 
@@ -599,8 +597,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     moveDrag(event: MouseEvent) {
         if (this.currentDrag) {
-            let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
-            let nextIndex: number = this.currentDrag.columns.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
+            const leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
+            const nextIndex: number = this.currentDrag.columns.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
             if (leftDragWidth >= 10) {
                 this.currentDrag.columns[this.currentDrag.leftColIndex].width = (leftDragWidth + 0) + 'px';
                 if (this.currentDrag.totalWidth - leftDragWidth < 10 && nextIndex != -1) {
@@ -623,10 +621,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getHash(): string {
-        let username: string = KeycloakService.auth.authz.tokenParsed.name;
-        let stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, 30);
+        const username: string = KeycloakService.auth.authz.tokenParsed.name;
+        const stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, 30);
         return hex;
     }
 
@@ -652,18 +650,18 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
             let completion: Promise<void> = Promise.resolve();
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
-                let pageable: Pageable = this.getPageable();
+                const pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                let getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
+                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
                 completion = completion.then(() => { // load pages sequentially
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
-                            for (let entry of page.content) {
+                            for (const entry of page.content) {
                                 csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
                             }
                         });
                     } else if (getPage instanceof Page) {
-                        for (let entry of getPage.content) {
+                        for (const entry of getPage.content) {
                             csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
                         }
                         return Promise.resolve();

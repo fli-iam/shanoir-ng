@@ -14,10 +14,13 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+
 import { ExtraData } from './extradata.model';
 
 @Injectable()
@@ -51,17 +54,16 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${datatype}`;
         return this.http.post<ExtraData>(url, JSON.stringify(extradata)).toPromise();
     }
         
         
-    postFile(fileToUpload: File,  extraData: ExtraData): Observable<any> {
+    postFile(fileToUpload: File,  extraData: ExtraData): Promise<any> {
         const endpoint = this.getUploadUrl(extraData);
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
-        return this.http
-            .post(endpoint, formData);
+        return firstValueFrom(this.http.post(endpoint, formData));
     }
     	
     getUploadUrl(extraData: ExtraData): string {
@@ -75,21 +77,22 @@ export class ExtraDataService extends EntityService<ExtraData>{
     
         
     deleteExtradata(extradata: ExtraData): Promise<void> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}`;
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}`;
         return this.http.delete<void>(url)
             .toPromise();
     }
     
-    download(extradata:ExtraData): Observable<any>{
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
-        return this.http.get<ExtraData>(url);
+    download(extradata:ExtraData): Promise<any>{
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
+        return firstValueFrom(this.http.get<ExtraData>(url));
     }
     
         
-    updateExtradata(datatype :string, id: number,extradata : ExtraData): Observable<ExtraData> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/`+datatype+`/`+id;
-        return this.http
-        .put<ExtraData>(url, JSON.stringify(extradata));
+    updateExtradata(datatype :string, id: number,extradata : ExtraData): Promise<ExtraData> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examinationId}/`+datatype+`/`+id;
+        return firstValueFrom(
+            this.http.put<ExtraData>(url, JSON.stringify(extradata)).pipe()
+        ); 
     }
     
 }

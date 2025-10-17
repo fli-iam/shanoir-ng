@@ -12,10 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core';
+import {Input, Output, ViewChild, Component, EventEmitter} from '@angular/core';
 
 import { PreclinicalSubject } from '../animalSubject/shared/preclinicalSubject.model';
-import { ModesAware } from "../shared/mode/mode.decorator";
 import { TableComponent } from '../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -27,15 +26,14 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
     standalone: false
 })
 
-@ModesAware
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Input() preclinicalSubject: PreclinicalSubject;
     @Input() mode: Mode;
-    @Output() onEvent = new EventEmitter();
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    @Output() event = new EventEmitter();
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
     public toggleForm: boolean = false;
     public createMode: boolean = false;
     public selectedEntity: T;
@@ -107,7 +105,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         if (subjectEntity && create) {
             this.addEntity(subjectEntity);
         }
-        this.onEvent.emit("create");
+        this.event.emit("create");
         this.table.refresh();
     }
 
@@ -129,7 +127,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
                  entity.splice(entity.indexOf(item), 1);
             }
         }
-        this.onEvent.emit("delete");
+        this.event.emit("delete");
         this.onDelete.next({entity: item});
         this.table.refresh();
     }
@@ -146,7 +144,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         }
     }
 
-    public onRowClick(entity: T) {
+    public onRowClick() {
         // do nothing to avoid wrong route
     }
 }

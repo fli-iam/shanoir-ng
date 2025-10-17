@@ -16,12 +16,13 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
 import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
 
 @Component({
@@ -54,13 +55,6 @@ export class CenterComponent extends EntityComponent<Center> {
         return Selection.fromCenter(this.center);
     }
 
-    init() {
-        super.init();
-        if (this.mode == 'create' && this.breadcrumbsService.currentStep.isPrefilled("entity")) {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.center = res);
-        }
-    }
-
     initView(): Promise<void> {
         return Promise.resolve();
     }
@@ -78,7 +72,7 @@ export class CenterComponent extends EntityComponent<Center> {
         return this.formBuilder.group({
             'name': [this.center.name, [ShanoirValidators.required, ShanoirValidators.minLength(2), ShanoirValidators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],
-            'postalCode': [this.center.postalCode],
+            'postalCode': [this.center.postalCode, [Validators.pattern(/^[0-9]*$/)]],
             'city': [this.center.city],
             'country': [this.center.country],
             'phoneNumber': [this.center.phoneNumber, ShanoirValidators.isPhoneNumber()],

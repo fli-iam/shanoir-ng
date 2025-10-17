@@ -43,7 +43,7 @@ export enum UnitOfMeasure {
 
 } export namespace UnitOfMeasure {
 
-    export function all(): Array<UnitOfMeasure> {
+    export function all(): UnitOfMeasure[] {
         return allOfEnum<UnitOfMeasure>(UnitOfMeasure);
     }
 
@@ -115,5 +115,5 @@ export enum UnitOfMeasure {
         }
     }
 
-    export var options: Option<UnitOfMeasure>[] = all().map(prop => new Option<UnitOfMeasure>(prop, getLabel(prop)));
+    export const options: Option<UnitOfMeasure>[] = all().map(prop => new Option<UnitOfMeasure>(prop, getLabel(prop)));
 }

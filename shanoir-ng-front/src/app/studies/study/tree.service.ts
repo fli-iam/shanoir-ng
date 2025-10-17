@@ -14,30 +14,31 @@
 
 import { Injectable } from "@angular/core";
 import { ActivatedRoute, ActivationStart, Router } from '@angular/router';
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-import { Center } from 'src/app/centers/shared/center.model';
-import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { Examination } from 'src/app/examinations/shared/examination.model';
-import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
-import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
-import { Subject } from "src/app/subjects/shared/subject.model";
-import { User } from 'src/app/users/shared/user.model';
-import { Study } from "../shared/study.model";
-
 import { Subject as RxjsSubject } from 'rxjs';
+
+import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Center } from 'src/app/centers/shared/center.model';
 import { Coil } from "src/app/coils/shared/coil.model";
 import { CoilService } from "src/app/coils/shared/coil.service";
+import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { Examination } from 'src/app/examinations/shared/examination.model';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
+import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
+import { Subject } from "src/app/subjects/shared/subject.model";
+import { User } from 'src/app/users/shared/user.model';
+
+import { SuperPromise } from '../../utils/super-promise';
+import { Study } from "../shared/study.model";
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
@@ -128,7 +129,7 @@ export class TreeService {
                     this.reopenAfterNavigation = false;
                 }
                 setTimeout(() => {
-                    let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
+                    const newState: boolean = event?.snapshot?.data?.['treeAvailable'];
                     if (newState && !this.treeAvailable) {
                         this.treeAvailable = true;
                     } else if (!newState && this.treeAvailable) {
@@ -141,7 +142,7 @@ export class TreeService {
 
     updateTree() {
         // update everything
-        let studyId: number = this.study?.id;
+        const studyId: number = this.study?.id;
         this.study = null;
         this.initStudy(studyId).then(() => {
             this.changeSelection();
@@ -155,7 +156,7 @@ export class TreeService {
     private collapseNode(node: ShanoirNode, collapseRoot: boolean = true): Promise<void> {
         return Promise.all(
             Object.getOwnPropertyNames(node).map(propLabel => {
-                let prop = node[propLabel];
+                const prop = node[propLabel];
                 if (prop instanceof ShanoirNode && propLabel != 'parent') {
                     return this.collapseNode(prop);
                 } else if (Array.isArray(prop) && prop[0] instanceof ShanoirNode) {
@@ -185,9 +186,9 @@ export class TreeService {
     removeCurrentNode() {
         if (this.selectedNode?.parent) {
             const route: string = this.selectedNode.route;
-            Object.entries(this.selectedNode.parent).forEach((entry, index) => {
+            Object.entries(this.selectedNode.parent).forEach((entry, ) => {
                 if (Array.isArray(entry[1])) {
-                    let i: number = entry[1].findIndex(node => node.route == route);
+                    const i: number = entry[1].findIndex(node => node.route == route);
                     entry[1].splice(i, 1);
                 }
             });
@@ -273,7 +274,7 @@ export class TreeService {
             node = this.selectCoil(selection.entity as Coil);
         } else node = Promise.resolve(null);
         node.then(n => {
-            if(!!n) n.fake = false;
+            if(n) n.fake = false;
         });
         return node;
     }
@@ -283,7 +284,7 @@ export class TreeService {
             return this.studyNode.subjectsNode.open().then(() => {
                 return this.findDatasetChainFromBottomDataset(dataset).then(ret => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
                             return sn.id == ret.subjectId;
                         });
                         if (subjectNode) {
@@ -291,17 +292,17 @@ export class TreeService {
                             this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
-                                    let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.examId);
+                                    const examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.examId);
                                     if (examNode) {
                                         this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
-                                                let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.acqId);
+                                                const acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.acqId);
                                                 if (acqNode) {
                                                     this.scrollTo(acqNode);
                                                     return acqNode.open()?.then(() => {
                                                         if (acqNode.datasets != UNLOADED) {
-                                                            let dsNode: DatasetNode = acqNode.datasets?.find(acqDs => acqDs.id == ret.id);
+                                                            const dsNode: DatasetNode = acqNode.datasets?.find(acqDs => acqDs.id == ret.id);
                                                             if (dsNode) {
                                                                 this.scrollTo(dsNode);
                                                                 return dsNode.open().then(() => {
@@ -326,13 +327,13 @@ export class TreeService {
     private openDatasetProcessingChain(dsNode: DatasetNode, chain: DatasetForChain): any {
         if (chain.outProcessing) { // if sub processing/datasets 
             if (dsNode.processings != UNLOADED) {
-                let procNode: ProcessingNode = dsNode.processings.find(proc => {
+                const procNode: ProcessingNode = dsNode.processings.find(proc => {
                     return proc.id == chain.outProcessing.id;
                 });
                 if (procNode) {
                     return procNode.open().then(() => {
                         if (procNode.datasets != UNLOADED) {
-                            let childDsNode: DatasetNode = procNode.datasets?.find(dsNd => dsNd.id == chain.outProcessing?.outDataset?.id);
+                            const childDsNode: DatasetNode = procNode.datasets?.find(dsNd => dsNd.id == chain.outProcessing?.outDataset?.id);
                             return this.openDatasetProcessingChain(childDsNode, chain.outProcessing.outDataset);
                         }
                     });
@@ -359,10 +360,10 @@ export class TreeService {
             datasetPromise = Promise.resolve(dataset);
         }
         return datasetPromise.then(ds => {
-            if (ds.hasProcessing) {
+            if (ds?.hasProcessing) {
                 return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
-                return Promise.resolve({id: ds.id,
+                return Promise.resolve({id: ds?.id,
                     acqId: ds.datasetAcquisition?.id,
                     examId: ds.datasetAcquisition?.examination?.id,
                     subjectId: ds.datasetAcquisition?.examination?.subject?.id || ds.subject?.id,
@@ -372,7 +373,6 @@ export class TreeService {
     }
 
     private findDatasetChain(bottomChain: DatasetForChain): Promise<DatasetForChain> {
-        let childDatasetPromise: Promise<Dataset>;
         if (!bottomChain) return Promise.reject('cannot have null or undefined as input');
         return this.datasetService.get(bottomChain.id).then(ds => {
             if (ds.hasProcessing) {
@@ -395,7 +395,7 @@ export class TreeService {
             processingPromise = Promise.resolve(processing);
         }
         return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
@@ -416,12 +416,12 @@ export class TreeService {
                 }
                 return acqPromise.then(dsa => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
                         if (subjectNode) {
                             this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
-                                    let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
+                                    const examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
                                     if (examNode) {
                                         this.scrollTo(examNode);
                                         return examNode.open().then(() => {
@@ -450,7 +450,7 @@ export class TreeService {
                 }
                 return examPromise.then(exam => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
                         if (subjectNode) {
                             this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
@@ -493,7 +493,7 @@ export class TreeService {
                     : Promise.resolve(equipment)
                 ).then(acqEq => {
                     if (this.studyNode.centersNode.centers != UNLOADED) {
-                        let centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => acqEq.center.id == cn.id);
+                        const centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => acqEq.center.id == cn.id);
                         return centerNode?.open().then(() => {
                             if (centerNode.acquisitionEquipments != UNLOADED) {
                                 return centerNode.acquisitionEquipments?.find(aen => aen.id == acqEq.id);
@@ -513,7 +513,7 @@ export class TreeService {
                     : Promise.resolve(coil)
                 ).then(coil => {
                     if (this.studyNode.centersNode.centers != UNLOADED) {
-                        let centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => coil.center.id == cn.id);
+                        const centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => coil.center.id == cn.id);
                         return centerNode?.open().then(() => {
                             if (centerNode.coils != UNLOADED) {
                                 return centerNode.coils?.find(cn => cn.id == coil.id);
@@ -563,13 +563,13 @@ export class TreeService {
             this.studyLoading = true;
             this.studyNodeOpenPromise = new SuperPromise(); 
             this.studyNodeInit = new SuperPromise();
-            let studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
+            const studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
                 this.study = study;
                 this.studyPromise = new SuperPromise();
                 this.studyPromise.resolve(study);
             });
 
-            let rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
+            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
                 ? Promise.resolve(StudyUserRight.all())
                 : this.studyRightsService.getMyRightsForStudy(id)
             ).then(rights => {
@@ -592,7 +592,7 @@ export class TreeService {
     }
 
     public buildStudyNode(study: Study, rights: StudyUserRight[]): StudyNode {
-        let studyNode: StudyNode = new StudyNode(
+        const studyNode: StudyNode = new StudyNode(
             null,
             study.id,
             study.name,
@@ -604,7 +604,7 @@ export class TreeService {
             rights
         );
             
-        let subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
+        const subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
             if(subjectStudy.subject.preclinical){
                 return PreclinicalSubjectNode.fromSubjectStudy(
                     subjectStudy, 
@@ -624,12 +624,12 @@ export class TreeService {
             s.fake = !this.isSelected(s.id, 'subject');
             return s;
         });
-        let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
+        const centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
             return new CenterNode(studyNode, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
         });
-        let members: MemberNode[] = study.studyUserList.map(studyUser => {
+        const members: MemberNode[] = study.studyUserList.map(studyUser => {
             let memberNode: MemberNode = null;
-            let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
+            const rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
             memberNode = new MemberNode(studyNode, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
             memberNode.fake = !this.isSelected(memberNode.id, 'user');
             return memberNode;

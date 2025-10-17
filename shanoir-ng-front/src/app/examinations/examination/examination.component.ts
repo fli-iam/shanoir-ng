@@ -11,18 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild} from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AbstractControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
@@ -30,10 +32,9 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
+import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {Subject} from "../../subjects/shared/subject.model";
 
 @Component({
     selector: 'examination-detail',
@@ -55,10 +56,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    pattern: string = '[^:|<>&\/]+';
+    pattern: RegExp = /[^:|<>&/]+/;
     downloadState: TaskState = new TaskState();
     dateDisplay = dateDisplay;
-    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    datasetIds: Promise<number[]> = new Promise(() => { return; });
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
@@ -66,6 +67,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    private studyFirstChange: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -97,21 +99,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         return Selection.fromExamination(this.examination);
     }
 
-    set entity(exam: Examination) {
-        super.entity = exam;
-        this.getSubjects();
-    }
-
-    get entity(): Examination {
-        return super.entity;
-    }
-
-    init() {
-        super.init();
-        if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.examination = res);
-        }
-    }
 
     initView(): Promise<void> {
         if(!this.examination.weightUnitOfMeasure){
@@ -132,37 +119,78 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     initEdit(): Promise<void> {
-        this.getCenters();
         this.getStudies();
-
+        this.getSubjects(this.examination.study?.id);
+        this.getCenters(this.examination.study?.id);
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.getSubjects();
         return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
-        this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
-
         return Promise.resolve();
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
-            'subject': [{value: this.examination.subject, disabled: this.inImport}, Validators.required],
-            'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
-            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
+            'subject': [{value: this.examination.subject, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+        const examinationDateCtrl: AbstractControl = form.get('examinationDate');
+        this.subscriptions.push(
+            examinationDateCtrl.valueChanges.subscribe(value => {
+                if (value && this.inImport && examinationDateCtrl.enabled) examinationDateCtrl.disable();
+            }),
+            form.get('study').valueChanges.subscribe(value => {
+                if (this.inImport) {
+                    this.fillSubjectsAndCentersWithPrefilled();
+                    return;
+                }
+                if (!this.studyFirstChange) {
+                    this.examination.subject = null;
+                    this.examination.center = null;
+                    if (value?.id) {
+                        this.getSubjects(value.id);
+                        this.getCenters(value.id);
+                        if (form.get('subject').disabled) form.get('subject').enable();
+                        if (form.get('center').disabled) form.get('center').enable();
+                    } else {
+                        this.centers = [];
+                        this.subjects = [];
+                        if (form.get('subject').enabled) form.get('subject').disable();
+                        if (form.get('center').enabled) form.get('center').disable();
+                    }
+                }
+                this.studyFirstChange = false;
+            })
+        );
+        return form;
+    }
+
+    private fillSubjectsAndCentersWithPrefilled() {
+        if (!(this.subjects?.length > 0) && this.entity?.subject) {
+            if (this.entity.subject instanceof Subject) {
+                this.subjects = [this.entity.subject];
+            } else {
+                const sub = new Subject();
+                sub.id = this.entity.subject.id;
+                sub.name = this.entity.subject.name;
+                this.subjects = [sub];
+            }
+        }
+        if (!(this.centers?.length > 0) && this.entity?.center) {
+            this.centers = [{id: this.entity.center.id, name: this.entity.center.name} as IdName];
+        }
     }
 
     downloadAll() {
@@ -177,9 +205,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    getCenters(): void {
+    getCenters(studyId: number): void {
         this.centerService
-            .getCentersNames()
+            .getCentersNamesByStudyId(studyId)
             .then(centers => {
                 this.centers = centers;
             });
@@ -193,10 +221,9 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             });
     }
 
-    getSubjects(): void {
-        if (!this.examination || !this.examination.study) return;
+    getSubjects(studyId: number): void {
         this.studyService
-            .findSubjectsByStudyId(this.examination.study.id)
+            .findSubjectsByStudyId(studyId)
             .then(subjects => this.subjects = subjects);
     }
 
@@ -206,10 +233,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         } else {
             return '/subject/details/'+ this.examination.subject?.id;
         }
-    }
-
-    onStudyChange() {
-        this.getSubjects();
     }
 
     public async hasEditRight(): Promise<boolean> {
@@ -232,7 +255,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
         this.form.markAsDirty();
@@ -240,10 +263,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public save(): Promise<Examination> {
-        return super.save( () => {
-            let uploads: Promise<void>[] = [];
+        return super.save(() => {
+            const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
+            for (const file of this.files) {
                 uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
             return Promise.all(uploads).then(() => null);
@@ -262,15 +285,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
-    ngOnDestroy() {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.examination);
-
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
-        }
-    }
-
+    
     downloadFile(file) {
         this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }

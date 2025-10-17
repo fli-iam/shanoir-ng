@@ -28,8 +28,8 @@ export class ImportJob {
     studyCardId: number;
     acquisitionEquipmentId: number;
     archive: string;
-    subjectName: String;
-    studyName: String;
+    subjectName: string;
+    studyName: string;
     userId: number;
     centerId: number;
     anonymisationProfileToUse: string;

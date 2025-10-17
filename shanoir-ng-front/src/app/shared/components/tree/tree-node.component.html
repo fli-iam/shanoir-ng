@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="fa fa-cog fa-spin"></div>
     </span>
     <a *ngIf="!dataLoading && pictoUrl" [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
-        <img class="picto" src="{{pictoUrl}}" />
+        <img class="picto" src="{{pictoUrl}}" alt="node pictogram"/>
     </a>
     <a *ngIf="!dataLoading && awesome" [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
         <i class="{{awesome}}"></i>
