@@ -23,7 +23,6 @@ import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
 import { PathologyService } from '../../pathology/shared/pathology.service';
 import { slideDown } from '../../../../shared/animations/animations';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 
@@ -34,7 +33,6 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{
 
     pathologies: Pathology[];
@@ -88,7 +86,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             'name': [this.model.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'pathology': [this.model.pathology, Validators.required],
             'comment': [this.model.comment],
-            'specifications': [this.model.filename]
+            'filename': [this.model.filename]
         });
     }
 

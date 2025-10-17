@@ -23,7 +23,6 @@ import { PhysiologicalData }    from '../shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
@@ -34,10 +33,9 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
 
-    @Input() examination_id:number;
+    @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
     @Input() canModify: boolean = false;
     @Output() physioDataReady = new EventEmitter();
@@ -62,7 +60,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     protected fetchEntity: () => Promise<PhysiologicalData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
             return this.getExaminationExtraDatas(extradatas);
         });
     }

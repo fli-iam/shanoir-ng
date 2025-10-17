@@ -1,0 +1,106 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component">
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(back)="goBack()"
+			></form-footer>
+			<span>
+				@switch (mode) {
+					@case ('view') {
+						<h2 class="header command-zone">Details on subject pathology</h2>
+					} 
+					@case ('edit') {
+						<h2 class="header command-zone">Edit subject pathology</h2>
+					} 
+					@case ('create') {
+						<h2 class="header command-zone">Create a pathology record for a subject</h2>
+					}
+				}
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label>Pathology</label>
+						<span class="right-col">
+							@if (mode != 'view') {
+								<select-box [optionArr]="pathologies" (userChange)="refreshModelsByPathology($event)"></select-box>
+							}
+						</span>
+					</li>
+					<li>
+						<label>Model</label>
+						<span class="right-col">
+							@switch (mode) {
+								@case ('view') {
+									{{subjectPathology?.pathologyModel?.name}}
+								}
+								@default {
+									<select-box formControlName="pathologyModel" [optionArr]="displayedModels" (newOption)="isUserAdmin() ? goToAddPathologyModel() : null"></select-box>
+									<label *ngIf="hasError('pathologyModel', ['required'])" [@slideDown]="hasError('pathologyModel', ['required'])" class="form-validation-alert">Pathology model is required!</label>
+								}
+							}
+						</span>
+					</li>
+					<li>
+						<label>Location</label>
+						<span class="right-col">
+							@switch (mode) {
+								@case ('view') {
+									{{subjectPathology?.location?.value}}
+								}
+								@default {
+									<select-box formControlName="location" [optionArr]="locations" (newOption)="isUserAdmin() ? goToAddLocation() : null"></select-box>
+									<label *ngIf="hasError('location', ['required'])" [@slideDown]="hasError('location', ['required'])" class="form-validation-alert">Location is required!</label>
+								}
+							}
+						</span>
+					</li>
+					<li>
+						<label>Start Date</label>
+						<span class="right-col">
+							@switch (mode) {
+								@case ('view') {
+									{{subjectPathology?.startDate | date:'shortDate'}}
+								}
+								@default {
+									<datepicker formControlName="startDate"></datepicker>
+									<label *ngIf="hasError('startDate', ['date-format'])" [@slideDown]="hasError('startDate', ['date-format'])" class="form-validation-alert">Start date is required!</label>
+								}
+							}
+						</span>
+					</li>
+					<li>
+						<label>End Date</label>
+						<span class="right-col">
+							@switch (mode) {
+								@case ('view') {
+									{{subjectPathology?.endDate | date:'shortDate'}}
+								}
+								@default {
+									<datepicker formControlName="endDate"></datepicker>
+									<label *ngIf="hasError('endDate', ['date-format'])" [@slideDown]="hasError('endDate', ['date-format'])" class="form-validation-alert">End date is required!</label>
+								}
+							}
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+		</div>
+	</form>
+</div>

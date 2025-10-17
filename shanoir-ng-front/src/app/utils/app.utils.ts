@@ -393,6 +393,16 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
+@Pipe({
+    name: 'camel',
+    standalone: false
+})
+export class CamelPipe implements PipeTransform {
+    transform(value: string): any {
+        return capitalsAndUnderscoresToDisplayable(value);
+    }
+}
+
 export function camelToSpaces(str: string): string {
     return str
         // insert a space before all caps
@@ -442,9 +452,9 @@ function deepEquals(x, y) {
 };
 
 export function objectsEqual(value1, value2) {
-    if (value1 == value2) return true;
-    else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+    if (value1 === value2) return true;
+    else if (value1 && value2 && value1.id && value2.id) return value1.id === value2.id;
+    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals === 'function' && typeof value2.equals === 'function') return value1.equals(value2);
     else return deepEquals(value1, value2);
 }
 

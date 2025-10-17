@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
+import org.shanoir.ng.shared.exception.EntityLinkedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Manufacturer model service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -127,10 +129,14 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 		return repository.save(entityDb);
 	}
 
-	public void deleteById(final Long id) throws EntityNotFoundException  {
+	public void deleteById(final Long id) throws EntityNotFoundException, EntityLinkedException {
 		final Optional<Manufacturer> entity = repository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-		repository.deleteById(id);
+		try {
+			repository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new EntityLinkedException("Cannot delete entity with id = " + id + " because it is linked to other entities.", e);
+		}
 	}
 
 }

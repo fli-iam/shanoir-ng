@@ -83,12 +83,12 @@ export class BrukerUploadComponent {
         this.fileToUpload = file.item(0);
     	this.uploadProgress = 1;
     	this.importBrukerService.postFile(this.fileToUpload)
-        	.subscribe(res => {
+        	.then(res => {
     			this.archive = this.fileToUpload.name;
     			this.uploadProgress = 3;
                         this.archiveFolder = res.substring(res.indexOf(".") + 1, res.indexOf(".converted.zip"));
     			this.importBrukerService.importDicomFile(res)
-            		.subscribe((patientDicomList: ImportJob) => {
+            		.then((patientDicomList: ImportJob) => {
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                         this.importDataService.archiveUploaded = patientDicomList;
                         this.importDataService.patientList = patientDicomList;
