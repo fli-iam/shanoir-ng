@@ -108,6 +108,9 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected prefillSubject() {
+        const subjectStudy = new SubjectStudy();
+        subjectStudy.study = this.study;
+        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {

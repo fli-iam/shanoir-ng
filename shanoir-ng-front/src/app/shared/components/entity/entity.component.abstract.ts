@@ -65,7 +65,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
     static ActivateTreeOnThisPage: boolean = true;
-    getOnDeleteConfirmMessage?(entity: Entity): string;
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
     protected destroy$: Subject<void> = new Subject<void>();
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;

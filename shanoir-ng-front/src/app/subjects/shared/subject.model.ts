@@ -44,7 +44,7 @@ export class Subject extends Entity {
     @Field() tags: Tag[];
     @Field() qualityTag: QualityTag;
     @Field() study: Study;
-    studyId: number;
+    @Field() studyId: number;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
         const subject = new Subject();
