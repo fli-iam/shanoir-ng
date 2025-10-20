@@ -20,9 +20,9 @@ import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
-import {Profile} from '../../shared/models/profile.model';
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
+import { Profile } from '../../shared/models/profile.model';
+import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
+import { SubjectDTO } from "../../subjects/shared/subject.dto";
 
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
