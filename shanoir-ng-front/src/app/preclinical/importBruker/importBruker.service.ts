@@ -12,30 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { ImportJob } from '../../import/shared/dicom-data.model';
-import * as PreclinicalUtils from '../utils/preclinical.utils';
 import * as AppUtils from '../../utils/app.utils';
+import * as PreclinicalUtils from '../utils/preclinical.utils';
 
 @Injectable()
 export class ImportBrukerService {
 
     constructor(private http: HttpClient) { }
 
-     postFile(fileToUpload: File): Observable<string> {
+     postFile(fileToUpload: File): Promise<string> {
         const endpoint = PreclinicalUtils.PRECLINICAL_API_BRUKER_UPLOAD;
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
         const options = {responseType: 'text' as const};
-        return this.http
-            .post(endpoint, formData, options);
+        return firstValueFrom(this.http.post(endpoint, formData, options));
     }
     
-    importDicomFile(filePath: string): Observable<ImportJob> {
-        return this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath);
+    importDicomFile(filePath: string): Promise<ImportJob> {
+        return firstValueFrom(this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath));
     }
     
 }

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -33,8 +33,9 @@ import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 
 @Directive()
-export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
+export abstract class EntityListComponent<T extends Entity> implements OnInit, OnDestroy {
 
+    @Input() embedded: boolean = false;
     abstract table: TableComponent;
     columnDefs: ColumnDefinition[];
     customActionDefs: any[];
@@ -77,8 +78,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
-        this.breadcrumbsService.markMilestone();
-        this.breadcrumbsService.nameStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');
+    }
+    
+    ngOnInit(): void {
+        if (!this.embedded) {
+            this.breadcrumbsService.markMilestone();
+            this.breadcrumbsService.nameStep(capitalizeFirstLetter(this.ROUTING_NAME) + ' list');
+        }
     }
 
     private computeOptions() {
@@ -124,37 +130,38 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
         const studyListStr = this.getOnDeleteConfirmMessage(entity);
-        this.confirmDialogService
-            .confirm(
+        this.confirmDialogService.confirm(
                 dialogTitle,
                 dialogMsg + studyListStr
             ).then(res => {
-            if (res) {
-                this.getService().delete(entity.id).then(() => {
-                    this.onDelete.next({entity: entity});
-                    this.table.refresh().then(() => {
-                        if (this.ROUTING_NAME == 'examination') {
-                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
-                        } else {
-                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
-                        }
+                if (res) {
+                    this.getService().delete(entity.id).then(() => {
+                        this.onDelete.next({entity: entity});
+                        setTimeout(() => {
+                            this.table.refresh().then(() => {
+                                if (this.ROUTING_NAME == 'examination') {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                                } else {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
+                                }
+                            });
+                        }, 1000);
+                        this.treeService.updateTree();
                     });
-                    this.treeService.updateTree();
-                }).catch(reason => {
-                    if (!reason){
-                        return;
-                    }
-                    if (reason instanceof ShanoirError && reason.code == 422) {
-                        this.dealWithDeleteError(reason, entity);
-                        return;
-                    } else if (reason.error){
-                        this.dealWithDeleteError(new ShanoirError(reason), entity);
-                        return;
-                    }
-                    throw Error(reason);
-                });
-            }
-        })
+                }
+            }).catch(reason => {
+                if (!reason){
+                    return;
+                }
+                if (reason instanceof ShanoirError && reason.code == 422) {
+                    this.dealWithDeleteError(reason, entity);
+                    return;
+                } else if (reason.error){
+                    this.dealWithDeleteError(new ShanoirError(reason), entity);
+                    return;
+                }
+                throw Error(reason);
+        });
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {
@@ -170,7 +177,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
      * Can be overriden to set options
      */
     protected getOptions(): any {
-        return {};
+        return { };
     }
 
     /**

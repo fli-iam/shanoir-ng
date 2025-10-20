@@ -50,7 +50,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    selectedStudy: IdName;
     //isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
@@ -109,8 +108,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     init() {
         super.init();
         if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => this.firstName = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => this.lastName = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => {
+                this.firstName = res;
+                this.form.get('firstName').setValue(this.firstName);
+            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => {
+                this.lastName = res;
+                this.form.get('lastName').setValue(this.lastName);
+            });
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
@@ -153,7 +158,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         this.subject = new Subject();
         this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
         return Promise.resolve();
     }
 
@@ -168,7 +172,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'studyIdentifier': [this.subject.studyIdentifier],
+            'studyIdentifier': [this.subject.identifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
             'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
@@ -184,6 +188,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         );
         this.subscriptions.push(
             subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(() => {
+                this.toggleAnonymised();
                 this.updateFormControl(subjectForm);
             })
         );
@@ -195,9 +200,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     public onSelectStudy() {
-        this.studyService.get(this.selectedStudy?.id).then( study => {
+        this.studyService.get(this.subject.study?.id).then(study => {
             this.subject.study = study;
-            this.studyService.getTagsFromStudyId(this.selectedStudy.id).then(tags => {
+            this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
                 this.subject.study.tags = tags ? tags : [];
             })
         });
@@ -259,8 +264,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             });
     }
 
-    findStudyName(): string {
-        return this.studies.find(study => study.id === this.subject.study.id)?.name;
+    studyNameForSubject() {
+        this.studies = this.studies.filter(s => s.id == this.entity.study.id);
+        return this.studies[0] ? this.studies[0].name : "";
     }
 
     private generateSubjectIdentifier(): string {
@@ -316,14 +322,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     ngOnDestroy() {
+        super.ngOnDestroy();
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
         this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.subject);
-
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     getFontColor(colorInp: string): boolean {

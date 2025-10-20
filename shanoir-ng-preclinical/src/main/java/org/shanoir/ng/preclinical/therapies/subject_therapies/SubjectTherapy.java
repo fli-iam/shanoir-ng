@@ -50,29 +50,22 @@ public class SubjectTherapy extends HalEntity {
 	@JsonManagedReference
 	private AnimalSubject animalSubject = null;
 
-	@JsonProperty("therapy")
 	@ManyToOne
 	@NotNull
 	private Therapy therapy = null;
 
-	@JsonProperty("startDate")
 	private Date startDate = null;
 
-	@JsonProperty("endDate")
 	private Date endDate = null;
 
-	@JsonProperty("dose")
 	private Double dose;
 
-	@JsonProperty("dose_unit")
 	// @RefValueExists
 	@ManyToOne
 	private Reference doseUnit = null;
 
-	@JsonProperty("frequency")
 	private String frequency;
 
-	@JsonProperty("molecule")
 	private String molecule;
 
 	/**

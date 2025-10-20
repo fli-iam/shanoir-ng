@@ -15,7 +15,8 @@
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
@@ -53,15 +54,8 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     initCreate(): Promise<void> {
-        this.entity = new Manufacturer();
+        this.manuf = new Manufacturer();
         return Promise.resolve();
-    }
-
-    getManufacturer(): Promise<void> {
-        return this.manufService.get(this.id)
-            .then(manuf => {
-                this.manuf = manuf;
-            });
     }
 
     buildForm(): UntypedFormGroup {
