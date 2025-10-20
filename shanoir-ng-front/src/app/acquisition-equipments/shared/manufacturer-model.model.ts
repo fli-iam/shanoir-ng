@@ -15,13 +15,14 @@
 
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { Field } from '../../shared/reflect/field.decorator';
 
 import { Manufacturer } from './manufacturer.model';
 
 export class ManufacturerModel extends Entity {
-    id: number;
-    name: string;
-    manufacturer: Manufacturer;
-    magneticField: number;
-    datasetModalityType: DatasetModalityType;
+    @Field() id: number;
+    @Field() name: string;
+    @Field() manufacturer: Manufacturer;
+    @Field() magneticField: number;
+    @Field() datasetModalityType: DatasetModalityType;
 }

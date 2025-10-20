@@ -21,7 +21,6 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
-import { ModesAware } from '../../../shared/mode/mode.decorator';
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
 
@@ -33,7 +32,6 @@ import { TherapyService } from '../shared/therapy.service';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     TherapyType = TherapyType;

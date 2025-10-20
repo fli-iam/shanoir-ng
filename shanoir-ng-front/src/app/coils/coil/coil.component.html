@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" formControlName="name" [(ngModel)]="coil.name" />
+								<input type="text" id="name" formControlName="name"/>
 							</ng-template>
 						</span>
 					</li>
@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.serialNumber}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="serialNb" formControlName="serialNb" [(ngModel)]="coil.serialNumber" />
+								<input type="text" id="serialNb" formControlName="serialNumber"/>
 							</ng-template>
 						</span>
 					</li>
@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.coilType}}
 							</ng-template>
 								<ng-template ngSwitchDefault>
-								<select-box [formControl]="form.controls['coilType']" [(ngModel)]="coil.coilType" [optionArr]="coilTypes">
+								<select-box formControlName="coilType" [optionArr]="coilTypes">
 								</select-box>
 							</ng-template>
 						</span>
@@ -77,7 +77,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.numberOfChannels}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="nbChannel" formControlName="nbChannel" [(ngModel)]="coil.numberOfChannels" />
+								<input type="number" min="0" step="1" id="nbChannel" formControlName="numberOfChannels" />
 							</ng-template>
 						</span>
 					</li>
@@ -92,10 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template ngSwitchDefault>
 								<select-box
 										(newClick)="openNewCenter()"
-										[newDisabled]="prefilledCenter"
-                                        [formControl]="form.controls['center']"
-										[(ngModel)]="coil.center"
-										(ngModelChange)="updateManufList($event?.id)"
+                                        formControlName="center"
 										[optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
@@ -112,10 +109,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box
-										formControlName="acquiEquipModel"
-										[(ngModel)]="coil.manufacturerModel"
+										formControlName="manufacturerModel"
 										(newClick)="openNewManufModel()"
-										[newDisabled]="!coil.center || prefilledManuf"
 										[optionArr]="manufModels"
 										[pipe]="manufModelPipe">
 								</select-box>

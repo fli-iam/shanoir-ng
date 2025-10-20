@@ -17,6 +17,9 @@ import {  ActivatedRoute} from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
+import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
+import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -25,9 +28,6 @@ import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Enum } from "../../../../shared/utils/enum";
-import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 
 @Component({
@@ -35,7 +35,6 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
     templateUrl: 'examinationAnesthetic-form.component.html',
     standalone: false
 })
-@ModesAware
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
 
     @Input() isStandalone: boolean = false;
@@ -43,9 +42,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     @Output() examAnestheticChange = new EventEmitter();
     //examinationAnesthetic : ExaminationAnesthetic;
     anesthetics: Anesthetic[] = [];
-    sites: Enum[] = [];
-    intervals: Enum[] = [];
-    injtypes: Enum[] = [];
+    sites: InjectionSite[] = [];
+    intervals: InjectionInterval[] = [];
+    injtypes: InjectionType[] = [];
     units: Reference[] = [];
     references: Reference[] = [];
     selectedStartDate: string = null;
@@ -55,8 +54,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private route: ActivatedRoute,
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
-        private anestheticService: AnestheticService,
-        public enumUtils: EnumUtils) 
+        private anestheticService: AnestheticService) 
     {
         super(route, 'preclinical-examination-anesthetics');
     }
@@ -73,7 +71,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             if (examAnesthetics && examAnesthetics.length > 0) {
                 //Should be only one
                 const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                examAnesthetic.internal_id = examAnesthetic.id;
+                examAnesthetic.internalId = examAnesthetic.id;
                 return examAnesthetic;
             }
         });
@@ -90,7 +88,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         return this.loadData().then(() => {
             //Should be only one
-            this.examinationAnesthetic.dose_unit = this.getReferenceById(this.examinationAnesthetic.dose_unit);
+            this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
             this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
 
         });
@@ -100,21 +98,27 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         this.loadData();
         this.examinationAnesthetic = new ExaminationAnesthetic();
-        this.examinationAnesthetic.examination_id = this.id;
+        this.examinationAnesthetic.examinationId = this.id;
         return Promise.resolve();
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'anesthetic': [this.examinationAnesthetic.anesthetic],
-            'injectionInterval': [this.examinationAnesthetic.injection_interval],
-            'injectionSite': [this.examinationAnesthetic.injection_site],
-            'injectionType': [this.examinationAnesthetic.injection_type],
+            'injectionInterval': [this.examinationAnesthetic.injectionInterval],
+            'injectionSite': [this.examinationAnesthetic.injectionSite],
+            'injectionType': [this.examinationAnesthetic.injectionType],
             'dose': [this.examinationAnesthetic.dose],
-            'dose_unit': [this.examinationAnesthetic.dose_unit],
+            'doseUnit': [this.examinationAnesthetic.doseUnit],
             'startDate': [this.examinationAnesthetic.startDate],
             'endDate': [this.examinationAnesthetic.endDate]
         });
+        this.subscriptions.push(
+            form.valueChanges.subscribe(() => {
+                this.eaChange();
+            })
+        );
+        return form;
     }
 
 
@@ -138,9 +142,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     getEnums(): void {
-        this.intervals = this.enumUtils.getEnumArrayFor('InjectionInterval');
-        this.sites = this.enumUtils.getEnumArrayFor('InjectionSite');
-        this.injtypes = this.enumUtils.getEnumArrayFor('InjectionType');
+        this.intervals = InjectionInterval.all();
+        this.sites = InjectionSite.all();
+        this.injtypes = InjectionType.all();
     }
     
 
@@ -167,7 +171,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
     
     
-    eaChange(){
+    eaChange() {
         if(!this.isStandalone && this.examinationAnesthetic) {
             this.examAnestheticChange.emit(this.examinationAnesthetic);
         }       
@@ -175,7 +179,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     
 
-    goToAddAnesthetic(){
+    goToAddAnesthetic() {
         this.router.navigate(['/preclinical-anesthetic/create']);
     }
 
@@ -201,12 +205,12 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         if (!this.examinationAnesthetic) { 
             return Promise.resolve(null); 
         } else {
-            return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic));
+            return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examinationId, this.examinationAnesthetic));
         }
     }
 
     updateExaminationAnesthetic(): Promise<ExaminationAnesthetic> {
-        return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic).then(() => this.examinationAnesthetic);
+        return this.examAnestheticService.update(this.examinationAnesthetic.examinationId, this.examinationAnesthetic).then(() => this.examinationAnesthetic);
     }
 
     public async hasDeleteRight(): Promise<boolean> {
