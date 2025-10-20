@@ -22,6 +22,7 @@ import { Study } from "../../studies/shared/study.model";
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { Subject } from './subject.model';
 import { Sex, SubjectType } from './subject.types';
+import {Field} from "../../shared/reflect/field.decorator";
 
 
 @Injectable()
@@ -69,7 +70,7 @@ export class SubjectDTOService {
         entity.manualHemisphericDominance = dto.manualHemisphericDominance;
         entity.imagedObjectCategory = dto.imagedObjectCategory;
         entity.sex = dto.sex;
-        entity.identifier = dto.studyIdentifier;
+        entity.studyIdentifier = dto.studyIdentifier;
         entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
         entity.subjectType = dto.subjectType;
         entity.physicallyInvolved = dto.physicallyInvolved;
@@ -123,7 +124,7 @@ export class SubjectDTO {
         this.sex = subject.sex;
         this.selected = subject.selected;
         this.preclinical = subject.preclinical;
-        this.studyIdentifier = subject.identifier;
+        this.studyIdentifier = subject.studyIdentifier;
         this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
         this.subjectType = subject.subjectType;
         this.physicallyInvolved = subject.physicallyInvolved;

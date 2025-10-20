@@ -172,7 +172,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'studyIdentifier': [this.subject.identifier],
+            'studyIdentifier': [this.subject.studyIdentifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
             'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],

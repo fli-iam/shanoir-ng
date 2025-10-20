@@ -36,6 +36,7 @@ export class Subject extends Entity {
     @Field() imagedObjectCategory: ImagedObjectCategory;
     @Field() sex: Sex;
     @Field() selected: boolean = false;
+    @Field() studyIdentifier: string;
     @Field() subjectStudyList: SubjectStudy[] = [];
     @Field() isAlreadyAnonymized: boolean = false;
     @Field() subjectType: SubjectType;

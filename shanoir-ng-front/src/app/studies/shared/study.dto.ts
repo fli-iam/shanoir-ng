@@ -195,7 +195,7 @@ export class StudyDTOService {
         subject.subjectType = dtoSubject.subjectType;
         subject.physicallyInvolved = dtoSubject.physicallyInvolved;
         subject.isAlreadyAnonymized = dtoSubject.isAlreadyAnonymized;
-        subject.identifier = dtoSubject.studyIdentifier;
+        subject.studyIdentifier = dtoSubject.studyIdentifier;
         subject.tags = dtoSubject.tags;
         subject.qualityTag = dtoSubject.qualityTag;
         subject.studyId = dtoSubject.studyId;
