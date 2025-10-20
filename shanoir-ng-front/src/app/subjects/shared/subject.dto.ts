@@ -22,7 +22,6 @@ import { Study } from "../../studies/shared/study.model";
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { Subject } from './subject.model';
 import { Sex, SubjectType } from './subject.types';
-import {Field} from "../../shared/reflect/field.decorator";
 
 
 @Injectable()
