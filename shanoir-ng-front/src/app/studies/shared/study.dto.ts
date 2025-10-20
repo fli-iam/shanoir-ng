@@ -20,13 +20,14 @@ import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Tag } from '../../tags/tag.model';
+import {Profile} from '../../shared/models/profile.model';
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {SubjectDTO} from "../../subjects/shared/subject.dto";
+
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
-import {Profile} from '../../shared/models/profile.model';
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
 
 @Injectable()
 export class StudyDTOService {
@@ -194,7 +195,7 @@ export class StudyDTOService {
         subject.subjectType = dtoSubject.subjectType;
         subject.physicallyInvolved = dtoSubject.physicallyInvolved;
         subject.isAlreadyAnonymized = dtoSubject.isAlreadyAnonymized;
-        subject.studyIdentifier = dtoSubject.studyIdentifier;
+        subject.identifier = dtoSubject.studyIdentifier;
         subject.tags = dtoSubject.tags;
         subject.qualityTag = dtoSubject.qualityTag;
         subject.studyId = dtoSubject.studyId;

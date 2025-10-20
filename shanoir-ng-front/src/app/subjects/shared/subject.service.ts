@@ -14,10 +14,12 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
+
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
+
 import { Subject } from './subject.model';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
 
