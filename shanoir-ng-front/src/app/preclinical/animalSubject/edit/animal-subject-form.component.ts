@@ -360,7 +360,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (!(this.preclinicalSubject && this.preclinicalSubject.subject)) {
             return;
         }
-
         return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
             .then(() => {
                 if (this.preclinicalSubject.animalSubject) {
