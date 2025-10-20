@@ -603,7 +603,6 @@ export class TreeService {
             null, //members
             rights
         );
-
         const subjects: SubjectNode[] = study.subjects.map(subject => {
             if(subject.preclinical){
                 return PreclinicalSubjectNode.fromSubject(
