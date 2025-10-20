@@ -130,7 +130,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
                     updateOn: 'change'
                 }
             ],
-            'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
+            'manufacturerModel': [this.acqEquip.manufacturerModel, 
+                {
+                    validators: [Validators.required],
+                    asyncValidators: [this.uniqueEquipmentValidator],
+                    updateOn: 'change'
+                }
+            ],
             'center': [this.acqEquip.center, Validators.required],
         });
         this.registerManufAndSerialUnicityValidator(form);
@@ -186,16 +192,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     viewCenter(center: Center) {
         this.router.navigate(['center/details/' + center.id]);
-    }
-
-    onCenterChange() {
-        this.form.markAsDirty();
-        this.form.updateValueAndValidity();
-    }
-
-    onSerialNumberInput() {
-        this.form.markAsDirty();
-        this.form.updateValueAndValidity();
     }
 }
 
