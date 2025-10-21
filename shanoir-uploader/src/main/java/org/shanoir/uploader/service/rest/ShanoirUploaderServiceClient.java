@@ -941,15 +941,15 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public void postDicomSR(File file) throws Exception {
+	public void postDicom(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFileMultipartRelated(this.serviceURLDatasetsDicomWebStudies, file)) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
 			} else {
-				logger.error("Error in postDicomSR: with file (path: "
+				logger.error("Error in postDicom: with file (path: "
 						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in postDicomSR");
+				throw new Exception("Error in postDicom");
 			}
 		}		
 	}
