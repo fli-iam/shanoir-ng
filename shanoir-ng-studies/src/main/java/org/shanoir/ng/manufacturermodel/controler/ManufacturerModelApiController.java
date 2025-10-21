@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,6 +22,7 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.EntityLinkedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -116,11 +117,32 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		}
 	}
 
+	@Override
+	public ResponseEntity<Void> deleteManufacturerModel(Long manufacturerModelId) throws RestServiceException {
+		try {
+			if (manufacturerModelId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
+			}
+			manufacturerModelService.deleteById(manufacturerModelId);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (EntityLinkedException e) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This manufacturer is still linked to manufacturer models."
+					)
+			);
+		}
+	}
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
 }

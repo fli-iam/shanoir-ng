@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+
 import { Pipeline } from './models/pipeline';
 
 @Injectable({
@@ -10,9 +10,6 @@ export class ExecutionDataService {
     //observables
     public selectedDatasets: Set<number>;
     public selectedPipeline: Pipeline;
-
-    constructor() {
-    }
 
     public setDatasets(datasetsIds: Set<number>) {
         this.selectedDatasets = datasetsIds;

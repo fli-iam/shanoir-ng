@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-shuffle"></i>{{qualityCard.name}}
             </td>
             <td>
-                <span class="nb-rules" (mouseover)="onMouseOverNbRules(qualityCard, $event)" (mouseleave)="onMouseOutNbRules(qualityCard)" [class.hover]="selectedQualityCard?.id == qualityCard.id">
+                <span class="nb-rules" (mouseover)="onMouseOverNbRules(qualityCard)" (mouseleave)="onMouseOutNbRules(qualityCard)" [class.hover]="selectedQualityCard?.id == qualityCard.id">
                     {{qualityCard.rules?.length}} rule(s)
                     <study-card-rules class="rules" cardType="qualitycard"
                             *ngIf="selectedQualityCard?.id == qualityCard.id"
@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <td>
                 <span>
                     Check at import
-                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
+                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (userChange)="updateQualityCard(qualityCard)"></checkbox>
                 </span>
             </td>
             <td>

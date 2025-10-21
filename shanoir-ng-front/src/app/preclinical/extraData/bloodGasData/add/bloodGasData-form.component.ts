@@ -16,14 +16,13 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasData } from '../shared/bloodGasData.model';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
-
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
 
@@ -34,12 +33,11 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
-    @Input() examination_id:number;
+    @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
   
     fileToUpload: File = null;
     @Output() bloodGasDataReady = new EventEmitter();
@@ -52,14 +50,14 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     get bloodGasData(): BloodGasData { return this.entity; }
-    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
+    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
     
     getService(): EntityService<BloodGasData> {
         return this.extradatasService;
     }
 
     protected fetchEntity: () => Promise<BloodGasData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
             return this.loadExaminationExtraDatas(extradatas);
         });
     }
@@ -78,10 +76,10 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasData {
-    	for (let ex of extradatas) {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype != "Physiological data"){
-    			return <BloodGasData>ex;
+    			return ex as BloodGasData;
     		}
     	}
         return new BloodGasData();
@@ -108,7 +106,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.bloodGasData.filename= this.fileToUpload.name;
-    	let bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
+    	const bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
     	bloodGasDataFile.filename = this.fileToUpload.name;
     	bloodGasDataFile.bloodGasDataFile = this.fileToUpload;
     	if(!this.isStandalone){

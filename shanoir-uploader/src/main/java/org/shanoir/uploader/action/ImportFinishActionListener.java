@@ -220,7 +220,7 @@ public class ImportFinishActionListener implements ActionListener {
 		// If the user wants to use an existing examination
 		} else {
 			examination = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
-			logger.info("Examination (existing) re-used on server with ID: " + examination.getId());
+			logger.info("Examination used on server with ID: " + examination.getId());
 		}
 				
 		/**

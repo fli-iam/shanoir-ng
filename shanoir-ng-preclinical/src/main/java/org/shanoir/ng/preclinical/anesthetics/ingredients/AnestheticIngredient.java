@@ -38,7 +38,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "anesthetic_ingredient")
-@JsonPropertyOrder({"_links", "name", "concentration", "concentration_unit"})
+@JsonPropertyOrder({"_links", "name", "concentration", "concentrationUnit"})
 public class AnestheticIngredient extends HalEntity {
 
     @ManyToOne
@@ -55,7 +55,7 @@ public class AnestheticIngredient extends HalEntity {
     @JsonProperty("concentration")
     private Double concentration;
 
-    @JsonProperty("concentration_unit")
+    @JsonProperty("concentrationUnit")
     @RefValueExists
     @ManyToOne
     private Reference concentrationUnit = null;

@@ -12,8 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export enum Modes {
-    view,
-    create,
-    edit
+package org.shanoir.ng.dua.service;
+
+import java.util.Optional;
+
+import org.shanoir.ng.dua.model.DuaDraft;
+import org.shanoir.ng.shared.exception.EntityFoundException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+public interface DuaDraftService {
+
+	Optional<DuaDraft> findById(final String id);
+
+	DuaDraft create(final DuaDraft dua) throws EntityFoundException;
+
+	DuaDraft update(final DuaDraft dua) throws EntityNotFoundException;
 }

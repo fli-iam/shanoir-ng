@@ -12,7 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export class Enum {
-    public key: string;
-    public value: string;
+package org.shanoir.ng.dua.dto;
+
+public class DuaDraftCreationWrapperDTO {
+
+    private DuaDraftCreationDTO duaDraft;
+    
+    private String email;
+    
+
+    public DuaDraftCreationDTO getDuaDraft() {
+        return duaDraft;
+    }
+
+    public void setDuaDraft(DuaDraftCreationDTO duaDraft) {
+        this.duaDraft = duaDraft;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

@@ -14,10 +14,8 @@
 
 import { Injectable } from "@angular/core";
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { switchMap } from 'rxjs/operators';
+import { catchError , switchMap } from 'rxjs/operators';
 
 import { KeycloakService } from "./keycloak.service";
 
@@ -34,7 +32,10 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
-        if (!req.url.endsWith('/accountrequest') && !req.url.endsWith('/extensionrequest') && !req.url.endsWith('/data')) {
+        if (!req.url.endsWith('/accountrequest') 
+                && !req.url.endsWith('/extensionrequest') 
+                && !req.url.endsWith('/data')
+                && !(req.url.includes('/studies/dua') && ['GET', 'PUT'].includes(req.method))) {
             authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
@@ -47,9 +48,9 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {
-                        this.keycloakService.getToken().then((token: string) => {
+                        this.keycloakService.getToken().then(() => {
                             authReq = this.setAuthHeader(authReq);
-                            observer.next();
+                            observer.next(null);
                             observer.complete();
                         }).catch(() => {
                             this.keycloakService.logout();

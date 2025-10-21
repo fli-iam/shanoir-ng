@@ -26,6 +26,7 @@ export class HandleErrorService implements ErrorHandler {
     constructor (private consoleService: ConsoleService) { }
 
     public handleError(error: any) {
+        console.log(error)
         try {
             if (error instanceof HttpErrorResponse) {
                 this.handleHttpError(error);
@@ -40,7 +41,7 @@ export class HandleErrorService implements ErrorHandler {
 
     private handleHttpError(error: HttpErrorResponse) {
         try {
-            let details: string[] = [
+            const details: string[] = [
                 formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss', 'en'),
                 '[' + error.status + '] ' + this.getStatus(error.status),
                 error.url,
@@ -48,12 +49,12 @@ export class HandleErrorService implements ErrorHandler {
             ];
             if(error.error instanceof Blob) {
                 error.error.text().then(text => {
-                    let msg = (JSON.parse(text).message);
+                    const msg = (JSON.parse(text).message);
                     this.consoleService.log('error', msg, details);
                 });
             } else {
                 //handle regular json error - useful if you are offline
-                let msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
+                const msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
                 this.consoleService.log('error', msg, details);
             }
         } catch (error) {
@@ -69,7 +70,7 @@ export class HandleErrorService implements ErrorHandler {
         try {
             let msg: string = 'Error' 
             if (error.name != 'Error') msg += ' : ' + error.name;
-            let details: string[] = [error.message];
+            const details: string[] = [error.message];
             this.consoleService.log('error', msg, details);
         } catch (error) {
             console.error(error);
@@ -82,7 +83,7 @@ export class HandleErrorService implements ErrorHandler {
     }
 
     private extractServerNameFromUrl(url: string) {
-        let urlArr: string[] = url.split('/');
+        const urlArr: string[] = url.split('/');
         return urlArr[urlArr.findIndex(str => str == 'shanoir-ng') + 1];
     }
 }  

@@ -23,7 +23,6 @@ import org.mapstruct.Mappings;
 import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.examination.dto.mapper.ExaminationDecorator;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
