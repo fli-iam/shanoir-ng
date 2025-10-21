@@ -1,7 +1,6 @@
 package org.shanoir.ng.importer.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,9 +11,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
@@ -23,14 +19,12 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
