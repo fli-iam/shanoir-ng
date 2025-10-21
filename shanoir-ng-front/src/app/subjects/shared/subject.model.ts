@@ -37,7 +37,6 @@ export class Subject extends Entity {
     @Field() sex: Sex;
     @Field() selected: boolean = false;
     @Field() studyIdentifier: string;
-    @Field() subjectStudyList: SubjectStudy[] = [];
     @Field() isAlreadyAnonymized: boolean = false;
     @Field() subjectType: SubjectType;
     @Field() physicallyInvolved: boolean;
