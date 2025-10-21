@@ -5,6 +5,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.controller.BidsApiController;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -48,7 +49,10 @@ public class BidsApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+	@MockBean
+	private DicomImporterService dicomImporterService;
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
