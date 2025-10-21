@@ -65,7 +65,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
     static ActivateTreeOnThisPage: boolean = true;
-    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: Entity): string;
     protected destroy$: Subject<void> = new Subject<void>();
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
@@ -325,12 +325,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             const control = formGroup.get(key);
             if (control instanceof FormGroup) {
                 this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
-            } else { 
+            } else {
                 const sub: Subscription = control.valueChanges.subscribe(value => {
                     const declaredFields: string[] = getDeclaredFields(entity);
                     if (entity
                             && declaredFields.indexOf(key) >= 0
-                            && entity[key] !== value 
+                            && entity[key] !== value
                             && !Entity.equals(entity?.[key], value)) {
                         entity[key] = value;
                     }
@@ -381,7 +381,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 }
             }
         });
-    }    
+    }
 
     private clearRequiredStyles() {
         if (this.formContainerElement) {
@@ -595,7 +595,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    /** 
+    /**
      * Navigate to a create step for an attribute of the current entity.
      * This method will wait for the step to be saved and return the created entity.
      */
@@ -605,7 +605,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             prefills.forEach(readOnlyProp => {
                 this.breadcrumbsService.addNextStepPrefilled('entity.' + readOnlyProp.propName, readOnlyProp.value, true);
             });
-        } 
+        }
         const currentStep: Step = this.breadcrumbsService.currentStep;
         return this.router.navigate([route], extras).then(() => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
@@ -615,7 +615,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 // see @this.prefillProperties() method
             });
         });
-        
+
     }
 
     /**
@@ -629,7 +629,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     if (res?.value === undefined || res?.value === null) return;
                     const propKeyParts: string[] = propKey.split('.');
                     let currentObj = this.entity;
-                    let currentFormObj: FormGroup = this.form; 
+                    let currentFormObj: FormGroup = this.form;
                     const lastPart = propKeyParts.pop();
                     propKeyParts.forEach(part => {
                         currentObj = currentObj[part];
@@ -743,7 +743,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('entity', this.entity);
-            console.log('form controls:', this.mapFormControls(this.form), 
+            console.log('form controls:', this.mapFormControls(this.form),
                 this.form.status, this.form.dirty, this.form.touched);
             console.log('footer state', this.footerState);
         }
