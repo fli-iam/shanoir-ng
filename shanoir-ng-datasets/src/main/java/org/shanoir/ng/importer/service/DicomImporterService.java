@@ -1,7 +1,9 @@
 package org.shanoir.ng.importer.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
@@ -10,18 +12,25 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +60,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class DicomImporterService {
 
+
     private static final Logger LOG = LoggerFactory.getLogger(DicomImporterService.class);
 
     private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
+
+    private static final String UNKNOWN = "unknown";
 
     @Autowired
     private StudyService studyService;
@@ -63,6 +75,9 @@ public class DicomImporterService {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private CenterRepository centerRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -85,14 +100,49 @@ public class DicomImporterService {
             return false;
         }
         Subject subject = manageSubject(datasetAttributes, study);
-        Examination examination = manageExamination(datasetAttributes, study, subject);
+        Center center = manageCenter(datasetAttributes);
+        Examination examination = manageExamination(datasetAttributes, study, subject, center);
         // create acquisition, depending on SeriesInstanceUID, if necessary
         // and dataset depending on volume
         // sendToPacs and index Dataset to Solr, in case new created
         return true;
     }
 
-    private Examination manageExamination(Attributes datasetAttributes, Study study, Subject subject) {
+    /**
+     * For the moment, we assume here that only pseudonymized
+     * DICOM enter this import workflow. This means institution
+     * name and address have been removed, so no way to create a
+     * clean center, as Shanoir does normally. That is, why we assume,
+     * that we do not communicate with MS Studies to create an unkown
+     * center, we only keep it in MS Datasets to increase performance
+     * and not too lose any significant value.
+     * 
+     * @param datasetAttributes
+     * @return
+     */
+    private Center manageCenter(Attributes datasetAttributes) {
+        String institutionName = datasetAttributes.getString(Tag.InstitutionName);
+        String institutionAddress = datasetAttributes.getString(Tag.InstitutionAddress);
+        if (StringUtils.isNotBlank(institutionName)) {
+	    	return findOrCreateCenter(institutionName);
+		} else {
+            return findOrCreateCenter(UNKNOWN);
+		}
+    }
+
+    private Center findOrCreateCenter(String institutionName) {
+        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionName);
+        if (!centerOpt.isEmpty()) {
+            return centerOpt.get();
+        } else {
+            Center center = new Center();
+            center.setName(institutionName);
+            // @todo: create center in ms studies to remain consistent
+            return centerRepository.save(center);
+        }
+    }
+
+    private Examination manageExamination(Attributes datasetAttributes, Study study, Subject subject, Center center) {
         Examination examination = null;
         // @todo: Use code in modifyDicom and pass by StudyInstanceUID
         LocalDate examinationDate = DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate));
@@ -107,8 +157,7 @@ public class DicomImporterService {
             examination.setSubject(subject);
             examination.setExaminationDate(examinationDate);
             examination.setComment(examinationComment);
-            // @todo: findOrCreateCenter
-            examination.setCenterId(null);
+            examination.setCenterId(center.getId());
             examination = examinationService.save(examination);
         } // Avoid, that the examination creation makes RabbitMQ calls
         return examination;
