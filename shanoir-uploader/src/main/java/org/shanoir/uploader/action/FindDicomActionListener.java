@@ -165,11 +165,11 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							+ firstName1.toUpperCase();
 				else
 					patientNameFinal = lastName.toUpperCase();
-					String modality = mainWindow.modality;
-					boolean studyRootQuery = false;
-					if (mainWindow.sRB.isSelected()) {
-						studyRootQuery = true;
-					}
+				String modality = mainWindow.modality;
+				boolean studyRootQuery = false;
+				if (mainWindow.sRB.isSelected()) {
+					studyRootQuery = true;
+				}
 
 				// We allow query on a single word from study description
 				String studyDescription = mainWindow.studyDescriptionTF.getText();
@@ -177,12 +177,12 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					studyDescription = WILDCARD.concat(studyDescription.replace(" ", WILDCARD).concat(WILDCARD));
 				}
 
-					List<Patient> patients = dicomServerClient.queryDicomServer(
-							studyRootQuery,
-							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
-							studyDescription,
-							mainWindow.birthDate, mainWindow.studyDate);
-					fillMediaWithPatients(media, patients);
+				List<Patient> patients = dicomServerClient.queryDicomServer(
+						studyRootQuery,
+						modality, patientNameFinal, mainWindow.patientIDTF.getText(),
+						studyDescription,
+						mainWindow.birthDate, mainWindow.studyDate);
+				fillMediaWithPatients(media, patients);
 				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 			} catch (ConnectException cE) {
 				logger.error(cE.getMessage(), cE);

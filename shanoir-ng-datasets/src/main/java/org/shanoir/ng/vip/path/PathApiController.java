@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
@@ -21,8 +22,6 @@ import java.util.List;
 public class PathApiController implements PathApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(PathApiController.class);
-
-    private static final String DCM = "dcm";
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
@@ -53,11 +52,13 @@ public class PathApiController implements PathApi {
 
                     datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true);
                     return new ResponseEntity<Void>(HttpStatus.OK);
+                default:
+                    ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");
+                    throw new RestServiceException(errorModel);
             }
         } catch (Exception e) {
             LOG.error("Error while VIP downloading data", e);
             throw e;
         }
-        return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
     }
 }

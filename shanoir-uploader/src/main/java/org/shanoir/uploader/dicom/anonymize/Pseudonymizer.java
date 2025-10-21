@@ -162,15 +162,15 @@ public class Pseudonymizer {
 		 * Alert the user if an error occured during pseudonymus hash creation.
 		 */
 		if ((birthNameHash1 == null || "".equals(birthNameHash1) || birthNameHash1.contains(DEBUG))
-			|| (birthNameHash2 == null || "".equals(birthNameHash2) || birthNameHash2.contains(DEBUG))
-			|| (birthNameHash3 == null || "".equals(birthNameHash3) || birthNameHash3.contains(DEBUG))
-			|| (lastNameHash1 == null || "".equals(lastNameHash1) || lastNameHash1.contains(DEBUG))
-			|| (lastNameHash2 == null || "".equals(lastNameHash2) || lastNameHash2.contains(DEBUG))
-			|| (lastNameHash3 == null || "".equals(lastNameHash3) || lastNameHash3.contains(DEBUG))
-			|| (firstNameHash1 == null || "".equals(firstNameHash1) || firstNameHash1.contains(DEBUG))
-			|| (firstNameHash2 == null || "".equals(firstNameHash2) || firstNameHash2.contains(DEBUG))
-			|| (firstNameHash3 == null || "".equals(firstNameHash3) || firstNameHash3.contains(DEBUG))
-			|| (birthDateHash == null || "".equals(birthDateHash) || birthDateHash.contains(DEBUG))) {
+				|| (birthNameHash2 == null || "".equals(birthNameHash2) || birthNameHash2.contains(DEBUG))
+				|| (birthNameHash3 == null || "".equals(birthNameHash3) || birthNameHash3.contains(DEBUG))
+				|| (lastNameHash1 == null || "".equals(lastNameHash1) || lastNameHash1.contains(DEBUG))
+				|| (lastNameHash2 == null || "".equals(lastNameHash2) || lastNameHash2.contains(DEBUG))
+				|| (lastNameHash3 == null || "".equals(lastNameHash3) || lastNameHash3.contains(DEBUG))
+				|| (firstNameHash1 == null || "".equals(firstNameHash1) || firstNameHash1.contains(DEBUG))
+				|| (firstNameHash2 == null || "".equals(firstNameHash2) || firstNameHash2.contains(DEBUG))
+				|| (firstNameHash3 == null || "".equals(firstNameHash3) || firstNameHash3.contains(DEBUG))
+				|| (birthDateHash == null || "".equals(birthDateHash) || birthDateHash.contains(DEBUG))) {
 			throw new PseudonymusException("Some hash fields are malformed!");
 		}
 		return pseudonymusHashValues;

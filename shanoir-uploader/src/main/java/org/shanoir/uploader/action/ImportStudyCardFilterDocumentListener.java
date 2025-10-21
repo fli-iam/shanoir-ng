@@ -39,10 +39,10 @@ public class ImportStudyCardFilterDocumentListener implements DocumentListener {
  		mainWindow.importDialog.studyCardCB.removeAllItems();
  		String filter = mainWindow.importDialog.studyCardFilterTextField.getText();
  		for (StudyCard studyCard : defaultStudyCards) {
-             if (studyCard.toString().toLowerCase().contains(filter.toLowerCase())) {
-             	mainWindow.importDialog.studyCardCB.addItem(studyCard);
-             }
-         }
+			if (studyCard.toString().toLowerCase().contains(filter.toLowerCase())) {
+				mainWindow.importDialog.studyCardCB.addItem(studyCard);
+			}
+		}
  	}
 
  	public void addDefaultStudyCard(StudyCard defaultStudyCard) {

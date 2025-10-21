@@ -247,13 +247,13 @@ public class CurrentUploadsWindowTable implements Observer {
 				.entrySet()) {
 			if (entry.getValue() != null) {
 				if (entry.getValue().getUploadPercentage() == null
-					|| entry.getValue().getUploadPercentage().isEmpty()
-					|| UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
+						|| entry.getValue().getUploadPercentage().isEmpty()
+						|| UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
 					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
-					|| entry.getValue().getUploadPercentage().equals(checkOKUploadState)
-					|| entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
+							|| entry.getValue().getUploadPercentage().equals(checkOKUploadState)
+							|| entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
 					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {

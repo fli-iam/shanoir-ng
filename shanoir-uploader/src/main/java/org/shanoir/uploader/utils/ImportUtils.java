@@ -77,7 +77,7 @@ public class ImportUtils {
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
 			.registerModule(new Jdk8Module())
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ImportUtils {
 	public static File createUploadFolder(final File workFolder, final String subjectIdentifier) {
 		final String timeStamp = Util.getCurrentTimeStampForFS();
 		final String folderName = workFolder.getAbsolutePath() + File.separator + subjectIdentifier
-		+ "_" + timeStamp;
+				+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();
 		return uploadFolder;
@@ -452,7 +452,7 @@ public class ImportUtils {
 		studies.stream()
 			.filter(Study::isWithStudyCards)
 			.map(Study::getId)
-       		.forEach(idList.getIdList()::add);
+       			.forEach(idList.getIdList()::add);
 		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
 		return studyCards;
 	}
@@ -468,15 +468,15 @@ public class ImportUtils {
 
 	private static boolean checkEquipment(AcquisitionEquipment acquisitionEquipment, String manufacturerModelName, String deviceSerialNumber) {
 		if (acquisitionEquipment == null
-			|| acquisitionEquipment.getManufacturerModel() == null
-			|| acquisitionEquipment.getManufacturerModel().getName().isBlank()
-			|| acquisitionEquipment.getSerialNumber() == null
-			|| acquisitionEquipment.getSerialNumber().isBlank()) {
+				|| acquisitionEquipment.getManufacturerModel() == null
+				|| acquisitionEquipment.getManufacturerModel().getName().isBlank()
+				|| acquisitionEquipment.getSerialNumber() == null
+				|| acquisitionEquipment.getSerialNumber().isBlank()) {
 			return false;
 		}
 		if (acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
 			if (acquisitionEquipment.getSerialNumber().equalsIgnoreCase(deviceSerialNumber)
-				|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
+					|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
 				return true;
 			}
 		}
@@ -548,7 +548,7 @@ public class ImportUtils {
 	public static ManufacturerModel findManufacturerModelInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer, String manufacturerModelName) {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)
-				&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
+					&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
 				return acquisitionEquipment.getManufacturerModel();
 			}
 		}
