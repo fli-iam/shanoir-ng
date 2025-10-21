@@ -86,11 +86,15 @@ public class DicomImporterService {
         }
         Subject subject = manageSubject(datasetAttributes, study);
         Examination examination = manageExamination(datasetAttributes, study, subject);
+        // create acquisition, depending on SeriesInstanceUID, if necessary
+        // and dataset depending on volume
+        // sendToPacs and index Dataset to Solr, in case new created
         return true;
     }
 
     private Examination manageExamination(Attributes datasetAttributes, Study study, Subject subject) {
         Examination examination = null;
+        // @todo: Use code in modifyDicom and pass by StudyInstanceUID
         LocalDate examinationDate = DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate));
         String examinationComment = datasetAttributes.getString(Tag.StudyDescription);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subject.getId(), study.getId());
