@@ -19,7 +19,6 @@ import { QualityTag } from "../../study-cards/shared/quality-card.model";
 import { SimpleStudy, Study } from "../../studies/shared/study.model";
 
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudy } from './subject-study.model';
 import { Sex, SubjectType } from './subject.types';
 
 
