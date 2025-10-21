@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <card-node
                     *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
                     [input]="qualitycard"
-                    (onCardDelete)="onQualityCardDelete(i)"
+                    (cardDelete)="onQualityCardDelete(i)"
                     [withMenu]="withMenu"
                     detailsPath="quality-card/details"
             >

@@ -168,7 +168,7 @@ public class SubjectApiController implements SubjectApi {
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
-			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
+			throw new RestServiceException(e, new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 

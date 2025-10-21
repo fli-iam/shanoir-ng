@@ -58,7 +58,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private http: HttpClient,
         private keycloakService: KeycloakService,
         private consoleService: ConsoleService
-    ) { }
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {

@@ -73,9 +73,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             private centerService: CenterService,
             coilService: CoilService) {
         super(route, 'study-card');
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
         this.subscriptions.push(this.onSave.subscribe(() => {
             const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
@@ -191,7 +188,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             form.get('acquisitionEquipment').enable();
             this.centerService.getCentersNamesByStudyId(study.id).then(centers => {
                 this.centers = centers;
-                this.breadcrumbsService.currentStep.addPrefilled("center", this.centers);
             });
         } else {
             form.get('acquisitionEquipment').disable();
@@ -264,18 +260,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     }
 
     createAcqEq() {
-        const currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(() => {
-            this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
-            if (this.centers.length == 1) {
-                this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);
+        const options: {propName: string, value: any}[] = [];
+        if (this.centers?.length > 0) {
+            options.push({propName: 'centers', value: this.centers});
+            if (this.centers?.length > 0) {
+                options.push({propName: 'center', value: this.centers[0]});
             }
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    this.entity.acquisitionEquipment = entity as AcquisitionEquipment;
-                })
-            );
-        });
+        } 
+        this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
 }
