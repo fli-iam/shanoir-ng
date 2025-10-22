@@ -320,7 +320,7 @@ public class ExaminationApiController implements ExaminationApi {
 	/**
 	 * This method generates during the examination creation a DICOM
 	 * StudyInstanceUID, that will be used for all DICOM files of this
-	 * examination (== DICOM study).
+	 * examination (== study DICOM).
 	 * 
 	 * @param examination
 	 */

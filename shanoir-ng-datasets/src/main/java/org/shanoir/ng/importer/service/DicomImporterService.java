@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -53,7 +55,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class DicomImporterService {
 
-
     private static final Logger LOG = LoggerFactory.getLogger(DicomImporterService.class);
 
     private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
@@ -68,6 +69,9 @@ public class DicomImporterService {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetAcquisitionService acquisitionService;
 
     @Autowired
     private CenterRepository centerRepository;
@@ -103,7 +107,17 @@ public class DicomImporterService {
     }
 
     private DatasetAcquisition manageAcquisition(Attributes datasetAttributes, Examination examination) {
-        return null;
+        DatasetAcquisition acquisition = null;
+        Serie serieDICOM = new Serie(datasetAttributes);
+        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
+        Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
+                .filter(a -> a.getSeriesInstanceUID().equals(serieDICOM.getSeriesInstanceUID()))
+                .findFirst();
+        if (existingAcquisition.isPresent()) {
+            acquisition = existingAcquisition.get();
+        } else {
+        }
+        return acquisition;
     }
 
     /**
@@ -154,6 +168,7 @@ public class DicomImporterService {
             examination.setStudy(study);
             examination.setSubject(subject);
             examination.setExaminationDate(studyDICOM.getStudyDate());
+            examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
             examination.setComment(studyDICOM.getStudyDescription());
             examination.setCenterId(center.getId());
             examination = examinationService.save(examination);
