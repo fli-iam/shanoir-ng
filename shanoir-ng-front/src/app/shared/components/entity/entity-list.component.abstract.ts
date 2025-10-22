@@ -79,7 +79,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
     }
-    
+
     ngOnInit(): void {
         if (!this.embedded) {
             this.breadcrumbsService.markMilestone();
@@ -129,10 +129,15 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
         const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
-        const studyListStr = this.getOnDeleteConfirmMessage(entity);
-        this.confirmDialogService.confirm(
+        let deleteConfirmMsg: string;
+        if (this.getOnDeleteConfirmMessage) {
+            deleteConfirmMsg = this.getOnDeleteConfirmMessage(entity);
+        } else {
+            deleteConfirmMsg = '';
+        }
+            this.confirmDialogService.confirm(
                 dialogTitle,
-                dialogMsg + studyListStr
+                dialogMsg + deleteConfirmMsg
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
@@ -150,18 +155,18 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
                     });
                 }
             }).catch(reason => {
-                if (!reason){
+                if (!reason) {
                     return;
                 }
                 if (reason instanceof ShanoirError && reason.code == 422) {
                     this.dealWithDeleteError(reason, entity);
                     return;
-                } else if (reason.error){
+                } else if (reason.error) {
                     this.dealWithDeleteError(new ShanoirError(reason), entity);
                     return;
                 }
                 throw Error(reason);
-        });
+            });
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {
