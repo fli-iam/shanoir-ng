@@ -34,7 +34,6 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 

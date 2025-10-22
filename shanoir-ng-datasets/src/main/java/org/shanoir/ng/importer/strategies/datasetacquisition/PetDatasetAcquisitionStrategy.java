@@ -53,7 +53,6 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	@Autowired
 	private DatasetStrategy<PetDataset> datasetStrategy;
 	
-	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
@@ -64,8 +63,6 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
 		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
-
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 

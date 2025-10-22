@@ -88,7 +88,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setUsername(importJob.getUsername());
 		mrDatasetAcquisition.setImportDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);

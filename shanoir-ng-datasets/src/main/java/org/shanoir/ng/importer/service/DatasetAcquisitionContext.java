@@ -29,8 +29,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * In the strategy pattern this class represents the context.
- * The context holds the variable to the actual strategy in use, that has
- * been chosen on using the required modality.
+ * The context holds the variable to the actual strategy in use,
+ * that has been chosen on using the required modality.
  * 
  * @author mkain
  *

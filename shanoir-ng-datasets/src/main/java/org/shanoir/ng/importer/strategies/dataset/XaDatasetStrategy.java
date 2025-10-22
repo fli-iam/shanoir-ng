@@ -59,7 +59,6 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 			XaDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;

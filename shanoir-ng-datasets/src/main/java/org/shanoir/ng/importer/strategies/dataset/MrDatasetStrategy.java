@@ -87,8 +87,6 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		}
 
 		for (Dataset dataset : serie.getDatasets()) {
-			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-
 			MrDataset mrDataset = new MrDataset();
 			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {

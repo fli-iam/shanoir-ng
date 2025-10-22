@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -96,10 +97,15 @@ public class DicomImporterService {
         Subject subject = manageSubject(datasetAttributes, study);
         Center center = manageCenter(datasetAttributes);
         Examination examination = manageExamination(datasetAttributes, study, subject, center);
+        DatasetAcquisition acquisition = manageDatasetAcquisition(datasetAttributes, examination);
         // create acquisition, depending on SeriesInstanceUID, if necessary
         // and dataset depending on volume
         // sendToPacs and index Dataset to Solr, in case new created
         return true;
+    }
+
+    private DatasetAcquisition manageDatasetAcquisition(Attributes datasetAttributes, Examination examination) {
+        return null;
     }
 
     /**

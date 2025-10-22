@@ -45,7 +45,6 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;

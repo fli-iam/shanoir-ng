@@ -59,7 +59,6 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 			CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;

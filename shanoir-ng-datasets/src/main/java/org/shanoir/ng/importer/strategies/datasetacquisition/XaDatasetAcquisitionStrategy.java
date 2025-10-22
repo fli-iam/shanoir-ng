@@ -64,7 +64,6 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
 		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
