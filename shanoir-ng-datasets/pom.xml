@@ -24,7 +24,7 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-datasets</name>
-	<description>Dataset microservice for Shanoir NG</description>
+	<description>Dataset microservice</description>
 
 	<properties>
 		<solrj.version>9.4.1</solrj.version>

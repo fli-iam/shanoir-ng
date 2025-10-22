@@ -24,10 +24,10 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-import</name>
-	<description>Shanoir-NG Import Microservice</description>
+	<description>Import microservice</description>
 
 	<dependencies>
-		<!-- Shanoir-NG dependencies -->
+		<!-- Shanoir dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>

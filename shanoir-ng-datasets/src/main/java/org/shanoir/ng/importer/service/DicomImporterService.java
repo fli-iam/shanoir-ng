@@ -1,6 +1,5 @@
 package org.shanoir.ng.importer.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +10,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
@@ -144,19 +142,19 @@ public class DicomImporterService {
 
     private Examination manageExamination(Attributes datasetAttributes, Study study, Subject subject, Center center) {
         Examination examination = null;
-        // @todo: Use code in modifyDicom and pass by StudyInstanceUID
-        LocalDate examinationDate = DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate));
-        String examinationComment = datasetAttributes.getString(Tag.StudyDescription);
+        org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(datasetAttributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subject.getId(), study.getId());
-        examinations = examinations.stream().filter(e -> e.getExaminationDate().equals(examinationDate)).toList();
-        if (examinations.size() == 1) {
-            examination = examinations.iterator().next();
-        } else { // Create new examination
+        Optional<Examination> existingExamination = examinations.stream()
+                .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
+                .findFirst();
+        if (existingExamination.isPresent()) {
+            examination = existingExamination.get();
+        } else {
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
-            examination.setExaminationDate(examinationDate);
-            examination.setComment(examinationComment);
+            examination.setExaminationDate(studyDICOM.getStudyDate());
+            examination.setComment(studyDICOM.getStudyDescription());
             examination.setCenterId(center.getId());
             examination = examinationService.save(examination);
         } // Avoid, that the examination creation makes RabbitMQ calls
