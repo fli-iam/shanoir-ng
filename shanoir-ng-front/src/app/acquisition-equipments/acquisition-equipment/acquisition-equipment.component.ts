@@ -29,7 +29,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-
+import { of } from "rxjs";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -43,6 +43,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public centers: IdName[];
     public centersFromStudyCard;
     public datasetModalityTypeStr: string;
+    private currentManufAndSerial: ManufacturerAndSerial;
     fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
@@ -78,6 +79,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initEdit(): Promise<void> {
+        this.currentManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames()
@@ -120,8 +122,21 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): UntypedFormGroup {
         const form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator], [this.uniqueEquipmentValidator]],
-            'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
+            'serialNumber': [
+                this.acqEquip.serialNumber,
+                {
+                    validators: [this.noSpacesStartAndEndValidator],
+                    asyncValidators: [this.uniqueEquipmentValidator],
+                    updateOn: 'change'
+                }
+            ],
+            'manufacturerModel': [this.acqEquip.manufacturerModel,
+                {
+                    validators: [Validators.required],
+                    asyncValidators: [this.uniqueEquipmentValidator],
+                    updateOn: 'change'
+                }
+            ],
             'center': [this.acqEquip.center, Validators.required],
         });
         this.registerManufAndSerialUnicityValidator(form);
@@ -159,16 +174,19 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
-        if (!control.parent) return null;
+        if (!control.parent) return of(null);
 
         const serialNumber = control.value;
-        const manufacturerModel = control.parent.get('manufacturerModel')?.value;
+        const manufacturerModel = control.parent.get('manufacturerModel')?.value as ManufacturerModel;
 
         if (!serialNumber || !manufacturerModel) return null;
+        if (serialNumber == this.currentManufAndSerial?.serial && manufacturerModel.id == this.currentManufAndSerial?.manuf.id) return null;
 
         try {
-            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
-            return exists ? { unique: true } : null;
+            if (typeof serialNumber == 'string') {
+                const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+                return exists ? {unique: true} : null;
+            }
         } catch {
             return null;
         }
