@@ -46,18 +46,16 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 export class SubjectStudyListComponent extends AbstractInput<Subject[]> implements OnChanges, OnDestroy {
 
     @Input() mode: Mode;
-    @Input() subject: Subject;
     @Input() study: Study;
-    @Input() selectableList: Subject[] | Study[];
-    public selected: Subject | Study;
-    public optionList: Option<Subject | Study>[];
+    @Input() selectableList: Subject[];
+    public selected: Subject;
     @Input() displaySubjectType: boolean = true;
     @Input() allowRemove: boolean;
     hasTags: boolean;
     hasQualityTags: boolean;
     columnDefs: ColumnDefinition[];
     @ViewChild('table') table: TableComponent;
-    private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
+    private subjectOrStudyObs: RxjsSubject <Subject[] | Study> = new RxjsSubject();
     private subjectListObs: RxjsSubject<Subject[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
     private warningDisplayed: boolean = false;
@@ -71,28 +69,11 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
                 this.createColumnDefs();
             })
         );
-
-    }
-
-    get legend(): string {
-        return this.compMode == 'study' ? 'Subject' : 'Study';
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.selectableList) {
-            this.optionList = [];
-            if (this.selectableList) {
-                for (const item of this.selectableList) {
-                    const option: Option<Subject | Study> = new Option(item, item.name);
-                    if(this.model && this.model.find(subject => (this.compMode == 'study' ? subject.id : subject.study.id) == option.value.id)) {
-                        option.disabled = true;
-                    }
-                    this.optionList.push(option);
-                }
-            }
-        }
         if (changes.subject || changes.study) {
-            this.subjectOrStudyObs.next(changes.subject ? this.subject : this.study);
+            this.subjectOrStudyObs.next(changes.subject ? this.study.subjects : this.study);
         }
     }
 
@@ -103,24 +84,19 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
     writeValue(obj: any): void {
         super.writeValue(obj);
         this.subjectListObs.next(obj);
-        this.updateDisabled();
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<Subject>> {
-        return Promise.resolve(new BrowserPaging<Subject>(this.model, this.columnDefs).getPage(pageable));
+        return Promise.resolve(new BrowserPaging<Subject>(this.study.subjects, this.columnDefs).getPage(pageable));
     }
 
     private createColumnDefs() {
-        if (this.compMode == 'study') {
-            this.columnDefs = [{ headerName: 'Subject', field: 'name', defaultSortCol: true }];
-        } else if (this.compMode == 'subject') {
-            this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
-        }
+        this.columnDefs = [{ headerName: 'Subject', field: 'name', defaultSortCol: true }];
         if (this.hasTags) {
             this.columnDefs.push(
                 { headerName: 'Tags', field: 'tags', editable: true, multi: true,
-                    possibleValues: (subject: Subject) => {
-                        return subject?.study?.tags?.map(tag => {
+                    possibleValues: () => {
+                        return this.study.tags?.map(tag => {
                             const opt = new Option(tag, tag.name);
                             if (tag.color) {
                                 opt.backgroundColor = tag.color;
@@ -161,74 +137,11 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
     }
 
     goToView(item): void {
-        // case of study details > subject tab > open subject details
-        if (this.compMode == 'study') {
-            this.router.navigate(['/subject/details/' + item.subject?.id]);
-        }
-        // case of subject details > edit > open study details
-        else if (this.compMode == 'subject') {
-            this.router.navigate(['/study/details/' + item.study?.id]);
-        }
+        this.router.navigate(['/study/details/' + item.study?.id]);
     }
 
     rowClick(item): string {
-        if (this.compMode == 'study') {
-            return '/subject/details/' + item.subject?.id;
-        }
-        else if (this.compMode == 'subject') {
-            return '/study/details/' + item.study?.id;
-        }
-    }
-
-    private updateDisabled() {
-        if (this.selectableList && this.model) {
-            if (this.compMode == 'study') {
-                for (const option of this.optionList) {
-                    if(this.model.find(subject => subject.id == option.value.id)) option.disabled = true;
-                }
-            } else if (this.compMode == 'subject') {
-                for (const option of this.optionList) {
-                    if(this.model.find(subject => subject.study.id == option.value.id)) option.disabled = true;
-                }
-            }
-        }
-    }
-
-    get compMode(): 'subject' | 'study' {
-        if (this.subject && this.study) throw Error('You cannot set both subject and study');
-        if (this.subject) return 'subject';
-        if (this.study) return 'study';
-        throw Error('You have to set either subject or study');
-
-    }
-
-    onAdd() {
-        if (!this.selected) return;
-        if (this.optionList) {
-            const foundOption = this.optionList.find(option => option.value.id == this.selected.id);
-            if (foundOption) foundOption.disabled = true;
-        }
-        let newSubject: Subject = new Subject();
-        newSubject.physicallyInvolved = false;
-        newSubject.tags=[];
-        if (this.compMode == "study") {
-            const studyCopy: Study = new Study();
-            studyCopy.id = this.study.id;
-            studyCopy.tags = this.study.tags;
-            newSubject.study = studyCopy;
-            newSubject = this.selected as Subject;
-        }
-        else if (this.compMode == "subject") {
-            const subjectCopy: Subject = new Subject();
-            subjectCopy.id = this.subject.id;
-            newSubject = subjectCopy;
-            newSubject.study = this.selected as Study;
-        }
-        this.selected = undefined;
-        this.model.push(newSubject);
-        this.processHasTags();
-        this.propagateChange(this.model);
-        this.table?.refresh();
+        return '/study/details/' + item.study?.id;
     }
 
     private processHasTags() {
@@ -253,17 +166,10 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
     }
 
     removeSubjectOk(subject: Subject):void {
-        const index: number = this.model.indexOf(subject);
+        const index: number = this.study.subjects.indexOf(subject);
         if (index > -1) {
-            this.model.splice(index, 1);
-            this.propagateChange(this.model);
-            if (this.compMode == 'study') {
-                const option: Option<Subject> = this.optionList.find(opt => opt.value.id == subject.id) as Option<Subject>;
-                if (option) option.disabled = false;
-            } else if (this.compMode == 'subject') {
-                const option: Option<Study> = this.optionList.find(opt => opt.value.id == subject.study.id) as Option<Study>;
-                if (option) option.disabled = false;
-            }
+            this.study.subjects.splice(index, 1);
+            this.propagateChange(this.study);
         }
         this.table.refresh();
     }
@@ -273,7 +179,4 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
         this.propagateTouched();
     }
 
-    onTouch() {
-        this.propagateTouched();
-    }
 }
