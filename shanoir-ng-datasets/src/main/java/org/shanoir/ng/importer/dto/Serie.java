@@ -99,8 +99,7 @@ public class Serie {
 		sopClassUID = attributes.getString(Tag.SOPClassUID);
 		seriesDescription = attributes.getString(Tag.SeriesDescription);
 		seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		seriesNumber = Integer.toString(attributes.getInt(Tag.SeriesNumber, 0));
-		acquisitionTime = attributes.getString(Tag.AcquisitionTime);
+		seriesNumber = attributes.getInt(Tag.SeriesNumber, 0);
 		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		modality = attributes.getString(Tag.Modality);
 		protocolName = attributes.getString(Tag.ProtocolName);
