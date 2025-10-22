@@ -130,7 +130,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
                     updateOn: 'change'
                 }
             ],
-            'manufacturerModel': [this.acqEquip.manufacturerModel, 
+            'manufacturerModel': [this.acqEquip.manufacturerModel,
                 {
                     validators: [Validators.required],
                     asyncValidators: [this.uniqueEquipmentValidator],
@@ -183,8 +183,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         if (serialNumber == this.currentManufAndSerial?.serial && manufacturerModel.id == this.currentManufAndSerial?.manuf.id) return null;
 
         try {
-            const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
-            return exists ? { unique: true } : null;
+            if (typeof serialNumber == 'string') {
+                const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+                return exists ? {unique: true} : null;
+            }
         } catch {
             return null;
         }
