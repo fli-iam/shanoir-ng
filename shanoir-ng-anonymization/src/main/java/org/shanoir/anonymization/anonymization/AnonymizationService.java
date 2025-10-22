@@ -53,8 +53,8 @@ public interface AnonymizationService {
 	 * @throws Exception 
 	 */
 	void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientFirstName,
-			String patientLastName, String patientID) throws Exception;
+			String patientLastName, String patientID, String studyInstanceUID) throws Exception;
 	
-	void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception;
+	void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID) throws Exception;
 	
 }

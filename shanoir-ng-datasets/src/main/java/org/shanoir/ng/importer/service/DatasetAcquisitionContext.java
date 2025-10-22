@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.service;
 
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -54,9 +55,8 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
 	
 	// add other strategies for other modalities here
-
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
 		String modality = serie.getModality();
 		if ("MR".equals(modality)) {
@@ -70,8 +70,10 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 		}else {
 			// By default we just create a generic dataset acquisition
 			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-		}		
-		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
+		}
+		// Set SeriesInstanceUID into acquisition; this applies for all modalities DICOM, that are stored in PACS
+		seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
+		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, seriesInstanceUID, rank, importJob, dicomAttributes);
 	}
 	
 }
