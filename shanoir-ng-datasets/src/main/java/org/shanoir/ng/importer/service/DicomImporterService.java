@@ -97,14 +97,14 @@ public class DicomImporterService {
         Subject subject = manageSubject(datasetAttributes, study);
         Center center = manageCenter(datasetAttributes);
         Examination examination = manageExamination(datasetAttributes, study, subject, center);
-        DatasetAcquisition acquisition = manageDatasetAcquisition(datasetAttributes, examination);
+        DatasetAcquisition acquisition = manageAcquisition(datasetAttributes, examination);
         // create acquisition, depending on SeriesInstanceUID, if necessary
         // and dataset depending on volume
         // sendToPacs and index Dataset to Solr, in case new created
         return true;
     }
 
-    private DatasetAcquisition manageDatasetAcquisition(Attributes datasetAttributes, Examination examination) {
+    private DatasetAcquisition manageAcquisition(Attributes datasetAttributes, Examination examination) {
         return null;
     }
 
