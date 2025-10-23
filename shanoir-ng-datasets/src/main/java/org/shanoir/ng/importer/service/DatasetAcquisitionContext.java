@@ -28,8 +28,6 @@ import org.shanoir.ng.importer.strategies.datasetacquisition.XaDatasetAcquisitio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.micrometer.common.util.StringUtils;
-
 /**
  * In the strategy pattern this class represents the context.
  * The context holds the variable to the actual strategy in use,
