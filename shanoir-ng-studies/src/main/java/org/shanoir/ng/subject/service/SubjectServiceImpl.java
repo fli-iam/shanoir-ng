@@ -327,6 +327,7 @@ public class SubjectServiceImpl implements SubjectService {
 		// We can not update the study: attention: created exams contain study id
 		subjectOld.setStudyIdentifier(subjectNew.getStudyIdentifier());
 		subjectOld.setSubjectType(subjectNew.getSubjectType());
+		subjectOld.setTags(subjectNew.getTags());
 		subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
 		subjectOld.setQualityTag(subjectNew.getQualityTag());
 		subjectOld.setStudy(subjectNew.getStudy());
