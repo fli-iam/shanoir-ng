@@ -16,15 +16,7 @@ package org.shanoir.ng.study.service;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -340,7 +332,6 @@ public class StudyServiceImpl implements StudyService {
 		List<Subject> toBeDeleted = new ArrayList<Subject>();
 
 		if (study.getSubjectStudyList() != null) {
-
 			// Find all ids from new study
 			Set<Long> updatedIds = new HashSet<>();
 			for (SubjectStudy entity : study.getSubjectStudyList()) {
@@ -364,7 +355,6 @@ public class StudyServiceImpl implements StudyService {
 									ShanoirEvent.SUCCESS,
 									study.getId())
 					);
-
 				}
 			}
 			for (Subject subject : removed) {
@@ -373,6 +363,28 @@ public class StudyServiceImpl implements StudyService {
 				}
 			}
 		}
+
+		// Update subjects
+		if (study.getSubjects() != null) {
+			Study oldStudy = studyRepository.findById(study.getId())
+					.orElseThrow(() -> new EntityNotFoundException(Study.class, study.getId()));
+
+			Map<Long, Subject> oldSubjectsMap = new HashMap<>();
+			for (Subject s : oldStudy.getSubjects()) {
+				oldSubjectsMap.put(s.getId(), s);
+			}
+
+			for (Subject newSubject : study.getSubjects()) {
+				Subject oldSubject = oldSubjectsMap.get(newSubject.getId());
+				
+				// Call update if necessary (only a few fields can be changed)
+				if (oldSubject != null && hasSubjectChanged(oldSubject, newSubject)) {
+					newSubject.setStudy(study);
+					subjectService.update(newSubject);
+				}
+			}
+		}
+
 
 		if (studyDb.getProtocolFilePaths() != null) {
 			for (String filePath : studyDb.getProtocolFilePaths()) {
@@ -414,6 +426,15 @@ public class StudyServiceImpl implements StudyService {
 
 		return studyDb;
 	}
+
+	private boolean hasSubjectChanged(Subject oldSub, Subject newSub) {
+		return !Objects.equals(oldSub.getSex(), newSub.getSex())
+				|| !Objects.equals(oldSub.getSubjectType(), newSub.getSubjectType())
+				|| oldSub.isPhysicallyInvolved() != newSub.isPhysicallyInvolved()
+				|| !Objects.equals(oldSub.getTags(), newSub.getTags())
+				|| !Objects.equals(oldSub.getStudyIdentifier(), newSub.getStudyIdentifier());
+	}
+
 
 	/**
 	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 

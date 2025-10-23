@@ -24,6 +24,7 @@ import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
+import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.TagDTO;
@@ -76,6 +77,8 @@ public class StudyDTO {
 	private StudyType studyType;
 
 	private List<SubjectStudyDTO> subjectStudyList;
+
+	private List<SubjectDTO> subjects;
 
 	private List<TimepointDTO> timepoints;
 
@@ -342,6 +345,14 @@ public class StudyDTO {
 		this.subjectStudyList = subjectStudyList;
 	}
 
+	public List<SubjectDTO> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(List<SubjectDTO> subjectList) {
+		this.subjects = subjectList;
+	}
+
 	/**
 	 * @return the timepoints
 	 */
@@ -486,9 +497,10 @@ public class StudyDTO {
 				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
 				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList
 				+ ", studyStatus=" + studyStatus + ", studyType=" + studyType + ", subjectStudyList=" + subjectStudyList
-				+ ", timepoints=" + timepoints + ", visibleByDefault=" + visibleByDefault + ", withExamination="
-				+ withExamination + ", studyUserList=" + studyUserList + ", challenge=" + challenge + ", description="
-				+ description + ", license=" + license + ", storageVolume=" + storageVolume + "]";
+				+ ", subjects=" + subjects + ", timepoints=" + timepoints + ", visibleByDefault="
+				+ visibleByDefault + ", withExamination=" + withExamination + ", studyUserList=" + studyUserList
+				+ ", challenge=" + challenge + ", description=" + description + ", license=" + license
+				+ ", storageVolume=" + storageVolume + "]";
 	}
 
 }
