@@ -118,7 +118,7 @@ public class DicomImporterService {
             acquisition = existingAcquisition.get();
         } else {
             acquisition = acquisitionContext.generateDatasetAcquisitionForSerie(
-                serieDICOM, "", serieDICOM.getSeriesNumber(), null, null);
+                serieDICOM, serieDICOM.getSeriesNumber(), null, null);
         }
         return acquisition;
     }

@@ -83,7 +83,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     }
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = generateMrDatasetAcquisitionBase(
 				importJob.getUsername(), serie, rank, dicomAttributes.getFirstDatasetAttributes());
 

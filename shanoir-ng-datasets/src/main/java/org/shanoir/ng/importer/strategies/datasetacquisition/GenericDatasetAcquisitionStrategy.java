@@ -30,12 +30,12 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	private DatasetStrategy<GenericDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
+		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));

@@ -55,14 +55,14 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 	
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
 		
 		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
+		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));

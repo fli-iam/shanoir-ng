@@ -28,6 +28,8 @@ import org.shanoir.ng.importer.strategies.datasetacquisition.XaDatasetAcquisitio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.micrometer.common.util.StringUtils;
+
 /**
  * In the strategy pattern this class represents the context.
  * The context holds the variable to the actual strategy in use,
@@ -56,7 +58,7 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	
 	// add other strategies for other modalities here
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
 		String modality = serie.getModality();
 		if ("MR".equals(modality)) {
@@ -71,9 +73,10 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			// By default we just create a generic dataset acquisition
 			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
 		}
-		// Set SeriesInstanceUID into acquisition; this applies for all modalities DICOM, that are stored in PACS
-		seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
-		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, seriesInstanceUID, rank, importJob, dicomAttributes);
+		// Use always SeriesInstanceUID from DICOM files
+		String seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
+		serie.setSeriesInstanceUID(seriesInstanceUID);
+		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
 	}
 	
 }
