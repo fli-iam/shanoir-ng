@@ -1,7 +1,6 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
-
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -13,7 +12,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +28,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 	
 	@Override
 	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-			ImportJob importJob) throws Exception {
+			Long subjectId) throws Exception {
 		DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -45,7 +43,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
+			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}
@@ -56,7 +54,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 
 	@Override
 	public GenericDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset,
-			int datasetIndex, ImportJob importJob) throws Exception {
+			int datasetIndex, Long subjectId) throws Exception {
 		GenericDataset genericDataset = new GenericDataset();
 		genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		genericDataset.setCreationDate(serie.getSeriesDate());
@@ -74,7 +72,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
 		// Set the study and the subject
-		genericDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+		genericDataset.setSubjectId(subjectId);
 
 		// Set the modality from dicom fields
 		genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
@@ -96,7 +94,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
 			datasetExpression.setDataset(genericDataset);
 			genericDataset.getDatasetExpressions().add(datasetExpression);
 		}

@@ -12,7 +12,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
@@ -30,18 +29,18 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	private DatasetStrategy<GenericDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
 													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
-		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(datasetAcquisition);

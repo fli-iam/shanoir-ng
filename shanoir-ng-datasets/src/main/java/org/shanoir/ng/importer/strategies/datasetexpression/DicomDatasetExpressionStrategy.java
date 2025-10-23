@@ -28,7 +28,6 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
@@ -61,7 +60,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	private String dicomWebRS;
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException {
+	public DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException {
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);

@@ -33,7 +33,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.shared.dicom.EchoTime;
@@ -71,7 +70,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	
 	@Override
 	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes<String> serieAttributes, Serie serie,
-			ImportJob importJob) throws Exception {
+			Long subjectId) throws Exception {
 		
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
@@ -88,7 +87,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 		for (Dataset dataset : serie.getDatasets()) {
 			MrDataset mrDataset = new MrDataset();
-			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
+			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, subjectId);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
@@ -120,7 +119,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	 */
 	@Override
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-			ImportJob importJob) throws Exception {
+			Long subjectId) throws Exception {
 		MrDataset mrDataset = new MrDataset();
 		mrDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		mrDataset.setCreationDate(serie.getSeriesDate());
@@ -139,7 +138,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		mrDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
 		// Set the study and the subject
-		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+		mrDataset.setSubjectId(subjectId);
 
 		// Set the modality from dicom fields
 		mrDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
@@ -240,7 +239,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
 			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
 					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());

@@ -27,7 +27,6 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.PetProtocolStrategy;
@@ -54,13 +53,12 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	private DatasetStrategy<PetDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
-		
 		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
@@ -71,8 +69,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		datasetAcquisition.setPetProtocol(protocol);
 	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
-		DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(datasetAcquisition);
@@ -81,4 +78,5 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
+
 }

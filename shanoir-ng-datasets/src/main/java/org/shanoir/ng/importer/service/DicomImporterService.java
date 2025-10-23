@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -109,6 +110,7 @@ public class DicomImporterService {
 
     private DatasetAcquisition manageAcquisition(Attributes datasetAttributes, Examination examination) throws Exception {
         DatasetAcquisition acquisition = null;
+        final String userName = KeycloakUtil.getTokenUserName();
         Serie serieDICOM = new Serie(datasetAttributes);
         List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
         Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
@@ -118,7 +120,7 @@ public class DicomImporterService {
             acquisition = existingAcquisition.get();
         } else {
             acquisition = acquisitionContext.generateDatasetAcquisitionForSerie(
-                serieDICOM, serieDICOM.getSeriesNumber(), null, null);
+                userName, examination.getSubject().getId(), serieDICOM, serieDICOM.getSeriesNumber(), null);
         }
         return acquisition;
     }

@@ -26,7 +26,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 	
 	@Override
 	public DatasetsWrapper<CtDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-			ImportJob importJob) throws Exception {
+			Long subjectId) throws Exception {
 		
 		DatasetsWrapper<CtDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
@@ -59,7 +58,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
+			CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}
@@ -70,7 +69,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
 	@Override
 	public CtDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-			ImportJob importJob) throws Exception {
+			Long subjectId) throws Exception {
 		CtDataset ctDataset = new CtDataset();
 		ctDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		ctDataset.setCreationDate(serie.getSeriesDate());
@@ -88,7 +87,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		ctDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
 		// Set the study and the subject
-		ctDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+		ctDataset.setSubjectId(subjectId);
 
 		ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.CT_DATASET);
 
@@ -109,7 +108,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
 			datasetExpression.setDataset(ctDataset);
 			ctDataset.getDatasetExpressions().add(datasetExpression);
 		}

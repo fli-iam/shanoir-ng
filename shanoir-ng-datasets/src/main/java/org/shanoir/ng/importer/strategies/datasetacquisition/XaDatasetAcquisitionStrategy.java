@@ -27,7 +27,6 @@ import org.shanoir.ng.datasetacquisition.model.xa.XaProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.XaProtocolStrategy;
@@ -53,15 +52,13 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 	@Autowired
 	private DatasetStrategy<XaDataset> datasetStrategy;
 	
-	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
-		
 		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
@@ -72,8 +69,7 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		XaProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		datasetAcquisition.setXaProtocol(protocol);
 	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
-		DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(datasetAcquisition);
@@ -82,4 +78,5 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
+
 }
