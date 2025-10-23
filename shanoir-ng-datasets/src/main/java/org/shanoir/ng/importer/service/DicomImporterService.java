@@ -22,7 +22,6 @@ import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -74,6 +73,9 @@ public class DicomImporterService {
     private DatasetAcquisitionService acquisitionService;
 
     @Autowired
+    private DatasetAcquisitionContext acquisitionContext;
+
+    @Autowired
     private CenterRepository centerRepository;
 
     @Autowired
@@ -84,7 +86,7 @@ public class DicomImporterService {
 
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality)
-            throws RestServiceException, JsonProcessingException, AmqpException {
+            throws Exception {
         String deIdentificationMethod = datasetAttributes.getString(Tag.DeidentificationMethod);
         if (!StringUtils.isNotBlank(deIdentificationMethod)) {
             LOG.error("Only de-identified DICOM is allowed.");
@@ -100,13 +102,12 @@ public class DicomImporterService {
         Center center = manageCenter(datasetAttributes);
         Examination examination = manageExamination(datasetAttributes, study, subject, center);
         DatasetAcquisition acquisition = manageAcquisition(datasetAttributes, examination);
-        // create acquisition, depending on SeriesInstanceUID, if necessary
         // and dataset depending on volume
         // sendToPacs and index Dataset to Solr, in case new created
         return true;
     }
 
-    private DatasetAcquisition manageAcquisition(Attributes datasetAttributes, Examination examination) {
+    private DatasetAcquisition manageAcquisition(Attributes datasetAttributes, Examination examination) throws Exception {
         DatasetAcquisition acquisition = null;
         Serie serieDICOM = new Serie(datasetAttributes);
         List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
@@ -116,6 +117,8 @@ public class DicomImporterService {
         if (existingAcquisition.isPresent()) {
             acquisition = existingAcquisition.get();
         } else {
+            acquisition = acquisitionContext.generateDatasetAcquisitionForSerie(
+                serieDICOM, "", serieDICOM.getSeriesNumber(), null, null);
         }
         return acquisition;
     }

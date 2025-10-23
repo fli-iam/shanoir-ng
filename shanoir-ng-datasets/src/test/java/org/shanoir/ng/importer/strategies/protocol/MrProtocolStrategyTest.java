@@ -52,7 +52,7 @@ public class MrProtocolStrategyTest {
 		Serie serie = generateSerie(attributes);
 		AcquisitionAttributes<String> acqAttributes = new AcquisitionAttributes<>();
 		acqAttributes.addDatasetAttributes("UID12345", attributes);
-		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(acqAttributes, serie);
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(acqAttributes.getFirstDatasetAttributes(), serie);
 		Assertions.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
 		Assertions.assertTrue(mrProtocol.getFilters().equals("77"));
 	}	

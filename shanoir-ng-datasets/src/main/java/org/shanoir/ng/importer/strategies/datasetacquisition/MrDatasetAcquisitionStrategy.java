@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -46,7 +48,7 @@ import org.springframework.stereotype.Component;
 /**
  * 
  * MR Dataset Acquisition Strategy used to create new Mr Dataset Acquisition.
- * Called by the ImportService. Requires an importJob
+ * Called by the ImportService.
  * 
  * Refer to Interface for more information
  * 
@@ -56,7 +58,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 	
-	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
 	
 	@Autowired
@@ -66,6 +67,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
     private static final Map<String, BidsDataType> dataTypeMapping;
+
     static {
         Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
         aMap.put("ANGIO_TIME", BidsDataType.ANAT);
@@ -77,23 +79,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         aMap.put("T1", BidsDataType.ANAT);
         aMap.put("T2", BidsDataType.ANAT);
         aMap.put("T2_STAR", BidsDataType.ANAT);
-        //TODO: To be completed by an expert
         dataTypeMapping = Collections.unmodifiableMap(aMap);
     }
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		mrDatasetAcquisition.setUsername(importJob.getUsername());
-		mrDatasetAcquisition.setImportDate(LocalDate.now());
-		mrDatasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
-		mrDatasetAcquisition.setRank(rank);
-		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		mrDatasetAcquisition.setMrProtocol(mrProtocol);
-	
+		MrDatasetAcquisition mrDatasetAcquisition = generateMrDatasetAcquisitionBase(
+				importJob.getUsername(), serie, rank, dicomAttributes.getFirstDatasetAttributes());
+
 		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -113,13 +106,30 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
 		}
+		return mrDatasetAcquisition;
+	}
 
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+	public MrDatasetAcquisition generateMrDatasetAcquisitionBase(
+			String userName, Serie serie, int rank,	Attributes attributes) throws IOException {
+		LOG.info("Generating MrDatasetAcquisition for   : {} - {} - Rank: {}",
+				serie.getSequenceName(), serie.getProtocolName(), rank);
+		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
+		mrDatasetAcquisition.setUsername(userName);
+		mrDatasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+		mrDatasetAcquisition.setImportDate(LocalDate.now());
+		mrDatasetAcquisition.setRank(rank);
+		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+		mrDatasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+				attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
 		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
+		mrDatasetAcquisition.setMrProtocol(mrProtocol);
+
 		// Can be overridden by study cards
-		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
+		String imageType = attributes.getString(Tag.ImageType, 2);		
 		if (imageType != null && dataTypeMapping.get(imageType) != null) {
 			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
 				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
@@ -128,4 +138,5 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		}
 		return mrDatasetAcquisition;
 	}
+
 }
