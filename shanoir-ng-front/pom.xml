@@ -78,8 +78,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
-							<nodeVersion>v20.11.1</nodeVersion>
-							<npmVersion>10.5.1</npmVersion>
+							<nodeVersion>v20.19.0</nodeVersion>
+							<npmVersion>10.8.2</npmVersion>
 						</configuration>
 					</execution>
 
@@ -134,7 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<outputDirectory>${nginx.webapp.directory}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.basedir}/dist</directory>
+									<directory>${project.basedir}/dist/browser</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
@@ -150,7 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<outputDirectory>${nginx.webapp.directory.docker.compose}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.basedir}/dist</directory>
+									<directory>${project.basedir}/dist/browser</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
