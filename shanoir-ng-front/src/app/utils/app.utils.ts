@@ -43,6 +43,7 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + '/public/count';
 
 
 

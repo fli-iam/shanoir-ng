@@ -92,4 +92,11 @@ export class UserService extends EntityService<User> implements OnDestroy {
                 return typeResult;
             });
     }
+
+    countAllUsers(): Promise<number> {
+        return this.http.get<number>(AppUtils.BACKEND_API_USER_PUBLIC_COUNT)
+            .toPromise().then((count: number) => {
+                return count;
+            });
+    }
 }

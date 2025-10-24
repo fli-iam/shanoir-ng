@@ -99,6 +99,14 @@ public interface UserApi {
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
 	ResponseEntity<List<User>> findUsers();
 
+	@Operation(summary = "", description = "Count all the users")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found users"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/public/count", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<Long> countUsers();
+
 	@Operation(summary = "", description = "Returns all the users on account request")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found users"),
 			@ApiResponse(responseCode = "204", description = "no user found"),

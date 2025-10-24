@@ -17,8 +17,6 @@ package org.shanoir.ng.user.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
@@ -41,6 +39,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
@@ -78,7 +78,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
-	
 	@Override
 	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
 		try {
@@ -91,7 +90,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
 		}
 	}
-
 	
 	@Override
 	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
@@ -110,7 +108,11 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
-	
+
+	@Override
+	public ResponseEntity<Long> countUsers() {
+		return new ResponseEntity<>(getUserService().count(), HttpStatus.OK);
+	}
 	
 	@Override
 	public ResponseEntity<List<User>> findAccountRequests() {
@@ -120,7 +122,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
-	
 	
 	@Override
 	public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {

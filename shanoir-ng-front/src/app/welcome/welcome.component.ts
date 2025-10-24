@@ -15,6 +15,7 @@ import { ImagesUrlUtil } from "../shared/utils/images-url.util";
 import { StudyType } from "../studies/shared/study-type.enum";
 import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
+import { UserService } from "../users/shared/user.service"; 
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
 
@@ -31,12 +32,14 @@ export class WelcomeComponent implements OnInit {
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
 	public email: string = "mailto:developers_shanoir-request@inria.fr";
 	public studies: StudyLight[] = [];
+    public usersCount: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
 
 	constructor(
 		private studyService: StudyService,
+        private userService: UserService,
         private _renderer2: Renderer2,
         private confirmDialogService: ConfirmDialogService,
         @Inject(DOCUMENT) private _document: Document
@@ -44,6 +47,7 @@ export class WelcomeComponent implements OnInit {
 
 	ngOnInit(): void {
         this.fetchStudies();
+        this.fetchUsersCount();
     }
 
     addSchemaToDOM(): void {
@@ -150,6 +154,12 @@ export class WelcomeComponent implements OnInit {
             this.addSchemaToDOM();
 		});
 	}
+
+    private fetchUsersCount() {
+        this.userService.countAllUsers().then(count => {
+            this.usersCount = count;
+        });
+    }
 
 	increaseShow() {
 		this.show += 10;

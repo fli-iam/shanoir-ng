@@ -73,11 +73,10 @@ public class SecurityConfiguration {
 				.csrf(AbstractHttpConfigurer::disable)
 				.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
 				.authorizeHttpRequests(
-					matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date")
+					matcher -> matcher
+					.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date", "/users/public/count").permitAll()
 						// the swagger API is not exposed here for security reasons (MK)
-						.permitAll()
-					.anyRequest()
-						.authenticated()
+					.anyRequest().authenticated()
 				)
 				.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
 					Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
