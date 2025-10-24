@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <packaging>jar</packaging>
 
     <name>shanoir-ng-nifti-conversion</name>
-    <description>Shanoir-NG nifti conversion Microservice</description>
+    <description>NIfTI conversion microservice</description>
   
     <properties>
         <dcm4che.version>5.14.1</dcm4che.version>

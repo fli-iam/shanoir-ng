@@ -14,8 +14,13 @@
 
 package org.shanoir.ng.dicom.web;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +28,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -41,12 +47,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
 @WebMvcTest(controllers = DICOMJsonApiController.class)
@@ -70,7 +72,10 @@ public class DICOMJsonApiControllerTest {
 	private ExaminationService examinationServiceMock;
 	
 	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+	@MockBean
+	private DicomImporterService dicomImporterService;
 
 	@BeforeEach
 	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {

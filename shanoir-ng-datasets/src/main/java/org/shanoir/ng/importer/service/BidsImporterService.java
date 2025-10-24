@@ -304,4 +304,5 @@ public class BidsImporterService {
 		event.setProgress(1f);
 		eventService.publishEvent(event);
 	}
+
 }

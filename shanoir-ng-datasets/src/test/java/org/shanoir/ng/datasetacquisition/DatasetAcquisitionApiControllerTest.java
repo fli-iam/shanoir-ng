@@ -12,6 +12,7 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
@@ -42,7 +43,10 @@ public class DatasetAcquisitionApiControllerTest {
 	private EegImporterService eegImporterService;
 
 	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+	@MockBean
+	private DicomImporterService dicomImporterService;
 	
 	@MockBean 
 	private DatasetAcquisitionService datasetAcquisitionService;

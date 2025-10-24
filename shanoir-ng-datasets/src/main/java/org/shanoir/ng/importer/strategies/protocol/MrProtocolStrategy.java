@@ -36,7 +36,6 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceKSpaceFill;
 import org.shanoir.ng.datasetacquisition.model.mr.ParallelAcquisitionTechnique;
 import org.shanoir.ng.datasetacquisition.model.mr.PatientPosition;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.CoilDTO;
 import org.shanoir.ng.importer.dto.CoilType;
 import org.shanoir.ng.importer.dto.Serie;
@@ -47,12 +46,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MrProtocolStrategy {
 
-	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {
-
-		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
+	public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {
 		// dcm4che3 does not support MultiframeExtraction for MRS
 		if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
 			// MultiFrameExtractor is only used in case of EnhancedMR MRI.
