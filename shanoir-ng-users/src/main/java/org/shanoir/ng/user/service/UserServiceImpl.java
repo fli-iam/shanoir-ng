@@ -406,4 +406,9 @@ public class UserServiceImpl implements UserService {
         userDb.setUsername(user.getUsername());
         return userDb;
     }
+
+    @Override
+	public Long count() {
+		return userRepository.count();
+	}
 }

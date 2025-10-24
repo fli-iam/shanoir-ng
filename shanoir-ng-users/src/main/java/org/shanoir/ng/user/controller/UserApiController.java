@@ -196,4 +196,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
+    @Override
+	public ResponseEntity<Long> countUsers() {
+		return new ResponseEntity<>(getUserService().count(), HttpStatus.OK);
+	}
+
 }
