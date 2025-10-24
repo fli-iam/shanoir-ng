@@ -133,11 +133,11 @@ public class ImporterService {
                 if (!importJob.isFromShanoirUploader()) {
                     qualityResult = qualityService.checkQuality(examData, importJob, null);
                 } else {
-                    LOG.info("Importing Data from ShanoirUploader.");
+                    LOG.info("Importing data from ShanoirUploader.");
                     // We retrieve quality card result from ShUp import job
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
-                        LOG.info("Retrieving Quality Control result from ShanoirUploader.");
+                        LOG.info("Retrieving quality control result from ShanoirUploader.");
                         if(subject != null) {
                             subject.setQualityTag(qualityResult.get(0).getTagSet());
                             qualityResult.addUpdatedSubject(subject);

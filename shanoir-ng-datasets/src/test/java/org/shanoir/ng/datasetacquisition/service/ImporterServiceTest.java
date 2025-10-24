@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -180,13 +183,15 @@ public class ImporterServiceTest {
 		entry.setTagSet(QualityTag.VALID);
 		qualityResult.add(entry);
 
-		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
-		
+		AcquisitionAttributes<String> acquisitionAttributes = new AcquisitionAttributes<String>();
+		Attributes attributes = new Attributes();
+		attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
+		acquisitionAttributes.addDatasetAttributes("1", attributes);
+
 		try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
 			dicomProcessingMock
-				.when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
-				.thenReturn(new Attributes());
-
+				.when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie))
+				.thenReturn(acquisitionAttributes);
 			when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(importJob.getUsername()), Mockito.eq(examination.getSubject().getId()), Mockito.eq(serie), Mockito.eq(0), Mockito.any())).thenReturn(datasetAcq);
 			when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 			when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
