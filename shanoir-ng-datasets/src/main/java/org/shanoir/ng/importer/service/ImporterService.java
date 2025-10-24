@@ -297,13 +297,13 @@ public class ImporterService {
         String studyInstanceUIDImportJob = importJob.getStudyInstanceUID();
         if (StringUtil.isNullOrEmpty(studyInstanceUIDImportJob)) { // Handle old versions of ShUp: nothing in ImportJob
             if (StringUtil.isNullOrEmpty(studyInstanceUIDExamination)
-                || !examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)) {
+                    || !examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)) {
                 LOG.info("Old version of ShUp used: updating StudyInstanceUID of examination from {} to {}", examination.getStudyInstanceUID(), studyInstanceUIDDICOM);
                 examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUIDDICOM);
             } // do nothing as all in line
         } else { // New version of ShUp, sending in ImportJob
             if (examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)
-                && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob)) {
+                    && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob)) {
                 // do nothing as all in line
             } else {
                 throw new ShanoirException("Error with StudyInstanceUIDs.");
