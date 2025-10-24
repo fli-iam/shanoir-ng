@@ -191,8 +191,8 @@ public class ImporterServiceTest {
 
 		try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
 			dicomProcessingMock
-				.when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
-				.thenReturn(new Attributes());
+				.when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()))
+				.thenReturn(acquisitionAttributes);
 			when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(""), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 			when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 			when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
