@@ -45,7 +45,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     @Output() userChange: EventEmitter<Tag[]> = new EventEmitter<Tag[]>();
 
     writeValue(obj: any): void {
-        this.tags = obj || [];
+        this.tags = (obj || []).map((t: any) => Object.assign(new Tag(), t));
         if (this.availableTags) {
             this.updateOptions();
         }
