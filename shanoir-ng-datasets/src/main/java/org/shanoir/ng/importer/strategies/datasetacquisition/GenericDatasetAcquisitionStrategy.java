@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -29,17 +30,9 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	private DatasetStrategy<GenericDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}",serie.getSequenceName(), serie.getProtocolName(), rank);
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(userName);
-		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
-		datasetAcquisition.setRank(rank);
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+		GenericDatasetAcquisition datasetAcquisition = (GenericDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
+				userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
 		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -47,6 +40,24 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 			genericizedList.add(dataset);
 		}
 		datasetAcquisition.setDatasets(genericizedList);		
+		return datasetAcquisition;
+	}
+
+	@Override
+	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+			Attributes attributes) throws Exception {
+		LOG.info("Generating GenericDatasetAcquisition for: {} - {} - Rank: {}",
+				serie.getSequenceName(), serie.getProtocolName(), rank);
+		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
+		datasetAcquisition.setUsername(userName);
+		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+		datasetAcquisition.setRank(rank);
+		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+		datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+		datasetAcquisition.setAcquisitionStartTime(
+				LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(attributes.getString(Tag.AcquisitionDate)), 
+				DateTimeUtils.stringToLocalTime(attributes.getString(Tag.AcquisitionTime))));
 		return datasetAcquisition;
 	}
 

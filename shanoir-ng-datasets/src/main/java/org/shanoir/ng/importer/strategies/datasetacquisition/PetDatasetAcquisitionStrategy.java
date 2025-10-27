@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 
-
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(PetDatasetAcquisitionStrategy.class);
 	
@@ -53,22 +53,10 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	private DatasetStrategy<PetDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
-		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(userName);
-		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
-		datasetAcquisition.setRank(rank);
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
-		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		datasetAcquisition.setPetProtocol(protocol);
-	
+		PetDatasetAcquisition datasetAcquisition = (PetDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
+				userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
 		DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -76,6 +64,27 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 			genericizedList.add(dataset);
 		}
 		datasetAcquisition.setDatasets(genericizedList);		
+		return datasetAcquisition;
+	}
+
+	@Override
+	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+			Attributes attributes) throws Exception {
+		LOG.info("Generating PetDatasetAcquisition for: {} - {} - Rank: {}",
+				serie.getSequenceName(), serie.getProtocolName(), rank);
+		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
+		datasetAcquisition.setUsername(userName);
+		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+		datasetAcquisition.setRank(rank);
+		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+		datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+				attributes.getString(Tag.AcquisitionDate), 
+				attributes.getString(Tag.AcquisitionTime));
+		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(attributes, serie);
+		datasetAcquisition.setPetProtocol(protocol);
 		return datasetAcquisition;
 	}
 

@@ -119,8 +119,8 @@ public class DicomImporterService {
         if (existingAcquisition.isPresent()) {
             acquisition = existingAcquisition.get();
         } else {
-            acquisition = acquisitionContext.generateDatasetAcquisitionForSerie(
-                userName, examination.getSubject().getId(), serieDICOM, serieDICOM.getSeriesNumber(), null);
+            acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
+                userName, serieDICOM, serieDICOM.getSeriesNumber(), datasetAttributes);
         }
         return acquisition;
     }

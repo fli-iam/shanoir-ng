@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.service;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -53,9 +54,21 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	@Autowired
 	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
 	
-	// add other strategies for other modalities here
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, dicomAttributes.getFirstDatasetAttributes());
+		return datasetAcquisitionStrategy.generateDeepDatasetAcquisitionForSerie(userName, subjectId, serie, rank, dicomAttributes);
+	}
+
+	@Override
+	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+			Attributes attributes) throws Exception {
+		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
+		return datasetAcquisitionStrategy.generateFlatDatasetAcquisitionForSerie(userName, serie, rank, attributes);
+	}
+
+	// add other strategies for other modalities here
+	private DatasetAcquisitionStrategy selectModalityStrategy(Serie serie, Attributes attributes) {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
 		String modality = serie.getModality();
 		if ("MR".equals(modality)) {
@@ -71,9 +84,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
 		}
 		// Use always SeriesInstanceUID from DICOM files
-		String seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
+		String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
 		serie.setSeriesInstanceUID(seriesInstanceUID);
-		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(userName, subjectId, serie, rank, dicomAttributes);
+		return datasetAcquisitionStrategy;
 	}
 	
 }

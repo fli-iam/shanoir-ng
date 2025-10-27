@@ -19,7 +19,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +34,8 @@ public class PetProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
 	
-	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) throws IOException {		
-		PetProtocol petProtocol = new PetProtocol();  
-		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
+	public PetProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {		
+		PetProtocol petProtocol = new PetProtocol();
 		
 		/** (0028, 0010) Rows */
 		final Integer dimensionX = attributes.getInt(Tag.Rows, 0);

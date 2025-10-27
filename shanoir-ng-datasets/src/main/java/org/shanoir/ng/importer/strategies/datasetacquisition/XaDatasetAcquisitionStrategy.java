@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 
-
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(XaDatasetAcquisitionStrategy.class);
 	
@@ -53,22 +53,10 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 	private DatasetStrategy<XaDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
-		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank: {}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(userName);
-		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
-		datasetAcquisition.setRank(rank);
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
-				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
-		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		XaProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		datasetAcquisition.setXaProtocol(protocol);
-	
+		XaDatasetAcquisition datasetAcquisition = (XaDatasetAcquisition)generateFlatDatasetAcquisitionForSerie(
+				userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
 		DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -76,6 +64,26 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 			genericizedList.add(dataset);
 		}
 		datasetAcquisition.setDatasets(genericizedList);		
+		return datasetAcquisition;
+	}
+
+	@Override
+	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+			Attributes attributes) throws Exception {
+		LOG.info("Generating XaDatasetAcquisition for: {} - {} - Rank: {}",
+				serie.getSequenceName(), serie.getProtocolName(), rank);
+		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
+		datasetAcquisition.setUsername(userName);
+		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+		datasetAcquisition.setRank(rank);
+		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+		datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+				attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+		XaProtocol protocol = protocolStrategy.generateProtocolForSerie(attributes, serie);
+		datasetAcquisition.setXaProtocol(protocol);
 		return datasetAcquisition;
 	}
 
