@@ -25,9 +25,10 @@ export class Queue {
     }
 
     waitForTurn(): Promise<() => void> {
-        const stop: Subject<any> = new Subject<any>();
+        const stop: Subject<void> = new Subject<void>();
         const ticket: number = this._nextTicket++;
-        return new Promise((resolve) => {
+        return new Promise((resolve,) => {
+            // takeUntil(stop) manages the unsubscription
             this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
                 if (calledTicket == ticket) {
                     stop.next();
