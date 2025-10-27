@@ -97,6 +97,7 @@ export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils
 // Datasets http api
 export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
+export const BACKEND_API_EXAMINATIONS_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
 export const BACKEND_API_OVERALL_STATISTICS_URL: string = BACKEND_API_DATASET_URL + '/overallStatistics';
 
