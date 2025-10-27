@@ -57,7 +57,7 @@ export class WelcomeComponent implements OnInit {
         this.fetchUsersCount();
         this.fetchEventsCount();
         this.fetchExaminationsCount();
-        //this.fetchSubjectsCount();
+        this.fetchSubjectsCount();
     }
 
     addSchemaToDOM(): void {
@@ -191,6 +191,13 @@ export class WelcomeComponent implements OnInit {
         // count all examinations
         this.datasetService.countAllExaminations().then(count => {
             this.examinationsCount = count;
+        });
+    }
+
+    private fetchSubjectsCount() {
+        // count all subjects
+        this.studyService.countAllSubjects().then(count => {
+            this.subjectsCount = count;
         });
     }
 

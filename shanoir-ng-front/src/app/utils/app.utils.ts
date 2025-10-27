@@ -87,6 +87,7 @@ export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/su
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
 export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER: string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
+export const BACKEND_API_SUBJECT_COUNT_URL: string = BACKEND_API_SUBJECT_URL + '/count';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
