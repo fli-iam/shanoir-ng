@@ -74,7 +74,7 @@ public class SecurityConfiguration {
 				.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
 				.authorizeHttpRequests(
 					matcher -> matcher
-					.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date", "/users/public/count").permitAll()
+					.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date", "/users/count", "/events/count").permitAll()
 						// the swagger API is not exposed here for security reasons (MK)
 					.anyRequest().authenticated()
 				)

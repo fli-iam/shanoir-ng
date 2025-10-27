@@ -20,7 +20,7 @@ public class EventsApiController implements EventsApi {
     private static final Logger LOG = LoggerFactory.getLogger(EventsApiController.class);
     @Override
     public ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) throws RestServiceException {
-        LOG.error("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
+        LOG.info("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
         try {
             Page<ShanoirEvent> events = shanoirEventsService.findByStudyId(pageable, studyId, searchStr, searchField);
 
@@ -34,4 +34,16 @@ public class EventsApiController implements EventsApi {
         }
 
     }
+
+    @Override
+    public ResponseEntity<Long> countPassedEvents(Integer days) throws RestServiceException {
+        LOG.info("countPassedEvents : days=" + days);
+        try {
+            Long count = shanoirEventsService.countPassedEvents(days);
+            return new ResponseEntity<>(count, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
+        }
+    }
+
 }

@@ -168,4 +168,15 @@ public class ShanoirEventsService {
 		Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
 		return events;
 	}
+
+	/**
+	 * Count number of events happened in the last x days
+	 * to display statistic on welcome page
+	 *
+	 * @param days number of days
+	 * @return number of events
+	 */
+	public Long countPassedEvents(Integer days) {
+		return repository.countByLastUpdateAfter(new Date(System.currentTimeMillis() - days * DateUtils.MILLIS_PER_DAY));
+	}
 }

@@ -16,11 +16,11 @@
 		</div>
 	</div>
     <div class="stats">
-        This instance of Shanoir has {{ usersCount }} users and the {{ studies?.length }} publicly shared studies below.
+        This instance of Shanoir has {{ usersCount }} users who made {{ eventsCount }} queries during the last month. It has {{ studiesCount }} data collections including {{ publicStudies?.length }} publicly shared studies detailed below.
     </div>
     <div class="study-tab-parent">
-        <div *ngIf="studies?.length > 0" class="study-tab">
-            <div class="studyItem" *ngFor="let study of studies | slice:0:show; let index = index;">
+        <div *ngIf="publicStudies?.length > 0" class="study-tab">
+            <div class="studyItem" *ngFor="let study of publicStudies | slice:0:show; let index = index;">
                 <div class="title link" (click)="accessRequest(study)">
                     <span class="studyTitle"><b>{{study.name}}</b></span>
                     <span *ngIf="study.description" class="studyDescription">
@@ -59,12 +59,12 @@
                         <span class="tag" [style.border-color]="tag.color" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
                     </div>
                 </div>
-                <hr *ngIf="index < (studies.length - 1)" />
+                <hr *ngIf="index < (publicStudies.length - 1)" />
                 <div class="accessRequest">
                     <a class="buttonItem" type="button" (click)="accessRequest(study)">Request an access</a>
                 </div>
             </div>
-            <div *ngIf="studies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
+            <div *ngIf="publicStudies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
         </div>
     </div>
 </div>

@@ -15,7 +15,7 @@ import { ImagesUrlUtil } from "../shared/utils/images-url.util";
 import { StudyType } from "../studies/shared/study-type.enum";
 import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
-import { UserService } from "../users/shared/user.service"; 
+import { UserService } from "../users/shared/user.service";
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
 
@@ -31,8 +31,10 @@ export class WelcomeComponent implements OnInit {
 	public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
 	public email: string = "mailto:developers_shanoir-request@inria.fr";
-	public studies: StudyLight[] = [];
+	public publicStudies: StudyLight[] = [];
     public usersCount: number = 0;
+    public eventsCount: number = 0;
+    public studiesCount: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
@@ -47,7 +49,9 @@ export class WelcomeComponent implements OnInit {
 
 	ngOnInit(): void {
         this.fetchStudies();
+        this.fetchPublicStudies();
         this.fetchUsersCount();
+        this.fetchEventsCount();
     }
 
     addSchemaToDOM(): void {
@@ -57,7 +61,7 @@ export class WelcomeComponent implements OnInit {
         let datasetStr: string = "";
         const shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
-        this.studies?.forEach( study => {
+        this.publicStudies?.forEach( study => {
 
             // keywords handling
             let keywords: string = "";
@@ -87,7 +91,7 @@ export class WelcomeComponent implements OnInit {
                         ]
                     }`
             }
-            if (study != this.studies[this.studies.length - 1]) {
+            if (study != this.publicStudies[this.publicStudies.length - 1]) {
                 datasetStr += ",";
             }
         })
@@ -143,10 +147,32 @@ export class WelcomeComponent implements OnInit {
         this._renderer2.appendChild(this._document.head, script);
 	}
 
-	private fetchStudies() {
+    private fetchUsersCount() {
+        //count all users
+        this.userService.countAllUsers().then(count => {
+            this.usersCount = count;
+        });
+    }
+
+    private fetchEventsCount() {
+        // count all users events during last month
+        this.userService.countLastMonthEvents().then(count => {
+            this.eventsCount = count;
+        });
+    }
+
+    private fetchStudies() {
+        // count all studies
+        this.studyService.countAllStudies().then(count => {
+            this.studiesCount = count;
+        });
+    }
+
+	private fetchPublicStudies() {
+        // get public studies
 		this.studyService.getPublicStudiesData().then(studies => {
 			// sort by nbExaminations
-			this.studies = studies?.sort((a, b) => {
+			this.publicStudies = studies?.sort((a, b) => {
 				// To order by dates :
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
@@ -154,12 +180,6 @@ export class WelcomeComponent implements OnInit {
             this.addSchemaToDOM();
 		});
 	}
-
-    private fetchUsersCount() {
-        this.userService.countAllUsers().then(count => {
-            this.usersCount = count;
-        });
-    }
 
 	increaseShow() {
 		this.show += 10;
@@ -197,6 +217,6 @@ export class WelcomeComponent implements OnInit {
 	@HostListener('window:scroll', ['$event']) onWindowScroll(e) {
 		const scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
 		const end = this.showMore?.nativeElement?.offsetTop;
-		if (scroll > end && this.studies.length > this.show) this.increaseShow();
+		if (scroll > end && this.publicStudies.length > this.show) this.increaseShow();
 	}
 }

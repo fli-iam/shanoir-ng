@@ -13,7 +13,7 @@
  */
 
 import { Injectable, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Subject } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -95,6 +95,14 @@ export class UserService extends EntityService<User> implements OnDestroy {
 
     countAllUsers(): Promise<number> {
         return this.http.get<number>(AppUtils.BACKEND_API_USER_PUBLIC_COUNT)
+            .toPromise().then((count: number) => {
+                return count;
+            });
+    }
+
+    countLastMonthEvents(): Promise<number> {
+        const param = new HttpParams().set('days', AppUtils.BACKEND_API_EVENTS_COUNT_DAYS_PARAM);
+        return this.http.get<number>(AppUtils.BACKEND_API_USER_PUBLIC_COUNT_LAST_MONTH_EVENTS, { params: param })
             .toPromise().then((count: number) => {
                 return count;
             });

@@ -35,6 +35,7 @@ export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shano
 export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
 export const BACKEND_API_USER_EVENTS: string = BACKEND_API_USERS_MS_URL + '/events';
+export const BACKEND_API_PUBLIC_COUNT_ENDPOINT: string = '/public/count';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';
@@ -43,9 +44,11 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
-export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + '/public/count';
+export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_PUBLIC_COUNT_ENDPOINT;
 
-
+// ShanoirEvents http api
+export const BACKEND_API_EVENTS_COUNT_DAYS_PARAM: string = '30';
+export const BACKEND_API_USER_PUBLIC_COUNT_LAST_MONTH_EVENTS: string = BACKEND_API_USER_EVENTS + BACKEND_API_PUBLIC_COUNT_ENDPOINT;
 
 
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
@@ -68,6 +71,7 @@ export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_UR
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/public/data';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_URL + '/public/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
+export const BACKEND_API_STUDY_COUNT_ALL_URL: string = BACKEND_API_STUDY_URL + '/count';
 
 
 // Profile API

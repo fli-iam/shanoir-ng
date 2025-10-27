@@ -157,9 +157,18 @@ public interface StudyService {
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 
-	Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyId);
+	Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds);
 
-		/**
+	/**
+	 * Calculate global storage volume for a list of studies
+	 * 
+	 * @param studyIds
+	 *            list of study IDs
+	 * @return global storage volume
+	 */
+	// Long getGlobalStorageVolume(List<Long> studyIds);
+
+	/**
 	 * Get statistics for data analysts and study promoters
 	 * 
 	 * @return imaging statistics
@@ -170,4 +179,9 @@ public interface StudyService {
 	public List<Tag> getTagsFromStudy(Long studyId);
 
 	List<Long> queryStudiesByRight(StudyUserRight right);
+
+	/**
+	 * Count all studies;
+	 */
+	public Long countStudies();
 }
