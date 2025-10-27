@@ -519,6 +519,24 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }
 
+	@Override
+	public ResponseEntity<Long> countAllStudies() {
+		Long count = studyService.countStudies();
+		return new ResponseEntity<>(count, HttpStatus.OK);
+	}
+
+	// @Override
+	// public ResponseEntity<PublicStudiesStatisticsDTO> getPublicStatistics() {
+	// 	PublicStudiesStatisticsDTO statistics = new PublicStudiesStatisticsDTO();
+	// 	statistics.setStudies(studyService.countStudies());
+	// 	statistics.setStorageVolume(studyService.calculateStorageVolume());
+	// 	statistics.setQueriesPerMonth(studyService.countQueriesPerMonth());
+	// 	statistics.setSubjects(studyService.countSubjects());
+	// 	statistics.setExaminations(studyService.countExaminations());
+
+	// 	return new ResponseEntity<>(statistics, HttpStatus.OK);
+	// }
+
     @Override
     public ResponseEntity<List<StudyUser>> getStudyUserByStudyId(Long studyId) {
         List<StudyUser> studyUserList = this.studyUserService.findStudyUsersByStudyId(studyId);

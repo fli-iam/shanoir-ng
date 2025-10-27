@@ -939,4 +939,9 @@ public class StudyServiceImpl implements StudyService {
     public List<Long> queryStudiesByRight(StudyUserRight right) {
         return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
     }
+
+	@Override
+	public Long countStudies() {
+		return studyRepository.count();
+	}
 }

@@ -123,7 +123,7 @@ public interface UserApi {
 	    @ApiResponse(responseCode = "401", description = "unauthorized"),
 	    @ApiResponse(responseCode = "403", description = "forbidden"),
 	    @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/public/count", produces = { "application/json" }, method = RequestMethod.GET)
+    @RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
     ResponseEntity<Long> countUsers();
 
     @Operation(summary = "", description = "Saves a new user")

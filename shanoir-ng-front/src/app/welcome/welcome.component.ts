@@ -347,6 +347,7 @@ export class WelcomeComponent implements OnInit {
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
 			})
+      this.addSchemaToDOM();
 		});
 	}
 

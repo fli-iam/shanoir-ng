@@ -131,7 +131,6 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
         return Pair.of(query.getResultList(), total);
     }
 
-    // Add filter on downloadDataset.event and importDataset.event on query ?
     public Long countByLastUpdateAfter(Date expiryDate) {
         String queryStr = "select count(e) from ShanoirEvent as e where e.lastUpdate > ?1";
         Query query = entityManager.createQuery(queryStr);
