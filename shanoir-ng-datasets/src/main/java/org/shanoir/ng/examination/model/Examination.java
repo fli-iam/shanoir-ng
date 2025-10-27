@@ -50,7 +50,7 @@ import jakarta.validation.constraints.NotNull;
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId", "preclinical" })
+@JsonPropertyOrder({ "_links", "id", "examinationDate", "studyInstanceUID", "centerId", "subjectId", "studyId", "preclinical" })
 public class Examination extends HalEntity {
 
     /**
@@ -138,6 +138,13 @@ public class Examination extends HalEntity {
     @ColumnDefault("false")
     private boolean preclinical;
 
+    /**
+     * The DICOM StudyInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light, and generated during examination creation.
+     */
+    @Column(name = "study_instance_uid")
+    private String studyInstanceUID;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_id")
     private Examination source;
@@ -146,7 +153,6 @@ public class Examination extends HalEntity {
     private List<Examination> copies;
 
     public Examination() {
-
     }
 
     public Examination(Examination other, Study study, Subject subject) {
@@ -174,6 +180,7 @@ public class Examination extends HalEntity {
         this.preclinical = other.preclinical;
         this.source = other.source;
         this.copies = other.copies;
+        this.studyInstanceUID = other.studyInstanceUID;
     }
 
     /**
@@ -369,7 +376,15 @@ public class Examination extends HalEntity {
         this.study = study;
     }
 
-    public Subject getSubject() {
+    public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
+	public Subject getSubject() {
         return subject;
     }
 
@@ -448,6 +463,13 @@ public class Examination extends HalEntity {
 
     public void setCopies(List<Examination> copies) {
         this.copies = copies;
+    }
+
+    @Override
+    public String toString() {
+        return "Examination [centerId=" + centerId + ", comment=" + comment + ", examinationDate=" + examinationDate
+                + ", extraDataFilePathList=" + extraDataFilePathList + ", note=" + note + ", subject=" + subject.getName()
+                + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
     }
 
 }
