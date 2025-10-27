@@ -92,7 +92,7 @@ public class DicomImporterService {
         String deIdentificationMethod = datasetAttributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationActionSequence = datasetAttributes.getSequence(Tag.DeidentificationActionSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-            && deIdentificationActionSequence.isEmpty()) {
+                && deIdentificationActionSequence.isEmpty()) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }
