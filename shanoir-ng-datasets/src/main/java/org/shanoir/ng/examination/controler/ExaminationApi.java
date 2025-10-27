@@ -202,4 +202,12 @@ public interface ExaminationApi {
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
+	@Operation(summary = "", description = "Counts all the examinations")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found result"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/count", produces = { "application/json" })
+	ResponseEntity<Long> countAllExaminations();
 }

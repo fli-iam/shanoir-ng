@@ -16,7 +16,8 @@
 		</div>
 	</div>
     <div class="stats">
-        This instance of Shanoir has {{ usersCount }} users who made {{ eventsCount }} queries during the last month. It has {{ studiesCount }} data collections including {{ publicStudies?.length }} publicly shared studies detailed below.
+        This instance of Shanoir has {{ usersCount }} users. {{ eventsCount }} queries were made during the last month.<br>
+        It has {{ studiesCount }} data collections containing {{ examinationsCount }} imaging examinations of {{ subjectsCount }} subjects and {{ publicStudies?.length }} publicly shared data collections detailed below.
     </div>
     <div class="study-tab-parent">
         <div *ngIf="publicStudies?.length > 0" class="study-tab">

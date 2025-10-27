@@ -15,8 +15,9 @@
 package org.shanoir.ng.examination.repository;
 
 import java.util.List;
-import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import java.util.Optional;
+
+import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

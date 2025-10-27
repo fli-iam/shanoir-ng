@@ -16,6 +16,7 @@ import { StudyType } from "../studies/shared/study-type.enum";
 import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
 import { UserService } from "../users/shared/user.service";
+import { DatasetService } from "../datasets/shared/dataset.service";
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
 
@@ -35,6 +36,8 @@ export class WelcomeComponent implements OnInit {
     public usersCount: number = 0;
     public eventsCount: number = 0;
     public studiesCount: number = 0;
+    public examinationsCount: number = 0;
+    public subjectsCount: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
@@ -42,6 +45,7 @@ export class WelcomeComponent implements OnInit {
 	constructor(
 		private studyService: StudyService,
         private userService: UserService,
+        private datasetService: DatasetService,
         private _renderer2: Renderer2,
         private confirmDialogService: ConfirmDialogService,
         @Inject(DOCUMENT) private _document: Document
@@ -52,6 +56,8 @@ export class WelcomeComponent implements OnInit {
         this.fetchPublicStudies();
         this.fetchUsersCount();
         this.fetchEventsCount();
+        this.fetchExaminationsCount();
+        //this.fetchSubjectsCount();
     }
 
     addSchemaToDOM(): void {
@@ -180,6 +186,13 @@ export class WelcomeComponent implements OnInit {
             this.addSchemaToDOM();
 		});
 	}
+
+    private fetchExaminationsCount() {
+        // count all examinations
+        this.datasetService.countAllExaminations().then(count => {
+            this.examinationsCount = count;
+        });
+    }
 
 	increaseShow() {
 		this.show += 10;

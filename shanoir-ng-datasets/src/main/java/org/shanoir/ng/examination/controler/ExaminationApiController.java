@@ -319,4 +319,10 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 		});
 	}
+
+	@Override
+	public ResponseEntity<Long> countAllExaminations() {
+		Long count = examinationService.countAllExaminations();
+		return new ResponseEntity<>(count, HttpStatus.OK);
+	}
 }
