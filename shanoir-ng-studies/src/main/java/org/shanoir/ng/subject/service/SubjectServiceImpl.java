@@ -516,4 +516,9 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
+	@Override
+	public Long countSubjects() {
+		return subjectRepository.count();
+	}
+
 }

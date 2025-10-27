@@ -117,7 +117,7 @@ public interface SubjectApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForEveryStudies(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<SubjectDTO> findSubjectById(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+	    @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
     // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "Saves a new subject")
@@ -173,5 +173,14 @@ public interface SubjectApi {
     // PostAuthorize removed here: only a subject can be returned from studies with correct rights
     ResponseEntity<SubjectDTO> findSubjectByIdentifier(
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
+
+	@Operation(summary = "", description = "Returns the total number of subjects")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found subjects"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/count", produces = { "application/json" })
+	ResponseEntity<Long> countAllSubjects();
 
 }
