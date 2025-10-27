@@ -96,7 +96,7 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
             this.columnDefs.push(
                 { headerName: 'Tags', field: 'tags', editable: true, multi: true,
                     possibleValues: () => {
-                        return this.study.tags?.map(tag => {
+                        return this.study?.tags?.map(tag => {
                             const opt = new Option(tag, tag.name);
                             if (tag.color) {
                                 opt.backgroundColor = tag.color;

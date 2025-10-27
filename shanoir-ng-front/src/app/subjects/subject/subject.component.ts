@@ -151,6 +151,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     initEdit(): Promise<void> {
         this.loadAllStudies();
+        this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
+            this.subject.study.tags = tags ? tags : [];
+        })
         return Promise.resolve();
     }
 

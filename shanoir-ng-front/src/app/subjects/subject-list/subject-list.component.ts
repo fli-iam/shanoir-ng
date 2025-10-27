@@ -90,7 +90,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     canDelete(subject: Subject): boolean {
-        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.study.id);
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.studyId);
     }
 
     getOnDeleteConfirmMessage(entity: Subject): string {
