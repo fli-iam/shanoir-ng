@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -89,7 +90,9 @@ public class DicomImporterService {
     public boolean importDicom(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality)
             throws Exception {
         String deIdentificationMethod = datasetAttributes.getString(Tag.DeidentificationMethod);
-        if (!StringUtils.isNotBlank(deIdentificationMethod)) {
+        Sequence deIdentificationActionSequence = datasetAttributes.getSequence(Tag.DeidentificationActionSequence);
+        if (!StringUtils.isNotBlank(deIdentificationMethod)
+            && deIdentificationActionSequence.isEmpty()) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }
