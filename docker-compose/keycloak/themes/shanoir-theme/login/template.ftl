@@ -1,6 +1,8 @@
+									 
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayRequiredFields=false showAnotherWayIfPresent=true>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" class="${properties.kcHtmlClass!}">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -15,6 +17,11 @@
     </#if>
     <title>${msg("loginTitle",(realm.displayName!''))}</title>
     <link rel="icon" href="/assets/images/favicon.png" type="image/png" />
+											 
+														   
+																				
+				
+		  
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
@@ -25,22 +32,43 @@
             <script src="${url.resourcesPath}/${script}" type="text/javascript"></script>
         </#list>
     </#if>
+							 
+		 
+						
+																				 
+			 
+		 
+			 
+																					  
     <#if scripts??>
         <#list scripts as script>
             <script src="${script}" type="text/javascript"></script>
         </#list>
     </#if>
 </head>
+																					 
 
 <body class="${properties.kcBodyClass!}">
+												
+		  
+			 
+								 
+							  
+																					  
 
 	<div class="logo">
 		<#if realm.name == "shanoir-ng">
 			<img src="${properties.assets!}/images/logo.shanoir.white.png"/>
+				 
 		</#if>
 	</div>
 
+																		
 <div class="${properties.kcLoginClass!}">
+															 
+								   
+																																	 
+		  
     <div class="${properties.kcFormCardClass!}">
         <header class="${properties.kcFormHeaderClass!}">
             <#if realm.internationalizationEnabled  && locale.supported?size gt 1>
@@ -49,10 +77,15 @@
                         <div class="kc-dropdown" id="kc-locale-dropdown">
                             <a href="#" id="kc-current-locale-link">${locale.current}</a>
                             <ul>
+											   
                                 <#list locale.supported as l>
+																								 
                                     <li class="kc-dropdown-item"><a href="${l.url}">${l.label}</a></li>
+										 
+												 
                                 </#list>
                         </ul>
+							  
                     </div>
                 </div>
             </div>
@@ -132,6 +165,8 @@
                 </form>
             </#if>
 
+									 
+
           <#if displayInfo>
               <div id="kc-info" class="${properties.kcSignUpClass!}">
                   <div id="kc-info-wrapper" class="${properties.kcInfoAreaWrapperClass!}">
@@ -142,6 +177,7 @@
         </div>
       </div>
 
+							 
     </div>
   </div>
 </body>
