@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +29,13 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	@Autowired
 	private DatasetStrategy<GenericDataset> datasetStrategy;
 	
-	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
@@ -48,5 +51,5 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
-	
+
 }
