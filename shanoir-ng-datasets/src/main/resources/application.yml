@@ -146,7 +146,7 @@ dcm4chee-arc:
 
 # VIP
 vip:
-  uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest
+  uri: "${VIP_URL_SCHEME}://${VIP_URL_HOST}:8080/rest"
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
   file-formats: .nii.gz, .nii
