@@ -199,7 +199,7 @@ public class DatasetDownloaderServiceImpl {
 
 		if (dataset.getDatasetProcessing() != null) {
             // DOWNLOAD PROCESSED DATASET
-            if (Objects.equals("dcm", format)) {
+            if (Objects.equals("dcm", format) && (dataset.getName().contains(".dcm") || !dataset.getName().contains("."))) {
                 // processed DICOM
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
                 List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
