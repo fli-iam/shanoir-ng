@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production --source-map",
+    "build": "ng build --configuration production --output-path dist/browser --source-map",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
