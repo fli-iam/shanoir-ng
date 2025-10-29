@@ -335,7 +335,6 @@ COPY --link common/entrypoint_common /usr/bin/
 COPY --link nginx/entrypoint         /usr/bin/
 
 COPY --link nginx/webapp/ /etc/nginx/html/
-COPY --link shanoir-ng-front/dist/browser/ /etc/nginx/html/
 
 ENTRYPOINT ["/bin/entrypoint"]
 CMD ["nginx", "-g", "daemon off;"]

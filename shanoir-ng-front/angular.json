@@ -11,11 +11,9 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "outputPath": {
-              "base": "dist"
-            },
+            "outputPath": "dist/shanoir-ng-front",
             "index": "src/index.html",
             "polyfills": [
               "src/polyfills.ts"
@@ -35,7 +33,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "browser": "src/main.ts"
+            "main": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -69,7 +67,17 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "shanoir-ng-front:build"
+            "buildTarget": "shanoir-ng-front:build",
+            "host": "0.0.0.0",
+            "port": 4200,
+            "allowedHosts": ["shanoir-ng-nginx", "localhost", "front-dev"],
+            "hmr": false,
+            "liveReload": true,
+            "watch": true,
+            "ssl": false,
+            "publicHost": "http://shanoir-ng-nginx",
+            "disableHostCheck": true,
+            "verbose": true
           },
           "configurations": {
             "production": {
