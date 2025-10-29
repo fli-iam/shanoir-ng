@@ -76,10 +76,11 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
     			MimeMultipart multipart = new MimeMultipart(datasource);
     			int count = multipart.getCount();
+                boolean nonOhifRequest = "true".equalsIgnoreCase(httpRequest.getParameter("nonOhifRequest"));
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
+    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream(), nonOhifRequest)) {
     						throw new ServletException("Error in importDicomSEGAndSR.");
     					}
     				} else {

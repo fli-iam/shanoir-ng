@@ -148,4 +148,11 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	@Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
 	int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
 
+    /**
+     * Find examination by DICOM StudyInstanceUID
+     *
+     * @param studyInstanceUID the DICOM StudyInstanceUID
+     * @return the examination if found
+     */
+    Optional<Examination> findByStudyInstanceUID(String studyInstanceUID);
 }
