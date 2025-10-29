@@ -149,7 +149,8 @@ public final class KeycloakUtil {
 		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.add("Authorization", "Bearer " + jwt.getToken().getTokenValue());
+        headers.add("Authorization", "Bearer " + jwt.getToken().getTokenValue());
+        headers.add("apikey",  String.valueOf(7));
 		return headers;
 	}
 
