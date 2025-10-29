@@ -734,10 +734,10 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://shanoir-viewer-qualif.irisa.fr/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
-        "https://shanoir-viewer-qualif.irisa.fr"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -940,7 +940,7 @@
       "clientId": "service-account",
       "name": "service-account",
       "description": "",
-      "rootUrl": "https://shanoir-qualif.irisa.fr",
+      "rootUrl": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
       "adminUrl": "",
       "baseUrl": "",
       "surrogateAuthRequired": false,
@@ -949,7 +949,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://shanoir-qualif.irisa.fr/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1050,10 +1050,10 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://shanoir-qualif.irisa.fr/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
-        "https://shanoir-qualif.irisa.fr"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1218,7 +1218,7 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://shanoir-qualif.irisa.fr/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
         "/*"
@@ -2200,54 +2200,6 @@
       ]
     },
     {
-      "id": "e14e01c0-de83-4c00-9ef1-9cfa1da24eb3",
-      "alias": "Browser - Conditional OTP",
-      "description": "Flow to determine if the OTP is required for the authentication",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": true,
-      "authenticationExecutions": [
-        {
-          "authenticator": "conditional-user-configured",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 10,
-          "userSetupAllowed": false
-        },
-        {
-          "authenticator": "auth-otp-form",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 20,
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "id": "387023a4-9f76-4cfd-8ac6-0b86c30da370",
-      "alias": "Direct Grant - Conditional OTP",
-      "description": "Flow to determine if the OTP is required for the authentication",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": true,
-      "authenticationExecutions": [
-        {
-          "authenticator": "conditional-user-configured",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 10,
-          "userSetupAllowed": false
-        },
-        {
-          "authenticator": "direct-grant-validate-otp",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 20,
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
       "id": "85c56534-c3a2-4c8d-a4a1-3d5840496c23",
       "alias": "Direct Grant - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
@@ -2321,30 +2273,6 @@
     },
     {
       "id": "6fe5c83f-90ae-47b0-b0e9-f413edc274c2",
-      "alias": "Reset - Conditional OTP",
-      "description": "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": true,
-      "authenticationExecutions": [
-        {
-          "authenticator": "conditional-user-configured",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 10,
-          "userSetupAllowed": false
-        },
-        {
-          "authenticator": "reset-otp",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 20,
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "id": "cc21c284-cfa6-4407-add3-1bdbfc7e66ed",
       "alias": "Reset - Conditional OTP",
       "description": "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
       "providerId": "basic-flow",
@@ -2605,30 +2533,6 @@
     },
     {
       "id": "6dd73ee2-8ff8-482d-a6c5-8e618f8d2cbd",
-      "alias": "forms",
-      "description": "Username, password, otp and other auth forms.",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": true,
-      "authenticationExecutions": [
-        {
-          "authenticator": "auth-username-password-form",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 10,
-          "userSetupAllowed": false
-        },
-        {
-          "authenticatorFlow": true,
-          "requirement": "CONDITIONAL",
-          "priority": 20,
-          "flowAlias": "Browser - Conditional OTP",
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "id": "9f05ac4e-111f-440a-bdac-1562fec13535",
       "alias": "forms",
       "description": "Username, password, otp and other auth forms.",
       "providerId": "basic-flow",
