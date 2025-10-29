@@ -58,7 +58,6 @@ public class DatasetDTO {
 
 	private List<Long> copies;
 
-
 	/**
 	 * @return the creationDate
 	 */
