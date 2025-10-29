@@ -74,6 +74,10 @@ jobs:
             --no-header-files \
             --no-man-pages
 
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
+
       - name: Package .deb
         run: |
           cd shanoir-uploader
@@ -139,6 +143,11 @@ jobs:
             --no-header-files `
             --no-man-pages
 
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $Env:JAVA_HOME\lib\security\cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
+
+
       - name: Package .exe
         run: |
           cd shanoir-uploader
@@ -202,6 +211,10 @@ jobs:
             --strip-debug \
             --no-header-files \
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
 
       - name: Package .dmg
         run: |
