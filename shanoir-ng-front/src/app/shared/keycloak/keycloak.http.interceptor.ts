@@ -30,7 +30,6 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
     ) {}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        console.log('intercept ', req.url)
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
         if (!req.url.endsWith('/accountrequest')
