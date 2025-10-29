@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "outputPath": "dist/shanoir-ng-front",
+            "outputPath": "dist/browser",
             "index": "src/index.html",
             "polyfills": [
               "src/polyfills.ts"
