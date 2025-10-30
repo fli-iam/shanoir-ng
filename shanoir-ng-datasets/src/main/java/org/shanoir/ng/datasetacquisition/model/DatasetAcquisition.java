@@ -103,8 +103,11 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/** Software release. */
 	private String softwareRelease;
 
-	/** (0020,0011) Series number from dicom tags. */
+	/** (0020,0011) Tag.SeriesNumber */
 	private Integer sortingIndex;
+
+	/** (0020,0012) Tag.AcquisitionNumber, Optional(3) */
+	private Integer acquisitionNumber;
 
 	/** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
 	@LocalDateAnnotations
@@ -237,6 +240,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.sortingIndex = sortingIndex;
 	}
 	
+	public Integer getAcquisitionNumber() {
+		return acquisitionNumber;
+	}
+
+	public void setAcquisitionNumber(Integer acquisitionNumber) {
+		this.acquisitionNumber = acquisitionNumber;
+	}
+
 	public StudyCard getStudyCard() {
 		return studyCard;
 	}

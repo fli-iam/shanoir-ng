@@ -59,9 +59,9 @@ public class DatasetMetadata extends AbstractEntity {
 	/** Processed dataset type. */
 	private Integer processedDatasetType;
 
-	public DatasetMetadata() {
+	private String imageOrientationPatient;
 
-	}
+	public DatasetMetadata() {}
 
 	public DatasetMetadata(DatasetMetadata other) {
 		if (other.getCardinalityOfRelatedSubjects() != null) {
@@ -173,6 +173,14 @@ public class DatasetMetadata extends AbstractEntity {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getImageOrientationPatient() {
+		return imageOrientationPatient;
+	}
+
+	public void setImageOrientationPatient(String imageOrientationPatient) {
+		this.imageOrientationPatient = imageOrientationPatient;
 	}
 
 	/**
