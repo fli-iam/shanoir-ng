@@ -1,27 +1,33 @@
 package org.shanoir.ng.importer;
 
-import org.shanoir.ng.importer.model.*;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.shanoir.ng.importer.model.Dataset;
+import org.shanoir.ng.importer.model.DatasetFile;
+import org.shanoir.ng.importer.model.ExpressionFormat;
+import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.Map.Entry;
-
-/**
- *
- * @author mkain
- *
- */
 @Service
 public class DatasetsCreatorService {
 
@@ -85,7 +91,7 @@ public class DatasetsCreatorService {
 				Field field = aClass.getDeclaredField(tag);
 				field.setAccessible(true);
 				String dicomValue = (String) field.get(serie);
-				String wildcard = ImportUtils.wildcardToRegex(value);
+				String wildcard = Utils.wildcardToRegex(value);
 				if (dicomValue != null && dicomValue.matches(wildcard)) {
 					return true;
 				}

@@ -7,7 +7,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.dcmr.AcquisitionModality;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class DicomSerieAndInstanceAnalyzer {
                 final String tag = item.split(DOUBLE_EQUAL)[0];
                 final String value = item.split(DOUBLE_EQUAL)[1];
                 LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
-                String wildcard = ImportUtils.wildcardToRegex(value);
+                String wildcard = Utils.wildcardToRegex(value);
                 if (seriesDescription != null && seriesDescription.matches(wildcard)) {
                     LOG.info("Serie found with Spectroscopy (CSANonImageStorage): {}", seriesDescription);
                     return true;
