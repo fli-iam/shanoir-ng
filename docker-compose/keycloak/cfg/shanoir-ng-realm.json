@@ -947,7 +947,10 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "VIP_CLIENT_SECRET",
+      "defaultRoles": [
+        "ROLE_SERVICE"
+      ],
       "redirectUris": [
         "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
