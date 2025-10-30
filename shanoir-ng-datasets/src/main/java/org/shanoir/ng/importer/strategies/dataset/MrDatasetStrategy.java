@@ -118,7 +118,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	 * @see org.shanoir.ng.dataset.modality.DatasetStrategy#generateSingleMrDataset(org.dcm4che3.data.Attributes, org.shanoir.ng.importer.dto.Serie, org.shanoir.ng.importer.dto.Dataset, int, org.shanoir.ng.importer.dto.ImportJob)
 	 */
 	@Override
-	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
+	public MrDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
 			Long subjectId) throws Exception {
 		MrDataset mrDataset = new MrDataset();
 		mrDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
@@ -185,8 +185,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (serie.getIsSpectroscopy()) {
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
-			int rows = dicomAttributes.getInt(Tag.Rows, 0);
-			int columns = dicomAttributes.getInt(Tag.Columns, 0);
+			int rows = attributes.getInt(Tag.Rows, 0);
+			int columns = attributes.getInt(Tag.Columns, 0);
 			if (rows == 1 && columns == 1) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET);
 			} else {
@@ -198,7 +198,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
 			// Tag (0008,0008) ImageType is of Type Required (1) in Enhanced MR Image IOD
-			String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
+			String[] imageTypeArray = attributes.getStrings(Tag.ImageType);
 			if (imageTypeArray != null) {
 				// Check if image flavor is present, Value Multiplicity 2-n
 				// Example was: ["DERIVED", "PRIMARY"]: no image flavor present

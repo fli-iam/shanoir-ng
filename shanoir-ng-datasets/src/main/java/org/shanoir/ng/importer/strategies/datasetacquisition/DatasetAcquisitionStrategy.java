@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import org.dcm4che3.data.Attributes;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
@@ -37,5 +38,7 @@ public interface DatasetAcquisitionStrategy {
 	DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception;
 
 	DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank, Attributes attributes) throws Exception;
+
+	Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie, int datasetIndex, Long subjectId);
 
 }

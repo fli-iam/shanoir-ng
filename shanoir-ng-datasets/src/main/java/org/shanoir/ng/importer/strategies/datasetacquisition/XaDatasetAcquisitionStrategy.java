@@ -87,4 +87,11 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		return datasetAcquisition;
 	}
 
+	@Override
+	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie,
+			int datasetIndex, Long subjectId) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
+	}
+
 }

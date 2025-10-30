@@ -1,9 +1,6 @@
 package org.shanoir.ng.importer.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -18,7 +15,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
-import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -36,7 +32,6 @@ import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
@@ -83,10 +78,10 @@ public class DicomSEGAndSRImporterService {
 	private SubjectRepository subjectRepository;
 	
 	@Autowired
-	private DICOMWebService dicomWebService;
-	
-	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Autowired
+	private DicomImporterService dicomImporterService;
 	
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -111,7 +106,7 @@ public class DicomSEGAndSRImporterService {
 		}
 		try {
 			createDataset(modality, examination, dataset, datasetAttributes);
-			sendToPacs(metaInformationAttributes, datasetAttributes);
+			dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
 		} catch (Exception e) {
 			LOG.error("Error during import of DICOM SEG/SR.", e);
 			return false;
@@ -406,32 +401,6 @@ public class DicomSEGAndSRImporterService {
 		List<DatasetFile> files = new ArrayList<DatasetFile>();
 		files.add(datasetFile);
 		return files;
-	}
-
-	/**
-	 * This method writes both attributes to an output stream and converts
-	 * this one to an input stream, that can be used to send the manipulated
-	 * file to the backend pacs.
-	 * 
-	 * @param metaInformationAttributes
-	 * @param datasetAttributes
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	private void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
-			throws IOException, Exception {
-		/**
-		 * Create a new output stream to write the changes into and use its bytes
-		 * to produce a new input stream to send later by http client to the DICOM server.
-		 */
-		ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
-		// close calls to the outer stream, close the inner stream
-		try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
-			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-			try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
-			}
-		}
 	}
 
 }

@@ -137,4 +137,10 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		return mrDatasetAcquisition;
 	}
 
+	@Override
+	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie, int datasetIndex, Long subjectId) {
+//		mrDatasetStrategy.generateSingleDataset(attributes, serie, null, datasetIndex, subjectId);
+		return null;
+	}
+
 }

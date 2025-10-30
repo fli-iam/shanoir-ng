@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.service;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
@@ -65,6 +66,13 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			Attributes attributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
 		return datasetAcquisitionStrategy.generateFlatDatasetAcquisitionForSerie(userName, serie, rank, attributes);
+	}
+
+	@Override
+	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie,
+			int datasetIndex, Long subjectId) {
+		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
+		return null;
 	}
 
 	// add other strategies for other modalities here

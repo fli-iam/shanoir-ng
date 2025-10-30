@@ -39,7 +39,7 @@ public interface DatasetStrategy<T extends org.shanoir.ng.dataset.model.Dataset>
 
 	DatasetsWrapper<T> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, Long subjectId) throws Exception;
 
-	T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,	Long subjectId) throws Exception;
+	T generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex, Long subjectId) throws Exception;
 
 	String computeDatasetName(String name, int index);
 
