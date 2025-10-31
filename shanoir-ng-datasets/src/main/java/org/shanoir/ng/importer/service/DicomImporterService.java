@@ -5,7 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,9 +26,13 @@ import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -40,6 +48,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -85,10 +94,10 @@ public class DicomImporterService {
 
     private static final String DOUBLE_EQUAL = "==";
 
-	private static final String SEMI_COLON = ";";
+    private static final String SEMI_COLON = ";";
 
-	@Value("${shanoir.import.series.seriesProperties}")
-	private String seriesProperties;
+    @Value("${shanoir.import.series.seriesProperties}")
+    private String seriesProperties;
 
     @Autowired
     private StudyService studyService;
@@ -107,28 +116,45 @@ public class DicomImporterService {
 
     @Autowired
     private CenterRepository centerRepository;
-	
+
     @Autowired
-	private DICOMWebService dicomWebService;
+    private DICOMWebService dicomWebService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
+    private SolrService solrService;
+
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Value("${dcm4chee-arc.protocol}")
+    private String dcm4cheeProtocol;
+
+    @Value("${dcm4chee-arc.host}")
+    private String dcm4cheeHost;
+
+    @Value("${dcm4chee-arc.port.web}")
+    private String dcm4cheePortWeb;
+
+    @Value("${dcm4chee-arc.dicom.web.rs}")
+    private String dicomWebRS;
 
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
         // DicomEnhanced: get attributes differently
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-				|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
-			MultiframeExtractor emf = new MultiframeExtractor();
-			attributes = emf.extract(attributes, 0);
-		}
+        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
+                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+                || UID.EnhancedCTImageStorage.equals(sopClassUID)
+                || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+            MultiframeExtractor emf = new MultiframeExtractor();
+            attributes = emf.extract(attributes, 0);
+        }
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
@@ -146,13 +172,16 @@ public class DicomImporterService {
         Center center = manageCenter(attributes);
         Examination examination = manageExamination(attributes, study, subject, center);
         DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
-        manageDatasets(attributes, subject, acquisition);
-        // index Dataset to Solr, in case new created
+        Dataset dataset = manageDataset(attributes, subject, acquisition);
+        manageDatasetExpression(attributes, dataset);
+        Dataset createdDataset = datasetService.create(dataset);
+        solrService.indexDataset(createdDataset.getId());
         sendToPacs(metaInformationAttributes, attributes);
         return true;
     }
 
-    private void manageDatasets(Attributes attributes, Subject subject, DatasetAcquisition acquisition) throws Exception {
+    private Dataset manageDataset(Attributes attributes, Subject subject, DatasetAcquisition acquisition)
+            throws Exception {
         Dataset currentDataset = null;
         Serie serieDICOM = new Serie(attributes);
         List<Dataset> datasets = acquisition.getDatasets();
@@ -168,35 +197,35 @@ public class DicomImporterService {
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-   //					dataset.setEchoTimes(seriesToDatasetsSeparator);
-            currentDataset = acquisitionContext.generateFlatDataset(serieDICOM, dataset, 0, subject.getId(), attributes);
+            // dataset.setEchoTimes(seriesToDatasetsSeparator);
+            currentDataset = acquisitionContext.generateFlatDataset(serieDICOM, dataset, 0, subject.getId(),
+                    attributes);
             acquisition.getDatasets().add(currentDataset);
-        // Add file to existing dataset
-        } else {
-
+            currentDataset.setDatasetAcquisition(acquisition);
         }
+        return currentDataset;
     }
 
-    private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition, List<Dataset> datasets) {
+    private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition,
+            List<Dataset> datasets) {
         final HashMap<SerieToDatasetsSeparator, Dataset> existingDatasetToSeparatorMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
         for (Dataset dataset : datasets) {
             SerieToDatasetsSeparator existingSeparator;
-            String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");                
+            String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");
             double[] imageOrientationPatient = new double[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 imageOrientationPatient[i] = Double.parseDouble(parts[i]);
             }
-            Set<EchoTime> echoTimes = new HashSet<EchoTime>(); 
+            Set<EchoTime> echoTimes = new HashSet<EchoTime>();
             if (acquisition instanceof MrDatasetAcquisition) {
                 MrDataset mrDataset = (MrDataset) dataset;
                 mrDataset.getEchoTime().stream().forEach(
                         eT -> echoTimes.add(eT.getEchoTimeShared()));
             }
             existingSeparator = new SerieToDatasetsSeparator(
-                acquisition.getAcquisitionNumber().intValue(),
-                echoTimes,
-                imageOrientationPatient
-            );
+                    acquisition.getAcquisitionNumber().intValue(),
+                    echoTimes,
+                    imageOrientationPatient);
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
         }
         SerieToDatasetsSeparator seriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
@@ -211,25 +240,25 @@ public class DicomImporterService {
     private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes) {
         // Acquisition number
         final int acquisitionNumber = attributes.getInt(Tag.AcquisitionNumber, 0);
-		// Echo times
+        // Echo times
         Set<EchoTime> echoTimes = new HashSet<>();
-		EchoTime echoTime = new EchoTime();
-		echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
-		echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
-		echoTimes.add(echoTime);
-		// Image orientation patient
+        EchoTime echoTime = new EchoTime();
+        echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
+        echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
+        echoTimes.add(echoTime);
+        // Image orientation patient
         List<Double> imageOrientationPatient = new ArrayList<>();
-		double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
-		if (imageOrientationPatientArray != null) {
-			for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-				imageOrientationPatient.add(imageOrientationPatientArray[i]);
-			}
+        double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
+        if (imageOrientationPatientArray != null) {
+            for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+                imageOrientationPatient.add(imageOrientationPatientArray[i]);
+            }
         }
-		double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
+        double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
                 ? null
-                : imageOrientationPatient.stream().mapToDouble(i->i).toArray();
-        SerieToDatasetsSeparator seriesToDatasetsSeparator =
-				new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
+                : imageOrientationPatient.stream().mapToDouble(i -> i).toArray();
+        SerieToDatasetsSeparator seriesToDatasetsSeparator = new SerieToDatasetsSeparator(acquisitionNumber, echoTimes,
+                imageOrientationPatientsDoubleArray);
         return seriesToDatasetsSeparator;
     }
 
@@ -245,7 +274,7 @@ public class DicomImporterService {
             acquisition = existingAcquisition.get();
         } else {
             acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
-                userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
+                    userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
         }
         return acquisitionService.create(acquisition);
     }
@@ -266,10 +295,10 @@ public class DicomImporterService {
         String institutionName = attributes.getString(Tag.InstitutionName);
         String institutionAddress = attributes.getString(Tag.InstitutionAddress);
         if (StringUtils.isNotBlank(institutionName)) {
-	    	return findOrCreateCenter(institutionName);
-		} else {
+            return findOrCreateCenter(institutionName);
+        } else {
             return findOrCreateCenter(UNKNOWN);
-		}
+        }
     }
 
     private Center findOrCreateCenter(String institutionName) {
@@ -326,56 +355,106 @@ public class DicomImporterService {
     }
 
     /**
-	 * This method receives a serie object and a String from the properties
-	 * and checks if the tag exists with a specific value.
-	 * @throws NoSuchFieldException
-	 */
-	private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString) throws NoSuchFieldException {
-		final String[] itemArray = propertiesString.split(SEMI_COLON);
-		for (final String item : itemArray) {
-			final String tag = item.split(DOUBLE_EQUAL)[0];
-			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkDicomFromProperties : tag={}, value={}", tag, value);
-			try {
-				Class<? extends Serie> aClass = serie.getClass();
-				Field field = aClass.getDeclaredField(tag);
-				field.setAccessible(true);
-				String dicomValue = (String) field.get(serie);
-				String wildcard = Utils.wildcardToRegex(value);
-				if (dicomValue != null && dicomValue.matches(wildcard)) {
-					return true;
-				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LOG.error(e.getMessage());
-			}
-		}
-		return false;
-	}
+     * This method receives a serie object and a String from the properties
+     * and checks if the tag exists with a specific value.
+     * 
+     * @throws NoSuchFieldException
+     */
+    private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString)
+            throws NoSuchFieldException {
+        final String[] itemArray = propertiesString.split(SEMI_COLON);
+        for (final String item : itemArray) {
+            final String tag = item.split(DOUBLE_EQUAL)[0];
+            final String value = item.split(DOUBLE_EQUAL)[1];
+            LOG.debug("checkDicomFromProperties : tag={}, value={}", tag, value);
+            try {
+                Class<? extends Serie> aClass = serie.getClass();
+                Field field = aClass.getDeclaredField(tag);
+                field.setAccessible(true);
+                String dicomValue = (String) field.get(serie);
+                String wildcard = Utils.wildcardToRegex(value);
+                if (dicomValue != null && dicomValue.matches(wildcard)) {
+                    return true;
+                }
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                LOG.error(e.getMessage());
+            }
+        }
+        return false;
+    }
 
     /**
-	 * This method writes both attributes to an output stream and converts
-	 * this one to an input stream, that can be used to send the manipulated
-	 * file to the backend pacs.
-	 * 
-	 * @param metaInformationAttributes
-	 * @param datasetAttributes
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
-			throws IOException, Exception {
-		/**
-		 * Create a new output stream to write the changes into and use its bytes
-		 * to produce a new input stream to send later by http client to the DICOM server.
-		 */
-		ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
-		// close calls to the outer stream, close the inner stream
-		try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
-			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-			try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
-			}
-		}
-	}
+     * This method writes both attributes to an output stream and converts
+     * this one to an input stream, that can be used to send the manipulated
+     * file to the backend pacs.
+     * 
+     * @param metaInformationAttributes
+     * @param datasetAttributes
+     * @throws IOException
+     * @throws Exception
+     */
+    public void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
+            throws IOException, Exception {
+        /**
+         * Create a new output stream to write the changes into and use its bytes
+         * to produce a new input stream to send later by http client to the DICOM
+         * server.
+         */
+        ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
+        // close calls to the outer stream, close the inner stream
+        try (DicomOutputStream dOS = new DicomOutputStream(bAOS,
+                metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
+            dOS.writeDataset(metaInformationAttributes, datasetAttributes);
+            try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
+                dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
+            }
+        }
+    }
+
+    /**
+     * Create the necessary dataset expression.
+     * 
+     * @param attributes
+     * @param measurementDataset
+     * @throws MalformedURLException
+     */
+    public void manageDatasetExpression(Attributes attributes, Dataset dataset)
+            throws MalformedURLException {
+        DatasetExpression expression = new DatasetExpression();
+        expression.setCreationDate(LocalDateTime.now());
+        expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+        expression.setDataset(dataset);
+        dataset.setDatasetExpressions(Collections.singletonList(expression));
+        List<DatasetFile> files = createDatasetFiles(attributes, expression);
+        expression.setDatasetFiles(files);
+    }
+
+    /**
+     * Create the dataset files, as WADO-RS links in that case,
+     * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
+     * 
+     * @param attributes
+     * @param expression
+     * @return
+     * @throws MalformedURLException
+     */
+    private List<DatasetFile> createDatasetFiles(Attributes attributes, DatasetExpression expression)
+            throws MalformedURLException {
+        DatasetFile datasetFile = new DatasetFile();
+        final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+        final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+        final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+        final StringBuffer wadoStrBuf = new StringBuffer();
+        wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+        wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
+                + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
+        URL wadoURL = new URL(wadoStrBuf.toString());
+        datasetFile.setPath(wadoURL.toString());
+        datasetFile.setPacs(true);
+        datasetFile.setDatasetExpression(expression);
+        List<DatasetFile> files = new ArrayList<DatasetFile>();
+        files.add(datasetFile);
+        return files;
+    }
 
 }

@@ -2,11 +2,7 @@ package org.shanoir.ng.importer.service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +37,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,18 +77,6 @@ public class DicomSEGAndSRImporterService {
 
 	@Autowired
 	private DicomImporterService dicomImporterService;
-	
-	@Value("${dcm4chee-arc.protocol}")
-	private String dcm4cheeProtocol;
-	
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
-
-	@Value("${dcm4chee-arc.port.web}")
-	private String dcm4cheePortWeb;
-	
-	@Value("${dcm4chee-arc.dicom.web.rs}")
-	private String dicomWebRS;
 	
 	@Transactional
 	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality) {
@@ -281,7 +264,7 @@ public class DicomSEGAndSRImporterService {
 		// for rights check: keep link to original acquisition
 		newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
 		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
-		createDatasetExpression(datasetAttributes, newMsOrSegDataset);
+		dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
 		Dataset createdDataset = datasetService.create(newMsOrSegDataset);
 		solrService.indexDataset(createdDataset.getId());
 	}
@@ -355,52 +338,6 @@ public class DicomSEGAndSRImporterService {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Create the necessary dataset expression.
-	 * 
-	 * @param datasetAttributes
-	 * @param measurementDataset
-	 * @throws MalformedURLException
-	 */
-	private void createDatasetExpression(Attributes datasetAttributes, Dataset dataset)
-			throws MalformedURLException {
-		DatasetExpression expression = new DatasetExpression();
-		expression.setCreationDate(LocalDateTime.now());
-		expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-		expression.setDataset(dataset);
-		dataset.setDatasetExpressions(Collections.singletonList(expression));		
-		List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
-		expression.setDatasetFiles(files);
-	}
-
-	/**
-	 * Create the dataset files, as WADO-RS links in that case,
-	 * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-	 * 
-	 * @param datasetAttributes
-	 * @param expression
-	 * @return
-	 * @throws MalformedURLException
-	 */
-	private List<DatasetFile> createDatasetFiles(Attributes datasetAttributes, DatasetExpression expression)
-			throws MalformedURLException {
-		DatasetFile datasetFile = new DatasetFile();
-		final String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		final String seriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
-		final String sOPInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-		final StringBuffer wadoStrBuf = new StringBuffer();
-		wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-		wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
-					+ "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
-		URL wadoURL = new URL(wadoStrBuf.toString());
-		datasetFile.setPath(wadoURL.toString());
-		datasetFile.setPacs(true);
-		datasetFile.setDatasetExpression(expression);
-		List<DatasetFile> files = new ArrayList<DatasetFile>();
-		files.add(datasetFile);
-		return files;
 	}
 
 }
