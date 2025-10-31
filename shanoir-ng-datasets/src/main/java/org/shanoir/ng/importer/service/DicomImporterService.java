@@ -154,19 +154,25 @@ public class DicomImporterService {
 
     private void manageDatasets(Attributes attributes, Subject subject, DatasetAcquisition acquisition) throws NoSuchFieldException {
         Dataset currentDataset = null;
-        List<Dataset> datasets = acquisition.getDatasets();
-        // Check if serie == acquisition: separate datasets
         Serie serieDICOM = new Serie(attributes);
-		boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
-        // Manage split series in the if-clause
-        if (!serieIdentifiedForNotSeparating) {
-            currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
+        List<Dataset> datasets = acquisition.getDatasets();
+        if (!datasets.isEmpty()) {
+            boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
+            // Manage split series in the if-clause
+            if (!serieIdentifiedForNotSeparating) {
+                // Check if serie == acquisition: separate datasets
+                currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
+            }
         }
         // Create a new dataset
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
    //					dataset.setEchoTimes(seriesToDatasetsSeparator);
+            acquisitionContext.generateFlatDataset(acquisition, attributes, serieDICOM, 0, subject.getId());
+        // Add file to existing dataset
+        } else {
+
         }
     }
 
