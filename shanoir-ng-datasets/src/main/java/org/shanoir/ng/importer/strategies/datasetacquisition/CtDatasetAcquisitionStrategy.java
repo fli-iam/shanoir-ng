@@ -95,8 +95,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	}
 
 	@Override
-	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie,
-			int datasetIndex, Long subjectId) {
+	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
 	}

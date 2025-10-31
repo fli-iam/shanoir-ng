@@ -69,10 +69,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	}
 
 	@Override
-	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie,
-			int datasetIndex, Long subjectId) {
+	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
-		return null;
+		return datasetAcquisitionStrategy.generateFlatDataset(serie, dataset, datasetIndex, subjectId, attributes);
 	}
 
 	// add other strategies for other modalities here

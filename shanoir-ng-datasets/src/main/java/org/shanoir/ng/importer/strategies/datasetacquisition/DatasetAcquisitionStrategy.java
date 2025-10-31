@@ -39,6 +39,6 @@ public interface DatasetAcquisitionStrategy {
 
 	DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank, Attributes attributes) throws Exception;
 
-	Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie, int datasetIndex, Long subjectId);
+	Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception;
 
 }

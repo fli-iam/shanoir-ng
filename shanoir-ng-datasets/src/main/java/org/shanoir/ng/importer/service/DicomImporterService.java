@@ -152,7 +152,7 @@ public class DicomImporterService {
         return true;
     }
 
-    private void manageDatasets(Attributes attributes, Subject subject, DatasetAcquisition acquisition) throws NoSuchFieldException {
+    private void manageDatasets(Attributes attributes, Subject subject, DatasetAcquisition acquisition) throws Exception {
         Dataset currentDataset = null;
         Serie serieDICOM = new Serie(attributes);
         List<Dataset> datasets = acquisition.getDatasets();
@@ -169,7 +169,8 @@ public class DicomImporterService {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
    //					dataset.setEchoTimes(seriesToDatasetsSeparator);
-            acquisitionContext.generateFlatDataset(acquisition, attributes, serieDICOM, 0, subject.getId());
+            currentDataset = acquisitionContext.generateFlatDataset(serieDICOM, dataset, 0, subject.getId(), attributes);
+            acquisition.getDatasets().add(currentDataset);
         // Add file to existing dataset
         } else {
 
@@ -246,7 +247,7 @@ public class DicomImporterService {
             acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
                 userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
         }
-        return acquisition;
+        return acquisitionService.create(acquisition);
     }
 
     /**

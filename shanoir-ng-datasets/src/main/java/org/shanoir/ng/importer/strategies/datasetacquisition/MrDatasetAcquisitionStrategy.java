@@ -138,9 +138,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	}
 
 	@Override
-	public Dataset generateFlatDataset(DatasetAcquisition datasetAcquisition, Attributes attributes, Serie serie, int datasetIndex, Long subjectId) {
-//		mrDatasetStrategy.generateSingleDataset(attributes, serie, null, datasetIndex, subjectId);
-		return null;
+	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
+		return mrDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
 	}
 
 }
