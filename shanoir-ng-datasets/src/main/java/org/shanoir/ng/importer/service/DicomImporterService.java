@@ -20,7 +20,9 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomOutputStream;
+import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -160,25 +162,24 @@ public class DicomImporterService {
         List<Dataset> datasets = acquisition.getDatasets();
 		final HashMap<Long, SerieToDatasetsSeparator> datasetToSeparatorMap = new HashMap<Long, SerieToDatasetsSeparator>();
         for (Dataset dataset : datasets) {
-            if (acquisition instanceof MrDatasetAcquisition) {
-                String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");
-                double[] numbers = new double[parts.length];
-                for (int i = 0; i < parts.length; i++) {
-                numbers[i] = Double.parseDouble(parts[i]);
-                }
-                MrDataset mrDataset = (MrDataset) dataset;
-                SerieToDatasetsSeparator separator = new SerieToDatasetsSeparator(
-                    acquisition.getAcquisitionNumber().intValue(),
-                    mrDataset.getEchoTime().stream().collect(Collectors.toSet()),
-                    numbers
-                );
-
-            } else if (acquisition instanceof CtDatasetAcquisition) {
-
-            } else if (acquisition instanceof PetDatasetAcquisition
-                    || acquisition instanceof XaDatasetAcquisition
-                    || acquisition instanceof GenericDatasetAcquisition)
+            SerieToDatasetsSeparator separator;
+            String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");                
+            double[] imageOrientationPatient = new double[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                imageOrientationPatient[i] = Double.parseDouble(parts[i]);
             }
+            Set<EchoTime> echoTimes = new HashSet<EchoTime>(); 
+            if (acquisition instanceof MrDatasetAcquisition) {
+                MrDataset mrDataset = (MrDataset) dataset;
+                mrDataset.getEchoTime().stream().forEach(
+                        eT -> echoTimes.add(eT.getEchoTimeShared()));
+            }
+            separator = new SerieToDatasetsSeparator(
+                acquisition.getAcquisitionNumber().intValue(),
+                echoTimes,
+                imageOrientationPatient
+            );
+            datasetToSeparatorMap.put(dataset.getId(), separator);
         }
         // Check if serie == acquisition: separate datasets
         Serie serieDICOM = new Serie(attributes);
@@ -186,7 +187,7 @@ public class DicomImporterService {
 
         SerieToDatasetsSeparator seriesToDatasetsSeparator = getSeriesToDatasetsSeparator(attributes);
 		boolean found = false;
-		for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
+		for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetToSeparatorMap.values()) {
             if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
                 found = true;
                 seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
