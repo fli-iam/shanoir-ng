@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
@@ -20,16 +20,10 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomOutputStream;
-import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -159,10 +153,27 @@ public class DicomImporterService {
     }
 
     private void manageDatasets(Attributes attributes, Subject subject, DatasetAcquisition acquisition) throws NoSuchFieldException {
+        Dataset currentDataset = null;
         List<Dataset> datasets = acquisition.getDatasets();
-		final HashMap<Long, SerieToDatasetsSeparator> datasetToSeparatorMap = new HashMap<Long, SerieToDatasetsSeparator>();
+        // Check if serie == acquisition: separate datasets
+        Serie serieDICOM = new Serie(attributes);
+		boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
+        // Manage split series in the if-clause
+        if (!serieIdentifiedForNotSeparating) {
+            currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
+        }
+        // Create a new dataset
+        if (currentDataset == null) {
+            org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
+            dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
+   //					dataset.setEchoTimes(seriesToDatasetsSeparator);
+        }
+    }
+
+    private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition, List<Dataset> datasets) {
+        final HashMap<SerieToDatasetsSeparator, Dataset> existingDatasetToSeparatorMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
         for (Dataset dataset : datasets) {
-            SerieToDatasetsSeparator separator;
+            SerieToDatasetsSeparator existingSeparator;
             String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");                
             double[] imageOrientationPatient = new double[parts.length];
             for (int i = 0; i < parts.length; i++) {
@@ -174,37 +185,23 @@ public class DicomImporterService {
                 mrDataset.getEchoTime().stream().forEach(
                         eT -> echoTimes.add(eT.getEchoTimeShared()));
             }
-            separator = new SerieToDatasetsSeparator(
+            existingSeparator = new SerieToDatasetsSeparator(
                 acquisition.getAcquisitionNumber().intValue(),
                 echoTimes,
                 imageOrientationPatient
             );
-            datasetToSeparatorMap.put(dataset.getId(), separator);
+            existingDatasetToSeparatorMap.put(existingSeparator, dataset);
         }
-        // Check if serie == acquisition: separate datasets
-        Serie serieDICOM = new Serie(attributes);
-		boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
-
-        SerieToDatasetsSeparator seriesToDatasetsSeparator = getSeriesToDatasetsSeparator(attributes);
-		boolean found = false;
-		for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetToSeparatorMap.values()) {
-            if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
-                found = true;
-                seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
-                break;
+        SerieToDatasetsSeparator seriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
+        for (Map.Entry<SerieToDatasetsSeparator, Dataset> entry : existingDatasetToSeparatorMap.entrySet()) {
+            if (entry.getKey().equals(seriesToDatasetsSeparator)) {
+                return entry.getValue();
             }
         }
-        // existing dataset has been found, just add the image/datasetFile
-        if (found) {
-        // new dataset has to be created, new expression format and add image/datasetfile
-        } else {
-            org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
-            dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-//					dataset.setEchoTimes(seriesToDatasetsSeparator);
-        }
+        return null;
     }
 
-    private SerieToDatasetsSeparator getSeriesToDatasetsSeparator(Attributes attributes) {
+    private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes) {
         // Acquisition number
         final int acquisitionNumber = attributes.getInt(Tag.AcquisitionNumber, 0);
 		// Echo times
