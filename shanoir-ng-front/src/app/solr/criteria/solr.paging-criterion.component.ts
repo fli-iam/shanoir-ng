@@ -13,7 +13,7 @@
  */
 import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 import { Router } from '@angular/router';
 
 import { slideDown, slideRight } from '../../shared/animations/animations';

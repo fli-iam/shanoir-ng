@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2024 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -347,7 +347,7 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@19.0.1
+RUN npm install -g @angular/cli@20.3.7
 
 
 
@@ -365,7 +365,7 @@ COPY --link --chmod=0755 \
     database/3_add_statistics_procedure.sql \
     database/4_add_studyStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
- 
+
 COPY --link database/db-changes /opt/db-changes
 
 
@@ -392,4 +392,3 @@ COPY --link solr/entrypoint /usr/bin/
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
-

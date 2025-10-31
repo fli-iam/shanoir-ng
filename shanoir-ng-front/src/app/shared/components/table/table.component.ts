@@ -14,7 +14,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { Router } from "@angular/router";
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';

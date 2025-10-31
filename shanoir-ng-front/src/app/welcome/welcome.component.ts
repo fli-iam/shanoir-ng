@@ -1,13 +1,14 @@
-import { DOCUMENT } from "@angular/common";
+
 import {
-    Component,
-    ElementRef,
-    HostListener,
-    Inject,
-    OnInit,
-    Renderer2,
-    ViewChild,
-    ViewEncapsulation
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnInit,
+  Renderer2,
+  ViewChild,
+  ViewEncapsulation,
+  DOCUMENT
 } from '@angular/core';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';

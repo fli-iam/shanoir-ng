@@ -14,7 +14,7 @@
 import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
