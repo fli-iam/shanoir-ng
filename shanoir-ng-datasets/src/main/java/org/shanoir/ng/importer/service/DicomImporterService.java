@@ -420,13 +420,22 @@ public class DicomImporterService {
      */
     public void manageDatasetExpression(Attributes attributes, Dataset dataset)
             throws MalformedURLException {
-        DatasetExpression expression = new DatasetExpression();
-        expression.setCreationDate(LocalDateTime.now());
-        expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-        expression.setDataset(dataset);
-        dataset.setDatasetExpressions(Collections.singletonList(expression));
-        List<DatasetFile> files = createDatasetFiles(attributes, expression);
-        expression.setDatasetFiles(files);
+        DatasetExpression currentExpression = null;
+        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+                currentExpression = expression;
+                break;
+            }
+        }
+        if (currentExpression == null) {
+            currentExpression = new DatasetExpression();
+            currentExpression.setCreationDate(LocalDateTime.now());
+            currentExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+            currentExpression.setDataset(dataset);
+            dataset.setDatasetExpressions(Collections.singletonList(currentExpression));
+        }
+        List<DatasetFile> files = createDatasetFiles(attributes, currentExpression);
+        currentExpression.setDatasetFiles(files);
     }
 
     /**
