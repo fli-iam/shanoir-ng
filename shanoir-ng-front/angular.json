@@ -37,6 +37,7 @@
           },
           "configurations": {
             "production": {
+              "outputPath": "dist/browser",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

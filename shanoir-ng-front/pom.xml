@@ -174,12 +174,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<npm.executable>npm.cmd</npm.executable>
 			</properties>
 		</profile>
-		<profile>
-			<id>qualif</id>
-			<properties>
-				<npm.build.task>build:qualif</npm.build.task>
-			</properties>
-		</profile>
 	</profiles>
 
 </project>
