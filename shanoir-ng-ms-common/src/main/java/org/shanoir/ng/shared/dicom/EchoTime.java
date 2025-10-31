@@ -54,4 +54,5 @@ public class EchoTime {
 		result = prime * result + echoTime.hashCode();
 		return result;
 	}
+
 }

@@ -1,15 +1,8 @@
 package org.shanoir.ng.importer.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +11,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
-import org.dcm4che3.io.DicomInputStream;
-import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -35,8 +26,8 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
@@ -46,7 +37,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,10 +60,6 @@ public class DicomSEGAndSRImporterService {
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
-	private static final String SEG = "SEG";
-
-	private static final String SR = "SR";
-
 	@Autowired
 	private ExaminationRepository examinationRepository;
 
@@ -87,47 +73,25 @@ public class DicomSEGAndSRImporterService {
 	private SubjectRepository subjectRepository;
 	
 	@Autowired
-	private DICOMWebService dicomWebService;
-	
-	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
-	@Value("${dcm4chee-arc.protocol}")
-	private String dcm4cheeProtocol;
-	
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
 
-	@Value("${dcm4chee-arc.port.web}")
-	private String dcm4cheePortWeb;
-	
-	@Value("${dcm4chee-arc.dicom.web.rs}")
-	private String dicomWebRS;
+	@Autowired
+	private DicomImporterService dicomImporterService;
 	
 	@Transactional
-	public boolean importDicomSEGAndSR(InputStream inputStream) {
-		// DicomInputStream consumes the input stream to read the data
-		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
-			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
-			Attributes datasetAttributes = dIS.readDataset();
-			String modality = datasetAttributes.getString(Tag.Modality);
-			// check for modality: DICOM SEG or SR
-			if (SEG.equals(modality) || SR.equals(modality)) {
-				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-				Examination examination = modifyDicom(datasetAttributes);
-				Dataset dataset = findDataset(examination, datasetAttributes);
-				if (dataset == null) {
-					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-					return false;	
-				}
-				createDataset(modality, examination, dataset, datasetAttributes);
-				sendToPacs(metaInformationAttributes, datasetAttributes);
-			} else {
-				LOG.error("Error: importDicomSEGAndSR: other modality sent then SEG or SR.");
-				return false;
-			}
+	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality) {
+		// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
+		Examination examination = modifyDicom(datasetAttributes);
+		Dataset dataset = findDataset(examination, datasetAttributes);
+		if (dataset == null) {
+			LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+			return false;
+		}
+		try {
+			createDataset(modality, examination, dataset, datasetAttributes);
+			dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
 		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("Error during import of DICOM SEG/SR.", e);
 			return false;
 		}
 		return true;
@@ -287,7 +251,7 @@ public class DicomSEGAndSRImporterService {
 	 */
 	private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
 		Dataset newMsOrSegDataset = null;
-		if (SEG.equals(modality)) {
+		if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
 			newMsOrSegDataset = new SegmentationDataset();
 		} else {
 			newMsOrSegDataset = new MeasurementDataset();
@@ -300,7 +264,7 @@ public class DicomSEGAndSRImporterService {
 		// for rights check: keep link to original acquisition
 		newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
 		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
-		createDatasetExpression(datasetAttributes, newMsOrSegDataset);
+		dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
 		Dataset createdDataset = datasetService.create(newMsOrSegDataset);
 		solrService.indexDataset(createdDataset.getId());
 	}
@@ -372,78 +336,6 @@ public class DicomSEGAndSRImporterService {
 						}
 					}
 				}
-			}
-		}
-	}
-
-	/**
-	 * Create the necessary dataset expression.
-	 * 
-	 * @param datasetAttributes
-	 * @param measurementDataset
-	 * @throws MalformedURLException
-	 */
-	private void createDatasetExpression(Attributes datasetAttributes, Dataset dataset)
-			throws MalformedURLException {
-		DatasetExpression expression = new DatasetExpression();
-		expression.setCreationDate(LocalDateTime.now());
-		expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-		expression.setDataset(dataset);
-		dataset.setDatasetExpressions(Collections.singletonList(expression));		
-		List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
-		expression.setDatasetFiles(files);
-	}
-
-	/**
-	 * Create the dataset files, as WADO-RS links in that case,
-	 * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-	 * 
-	 * @param datasetAttributes
-	 * @param expression
-	 * @return
-	 * @throws MalformedURLException
-	 */
-	private List<DatasetFile> createDatasetFiles(Attributes datasetAttributes, DatasetExpression expression)
-			throws MalformedURLException {
-		DatasetFile datasetFile = new DatasetFile();
-		final String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		final String seriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
-		final String sOPInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-		final StringBuffer wadoStrBuf = new StringBuffer();
-		wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-		wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
-					+ "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
-		URL wadoURL = new URL(wadoStrBuf.toString());
-		datasetFile.setPath(wadoURL.toString());
-		datasetFile.setPacs(true);
-		datasetFile.setDatasetExpression(expression);
-		List<DatasetFile> files = new ArrayList<DatasetFile>();
-		files.add(datasetFile);
-		return files;
-	}
-
-	/**
-	 * This method writes both attributes to an output stream and converts
-	 * this one to an input stream, that can be used to send the manipulated
-	 * file to the backend pacs.
-	 * 
-	 * @param metaInformationAttributes
-	 * @param datasetAttributes
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	private void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
-			throws IOException, Exception {
-		/**
-		 * Create a new output stream to write the changes into and use its bytes
-		 * to produce a new input stream to send later by http client to the DICOM server.
-		 */
-		ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
-		// close calls to the outer stream, close the inner stream
-		try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
-			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-			try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
 			}
 		}
 	}

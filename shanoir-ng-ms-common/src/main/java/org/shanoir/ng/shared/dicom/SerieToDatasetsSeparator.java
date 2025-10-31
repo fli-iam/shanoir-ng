@@ -15,7 +15,6 @@
 package org.shanoir.ng.shared.dicom;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -60,11 +59,6 @@ public class SerieToDatasetsSeparator {
 		this.imageOrientationPatient = imageOrientationPatient;
 	}
 
-	public SerieToDatasetsSeparator(String acquisitionNumber, List<EchoTime> echoTimes,
-			List<Double> imageOrientationPatient) {
-		
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -103,7 +97,6 @@ public class SerieToDatasetsSeparator {
 			return false;
 		}
 		return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
-
 	}
 
 	/**

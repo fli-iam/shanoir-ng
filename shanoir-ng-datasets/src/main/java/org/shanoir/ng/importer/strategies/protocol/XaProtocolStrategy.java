@@ -20,7 +20,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.xa.XaProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,21 +30,17 @@ public class XaProtocolStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(XaProtocolStrategy.class);
 
-	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {		
+	public XaProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {		
 		XaProtocol protocol = new XaProtocol();
-		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
-
 		// Slice thickness
 		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
 		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
 		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
 		protocol.setSliceThickness(sliceThickness);
-
 		/** Number of Slices */
 		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
 		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		protocol.setNumberOfSlices(numberOfSlices);
-		
 		return protocol;
 	}
 

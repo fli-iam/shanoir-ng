@@ -40,7 +40,6 @@ public class EchoTime extends AbstractEntity {
 	 */
 	private static final long serialVersionUID = -6515796982839794497L;
 
-
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
@@ -61,8 +60,7 @@ public class EchoTime extends AbstractEntity {
 	@NotNull
 	private Double echoTimeValue;
 
-	public EchoTime() {
-	}
+	public EchoTime() {}
 
 	public EchoTime(EchoTime et, MrDataset mr) {
 		this.mrDataset = mr;
@@ -129,6 +127,19 @@ public class EchoTime extends AbstractEntity {
 		hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
 		hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
 		return hash;
+	}
+
+	/**
+	 * This method makes a transient type translation
+	 * between database EchoTime and the EchoTime used
+	 * during the imports before.
+	 * @return
+	 */
+	public org.shanoir.ng.shared.dicom.EchoTime getEchoTimeShared() {
+		org.shanoir.ng.shared.dicom.EchoTime echoTime = new org.shanoir.ng.shared.dicom.EchoTime();
+		echoTime.setEchoNumber(this.echoNumber);
+		echoTime.setEchoTime(this.echoTimeValue);
+		return echoTime;
 	}
 
 }

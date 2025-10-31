@@ -29,13 +29,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-users</name>
-	<description>Shanoir-NG Users Microservice</description>
+	<description>Users microservice</description>
 
 	<dependencies>
 		<!-- Common MS dependency -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>3.4.0</version>
+		</dependency>
+		<!-- Users -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>3.4.0</version>
 		</dependency>
 	
@@ -56,13 +62,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
-
-		<!-- Users -->
-		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>3.4.0</version>
 		</dependency>
 		
 		<!-- Test -->

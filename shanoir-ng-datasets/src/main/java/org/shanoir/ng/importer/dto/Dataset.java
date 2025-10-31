@@ -149,4 +149,5 @@ public class Dataset {
 	public void setFirstImageSOPInstanceUID(String firstImageSOPInstanceUID) {
 		this.firstImageSOPInstanceUID = firstImageSOPInstanceUID;
 	}
+
 }
