@@ -3,9 +3,16 @@ package org.shanoir.uploader.test.datasets.dicom.web;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.test.AbstractTest;
 
@@ -29,13 +36,46 @@ public class StowRSDicomTest extends AbstractTest {
 	@Test
 	public void postDICOMMRToDicomWeb() throws Exception {
 		try {
-			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
+			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
 			if (resource != null) {
 				File file = new File(resource.toURI());
 				shUpClient.postDicom(file);
 			}
 		} catch (URISyntaxException e) {
 			logger.error("Error while reading file", e);
+		}
+	}
+
+	/**
+	 * The below method can be used to produce STOW-RS
+	 * ready DICOM files to test the import of STO-RS
+	 * on the Shanoir server.
+	 * 
+	 * @throws Exception
+	 */
+	public void generateStowRSDicom() throws Exception {
+		URL source = getClass().getClassLoader().getResource("acr_phantom_t1/");
+		URL destination = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
+		if (source != null) {
+			File sourceFile = new File(source.toURI());
+			File destinationFile = new File(destination.toURI());
+			if (sourceFile.isDirectory()) {
+				for (File f : sourceFile.listFiles()) {
+					File newFile = new File(destinationFile, f.getName());
+					try (DicomInputStream dIn = new DicomInputStream(f);
+						DicomOutputStream dOu = new DicomOutputStream(newFile);) {
+						Attributes metaInformationAttributes = dIn.readFileMetaInformation();
+						Attributes datasetAttributes = dIn.readDataset();
+						String deidMethod = "Basic Application Confidentiality Profile + Clean Pixel Data Option";
+        				datasetAttributes.setString(Tag.DeidentificationMethod, VR.LO, deidMethod);
+				        datasetAttributes.setString(Tag.PatientIdentityRemoved, VR.CS, "YES");
+				        String protocolId = "1";
+        				datasetAttributes.setString(Tag.ClinicalTrialProtocolID, VR.LO, protocolId);
+						datasetAttributes.setString(Tag.ClinicalTrialProtocolName, VR.LO, "Cardiac Phantom QA Study");
+						dOu.writeDataset(metaInformationAttributes, datasetAttributes);
+					}
+				}
+			}
 		}
 	}
 
