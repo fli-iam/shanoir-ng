@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer.dto;
 
+import org.shanoir.ng.shared.core.model.IdName;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,6 +32,9 @@ public class Subject {
     @JsonProperty("name")
     private String name;
 
+	@JsonProperty("study")
+	private IdName study;
+
 	public long getId() {
 		return id;
 	}
@@ -44,6 +49,14 @@ public class Subject {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public IdName getStudy() {
+		return study;
+	}
+
+	public void setStudy(IdName study) {
+		this.study = study;
 	}
 
 }

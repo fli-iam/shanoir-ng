@@ -38,6 +38,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -342,11 +343,11 @@ public class DicomImporterService {
         String subjectName = attributes.getString(Tag.PatientName);
         Subject subject = subjectService.findByNameAndStudyId(subjectName, study.getId());
         if (subject == null) { // Communicate with MS Studies here, only if not existing
-            subject = new Subject();
-            subject.setName(subjectName);
-            subject.setStudy(study);
+            org.shanoir.ng.importer.dto.Subject subjectDTO = new org.shanoir.ng.importer.dto.Subject();
+            subjectDTO.setName(subjectName);
+            subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
             Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE,
-                    objectMapper.writeValueAsString(subject));
+                    objectMapper.writeValueAsString(subjectDTO));
             if (subjectId == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));

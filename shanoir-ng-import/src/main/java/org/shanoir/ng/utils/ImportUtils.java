@@ -353,7 +353,7 @@ public class ImportUtils {
 	}
 
 	/**
-	 * Create an exam from fiew attributes
+	 * Create an exam from a few attributes
 	 * @return the created exam
 	 */
 	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
