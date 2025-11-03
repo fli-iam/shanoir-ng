@@ -131,7 +131,7 @@ public class DicomImporterService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @Value("${dcm4chee-arc.protocol}")
     private String dcm4cheeProtocol;
 
@@ -159,7 +159,8 @@ public class DicomImporterService {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-                && deIdentificationActionSequence.isEmpty()) {
+                && (deIdentificationActionSequence == null    
+                || deIdentificationActionSequence.isEmpty())) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }

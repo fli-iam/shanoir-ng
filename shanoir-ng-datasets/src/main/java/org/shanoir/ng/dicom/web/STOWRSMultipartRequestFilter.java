@@ -103,7 +103,6 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
     			MimeMultipart multipart = new MimeMultipart(datasource);
     			int count = multipart.getCount();
-				LOG.info("Multipart request with {} parts received.", count);
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
