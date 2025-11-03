@@ -994,14 +994,19 @@ public class DatasetSecurityService {
     	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
+		long ts = System.currentTimeMillis();
     	Examination exam = examinationRepository.findById(examinationId).orElse(null);
+		LOG.debug("######### - hasRightOnExamination took {} ms to fetch exam", System.currentTimeMillis() - ts);
         if (exam == null) {
 			throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
 		}
         if (exam.getStudyId() == null) {
 			return false;
 		}
-        return this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
+		ts = System.currentTimeMillis();
+		boolean result = this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
+		LOG.debug("######### - hasRightOnExamination took {} ms to check rights", System.currentTimeMillis() - ts);
+        return result;
     }
 
 
