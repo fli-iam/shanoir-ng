@@ -22,6 +22,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -33,6 +34,10 @@ import org.springframework.data.repository.query.Param;
  * @author ifakhfakh
  */
 public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
+
+	// faster than .count() as uses count(1) on database
+	@Query("SELECT COUNT(e) FROM Examination e")
+	long countExaminations();
 
 	/**
 	 * Get a list of examinations for a subject.
@@ -61,7 +66,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	List<Examination> findByIdGreaterThan(Long id);
+	List<Examination> findTop1000ByIdGreaterThanOrderByIdAsc(long examinationId);
 	
 	/**
 	 * Get a paginated list of examinations
@@ -138,5 +143,9 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	@EntityGraph(attributePaths = {"datasetAcquisitions"})
 	@Query("SELECT e FROM Examination e WHERE e.id = :id")
 	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
+
+	@Modifying
+	@Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
+	int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
 
 }

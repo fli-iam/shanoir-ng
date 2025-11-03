@@ -197,15 +197,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
+		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+		Set<Long> unrestrictedStudies = new HashSet<Long>();
+		securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 		if (searchStr != null && searchStr.length() >= 1) {
-			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-			Set<Long> unrestrictedStudies = new HashSet<Long>();
-			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 			return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
 		} else {
-			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-			Set<Long> unrestrictedStudies = new HashSet<Long>();
-			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 			return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
 		}
 	}

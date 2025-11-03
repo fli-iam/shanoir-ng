@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -102,7 +103,6 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<Void> deleteExamination(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
 		Long studyId = examinationService.findById(examinationId).getStudyId();
-
 		ShanoirEvent event = null;
 		event = new ShanoirEvent(
 				ShanoirEventType.DELETE_EXAMINATION_EVENT,
@@ -112,10 +112,8 @@ public class ExaminationApiController implements ExaminationApi {
 				ShanoirEvent.IN_PROGRESS,
 				0,
 				studyId);
-
 		eventService.publishEvent(event);
 		examinationService.deleteExaminationAsync(examinationId, studyId, event);
-
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -138,7 +136,6 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
-
 	
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
@@ -180,7 +177,10 @@ public class ExaminationApiController implements ExaminationApi {
 			@Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
-        final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
+		Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
+		generateStudyInstanceUID(examination);
+        final Examination createdExamination = examinationService.save(examination);
+		LOG.info("New examination created: " + createdExamination.toString());
 		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
@@ -250,10 +250,10 @@ public class ExaminationApiController implements ExaminationApi {
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());
 		examination.setExtraDataFilePathList(pathList);
+		generateStudyInstanceUID(examination);
 		Examination dbExamination = examinationService.save(examination);
-		
 		String path = examinationService.addExtraData(dbExamination.getId(), file);
-		
+		LOG.info("New examination created: " + examination.toString());
 		if (path != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
@@ -261,7 +261,6 @@ public class ExaminationApiController implements ExaminationApi {
 		}		
 	}
 	
-
 	@Override
 	public void downloadExtraData(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
@@ -273,9 +272,7 @@ public class ExaminationApiController implements ExaminationApi {
 			response.sendError(HttpStatus.NO_CONTENT.value());
 			return;
 		}
-
 		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
-
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
 			response.setContentType(contentType);
@@ -325,4 +322,18 @@ public class ExaminationApiController implements ExaminationApi {
 		Long count = examinationService.countAllExaminations();
 		return new ResponseEntity<>(count, HttpStatus.OK);
 	}
+  
+	/**
+	 * This method generates during the examination creation a DICOM
+	 * StudyInstanceUID, that will be used for all DICOM files of this
+	 * examination (== DICOM study).
+	 * 
+	 * @param examination
+	 */
+	private void generateStudyInstanceUID(Examination examination) {
+		UIDGeneration generator = new UIDGeneration();
+		String newUID = generator.getNewUID();
+		examination.setStudyInstanceUID(newUID);
+	}
+
 }
