@@ -983,7 +983,7 @@ public class MainWindow extends JFrame {
 		currentUploadsPanel.add(scrollPaneUpload, BorderLayout.CENTER);
 
 		// Add delete all finished uploads button
-		deleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll"));
+		deleteFinishedUploads = new JButton(resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll.button"));
 		deleteFinishedUploads.setFont(new Font("SansSerif", Font.BOLD, 14));
 		deleteFinishedUploads.setBackground(new Color(220, 53, 69));
 		deleteFinishedUploads.setForeground(Color.WHITE);

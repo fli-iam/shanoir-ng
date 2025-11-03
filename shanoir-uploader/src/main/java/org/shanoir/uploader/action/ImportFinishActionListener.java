@@ -114,15 +114,21 @@ public class ImportFinishActionListener implements ActionListener {
 				return;
 			}
 			String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
-			String regex = "\\d+(\\.\\d+)?";
-			Pattern pattern = Pattern.compile(regex);
-        	Matcher matcher = pattern.matcher(magneticFieldStrength);
-			if (!matcher.find()) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
+			// Check that magnetic field strength is a number value if modality is not CT or XA
+			if (importJob.getFirstSelectedSerie().getModality() != null 
+					&& !importJob.getFirstSelectedSerie().getModality().equals("CT")
+					&& !importJob.getFirstSelectedSerie().getModality().equals("XA")) {
+				String regex = "\\d+(\\.\\d+)?";
+				Pattern pattern = Pattern.compile(regex);
+        		Matcher matcher = pattern.matcher(magneticFieldStrength);
+				if (!matcher.find()) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.equipment.magnetic.field"),
 					"Error", JOptionPane.ERROR_MESSAGE);
-				return;
+					return;
+				}
 			}
+			
 			InstitutionDicom institutionDicom = new InstitutionDicom();
 			institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
 			institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
