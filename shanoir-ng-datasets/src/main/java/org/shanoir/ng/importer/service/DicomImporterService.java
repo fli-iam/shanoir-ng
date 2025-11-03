@@ -434,12 +434,11 @@ public class DicomImporterService {
             currentExpression.setDataset(dataset);
             dataset.setDatasetExpressions(Collections.singletonList(currentExpression));
         }
-        List<DatasetFile> files = createDatasetFiles(attributes, currentExpression);
-        currentExpression.setDatasetFiles(files);
+        addDatasetFile(attributes, currentExpression);
     }
 
     /**
-     * Create the dataset files, as WADO-RS links in that case,
+     * Add a dataset_file, as WADO-RS links in that case,
      * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
      * 
      * @param attributes
@@ -447,7 +446,7 @@ public class DicomImporterService {
      * @return
      * @throws MalformedURLException
      */
-    private List<DatasetFile> createDatasetFiles(Attributes attributes, DatasetExpression expression)
+    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
             throws MalformedURLException {
         DatasetFile datasetFile = new DatasetFile();
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
@@ -461,9 +460,12 @@ public class DicomImporterService {
         datasetFile.setPath(wadoURL.toString());
         datasetFile.setPacs(true);
         datasetFile.setDatasetExpression(expression);
-        List<DatasetFile> files = new ArrayList<DatasetFile>();
-        files.add(datasetFile);
-        return files;
+        List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
+        if (datasetFilesDb == null) {
+            datasetFilesDb = new ArrayList<DatasetFile>();
+        }
+        datasetFilesDb.add(datasetFile);
+        expression.setDatasetFiles(datasetFilesDb);
     }
 
 }
