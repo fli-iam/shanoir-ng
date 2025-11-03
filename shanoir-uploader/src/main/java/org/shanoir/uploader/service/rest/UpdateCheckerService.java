@@ -22,6 +22,13 @@ import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Service to check for updates on GitHub releases page.
+ * This service is called when the user clicks on "Check for updates" in the Help menu.
+ *
+ * @author lvallet
+ *
+ */
 public class UpdateCheckerService {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateCheckerService.class);
