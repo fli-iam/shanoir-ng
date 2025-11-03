@@ -131,6 +131,7 @@ public class DicomImporterService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    
     @Value("${dcm4chee-arc.protocol}")
     private String dcm4cheeProtocol;
 
