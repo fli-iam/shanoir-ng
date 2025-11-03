@@ -48,7 +48,7 @@ public class StowRSDicomTest extends AbstractTest {
 
 	/**
 	 * The below method can be used to produce STOW-RS
-	 * ready DICOM files to test the import of STO-RS
+	 * ready DICOM files to test the import of STOW-RS
 	 * on the Shanoir server.
 	 * 
 	 * @throws Exception
