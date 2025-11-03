@@ -164,7 +164,7 @@ public class DicomImporterService {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }
-        Long studyId = attributes.getLong(Tag.ClinicalTrialProtocolID, 0L);
+        Long studyId = Long.parseLong(attributes.getString(Tag.ClinicalTrialProtocolID));
         Study study = studyService.findById(studyId);
         if (study == null) {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
