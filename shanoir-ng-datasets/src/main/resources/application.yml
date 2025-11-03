@@ -153,7 +153,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
-  shanoir-vip-host: ${HOSTNAME:local}
+  shanoir-vip-host: ${SHANOIR_URL_HOST:local}
 
 # Service account
 service-account:
