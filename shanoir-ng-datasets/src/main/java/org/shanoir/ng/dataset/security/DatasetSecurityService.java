@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,42 +46,44 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DatasetSecurityService {
-	
+
 	private static final String ROLE_ADMIN = "ROLE_ADMIN";
-	
+
 	@Autowired
 	DatasetRepository datasetRepository;
-	
+
 	@Autowired
 	DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
 	@Autowired
 	StudyCardRepository studyCardRepository;
-	
+
 	@Autowired
     QualityCardRepository qualityCardRepository;
-	
+
 	@Autowired
 	ExaminationRepository examinationRepository;
-	
+
 	@Autowired
 	SubjectRepository subjectRepository;
-	
+
 	@Autowired
 	StudyRightsService commService;
-	
+
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
 	/**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -115,10 +117,10 @@ public class DatasetSecurityService {
 
 		return givenIds.size() == commService.hasRightOnStudies(givenIds, rightStr).size();
 	}
-    
+
     /**
      * Check that the connected user has the given right for the given subject.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -137,10 +139,10 @@ public class DatasetSecurityService {
 		}
     	return false;
     }
-    
+
     /**
 	 * Check that the connected user has the given right for the given subject.
-	 * 
+	 *
 	 * @param subjectName the study name
 	 * @param rightStr the right
 	 * @return true or false
@@ -159,10 +161,10 @@ public class DatasetSecurityService {
 		}
     	return false;
     }
-    
+
     /**
 	 * Check that the connected user has the given right for the given study card.
-	 * 
+	 *
 	 * @param studyCardId the study card id
 	 * @param rightStr the right
 	 * @return true or false
@@ -181,10 +183,10 @@ public class DatasetSecurityService {
 		}
         return commService.hasRightOnStudy(sc.getStudyId(), rightStr);
     }
-    
+
     /**
      * Check that the connected user has the given right for the given quality card.
-     * 
+     *
      * @param qualityCardId the study card id
      * @param rightStr the right
      * @return true or false
@@ -203,10 +205,10 @@ public class DatasetSecurityService {
         }
         return commService.hasRightOnStudy(qc.getStudyId(), rightStr);
     }
-    
+
     /**
      * Check that the connected user has the given right for the given study card.
-     * 
+     *
      * @param studyCardId the study card id
      * @param rightStr the right
      * @return true or false
@@ -221,7 +223,7 @@ public class DatasetSecurityService {
         }
         Card card;
         if ("study".equals(type)) {
-            card = studyCardRepository.findById(cardId).orElse(null);            
+            card = studyCardRepository.findById(cardId).orElse(null);
         } else if ("quality".equals(type)) {
             card = qualityCardRepository.findById(cardId).orElse(null);
         } else throw new IllegalArgumentException("Bad type argument '" + type + "', should be 'study' or 'quality'");
@@ -230,10 +232,10 @@ public class DatasetSecurityService {
         }
         return commService.hasRightOnStudy(card.getStudyId(), rightStr);
     }
-    
+
     /**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -247,10 +249,10 @@ public class DatasetSecurityService {
 		}
         return commService.hasOneRightOnStudy(studyId, rightStrs);
     }
-    
+
     /**
 	 * Check that the connected user has the given right for the given study card.
-	 * 
+	 *
 	 * @param studyCardId the study card id
 	 * @param rightStr the right
 	 * @return true or false
@@ -269,10 +271,10 @@ public class DatasetSecurityService {
 		}
         return commService.hasOneRightOnStudy(sc.getStudyId(), rightStrs);
     }
-    
+
     /**
 	 * Check that the connected user has the given right for updating the given study card.
-	 * 
+	 *
 	 * @param studyCardId the study card id
 	 * @param rightStr the right
 	 * @return true or false
@@ -292,10 +294,10 @@ public class DatasetSecurityService {
         return commService.hasOneRightOnStudy(dbStudyCard.getStudyId(), rightStrs) && (
         		dbStudyCard.getStudyId().equals(studyCard.getStudyId()) || commService.hasOneRightOnStudy(studyCard.getStudyId(), rightStrs));
     }
-    
+
     /**
      * Check that the connected user has the given right for the given dataset.
-     * 
+     *
      * @param datasetId the dataset id
      * @param rightStr the right
      * @return true or false
@@ -311,10 +313,10 @@ public class DatasetSecurityService {
 		}
         return hasRightOnTrustedDataset(dataset, rightStr);
     }
-    
+
     /**
      * Check that the connected user has the given right for the given dataset.
-     * 
+     *
      * @param datasetId the dataset id
      * @param rightStr the right
      * @return true or false
@@ -336,19 +338,19 @@ public class DatasetSecurityService {
     		if (dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
     			return true;
     		} else {
-    			return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);    			
+    			return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     		}
     	} else {
     		return hasRightOnStudyCenter(
-				dataset.getDatasetAcquisition().getExamination().getCenterId(), 
-				dataset.getDatasetAcquisition().getExamination().getStudyId(), 
-				rightStr);    		
+				dataset.getDatasetAcquisition().getExamination().getCenterId(),
+				dataset.getDatasetAcquisition().getExamination().getStudyId(),
+				rightStr);
     	}
     }
 
     /**
      * Check that the connected user has the given right for the given dataset acquisition.
-     * 
+     *
      * @param datasetId the dataset acquisition id
      * @param rightStr the right
      * @return true or false
@@ -367,10 +369,10 @@ public class DatasetSecurityService {
 		}
         return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
     }
-    
+
     /**
      * Check that the connected user has the given right for the given dataset acquisitions.
-     * 
+     *
      * @param datasetAcquisitionIds the dataset acquisition ids
      * @param rightStr the right
      * @return true or false
@@ -391,11 +393,11 @@ public class DatasetSecurityService {
     	}
 		return true;
     }
-    
+
     /**
      * Reject if one dataset doesn't have the right.
      * DatasetIds list is also cleaned here
-     * 
+     *
      * @param datasets the datasets
      * @param rightStr the right
      * @return true or false
@@ -408,7 +410,7 @@ public class DatasetSecurityService {
     	// If the entry is empty, return an empty list
     	if (datasetIds == null || datasetIds.isEmpty()) {
 			return true;
-		}    	
+		}
 		List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
 				.stream()
 				.map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
@@ -426,7 +428,7 @@ public class DatasetSecurityService {
 
 	/**
      * Check that the connected user has the given right for the given dataset.
-     * 
+     *
      * @param dataset the dataset
      * @param rightStr the right
      * @return true or false
@@ -473,7 +475,7 @@ public class DatasetSecurityService {
     /**
      * Check the connected user has the given right for the given dataset.
      * If the study is updated, check the user has the given right in both former and new studies.
-     * 
+     *
      * @param dataset the dataset
      * @param rightStr the right
      * @return true or false
@@ -537,7 +539,7 @@ public class DatasetSecurityService {
     /**
      * Check the connected user has the given right for the given dataset acquisition DTO.
      * If the study is updated, check the user has the given right in both former and new studies.
-     * 
+     *
      * @param datasetAcqDto the dataset acquisition dto
      * @param rightStr the right
      * @return true or false
@@ -567,11 +569,11 @@ public class DatasetSecurityService {
     				this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
     	}
     }
-    
+
     /**
      * Check the connected user has the given right for the given study card.
      * If the study card is updated, check the user has the given right in both former and new study cards.
-     * 
+     *
      * @param studyCard the study card
      * @param rightStr the right
      * @return true or false
@@ -580,11 +582,11 @@ public class DatasetSecurityService {
     public boolean hasUpdateRightOnStudyCard(StudyCard studyCard, String rightStr) throws EntityNotFoundException {
         return hasUpdateRightOnCard(studyCard, rightStr);
     }
-    
+
     /**
      * Check the connected user has the given right for the given study card.
      * If the study card is updated, check the user has the given right in both former and new study cards.
-     * 
+     *
      * @param studyCard the study card
      * @param rightStr the right
      * @return true or false
@@ -593,11 +595,11 @@ public class DatasetSecurityService {
     public boolean hasUpdateRightOnQualityCard(QualityCard qualityCard, String rightStr) throws EntityNotFoundException {
         return hasUpdateRightOnCard(qualityCard, rightStr);
     }
-    
+
     /**
     * Check the connected user has the given right for the given study card.
     * If the study card is updated, check the user has the given right in both former and new study cards.
-    * 
+    *
     * @param studyCard the study card
     * @param rightStr the right
     * @return true or false
@@ -635,10 +637,10 @@ public class DatasetSecurityService {
 		}
 	}
 
-    
+
     /**
      * Check that page checking the connected user has the right on those datasets.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true or false
@@ -652,12 +654,12 @@ public class DatasetSecurityService {
 				return false;
 			}
     	}
-    	return true; 
+    	return true;
     }
-    
+
     /**
      * Check that page checking the connected user has the right on those datasets.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true or false
@@ -673,10 +675,10 @@ public class DatasetSecurityService {
     	}
     	return true;
     }
-    
+
     /**
      * Filter datasets in that page checking the connected user has the right on those datasets.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -685,7 +687,7 @@ public class DatasetSecurityService {
 		UserRights userRights = commService.getUserRights();
     	Set<Dataset> toRemove = new HashSet<>();
     	list.forEach((Dataset ds) -> {
-            if (ds.getDatasetAcquisition() == null 
+            if (ds.getDatasetAcquisition() == null
                     || ds.getDatasetAcquisition().getExamination() == null
                     || ds.getDatasetAcquisition().getExamination().getStudyId() == null) {
 				// if processed dataset (no center)
@@ -697,7 +699,7 @@ public class DatasetSecurityService {
 						toRemove.add(ds);
 					}
                 } else {
-                    throw new IllegalStateException("Cannot check dataset n°" + ds.getId() + " rights, this dataset has neither examination nor processing parent !");                
+                    throw new IllegalStateException("Cannot check dataset n°" + ds.getId() + " rights, this dataset has neither examination nor processing parent !");
                 }
             } else { // general case
 				Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
@@ -711,10 +713,10 @@ public class DatasetSecurityService {
     	list.removeAll(toRemove);
     	return true;
     }
-        
+
     /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -730,10 +732,10 @@ public class DatasetSecurityService {
 		}
 		return true;
     }
-    
+
     /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -751,10 +753,10 @@ public class DatasetSecurityService {
 		list.removeAll(toRemove);
 		return true;
     }
-    
+
     /**
      * Filter datasets checking the connected user has the right on those.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -788,16 +790,17 @@ public class DatasetSecurityService {
     	list.removeIf(a -> dsRemove.contains(a.getId()));
     	return true;
     }
-    
-    
+
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetSecurityService.class);
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
      */
     public boolean filterDatasetAcquisitionList(List<DatasetAcquisition> list, String rightStr) {
+		long ts = System.currentTimeMillis();
 		if (list == null || list.isEmpty()) return true;
 		Set<DatasetAcquisition> toRemove = new HashSet<>();
 		UserRights userRights = commService.getUserRights();
@@ -809,12 +812,13 @@ public class DatasetSecurityService {
 			}
 		}
 		list.removeAll(toRemove);
+		LOG.error("######### - filterDatasetAcquisitionList took {} ms", System.currentTimeMillis() - ts);
 		return true;
     }
 
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -833,17 +837,17 @@ public class DatasetSecurityService {
 		list.removeAll(toRemove);
 		return true;
     }
-    
+
 
 	/**
 	* Filter dataset acquisitions checking the connected user has the right on those.
-	* 
+	*
 	* @param page the page
 	* @param rightStr the right
 	* @return true
 	*/
 	public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-
+		long ts = System.currentTimeMillis();
 		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
@@ -862,13 +866,14 @@ public class DatasetSecurityService {
 			}
 		}
     	list.removeIf(e -> examsToRemove.contains(e.getId()));
+		LOG.error("######### - filterExaminationDatasetAcquisitionDTOList took {} ms", System.currentTimeMillis() - ts);
     	return true;
 	}
 
-    
+
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -887,10 +892,10 @@ public class DatasetSecurityService {
 		}
 		return true;
     }
-    
+
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -909,10 +914,10 @@ public class DatasetSecurityService {
 		}
 		return true;
     }
-    
+
     /**
      * Filter study cards in that page checking the connected user has the right on those cards.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -927,13 +932,13 @@ public class DatasetSecurityService {
         });
         Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
         list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
-        
+
         return true;
     }
-    
+
     /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -955,7 +960,7 @@ public class DatasetSecurityService {
 
     /**
      * Filter examinations in that list checking the connected user has the right on those examinations.
-     * 
+     *
      * @param page the page
      * @param rightStr the right
      * @return true
@@ -976,10 +981,10 @@ public class DatasetSecurityService {
     	list.removeAll(examsToRemove);
     	return true;
     }
-    
+
     /**
      * Check that the connected user has the given right for the given examination.
-     * 
+     *
      * @param examinationId the examination id
      * @param rightStr the right
      * @return true or false
@@ -998,11 +1003,11 @@ public class DatasetSecurityService {
 		}
         return this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
     }
-    
-    
+
+
     /**
      * Check that the connected user has the given right for the given examination.
-     * 
+     *
      * @param examinationId the examination id
      * @param rightStr the right
      * @return true or false
@@ -1020,8 +1025,8 @@ public class DatasetSecurityService {
 		}
         return this.hasRightOnStudyCenter(examination.getCenterId(), examination.getStudyId(), rightStr);
     }
-    
-    
+
+
     public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
 		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
 		return hasRightOnExamination(id, rightStr);
