@@ -283,6 +283,7 @@ public class DicomImporterService {
         }
         acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
                     userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
+        acquisition.setExamination(examination);
         return acquisitionService.create(acquisition);
     }
 
