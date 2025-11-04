@@ -1,7 +1,14 @@
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -21,17 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -48,12 +55,15 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private SubjectRepository subjectRepository;
+
+	@Autowired
+	private CenterService centerService;
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
 	
 	@Autowired
-	private ObjectMapper objectMapper;
+	private ObjectMapper mapper;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -73,7 +83,7 @@ public class RabbitMQStudiesService {
 	public void linkExamination(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+			ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
 			Long studyId = event.getStudyId();
 			String message = event.getMessage();
@@ -149,7 +159,7 @@ public class RabbitMQStudiesService {
 	public boolean studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
+			ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
 			Long userId = event.getUserId();
 			Long studyId = Long.valueOf(event.getObjectId());
 			// Get the study
@@ -193,7 +203,7 @@ public class RabbitMQStudiesService {
 		try {
 		    LOG.info(messageStr);
 			List<SubjectQualityTagDTO> subjectStudyCardTagList =
-					objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>(){});
+					mapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>(){});
 			// build a id -> dto map
 			Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
 			for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
@@ -210,6 +220,25 @@ public class RabbitMQStudiesService {
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.CREATE_CENTER_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitHandler
+	public Long createCenter(final String messageStr) {
+		try {
+			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+			Center center = mapper.readValue(messageStr, Center.class);
+			center = createCenter(center);
+			return center.getId();
+		} catch (Exception e) {
+			LOG.error("Error while creating a new center: ", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	@Transactional
+	private Center createCenter(Center center) {
+		return centerService.create(center);
 	}
 
 }

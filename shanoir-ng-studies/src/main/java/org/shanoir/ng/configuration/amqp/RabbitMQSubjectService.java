@@ -17,22 +17,21 @@ package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,15 +54,9 @@ public class RabbitMQSubjectService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
-
-	@Autowired
-	private ShanoirEventService eventService;
 	
 	@Autowired
 	private ObjectMapper mapper;
-
-	@Autowired
-	private SubjectUniqueConstraintManager uniqueConstraintManager;
 	
 	/**
 	 * This methods returns a list of subjects for a given study ID
