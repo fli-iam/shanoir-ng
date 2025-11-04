@@ -237,29 +237,31 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current mrDataset
 		 * 
 		 **/
-		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
-				if (mrDataset.getFirstImageAcquisitionTime() == null) {
-					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
-				} else {
-					if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
+		if (dataset.getExpressionFormats() != null) {
+			for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+				datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+				DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+				if (datasetExpression.getFirstImageAcquisitionTime() != null) {
+					if (mrDataset.getFirstImageAcquisitionTime() == null) {
 						mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
+					} else {
+						if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
+							mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
+						}
 					}
 				}
-			}
-			if (datasetExpression.getLastImageAcquisitionTime() != null) {
-				if (mrDataset.getLastImageAcquisitionTime() == null) {
-					mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
-				} else {
-					if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
+				if (datasetExpression.getLastImageAcquisitionTime() != null) {
+					if (mrDataset.getLastImageAcquisitionTime() == null) {
 						mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
+					} else {
+						if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
+							mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
+						}
 					}
 				}
+				datasetExpression.setDataset(mrDataset);
+				mrDataset.getDatasetExpressions().add(datasetExpression);
 			}
-			datasetExpression.setDataset(mrDataset);
-			mrDataset.getDatasetExpressions().add(datasetExpression);
 		}
 		
 		DatasetMetadata originalDM = mrDataset.getOriginMetadata();
