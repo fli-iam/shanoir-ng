@@ -198,12 +198,13 @@ public class DicomImporterService {
                 // Check if serie == acquisition: separate datasets
                 currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
             }
+        } else {
+            acquisition.setDatasets(new ArrayList<Dataset>());
         }
         // Create a new dataset
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-            // dataset.setEchoTimes(seriesToDatasetsSeparator);
             currentDataset = acquisitionContext.generateFlatDataset(serieDICOM, dataset, 0, subject.getId(),
                     attributes);
             acquisition.getDatasets().add(currentDataset);
