@@ -205,10 +205,12 @@ public class DicomImporterService {
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-            currentDataset = acquisitionContext.generateFlatDataset(serieDICOM, dataset, 0, subject.getId(),
+            currentDataset = acquisitionContext.generateFlatDataset(
+                    serieDICOM, dataset, 0, subject.getId(),
                     attributes);
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
+            currentDataset.setStudyId(subject.getStudy().getId());
         }
         return currentDataset;
     }
@@ -455,7 +457,13 @@ public class DicomImporterService {
             currentExpression.setCreationDate(LocalDateTime.now());
             currentExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
             currentExpression.setDataset(dataset);
-            dataset.setDatasetExpressions(Collections.singletonList(currentExpression));
+        }
+        if (dataset.getDatasetExpressions() != null) {
+            dataset.getDatasetExpressions().add(currentExpression);
+        } else {
+            ArrayList<DatasetExpression> datasetExpressions = new ArrayList<>();
+            datasetExpressions.add(currentExpression);
+            dataset.setDatasetExpressions(datasetExpressions);
         }
         addDatasetFile(attributes, currentExpression);
     }
