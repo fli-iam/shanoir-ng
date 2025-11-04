@@ -223,16 +223,16 @@ public class DatasetDownloaderServiceImpl {
             } else {
                 // processed NIfTI
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
             }
 		} else if (dataset instanceof EegDataset) {
 			// DOWNLOAD EEG
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath, null);
+			DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath, null);
 		} else if (dataset instanceof BidsDataset) {
 			// DOWNLOAD BIDS
 			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, downloadResult);
-			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, null);
+			DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, null);
 			// Manage errors here
         } else if (Objects.equals("dcm", output_format)) {
 			// DOWNLOAD DICOM
@@ -255,7 +255,7 @@ public class DatasetDownloaderServiceImpl {
                 }
 
                 // Step 3: Copy NIfTI files to output ZIP
-                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath, null);
+                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath, null);
             } catch (IOException | RestServiceException e) {
                 LOG.error("Failed to convert or copy NIfTI files for dataset {}", dataset.getId(), e);
                 downloadResult.update("Failed to process NIfTI files: " + e.getMessage(), DatasetDownloadError.ERROR);

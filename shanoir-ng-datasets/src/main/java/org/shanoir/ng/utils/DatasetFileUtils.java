@@ -93,63 +93,64 @@ public final class DatasetFileUtils {
         }
     }
 
-    /**
-     * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-     * Return the list of copied files
-     *
-     * @param urls
-     * @param subjectName         the subjectName
-     * @param datasetFilePath
-     * @param datasetDownloadName
-     * @return
-     * @throws IOException
-     * @throws MessagingException
-     */
-    public static List<String> copyNiftiFilesForURLs(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName) throws IOException {
+	/**
+	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+	 * Return the list of copied files
+	 *
+	 * @param urls
+	 * @param subjectName         the subjectName
+	 * @param datasetFilePath
+	 * @param datasetDownloadName
+	 * @return
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName)
+            throws IOException {
+
+		List<String> filesInZip = new ArrayList<>();
         int index = 0;
-        List<String> files = new ArrayList<>();
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
+
+		for (URL url : urls) {
             File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
             String srcPath = srcFile.getAbsolutePath();
 
-            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
+            // Generate the target file name
+			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
+            fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
 
-            if (fileName.contains(File.separator)) {
-                fileName = fileName.replaceAll(File.separator, UNDERSCORE);
-            }
-            // add folder logic if necessary
-            if (datasetFilePath != null) {
-                fileName = datasetFilePath + File.separator + fileName;
-            }
-            boolean compressed = srcPath.endsWith(".nii");
+			// Add folder path if specified
+			if (datasetFilePath != null)
+				fileName = datasetFilePath + File.separator + fileName;
 
-            // Gzip file if necessary in order to always return a .nii.gz file
-            if (compressed) {
-                srcPath = srcPath + ".gz";
-                fileName = fileName + ".gz";
-                compressGzipFile(srcFile.getAbsolutePath(), srcPath);
-            }
+            // If it's an uncompressed NIfTI file, compress it.
+            boolean compress = srcPath.endsWith(".nii");
+            String zipPath = compress ? srcPath + ".gz" : srcPath;
+            String zipFileName = compress ? fileName + ".gz" : fileName;
 
-            files.add(fileName);
+            // Compress file if needed
+            if (compress)
+                compressGzipFile(srcPath, zipPath);
 
-            FileSystemResource fileSystemResource = new FileSystemResource(srcPath);
-            ZipEntry zipEntry = new ZipEntry(fileName);
-            zipEntry.setSize(fileSystemResource.contentLength());
+			// Add to ZIP
+            FileSystemResource resource = new FileSystemResource(srcPath);
+            ZipEntry zipEntry = new ZipEntry(zipFileName);
+            zipEntry.setSize(resource.contentLength());
             zipEntry.setTime(System.currentTimeMillis());
             zipOutputStream.putNextEntry(zipEntry);
-            StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+            StreamUtils.copy(resource.getInputStream(), zipOutputStream);
             zipOutputStream.closeEntry();
 
-            if (compressed) {
-                // If we gzipped the file, delete the newly created file directly after
-                FileUtils.deleteQuietly(new File(srcPath));
-            }
+			if (compressed) {
+				// If we gzipped the file, delete the newly created file directly after
+				FileUtils.deleteQuietly(new File(srcPath));
+			}
 
-            index++;
-        }
-        return files;
-    }
+            filesInZip.add(zipFileName);
+			index++;
+		}
+		return filesInZip;
+	}
 
     public static void writeManifestForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> filesByAcquisitionId) throws IOException {
         InputDTO input = new InputDTO();
