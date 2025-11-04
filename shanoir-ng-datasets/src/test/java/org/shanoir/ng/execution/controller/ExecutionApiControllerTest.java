@@ -1,16 +1,20 @@
 package org.shanoir.ng.execution.controller;
 
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
+import org.shanoir.ng.dataset.dto.DatasetForRights;
+import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.processing.dto.GroupByEnum;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertException;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.shanoir.ng.vip.execution.controler.ExecutionApi;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
@@ -19,6 +23,7 @@ import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -50,30 +55,36 @@ public class ExecutionApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testCreateExecutionAsAdmin() throws Exception {
-
-		// DatasetForRightsProjection ds1 = new DatasetForRights(1L, 1L, 1L, null);
-		// DatasetForRightsProjection ds2 = new DatasetForRights(2L, 1L, 1L, new HashSet<>(List.of(2L, 3L)));
-		// given(datasetRepository.findDatasetsForRights(List.of(1L, 2L))).willReturn(List.of(ds1, ds2));
-
 		ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-
 		assertAccessAuthorized(api::createExecution, candidate);
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void testCreateExecutionAsExpert() throws Exception {
-
-		// DatasetForRightsProjection ds1 = new DatasetForRights(1L, 1L, 1L, null);
-		// DatasetForRightsProjection ds2 = new DatasetForRights(2L, 1L, 1L, new HashSet<>(List.of(2L, 3L)));
-		// given(datasetRepository.findDatasetsForRights(List.of(1L, 2L))).willReturn(List.of(ds1, ds2));
-
 		ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-
 		assertAccessDenied(api::createExecution, candidate);
 	}
 
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
+	public void testCreateExecutionAsUser() throws Exception {
+		ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
+		assertAccessDenied(api::createExecution, candidate);
+	}
+
+	@Test
+	public void testCreateExecutionAsUnauthenticated() throws Exception {
+		ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
+		assertException(api::createExecution, candidate, AuthenticationCredentialsNotFoundException.class);
+	}
+
+
 	private ExecutionCandidateDTO createExecutionCandidateDTO() {
+		DatasetForRightsProjection ds1 = new DatasetForRights(1L, 1L, 1L, null);
+		DatasetForRightsProjection ds2 = new DatasetForRights(2L, 1L, 1L, new HashSet<>(List.of(2L, 3L)));
+		given(datasetRepository.findDatasetsForRights(List.of(1L, 2L))).willReturn(List.of(ds1, ds2));
+
 		ExecutionCandidateDTO candidate = new ExecutionCandidateDTO();
 		candidate.setName("Test execution");
 		candidate.setPipelineIdentifier("pipeline1");

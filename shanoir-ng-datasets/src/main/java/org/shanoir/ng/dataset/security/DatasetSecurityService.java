@@ -1082,7 +1082,6 @@ public class DatasetSecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnExecutionCandidate(ExecutionCandidateDTO executionCandidate) throws EntityNotFoundException {
-		System.out.println("############################################################################# Checking rights on execution candidate");
 		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
