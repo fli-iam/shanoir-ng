@@ -36,10 +36,14 @@ public class StowRSDicomTest extends AbstractTest {
 	@Test
 	public void postDICOMMRToDicomWeb() throws Exception {
 		try {
-			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
+			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
 			if (resource != null) {
 				File file = new File(resource.toURI());
-				shUpClient.postDicom(file);
+				if (file.isDirectory()) {
+					for (File f : file.listFiles()) {
+						shUpClient.postDicom(f);
+					}
+				}
 			}
 		} catch (URISyntaxException e) {
 			logger.error("Error while reading file", e);
