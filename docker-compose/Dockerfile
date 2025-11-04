@@ -52,8 +52,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
-    && apt-get install -qqy temurin-21-jre ca-certificates-java \
-    && update-ca-certificates
+    && apt-get install -qqy temurin-21-jdk ca-certificates-java curl \
+    && update-ca-certificates \
+    # install async-profiler
+    && curl -L -o /tmp/async-profiler.tar.gz \
+         https://github.com/jvm-profiling-tools/async-profiler/releases/download/v3.0/async-profiler-3.0-linux-x64.tar.gz \
+    && mkdir -p /opt/async-profiler \
+    && tar -xzf /tmp/async-profiler.tar.gz -C /opt/async-profiler --strip-components=1 \
+    && ln -s /opt/async-profiler/profiler.sh /usr/local/bin/profiler.sh \
+    && rm -rf /tmp/async-profiler.tar.gz
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 

@@ -208,6 +208,11 @@ services:
     ports:
      - "9904:9904"
      - "9914:9914"
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor=unconfined
+    privileged: true
     depends_on:
       - "database"
       - "rabbitmq"
