@@ -350,14 +350,13 @@ public class WADODownloaderService {
         headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(url,
-                HttpMethod.GET, entity, byte[].class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new IOException("Download did not work: wrong status code received.");
-        }
-    }
+		ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class, "1");
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		} else {
+			throw new IOException("Download did not work: wrong status code received.");
+		}
+	}
 
     private String downloadMetadataFromPACS(final String url) throws IOException {
         HttpHeaders headers = new HttpHeaders();
