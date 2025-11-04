@@ -99,11 +99,14 @@ public class RabbitMQConfiguration {
 	
 	/** Center name updated => notify dataset MS to change database. */
 	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
+
+	public static final String CREATE_CENTER_QUEUE = "create-center-queue";
 	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
 	public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
+	
 	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
 	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";

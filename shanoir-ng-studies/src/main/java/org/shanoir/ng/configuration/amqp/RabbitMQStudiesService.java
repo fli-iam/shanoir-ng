@@ -57,6 +57,7 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	ShanoirEventService eventService;
+
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
 	 * @param commandArrStr the task as a json string.
