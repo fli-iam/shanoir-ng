@@ -191,7 +191,7 @@ public class DicomImporterService {
         Dataset currentDataset = null;
         Serie serieDICOM = new Serie(attributes);
         List<Dataset> datasets = acquisition.getDatasets();
-        if (!datasets.isEmpty()) {
+        if (datasets != null && !datasets.isEmpty()) {
             boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
             // Manage split series in the if-clause
             if (!serieIdentifiedForNotSeparating) {
@@ -284,6 +284,8 @@ public class DicomImporterService {
         acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
                     userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
         acquisition.setExamination(examination);
+        // @todo: take care of acquisition equipment
+        acquisition.setAcquisitionEquipmentId(1L);
         return acquisitionService.create(acquisition);
     }
 
