@@ -54,6 +54,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,6 +91,8 @@ public class DicomImporterService {
     private static final Logger LOG = LoggerFactory.getLogger(DicomImporterService.class);
 
     private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
+
+    private static final String CENTER_CREATION_ERROR = "An error occured during the center creation, please check your rights.";
 
     private static final String UNKNOWN = "unknown";
 
@@ -293,8 +296,11 @@ public class DicomImporterService {
      * 
      * @param attributes
      * @return
+     * @throws RestServiceException 
+     * @throws AmqpException 
+     * @throws JsonProcessingException 
      */
-    private Center manageCenter(Attributes attributes) {
+    private Center manageCenter(Attributes attributes) throws JsonProcessingException, AmqpException, RestServiceException {
         String institutionName = attributes.getString(Tag.InstitutionName);
         String institutionAddress = attributes.getString(Tag.InstitutionAddress);
         if (StringUtils.isNotBlank(institutionName)) {
@@ -304,15 +310,22 @@ public class DicomImporterService {
         }
     }
 
-    private Center findOrCreateCenter(String institutionName) {
+    private Center findOrCreateCenter(String institutionName) throws JsonProcessingException, AmqpException, RestServiceException {
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionName);
         if (!centerOpt.isEmpty()) {
             return centerOpt.get();
-        } else {
+        } else {// Communicate with MS Studies here, only if not existing
             Center center = new Center();
             center.setName(institutionName);
-            // @todo: create center in ms studies to remain consistent
-            return centerRepository.save(center);
+            Long centerId = (Long) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.CREATE_CENTER_QUEUE,
+                    objectMapper.writeValueAsString(center));
+            if (centerId == null) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
+            }
+            LOG.info("Center created with ID: {}, Name: {}", centerId, center.getName());
+            return centerRepository.findById(centerId).orElseThrow();
         }
     }
 
