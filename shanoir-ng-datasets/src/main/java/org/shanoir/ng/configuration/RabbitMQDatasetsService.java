@@ -225,20 +225,19 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveAcEqUpdate(final String acEqStr) {
 		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
 	}
 
-	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
 	}
 	
+	@Transactional
 	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
 		try {
