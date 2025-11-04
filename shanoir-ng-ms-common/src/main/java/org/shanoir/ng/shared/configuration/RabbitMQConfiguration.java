@@ -356,6 +356,11 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue createCenterQueue() {
+		return new Queue(CREATE_CENTER_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue createDatasetAcquisitionQueue() {
 		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
