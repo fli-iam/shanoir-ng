@@ -47,25 +47,25 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: oracle
           java-version: 21
       
       - name: Check Java Cacerts
         run: |
           keytool -list -v -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit | grep -i geant
 
-      - name: Set ShUp version from incremented tag
-        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+      # - name: Set ShUp version from incremented tag
+      #   run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
 
-      - name: Maven cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
+      # - name: Maven cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.m2/repository
+      #     key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      #     restore-keys: ${{ runner.os }}-maven-
 
-      - name: Maven Build
-        run: cd shanoir-ng-parent && mvn clean package -DskipTests
+      # - name: Maven Build
+      #   run: cd shanoir-ng-parent && mvn clean package -DskipTests
 
   #     - name: Create custom runtime with jlink
   #       run: |
