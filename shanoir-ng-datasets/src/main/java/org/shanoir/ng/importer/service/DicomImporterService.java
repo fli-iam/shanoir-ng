@@ -273,15 +273,16 @@ public class DicomImporterService {
         final String userName = KeycloakUtil.getTokenUserName();
         Serie serieDICOM = new Serie(attributes);
         List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
-        Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
-                .filter(a -> a.getSeriesInstanceUID().equals(serieDICOM.getSeriesInstanceUID()))
-                .findFirst();
-        if (existingAcquisition.isPresent()) {
-            acquisition = existingAcquisition.get();
-        } else {
-            acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
-                    userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
+        if (acquisitions != null) {
+            Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
+                    .filter(a -> a.getSeriesInstanceUID().equals(serieDICOM.getSeriesInstanceUID()))
+                    .findFirst();
+            if (existingAcquisition.isPresent()) {
+                return existingAcquisition.get();
+            }
         }
+        acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
+                    userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
         return acquisitionService.create(acquisition);
     }
 
