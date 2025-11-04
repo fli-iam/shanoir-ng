@@ -346,14 +346,16 @@ public class DicomImporterService {
             org.shanoir.ng.importer.dto.Subject subjectDTO = new org.shanoir.ng.importer.dto.Subject();
             subjectDTO.setName(subjectName);
             subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
-            Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE,
+            Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.SUBJECTS_QUEUE,
                     objectMapper.writeValueAsString(subjectDTO));
             if (subjectId == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
             LOG.info("Subject created with ID: {}, Name: {}", subjectId, subjectName);
-        } // We need to assure here: subject created in ms studies + ms datasets
+            subject = subjectService.findById(subjectId).orElseThrow();
+        }
         return subject;
     }
 
