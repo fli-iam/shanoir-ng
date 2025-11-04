@@ -40,7 +40,6 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
             private activatedRoute: ActivatedRoute) {
 
         super(studyCardService, acqEqptLabelPipe);
-        this.breadcrumbsService.resetMilestone();
     }
 
     ngOnInit() {

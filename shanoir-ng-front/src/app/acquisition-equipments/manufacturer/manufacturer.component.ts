@@ -55,15 +55,8 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     initCreate(): Promise<void> {
-        this.entity = new Manufacturer();
+        this.manuf = new Manufacturer();
         return Promise.resolve();
-    }
-
-    getManufacturer(): Promise<void> {
-        return this.manufService.get(this.id)
-            .then(manuf => {
-                this.manuf = manuf;
-            });
     }
 
     buildForm(): UntypedFormGroup {

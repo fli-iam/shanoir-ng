@@ -12,28 +12,25 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild} from '@angular/core';
-import { Validators, UntypedFormGroup } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
+import { Component, ViewChild } from '@angular/core';
+import { UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Anesthetic }    from '../shared/anesthetic.model';
-import { AnestheticService } from '../shared/anesthetic.service';
-import { AnestheticIngredient }   from '../../ingredients/shared/anestheticIngredient.model';
-import { AnestheticIngredientService } from '../../ingredients/shared/anestheticIngredient.service';
-import { AnestheticType } from "../../../shared/enum/anestheticType";
-import { ReferenceService } from '../../../reference/shared/reference.service';
-import { Reference }    from '../../../reference/shared/reference.model';
-import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
+import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
-import { slideDown } from '../../../../shared/animations/animations';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { Reference } from '../../../reference/shared/reference.model';
+import { ReferenceService } from '../../../reference/shared/reference.service';
+import { AnestheticType } from "../../../shared/enum/anestheticType";
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { AnestheticIngredient } from '../../ingredients/shared/anestheticIngredient.model';
+import { AnestheticIngredientService } from '../../ingredients/shared/anestheticIngredient.service';
+import { Anesthetic } from '../shared/anesthetic.model';
+import { AnestheticService } from '../shared/anesthetic.service';
+import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'anesthetic-form',
@@ -42,7 +39,6 @@ import { FilterablePageable, Page } from '../../../../shared/components/table/pa
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
     @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
@@ -67,8 +63,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private route: ActivatedRoute,
         private anestheticService: AnestheticService,
         private ingredientService: AnestheticIngredientService,
-        private referenceService: ReferenceService,
-        public enumUtils: EnumUtils) {
+        private referenceService: ReferenceService) {
 
         super(route, 'preclinical-anesthetic');
         this.manageSaveEntity();
@@ -88,7 +83,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         });
         this.loadUnits();
         this.loadNames();
-        this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
             this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
@@ -109,7 +103,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         });
         this.loadUnits();
         this.loadNames();
-        this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         if (this.anesthetic && this.anesthetic.id){
             this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
@@ -157,7 +150,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.columnDefs = [
             {headerName: "Name", field: "name.value"},
             {headerName: "Concentration", field: "concentration", type: "number"},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "number"}
+            {headerName: "Concentration Unit", field: "concentrationUnit.value", type: "number"}
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
@@ -211,7 +204,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
                 let strIngredient = '';
                 strIngredient = strIngredient.concat(ingredient.name.value.substring(0, 3)).concat('. ');
                 if (ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
-                if (ingredient.concentration_unit) strIngredient = strIngredient.concat(ingredient.concentration_unit.value);
+                if (ingredient.concentrationUnit) strIngredient = strIngredient.concat(ingredient.concentrationUnit.value);
                 strIngredient = strIngredient.concat(' ');
                 if (generatedName.indexOf(strIngredient) < 0) {
                     generatedName = generatedName.concat(strIngredient);

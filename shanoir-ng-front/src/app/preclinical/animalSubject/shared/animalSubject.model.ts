@@ -12,21 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Reference } from '../../reference/shared/reference.model';
+import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { Entity } from "../../../shared/components/entity/entity.abstract";
-import {ImagedObjectCategory} from "../../../subjects/shared/imaged-object-category.enum";
-import {Sex} from "../../../subjects/shared/subject.types";
+import { ImagedObjectCategory } from "../../../subjects/shared/imaged-object-category.enum";
+import { Sex } from "../../../subjects/shared/subject.types";
+import { Reference } from '../../reference/shared/reference.model';
 
 export class AnimalSubject extends Entity {
 
-    id: number;
-    name: string;
-    imagedObjectCategory: ImagedObjectCategory;
-    sex: Sex;
-    study: number;
-    specie: Reference;
-    strain: Reference;
-    biotype: Reference;
-    provider : Reference;
-    stabulation: Reference;
+    @Field() id: number;
+    @Field() name: string;
+    @Field() imagedObjectCategory: ImagedObjectCategory;
+    @Field() sex: Sex;
+    @Field() study: number;
+    @Field() specie: Reference;
+    @Field() strain: Reference;
+    @Field() biotype: Reference;
+    @Field() provider : Reference;
+    @Field() stabulation: Reference;
 }
