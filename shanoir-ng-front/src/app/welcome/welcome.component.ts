@@ -34,11 +34,11 @@ export class WelcomeComponent implements OnInit {
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
 	public email: string = "mailto:developers_shanoir-request@inria.fr";
 	public publicStudies: StudyLight[] = [];
-    public usersCount: number = 0;
-    public eventsCount: number = 0;
-    public studiesCount: number = 0;
-    public examinationsCount: number = 0;
-    public subjectsCount: number = 0;
+  public usersCount: number = 0;
+  public eventsCount: number = 0;
+  public studiesCount: number = 0;
+  public examinationsCount: number = 0;
+  public subjectsCount: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
