@@ -103,10 +103,11 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
     			MimeMultipart multipart = new MimeMultipart(datasource);
     			int count = multipart.getCount();
+				boolean nonOhifRequest = "true".equalsIgnoreCase(httpRequest.getParameter("nonOhifRequest"));
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					manageDICOM(bodyPart);
+    					manageDICOM(bodyPart, nonOhifRequest);
     				} else {
     					throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
     				}
@@ -119,14 +120,14 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
         chain.doFilter(request, response);
     }
 
-	private void manageDICOM(BodyPart bodyPart) throws Exception {
+	private void manageDICOM(BodyPart bodyPart, boolean nonOhifRequest) throws Exception {
 		// DicomInputStream consumes the input stream to read the data
 		try (DicomInputStream dIS = new DicomInputStream(bodyPart.getInputStream())) {
 			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
 			Attributes datasetAttributes = dIS.readDataset();
 			String modality = datasetAttributes.getString(Tag.Modality);
 			if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
-				if(!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality)) {
+				if(!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
 					LOG.error("Error during import of DICOM SEG/SR.");
 					throw new ServletException("Error during import of DICOM SEG/SR.");
 				}
