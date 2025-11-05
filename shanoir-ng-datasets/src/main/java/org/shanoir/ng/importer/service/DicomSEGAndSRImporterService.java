@@ -79,14 +79,23 @@ public class DicomSEGAndSRImporterService {
 	private DicomImporterService dicomImporterService;
 	
 	@Transactional
-	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality) {
-		// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-		Examination examination = modifyDicom(datasetAttributes);
-		Dataset dataset = findDataset(examination, datasetAttributes);
-		if (dataset == null) {
-			LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-			return false;
-		}
+	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
+            // Retrieve examination; adjust datasetAttributes if received from OHIF
+            String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+            Examination examination = nonOhifRequest
+                    ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
+                    : modifyDicom(datasetAttributes);
+            if (examination == null) {
+                LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
+                return false;
+            }
+
+            // Find related dataset
+            Dataset dataset = findDataset(examination, datasetAttributes);
+            if (dataset == null) {
+                LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+                return false;
+            }
 		try {
 			createDataset(modality, examination, dataset, datasetAttributes);
 			dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
@@ -292,7 +301,7 @@ public class DicomSEGAndSRImporterService {
 		dataset.setOriginMetadata(originMetadata);
 		dataset.setUpdatedMetadata(originMetadata);
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
-		if (contentSequence != null) {
+		if (contentSequence != null && contentSequence.size() >= 5) {
 			Attributes contentSequenceAttributes = contentSequence.get(4);
 			if (contentSequenceAttributes != null) {
 				// level of imaging measurements
