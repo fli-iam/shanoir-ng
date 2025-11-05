@@ -79,8 +79,7 @@ public class ExaminationsConsistencyChecker {
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
 	
-//    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-	@Scheduled(fixedDelay = 5 * 60 * 1000) // Run every 5 minutes (in milliseconds)
+    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
 		try {
