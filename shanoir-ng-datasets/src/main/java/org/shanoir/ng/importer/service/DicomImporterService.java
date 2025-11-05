@@ -219,10 +219,13 @@ public class DicomImporterService {
         final HashMap<SerieToDatasetsSeparator, Dataset> existingDatasetToSeparatorMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
         for (Dataset dataset : datasets) {
             SerieToDatasetsSeparator existingSeparator;
-            String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");
-            double[] imageOrientationPatient = new double[parts.length];
-            for (int i = 0; i < parts.length; i++) {
-                imageOrientationPatient[i] = Double.parseDouble(parts[i]);
+            double[] imageOrientationPatient = null;
+            if (dataset.getOriginMetadata().getImageOrientationPatient() != null) {
+                String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");
+                imageOrientationPatient = new double[parts.length];
+                for (int i = 0; i < parts.length; i++) {
+                    imageOrientationPatient[i] = Double.parseDouble(parts[i]);
+                }
             }
             Set<EchoTime> echoTimes = new HashSet<EchoTime>();
             if (acquisition instanceof MrDatasetAcquisition) {
@@ -230,8 +233,12 @@ public class DicomImporterService {
                 mrDataset.getEchoTime().stream().forEach(
                         eT -> echoTimes.add(eT.getEchoTimeShared()));
             }
+            int acquisitionNumber = 0; 
+            if (acquisition.getAcquisitionNumber() != null) {
+                acquisitionNumber = acquisition.getAcquisitionNumber().intValue();
+            }
             existingSeparator = new SerieToDatasetsSeparator(
-                    acquisition.getAcquisitionNumber().intValue(),
+                    acquisitionNumber,
                     echoTimes,
                     imageOrientationPatient);
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
@@ -425,10 +432,12 @@ public class DicomImporterService {
          * server.
          */
         ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
+        String tsuid = metaInformationAttributes.getString(Tag.TransferSyntaxUID);
         // close calls to the outer stream, close the inner stream
-        try (DicomOutputStream dOS = new DicomOutputStream(bAOS,
-                metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
-            dOS.writeDataset(metaInformationAttributes, datasetAttributes);
+        try (DicomOutputStream dOS = new DicomOutputStream(bAOS, UID.ExplicitVRLittleEndian)) {
+            dOS.writeFileMetaInformation(metaInformationAttributes);
+            dOS.switchTransferSyntax(tsuid);
+            dOS.writeDataset(null, datasetAttributes);
             try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
                 dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
