@@ -334,6 +334,7 @@ public class DicomImporterService {
         } else {// Communicate with MS Studies here, only if not existing
             Center center = new Center();
             center.setName(institutionName);
+            // @todo: set study here
             Long centerId = (Long) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.CREATE_CENTER_QUEUE,
                     objectMapper.writeValueAsString(center));
