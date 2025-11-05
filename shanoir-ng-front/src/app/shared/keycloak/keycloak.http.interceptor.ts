@@ -32,11 +32,11 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
-        if (!req.url.endsWith('/accountrequest') 
-                && !req.url.endsWith('/extensionrequest') 
+        if (!req.url.endsWith('/accountrequest')
+                && !req.url.endsWith('/extensionrequest')
                 && !req.url.endsWith('/data')
                 && !(req.url.endsWith('/count') && ['GET'].includes(req.method))
-                && !(req.url.includes('/studies/dua') && ['GET', 'PUT'].includes(req.method))) {
+                && !(req.url.includes('/studies/dua') && !req.url.includes('/studies/studies/dua') && ['GET', 'PUT'].includes(req.method))) {
             authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
