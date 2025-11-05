@@ -14,6 +14,7 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -65,7 +66,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 	}
 
 	@Override
-	public PetDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
+	public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
 			Long subjectId) throws Exception {
 		PetDataset petDataset = new PetDataset();
 		petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
@@ -88,6 +89,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 
 		// Set the modality from dicom fields
 		petDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.PET_DATASET);
+		petDataset.getOriginMetadata().setImageOrientationPatient(attributes.getString(Tag.ImageOrientationPatient));
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (petDataset.getSubjectId() != null) {

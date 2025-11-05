@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -53,7 +54,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 	}
 
 	@Override
-	public GenericDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset,
+	public GenericDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset,
 			int datasetIndex, Long subjectId) throws Exception {
 		GenericDataset genericDataset = new GenericDataset();
 		genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
@@ -84,6 +85,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
 		}
 		genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+		genericDataset.getOriginMetadata().setImageOrientationPatient(attributes.getString(Tag.ImageOrientationPatient));
 		
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :

@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -68,7 +69,7 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 	}
 
 	@Override
-	public XaDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
+	public XaDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
 			Long subjectId) throws Exception {
 		XaDataset xaDataset = new XaDataset();
 		xaDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
@@ -90,6 +91,7 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 		xaDataset.setSubjectId(subjectId);
 
 		xaDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.XA_DATASET);
+		xaDataset.getOriginMetadata().setImageOrientationPatient(attributes.getString(Tag.ImageOrientationPatient));
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (xaDataset.getSubjectId() != null) {
