@@ -221,11 +221,15 @@ public class DicomImporterService {
             SerieToDatasetsSeparator existingSeparator;
             double[] imageOrientationPatient = null;
             if (dataset.getOriginMetadata().getImageOrientationPatient() != null) {
-                String[] parts = dataset.getOriginMetadata().getImageOrientationPatient().split("\\s*,\\s*");
-                imageOrientationPatient = new double[parts.length];
-                for (int i = 0; i < parts.length; i++) {
-                    imageOrientationPatient[i] = Double.parseDouble(parts[i]);
-                }
+                String iop = dataset.getOriginMetadata().getImageOrientationPatient();
+                if (iop != null && !iop.isBlank()) {
+                    iop = iop.trim().replaceAll("[\\\\\\s]+", ",");
+                    String[] parts = iop.split("\\s*,\\s*");
+                    imageOrientationPatient = new double[parts.length];
+                    for (int i = 0; i < parts.length; i++) {
+                        imageOrientationPatient[i] = Double.parseDouble(parts[i]);
+                    }
+                }           
             }
             Set<EchoTime> echoTimes = new HashSet<EchoTime>();
             if (acquisition instanceof MrDatasetAcquisition) {
