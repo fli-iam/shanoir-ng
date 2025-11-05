@@ -80,22 +80,22 @@ public class DicomSEGAndSRImporterService {
 	
 	@Transactional
 	public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
-            // Retrieve examination; adjust datasetAttributes if received from OHIF
-            String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-            Examination examination = nonOhifRequest
-                    ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
-                    : modifyDicom(datasetAttributes);
-            if (examination == null) {
-                LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
-                return false;
-            }
+		// Retrieve examination; adjust datasetAttributes if received from OHIF
+		String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		Examination examination = nonOhifRequest
+				? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
+				: modifyDicom(datasetAttributes);
+		if (examination == null) {
+			LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
+			return false;
+		}
 
-            // Find related dataset
-            Dataset dataset = findDataset(examination, datasetAttributes);
-            if (dataset == null) {
-                LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-                return false;
-            }
+		// Find related dataset
+		Dataset dataset = findDataset(examination, datasetAttributes);
+		if (dataset == null) {
+			LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+			return false;
+		}
 		try {
 			createDataset(modality, examination, dataset, datasetAttributes);
 			dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
