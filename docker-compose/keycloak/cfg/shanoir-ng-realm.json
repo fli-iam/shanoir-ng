@@ -506,23 +506,6 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
-    {
-      "id": "ab27195e-089f-425b-b7f6-b3c68eec6b3f",
-      "username": "service-account-service-account",
-      "email": "vip-service-account@inria.fr",
-      "emailVerified": true,
-      "enabled": true,
-      "totp": false,
-      "serviceAccountClientId": "service-account",
-      "disableableCredentialTypes": [],
-      "requiredActions": [],
-      "realmRoles": [
-        "default-roles-shanoir-ng",
-        "ROLE_SERVICE"
-      ],
-      "notBefore": 0,
-      "groups": []
-    }
   ],
   "scopeMappings": [
     {
