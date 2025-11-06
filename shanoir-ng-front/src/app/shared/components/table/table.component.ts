@@ -14,7 +14,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { Router } from "@angular/router";
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
@@ -412,6 +412,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Call to refresh from outside
      */
     public refresh(page?: number): Promise<Page<any>> {
+        if (page < 1) throw new Error('page must be >= 1');
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {

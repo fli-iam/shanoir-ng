@@ -12,15 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import {ShanoirError} from "../../shared/models/error.model";
-import {StudyCard} from "../../study-cards/shared/study-card.model";
+import { ShanoirError } from "../../shared/models/error.model";
+import { StudyCard } from "../../study-cards/shared/study-card.model";
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
-import {ManufacturerModel} from "./manufacturer-model.model";
+import { ManufacturerModel } from "./manufacturer-model.model";
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
@@ -63,12 +64,22 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     }
 
     checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
-        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
-            equipments => {
-                for (const equipment of equipments) {
-                    if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
-                }
+        return firstValueFrom(
+            this.http.get<AcquisitionEquipment[]>(
+                `${AppUtils.BACKEND_API_ACQ_EQUIP_URL}/bySerialNumber/${serialNumber}`
+            )
+        ).then(equipments => {
+            return equipments.some(equipment =>
+                equipment.manufacturerModel.id === manufacturerModel.id &&
+                equipment.serialNumber === serialNumber
+            );
+        }).catch(error => {
+            if (error instanceof HttpErrorResponse && error.status === 404) {
+                console.log("catch 404 error: no equipments found for this serial number");
+                return false; // No equipments found, so no duplicates
             }
-        );
+            // Handle other errors
+            throw new ShanoirError({error: {code: error.status, message: error.message}});
+        });
     }
 }

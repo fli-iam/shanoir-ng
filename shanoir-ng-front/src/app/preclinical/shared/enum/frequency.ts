@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { allOfEnum } from "src/app/utils/app.utils";
+
 export enum Frequency {
     DAILY = "Daily",
     WEEKLY = "Weekly",
@@ -19,4 +21,10 @@ export enum Frequency {
     BIMONTHLY = "Bimonthly",
     BIANNUALLY = "Biannually",
     ANNUALLY = "Annually"
+}
+
+export namespace Frequency {
+    export function all(): Frequency[] {
+        return allOfEnum<Frequency>(Frequency);
+    }
 }

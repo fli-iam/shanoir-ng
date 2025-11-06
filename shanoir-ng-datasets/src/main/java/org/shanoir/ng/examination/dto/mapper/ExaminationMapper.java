@@ -52,7 +52,6 @@ public interface ExaminationMapper {
 	 * @return list of examinations DTO.
 	 */
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
-	
     
 	/**
 	 * Map list of @Examination to list of @SubjectExaminationDTO.

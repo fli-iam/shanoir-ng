@@ -381,21 +381,20 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
 			studyDescription = importJob.getExaminationComment();
 		}
-		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
-		if (examinationId == null) {
-			importJob.setUploadState(UploadState.ERROR);
+		Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
+		if (examination == null) {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
 			csvWriter.addExaminationLine(false, line);
 			logger.error(importJob.getErrorMessage());
 			return false;
 		}
-		importJob.setExaminationId(examinationId);
 
 		logger.info("Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard, equipment);
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(),
+			examination.getId(), examination.getStudyInstanceUID(), studyREST, studyCard, equipment);
 		File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 		Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);

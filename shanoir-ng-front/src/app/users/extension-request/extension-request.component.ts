@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { UserService } from '../shared/user.service';
 import * as AppUtils from '../../utils/app.utils';
+import { UserService } from '../shared/user.service';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
 
@@ -36,7 +36,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     isDateValid: boolean = true;
     userId: number;
     selectedDateNormal: string = '';
-    private infoSubscription: Subscription;
+    private subscriptions: Subscription[] = [];
     requestSent: boolean = false;
     errorMessage: string;
 
@@ -90,8 +90,18 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
             'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]]
             });
 
-        this.infoSubscription = this.extensionRequestForm.valueChanges
-            .subscribe(() => this.onValueChanged());
+        this.subscriptions.push(
+            this.extensionRequestForm.valueChanges.subscribe(() => this.onValueChanged()),
+            this.extensionRequestForm.get('extensionDate').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.extensionDate = value;
+            }),
+            this.extensionRequestForm.get('extensionMotivation').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.extensionMotivation = value;
+            }),
+            this.extensionRequestForm.get('email').valueChanges.subscribe(value => {
+                this.extensionRequestInfo.email = value;
+            })
+        );
         this.onValueChanged(); // (re)set validation messages now
     }
 
@@ -123,6 +133,6 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.infoSubscription) this.infoSubscription.unsubscribe();
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 }

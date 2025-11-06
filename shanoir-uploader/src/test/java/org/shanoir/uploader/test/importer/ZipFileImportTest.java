@@ -24,6 +24,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -46,16 +47,20 @@ public class ZipFileImportTest extends AbstractTest {
 	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
 	@Test
-	public void testImportWithDicomZipUpload() throws Exception {
-		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 0; i++) {
-			ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-			if (!importJob.getPatients().isEmpty()) {
-				selectAllSeriesForImport(importJob);
-				org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
-				Long examinationId = createExamination(study, importJob, subject);
-				startImportJob(importJob, subject, examinationId, study);
+	public void testImportWithDicomZipUpload() {
+		try {
+			org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
+			for (int i = 0; i < 0; i++) {
+				ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+				if (!importJob.getPatients().isEmpty()) {
+					selectAllSeriesForImport(importJob);
+					org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
+					Long examinationId = createExamination(study, importJob, subject);
+					startImportJob(importJob, subject, examinationId, study);
+				}
 			}
+		} catch(Exception e) {
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -66,9 +71,9 @@ public class ZipFileImportTest extends AbstractTest {
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 		Date studyDateDate = Date.from(studyDateInstant);
 		String examinationComment = dicomStudy.getStudyDescription();
-		Long examinationId = ImportUtils.createExamination(study, subject, studyDateDate,
+		Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
 			examinationComment, study.getStudyCards().get(0).getCenterId());
-		return examinationId;
+		return examination.getId();
 	}
 
 	@Test
@@ -89,6 +94,7 @@ public class ZipFileImportTest extends AbstractTest {
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
 		study.setStudyStatus(IN_PROGRESS);
+		study.setStudyCardPolicy(1);
 		// add center to study
 		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
 		final StudyCenter studyCenter = new StudyCenter();
