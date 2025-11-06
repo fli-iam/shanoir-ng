@@ -27,19 +27,14 @@ VALUES
 	(1, 'DemoStudy');
 	
 INSERT INTO subject
-	(id, name)
+	(id, name, study_id)
 VALUES
-	(1, 'subject1');
+	(1, 'subject1', 1);
 
 INSERT INTO center
     (id, name)
 VALUES
     (1, 'CHU Rennes');
-
-INSERT INTO subject_study
-    (id, study_id, subject_id)
-VALUES
-    (1, 1, 1);
 
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)

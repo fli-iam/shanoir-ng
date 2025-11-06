@@ -105,27 +105,39 @@ public class DicomSEGAndSRImporterService {
 	private String dicomWebRS;
 	
 	@Transactional
-	public boolean importDicomSEGAndSR(InputStream inputStream) {
+	public boolean importDicomSEGAndSR(InputStream inputStream, boolean nonOhifRequest) {
 		// DicomInputStream consumes the input stream to read the data
 		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
 			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
 			Attributes datasetAttributes = dIS.readDataset();
-			String modality = datasetAttributes.getString(Tag.Modality);
-			// check for modality: DICOM SEG or SR
-			if (SEG.equals(modality) || SR.equals(modality)) {
-				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-				Examination examination = modifyDicom(datasetAttributes);
-				Dataset dataset = findDataset(examination, datasetAttributes);
-				if (dataset == null) {
-					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-					return false;	
-				}
-				createDataset(modality, examination, dataset, datasetAttributes);
-				sendToPacs(metaInformationAttributes, datasetAttributes);
-			} else {
-				LOG.error("Error: importDicomSEGAndSR: other modality sent then SEG or SR.");
-				return false;
-			}
+
+            // Validate modality
+            String modality = datasetAttributes.getString(Tag.Modality);
+            if (!SEG.equals(modality) && !SR.equals(modality)) {
+                LOG.error("Error: importDicomSEGAndSR: unsupported modality '{}'. Expected SEG or SR.", modality);
+                return false;
+            }
+
+            // Retrieve examination; adjust datasetAttributes if received from OHIF
+            String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+            Examination examination = nonOhifRequest
+                    ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
+                    : modifyDicom(datasetAttributes);
+            if (examination == null) {
+                LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
+                return false;
+            }
+
+            // Find related dataset
+            Dataset dataset = findDataset(examination, datasetAttributes);
+            if (dataset == null) {
+                LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+                return false;
+            }
+
+            // Create dataset and send it to PACS
+            createDataset(modality, examination, dataset, datasetAttributes);
+            sendToPacs(metaInformationAttributes, datasetAttributes);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return false;
@@ -328,7 +340,7 @@ public class DicomSEGAndSRImporterService {
 		dataset.setOriginMetadata(originMetadata);
 		dataset.setUpdatedMetadata(originMetadata);
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
-		if (contentSequence != null) {
+		if (contentSequence != null && contentSequence.size() >= 5) {
 			Attributes contentSequenceAttributes = contentSequence.get(4);
 			if (contentSequenceAttributes != null) {
 				// level of imaging measurements

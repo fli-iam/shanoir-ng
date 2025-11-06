@@ -26,6 +26,8 @@ public class Examination {
 	private Double subjectWeight;
 
 	private boolean preclinical;
+
+	private String studyInstanceUID;
 	
 	public Examination() {
 		super();
@@ -141,6 +143,14 @@ public class Examination {
 
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
+	}
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
 	}
 
 }
