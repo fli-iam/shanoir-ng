@@ -141,7 +141,7 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
     }
 
     rowClick(item): string {
-        return '/study/details/' + item.study?.id;
+        return '/subject/details/' + item.id;
     }
 
     private processHasTags() {
