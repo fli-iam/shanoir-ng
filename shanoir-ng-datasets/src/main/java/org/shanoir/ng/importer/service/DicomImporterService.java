@@ -179,8 +179,8 @@ public class DicomImporterService {
         DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
         Dataset dataset = manageDataset(attributes, subject, acquisition);
         manageDatasetExpression(attributes, dataset);
-        Dataset createdDataset = datasetService.create(dataset);
-        solrService.indexDataset(createdDataset.getId());
+        datasetService.update(dataset);
+        solrService.indexDataset(dataset.getId());
         sendToPacs(metaInformationAttributes, attributes);
         return true;
     }
@@ -210,6 +210,7 @@ public class DicomImporterService {
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
             currentDataset.setStudyId(subject.getStudy().getId());
+            currentDataset = datasetService.create(currentDataset);
         }
         return currentDataset;
     }
@@ -247,13 +248,13 @@ public class DicomImporterService {
                     acquisitionNumber,
                     echoTimes,
                     imageOrientationPatient);
-            LOG.info(existingSeparator.toString());
+            LOG.info("Existing dataset separator: " + existingSeparator.toString());
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
             LOG.info("#OfExistingSeparators:" + existingDatasetToSeparatorMap.size());
         }
-        SerieToDatasetsSeparator seriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
+        SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
         for (Map.Entry<SerieToDatasetsSeparator, Dataset> entry : existingDatasetToSeparatorMap.entrySet()) {
-            if (entry.getKey().equals(seriesToDatasetsSeparator)) {
+            if (entry.getKey().equals(currentSeriesToDatasetsSeparator)) {
                 return entry.getValue();
             }
         }
@@ -280,9 +281,11 @@ public class DicomImporterService {
         double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
                 ? null
                 : imageOrientationPatient.stream().mapToDouble(i -> i).toArray();
-        SerieToDatasetsSeparator seriesToDatasetsSeparator = new SerieToDatasetsSeparator(acquisitionNumber, echoTimes,
+        SerieToDatasetsSeparator seriesToDatasetsSeparator =
+                new SerieToDatasetsSeparator(
+                acquisitionNumber, echoTimes,
                 imageOrientationPatientsDoubleArray);
-        LOG.info(seriesToDatasetsSeparator.toString());
+        LOG.info("Create current separator: " + seriesToDatasetsSeparator.toString());
         return seriesToDatasetsSeparator;
     }
 
@@ -325,15 +328,16 @@ public class DicomImporterService {
     private Center manageCenterAndEquipment(Attributes attributes) throws JsonProcessingException, AmqpException, RestServiceException {
         String institutionName = attributes.getString(Tag.InstitutionName);
         String institutionAddress = attributes.getString(Tag.InstitutionAddress);
+        Center center = null;
         if (StringUtils.isNotBlank(institutionName)) {
-            findOrCreateCenter(institutionName);
+            center = findOrCreateCenter(institutionName);
         } else {
-            findOrCreateCenter(UNKNOWN);
+            center = findOrCreateCenter(UNKNOWN);
         }
         String manufacturer = attributes.getString(Tag.Manufacturer);
         String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
         String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-        return null;
+        return center;
     }
 
     private Center findOrCreateCenter(String institutionName) throws JsonProcessingException, AmqpException, RestServiceException {
