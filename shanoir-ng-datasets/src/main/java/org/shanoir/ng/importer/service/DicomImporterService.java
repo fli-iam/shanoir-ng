@@ -208,6 +208,12 @@ public class DicomImporterService {
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
+            Set<EchoTime> echoTimes = new HashSet<>();
+            EchoTime echoTime = new EchoTime();
+            echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
+            echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
+            echoTimes.add(echoTime);
+            dataset.setEchoTimes(echoTimes);
             currentDataset = acquisitionContext.generateFlatDataset(
                     serieDICOM, dataset, 0, subject.getId(),
                     attributes);
