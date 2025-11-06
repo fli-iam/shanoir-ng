@@ -128,4 +128,10 @@ public class SerieToDatasetsSeparator {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "SerieToDatasetsSeparator [acquisitionNumber=" + acquisitionNumber + ", echoTime=" + echoTime
+				+ ", imageOrientationPatient=" + Arrays.toString(imageOrientationPatient) + "]";
+	}
+
 }
