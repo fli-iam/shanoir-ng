@@ -236,7 +236,7 @@ public class DicomImporterService {
                 if (dataset instanceof MrDataset) {
                     MrDataset mrDataset = (MrDataset) dataset;
                     mrDataset.getEchoTime().stream().forEach(
-                        eT -> echoTimes.add(eT.getEchoTimeShared()));
+                            eT -> echoTimes.add(eT.getEchoTimeShared()));
                 }
             }
             int acquisitionNumber = 0; 
