@@ -14,7 +14,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
