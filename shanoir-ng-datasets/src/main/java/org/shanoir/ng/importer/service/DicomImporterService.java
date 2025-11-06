@@ -27,6 +27,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -133,6 +134,9 @@ public class DicomImporterService {
     private DatasetService datasetService;
 
     @Autowired
+    private DatasetExpressionRepository datasetExpressionRepository;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Value("${dcm4chee-arc.protocol}")
@@ -178,8 +182,8 @@ public class DicomImporterService {
         Examination examination = manageExamination(attributes, study, subject, center);
         DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
         Dataset dataset = manageDataset(attributes, subject, acquisition);
-        manageDatasetExpression(attributes, dataset);
-        datasetService.update(dataset);
+        DatasetExpression expression = manageDatasetExpression(attributes, dataset);
+        datasetExpressionRepository.save(expression);
         solrService.indexDataset(dataset.getId());
         sendToPacs(metaInformationAttributes, attributes);
         return true;
@@ -248,9 +252,7 @@ public class DicomImporterService {
                     acquisitionNumber,
                     echoTimes,
                     imageOrientationPatient);
-            LOG.info("Existing dataset separator: " + existingSeparator.toString());
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
-            LOG.info("#OfExistingSeparators:" + existingDatasetToSeparatorMap.size());
         }
         SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
         for (Map.Entry<SerieToDatasetsSeparator, Dataset> entry : existingDatasetToSeparatorMap.entrySet()) {
@@ -285,7 +287,6 @@ public class DicomImporterService {
                 new SerieToDatasetsSeparator(
                 acquisitionNumber, echoTimes,
                 imageOrientationPatientsDoubleArray);
-        LOG.info("Create current separator: " + seriesToDatasetsSeparator.toString());
         return seriesToDatasetsSeparator;
     }
 
@@ -305,8 +306,9 @@ public class DicomImporterService {
         acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
                     userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
         acquisition.setExamination(examination);
+        acquisition.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
         // @todo: take care of acquisition equipment
-        acquisition.setAcquisitionEquipmentId(1L);
+        acquisition.setAcquisitionEquipmentId(0L);
         return acquisitionService.create(acquisition);
     }
 
@@ -469,7 +471,7 @@ public class DicomImporterService {
      * @param measurementDataset
      * @throws MalformedURLException
      */
-    public void manageDatasetExpression(Attributes attributes, Dataset dataset)
+    public DatasetExpression manageDatasetExpression(Attributes attributes, Dataset dataset)
             throws MalformedURLException {
         DatasetExpression currentExpression = null;
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
@@ -492,6 +494,7 @@ public class DicomImporterService {
             dataset.setDatasetExpressions(datasetExpressions);
         }
         addDatasetFile(attributes, currentExpression);
+        return currentExpression;
     }
 
     /**

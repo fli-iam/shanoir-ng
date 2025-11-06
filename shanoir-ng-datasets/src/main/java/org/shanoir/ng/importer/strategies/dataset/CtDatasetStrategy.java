@@ -91,7 +91,9 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		ctDataset.setSubjectId(subjectId);
 
 		ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.CT_DATASET);
-		ctDataset.getOriginMetadata().setImageOrientationPatient(attributes.getString(Tag.ImageOrientationPatient));
+		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+		String orientationString = String.join("\\", orientationArray);
+		ctDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (ctDataset.getSubjectId() != null) {
