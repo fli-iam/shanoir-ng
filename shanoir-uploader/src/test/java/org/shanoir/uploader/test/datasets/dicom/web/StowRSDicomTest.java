@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -35,6 +36,7 @@ public class StowRSDicomTest extends AbstractTest {
 
 	@Test
 	public void postDICOMMRToDicomWeb() throws Exception {
+		long startTime = System.currentTimeMillis();
 		try {
 			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
 			if (resource != null) {
@@ -48,6 +50,9 @@ public class StowRSDicomTest extends AbstractTest {
 		} catch (URISyntaxException e) {
 			logger.error("Error while reading file", e);
 		}
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		logger.info("postDICOMMRToDicomWeb: " + elapsedTime + "ms");
 	}
 
 	/**
@@ -58,8 +63,8 @@ public class StowRSDicomTest extends AbstractTest {
 	 * @throws Exception
 	 */
 	public void generateStowRSDicom() throws Exception {
-		URL source = getClass().getClassLoader().getResource("acr_phantom_t1/");
-		URL destination = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
+		URL source = getClass().getClassLoader().getResource("sample1/");
+		URL destination = getClass().getClassLoader().getResource("sample1_stowrs/");
 		if (source != null) {
 			File sourceFile = new File(source.toURI());
 			File destinationFile = new File(destination.toURI());
