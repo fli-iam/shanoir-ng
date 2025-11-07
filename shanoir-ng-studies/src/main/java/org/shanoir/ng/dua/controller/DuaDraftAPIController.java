@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,8 +23,11 @@ import org.shanoir.ng.dua.model.DuaDraft;
 import org.shanoir.ng.dua.service.DuaDraftService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityFoundException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -42,6 +45,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class DuaDraftAPIController implements DuaDraftAPI {
@@ -54,7 +58,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Autowired
 	private DuaDraftMapper mapper;
 
@@ -69,9 +73,10 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 
 	@Override
 	public ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
+			@Parameter(description = "dua draft to create", required = true) @Valid @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
 			throws RestServiceException {
 
+		validate(result);
 	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
 		try {
 			DuaDraft created = duaDraftService.create(duaEntity);
@@ -89,9 +94,10 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 	@Override
 	public ResponseEntity<Void> update(
 			@Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
-			@Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
+			@Parameter(description = "study to update", required = true) @Valid @RequestBody DuaDraftDTO dua, BindingResult result)
 			throws RestServiceException {
 
+		validate(result);
 		DuaDraft duaEntity = mapper.DuaDraftDTOToDuaDraft(dua);
 		duaEntity.setId(duaId);
 		try {
@@ -124,5 +130,19 @@ public class DuaDraftAPIController implements DuaDraftAPI {
 		data.setSenderUserId(KeycloakUtil.getTokenUserId());
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, objectMapper.writeValueAsString(data));
     }
+
+	/**
+	 * Validate a dataset
+	 *
+	 * @param result
+	 * @throws RestServiceException
+	 */
+	private void validate(final BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap(result);
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		}
+	}
 
 }
