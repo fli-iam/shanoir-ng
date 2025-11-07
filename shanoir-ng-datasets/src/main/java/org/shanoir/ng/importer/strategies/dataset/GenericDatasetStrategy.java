@@ -86,8 +86,10 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		}
 		genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
 		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		String orientationString = String.join("\\", orientationArray);
-		genericDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		if (orientationArray != null) {
+			String orientationString = String.join("\\", orientationArray);
+			genericDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		}
 		
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :

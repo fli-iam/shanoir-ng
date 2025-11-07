@@ -143,8 +143,10 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		// Set the modality from dicom fields
 		mrDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		String orientationString = String.join("\\", orientationArray);
-		mrDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		if (orientationArray != null) {
+			String orientationString = String.join("\\", orientationArray);
+			mrDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		}
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (mrDataset.getSubjectId() != null) {

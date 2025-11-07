@@ -90,8 +90,10 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 		// Set the modality from dicom fields
 		petDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.PET_DATASET);
 		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		String orientationString = String.join("\\", orientationArray);
-		petDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		if (orientationArray != null) {
+			String orientationString = String.join("\\", orientationArray);
+			petDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		}
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (petDataset.getSubjectId() != null) {

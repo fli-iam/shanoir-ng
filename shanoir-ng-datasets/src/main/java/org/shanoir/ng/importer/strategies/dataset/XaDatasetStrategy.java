@@ -92,9 +92,11 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 
 		xaDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.XA_DATASET);
 		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		String orientationString = String.join("\\", orientationArray);
-		xaDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
-
+		if (orientationArray != null) {
+			String orientationString = String.join("\\", orientationArray);
+			xaDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+		}
+		
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (xaDataset.getSubjectId() != null) {
 			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
