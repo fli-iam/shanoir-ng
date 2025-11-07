@@ -200,6 +200,8 @@ public class DicomImporterService {
             if (!serieIdentifiedForNotSeparating) {
                 // Check if serie == acquisition: separate datasets
                 currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
+            } else {
+                currentDataset = datasets.getLast();
             }
         } else {
             acquisition.setDatasets(new ArrayList<Dataset>());
