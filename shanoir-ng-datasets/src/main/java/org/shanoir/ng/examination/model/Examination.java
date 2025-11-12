@@ -72,7 +72,7 @@ public class Examination extends HalEntity {
     /** Dataset acquisitions. */
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
-    @OrderBy("acquisitionId ASC")
+    @OrderBy("id ASC")
     private List<DatasetAcquisition> datasetAcquisitions;
 
     /** Examination date. */
