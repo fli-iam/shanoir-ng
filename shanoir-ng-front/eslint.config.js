@@ -27,7 +27,11 @@ module.exports = tseslint.config(
       ...angular.configs.tsRecommended,
     ],
     processor: angular.processInlineTemplates,
+    languageOptions: {
+      parserOptions: { project: ["./tsconfig.json"] },
+    },
     rules: {
+      "@typescript-eslint/no-deprecated": "warn",
       "@angular-eslint/directive-selector": [
         "error",
         {
