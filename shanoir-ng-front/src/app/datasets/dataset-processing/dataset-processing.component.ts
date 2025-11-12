@@ -16,7 +16,7 @@ import { formatDate } from "@angular/common";
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, takeUntil } from 'rxjs';
+import { distinctUntilChanged, takeUntil, firstValueFrom } from 'rxjs';
 
 import { Selection } from 'src/app/studies/study/tree.service';
 import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
@@ -290,7 +290,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
         const filename = this.executionMonitoring.name + ".stdout.log";
 
-        this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
+        firstValueFrom(this.vipClientService.getStdout(this.executionMonitoring.identifier)).then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
@@ -303,7 +303,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
         const filename = this.executionMonitoring.name + ".stderr.log";
 
-        this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
+        firstValueFrom(this.vipClientService.getStderr(this.executionMonitoring.identifier)).then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }

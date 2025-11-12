@@ -13,6 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -59,8 +60,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     }
 
     getPage(pageable: Pageable): Promise<Page<DatasetAcquisition>> {
-        return this.http.get<Page<DatasetAcquisitionDTO>>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL, { 'params': pageable.toParams() })
-            .toPromise()
+        return firstValueFrom(this.http.get<Page<DatasetAcquisitionDTO>>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL, { 'params': pageable.toParams() }))
             .then((page: Page<DatasetAcquisitionDTO>) => {
                 if (!page) return null;
                 const immediateResult: DatasetAcquisition[] = [];
@@ -70,18 +70,17 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     }
 
     getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> { // TODO : services shouldn't return dtos
-        return this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId)
-            .toPromise();
+        return firstValueFrom(this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId));
     }
 
     getAllForDatasets(datasetIds: number[]): Promise<DatasetAcquisition[]> {
-        return this.http.post<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byDatasetIds', Array.from(datasetIds))
-            .toPromise().then(dtos => this.mapEntityList(dtos));
+        return firstValueFrom(this.http.post<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byDatasetIds', Array.from(datasetIds)))
+            .then(dtos => this.mapEntityList(dtos));
     }
 
     getByStudycardId(studycardId: number): Promise<DatasetAcquisition[]> {
-        return this.http.get<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byStudyCard/' + studycardId)
-            .toPromise().then(dtos => this.mapEntityList(dtos));
+        return firstValueFrom(this.http.get<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byStudyCard/' + studycardId))
+            .then(dtos => this.mapEntityList(dtos));
     }
 
     public stringify(entity: DatasetAcquisition) {

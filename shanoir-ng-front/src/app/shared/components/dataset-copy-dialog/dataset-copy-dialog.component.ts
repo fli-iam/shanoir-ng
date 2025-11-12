@@ -14,6 +14,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import {Study} from "../../../studies/shared/study.model";
 import * as AppUtils from "../../../utils/app.utils";
@@ -86,8 +87,7 @@ export class DatasetCopyDialogComponent implements OnInit {
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
-                    .toPromise()
+                return firstValueFrom(this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'}))
                     .then( () => {
                         this.close();
                         this.consoleService.log('info', 'The copy of ' + this.datasetsIds.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');

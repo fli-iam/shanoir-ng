@@ -13,7 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
@@ -56,76 +56,72 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getEntityInstance() { return new Study(); }
 
     get(id: number, _mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
-        return this.http.get<any>(this.API_URL + '/' + id
-            + (withStorageVolume ? '?withStorageVolume=true' : ''))
-            .toPromise()
+        return firstValueFrom(this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : '')))
             .then(this.mapEntity);
     }
 
     getStudiesLight(): Promise<StudyLight[]> {
-      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL)
-        .toPromise().then((typeResult: StudyLight[]) => {
+      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL))
+        .then((typeResult: StudyLight[]) => {
           return typeResult;
         });
     }
 
     findStudiesByUserId(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-        .toPromise()
+        return firstValueFrom(this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL))
         .then(entities => entities?.map((entity) => Object.assign(new Study(), entity)) || []);
     }
 
     getStudiesNames(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL));
     }
 
     getStudyNamesAndCenters(): Promise<Study[]> {
-        return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/namesAndCenters')
-            .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
+        return firstValueFrom(this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/namesAndCenters'))
+            .then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
     getStudiesProfiles(): Promise<Profile[]> {
-      return this.http.get<Profile[]>(AppUtils.BACKEND_API_PROFILE_ALL_PROFILES_URL)
-        .toPromise();
+      return firstValueFrom(this.http.get<Profile[]>(AppUtils.BACKEND_API_PROFILE_ALL_PROFILES_URL));
     }
 
     getPublicStudiesData(): Promise<StudyLight[]> {
-      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
-        .toPromise().then((typeResult: StudyLight[]) => {
+      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL))
+        .then((typeResult: StudyLight[]) => {
           return typeResult;
         });
     }
 
     getChallenges(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
-            .toPromise().then((typeResult: IdName[]) => {
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL))
+            .then((typeResult: IdName[]) => {
                 return typeResult;
             });
     }
 
     getPublicStudiesConnected(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL)
-            .toPromise().then((typeResult: IdName[]) => {
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL))
+            .then((typeResult: IdName[]) => {
                 return typeResult;
             });
     }
 
     getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
-        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId)
-            .toPromise().then((su : StudyUser[]) => {
+        return firstValueFrom(this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId))
+            .then((su : StudyUser[]) => {
                 return su;
             });
     }
 
     findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
-        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise().then(this.mapSubjectList);
+        return firstValueFrom(this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects'))
+            .then(this.mapSubjectList);
     }
 
     findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<Subject[]> {
-        return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
-            .toPromise().then(this.mapSubjectList);
+        return firstValueFrom(this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical))
+            .then(this.mapSubjectList);
     }
 
     private findStudiesIcanAdmin(): Promise<Study[]> {
@@ -157,7 +153,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         } else if (fileType == 'protocol-file') {
             formData.append('file', fileToUpload, fileToUpload.name);
         }
-        const promise: Promise<void> = this.http.post<any>(endpoint, formData).toPromise();
+        const promise: Promise<void> = firstValueFrom(this.http.post<any>(endpoint, formData));
         // keep a track on the current uploadings
         if (this.fileUploads.has(studyId)) {
             this.fileUploads.set(studyId, Promise.all([this.fileUploads.get(studyId), promise]).then(() => null));
@@ -193,8 +189,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getMyDUA(): Promise<DataUserAgreement[]> {
-        return this.http.get<DataUserAgreement[]>(AppUtils.BACKEND_API_STUDY_URL + '/dua')
-                .toPromise()
+        return firstValueFrom(this.http.get<DataUserAgreement[]>(AppUtils.BACKEND_API_STUDY_URL + '/dua'))
                 .then(duas => {
                     this._duasToSign = duas ? duas.length : 0;
                     return duas;
@@ -206,24 +201,21 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     acceptDUA(duaId: number): Promise<void> {
-        return this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/dua/' + duaId, null)
-                .toPromise()
+        return firstValueFrom(this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/dua/' + duaId, null))
                 .then(() => {
                     this.getMyDUA();
                 });
     }
 
     hasDUAByStudyId(studyId: number): Promise<boolean> {
-        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId)
-            .toPromise()
+        return firstValueFrom(this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId))
             .then(dua => {
                 return dua;
             });
     }
 
     deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
-      return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
-        .toPromise();
+      return firstValueFrom(this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId));
     }
 
     exportBIDSByStudyId(studyId: number) {
@@ -269,8 +261,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getStudyDetailedStorageVolume(id: number): Promise<StudyStorageVolumeDTO> {
-        return this.http.get<StudyStorageVolumeDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
-            .toPromise();
+        return firstValueFrom(this.http.get<StudyStorageVolumeDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id));
     }
 
     getStudiesStorageVolume(ids: number[]): Promise<Map<number, StudyStorageVolumeDTO>> {
@@ -288,8 +279,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if (ids.length > 0) { // fetch volumes from server
             const formData: FormData = new FormData();
             formData.set('studyIds', ids.join(","));
-            rets.push(this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
-                .toPromise()
+            rets.push(firstValueFrom(this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData))
                 .then(volumes => {
                     return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
                 }).then(volumes => {
@@ -316,13 +306,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getTagsFromStudyId(studyId: number): Promise<Tag[]> {
-        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/tags/' + studyId)
-            .toPromise()
+        return firstValueFrom(this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/tags/' + studyId))
             .then(dtos => dtos?.map(dto => StudyDTOService.tagDTOToTag(dto)));
     }
 
     getStudiesByRight(right: StudyUserRight): Promise<number[]> {
-        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right)
-            .toPromise();
+        return firstValueFrom(this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right));
     }
 }

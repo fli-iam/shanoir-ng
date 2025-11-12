@@ -13,6 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import * as AppUtils from '../../utils/app.utils';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -41,14 +42,12 @@ export class StudyRightsService {
     }
 
     public getMyRightsForStudy(studyId: number): Promise<StudyUserRight[]> {
-        return this.http.get<StudyUserRight[]>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/' + studyId)
-            .toPromise()
+        return firstValueFrom(this.http.get<StudyUserRight[]>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/' + studyId))
             .then(rights => rights ? rights : []);
     }
 
     public getMyRights(): Promise<Map<number, StudyUserRight[]>> {
-        return this.http.get<Map<number, StudyUserRight[]>>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/all')
-            .toPromise()
+        return firstValueFrom(this.http.get<Map<number, StudyUserRight[]>>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/all'))
             .then(rights => {
                 return rights ? Object.entries(rights).reduce((map: Map<number, StudyUserRight[]>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
             });
@@ -56,8 +55,7 @@ export class StudyRightsService {
 
     hasOnStudyToImport(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
-        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT)
-            .toPromise();
+        return firstValueFrom(this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT));
     }
     
 }
