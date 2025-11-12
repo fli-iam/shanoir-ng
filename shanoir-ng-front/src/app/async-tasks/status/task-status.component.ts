@@ -26,12 +26,18 @@ import {Task} from '../task.model';
 import {TaskService} from "../task.service";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
+import { FormsModule } from '@angular/forms';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { NgIf } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
-    standalone: false
+    imports: [FormsModule, LoadingBarComponent, NgIf, RouterLink, TableComponent, LocalDateFormatPipe]
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 

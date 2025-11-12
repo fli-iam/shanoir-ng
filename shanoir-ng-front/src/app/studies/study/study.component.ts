@@ -11,10 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { KeyValue } from "@angular/common";
+import { KeyValue, NgClass, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor, KeyValuePipe } from "@angular/common";
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
@@ -35,7 +35,7 @@ import { DatepickerComponent } from '../../shared/date-picker/date-picker.compon
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from "../../shared/models/profile.model";
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
@@ -52,13 +52,25 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 
 import { Selection } from './tree.service';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
+import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { LoadingBarComponent } from "../../shared/components/loading-bar/loading-bar.component";
+import { TagCreatorComponent } from "../../tags/tag.creator.component";
+import { SubjectStudyListComponent } from "../../shared/components/subject-study-list/subject-study-list.component";
+import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
+import { QualityControlComponent } from "../../quality-control/quality-control.component";
+import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
+import { StudyHistoryComponent } from "../study-history/study-history.component";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { SizePipe } from "../../shared/utils/size.pipe";
 
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
     animations: [slideDown],
-    standalone: false
+    imports: [NgClass, NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, RouterLink, NgSwitchDefault, DatepickerComponent, SelectBoxComponent, NgFor, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

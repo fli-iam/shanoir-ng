@@ -12,9 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { slideDown } from '../../shared/animations/animations';
+import { NgIf } from '@angular/common';
 
 
 @Component({
@@ -24,11 +25,12 @@ import { slideDown } from '../../shared/animations/animations';
     animations: [slideDown],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrTextSearchComponent),
-          multi: true,
-        }],
-    standalone: false
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrTextSearchComponent),
+            multi: true,
+        }
+    ],
+    imports: [FormsModule, NgIf]
 })
 
 export class SolrTextSearchComponent implements ControlValueAccessor {

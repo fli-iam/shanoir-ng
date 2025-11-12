@@ -12,24 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Location, NgIf } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
+import { ConsoleComponent } from '../../shared/console/console.component';
 
 @Component({
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
     styleUrls: ['account-request.component.css'],
-    standalone: false
+    imports: [HeaderComponent, NgIf, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
 })
 
 export class AccountRequestComponent implements OnInit {
@@ -52,7 +54,7 @@ export class AccountRequestComponent implements OnInit {
             private location: Location,
             private route: ActivatedRoute,
             private consoleService: ConsoleService) {
-                this.router = ServiceLocator.injector.get(Router)
+                this.router = inject(Router)
                 this.studyName = this.route.snapshot.queryParams['study'];
                 this.invitationIssuer = this.route.snapshot.queryParams['from'];
                 this.function = this.route.snapshot.queryParams['function'];

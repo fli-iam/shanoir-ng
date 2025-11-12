@@ -29,7 +29,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
     selector: 'examination-list',
     templateUrl: 'examination-list.component.html',
     styleUrls: ['examination-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 

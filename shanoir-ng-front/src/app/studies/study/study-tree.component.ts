@@ -25,13 +25,16 @@ import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { environment } from "../../../environments/environment";
 
 import { TreeService } from './tree.service';
+import { DoubleAwesomeComponent } from '../../shared/double-awesome/double-awesome.component';
+import { NgIf } from '@angular/common';
+import { StudyNodeComponent } from '../tree/study-node.component';
 
 
 @Component({
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
     styleUrls: ['study-tree.component.css'],
-    standalone: false
+    imports: [DoubleAwesomeComponent, NgIf, StudyNodeComponent]
 })
 
 export class StudyTreeComponent implements OnDestroy {

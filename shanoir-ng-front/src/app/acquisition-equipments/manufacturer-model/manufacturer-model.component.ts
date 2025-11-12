@@ -13,24 +13,27 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 
 @Component({
     selector: 'manufacturer-model-detail',
     templateUrl: 'manufacturer-model.component.html',
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, NgSwitchDefault, SelectBoxComponent, RouterLink]
 })
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {

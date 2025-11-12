@@ -15,6 +15,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { slideDown } from '../../shared/animations/animations';
 import { Range } from '../../shared/models/range.model';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 
 @Component({
@@ -22,7 +24,7 @@ import { Range } from '../../shared/models/range.model';
     templateUrl: 'solr.range-criterion.component.html',
     styleUrls: ['solr.criterion.component.css', 'solr.range-criterion.component.css'],
     animations: [slideDown],
-    standalone: false
+    imports: [NgIf, FormsModule]
 })
 
 export class SolrRangeCriterionComponent {

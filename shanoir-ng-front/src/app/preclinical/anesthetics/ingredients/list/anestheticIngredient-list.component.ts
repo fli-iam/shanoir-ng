@@ -25,6 +25,7 @@ import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
+import { NgSwitch, NgIf, NgSwitchCase } from '@angular/common';
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -34,7 +35,7 @@ export type Mode =  "view" | "edit" | "create";
     selector: 'ingredients-list',
     templateUrl: 'anestheticIngredient-list.component.html',
     styleUrls: ['anestheticIngredient-list.component.css'],
-    standalone: false
+    imports: [NgSwitch, NgIf, NgSwitchCase, TableComponent]
 })
 
 export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListComponent<AnestheticIngredient> {

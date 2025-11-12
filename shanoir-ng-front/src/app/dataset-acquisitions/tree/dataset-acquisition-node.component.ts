@@ -24,12 +24,20 @@ import { MassDownloadService } from "../../shared/mass-download/mass-download.se
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { FormsModule } from '@angular/forms';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { RouterLink } from '@angular/router';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
 
 
 @Component({
     selector: 'dataset-acquisition-node',
     templateUrl: 'dataset-acquisition-node.component.html',
-    standalone: false
+    imports: [LoadingBarComponent, NgIf, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, DatasetNodeComponent]
 })
 
 export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<DatasetAcquisitionNode> implements OnChanges {

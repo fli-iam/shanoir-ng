@@ -24,6 +24,9 @@ import { slideDown } from '../../shared/animations/animations';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { NgIf } from '@angular/common';
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -33,7 +36,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     templateUrl: 'eeg-upload.component.html',
     styleUrls: ['eeg-upload.component.css', '../shared/import.step.css'],
     animations: [slideDown],
-    standalone: false
+    imports: [UploaderComponent, LoadingBarComponent, NgIf]
 })
 export class EegUploadComponent implements OnDestroy {
 

@@ -13,8 +13,8 @@
  */
 
 import { Component } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { of } from "rxjs";
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -30,11 +30,16 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'acquisition-equipment-detail',
     templateUrl: 'acquisition-equipment.component.html',
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, RouterLink, NgSwitchDefault, SelectBoxComponent, TooltipComponent, ManufacturerModelPipe]
 })
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {

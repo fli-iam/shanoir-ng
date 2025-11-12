@@ -19,13 +19,16 @@ import { ConfirmDialogService } from '../../shared/components/confirm-dialog/con
 import { StudyService } from '../../studies/shared/study.service';
 import { browserDownloadFile } from '../../utils/app.utils';
 import { DataUserAgreement } from '../shared/dua.model';
+import { NgIf } from '@angular/common';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { FormsModule } from '@angular/forms';
 
 
 @Component({
     selector: 'dua-signing',
     templateUrl: 'dua-signing.component.html',
     styleUrls: ['dua-signing.component.css'],
-    standalone: false
+    imports: [NgIf, CheckboxComponent, FormsModule]
 })
 
 export class DUASigningComponent implements OnChanges {

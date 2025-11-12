@@ -12,7 +12,7 @@ import {StudyUser} from "../shared/study-user.model";
     selector: 'study-history',
     templateUrl: './study-history.component.html',
     styleUrls: ['./study-history.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyHistoryComponent implements OnInit {
 

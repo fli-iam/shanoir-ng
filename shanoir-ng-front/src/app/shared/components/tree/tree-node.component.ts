@@ -22,13 +22,16 @@ import {
     SimpleChanges,
     ViewChild, AfterViewInit,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     provide: NG_VALUE_ACCESSOR,
@@ -41,7 +44,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     templateUrl: 'tree-node.component.html',
     styleUrls: ['tree-node.component.css'],
     providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
-    standalone: false
+    imports: [NgIf, RouterLink, FormsModule, NgFor, TooltipComponent]
 })
 
 export class TreeNodeComponent implements ControlValueAccessor, OnChanges, AfterViewInit {

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -23,6 +23,9 @@ import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
 
 
 
@@ -30,7 +33,7 @@ import { TherapyService } from '../shared/therapy.service';
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
     animations: [slideDown],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent]
 })
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 

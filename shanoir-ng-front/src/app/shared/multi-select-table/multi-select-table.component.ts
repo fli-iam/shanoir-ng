@@ -19,7 +19,8 @@ import { BrowserPaging } from '../components/table/browser-paging.model';
 import { ColumnDefinition } from '../components/table/column.definition.type';
 import { FilterablePageable, Page } from '../components/table/pageable.model';
 import { TableComponent } from '../components/table/table.component';
-import { Option } from '../select/select.component';
+import { Option, SelectBoxComponent } from '../select/select.component';
+import { NgIf } from '@angular/common';
 
 
 @Component({
@@ -33,7 +34,7 @@ import { Option } from '../select/select.component';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [NgIf, SelectBoxComponent, TableComponent]
 })
 
 export class MultiSelectTableComponent implements ControlValueAccessor, OnChanges {

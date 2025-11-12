@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { ConsoleService } from 'src/app/shared/console/console.service';
@@ -33,12 +33,17 @@ import {
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
 
 
 @Component({
     selector: 'subject-node',
     templateUrl: 'subject-node.component.html',
-    standalone: false
+    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, ExaminationNodeComponent]
 })
 
 export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode> implements OnChanges {

@@ -18,12 +18,15 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { NgIf, NgFor } from '@angular/common';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'challenge-block',
     templateUrl: 'challenge-block.component.html',
     styleUrls: ['challenge-block.component.css'],
-    standalone: false
+    imports: [NgIf, LoadingBarComponent, NgFor, RouterLink]
 })
 
 export class ChallengeBlockComponent {

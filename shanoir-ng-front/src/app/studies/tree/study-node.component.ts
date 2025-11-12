@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 import { Entity } from 'src/app/shared/components/entity/entity.abstract';
@@ -36,6 +36,15 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { FormsModule } from '@angular/forms';
+import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
+import { CenterNodeComponent } from '../../centers/tree/center-node.component';
+import { StudyCardNodeComponent } from '../../study-cards/tree/study-card-node.component';
+import { MemberNodeComponent } from '../../users/tree/member-node.component';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -43,7 +52,7 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
     styleUrls: ['study-node.component.css'],
-    standalone: false
+    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, NgFor, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
 })
 
 export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> implements OnChanges {

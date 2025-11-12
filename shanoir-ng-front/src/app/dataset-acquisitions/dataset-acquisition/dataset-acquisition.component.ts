@@ -12,8 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -32,12 +32,21 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { MrProtocolComponent } from '../modality/mr/mr-protocol.component';
+import { CtProtocolComponent } from '../modality/ct/ct-protocol.component';
+import { PetProtocolComponent } from '../modality/pet/pet-protocol.component';
+import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, RouterLink, NgFor, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 

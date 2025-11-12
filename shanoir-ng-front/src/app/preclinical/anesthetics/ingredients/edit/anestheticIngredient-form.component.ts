@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
-import { UntypedFormGroup,  Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -27,13 +27,14 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 import { slideDown } from '../../../../shared/animations/animations';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
 
 
 @Component({
     selector: 'anesthetic-ingredient-form',
     templateUrl: 'anestheticIngredient-form.component.html',
     animations: [slideDown],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor]
 })
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges {
 

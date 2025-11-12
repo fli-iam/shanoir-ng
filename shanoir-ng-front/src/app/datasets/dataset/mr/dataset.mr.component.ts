@@ -13,18 +13,19 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
+import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 
 @Component({
     selector: 'mr-dataset-details',
     templateUrl: 'dataset.mr.component.html',
-    standalone: false
+    imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, FormsModule]
 })
 
 export class MrDatasetComponent implements OnInit{

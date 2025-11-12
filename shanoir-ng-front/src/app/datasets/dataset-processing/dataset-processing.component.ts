@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { formatDate } from "@angular/common";
+import { formatDate, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from "@angular/common";
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { distinctUntilChanged, takeUntil, firstValueFrom } from 'rxjs';
 
 import { Selection } from 'src/app/studies/study/tree.service';
@@ -28,7 +28,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { dateDisplay } from "../../shared/localLanguage/localDate.abstract";
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from "../../utils/app.utils";
@@ -36,12 +36,17 @@ import { ExecutionService } from "../../vip/execution/execution.service";
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
+import { DatepickerComponent } from "../../shared/date-picker/date-picker.component";
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { MultiSelectTableComponent } from "../../shared/multi-select-table/multi-select-table.component";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
 
 @Component({
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
     styleUrls: ['dataset-processing.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, RouterLink, NgSwitchDefault, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe]
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {

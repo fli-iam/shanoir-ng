@@ -13,26 +13,28 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 
 import { UserService } from '../shared/user.service'
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 
 import { AccessRequest } from './access-request.model'
 import { AccessRequestService } from './access-request.service';
+import { NgIf } from '@angular/common';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 
 
 @Component({
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {

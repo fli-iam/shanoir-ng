@@ -12,19 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
-import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
+import { Location, NgIf } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { StudyService } from '../../studies/shared/study.service';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 
 import { AccountRequestInfo } from './account-request-info.model';
 
-@Component ({
+@Component({
     selector: 'account-request-info',
     templateUrl: 'account-request-info.component.html',
     providers: [
@@ -34,7 +34,7 @@ import { AccountRequestInfo } from './account-request-info.model';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 

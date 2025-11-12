@@ -12,7 +12,7 @@
 * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 */
 import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -29,12 +29,17 @@ import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
+import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'user-detail',
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, DatepickerComponent, NgFor, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {

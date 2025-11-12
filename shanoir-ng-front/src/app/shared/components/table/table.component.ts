@@ -13,7 +13,7 @@
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
-import { Router } from "@angular/router";
+import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import shajs from 'sha.js';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -27,6 +27,14 @@ import {TaskService} from "../../../async-tasks/task.service";
 
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { VarDirective } from '../../../utils/ng-var.directive';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { FormsModule } from '@angular/forms';
+import { MultiSelectComponent } from '../../multi-select/multi-select.component';
+import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
+import { TableSearchComponent } from './search/search.component';
+import { PagerComponent } from './pager/pager.component';
 
 @Component({
     selector: 'shanoir-table',
@@ -34,7 +42,7 @@ import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pagea
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [slideDown],
-    standalone: false
+    imports: [NgFor, VarDirective, NgIf, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;

@@ -18,10 +18,7 @@ import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
 
 import { ManufacturerModel } from './manufacturer-model.model';
 
-@Pipe({
-    name: "manufModelLabel",
-    standalone: false
-})
+@Pipe({ name: "manufModelLabel" })
 export class ManufacturerModelPipe implements PipeTransform {
 
     transform(manufModel: ManufacturerModel) {

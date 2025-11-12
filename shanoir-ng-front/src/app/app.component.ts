@@ -13,7 +13,8 @@
  */
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
+import { NgIf } from '@angular/common';
 
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
@@ -25,15 +26,20 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
 import { StudyService } from './studies/shared/study.service';
 import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
-import { ServiceLocator } from './utils/locator.service';
 import { NotificationsService } from './shared/notifications/notifications.service';
+import { SideMenuComponent } from './shared/side-menu/side-menu.component';
+import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { ServiceLocator } from './utils/locator.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
     animations: [slideRight, slideMarginLeft, parent],
-    standalone: false
+    imports: [NgIf, SideMenuComponent, BreadcrumbsComponent, StudyTreeComponent, RouterOutlet, ConsoleComponent, MsgBoxComponent, LoaderComponent]
 })
 
 export class AppComponent implements OnInit {

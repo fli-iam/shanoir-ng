@@ -15,12 +15,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { FooterState } from './footer-state.model';
+import { NgSwitch, NgIf, NgSwitchCase } from '@angular/common';
 
 @Component({
     selector: 'form-footer',
     templateUrl: 'form-footer.component.html',
     styleUrls: ['./form-footer.component.css'],
-    standalone: false
+    imports: [NgSwitch, NgIf, NgSwitchCase]
 })
 
 export class FormFooterComponent {

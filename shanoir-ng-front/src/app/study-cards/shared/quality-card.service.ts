@@ -13,12 +13,11 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
 
 import { QualityCardDTOService } from './quality-card.dto';
 import { QualityCardDTO } from './quality-card.dto.model';
@@ -33,7 +32,7 @@ export class QualityCardService extends EntityService<QualityCard> {
 
     API_URL = AppUtils.BACKEND_API_QUALITY_CARD_URL;
 
-    private qualityCardDTOService: QualityCardDTOService = ServiceLocator.injector.get(QualityCardDTOService);
+    private qualityCardDTOService: QualityCardDTOService = inject(QualityCardDTOService);
     
     constructor(protected http: HttpClient) {
         super(http)

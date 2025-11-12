@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Location } from '@angular/common';
+import { Location, NgIf } from '@angular/common';
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Subscription } from 'rxjs';
@@ -28,13 +28,16 @@ import { StudyService } from '../studies/shared/study.service';
 
 import { DuaDocument } from './shared/dua-document.model';
 import { DuaService } from './shared/dua.service';
+import { HeaderComponent } from '../shared/header/header.component';
+import { UploaderComponent } from '../shared/components/uploader/uploader.component';
+import { TooltipComponent } from '../shared/components/tooltip/tooltip.component';
 
 
 @Component({
     selector: 'dua-assistant',
     templateUrl: 'dua-assistant.component.html',
     styleUrls: ['dua-assistant.component.css'],
-    standalone: false
+    imports: [NgIf, HeaderComponent, RouterLink, FormsModule, ReactiveFormsModule, UploaderComponent, TooltipComponent]
 })
 
 export class DUAAssistantComponent implements OnDestroy {

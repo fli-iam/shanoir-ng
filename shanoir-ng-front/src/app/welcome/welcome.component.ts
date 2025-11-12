@@ -18,13 +18,14 @@ import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
+import { NgIf, NgFor, SlicePipe, TitleCasePipe } from '@angular/common';
 
 @Component({
     selector: 'app-welcome',
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [NgIf, NgFor, SlicePipe, TitleCasePipe]
 })
 export class WelcomeComponent implements OnInit {
 

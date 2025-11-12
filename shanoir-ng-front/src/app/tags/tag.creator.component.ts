@@ -12,13 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, Output, ViewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { AbstractInput } from '../shared/form/input.abstract';
 import { isDarkColor } from '../utils/app.utils';
 
 import { Tag } from './tag.model';
+import { NgIf, NgFor } from '@angular/common';
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -33,7 +34,7 @@ export type Mode =  "view" | "edit" | "create";
             multi: true
         }
     ],
-    standalone: false
+    imports: [NgIf, NgFor, FormsModule]
 })
 
 export class TagCreatorComponent extends AbstractInput<Tag[]> {

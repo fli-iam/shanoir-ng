@@ -19,12 +19,17 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";
+import { NgIf } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { RouterLink } from '@angular/router';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 
 
 @Component({
     selector: 'equipment-node',
     templateUrl: 'equipment-node.component.html',
-    standalone: false
+    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
 })
 
 export class EquipmentNodeComponent extends TreeNodeAbstractComponent<AcquisitionEquipmentNode> implements OnChanges {

@@ -15,13 +15,14 @@
 import { Component, ViewChild, ElementRef, Output, EventEmitter, Input } from '@angular/core';
 
 import { ImagesUrlUtil } from '../../utils/images-url.util';
+import { NgIf } from '@angular/common';
 
 
 @Component({
     selector: 'upload-file',
     templateUrl: 'uploader.component.html',
     styleUrls: ['uploader.component.css'],
-    standalone: false
+    imports: [NgIf]
 })
 export class UploaderComponent {
 

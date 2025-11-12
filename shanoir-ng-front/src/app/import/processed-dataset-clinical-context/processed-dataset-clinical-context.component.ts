@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
@@ -20,17 +20,20 @@ import { DatasetProcessingService } from '../../datasets/shared/dataset-processi
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
-import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ProcessedContextData } from '../shared/import.data-service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { FormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
 
 @Component({
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
-    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css','./processed-dataset-clinical-context.component.css'],
+    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css', './processed-dataset-clinical-context.component.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, NgIf]
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {
 
@@ -44,8 +47,8 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     public datasetProcessing: DatasetProcessing;
     public datasetProcessings: DatasetProcessing[] = [];
     public useStudyCard: boolean = false;
-    private datasetProcessingService: DatasetProcessingService = ServiceLocator.injector.get(DatasetProcessingService);
-    public datasetProcessingLabelPipe: DatasetProcessingPipe = ServiceLocator.injector.get(DatasetProcessingPipe);
+    private datasetProcessingService: DatasetProcessingService = inject(DatasetProcessingService);
+    public datasetProcessingLabelPipe: DatasetProcessingPipe = inject(DatasetProcessingPipe);
 
     getNextUrl(): string {
         return '/imports/processed-dataset';

@@ -15,13 +15,14 @@
 import { Component, HostBinding, Input } from '@angular/core';
 
 import { getSizeStr } from 'src/app/utils/app.utils';
+import { NgIf } from '@angular/common';
 
 
 @Component({
     selector: 'progress-bar',
     templateUrl: 'loading-bar.component.html',
     styleUrls: ['loading-bar.component.css'],
-    standalone: false
+    imports: [NgIf]
 })
 
 export class LoadingBarComponent {

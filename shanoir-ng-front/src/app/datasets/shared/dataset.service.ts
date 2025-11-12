@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { ErrorHandler, Injectable } from '@angular/core';
+import { ErrorHandler, Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -21,7 +21,6 @@ import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
 
 import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
@@ -45,9 +44,9 @@ export class DatasetService extends EntityService<Dataset> {
         super(http);
     }
 
-    private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+    private datasetDTOService: DatasetDTOService = inject(DatasetDTOService);
 
-    private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
+    private errorService: ErrorHandler  = inject(ErrorHandler);
 
     deleteAll(ids: number[]) {
         return firstValueFrom(this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) }));

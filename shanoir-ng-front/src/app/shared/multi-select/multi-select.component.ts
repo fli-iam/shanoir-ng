@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
 import { Option } from '../select/select.component';
+import { NgFor, NgIf } from '@angular/common';
 
 
 @Component({
@@ -29,7 +30,7 @@ import { Option } from '../select/select.component';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [NgFor, NgIf, FormsModule]
 })
 
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {

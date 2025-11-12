@@ -1,12 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {
-    UntypedFormControl,
-    UntypedFormGroup,
-    ValidatorFn,
-    Validators
-} from '@angular/forms';
+import {Component, inject, OnInit} from '@angular/core';
+import { UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {Router} from '@angular/router';
-import { formatDate } from '@angular/common';
+import { formatDate, NgIf, NgFor } from '@angular/common';
 
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
 import {Execution} from 'src/app/vip/models/execution';
@@ -20,23 +15,24 @@ import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
 import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 
 import {ExecutionDataService} from '../execution.data-service';
-import {Option} from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import {DatasetParameterDTO} from "../models/dataset-parameter.dto";
 import {GroupByEnum} from "../models/groupby.enum";
 import {PipelineParameter} from "../models/pipelineParameter";
-import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 @Component({
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, TooltipComponent, CheckboxComponent, SelectBoxComponent]
 })
 export class ExecutionComponent implements OnInit {
 
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     private selectedDatasets: Set<DatasetLight>;

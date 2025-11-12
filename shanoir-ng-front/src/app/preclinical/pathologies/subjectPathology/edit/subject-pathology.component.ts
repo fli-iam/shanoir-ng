@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Reference } from '../../../../preclinical/reference/shared/reference.model';
@@ -27,12 +27,16 @@ import { PathologyService } from '../../pathology/shared/pathology.service';
 import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
 import { PathologyModelService } from '../../pathologyModel/shared/pathologyModel.service';
 import { SubjectPathology } from '../shared/subjectPathology.model';
+import { NgIf, DatePipe } from '@angular/common';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
+import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';
 
 @Component({
     selector: 'subject-pathology',
     templateUrl: 'subject-pathology.component.html',
     animations: [slideDown],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectPathologyComponent extends EntityComponent<SubjectPathology> {
 

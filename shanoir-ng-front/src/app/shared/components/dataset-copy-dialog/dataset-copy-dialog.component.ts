@@ -13,24 +13,24 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { NgClass, NgFor } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 
-import {Study} from "../../../studies/shared/study.model";
+import { SolrDocument } from "../../../solr/solr.document.model";
+import { StudyRightsService } from "../../../studies/shared/study-rights.service";
+import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
+import { Study } from "../../../studies/shared/study.model";
+import { StudyService } from "../../../studies/shared/study.service";
 import * as AppUtils from "../../../utils/app.utils";
-import {KeycloakService} from "../../keycloak/keycloak.service";
-import {StudyUserRight} from "../../../studies/shared/study-user-right.enum";
-import {StudyRightsService} from "../../../studies/shared/study-rights.service";
-import {ServiceLocator} from "../../../utils/locator.service";
-import {ConsoleService} from "../../console/console.service";
-import {StudyService} from "../../../studies/shared/study.service";
-import {SolrDocument} from "../../../solr/solr.document.model";
+import { ConsoleService } from "../../console/console.service";
+import { KeycloakService } from "../../keycloak/keycloak.service";
 
 @Component({
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    standalone: false
+    imports: [NgFor, NgClass]
 })
 export class DatasetCopyDialogComponent implements OnInit {
     title: string;
@@ -47,7 +47,7 @@ export class DatasetCopyDialogComponent implements OnInit {
     subjectIds: string[]=[];
     lines: SolrDocument[];
     subjectIdStudyId: string[]=[];
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     constructor(private http: HttpClient,
                 private studyRightsService: StudyRightsService,
                 private studyService: StudyService,

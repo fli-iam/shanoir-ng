@@ -14,6 +14,7 @@
 
 import { Component, Input, Output, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { NgIf } from '@angular/common';
 
 @Component({
     selector: 'checkbox',
@@ -26,7 +27,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [NgIf]
 })
 export class CheckboxComponent implements ControlValueAccessor { 
     

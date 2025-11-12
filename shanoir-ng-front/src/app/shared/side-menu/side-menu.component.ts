@@ -25,6 +25,9 @@ import { ConsoleService } from '../console/console.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, DatePipe } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 
 
 @Component({
@@ -32,7 +35,7 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
     animations: [slideDown, disapearUp],
-    standalone: false
+    imports: [NgIf, RouterLink, RouterLinkActive, LoadingBarComponent, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, DatePipe]
 })
 
 export class SideMenuComponent {

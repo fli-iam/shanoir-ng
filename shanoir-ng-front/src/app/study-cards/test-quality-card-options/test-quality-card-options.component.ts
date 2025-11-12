@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Interval } from '../shared/quality-card.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { NgIf } from '@angular/common';
 
 
 
@@ -24,7 +25,7 @@ import { GlobalService } from '../../shared/services/global.service';
     selector: 'test-quality-card-options',
     templateUrl: 'test-quality-card-options.component.html',
     styleUrls: ['test-quality-card-options.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule]
 })
 export class TestQualityCardOptionsComponent implements OnInit {
 

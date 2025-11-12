@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -21,7 +21,6 @@ import { SingleDownloadService } from 'src/app/shared/mass-download/single-downl
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
 
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
@@ -36,7 +35,7 @@ export class ExaminationService extends EntityService<Examination> {
     constructor(protected http: HttpClient, private downloadService: SingleDownloadService) {
         super(http)
     }
-    protected examinationDtoService: ExaminationDTOService = ServiceLocator.injector.get(ExaminationDTOService);
+    protected examinationDtoService: ExaminationDTOService = inject(ExaminationDTOService);
 
     getEntityInstance() { return new Examination(); }
 

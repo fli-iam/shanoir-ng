@@ -20,6 +20,8 @@ import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+import { NgIf } from '@angular/common';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -28,7 +30,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     templateUrl: 'processed-dataset.component.html',
     styleUrls: ['processed-dataset.component.css', '../shared/import.step.css'],
     animations: [slideDown],
-    standalone: false
+    imports: [UploaderComponent, NgIf]
 })
 export class ImportProcessedDatasetComponent {
     

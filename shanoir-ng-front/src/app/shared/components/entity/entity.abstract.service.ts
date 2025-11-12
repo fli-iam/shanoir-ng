@@ -12,10 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 
-import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
@@ -29,8 +28,8 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     abstract API_URL: string;
     abstract getEntityInstance(entity?: T): T;
     getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
-    protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected confirmDialogService = inject(ConfirmDialogService);
+    protected consoleService = inject(ConsoleService);
     protected subscriptions: Subscription[] = [];
 
     constructor(

@@ -24,12 +24,19 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { AcquisitionEquipmentNode, CenterNode, CoilNode, UNLOADED } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { RouterLink } from '@angular/router';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { EquipmentNodeComponent } from '../../acquisition-equipments/tree/equipment-node.component';
+import { CoilNodeComponent } from '../../coils/coil/tree/coil-node.component';
 
 
 @Component({
     selector: 'center-node',
     templateUrl: 'center-node.component.html',
-    standalone: false
+    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, EquipmentNodeComponent, CoilNodeComponent]
 })
 
 export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> implements OnChanges {

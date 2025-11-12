@@ -20,12 +20,15 @@ import { Tag } from 'src/app/tags/tag.model';
 
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { ReverseStudyNodeComponent } from '../../studies/tree/reverse-study-node.component';
 
 
 @Component({
     selector: 'reverse-subject-node',
     templateUrl: 'reverse-subject-node.component.html',
-    standalone: false
+    imports: [NgIf, TreeNodeComponent, NgFor, ReverseStudyNodeComponent]
 })
 
 export class ReverseSubjectNodeComponent extends TreeNodeAbstractComponent<ReverseSubjectNode> implements OnChanges {

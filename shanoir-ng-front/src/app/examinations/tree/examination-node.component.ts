@@ -23,12 +23,20 @@ import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { NgIf, NgFor } from '@angular/common';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { FormsModule } from '@angular/forms';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { RouterLink } from '@angular/router';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { DatasetAcquisitionNodeComponent } from '../../dataset-acquisitions/tree/dataset-acquisition-node.component';
 
 
 @Component({
     selector: 'examination-node',
     templateUrl: 'examination-node.component.html',
-    standalone: false
+    imports: [LoadingBarComponent, NgIf, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, DatasetAcquisitionNodeComponent]
 })
 
 export class ExaminationNodeComponent extends TreeNodeAbstractComponent<ExaminationNode> implements OnChanges {

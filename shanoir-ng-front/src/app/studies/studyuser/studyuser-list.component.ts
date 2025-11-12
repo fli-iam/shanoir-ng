@@ -11,13 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 
 import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -26,13 +25,16 @@ import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
+import { NgIf, NgFor } from '@angular/common';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 @Component({
     selector: 'studyuser-list',
@@ -45,7 +47,7 @@ import { Study } from '../shared/study.model';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [NgIf, FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, NgFor]
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -77,7 +79,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
+        this.consoleService = inject(ConsoleService);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

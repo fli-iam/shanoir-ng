@@ -20,12 +20,13 @@ import { take } from 'rxjs/operators';
 import { WaitBurstEnd } from '../utils/wait-burst-end';
 
 import { BreadcrumbsService, Step } from './breadcrumbs.service';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.css'],
-    standalone: false
+    imports: [NgIf, NgFor]
 })
 
 export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterViewChecked {

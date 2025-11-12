@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -22,6 +22,8 @@ import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
+import { NgIf } from '@angular/common';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
     const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
@@ -34,7 +36,7 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
     animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgIf, TooltipComponent]
 })
 
 export class QueryPacsComponent{

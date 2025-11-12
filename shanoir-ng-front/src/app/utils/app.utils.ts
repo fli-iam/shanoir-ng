@@ -12,15 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { TaskState, TaskStatus } from '../async-tasks/task.model';
-
-import { ServiceLocator } from './locator.service';
-
 
 // Base urls
 const url = window.location;
@@ -176,21 +173,16 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string) {
-    if (window.navigator.msSaveBlob) {
-        // IE 10+
-        window.navigator.msSaveBlob(blob, filename);
-    } else {
-        const link = document.createElement('a');
-        // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    const link = document.createElement('a');
+    // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 
@@ -203,7 +195,7 @@ export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
 }
 
 export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    const http: HttpClient = inject(HttpClient);
     return firstValueFrom(http.get(
         url,
         {
@@ -218,7 +210,7 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
 }
 
 export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    const http: HttpClient = inject(HttpClient);
     const obs: Observable<HttpEvent<Blob>> = http.get(
         url,
         {
@@ -244,7 +236,7 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state?: 
 }
 
 export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    const http: HttpClient = inject(HttpClient);
     const obs: Observable<HttpEvent<Blob>> = http.post(
         url,
         formData,
@@ -340,10 +332,7 @@ export function findLastIndex<T>(array: T[], predicate: (value: T, index: number
 }
 
 
-@Pipe({
-    name: 'times',
-    standalone: false
-})
+@Pipe({ name: 'times' })
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -357,10 +346,7 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({
-    name: 'getValues',
-    standalone: false
-})
+@Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         const ret = [];
@@ -392,10 +378,7 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
-@Pipe({
-    name: 'camel',
-    standalone: false
-})
+@Pipe({ name: 'camel' })
 export class CamelPipe implements PipeTransform {
     transform(value: string): any {
         return capitalsAndUnderscoresToDisplayable(value);

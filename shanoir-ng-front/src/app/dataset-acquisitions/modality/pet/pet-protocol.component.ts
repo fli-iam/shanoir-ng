@@ -29,8 +29,7 @@ import { PetProtocol } from './pet-protocol.model';
             useExisting: forwardRef(() => PetProtocolComponent),
             multi: true,
         }
-    ],
-    standalone: false
+    ]
 })
 export class PetProtocolComponent implements ControlValueAccessor {
 

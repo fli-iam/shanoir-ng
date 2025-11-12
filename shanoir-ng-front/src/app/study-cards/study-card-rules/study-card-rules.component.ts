@@ -47,6 +47,7 @@ import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardRuleComponent } from './study-card-rule.component';
 import { ShanoirMetadataField } from './action/action.component';
 import { QualityCardRuleComponent } from './quality-card-rule.component';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
     selector: 'study-card-rules',
@@ -59,7 +60,7 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
             useExisting: forwardRef(() => StudyCardRulesComponent),
         }
     ],
-    standalone: false
+    imports: [NgFor, NgIf, StudyCardRuleComponent, QualityCardRuleComponent]
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     
