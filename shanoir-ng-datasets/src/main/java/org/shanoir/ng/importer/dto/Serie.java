@@ -103,6 +103,7 @@ public class Serie {
 		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		modality = attributes.getString(Tag.Modality);
 		protocolName = attributes.getString(Tag.ProtocolName);
+		sequenceName = attributes.getString(Tag.SequenceName);
 		isEnhanced = Boolean.FALSE;
 		isMultiFrame = Boolean.FALSE;
 		isSpectroscopy = Boolean.FALSE;
@@ -279,5 +280,6 @@ public class Serie {
 
 	public void setIsSpectroscopy(Boolean isSpectroscopy) {
 		this.isSpectroscopy = isSpectroscopy;
-	}	
+	}
+
 }
