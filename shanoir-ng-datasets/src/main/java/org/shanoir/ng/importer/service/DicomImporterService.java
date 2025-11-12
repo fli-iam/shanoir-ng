@@ -303,8 +303,10 @@ public class DicomImporterService {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
         Serie serieDICOM = new Serie(attributes);
+        int numberOfAcquisitions = 0;
         List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
         if (acquisitions != null) {
+            numberOfAcquisitions = acquisitions.size(); // rank
             Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
                     .filter(a -> a.getSeriesInstanceUID().equals(serieDICOM.getSeriesInstanceUID()))
                     .findFirst();
@@ -313,7 +315,7 @@ public class DicomImporterService {
             }
         }
         acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
-                    userName, serieDICOM, serieDICOM.getSeriesNumber(), attributes);
+                    userName, serieDICOM, numberOfAcquisitions, attributes);
         acquisition.setExamination(examination);
         acquisition.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
         // @todo: take care of acquisition equipment
