@@ -245,7 +245,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
-        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.createComponent(TestQualityCardOptionsComponent);
         modalRef.instance.nbExaminations = nbExaminations;
         return this.waitForEnd(modalRef);
     }

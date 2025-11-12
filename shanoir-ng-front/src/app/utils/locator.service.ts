@@ -12,9 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {ViewContainerRef} from "@angular/core";
+import {ComponentRef, createComponent, EnvironmentInjector, ViewContainerRef} from "@angular/core";
 
 // @dynamic
 export class ServiceLocator {
     static rootViewContainerRef: ViewContainerRef;
+
+    static createComponent(component: any): ComponentRef<any> {
+        return createComponent(component, {
+            environmentInjector: ServiceLocator.rootViewContainerRef.injector as EnvironmentInjector,
+        });
+    }   
 }
