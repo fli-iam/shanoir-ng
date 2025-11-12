@@ -204,7 +204,8 @@ public class DicomImporterService {
                 currentDataset = datasets.getLast();
             }
         } else {
-            acquisition.setDatasets(new ArrayList<Dataset>());
+            datasets = new ArrayList<Dataset>();
+            acquisition.setDatasets(datasets);
         }
         // Create a new dataset
         if (currentDataset == null) {
@@ -217,7 +218,7 @@ public class DicomImporterService {
             echoTimes.add(echoTime);
             dataset.setEchoTimes(echoTimes);
             currentDataset = acquisitionContext.generateFlatDataset(
-                    serieDICOM, dataset, 0, subject.getId(),
+                    serieDICOM, dataset, datasets.size()+1, subject.getId(),
                     attributes);
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
