@@ -306,7 +306,6 @@ export class ExaminationNode extends ShanoirNode {
             exam.preclinical
         );
         node.datasetAcquisitions = UNLOADED;
-        //exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;
     }
 }
