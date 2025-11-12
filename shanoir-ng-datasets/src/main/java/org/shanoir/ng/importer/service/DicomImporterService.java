@@ -191,6 +191,7 @@ public class DicomImporterService {
 
     private Dataset manageDataset(Attributes attributes, Subject subject, DatasetAcquisition acquisition)
             throws Exception {
+        int datasetIndex = -1; // Used for single-dataset acquisitions
         Dataset currentDataset = null;
         Serie serieDICOM = new Serie(attributes);
         List<Dataset> datasets = acquisition.getDatasets();
@@ -200,6 +201,7 @@ public class DicomImporterService {
             if (!serieIdentifiedForNotSeparating) {
                 // Check if serie == acquisition: separate datasets
                 currentDataset = manageDatasetSeparation(attributes, acquisition, datasets);
+                datasetIndex = datasets.size() + 1;
             } else {
                 currentDataset = datasets.getLast();
             }
@@ -218,7 +220,7 @@ public class DicomImporterService {
             echoTimes.add(echoTime);
             dataset.setEchoTimes(echoTimes);
             currentDataset = acquisitionContext.generateFlatDataset(
-                    serieDICOM, dataset, datasets.size()+1, subject.getId(),
+                    serieDICOM, dataset, datasetIndex, subject.getId(),
                     attributes);
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
