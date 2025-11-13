@@ -2,6 +2,10 @@
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password') displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
     <#if section = "header">
         ${msg("loginAccountTitle")}
+
+		<span style="color: #E0C000;">
+			${msg("updatePasswordPolicies")}
+        </span>
     <#elseif section = "form">
         <#if messagesPerField.existsError('username','password')>
             <span id="input-error" class="alert ${properties.kcInputErrorMessageClass!}" aria-live="polite">
