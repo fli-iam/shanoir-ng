@@ -24,7 +24,6 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 
 import { TaskService } from './task.service';
 import { Task } from './task.model';
-
 import { TaskStatusComponent } from './status/task-status.component';
 
 

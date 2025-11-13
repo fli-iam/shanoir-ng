@@ -23,11 +23,10 @@ import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, Stud
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 
 import { environment } from "../../../environments/environment";
+import { DoubleAwesomeComponent } from '../../shared/double-awesome/double-awesome.component';
+import { StudyNodeComponent } from '../tree/study-node.component';
 
 import { TreeService } from './tree.service';
-import { DoubleAwesomeComponent } from '../../shared/double-awesome/double-awesome.component';
-
-import { StudyNodeComponent } from '../tree/study-node.component';
 
 
 @Component({

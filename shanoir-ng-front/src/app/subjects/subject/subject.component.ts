@@ -14,6 +14,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { NgClass } from '@angular/common';
 import shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -36,7 +37,6 @@ import { SubjectService } from '../shared/subject.service';
 import {Tag} from "../../tags/tag.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 import {isDarkColor} from "../../utils/app.utils";
-import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { TagInputComponent } from '../../tags/tag.input.component';

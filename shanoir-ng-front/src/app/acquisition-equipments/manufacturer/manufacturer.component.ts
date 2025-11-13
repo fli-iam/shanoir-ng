@@ -21,7 +21,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 

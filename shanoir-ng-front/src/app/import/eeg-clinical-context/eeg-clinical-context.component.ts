@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Event } from '../../datasets/dataset/eeg/dataset.eeg.model';
@@ -32,9 +33,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
-
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
-import { FormsModule } from '@angular/forms';
 
 
 @Component({

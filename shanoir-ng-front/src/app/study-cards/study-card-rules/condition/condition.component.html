@@ -78,7 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @if (i > 0) {
                             <span class="or">or</span>
                         }
-                        {{ coil.name || coil.id }}
+                        {{ coil['name'] || coil['id'] || coil }}
                     </div>
                 }
             </span>
@@ -157,7 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <form [formGroup]="form">
             @if (condition.scope == "StudyCardDICOMConditionOnDatasets" || !(shanoirFieldOptions?.length > 0)) {
                 <span formArrayName="values" class="multi-value edit">
-                    @for (value of condition.values; track trackByFn(i, value); let i = $index) {
+                    @for (value of condition.values; track trackByFn(i); let i = $index) {
                         <span class="one-value">
                             <auto-ajust-input
                                 [formControlName]="i"

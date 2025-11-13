@@ -27,14 +27,14 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
 
 import { MrDataset } from './mr/dataset.mr.model';
-
-import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CommonDatasetComponent } from './common/dataset.common.component';
 import { MrDatasetComponent } from './mr/dataset.mr.component';
 import { EegDatasetComponent } from './eeg/dataset.eeg.component';
-import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
+
 
 
 @Component({

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Location, NgIf } from '@angular/common';
+import { Location } from '@angular/common';
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -25,12 +25,12 @@ import { Mode } from '../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyService } from '../studies/shared/study.service';
-
-import { DuaDocument } from './shared/dua-document.model';
-import { DuaService } from './shared/dua.service';
 import { HeaderComponent } from '../shared/header/header.component';
 import { UploaderComponent } from '../shared/components/uploader/uploader.component';
 import { TooltipComponent } from '../shared/components/tooltip/tooltip.component';
+
+import { DuaService } from './shared/dua.service';
+import { DuaDocument } from './shared/dua-document.model';
 
 
 @Component({

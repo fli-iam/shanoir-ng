@@ -23,14 +23,13 @@ import {
     ViewChild, AfterViewInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
-
-import { RouterLink } from '@angular/router';
 import { TooltipComponent } from '../tooltip/tooltip.component';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
@@ -109,7 +108,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges, After
 
     public isClickable(): boolean {
         if (this.clickable != undefined) return this.clickable;
-        else if (this.labelClick.observers.length > 0) {
+        else if (this.labelClick.observed) {
             return true;
         }
         return false;

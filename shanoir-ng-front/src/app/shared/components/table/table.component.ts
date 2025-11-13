@@ -15,6 +15,8 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListe
 import { fromEvent, Subscription } from 'rxjs';
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import shajs from 'sha.js';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
@@ -24,15 +26,13 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import {TaskService} from "../../../async-tasks/task.service";
-
-import { ColumnDefinition } from './column.definition.type';
-import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
-import { NgTemplateOutlet } from '@angular/common';
 import { VarDirective } from '../../../utils/ng-var.directive';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
-import { FormsModule } from '@angular/forms';
 import { MultiSelectComponent } from '../../multi-select/multi-select.component';
 import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
+
+import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import { ColumnDefinition } from './column.definition.type';
 import { TableSearchComponent } from './search/search.component';
 import { PagerComponent } from './pager/pager.component';
 
@@ -194,7 +194,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 
     onRowClick(item: any) {
-        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        if (this.rowClick.observed && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 

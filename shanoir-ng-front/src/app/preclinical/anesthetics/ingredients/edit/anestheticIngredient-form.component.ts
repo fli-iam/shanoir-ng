@@ -156,7 +156,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.anesthetic.ingredients = [];
         }
         this.anesthetic.ingredients.push(this.ingredient);
-        if (this.event.observers.length > 0) {
+        if (this.event.observed) {
             this.event.emit(this.ingredient);
         }
         this.toggleForm = false;
@@ -166,7 +166,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
             .subscribe(() =>{
-                if (this.event.observers.length > 0) {
+                if (this.event.observed) {
                     this.event.emit(this.ingredient);
                 }
             });

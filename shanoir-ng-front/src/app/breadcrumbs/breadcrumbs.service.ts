@@ -58,7 +58,7 @@ export class BreadcrumbsService implements OnDestroy {
                     return;
                 }
                 const timestamp: number = new Date().getTime();
-                if (this.router.getCurrentNavigation().extras?.replaceUrl) {
+                if (this.router.lastSuccessfulNavigation?.extras?.replaceUrl) {
                     this.steps.pop();
                     this.onUpdateSteps.next({steps: this.steps, operation: 'REMOVE'});
                 }

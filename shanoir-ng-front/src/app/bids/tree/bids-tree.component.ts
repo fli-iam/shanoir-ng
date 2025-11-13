@@ -14,6 +14,8 @@
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { NgTemplateOutlet } from '@angular/common';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { BidsElement } from '../model/bidsElement.model'
@@ -23,8 +25,6 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import {DatasetService} from "../../datasets/shared/dataset.service";
-import { NgTemplateOutlet } from '@angular/common';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @Component({
     selector: 'bids-tree',

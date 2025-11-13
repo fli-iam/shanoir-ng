@@ -16,6 +16,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, On
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 
@@ -24,7 +25,6 @@ import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
-import { NgTemplateOutlet } from '@angular/common';
 import { TooltipComponent } from '../../components/tooltip/tooltip.component';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { TreeNodeComponent } from '../../components/tree/tree-node.component';

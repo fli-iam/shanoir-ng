@@ -27,7 +27,6 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 

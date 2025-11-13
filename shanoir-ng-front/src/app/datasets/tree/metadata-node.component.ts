@@ -17,7 +17,6 @@ import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-n
 import { TreeService } from 'src/app/studies/study/tree.service';
 
 import { MetadataNode } from '../../tree/tree.model';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 
 

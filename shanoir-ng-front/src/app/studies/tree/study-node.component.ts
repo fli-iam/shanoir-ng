@@ -13,7 +13,7 @@
  */
 import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-
+import { FormsModule } from '@angular/forms';
 
 import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
@@ -36,11 +36,9 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { FormsModule } from '@angular/forms';
 import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
 import { CenterNodeComponent } from '../../centers/tree/center-node.component';
 import { StudyCardNodeComponent } from '../../study-cards/tree/study-card-node.component';

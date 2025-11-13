@@ -14,6 +14,7 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
@@ -24,7 +25,6 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImportService } from '../shared/import.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
-import { FormsModule } from '@angular/forms';
 import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
 
 

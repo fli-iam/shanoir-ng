@@ -13,6 +13,7 @@
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
@@ -22,11 +23,10 @@ import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
-import { NgIf, NgFor } from '@angular/common';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { FormsModule } from '@angular/forms';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+
 import { MetadataNodeComponent } from './metadata-node.component';
 import { ProcessingNodeComponent } from './processing-node.component';
 
@@ -34,7 +34,7 @@ import { ProcessingNodeComponent } from './processing-node.component';
 @Component({
     selector: 'dataset-node',
     templateUrl: 'dataset-node.component.html',
-    imports: [NgIf, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, NgFor, ProcessingNodeComponent]
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, ProcessingNodeComponent]
 })
 
 export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {

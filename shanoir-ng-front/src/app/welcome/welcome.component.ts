@@ -10,6 +10,7 @@ import {
   ViewEncapsulation,
   DOCUMENT
 } from '@angular/core';
+import { SlicePipe, TitleCasePipe } from '@angular/common';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { ImagesUrlUtil } from "../shared/utils/images-url.util";
@@ -18,7 +19,6 @@ import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
-import { SlicePipe, TitleCasePipe } from '@angular/common';
 
 @Component({
     selector: 'app-welcome',

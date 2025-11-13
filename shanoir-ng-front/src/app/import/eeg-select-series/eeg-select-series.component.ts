@@ -13,6 +13,7 @@
  */
 import { Component, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -22,7 +23,6 @@ import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
-import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'eeg-select-series',

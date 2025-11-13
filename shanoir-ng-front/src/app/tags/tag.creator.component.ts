@@ -89,7 +89,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
         }
     }
 
-    private tagUsed(tag: Tag) {
+    protected tagUsed(tag: Tag) {
         return !!this.tagsInUse?.find(ssTag => ssTag.equals(tag));
     }
 

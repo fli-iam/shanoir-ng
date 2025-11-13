@@ -14,9 +14,9 @@
 
 import { Component, forwardRef, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from "@angular/forms";
+import { SlicePipe } from "@angular/common";
 
 import { FacetResultPage } from "../../solr/solr.document.model";
-import { SlicePipe } from "@angular/common";
 
 @Component({
     selector: 'checkbox-list',

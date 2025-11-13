@@ -19,11 +19,10 @@ import { Option, SelectBoxComponent } from '../../shared/select/select.component
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardCondition } from '../shared/study-card.model';
+import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
 
 import { ShanoirMetadataField } from './action/action.component';
-
 import { StudyCardConditionComponent } from './condition/condition.component';
-import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
 
 
 @Component({

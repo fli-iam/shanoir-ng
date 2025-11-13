@@ -7,7 +7,6 @@ import { Pipeline } from 'src/app/vip/models/pipeline';
 import { ExecutionDataService } from '../execution.data-service';
 
 import { PipelineService } from "./pipeline/pipeline.service";
-
 import { PipelineComponent } from './pipeline/pipeline.component';
 
 @Component({

@@ -22,8 +22,8 @@ import { Option, SelectBoxComponent } from '../../../shared/select/select.compon
 import { DicomService } from '../../shared/dicom.service';
 import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
-
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
+
 import { DicomTagPipe } from './dicom-tag.pipe';
 
 
@@ -139,7 +139,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 for (const tag of tags) {
                     const hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
                     const cardinality: string = this.buildCadinalityLabel(tag.vm);
-                    const label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
+                    const label: string = hexStr.substring(0, 4) + ',' + hexStr.substring(4, 8) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
                     this.tagOptions.push(new Option<DicomTag>(tag, label));
                 }
             });

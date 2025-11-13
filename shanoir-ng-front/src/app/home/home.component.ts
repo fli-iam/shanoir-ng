@@ -13,6 +13,8 @@
  */
 
 import { Component } from '@angular/core';
+import { DecimalPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
@@ -25,11 +27,10 @@ import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
-import { DecimalPipe, DatePipe } from '@angular/common';
 import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
-import { ChallengeBlockComponent } from './challenge/challenge-block.component';
-import { RouterLink } from '@angular/router';
 import { EventTypePipe } from '../async-tasks/event.pipe';
+
+import { ChallengeBlockComponent } from './challenge/challenge-block.component';
 
 @Component({
     selector: 'home',

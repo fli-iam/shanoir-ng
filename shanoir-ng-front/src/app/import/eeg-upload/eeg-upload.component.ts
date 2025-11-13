@@ -82,9 +82,8 @@ export class EegUploadComponent implements OnDestroy {
         const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.subscriptions.push(
-            this.importService.uploadEegFile(formData)
-                .subscribe(
-                    event => {
+            this.importService.uploadEegFile(formData).subscribe({
+                next: event => {
                     if (event.type === HttpEventType.Sent) {
                         this.uploadState.progress = 0;
                     } else if (event.type === HttpEventType.UploadProgress) {
@@ -106,13 +105,15 @@ export class EegUploadComponent implements OnDestroy {
                                 }
                             });
                     }
-                }, error => {
+                }, 
+                error: error => {
                     this.setArchiveStatus('error');
                     this.uploadState.progress = 0;
                     if (error && error.error && error.error.message) {
                         this.errorMessage = error.error.message;
                     }
-                })
+                }
+            })
         );
     }
 

@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
@@ -25,7 +26,6 @@ import { ProcessedContextData } from '../shared/import.data-service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
-import { FormsModule } from '@angular/forms';
 
 
 @Component({

@@ -31,7 +31,6 @@ import { SuperPromise } from '../../utils/super-promise';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
 
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
-
 import { StudyCardConditionComponent } from './condition/condition.component';
 
 

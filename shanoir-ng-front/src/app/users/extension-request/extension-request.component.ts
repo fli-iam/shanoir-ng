@@ -19,11 +19,10 @@ import { Subscription } from 'rxjs';
 
 import * as AppUtils from '../../utils/app.utils';
 import { UserService } from '../shared/user.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
-import { HeaderComponent } from '../../shared/header/header.component';
-
-import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 
 @Component({
     selector: 'extensionRequest',

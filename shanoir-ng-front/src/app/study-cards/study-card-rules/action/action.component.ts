@@ -13,12 +13,11 @@
  */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { Observable, Subscription , of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
-
-import { FormsModule } from '@angular/forms';
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
 

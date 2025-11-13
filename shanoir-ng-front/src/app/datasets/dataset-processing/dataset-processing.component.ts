@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { formatDate, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from "@angular/common";
+import { formatDate } from "@angular/common";
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -100,14 +100,14 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         });
         // checking if the datasetProcessing is not execution monitoring
         this.subscriptions.push(
-            this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
-                (executionMonitoring: ExecutionMonitoring) => {
+            this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe({
+                next: (executionMonitoring: ExecutionMonitoring) => {
                     this.setExecutionMonitoring(executionMonitoring);
-                }, () => {
+                }, error: () => {
                     // 404 : if it's not found then it's not execution monitoring !
                     this.resetExecutionMonitoring();
                 }
-            )
+            })
         );
         return Promise.resolve();
     }

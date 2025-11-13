@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @for (dtag of displayedTags; track dtag) {
             <span class="tag" [class.dark]="dtag.darkFont" [style.background]="dtag.tag.color">
                 @if (mode != "view") {
-                    <span class="clickable" (click)="deleteTag(dtag)" [class.used]="dtag.used">
+                    <span class="clickable" (click)="deleteTag(dtag)" [class.used]="tagUsed(dtag.tag)">
                         <i class="fas fa-times"></i>
                     </span>
                 }

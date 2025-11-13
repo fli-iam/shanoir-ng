@@ -26,7 +26,6 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 @Component({

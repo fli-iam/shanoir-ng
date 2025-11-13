@@ -170,9 +170,12 @@
                     ) {
                         <tr [class.even]="even" [class.odd]="odd">
                             <td>{{ dataset.name }} ({{ dataset.id }})</td>
-                            <td>{{ dataset.datasetAcquisition?.id }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <!-- <td>{{ dataset.datasetAcquisition?.id }}</td>
                             <td>{{ dataset.datasetAcquisition?.examination?.id }}</td>
-                            <td>{{ dataset.subject?.name }}</td>
+                            <td>{{ dataset.subject?.name }}</td> -->
                             @if (datasetsByParam[parameter.name].length > 1) {
                                 <td
                                     class="icon icon-clickable"

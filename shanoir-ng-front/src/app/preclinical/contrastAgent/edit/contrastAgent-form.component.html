@@ -172,7 +172,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @default {
                                                 <select id="injectionInterval" formControlName="injectionInterval">
                                                     @for (interval of intervals; track interval) {
-                                                        <option [value]="interval.key">{{ interval?.value }}</option>
+                                                        <option [value]="interval">{{ interval }}</option>
                                                     }
                                                 </select>
                                             }
@@ -189,7 +189,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @default {
                                                 <select id="injectionSite" formControlName="injectionSite">
                                                     @for (site of sites; track site) {
-                                                        <option [value]="site.key">{{ site?.value }}</option>
+                                                        <option [value]="site">{{ site }}</option>
                                                     }
                                                 </select>
                                             }
@@ -206,7 +206,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @default {
                                                 <select id="injectionType" formControlName="injectionType">
                                                     @for (injtype of injtypes; track injtype) {
-                                                        <option [value]="injtype.key">{{ injtype?.value }}</option>
+                                                        <option [value]="injtype">{{ injtype }}</option>
                                                     }
                                                 </select>
                                             }

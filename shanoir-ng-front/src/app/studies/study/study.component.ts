@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { KeyValue, NgClass, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor, KeyValuePipe } from "@angular/common";
+import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -50,8 +50,6 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-
-import { Selection } from './tree.service';
 import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
 import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
 import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
@@ -64,6 +62,8 @@ import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
 import { StudyHistoryComponent } from "../study-history/study-history.component";
 import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
 import { SizePipe } from "../../shared/utils/size.pipe";
+
+import { Selection } from './tree.service';
 
 @Component({
     selector: 'study-detail',

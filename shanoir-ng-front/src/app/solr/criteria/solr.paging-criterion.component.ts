@@ -15,12 +15,12 @@ import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleCh
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import shajs from 'sha.js';
 import { Router } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { slideDown, slideRight } from '../../shared/animations/animations';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { NgTemplateOutlet } from '@angular/common';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 

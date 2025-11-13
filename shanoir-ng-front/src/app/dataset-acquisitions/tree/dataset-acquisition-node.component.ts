@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
@@ -25,11 +27,8 @@ import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../.
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { FormsModule } from '@angular/forms';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { RouterLink } from '@angular/router';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
 

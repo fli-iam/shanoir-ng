@@ -30,7 +30,6 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
@@ -64,7 +63,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
         super(route, 'acquisition-equipment');
 
-        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
+        this.fromImport = this.router.lastSuccessfulNavigation?.extras?.state?.fromImport;
     }
 
     getService(): EntityService<AcquisitionEquipment> {

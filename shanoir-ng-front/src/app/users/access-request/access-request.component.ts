@@ -23,12 +23,10 @@ import { UserService } from '../shared/user.service'
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 
 import { AccessRequest } from './access-request.model'
 import { AccessRequestService } from './access-request.service';
-
-import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
-
 
 @Component({
     selector: 'access-request',

@@ -13,6 +13,7 @@
  */
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { CardinalityOfRelatedSubjects } from "../../../enum/cardinality-of-related-subjects.enum";
 import { ExploredEntity } from '../../../enum/explored-entity.enum';
@@ -26,8 +27,6 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
 import { Dataset } from '../../shared/dataset.model';
-
-import { RouterLink } from '@angular/router';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({

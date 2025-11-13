@@ -22,7 +22,6 @@ import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
 import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({

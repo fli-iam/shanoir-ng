@@ -20,7 +20,6 @@ import { Tag } from 'src/app/tags/tag.model';
 
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ReverseStudyNodeComponent } from '../../studies/tree/reverse-study-node.component';
 

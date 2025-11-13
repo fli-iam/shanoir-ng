@@ -39,7 +39,6 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 

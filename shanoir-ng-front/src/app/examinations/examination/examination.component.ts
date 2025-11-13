@@ -14,6 +14,7 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -35,7 +36,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { InstrumentAssessmentComponent } from '../instrument-assessment/instrument-assessment.component';

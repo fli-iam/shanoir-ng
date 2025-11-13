@@ -28,7 +28,6 @@ import { InjectionType } from '../../shared/enum/injectionType';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
-
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({

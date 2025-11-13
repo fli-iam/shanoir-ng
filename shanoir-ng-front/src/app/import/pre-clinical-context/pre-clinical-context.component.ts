@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnDestroy, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
@@ -36,7 +35,7 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [NgIf, TooltipComponent, SelectBoxComponent, FormsModule]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
 

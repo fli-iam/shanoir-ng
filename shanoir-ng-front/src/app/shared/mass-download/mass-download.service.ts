@@ -168,28 +168,34 @@ export class MassDownloadService {
                     endPromise.reject(error);
                 }
 
-                const flowSubscription: Subscription = downloadObs.subscribe(state => {
-                    task.lastUpdate = new Date();
-                    task.progress = state?.progress;
-                    if (downloadState) {
-                        downloadState.progress = task?.progress;
-                    }
-                    task.status = state?.status;
-                    this.notificationService.pushLocalTask(task);
-                }, errorFunction);
+                const flowSubscription: Subscription = downloadObs.subscribe({
+                    next: state => {
+                        task.lastUpdate = new Date();
+                        task.progress = state?.progress;
+                        if (downloadState) {
+                            downloadState.progress = task?.progress;
+                        }
+                        task.status = state?.status;
+                        this.notificationService.pushLocalTask(task);
+                    },
+                    error: errorFunction
+                });
 
-                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
-                    flowSubscription.unsubscribe();
-                    const duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
-                    task.lastUpdate = new Date();
-                    task.status = state.status;
-                    task.progress = 1;
-                    task.report = state.errors;
-                    downloadState.progress = task.progress;
-                    this.notificationService.pushLocalTask(task);
-                    endPromise.resolve();
-                }, errorFunction);
+                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe({
+                    next: state => {
+                        flowSubscription.unsubscribe();
+                        const duration: number = Date.now() - start;
+                        task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
+                        task.lastUpdate = new Date();
+                        task.status = state.status;
+                        task.progress = 1;
+                        task.report = state.errors;
+                        downloadState.progress = task.progress;
+                        this.notificationService.pushLocalTask(task);
+                        endPromise.resolve();
+                    },
+                    error: errorFunction
+                });
 
                 return endPromise.finally(() => {
                     flowSubscription.unsubscribe();
@@ -569,12 +575,15 @@ export class MassDownloadService {
             modalRef.instance.go,
             modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
-        result.pipe(take(1)).subscribe(ret => {
-            modalRef.destroy();
-            resPromise.resolve(ret);
-        }, error => {
-            modalRef.destroy();
-            resPromise.reject(error);
+        result.pipe(take(1)).subscribe({
+            next: ret => {
+                modalRef.destroy();
+                resPromise.resolve(ret);
+            }, 
+            error: error => {
+                modalRef.destroy();
+                resPromise.reject(error);
+            }
         });
         return resPromise;
     }

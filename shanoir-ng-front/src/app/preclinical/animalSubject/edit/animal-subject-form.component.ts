@@ -15,6 +15,7 @@ import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import shajs from 'sha.js';
+import { NgClass } from '@angular/common';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -43,7 +44,6 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { TagInputComponent } from '../../../tags/tag.input.component';
 import { CheckboxComponent } from '../../../shared/checkbox/checkbox.component';

@@ -15,6 +15,7 @@
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 import { Reference } from 'src/app/preclinical/reference/shared/reference.model';
 import { ReferenceService } from 'src/app/preclinical/reference/shared/reference.service';
@@ -27,7 +28,6 @@ import { Therapy } from '../../therapy/shared/therapy.model';
 import { TherapyService } from '../../therapy/shared/therapy.service';
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { DatePipe } from '@angular/common';
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';

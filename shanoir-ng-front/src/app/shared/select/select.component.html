@@ -57,13 +57,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <i class="fa-regular fa-eye"></i>
                         </a>
                     }
-                    @if (newClick.observers.length > 0 && !newHidden && !disabled) {
+                    @if (newClick.observed && !newHidden && !disabled) {
                         <span (click)="clickNew()" [class.disabled]="newDisabled" class="button new-file">
                             <i class="far fa-file"></i>
                             <i class="fas fa-plus"></i>
                         </span>
                     }
-                    @if (addClick.observers.length > 0 && !addHidden) {
+                    @if (addClick.observed && !addHidden) {
                         <span (click)="clickAdd()" [class.disabled]="addDisabled" class="button">
                             <i class="fas fa-plus"></i>
                         </span>
@@ -171,7 +171,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{ inputText }}
             </a>
             <span class="commands">
-                @if (viewClick.observers.length > 0 && !viewHidden) {
+                @if (viewClick.observed && !viewHidden) {
                     <span (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button">
                         <i class="fa-regular fa-eye"></i>
                     </span>

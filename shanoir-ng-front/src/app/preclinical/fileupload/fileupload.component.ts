@@ -14,7 +14,7 @@
 
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { lastValueFrom, Observable } from 'rxjs';
+import { lastValueFrom, Observable, share } from 'rxjs';
 
 import { FileUploadReady } from './fileUploadReady.model';
 
@@ -37,8 +37,9 @@ export class FileUploadComponent {
     progressObserver: any;
 
     constructor(private http: HttpClient) {
-       this.progress$ = Observable.create(observer => {
-        this.progressObserver = observer}).share();    
+        this.progress$ = new Observable(observer => {
+            this.progressObserver = observer;
+        }).pipe(share());
     }
     
     public prepareUploadRequest(){
@@ -77,7 +78,7 @@ export class FileUploadComponent {
     
     
     private uploadRequest (url: string): Observable<any> {
-        return Observable.create(observer => {
+        return new Observable(observer => {
             this.fileUploadReady.xhr.onreadystatechange = () => {
                 if (this.fileUploadReady.xhr.readyState === 4) {
                     if (this.fileUploadReady.xhr.status === 200) {

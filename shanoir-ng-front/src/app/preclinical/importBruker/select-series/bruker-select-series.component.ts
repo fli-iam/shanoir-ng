@@ -14,6 +14,7 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -21,9 +22,7 @@ import { slideDown } from '../../../shared/animations/animations';
 import * as AppUtils from '../../../utils/app.utils';
 import { PatientDicom, SerieDicom } from '../../../import/shared/dicom-data.model';
 import { ImportService } from '../../../import/shared/import.service';
-
 import { TreeNodeComponent } from '../../../shared/components/tree/tree-node.component';
-import { FormsModule } from '@angular/forms';
 import { PapayaComponent } from '../../../shared/components/papaya/papaya.component';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 

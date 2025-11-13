@@ -29,7 +29,6 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { CamelPipe } from '../../../../utils/app.utils';
 

@@ -18,7 +18,6 @@ import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
 
 import { DataUserAgreement } from './shared/dua.model';
-
 import { DUASigningComponent } from './dua-signing/dua-signing.component';
 
 @Component({

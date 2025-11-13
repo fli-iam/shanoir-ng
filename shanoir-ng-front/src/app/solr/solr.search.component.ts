@@ -42,6 +42,7 @@ import { Study } from "../studies/shared/study.model";
 import { StudyService } from "../studies/shared/study.service";
 import { ServiceLocator } from "../utils/locator.service";
 import { ExecutionDataService } from '../vip/execution.data-service';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
@@ -49,7 +50,6 @@ import { SolrService } from "./solr.service";
 import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
 import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 export type TextualFacet = typeof TextualFacetNames[number];
@@ -118,7 +118,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             this.studies = studies;
         });
 
-        const input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        const input: string = this.router.lastSuccessfulNavigation?.extras && this.router.lastSuccessfulNavigation?.extras.state ? this.router.lastSuccessfulNavigation?.extras.state['input'] : null;
         if (input) {
             // TODO
         }

@@ -16,6 +16,7 @@ import { Component, ViewChild, ElementRef} from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
@@ -46,7 +47,6 @@ import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
 import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 import {Subject} from "../../../subjects/shared/subject.model";
-import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../shared/select/select.component';
 import { ExaminationAnestheticFormComponent } from '../../anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';

@@ -14,8 +14,8 @@
 import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Observable, race } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { firstValueFrom, Observable, race } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
@@ -44,7 +44,6 @@ import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
@@ -256,12 +255,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             modalRef.instance.test, 
             modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
-        result.pipe(take(1)).subscribe(ret => {
-            modalRef.destroy();
-            resPromise.resolve(ret);
-        }, error => {
-            modalRef.destroy();
-            resPromise.reject(error);
+        firstValueFrom(result)
+            .then(ret => {
+                modalRef.destroy();
+                resPromise.resolve(ret);
+            })
+            .catch(error => {
+                modalRef.destroy();
+                resPromise.reject(error);
         });
         return resPromise;
     }

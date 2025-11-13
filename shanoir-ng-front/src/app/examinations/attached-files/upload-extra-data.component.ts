@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Location, NgSwitch } from '@angular/common';
+import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -93,7 +93,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     };
 
    back(id?: number): void {
-        if (this.closing.observers.length > 0) {
+        if (this.closing.observed) {
            this.closing.emit(id);
         } else {
             this.location.back();

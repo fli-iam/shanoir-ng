@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
@@ -24,11 +26,8 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { FormsModule } from '@angular/forms';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { RouterLink } from '@angular/router';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 import { DatasetAcquisitionNodeComponent } from '../../dataset-acquisitions/tree/dataset-acquisition-node.component';
 

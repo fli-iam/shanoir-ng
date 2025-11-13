@@ -89,11 +89,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <div>
                         @for (
                             subject of filteredNodes || node.subjectsNode.subjects;
-                            track trackByFn(i, subject);
+                            track trackByFn(i, asNode(subject));
                             let i = $index
                         ) {
                             <div>
-                                @if (!subject.fake) {
+                                @if (!asNode(subject).fake) {
                                     <subject-node
                                         [input]="subject"
                                         [studyId]="node.id"
@@ -102,17 +102,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [withMenu]="withMenu"
                                         [rights]="rights"></subject-node>
                                 } @else {
-                                    <div class="fake-node" #fakeSubject [id]="subject.id">
-                                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(subject)"></i>
+                                    <div class="fake-node" #fakeSubject [id]="asNode(subject).id">
+                                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(asNode(subject))"></i>
                                         <a
-                                            [routerLink]="['/subject/details/', subject.id]"
+                                            [routerLink]="['/subject/details/', asNode(subject).id]"
                                             class="inner"
-                                            (click)="clickFakeNode(subject)"
-                                            [title]="subject.title + ' n°' + subject.id">
-                                            <i [class]="subject.awesome" class="picto"></i>
-                                            {{ subject.label }}
+                                            (click)="clickFakeNode(asNode(subject))"
+                                            [title]="asNode(subject).title + ' n°' + asNode(subject).id">
+                                            <i [class]="asNode(subject).awesome" class="picto"></i>
+                                            {{ asNode(subject).label }}
                                         </a>
-                                        @for (tag of subject.tags; track tag) {
+                                        @for (tag of asNode(subject).tags; track tag) {
                                             <span
                                                 class="tag label"
                                                 [class.dark]="getFontColor(tag.color)"
@@ -120,17 +120,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 {{ tag.name }}
                                             </span>
                                         }
-                                        @if (subject.qualityTag) {
+                                        @if (asNode(subject).qualityTag) {
                                             <span
                                                 class="tag label dark"
                                                 [style.background]="
-                                                    subject.qualityTag == 'ERROR'
+                                                    asNode(subject).qualityTag == 'ERROR'
                                                         ? 'red'
-                                                        : subject.qualityTag == 'WARNING'
+                                                        : asNode(subject).qualityTag == 'WARNING'
                                                           ? 'orange'
                                                           : 'green'
                                                 ">
-                                                {{ subject.qualityTag }}
+                                                {{ asNode(subject).qualityTag }}
                                             </span>
                                         }
                                     </div>
@@ -215,20 +215,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 @if (
                     node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any("UNLOADED")
                 ) {
-                    @for (member of node.membersNode.members; track trackByFn(i, member); let i = $index) {
+                    @for (member of node.membersNode.members; track trackByFn(i, asNode(member)); let i = $index) {
                         <div>
-                            @if (!member.fake) {
+                            @if (!asNode(member).fake) {
                                 <member-node [input]="member" [withMenu]="withMenu"></member-node>
                             } @else {
-                                <div class="fake-node" #fakeMember [id]="member.id">
-                                    <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(member)"></i>
+                                <div class="fake-node" #fakeMember [id]="asNode(member).id">
+                                    <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(asNode(member))"></i>
                                     <a
-                                        [routerLink]="['/user/details/', member.id]"
+                                        [routerLink]="['/user/details/', asNode(member).id]"
                                         class="inner"
-                                        (click)="clickFakeNode(member)"
-                                        [title]="member.title + ' n°' + member.id">
+                                        (click)="clickFakeNode(asNode(member))"
+                                        [title]="asNode(member).title + ' n°' + asNode(member).id">
                                         <i class="far fa-user picto"></i>
-                                        {{ member.label }}
+                                        {{ asNode(member).label }}
                                     </a>
                                 </div>
                             }

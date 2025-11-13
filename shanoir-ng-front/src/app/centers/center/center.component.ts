@@ -24,7 +24,6 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
-
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';

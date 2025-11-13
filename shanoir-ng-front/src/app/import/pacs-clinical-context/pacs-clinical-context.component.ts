@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BasicClinicalContextComponent } from '../basic-clinical-context/basic-clinical-context.component';
 import { ImportJob } from '../shared/dicom-data.model';
-import { NgIf } from '@angular/common';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
-import { FormsModule } from '@angular/forms';
+
 
 
 @Component({
@@ -27,7 +27,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [NgIf, TooltipComponent, SelectBoxComponent, FormsModule]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class PacsClinicalContextComponent extends BasicClinicalContextComponent {
     

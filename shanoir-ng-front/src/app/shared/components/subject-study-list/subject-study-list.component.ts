@@ -15,6 +15,7 @@ import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, View
 import { NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { combineLatest, Subscription , Subject as RxjsSubject} from 'rxjs';
 import { Router } from '@angular/router';
+import { LowerCasePipe } from '@angular/common';
 
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
@@ -29,7 +30,6 @@ import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '../table/column.definition.type';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { TooltipComponent } from '../tooltip/tooltip.component';
-import { LowerCasePipe } from '@angular/common';
 
 
 @Component({

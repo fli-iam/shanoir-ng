@@ -13,6 +13,7 @@
  */
 import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -20,9 +21,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { FormsModule } from '@angular/forms';
 import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
 import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 

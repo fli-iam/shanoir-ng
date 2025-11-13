@@ -23,7 +23,6 @@ import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
-
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 

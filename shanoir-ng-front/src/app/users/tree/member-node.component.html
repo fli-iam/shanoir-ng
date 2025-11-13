@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         @if (node.open && node.rights && node.rights != $any("UNLOADED")) {
             @for (right of node.rights; track right) {
-                <node [label]="right.label" awesome="fas fa-medal" [hasChildren]="false"></node>
+                <node [label]="right['title']" awesome="fas fa-medal" [hasChildren]="false"></node>
             }
         }
     </node>

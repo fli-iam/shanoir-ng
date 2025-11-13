@@ -15,6 +15,7 @@
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 import { Reference } from '../../../../preclinical/reference/shared/reference.model';
 import { ReferenceService } from '../../../../preclinical/reference/shared/reference.service';
@@ -27,7 +28,6 @@ import { PathologyService } from '../../pathology/shared/pathology.service';
 import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
 import { PathologyModelService } from '../../pathologyModel/shared/pathologyModel.service';
 import { SubjectPathology } from '../shared/subjectPathology.model';
-import { DatePipe } from '@angular/common';
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';

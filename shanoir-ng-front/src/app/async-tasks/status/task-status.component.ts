@@ -14,6 +14,8 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
@@ -26,10 +28,7 @@ import {Task} from '../task.model';
 import {TaskService} from "../task.service";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
-import { FormsModule } from '@angular/forms';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
-import { RouterLink } from '@angular/router';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 

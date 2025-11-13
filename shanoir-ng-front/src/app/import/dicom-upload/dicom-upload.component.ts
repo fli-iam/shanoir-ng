@@ -16,6 +16,7 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
 import {Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 
@@ -34,8 +35,6 @@ import {CenterService} from "../../centers/shared/center.service";
 import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisition-equipment.model";
 import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
-import { FormsModule } from '@angular/forms';
-
 import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
@@ -114,27 +113,28 @@ export class DicomUploadComponent implements OnDestroy {
         formData.append('file', file[0], file[0].name);
         if (!this.multipleExamImport) {
             this.subscriptions.push(
-            this.importService.uploadFile(formData)
-                .subscribe(
-                    event => {
-                    if (event.type === HttpEventType.Sent) {
+                this.importService.uploadFile(formData).subscribe({
+                    next: event => {
+                        if (event.type === HttpEventType.Sent) {
+                            this.uploadState.progress = 0;
+                        } else if (event.type === HttpEventType.UploadProgress) {
+                            this.uploadState.progress = (event.loaded / (event.total + 0.05));
+                        } else if (event instanceof HttpResponse) {
+                            const patientDicomList =  event.body;
+                            this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
+                            this.importDataService.patientList = patientDicomList;
+                            this.setArchiveStatus('uploaded');
+                            this.uploadState.progress = 1;
+                        }
+                    }, 
+                    error: error => {
+                        this.setArchiveStatus('error');
                         this.uploadState.progress = 0;
-                    } else if (event.type === HttpEventType.UploadProgress) {
-                        this.uploadState.progress = (event.loaded / (event.total + 0.05));
-                    } else if (event instanceof HttpResponse) {
-                        const patientDicomList =  event.body;
-                        this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
-                        this.importDataService.patientList = patientDicomList;
-                        this.setArchiveStatus('uploaded');
-                        this.uploadState.progress = 1;
+                        if (error && error.error && error.error.message) {
+                            this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
+                        }
+                        this.fileTooBigError = error.status === 413;
                     }
-                }, error => {
-                    this.setArchiveStatus('error');
-                    this.uploadState.progress = 0;
-                    if (error && error.error && error.error.message) {
-                        this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
-                    }
-                    this.fileTooBigError = error.status === 413;
                 })
             );
         } else {
@@ -149,26 +149,28 @@ export class DicomUploadComponent implements OnDestroy {
 
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
-                .subscribe(
-                    event => {
-                    if (event.type === HttpEventType.Sent) {
-                        this.uploadState.progress = -1;
-                    } else if (event.type === HttpEventType.UploadProgress) {
-                        this.uploadState.progress = (event.loaded / event.total);
-                    } else if (event instanceof HttpResponse) {
-                        this.setArchiveStatus('uploaded');
-                    }
-                }, error => {
-                    this.setArchiveStatus('error');
-                    this.uploadState.progress = 0;
-                    if (error?.error?.message) {
-                        if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
-                            this.dicomDirMissingError = true;
-                        } else {
-                            this.otherErrorMessage = error.error.message;
+                .subscribe({
+                    next: event => {
+                        if (event.type === HttpEventType.Sent) {
+                            this.uploadState.progress = -1;
+                        } else if (event.type === HttpEventType.UploadProgress) {
+                            this.uploadState.progress = (event.loaded / event.total);
+                        } else if (event instanceof HttpResponse) {
+                            this.setArchiveStatus('uploaded');
                         }
-                    } else {
-                        this.fileTooBigError = error.status === 413;
+                    }, 
+                    error: error => {
+                        this.setArchiveStatus('error');
+                        this.uploadState.progress = 0;
+                        if (error?.error?.message) {
+                            if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
+                                this.dicomDirMissingError = true;
+                            } else {
+                                this.otherErrorMessage = error.error.message;
+                            }
+                        } else {
+                            this.fileTooBigError = error.status === 413;
+                        }
                     }
                 })
             );

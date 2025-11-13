@@ -20,7 +20,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
-
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 

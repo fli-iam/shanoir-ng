@@ -13,6 +13,8 @@
  */
 import { Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { VERSION } from '../../../environments/version';
@@ -25,8 +27,6 @@ import { ConsoleService } from '../console/console.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-import { DatePipe } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 
 

@@ -13,10 +13,10 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { ColumnDefinition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
-import { FormsModule } from '@angular/forms';
 
 
 @Component({
