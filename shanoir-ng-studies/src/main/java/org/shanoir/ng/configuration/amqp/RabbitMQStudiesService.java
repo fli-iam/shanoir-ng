@@ -1,5 +1,6 @@
 package org.shanoir.ng.configuration.amqp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
 import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -21,6 +23,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -227,7 +230,17 @@ public class RabbitMQStudiesService {
 	public Long createCenter(final String messageStr) {
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-			Center center = mapper.readValue(messageStr, Center.class);
+			CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
+			Center center = new Center();
+			center.setName(message.getInstitutionDicom().getInstitutionName());
+			center.setStreet(message.getInstitutionDicom().getInstitutionAddress());
+			StudyCenter studyCenter = new StudyCenter();
+			Study study = studyService.findById(message.getStudyId());
+			studyCenter.setStudy(study);
+			studyCenter.setCenter(center);
+			List<StudyCenter> studyCenterList = new ArrayList<>();
+			studyCenterList.add(studyCenter);
+			center.setStudyCenterList(studyCenterList);
 			center = createCenter(center);
 			return center.getId();
 		} catch (Exception e) {

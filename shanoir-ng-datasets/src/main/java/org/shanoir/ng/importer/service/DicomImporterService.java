@@ -40,9 +40,11 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dicom.EchoTime;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
@@ -178,7 +180,7 @@ public class DicomImporterService {
             return false;
         }
         Subject subject = manageSubject(attributes, study);
-        Center center = manageCenterAndEquipment(attributes);
+        Center center = manageCenterAndEquipment(attributes, study);
         Examination examination = manageExamination(attributes, study, subject, center);
         DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
         Dataset dataset = manageDataset(attributes, subject, acquisition);
@@ -342,37 +344,31 @@ public class DicomImporterService {
      * @throws AmqpException 
      * @throws JsonProcessingException 
      */
-    private Center manageCenterAndEquipment(Attributes attributes) throws JsonProcessingException, AmqpException, RestServiceException {
-        String institutionName = attributes.getString(Tag.InstitutionName);
-        String institutionAddress = attributes.getString(Tag.InstitutionAddress);
-        Center center = null;
-        if (StringUtils.isNotBlank(institutionName)) {
-            center = findOrCreateCenter(institutionName);
-        } else {
-            center = findOrCreateCenter(UNKNOWN);
-        }
+    private Center manageCenterAndEquipment(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
+        InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
+        Center center = findOrCreateCenter(institutionDicom, study.getId());
         String manufacturer = attributes.getString(Tag.Manufacturer);
         String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
         String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
         return center;
     }
 
-    private Center findOrCreateCenter(String institutionName) throws JsonProcessingException, AmqpException, RestServiceException {
-        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionName);
+    private Center findOrCreateCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
             return centerOpt.get();
         } else {// Communicate with MS Studies here, only if not existing
-            Center center = new Center();
-            center.setName(institutionName);
-            // @todo: set study here
+            CreateCenterForStudyMessage message = new CreateCenterForStudyMessage();
+            message.setStudyId(studyId);
+            message.setInstitutionDicom(institutionDicom);
             Long centerId = (Long) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.CREATE_CENTER_QUEUE,
-                    objectMapper.writeValueAsString(center));
+                    objectMapper.writeValueAsString(message));
             if (centerId == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
             }
-            LOG.info("Center created with ID: {}, Name: {}", centerId, center.getName());
+            LOG.info("Center created with ID: {}, Name: {}", centerId, institutionDicom.getInstitutionName());
             return centerRepository.findById(centerId).orElseThrow();
         }
     }
