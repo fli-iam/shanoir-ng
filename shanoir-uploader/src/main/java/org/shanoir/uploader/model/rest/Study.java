@@ -11,9 +11,9 @@ import org.shanoir.uploader.ShUpConfig;
  */
 public class Study implements Comparable<Study> {
 
-	private static final Integer SC_MANDATORY = Integer.valueOf(1);
+	public static final String SC_MANDATORY = "MANDATORY";
 
-	private static final Integer SC_DISABLED = Integer.valueOf(2);
+	public static final String SC_DISABLED = "DISABLED";
 
 	private Long id;
 
@@ -27,7 +27,7 @@ public class Study implements Comparable<Study> {
 
 	private Boolean compatible;
 
-	private Integer studyCardPolicy;
+	private String studyCardPolicy;
 
 	public Long getId() {
 		return id;
@@ -77,11 +77,11 @@ public class Study implements Comparable<Study> {
 		this.compatible = compatible;
 	}
 
-	public Integer getStudyCardPolicy() {
+	public String getStudyCardPolicy() {
 		return studyCardPolicy;
 	}
 
-	public void setStudyCardPolicy(Integer studyCardPolicy) {
+	public void setStudyCardPolicy(String studyCardPolicy) {
 		this.studyCardPolicy = studyCardPolicy;
 	}
 
