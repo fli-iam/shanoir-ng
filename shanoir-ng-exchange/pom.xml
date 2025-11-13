@@ -20,7 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
 		<jackson.version>2.13.4.1</jackson.version>
-		<dcm4che.version>5.30.0</dcm4che.version>
+		<dcm4che.version>5.31.1</dcm4che.version>
 	</properties>
 
 	<dependencies>
