@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -267,6 +268,11 @@ public class Utils {
 		}
 		s.append('$');
 		return s.toString();
+	}
+
+	public static String getOrSetToDefault(Attributes attributes, int tag, String defaultValue) {
+		String value = attributes.getString(tag);
+		return (value == null || value.isEmpty()) ? defaultValue : value;
 	}
 
 }
