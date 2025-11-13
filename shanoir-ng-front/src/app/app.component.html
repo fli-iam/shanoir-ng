@@ -20,17 +20,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div> -->
 @if (isAuthenticated()) {
     @if (menuOpen) {
-        <div class="side-menu" @slideRight>
-            <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false"></side-menu>
+        <div class="side-menu" animate.enter="slide-right" animate.leave="slide-left">
+            <side-menu [class.reduce-height]="consoleOpened ? true : false"></side-menu>
         </div>
     }
     <div
         class="main-content"
-        [class.reduce-height]="
-            consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false
-        "
-        [class.open]="menuOpen"
-        [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
+        [class.reduce-height]="consoleOpened && consoleDeployed"
+        [class.open]="menuOpen">
         @if (treeService.treeOpened && treeService.treeAvailable) {
             <div class="tree-close-button" (click)="toggleTree(false)" title="open tree">
                 <i class="fas fa-chevron-left"></i>
@@ -61,7 +58,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
         </div>
     </div>
-    <shanoir-console #console></shanoir-console>
+    <shanoir-console
+        [class.hidden]="!menuOpen && !consoleDeployed"
+        (registerToggle)="registerConsoleToggle($event)" 
+        (consoleOpened)="consoleOpened = $event"
+        (consoleDeployed)="onConsoleDeployed($event)"></shanoir-console>
 }
 
 @if (!isAuthenticated()) {

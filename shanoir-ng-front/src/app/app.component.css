@@ -30,3 +30,29 @@ shanoir-console { position: absolute; bottom: 0; z-index: 1; }
 .tree-close-button { position: absolute; top: 45%; left: 0; z-index: 100; color: var(--color-a); cursor: pointer;
     border: 1px solid var(--grey); border-left: none; border-radius: 0 5px 5px 0; padding: 2px 1px; }
 .tree-frame { position: relative; }
+
+
+.slide-right {
+    animation: slideRight 500ms ease-in-out both;
+}
+@keyframes slideRight {
+    from { width: 0; }
+    to   { width: 300px; }
+}
+
+/* animation de sortie */
+.slide-left {
+  animation: slideLeft 500ms ease-in-out both;
+}
+@keyframes slideLeft {
+    from { width: 300px; }
+    to   { width: 0; }
+}
+
+.main-content {
+    transition: margin-left 0.5s ease-in-out;
+}
+
+.main-content:not(.open) {
+  margin-left: 0;
+}

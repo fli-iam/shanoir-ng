@@ -14,10 +14,6 @@
 
 import { animate, query, style, transition, trigger } from '@angular/animations';
 
-export const parent = trigger('parent', [
-    transition(':enter', [])
-]);
-
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [

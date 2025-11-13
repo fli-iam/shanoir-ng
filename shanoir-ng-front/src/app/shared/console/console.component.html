@@ -26,10 +26,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="content">
         <div class="right-tab">
             @if (!deployed) {
-                <i class="fa-solid fa-chevron-right" (click)="deployed = true"></i>
+                <i class="fa-solid fa-chevron-right" (click)="toggleDeployed(true)"></i>
             }
             @if (deployed) {
-                <i class="fa-solid fa-chevron-left" (click)="deployed = false"></i>
+                <i class="fa-solid fa-chevron-left" (click)="toggleDeployed(false)"></i>
             }
         </div>
         @for (msg of messages; track msg) {
