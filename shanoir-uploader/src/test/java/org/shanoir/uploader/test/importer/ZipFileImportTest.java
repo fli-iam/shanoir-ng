@@ -94,7 +94,7 @@ public class ZipFileImportTest extends AbstractTest {
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
 		study.setStudyStatus(IN_PROGRESS);
-		study.setStudyCardPolicy(1);
+		study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
 		// add center to study
 		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
 		final StudyCenter studyCenter = new StudyCenter();
