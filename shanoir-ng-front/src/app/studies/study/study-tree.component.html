@@ -12,65 +12,59 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div class="commands">
-	<button class="dl-button" 
-			type="button" 
-			(click)="treeService.updateTree()" 
-			title="refresh">
-		<i class="fa-solid fa-arrows-rotate"></i>
-	</button>
-	<button class="dl-button" 
-			type="button" 
-			(click)="treeService.collapseAll()" 
-			title="collapse all">
-		<i class="fa-solid fa-chevron-up"></i>
-	</button>	
-	<button class="dl-button" 
-			type="button" 
-			(click)="treeService.scrollToSelected()" 
-			title="scroll to selected">
-			<i class="fa-solid fa-arrows-to-circle"></i>
-	</button>
-    <button class="dl-button" 
-			type="button" 
-			(click)="downloadSelected()" 
-			[disabled]="selectionEmpty" 
-			title="download selection">
-		<i class="fas fa-download"></i>
-	</button>
-    <button class="dl-button" 
-			type="button" 
-			(click)="goToProcessing()" 
-			[disabled]="selectionEmpty" 
-			title="process selection">
-		<i class="fas fa-rocket"></i>
-	</button>
-    <button class="dl-button" 
-			type="button" 
-			(click)="openInViewer()" 
-			[disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)" 
-			[title]="loaded && canOpenDicomMultiExam ? 
-					'view DICOM images for the selected acquisitions/examinations' 
-					: 'view selected DICOM images for the one examination selected'">
-		<double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
-	</button>
-	<button class="dl-button" 
-			type="button" 
-			(click)="resetSelection()" 
-			[disabled]="selectionEmpty" 
-			title="unselect all">
-		<i class="fas fa-broom"></i>
-	</button>
+    <button class="dl-button" type="button" (click)="treeService.updateTree()" title="refresh">
+        <i class="fa-solid fa-arrows-rotate"></i>
+    </button>
+    <button class="dl-button" type="button" (click)="treeService.collapseAll()" title="collapse all">
+        <i class="fa-solid fa-chevron-up"></i>
+    </button>
+    <button class="dl-button" type="button" (click)="treeService.scrollToSelected()" title="scroll to selected">
+        <i class="fa-solid fa-arrows-to-circle"></i>
+    </button>
+    <button
+        class="dl-button"
+        type="button"
+        (click)="downloadSelected()"
+        [disabled]="selectionEmpty"
+        title="download selection">
+        <i class="fas fa-download"></i>
+    </button>
+    <button
+        class="dl-button"
+        type="button"
+        (click)="goToProcessing()"
+        [disabled]="selectionEmpty"
+        title="process selection">
+        <i class="fas fa-rocket"></i>
+    </button>
+    <button
+        class="dl-button"
+        type="button"
+        (click)="openInViewer()"
+        [disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)"
+        [title]="
+            loaded && canOpenDicomMultiExam
+                ? 'view DICOM images for the selected acquisitions/examinations'
+                : 'view selected DICOM images for the one examination selected'
+        ">
+        <double-awesome
+            main="fas fa-eye"
+            [sub]="loaded && canOpenDicomMultiExam ? 'far fa-copy' : 'far fa-file'"></double-awesome>
+    </button>
+    <button class="dl-button" type="button" (click)="resetSelection()" [disabled]="selectionEmpty" title="unselect all">
+        <i class="fas fa-broom"></i>
+    </button>
 </div>
 
-
 <div class="tree" #tree>
-	<study-node *ngIf="treeService.studyNode"
-			[input]="treeService.studyNode"
-			[hasBox]="true"
-			[withMenu]="false"
-			(nodeInit)="treeService.studyNodeInit.resolve()"
-			(selectedChange)="onSelectedChange($event)">
-	</study-node>
+    @if (treeService.studyNode) {
+        <study-node
+            [input]="treeService.studyNode"
+            [hasBox]="true"
+            [withMenu]="false"
+            (nodeInit)="treeService.studyNodeInit.resolve()"
+            (selectedChange)="onSelectedChange($event)"></study-node>
+    }
 </div>
 
 <ng-content></ng-content>

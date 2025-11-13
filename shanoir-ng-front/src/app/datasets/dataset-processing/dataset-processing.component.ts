@@ -46,7 +46,7 @@ import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
     styleUrls: ['dataset-processing.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, RouterLink, NgSwitchDefault, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe]
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {

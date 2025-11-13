@@ -14,7 +14,7 @@
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { NgIf } from '@angular/common';
+
 
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
@@ -39,7 +39,7 @@ import { ServiceLocator } from './utils/locator.service';
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
     animations: [slideRight, slideMarginLeft, parent],
-    imports: [NgIf, SideMenuComponent, BreadcrumbsComponent, StudyTreeComponent, RouterOutlet, ConsoleComponent, MsgBoxComponent, LoaderComponent]
+    imports: [SideMenuComponent, BreadcrumbsComponent, StudyTreeComponent, RouterOutlet, ConsoleComponent, MsgBoxComponent, LoaderComponent]
 })
 
 export class AppComponent implements OnInit {

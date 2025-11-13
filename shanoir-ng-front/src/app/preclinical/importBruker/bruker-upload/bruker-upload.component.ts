@@ -22,7 +22,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
 import { UploaderComponent } from '../../../shared/components/uploader/uploader.component';
-import { NgIf, NgSwitch } from '@angular/common';
+
 import { CheckboxComponent } from '../../../shared/checkbox/checkbox.component';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -32,7 +32,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     templateUrl: 'bruker-upload.component.html',
     styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
     animations: [slideDown],
-    imports: [UploaderComponent, NgIf, NgSwitch, CheckboxComponent]
+    imports: [UploaderComponent, CheckboxComponent]
 })
 export class BrukerUploadComponent {
 

@@ -12,10 +12,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<li #container
-        [class.opened]="opened"
-        [class.animate]="overflow">
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened"> 
-        <div class="sub-sub-content"><ng-content></ng-content></div>
-    </ul>
+<li #container [class.opened]="opened" [class.animate]="overflow">
+    @if (opened) {
+        <ul #contentWrapper class="sub-content" [@menuSlideRight]="opened">
+            <div class="sub-sub-content"><ng-content></ng-content></div>
+        </ul>
+    }
 </li>

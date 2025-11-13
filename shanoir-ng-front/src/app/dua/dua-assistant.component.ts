@@ -37,7 +37,7 @@ import { TooltipComponent } from '../shared/components/tooltip/tooltip.component
     selector: 'dua-assistant',
     templateUrl: 'dua-assistant.component.html',
     styleUrls: ['dua-assistant.component.css'],
-    imports: [NgIf, HeaderComponent, RouterLink, FormsModule, ReactiveFormsModule, UploaderComponent, TooltipComponent]
+    imports: [HeaderComponent, RouterLink, FormsModule, ReactiveFormsModule, UploaderComponent, TooltipComponent]
 })
 
 export class DUAAssistantComponent implements OnDestroy {

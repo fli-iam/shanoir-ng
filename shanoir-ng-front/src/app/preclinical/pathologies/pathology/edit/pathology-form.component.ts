@@ -20,14 +20,14 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 
 @Component({
     selector: 'pathology-form',
     templateUrl: 'pathology-form.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class PathologyFormComponent extends EntityComponent<Pathology>{
 

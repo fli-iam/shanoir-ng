@@ -26,14 +26,14 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 
 @Component({
     selector: 'manufacturer-model-detail',
     templateUrl: 'manufacturer-model.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, NgSwitchDefault, SelectBoxComponent, RouterLink]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, SelectBoxComponent, RouterLink]
 })
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {

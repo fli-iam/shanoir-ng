@@ -15,13 +15,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'help-message',
     templateUrl: 'help-message.component.html',
     styleUrls: ['help-message.component.css'],
-    imports: [NgIf]
+    imports: []
 })
 export class HelpMessageComponent implements OnInit {
 

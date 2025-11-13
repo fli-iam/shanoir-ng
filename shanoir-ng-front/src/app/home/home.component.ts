@@ -25,7 +25,7 @@ import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
-import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
 import { ChallengeBlockComponent } from './challenge/challenge-block.component';
 import { RouterLink } from '@angular/router';
@@ -35,7 +35,7 @@ import { EventTypePipe } from '../async-tasks/event.pipe';
     selector: 'home',
     templateUrl: 'home.component.html',
     styleUrls: ['home.component.css'],
-    imports: [NgIf, DUASigningComponent, NgFor, ChallengeBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
+    imports: [DUASigningComponent, ChallengeBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
 })
 
 export class HomeComponent {

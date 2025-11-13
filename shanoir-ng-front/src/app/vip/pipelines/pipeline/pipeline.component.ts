@@ -2,13 +2,13 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { Pipeline } from 'src/app/vip/models/pipeline';
 import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'app-pipeline',
     templateUrl: './pipeline.component.html',
     styleUrls: ['./pipeline.component.css'],
-    imports: [NgIf]
+    imports: []
 })
 export class PipelineComponent implements OnInit {
 

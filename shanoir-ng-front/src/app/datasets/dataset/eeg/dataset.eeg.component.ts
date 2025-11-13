@@ -21,12 +21,12 @@ import { BrowserPaging } from '../../../shared/components/table/browser-paging.m
 import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
 import{ Channel , EegDataset }from '../eeg/dataset.eeg.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'eeg-dataset-details',
     templateUrl: 'dataset.eeg.component.html',
-    imports: [NgIf, TableComponent]
+    imports: [TableComponent]
 })
 
 export class EegDatasetComponent implements OnInit  {

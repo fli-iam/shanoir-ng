@@ -36,7 +36,7 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
@@ -52,7 +52,7 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
     styleUrls: ['study-node.component.css'],
-    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, NgFor, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
 })
 
 export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> implements OnChanges {

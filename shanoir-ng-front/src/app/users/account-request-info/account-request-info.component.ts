@@ -14,7 +14,7 @@
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Location, NgIf } from '@angular/common';
+import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
@@ -34,7 +34,7 @@ import { AccountRequestInfo } from './account-request-info.model';
             multi: true,
         }
     ],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 

@@ -24,7 +24,7 @@ import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
-import { NgIf, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { TooltipComponent } from '../../components/tooltip/tooltip.component';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { TreeNodeComponent } from '../../components/tree/tree-node.component';
@@ -34,7 +34,7 @@ import { SizePipe } from '../../utils/size.pipe';
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
     styleUrls: ['download-setup.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, NgIf, SelectBoxComponent, TooltipComponent, CheckboxComponent, TreeNodeComponent, NgTemplateOutlet, SizePipe]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent, CheckboxComponent, TreeNodeComponent, NgTemplateOutlet, SizePipe]
 })
 
 export class DownloadSetupComponent implements OnInit, OnDestroy {

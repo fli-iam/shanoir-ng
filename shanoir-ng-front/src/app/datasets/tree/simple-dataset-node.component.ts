@@ -21,7 +21,7 @@ import { MassDownloadService } from "../../shared/mass-download/mass-download.se
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { FormsModule } from '@angular/forms';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
@@ -33,7 +33,7 @@ import { ProcessingNodeComponent } from './processing-node.component';
 @Component({
     selector: 'simple-dataset-node',
     templateUrl: 'dataset-node.component.html',
-    imports: [NgIf, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, NgFor, ProcessingNodeComponent]
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, ProcessingNodeComponent]
 })
 
 export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {

@@ -19,7 +19,7 @@ import { menuAnimDur, menuSlideRight } from '../../animations/animations';
 import { GlobalService } from '../../services/global.service';
 
 import { MenuItemComponent } from './menu-item/menu-item.component';
-import { NgIf } from '@angular/common';
+
 
 // @dynamic
 @Component({
@@ -27,7 +27,7 @@ import { NgIf } from '@angular/common';
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
     animations: [menuSlideRight],
-    imports: [NgIf]
+    imports: []
 })
 export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewInit {
 

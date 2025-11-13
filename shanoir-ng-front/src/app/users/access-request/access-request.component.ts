@@ -26,7 +26,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 
 import { AccessRequest } from './access-request.model'
 import { AccessRequestService } from './access-request.service';
-import { NgIf } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 
 
@@ -34,7 +34,7 @@ import { FormFooterComponent } from '../../shared/components/form-footer/form-fo
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {

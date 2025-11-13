@@ -12,9 +12,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="(model && model == true && !inverse) || (!model && inverse)">
-    <i class="fas fa-check"></i>
-</div>
-<div *ngIf="model == 'indeterminate'">
-    <i class="fas fa-ellipsis-h"></i>
-</div>
+@if ((model && model == true && !inverse) || (!model && inverse)) {
+    <div>
+        <i class="fas fa-check"></i>
+    </div>
+}
+@if (model == "indeterminate") {
+    <div>
+        <i class="fas fa-ellipsis-h"></i>
+    </div>
+}

@@ -14,28 +14,54 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="button button-top">
     <div class="tab" (click)="open = !open" title="open console">
-        <i class="fa-solid fa-chevron-up" *ngIf="!open"></i>
-        <i class="fa-solid fa-chevron-down" *ngIf="open"></i>
+        @if (!open) {
+            <i class="fa-solid fa-chevron-up"></i>
+        }
+        @if (open) {
+            <i class="fa-solid fa-chevron-down"></i>
+        }
     </div>
 </div>
-<div *ngIf="contentOpen" class="content">
-    <div class="right-tab">
-        <i class="fa-solid fa-chevron-right" *ngIf="!deployed" (click)="deployed = true"></i>
-        <i class="fa-solid fa-chevron-left" *ngIf="deployed" (click)="deployed = false"></i>
+@if (contentOpen) {
+    <div class="content">
+        <div class="right-tab">
+            @if (!deployed) {
+                <i class="fa-solid fa-chevron-right" (click)="deployed = true"></i>
+            }
+            @if (deployed) {
+                <i class="fa-solid fa-chevron-left" (click)="deployed = false"></i>
+            }
+        </div>
+        @for (msg of messages; track msg) {
+            <div [class]="msg.type" [class.fresh]="msg.fresh">
+                @if (msg.type == "info") {
+                    <i class="fas fa-check-circle"></i>
+                }
+                @if (msg.type == "warn") {
+                    <i class="fas fa-exclamation-circle"></i>
+                }
+                @if (msg.type == "error") {
+                    <i class="fas fa-times-circle"></i>
+                }
+                {{ msg.txt }}
+                @if (msg.nb > 1) {
+                    <span class="number">x{{ msg.nb }}</span>
+                }
+                @if (msg.details) {
+                    <span (click)="toggleDetails(msg)" class="details-button">
+                        <i class="fas fa-info"></i>
+                    </span>
+                }
+                @if (msg.detailsOpened) {
+                    <span class="details">
+                        <ul>
+                            @for (det of msg.details; track det) {
+                                <li>{{ det }}</li>
+                            }
+                        </ul>
+                    </span>
+                }
+            </div>
+        }
     </div>
-    <div *ngFor="let msg of messages" [class]="msg.type" [class.fresh]="msg.fresh">
-        <i *ngIf="msg.type == 'info'" class="fas fa-check-circle"></i>
-        <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
-        <i *ngIf="msg.type == 'error'" class="fas fa-times-circle"></i>
-        {{msg.txt}}
-        <span *ngIf="msg.nb > 1" class="number">x{{msg.nb}}</span>
-        <span *ngIf="msg.details" (click)="toggleDetails(msg)" class="details-button">
-            <i class="fas fa-info"></i>
-        </span>
-        <span *ngIf="msg.detailsOpened" class="details">
-            <ul>
-                <li *ngFor="let det of msg.details">{{det}}</li>
-            </ul>
-        </span>
-    </div>
-</div>
+}

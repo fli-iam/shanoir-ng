@@ -12,18 +12,31 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div id="my-breadcrumbs">
-	<ul>
-		<li><a (click)="goHome()"><span class="before-icon"><i class="fas fa-home"></i></span>Home</a></li>
-		<li *ngIf="nbHidden > 0" class="ellipsis">
-			<a>
-				<i class="fa-solid fa-ellipsis"></i> 
-			</a>
-		</li>
-		<ng-container *ngFor="let step of displayedSteps; let i = index">
-			<li *ngIf="!step.disabled && step.label && step.label != 'Home'" [class.waiting]="step.isWaiting && step.displayWaitStatus">
-				<a (click)="clickStep(step)">{{step.label}}
-				<span class="after-icon" *ngIf="step.isWaiting && step.displayWaitStatus"><i class="fas fa-edit"></i></span></a>
-			</li>
-		</ng-container>
-	</ul>
+    <ul>
+        <li>
+            <a (click)="goHome()">
+                <span class="before-icon"><i class="fas fa-home"></i></span>
+                Home
+            </a>
+        </li>
+        @if (nbHidden > 0) {
+            <li class="ellipsis">
+                <a>
+                    <i class="fa-solid fa-ellipsis"></i>
+                </a>
+            </li>
+        }
+        @for (step of displayedSteps; track step; let i = $index) {
+            @if (!step.disabled && step.label && step.label != "Home") {
+                <li [class.waiting]="step.isWaiting && step.displayWaitStatus">
+                    <a (click)="clickStep(step)">
+                        {{ step.label }}
+                        @if (step.isWaiting && step.displayWaitStatus) {
+                            <span class="after-icon"><i class="fas fa-edit"></i></span>
+                        }
+                    </a>
+                </li>
+            }
+        }
+    </ul>
 </div>

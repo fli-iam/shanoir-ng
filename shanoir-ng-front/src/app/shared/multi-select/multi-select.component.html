@@ -12,28 +12,30 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span *ngFor="let option of selectedOptions; let i = index"
+@for (option of selectedOptions; track option; let i = $index) {
+    <span
         class="left-icon block"
         [class.dark]="getFontColor(option.backgroundColor)"
         [style.background-color]="option.backgroundColor">
-    <i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
-    <span class="label">{{option.label}}</span>
-</span>
+        <i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
+        <span class="label">{{ option.label }}</span>
+    </span>
+}
 
 <span class="select-wrapper">
     <span class="open-icon"><i class="fa-solid fa-plus"></i></span>
-    <select 
-            *ngIf="!readOnly"
-            [disabled]="disabled"
-            [ngModel]="null"
-            (ngModelChange)="onSelectOption($event)">
-        <option *ngFor="let option of options"
-                [class.disabled]="option.disabled"
-                [style.color]="option.color"
-                [style.background-color]="option.backgroundColor"
-                [ngValue]="option.value"
-                [disabled]="option.disabled">
-            {{pipe ? pipe.transform(option.value) : option.label}}
-        </option>
-    </select>
+    @if (!readOnly) {
+        <select [disabled]="disabled" [ngModel]="null" (ngModelChange)="onSelectOption($event)">
+            @for (option of options; track option) {
+                <option
+                    [class.disabled]="option.disabled"
+                    [style.color]="option.color"
+                    [style.background-color]="option.backgroundColor"
+                    [ngValue]="option.value"
+                    [disabled]="option.disabled">
+                    {{ pipe ? pipe.transform(option.value) : option.label }}
+                </option>
+            }
+        </select>
+    }
 </span>

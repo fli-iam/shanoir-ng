@@ -12,32 +12,43 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-
-<table *ngIf="challengeStudy"><tr>
-    <td class="left-cell">
-        <div class="block-title">
-            <span class="challenge-title">
-                <i class="fas fa-trophy"></i>
-                Challenge
-                <i class="fas fa-trophy"></i>
-            </span>
-        </div>
-        <p class="challenge-name">{{challengeStudy.name}}</p>
-        <p class="msg">Here you can now download all the ressources you need for the challenge and explore its data using Shanoir</p>
-    </td>
-    <td>
-        <ul class="challenge-files">
-            <div [hidden]="!downloadState?.progress">
-                <progress-bar [progress]="downloadState?.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-            </div>
-            <li *ngFor="let filePath of challengeStudy.protocolFilePaths">
-                <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
-                <span (click)="downloadFile(filePath)">{{filePath}}</span>
-            </li>
-            <li class="study">
-                <i class="fa-regular fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
-                <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
-            </li>
-        </ul>
-    </td>
-</tr></table>
+@if (challengeStudy) {
+    <table>
+        <tr>
+            <td class="left-cell">
+                <div class="block-title">
+                    <span class="challenge-title">
+                        <i class="fas fa-trophy"></i>
+                        Challenge
+                        <i class="fas fa-trophy"></i>
+                    </span>
+                </div>
+                <p class="challenge-name">{{ challengeStudy.name }}</p>
+                <p class="msg">
+                    Here you can now download all the ressources you need for the challenge and explore its data using
+                    Shanoir
+                </p>
+            </td>
+            <td>
+                <ul class="challenge-files">
+                    <div [hidden]="!downloadState?.progress">
+                        <progress-bar
+                            [progress]="downloadState?.progress"
+                            [text]="'Preparing download'"
+                            [unknownDownload]="true"></progress-bar>
+                    </div>
+                    @for (filePath of challengeStudy.protocolFilePaths; track filePath) {
+                        <li>
+                            <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
+                            <span (click)="downloadFile(filePath)">{{ filePath }}</span>
+                        </li>
+                    }
+                    <li class="study">
+                        <i class="fa-regular fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
+                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+}

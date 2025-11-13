@@ -16,12 +16,12 @@ import { Component, Input } from '@angular/core';
 
 import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../instrument-assessment/instrument.model'
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { NgFor } from '@angular/common';
+
 
 @Component({
     selector: 'instrument-assessment-detail',
     templateUrl: 'instrument-assessment.component.html',
-    imports: [TreeNodeComponent, NgFor]
+    imports: [TreeNodeComponent]
 })
 
 export class InstrumentAssessmentComponent {

@@ -35,7 +35,7 @@ import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisit
 import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+
 import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
@@ -46,7 +46,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
     animations: [slideDown],
-    imports: [CheckboxComponent, FormsModule, NgIf, SelectBoxComponent, UploaderComponent, LoadingBarComponent]
+    imports: [CheckboxComponent, FormsModule, SelectBoxComponent, UploaderComponent, LoadingBarComponent]
 })
 export class DicomUploadComponent implements OnDestroy {
 

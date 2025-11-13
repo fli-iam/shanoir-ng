@@ -29,14 +29,14 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { CamelPipe } from '../../../../utils/app.utils';
 
 @Component({
     selector: 'examination-anesthetic-form',
     templateUrl: 'examinationAnesthetic-form.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor, CamelPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CamelPipe]
 })
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
 

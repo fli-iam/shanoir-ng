@@ -13,292 +13,529 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ng-template #tableRow let-item="rowItem" let-itemIndex="i" let-columnDefs="columnDefinitions">
-    <ng-container *ngFor="let col of columnDefs; let colIndex = index">
-        <ng-container *ngVar="{
+    @for (col of columnDefs; track col; let colIndex = $index) {
+        <ng-container
+            *ngVar="{
                 render: renderCell(item, col),
                 route: col.route ? col.route(item) : null,
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
                 rowRoute: rowRoute ? rowRoute(item) : null,
-                possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
+                possibleValues:
+                    page?._savedContentRendering && page?._savedContentRendering[itemIndex]
+                        ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues
+                        : null,
                 cellValue: getCellValue(item, col),
-                cellGraphics: getCellGraphics(item, col)
-        } as vars">
-            <td
-                    *ngIf="!col.hidden"
-                    class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}"
+                cellGraphics: getCellGraphics(item, col),
+            } as vars">
+            @if (!col.hidden) {
+                <td
+                    class="cell cell-{{ $any(col).field != undefined ? $any(col).field : 'nofield' }} {{
+                        getCellTypeStr(col)
+                    }}"
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [class.multi]="editMode && col.multi"
-                    [attr.title]="col.tip != undefined ? col.tip(item) : (vars.render.text ? vars.render.text : '')"
+                    [attr.title]="col.tip != undefined ? col.tip(item) : vars.render.text ? vars.render.text : ''"
                     [style.color]="vars.render?.color"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
-                    #refTd
-                    >
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="col.wrap">
-
-                    <!-- default display -->
-                    <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
-                        <span class="default-data-parent" title="{{vars.render.text ? vars.render.text : vars.render}}"
-                            [style.color]="vars.cellGraphics?.color"
-                            [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
-                            [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
-                            [class.block]="vars.cellGraphics?.tag"
-                        >
-                            <i *ngIf="vars.cellGraphics?.awesome" class="{{vars.cellGraphics.awesome}}"></i>
-                            {{vars.render.text ? vars.render.text : vars.render}}
+                    #refTd>
+                    @if (col.type != "button") {
+                        <div
+                            class="cell-container"
+                            (click)="col.type == 'button' ? null : onRowClick(item)"
+                            [class.table-edit]="editMode"
+                            [class.select]="!!col.possibleValues"
+                            [class.multiselect]="!!col.possibleValues && col.multi"
+                            [class.wrap]="col.wrap">
+                            <!-- default display -->
+                            @if (
+                                !(editMode && vars.editable) &&
+                                !vars.route &&
+                                !vars.boolean &&
+                                col.type != "progress" &&
+                                !col.multi &&
+                                col.type != "button"
+                            ) {
+                                <a class="cell-new-tab" [routerLink]="vars.rowRoute">
+                                    <span
+                                        class="default-data-parent"
+                                        title="{{ vars.render.text ? vars.render.text : vars.render }}"
+                                        [style.color]="vars.cellGraphics?.color"
+                                        [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
+                                        [style.background-color]="
+                                            vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null
+                                        "
+                                        [class.block]="vars.cellGraphics?.tag">
+                                        @if (vars.cellGraphics?.awesome) {
+                                            <i class="{{ vars.cellGraphics.awesome }}"></i>
+                                        }
+                                        {{ vars.render.text ? vars.render.text : vars.render }}
+                                    </span>
+                                </a>
+                            }
+                            <!-- link -->
+                            @if (!(editMode && vars.editable) && vars.route && !col.multi) {
+                                <a
+                                    [routerLink]="vars.rowRoute"
+                                    class="cell-new-tab"
+                                    title="{{ vars.render.text ? vars.render.text : vars.render }}">
+                                    <a
+                                        class="link"
+                                        [routerLink]="item.eventType != 'downloadStatistics.event' ? vars.route : null"
+                                        routerLinkActive="active"
+                                        (click)="downloadStats(item)">
+                                        {{ vars.render.text ? vars.render.text : vars.render }}
+                                        @if (!col.awesome) {
+                                            <i class="fas fa-external-link-alt"></i>
+                                        }
+                                        @if (col.awesome) {
+                                            <span class="awesome">
+                                                @if (col.awesome) {
+                                                    <i [class]="col.awesome"></i>
+                                                }
+                                            </span>
+                                        }
+                                    </a>
+                                </a>
+                            }
+                            <!-- multi -->
+                            @if (!editMode && col.multi) {
+                                <a [routerLink]="vars.rowRoute" class="cell-new-tab">
+                                    @for (oneVal of getFieldRawValue(item, col["field"]); track oneVal) {
+                                        <span
+                                            class="block"
+                                            [style.color]="oneVal.backgroundColor"
+                                            [style.background-color]="oneVal.color"
+                                            [class.dark]="getFontColor(oneVal.color)">
+                                            <span class="label">
+                                                {{ oneVal.label ? oneVal.label : oneVal.name ? oneVal.name : oneVal }}
+                                            </span>
+                                        </span>
+                                    }
+                                </a>
+                            }
+                            <!-- display a boolean -->
+                            @if (vars.boolean && (!editMode || !vars.editable)) {
+                                <a [routerLink]="vars.rowRoute" class="cell-new-tab">
+                                    @if (vars.cellValue == true && !col.awesome && !col.awesomeFalse) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    }
+                                    @if (vars.cellValue == false && !col.awesome && !col.awesomeFalse) {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                                    @if (vars.cellValue == true && col.awesome) {
+                                        <span class="bool-true">
+                                            <i [class]="col.awesome" [style.color]="col.color"></i>
+                                        </span>
+                                    }
+                                    @if (!vars.cellValue && col.awesomeFalse) {
+                                        <span class="bool-false">
+                                            <i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i>
+                                        </span>
+                                    }
+                                </a>
+                            }
+                        </div>
+                    }
+                    <!-- editable boolean -->
+                    @if (vars.boolean && editMode && vars.editable) {
+                        <checkbox
+                            [ngModel]="vars.cellValue"
+                            (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
+                    }
+                    <!-- editable text / number -->
+                    @if (
+                        editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues
+                    ) {
+                        <input
+                            type="text"
+                            [ngModel]="getFieldRawValue(item, col['field'])"
+                            (ngModelChange)="onFieldEdit(item, col, $event)" />
+                    }
+                    <!-- editable with dropdown -->
+                    @if (
+                        editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues
+                    ) {
+                        <!-- single -->
+                        @if (!col.multi) {
+                            <select
+                                [ngModel]="getFieldRawValue(item, col['field'])"
+                                (ngModelChange)="onFieldEdit(item, col, $event)">
+                                @for (possibleValue of vars.possibleValues; track possibleValue) {
+                                    <option [value]="possibleValue.value">{{ possibleValue.label }}</option>
+                                }
+                            </select>
+                        }
+                        <!-- multi -->
+                        @if (col.multi) {
+                            <multi-select
+                                [ngModel]="getFieldRawValue(item, col['field'])"
+                                (ngModelChange)="onFieldEdit(item, col, $event)"
+                                [options]="vars.possibleValues"></multi-select>
+                        }
+                    }
+                    <!-- display a button -->
+                    @if (
+                        col.type == "button" &&
+                        !rowDisabled(item) &&
+                        col.action &&
+                        (!col.condition || col.condition(item))
+                    ) {
+                        <span class="button" (click)="col.action(item)">
+                            @if (col.img) {
+                                <img src="{{ col.img }}" alt="image {{ col.title }}" />
+                            }
+                            @if (col.awesome) {
+                                <span class="awesome"><i [class]="col.awesome"></i></span>
+                            }
                         </span>
-                    </a>
-
-                    <!-- link -->
-                    <a [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab" title="{{vars.render.text ? vars.render.text : vars.render}}">
-                        <a class="link" [routerLink]="(item.eventType != 'downloadStatistics.event') ? vars.route : null" routerLinkActive="active" (click)="downloadStats(item)">{{vars.render.text ? vars.render.text : vars.render}}
-                            <i *ngIf="!col.awesome" class="fas fa-external-link-alt"></i>
-                            <span *ngIf="col.awesome" class="awesome">
-                                <i *ngIf="col.awesome" [class]="col.awesome"></i>
-                            </span>
-                        </a>
-                    </a>
-
-                    <!-- multi -->
-                    <a [routerLink]="vars.rowRoute" *ngIf="!editMode && col.multi"  class="cell-new-tab">
-                        <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color" [class.dark]="getFontColor(oneVal.color)">
-                            <span class="label">
-                                {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
-                            </span>
-                        </span>
-                    </a>
-
-                    <!-- display a boolean -->
-                    <a [routerLink]="vars.rowRoute" *ngIf="vars.boolean && (!editMode || !vars.editable)"  class="cell-new-tab">
-                        <span *ngIf="vars.cellValue == true && !col.awesome && !col.awesomeFalse" class="bool-true"><i class="fas fa-check"></i></span>
-                        <span *ngIf="vars.cellValue == false && !col.awesome && !col.awesomeFalse" class="bool-false"><i class="fas fa-times"></i></span>
-                        <span *ngIf="vars.cellValue == true && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
-                        <span *ngIf="!vars.cellValue && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
-                    </a>
-                </div>
-
-                <!-- editable boolean -->
-                <ng-container *ngIf="vars.boolean && editMode && vars.editable">
-                    <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
-                </ng-container>
-
-                <!-- editable text / number -->
-                <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
-                    <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
-                </ng-container>
-
-                <!-- editable with dropdown -->
-                <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
-                    <!-- single -->
-                    <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                        <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
-                    </select>
-                    <!-- multi -->
-                    <ng-container *ngIf="col.multi">
-                        <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
-                    </ng-container>
-                </ng-container>
-
-                <!-- display a button -->
-                <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item) && col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
-                    <img *ngIf="col.img" src="{{col.img}}" alt="image {{col.title}}"/>
-                    <span *ngIf="col.awesome" class="awesome"><i [class]="col.awesome"></i></span>
-                </span>
-
-                <!-- display a progress bar -->
-                <ng-container *ngIf="col.type == 'progress'">
-                    <progress-bar [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render" width="100" [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
-                </ng-container>
-                <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
-            </td>
+                    }
+                    <!-- display a progress bar -->
+                    @if (col.type == "progress") {
+                        <progress-bar
+                            [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render"
+                            width="100"
+                            [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
+                    }
+                    @if (colIndex < columnDefs.length - 1) {
+                        <div
+                            class="resizer"
+                            (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)"
+                            (mouseup)="stopDrag()"></div>
+                    }
+                </td>
+            }
         </ng-container>
-    </ng-container>
+    }
 </ng-template>
 
 <ng-template #th let-col="column" let-i="index" let-columnDefs="columnDefinitions" let-sub="subRows">
-    <th
-            *ngIf="!col.hidden"
-            class="{{getColTypeStr(col)}}"
-            [class.sortable]="!col.disableSorting && col.type!='button'"
-            [class.active]="lastSortedCol==col"
+    @if (!col.hidden) {
+        <th
+            class="{{ getColTypeStr(col) }}"
+            [class.sortable]="!col.disableSorting && col.type != 'button'"
+            [class.active]="lastSortedCol == col"
             [attr.title]="col.headerName"
             [style.width]="col.width"
             [class.sub-header]="sub"
             #refTh>
-        <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="!sub && $any(lastSortedCol)?.field==$any(col).field && !col.disableSorting && col.type!='button'">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
-                <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
-            </svg>
-        </span>
-        <div *ngIf="!sub" class="click-dummy" (click)="sortBy(col)" [class.resizing]="currentDrag"></div>
-        <span class="col-title">{{col.headerName}}</span>
-        <div *ngIf="i < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(i, refTh, $event, columnDefs)" (mouseup)="stopDrag()"></div>
-    </th>
+            @if (!sub && $any(lastSortedCol)?.field == $any(col).field && !col.disableSorting && col.type != "button") {
+                <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                        @if (lastSortedAsc) {
+                            <polygon points="0,0 100,0 50,100" />
+                        }
+                        @if (!lastSortedAsc) {
+                            <polygon points="0,100 100,100 50,0" />
+                        }
+                    </svg>
+                </span>
+            }
+            @if (!sub) {
+                <div class="click-dummy" (click)="sortBy(col)" [class.resizing]="currentDrag"></div>
+            }
+            <span class="col-title">{{ col.headerName }}</span>
+            @if (i < columnDefs.length - 1) {
+                <div class="resizer" (mousedown)="startDrag(i, refTh, $event, columnDefs)" (mouseup)="stopDrag()"></div>
+            }
+        </th>
+    }
 </ng-template>
 
-
-
 <!-- Control bar -->
-<caption class="controls" *ngIf="selectionAllowed || browserSearch || (customActionDefs?.length > 0)">
-    <span *ngIf="selectionAllowed" class="select-ctrl" [class.with-sub]="subRowsDefs">
-        <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
-    </span>
-    <span class="ctrl-right" [class.with-sub]="subRowsDefs">
-        <!-- Text search -->
-        <span *ngIf="browserSearch" class="text-search">
-            <shanoir-table-search #search [columnDefs]="columnDefs" [(filter)]="filter" (filterChange)="onSearchChange($event)"></shanoir-table-search>
+@if (selectionAllowed || browserSearch || customActionDefs?.length > 0) {
+    <caption class="controls">
+        @if (selectionAllowed) {
+            <span class="select-ctrl" [class.with-sub]="subRowsDefs">
+                <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
+            </span>
+        }
+        <span class="ctrl-right" [class.with-sub]="subRowsDefs">
+            <!-- Text search -->
+            @if (browserSearch) {
+                <span class="text-search">
+                    <shanoir-table-search
+                        #search
+                        [columnDefs]="columnDefs"
+                        [(filter)]="filter"
+                        (filterChange)="onSearchChange($event)"></shanoir-table-search>
+                </span>
+            }
+            <!-- User defined buttons -->
+            @for (command of customActionDefs; track command) {
+                <span class="command-block">
+                    @if (command.target != undefined) {
+                        <button
+                            type="button"
+                            [routerLink]="command.target"
+                            [queryParams]="command.getParams != undefined ? command.getParams() : null"
+                            routerLinkActive="active"
+                            [disabled]="
+                                (command.disabledIfNoSelected && selection.size == 0) ||
+                                (command.disabledIfNoResult && items?.length == 0)
+                            ">
+                            @if (command.img) {
+                                <img src="{{ command.img }}" alt="image {{ command.title }}" />
+                            }
+                            @if (command.awesome) {
+                                <span class="awesome"><i class="fas {{ command.awesome }}"></i></span>
+                            }
+                            <span>{{ command.title }}</span>
+                        </button>
+                    }
+                    @if (command.action != undefined) {
+                        <button
+                            type="button"
+                            (click)="command.action()"
+                            [disabled]="
+                                (command.disabledIfNoSelected && selection.size == 0) ||
+                                (command.disabledIfNoResult && items?.length == 0)
+                            ">
+                            {{ command.hasCopyRight }}
+                            @if (command.img) {
+                                <img src="{{ command.img }}" alt="image {{ command.title }}" />
+                            }
+                            @if (command.awesome) {
+                                <span class="awesome"><i class="fas {{ command.awesome }}"></i></span>
+                            }
+                            <span>{{ command.title }}</span>
+                        </button>
+                    }
+                </span>
+            }
         </span>
-        <!-- User defined buttons -->
-        <span *ngFor="let command of customActionDefs" class="command-block">
-            <button type="button" *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
-                <img *ngIf="command.img" src="{{command.img}}" alt="image {{command.title}}"/>
-                <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
-                <span>{{command.title}}</span>
-            </button>
-            <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
-                {{ command.hasCopyRight }}
-                <img *ngIf="command.img" src="{{command.img}}" alt="image {{command.title}}"/>
-                <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
-                <span>{{command.title}}</span>
-            </button>
-        </span>
-    </span>
-</caption>
+    </caption>
+}
 <!-- Headers -->
 <thead (mousemove)="moveDrag($event)">
-<tr class="full-row">
-    <th *ngIf="subRowsDefs" class="checkbox-col"></th>
-    <th *ngIf="selectionAllowed" class="checkbox-col"></th>
-    <ng-container *ngFor="let col of columnDefs; let i = index">
-        <ng-template [ngTemplateOutlet]="th" [ngTemplateOutletContext]="{column: col, index: i, columnDefinitions: columnDefs}"></ng-template>
-    </ng-container>
-</tr>
+    <tr class="full-row">
+        @if (subRowsDefs) {
+            <th class="checkbox-col"></th>
+        }
+        @if (selectionAllowed) {
+            <th class="checkbox-col"></th>
+        }
+        @for (col of columnDefs; track col; let i = $index) {
+            <ng-template
+                [ngTemplateOutlet]="th"
+                [ngTemplateOutletContext]="{ column: col, index: i, columnDefinitions: columnDefs }"></ng-template>
+        }
+    </tr>
 </thead>
 <!-- Table content -->
-<tbody *ngIf="items?.length > 0" (mousemove)="moveDrag($event)">
-<ng-container *ngFor="let item of items; let i = index">
-<tr
-    [class.odd]="i%2!=0"
-    [class.even]="i%2==0"
-    [class.disabled]="rowDisabled(item)"
-    [class.edit]="editMode"
-    [class.selected]="(selectionAllowed && isSelected(item)) || (!!item.id && selectedId == item.id)"
-    [class.opened]="subRowsDefs && subRowOpen[i]">
-    <td *ngIf="subRowsDefs" class="checkbox-cell deploy-cell">
-        <i *ngIf="!subRowOpen[i]" (click)="deploy(i)" class="fa-solid fa-plus"></i>
-        <i *ngIf="subRowOpen[i]" (click)="fold(i)" class="fa-solid fa-minus"></i>
-    </td>
-    <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
-    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: item, i: i, columnDefinitions: columnDefs}"></ng-template>
-
-</tr>
-<tr class="sub-container-tr" *ngIf="subRowsDefs && subRowOpen[i]" @slideDown>
-    <td class="sub-container-margin-td"></td>
-    <td [attr.colspan]="nbColumns" class="sub-container-td">
-        <table class="sub-container-table">
-            <thead>
-                <ng-container *ngFor="let col of subRowsDefs; let i = index">
-                    <ng-template [ngTemplateOutlet]="th" [ngTemplateOutletContext]="{column: col, index: i, columnDefinitions: subRowsDefs, subRows: true}"></ng-template>
-                </ng-container>
-            </thead>
-            <tbody>
-                <tr *ngFor="let subItem of item[subRowsKey]">
-                    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: subItem, i: i, columnDefinitions: subRowsDefs}"></ng-template>
+@if (items?.length > 0) {
+    <tbody (mousemove)="moveDrag($event)">
+        @for (item of items; track item; let i = $index) {
+            <tr
+                [class.odd]="i % 2 != 0"
+                [class.even]="i % 2 == 0"
+                [class.disabled]="rowDisabled(item)"
+                [class.edit]="editMode"
+                [class.selected]="(selectionAllowed && isSelected(item)) || (!!item.id && selectedId == item.id)"
+                [class.opened]="subRowsDefs && subRowOpen[i]">
+                @if (subRowsDefs) {
+                    <td class="checkbox-cell deploy-cell">
+                        @if (!subRowOpen[i]) {
+                            <i (click)="deploy(i)" class="fa-solid fa-plus"></i>
+                        }
+                        @if (subRowOpen[i]) {
+                            <i (click)="fold(i)" class="fa-solid fa-minus"></i>
+                        }
+                    </td>
+                }
+                @if (selectionAllowed) {
+                    <td class="checkbox-cell">
+                        <checkbox
+                            (ngModelChange)="onSelectChange(item, $event)"
+                            [ngModel]="isSelected(item)"></checkbox>
+                    </td>
+                }
+                <ng-template
+                    [ngTemplateOutlet]="tableRow"
+                    [ngTemplateOutletContext]="{ rowItem: item, i: i, columnDefinitions: columnDefs }"></ng-template>
+            </tr>
+            @if (subRowsDefs && subRowOpen[i]) {
+                <tr class="sub-container-tr" @slideDown>
+                    <td class="sub-container-margin-td"></td>
+                    <td [attr.colspan]="nbColumns" class="sub-container-td">
+                        <table class="sub-container-table">
+                            <thead>
+                                @for (col of subRowsDefs; track col; let i = $index) {
+                                    <ng-template
+                                        [ngTemplateOutlet]="th"
+                                        [ngTemplateOutletContext]="{
+                                            column: col,
+                                            index: i,
+                                            columnDefinitions: subRowsDefs,
+                                            subRows: true,
+                                        }"></ng-template>
+                                }
+                            </thead>
+                            <tbody>
+                                @for (subItem of item[subRowsKey]; track subItem) {
+                                    <tr>
+                                        <ng-template
+                                            [ngTemplateOutlet]="tableRow"
+                                            [ngTemplateOutletContext]="{
+                                                rowItem: subItem,
+                                                i: i,
+                                                columnDefinitions: subRowsDefs,
+                                            }"></ng-template>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </td>
                 </tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
-
-</ng-container>
-<!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-<tr *ngIf="items?.length > 0 && page?.totalPages > 1" class="full-row">
-    <th class="pager" [attr.colspan]="nbColumns">
-        <shanoir-pager
-            [currentPage]="currentPage"
-            [nbPages]="page ? page.totalPages : 0"
-            (pageChange)="goToPage($event)"
-        ></shanoir-pager>
-    </th>
-</tr>
-<tr [class.collapsable]="collapseControls">
-    <th class="status-bar controls" [attr.colspan]="nbColumns">
-        <!-- Nb results per page input -->
-        <span class="options">
-            <ng-container>
-                <span class="clickable bottom-refresh" (click)="refresh()">
-                    <span *ngIf="!isLoading">
-                        <i class="fas fa-sync-alt"></i>
-                    </span>
-                    <span *ngIf="isLoading">
-                        <i class="fas fa-sync-alt fa-spin"></i>
-                    </span>
+            }
+        }
+        <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
+        @if (items?.length > 0 && page?.totalPages > 1) {
+            <tr class="full-row">
+                <th class="pager" [attr.colspan]="nbColumns">
+                    <shanoir-pager
+                        [currentPage]="currentPage"
+                        [nbPages]="page ? page.totalPages : 0"
+                        (pageChange)="goToPage($event)"></shanoir-pager>
+                </th>
+            </tr>
+        }
+        <tr [class.collapsable]="collapseControls">
+            <th class="status-bar controls" [attr.colspan]="nbColumns">
+                <!-- Nb results per page input -->
+                <span class="options">
+                    <ng-container>
+                        <span class="clickable bottom-refresh" (click)="refresh()">
+                            @if (!isLoading) {
+                                <span>
+                                    <i class="fas fa-sync-alt"></i>
+                                </span>
+                            }
+                            @if (isLoading) {
+                                <span>
+                                    <i class="fas fa-sync-alt fa-spin"></i>
+                                </span>
+                            }
+                        </span>
+                        @if (selectionAllowed) {
+                            <span>Selected : {{ getNbSelected() }}</span>
+                        }
+                        @if (page && browserSearch) {
+                            <span>Found : {{ page?.numberOfElements }}</span>
+                        }
+                        @if (page) {
+                            <span>Total : {{ page?.totalElements }}</span>
+                        }
+                        <span>
+                            Page size :
+                            <input
+                                class="max-results"
+                                [(ngModel)]="maxResultsField"
+                                (change)="updateMaxResults()"
+                                type="text" />
+                        </span>
+                        <span>
+                            Go to :
+                            <input
+                                class="max-results"
+                                [(ngModel)]="pageNumber"
+                                (keyup.enter)="jumpToPage(pageNumber)"
+                                type="number"
+                                [min]="0"
+                                [max]="page?.totalPages" />
+                        </span>
+                        <span (click)="settingsOpened = true" class="clickable" title="Columns settings">
+                            <i class="fas fa-cog"></i>
+                            @if (!compactMode) {
+                                <span>Columns settings</span>
+                            }
+                        </span>
+                        <span (click)="resetColumns()" class="clickable" title="Reset columns">
+                            <i class="fas fa-undo-alt"></i>
+                            @if (!compactMode) {
+                                <span>Reset columns</span>
+                            }
+                        </span>
+                        <span (click)="exportTable()" class="clickable" title="Export as CSV">
+                            <i class="fas fa-file-export"></i>
+                            @if (!compactMode) {
+                                <span>Export CSV</span>
+                            }
+                        </span>
+                    </ng-container>
                 </span>
-                <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
-                <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
-                <span *ngIf="page">Total : {{page?.totalElements}}</span>
-                <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-                <span>Go to : <input class="max-results" [(ngModel)]="pageNumber" (keyup.enter)="jumpToPage(pageNumber)" type="number" [min]="0" [max]="page?.totalPages"/></span>
-                <span (click)="settingsOpened = true" class="clickable" title="Columns settings">
-                    <i class="fas fa-cog"></i>
-                    <span *ngIf="!compactMode">Columns settings</span>
-                </span>
-                <span (click)="resetColumns()" class="clickable" title="Reset columns">
-                    <i class="fas fa-undo-alt"></i>
-                    <span *ngIf="!compactMode">Reset columns</span>
-                </span>
-                <span (click)="exportTable()" class="clickable" title="Export as CSV">
-                    <i class="fas fa-file-export"></i>
-                    <span *ngIf="!compactMode">Export CSV</span>
-                </span>
-            </ng-container>
-        </span>
-    </th>
-</tr>
-</tbody>
+            </th>
+        </tr>
+    </tbody>
+}
 <!-- Empty table msg -->
-<tbody *ngIf="!items || items.length == 0">
-<tr>
-    <td *ngIf="!firstLoading" [attr.colspan]="nbColumns" class="empty">
-        <span *ngIf="!isError">No results</span>
-        <span *ngIf="isError" class="error">Error<i class="fas fa-exclamation-circle"></i></span>
-        <br/><span class="clickable refresh" (click)="!isLoading ? refresh() : null">
-            Refresh
-            <span *ngIf="!isLoading">
-                <i class="fas fa-sync-alt"></i>
-            </span>
-            <span *ngIf="isLoading">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </span>
-        </span>
-    </td>
+@if (!items || items.length == 0) {
+    <tbody>
+        <tr>
+            @if (!firstLoading) {
+                <td [attr.colspan]="nbColumns" class="empty">
+                    @if (!isError) {
+                        <span>No results</span>
+                    }
+                    @if (isError) {
+                        <span class="error">
+                            Error
+                            <i class="fas fa-exclamation-circle"></i>
+                        </span>
+                    }
+                    <br />
+                    <span class="clickable refresh" (click)="!isLoading ? refresh() : null">
+                        Refresh
+                        @if (!isLoading) {
+                            <span>
+                                <i class="fas fa-sync-alt"></i>
+                            </span>
+                        }
+                        @if (isLoading) {
+                            <span>
+                                <i class="fas fa-sync-alt fa-spin"></i>
+                            </span>
+                        }
+                    </span>
+                </td>
+            }
+            @if (firstLoading && isLoading) {
+                <td [attr.colspan]="nbColumns" class="empty">
+                    The data is loading
+                    <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
+                </td>
+            }
+        </tr>
+    </tbody>
+}
 
-    <td  *ngIf="firstLoading && isLoading"[attr.colspan]="nbColumns" class="empty">
-        The data is loading
-        <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
-    </td>
-</tr>
-</tbody>
-
-<div class="modal-host" *ngIf="settingsOpened">
-    <div class="modal-cell">
-        <div class="modal-window">
-            <div class="header">Table settings</div>
-            <div class="body">
-                <table>
-                    <tr *ngFor="let col of subRowsDefs ? columnDefs.concat(subRowsDefs) : columnDefs">
-                        <td>{{col.headerName}}</td>
-                        <td><checkbox [(ngModel)]="col.hidden" [inverse]=true (ngModelChange)="saveSettings()"></checkbox></td>
-                        <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()"></td>
-                    </tr>
-                </table>
-            </div>
-            <div class="footer">
-                <button type="button" (click)="resetColumns()">Reset</button>
-                <button type="button" (click)="settingsOpened = false">Close</button>
+@if (settingsOpened) {
+    <div class="modal-host">
+        <div class="modal-cell">
+            <div class="modal-window">
+                <div class="header">Table settings</div>
+                <div class="body">
+                    <table>
+                        @for (col of subRowsDefs ? columnDefs.concat(subRowsDefs) : columnDefs; track col) {
+                            <tr>
+                                <td>{{ col.headerName }}</td>
+                                <td>
+                                    <checkbox
+                                        [(ngModel)]="col.hidden"
+                                        [inverse]="true"
+                                        (ngModelChange)="saveSettings()"></checkbox>
+                                </td>
+                                <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()" /></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                <div class="footer">
+                    <button type="button" (click)="resetColumns()">Reset</button>
+                    <button type="button" (click)="settingsOpened = false">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}

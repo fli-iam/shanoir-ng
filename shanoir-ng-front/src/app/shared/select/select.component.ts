@@ -32,7 +32,7 @@ import { Subscription } from 'rxjs';
 
 import { findLastIndex, arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
-import { NgIf, NgFor } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 
 
@@ -47,7 +47,7 @@ import { RouterLink } from '@angular/router';
             multi: true,
         }
     ],
-    imports: [NgIf, FormsModule, RouterLink, NgFor]
+    imports: [FormsModule, RouterLink]
 })
 
 export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterViewInit {

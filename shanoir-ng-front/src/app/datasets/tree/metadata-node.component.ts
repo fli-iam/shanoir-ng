@@ -17,14 +17,14 @@ import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-n
 import { TreeService } from 'src/app/studies/study/tree.service';
 
 import { MetadataNode } from '../../tree/tree.model';
-import { NgIf } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 
 
 @Component({
     selector: 'metadata-node',
     templateUrl: 'metadata-node.component.html',
-    imports: [NgIf, TreeNodeComponent]
+    imports: [TreeNodeComponent]
 })
 
 export class MetadataNodeComponent extends TreeNodeAbstractComponent<MetadataNode> implements OnChanges {

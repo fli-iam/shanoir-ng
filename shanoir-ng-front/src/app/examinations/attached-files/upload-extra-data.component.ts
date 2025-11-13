@@ -26,7 +26,7 @@ import { Option, SelectBoxComponent } from '../../shared/select/select.component
 @Component({
     selector: 'upload-extra-data',
     templateUrl: 'upload-extra-data.component.html',
-    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, NgSwitch]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
 export class UploadExtraDataComponent implements OnInit, OnChanges {

@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {Router} from '@angular/router';
-import { formatDate, NgIf, NgFor } from '@angular/common';
+import { formatDate } from '@angular/common';
 
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
 import {Execution} from 'src/app/vip/models/execution';
@@ -28,7 +28,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, TooltipComponent, CheckboxComponent, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent, CheckboxComponent, SelectBoxComponent]
 })
 export class ExecutionComponent implements OnInit {
 

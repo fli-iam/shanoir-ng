@@ -24,7 +24,7 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 
 import { TaskService } from './task.service';
 import { Task } from './task.model';
-import { NgIf } from '@angular/common';
+
 import { TaskStatusComponent } from './status/task-status.component';
 
 
@@ -32,7 +32,7 @@ import { TaskStatusComponent } from './status/task-status.component';
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
     styleUrls: ['async-tasks.component.css'],
-    imports: [TableComponent, NgIf, TaskStatusComponent]
+    imports: [TableComponent, TaskStatusComponent]
 })
 
 export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {

@@ -13,175 +13,310 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="denyLoading || acceptLoading || footerState.loading">
-        <form-footer
-            [state]="footerState"
-            (save)="save()"
-            (edit)="goToEdit()"
-            (dismiss)="goToView()"
-            (back)="goBack()">
-            <button type="submit" *ngIf="mode != 'create' && user.accountRequestDemand" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
-                    class="Button">
-                Deny creation
-                <span *ngIf="!denyLoading">
-                    <i class="fas fa-times"></i>
-                </span><span *ngIf="denyLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button type="submit" *ngIf="mode != 'create' && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|Deny extension request button label@@editUserDenyExtensionRequestButton"
-                    class="Button">
-                Deny extension
-                <span *ngIf="!denyLoading">
-                    <i class="fas fa-times"></i>
-                </span><span *ngIf="denyLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button type="submit" *ngIf="mode != 'create' && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()"
-                    i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton" [disabled]="!form.valid">
-                Accept
-                <span *ngIf="!acceptLoading">
-                    <i class="fas fa-check"></i>
-                </span><span *ngIf="acceptLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button *ngIf="mode == 'view' && (user.id == keycloakService.getUserId())" type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
-                Change password
-            </button>
-        </form-footer>
-        <h2 class="header command-zone"*ngIf="mode == 'create'" i18n="Create user|Title@@createUserTitle">Create user</h2>
-        <h2 class="header command-zone"*ngIf="mode != 'create'" i18n="Edit user|Title@@editUserTitle">Edit user</h2>
-        <fieldset>
-        <ol>
-            <li>
-            <label i18n="Edit user|First name label@@editUserFirstName">First Name</label>
-            <span class="right-col" [ngSwitch]="mode">
-                <ng-template [ngSwitchCase]="'view'">
-                    {{user.firstName}}
-                </ng-template>
-                <ng-template ngSwitchDefault>
-                    <input type="text" id="firstName" formControlName="firstName"/>
-                </ng-template>
-                <label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
-                <label *ngIf="hasError('firstName', ['length'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be between 2 and 50!</label>
-            </span>
-            </li>
-            <li>
-                <label i18n="Edit user|Last name label@@editUserLastName">Last Name</label>
-                <span class="right-col" [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
-                        {{user.lastName}}
-                    </ng-template>
-                    <ng-template ngSwitchDefault>
-                        <input type="text" id="lastName" formControlName="lastName"/>
-                    </ng-template>
-                    <label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
-                    <label *ngIf="hasError('lastName', ['length'])" class="form-validation-alert" i18n="Edit user|Last name length error@@editUserLastNameLengthError">Last Name length must be between 2 and 50!</label>
-                </span>
-            </li>
-            <li *ngIf="mode != 'create'">
-                <label i18n="Edit user|Username label@@editUserUsername">Username</label>
-                <span class="right-col">
-                    {{user.username}}
-                </span>
-            </li>
-            <li>
-            <label i18n="Edit user|Email label@@editUserEmail">Email</label>
-            <span class="right-col" [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
-                        {{user.email}}
-                    </ng-template>
-                    <ng-template ngSwitchDefault>
-                        <input type="email" id="email" formControlName="email"/>
-                    </ng-template>
-                    <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
-                    <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
-                    <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
-                </span>
-            </li>
-        </ol>
-        </fieldset>
-        <fieldset>
-        <ol>
-            <li>
-                <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
-                <span class="right-col">
-                    <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
-                        {{user.expirationDate | localDateFormatPipe}}
-                    </ng-container>
-                    <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <datepicker formControlName="expirationDate"></datepicker>
-                        <label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
-                        <label *ngIf="hasError('expirationDate', ['future'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateFutureError">This date should be in the future!</label>
-                    </ng-container>
-                </span>
-            </li>
-            <li class="required">
-                <label i18n="Edit user|Role label@@editUserRole">Role of the user</label>
-                <span class="right-col">
-                    <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
-                        {{user.role.displayName}}
-                    </ng-container>
-                    <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <select id="role" formControlName="role">
-                            <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
-                        </select>
-                        <label *ngIf="hasError('role', ['required'])" class="form-validation-alert" i18n="Edit user|Role required error@@editUserRoleRequiredError">Role is required!</label>
-                    </ng-container>
-                </span>
-            </li>
-            <li>
-                <label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from PACS</label>
-                <span class="right-col" [ngSwitch]="mode">
-                    <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
-                        <span *ngIf="user.canAccessToDicomAssociation" class="bool-true"><i class="fas fa-check"></i></span>
-                        <span *ngIf="!user.canAccessToDicomAssociation" class="bool-false"><i class="fas fa-times"></i></span>
-                    </ng-container>
-                    <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <checkbox formControlName="canAccessToDicomAssociation"></checkbox>
-                    </ng-container>
-                </span>
-            </li>
-        </ol>
-        </fieldset>
-        <fieldset *ngIf="isUserAdmin()">
-            <legend>Joined studies</legend>
-            @if (studies?.length > 0) {
+    @if (form) {
+        <form
+            [formGroup]="form"
+            class="max-content"
+            novalidate
+            [class.disabled]="denyLoading || acceptLoading || footerState.loading">
+            <form-footer
+                [state]="footerState"
+                (save)="save()"
+                (edit)="goToEdit()"
+                (dismiss)="goToView()"
+                (back)="goBack()">
+                @if (mode != "create" && user.accountRequestDemand) {
+                    <button
+                        type="submit"
+                        (click)="deny()"
+                        i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
+                        class="Button">
+                        Deny creation
+                        @if (!denyLoading) {
+                            <span>
+                                <i class="fas fa-times"></i>
+                            </span>
+                        }
+                        @if (denyLoading) {
+                            <span>
+                                <i class="fa fa-cog fa-spin"></i>
+                            </span>
+                        }
+                    </button>
+                }
+                @if (mode != "create" && user.extensionRequestDemand) {
+                    <button
+                        type="submit"
+                        (click)="deny()"
+                        i18n="Edit user|Deny extension request button label@@editUserDenyExtensionRequestButton"
+                        class="Button">
+                        Deny extension
+                        @if (!denyLoading) {
+                            <span>
+                                <i class="fas fa-times"></i>
+                            </span>
+                        }
+                        @if (denyLoading) {
+                            <span>
+                                <i class="fa fa-cog fa-spin"></i>
+                            </span>
+                        }
+                    </button>
+                }
+                @if (mode != "create" && (user.accountRequestDemand || user.extensionRequestDemand)) {
+                    <button
+                        type="submit"
+                        (click)="accept()"
+                        i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton"
+                        [disabled]="!form.valid">
+                        Accept
+                        @if (!acceptLoading) {
+                            <span>
+                                <i class="fas fa-check"></i>
+                            </span>
+                        }
+                        @if (acceptLoading) {
+                            <span>
+                                <i class="fa fa-cog fa-spin"></i>
+                            </span>
+                        }
+                    </button>
+                }
+                @if (mode == "view" && user.id == keycloakService.getUserId()) {
+                    <button
+                        type="submit"
+                        (click)="changePassword()"
+                        i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
+                        Change password
+                    </button>
+                }
+            </form-footer>
+            @if (mode == "create") {
+                <h2 class="header command-zone" i18n="Create user|Title@@createUserTitle">Create user</h2>
+            }
+            @if (mode != "create") {
+                <h2 class="header command-zone" i18n="Edit user|Title@@editUserTitle">Edit user</h2>
+            }
+            <fieldset>
                 <ol>
-                    <li *ngFor="let study of studies; let index = index" class="userStudies">
-                    <span class="studyName">{{study?.name + ' (' + study?.id + ')'}}</span>
-                    <span *ngIf="mode == 'edit'">
-                        <span class="right-col" [ngSwitch]="mode">
-                            <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
-                            <i class="fas fa-trash"></i>
-                            </button>
+                    <li>
+                        <label i18n="Edit user|First name label@@editUserFirstName">First Name</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ user.firstName }}
+                                }
+                                @default {
+                                    <input type="text" id="firstName" formControlName="firstName" />
+                                }
+                            }
+                            @if (hasError("firstName", ["required"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
+                                    First Name is required!
+                                </label>
+                            }
+                            @if (hasError("firstName", ["length"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|First name length error@@editUserFirstNameLengthError">
+                                    First Name length must be between 2 and 50!
+                                </label>
+                            }
                         </span>
-                    </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit user|Last name label@@editUserLastName">Last Name</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ user.lastName }}
+                                }
+                                @default {
+                                    <input type="text" id="lastName" formControlName="lastName" />
+                                }
+                            }
+                            @if (hasError("lastName", ["required"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
+                                    Last Name is required!
+                                </label>
+                            }
+                            @if (hasError("lastName", ["length"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|Last name length error@@editUserLastNameLengthError">
+                                    Last Name length must be between 2 and 50!
+                                </label>
+                            }
+                        </span>
+                    </li>
+                    @if (mode != "create") {
+                        <li>
+                            <label i18n="Edit user|Username label@@editUserUsername">Username</label>
+                            <span class="right-col">
+                                {{ user.username }}
+                            </span>
+                        </li>
+                    }
+                    <li>
+                        <label i18n="Edit user|Email label@@editUserEmail">Email</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ user.email }}
+                                }
+                                @default {
+                                    <input type="email" id="email" formControlName="email" />
+                                }
+                            }
+                            @if (hasError("email", ["required"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|Email required error@@editUserEmailRequiredError">
+                                    Email is required!
+                                </label>
+                            }
+                            @if (hasError("email", ["pattern"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|Email pattern error@@editUserEmailPatternError">
+                                    Email should be valid!
+                                </label>
+                            }
+                            @if (hasError("email", ["unique"])) {
+                                <label
+                                    class="form-validation-alert"
+                                    i18n="Edit user|Email unique error@@editUserEmailUniqueError">
+                                    Email should be unique!
+                                </label>
+                            }
+                        </span>
                     </li>
                 </ol>
-            } @else {
-                <ol><li>none</li></ol>
+            </fieldset>
+            <fieldset>
+                <ol>
+                    <li>
+                        <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
+                        <span class="right-col">
+                            @if (mode == "view" || !isUserAdmin()) {
+                                {{ user.expirationDate | localDateFormatPipe }}
+                            }
+                            @if (mode != "view" && isUserAdmin()) {
+                                <datepicker formControlName="expirationDate"></datepicker>
+                                @if (hasError("expirationDate", ["format"])) {
+                                    <label
+                                        class="form-validation-alert"
+                                        i18n="Edit user|Date valid error@@editUserDateValidError">
+                                        Date should be valid! Date format: {{ dateDisplay }}
+                                    </label>
+                                }
+                                @if (hasError("expirationDate", ["future"])) {
+                                    <label
+                                        class="form-validation-alert"
+                                        i18n="Edit user|Date valid error@@editUserDateFutureError">
+                                        This date should be in the future!
+                                    </label>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li class="required">
+                        <label i18n="Edit user|Role label@@editUserRole">Role of the user</label>
+                        <span class="right-col">
+                            @if (mode == "view" || !isUserAdmin()) {
+                                {{ user.role.displayName }}
+                            }
+                            @if (mode != "view" && isUserAdmin()) {
+                                <select id="role" formControlName="role">
+                                    @for (role of roles; track role) {
+                                        <option [ngValue]="role">{{ role.displayName }}</option>
+                                    }
+                                </select>
+                                @if (hasError("role", ["required"])) {
+                                    <label
+                                        class="form-validation-alert"
+                                        i18n="Edit user|Role required error@@editUserRoleRequiredError">
+                                        Role is required!
+                                    </label>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label
+                            i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">
+                            Can import from PACS
+                        </label>
+                        <span class="right-col">
+                            @if (mode == "view" || !isUserAdmin()) {
+                                @if (user.canAccessToDicomAssociation) {
+                                    <span class="bool-true"><i class="fas fa-check"></i></span>
+                                }
+                                @if (!user.canAccessToDicomAssociation) {
+                                    <span class="bool-false"><i class="fas fa-times"></i></span>
+                                }
+                            }
+                            @if (mode != "view" && isUserAdmin()) {
+                                <checkbox formControlName="canAccessToDicomAssociation"></checkbox>
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+            @if (isUserAdmin()) {
+                <fieldset>
+                    <legend>Joined studies</legend>
+                    @if (studies?.length > 0) {
+                        <ol>
+                            @for (study of studies; track study; let index = $index) {
+                                <li class="userStudies">
+                                    <span class="studyName">{{ study?.name + " (" + study?.id + ")" }}</span>
+                                    @if (mode == "edit") {
+                                        <span>
+                                            <span class="right-col">
+                                                <button
+                                                    type="button"
+                                                    class="deleteButton"
+                                                    (click)="removeStudyFromUser(study, index)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </span>
+                                        </span>
+                                    }
+                                </li>
+                            }
+                        </ol>
+                    } @else {
+                        <ol>
+                            <li>none</li>
+                        </ol>
+                    }
+                </fieldset>
             }
-        </fieldset>
-
-        <fieldset *ngIf="user.accountRequestDemand">
-            <legend class="right-icon">
-                Account request details
-            </legend>
-            <account-request-info formControlName="accountRequestInfo"></account-request-info>
-        </fieldset>
-
-        <fieldset *ngIf="user.extensionRequestDemand">
-            <ol>
-                <li>
-                <label i18n="Extension comment |Extension comment label@@editUserExtensionComment">Extension comment</label>
-                <span class="right-col">
-                    <textarea autosize formControlName="extensionMotivation" readonly></textarea>
-                </span>
-                </li>
-            </ol>
-        </fieldset>
-    </form>
+            @if (user.accountRequestDemand) {
+                <fieldset>
+                    <legend class="right-icon">Account request details</legend>
+                    <account-request-info formControlName="accountRequestInfo"></account-request-info>
+                </fieldset>
+            }
+            @if (user.extensionRequestDemand) {
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label i18n="Extension comment |Extension comment label@@editUserExtensionComment">
+                                Extension comment
+                            </label>
+                            <span class="right-col">
+                                <textarea autosize formControlName="extensionMotivation" readonly></textarea>
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+            }
+        </form>
+    }
 </div>

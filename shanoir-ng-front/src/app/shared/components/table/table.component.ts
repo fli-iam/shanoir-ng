@@ -27,7 +27,7 @@ import {TaskService} from "../../../async-tasks/task.service";
 
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
-import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { VarDirective } from '../../../utils/ng-var.directive';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { FormsModule } from '@angular/forms';
@@ -42,7 +42,7 @@ import { PagerComponent } from './pager/pager.component';
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [slideDown],
-    imports: [NgFor, VarDirective, NgIf, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
+    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;

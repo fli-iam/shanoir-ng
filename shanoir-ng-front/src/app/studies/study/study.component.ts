@@ -70,7 +70,7 @@ import { SizePipe } from "../../shared/utils/size.pipe";
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
     animations: [slideDown],
-    imports: [NgClass, NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, RouterLink, NgSwitchDefault, DatepickerComponent, SelectBoxComponent, NgFor, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe]
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

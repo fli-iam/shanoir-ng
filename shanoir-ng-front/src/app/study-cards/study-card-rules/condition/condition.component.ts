@@ -22,7 +22,7 @@ import { Option, SelectBoxComponent } from '../../../shared/select/select.compon
 import { DicomService } from '../../shared/dicom.service';
 import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
-import { NgIf, NgFor } from '@angular/common';
+
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 import { DicomTagPipe } from './dicom-tag.pipe';
 
@@ -32,7 +32,7 @@ import { DicomTagPipe } from './dicom-tag.pipe';
     selector: 'condition',
     templateUrl: 'condition.component.html',
     styleUrls: ['condition.component.css'],
-    imports: [NgIf, NgFor, SelectBoxComponent, FormsModule, ReactiveFormsModule, AutoAdjustInputComponent, DicomTagPipe]
+    imports: [SelectBoxComponent, FormsModule, ReactiveFormsModule, AutoAdjustInputComponent, DicomTagPipe]
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     

@@ -27,7 +27,7 @@ import { Therapy } from '../../therapy/shared/therapy.model';
 import { TherapyService } from '../../therapy/shared/therapy.service';
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { NgIf, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';
@@ -36,7 +36,7 @@ import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.
     selector: 'subject-pathology',
     templateUrl: 'subject-therapy.component.html',
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
 

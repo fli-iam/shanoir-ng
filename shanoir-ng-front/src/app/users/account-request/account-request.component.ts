@@ -31,7 +31,7 @@ import { ConsoleComponent } from '../../shared/console/console.component';
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
     styleUrls: ['account-request.component.css'],
-    imports: [HeaderComponent, NgIf, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
+    imports: [HeaderComponent, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
 })
 
 export class AccountRequestComponent implements OnInit {

@@ -24,7 +24,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -33,7 +33,7 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
     selector: 'center-detail',
     templateUrl: 'center.component.html',
     styleUrls: ['center.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, NgSwitchDefault, NgFor, AcquisitionEquipmentPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, AcquisitionEquipmentPipe]
 })
 
 export class CenterComponent extends EntityComponent<Center> {

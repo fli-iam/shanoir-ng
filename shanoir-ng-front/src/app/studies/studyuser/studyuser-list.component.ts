@@ -32,7 +32,7 @@ import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
@@ -47,7 +47,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [NgIf, FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, NgFor]
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent]
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {

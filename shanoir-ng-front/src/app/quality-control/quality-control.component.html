@@ -12,68 +12,98 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span class="subtitle" *ngIf="qualityCards?.length > 0">These are the compatible quality cards that you can apply all over your study.</span>
-<span class="subtitle" *ngIf="qualityCards?.length == 0 || !qualityCards">There are no existing quality card for this study.</span>
+@if (qualityCards?.length > 0) {
+    <span class="subtitle">These are the compatible quality cards that you can apply all over your study.</span>
+}
+@if (qualityCards?.length == 0 || !qualityCards) {
+    <span class="subtitle">There are no existing quality card for this study.</span>
+}
 
 <table>
-    <ng-container *ngFor="let qualityCard of qualityCards">
+    @for (qualityCard of qualityCards; track qualityCard) {
         <tr>
-            <td class="sc-name left-icon"
-                    [routerLink]="'/quality-card/details/' + qualityCard?.id"
-                    routerLinkActive="active"
-                    title="open details">
-                <i class="fa-solid fa-shuffle"></i>{{qualityCard.name}}
+            <td
+                class="sc-name left-icon"
+                [routerLink]="'/quality-card/details/' + qualityCard?.id"
+                routerLinkActive="active"
+                title="open details">
+                <i class="fa-solid fa-shuffle"></i>
+                {{ qualityCard.name }}
             </td>
             <td>
-                <span class="nb-rules" (mouseover)="onMouseOverNbRules(qualityCard)" (mouseleave)="onMouseOutNbRules(qualityCard)" [class.hover]="selectedQualityCard?.id == qualityCard.id">
-                    {{qualityCard.rules?.length}} rule(s)
-                    <study-card-rules class="rules" cardType="qualitycard"
-                            *ngIf="selectedQualityCard?.id == qualityCard.id"
+                <span
+                    class="nb-rules"
+                    (mouseover)="onMouseOverNbRules(qualityCard)"
+                    (mouseleave)="onMouseOutNbRules(qualityCard)"
+                    [class.hover]="selectedQualityCard?.id == qualityCard.id">
+                    {{ qualityCard.rules?.length }} rule(s)
+                    @if (selectedQualityCard?.id == qualityCard.id) {
+                        <study-card-rules
+                            class="rules"
+                            cardType="qualitycard"
                             [ngModel]="selectedQualityCard.rules"
                             mode="view"
-                            [allCoils]="allCoils">
-                    </study-card-rules>
+                            [allCoils]="allCoils"></study-card-rules>
+                    }
                 </span>
             </td>
             <td>
                 <span>
                     Check at import
-                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (userChange)="updateQualityCard(qualityCard)"></checkbox>
+                    <checkbox
+                        [(ngModel)]="qualityCard.toCheckAtImport"
+                        (userChange)="updateQualityCard(qualityCard)"></checkbox>
                 </span>
             </td>
             <td>
-                <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="true || loading.get(qualityCard.id)">
-                    Apply now
-                    <i *ngIf="!loading.get(qualityCard.id)" class="fa-solid fa-play"></i>
-                    <i *ngIf="loading.get(qualityCard.id)" class="fa fa-cog fa-spin"></i>
-                </button>
-                <ng-container *ngIf="pagings.get(qualityCard.id) && pagings.get(qualityCard.id).items?.length > 0">
+                @if (!pagings.get(qualityCard.id)) {
+                    <button
+                        type="button"
+                        class="alt right-icon apply"
+                        (click)="apply(qualityCard)"
+                        [disabled]="true || loading.get(qualityCard.id)">
+                        Apply now
+                        @if (!loading.get(qualityCard.id)) {
+                            <i class="fa-solid fa-play"></i>
+                        }
+                        @if (loading.get(qualityCard.id)) {
+                            <i class="fa fa-cog fa-spin"></i>
+                        }
+                    </button>
+                }
+                @if (pagings.get(qualityCard.id) && pagings.get(qualityCard.id).items?.length > 0) {
                     <button type="button" class="apply right-icon" (click)="downloadReport(qualityCard)">
                         Download error report
                         <i class="fas fa-floppy-disk"></i>
                     </button>
-                    <span *ngIf="pagings.get(qualityCard.id).items?.length > 0" class="right-icon">
-                        See report
-                        <i class="fa-solid fa-arrow-down"></i>
+                    @if (pagings.get(qualityCard.id).items?.length > 0) {
+                        <span class="right-icon">
+                            See report
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </span>
+                    }
+                }
+                @if (pagings.get(qualityCard.id) && !(pagings.get(qualityCard.id).items?.length > 0)) {
+                    <span class="no-flaws left-icon">
+                        <i class="fa-regular fa-circle-check"></i>
+                        Quality check passed !
                     </span>
-                </ng-container>
-                <span *ngIf="pagings.get(qualityCard.id) && !(pagings.get(qualityCard.id).items?.length > 0)" class="no-flaws left-icon">
-                    <i class="fa-regular fa-circle-check"></i>
-                    Quality check passed !
-                </span>
+                }
             </td>
         </tr>
-        <tr *ngIf="pagings.get(qualityCard.id)?.items?.length > 0">
-            <td colspan="4" class="report-cell">
-                <shanoir-table class="report"
-                    [getPage]="getPage.get(qualityCard.id).bind(this)"
-                    [columnDefs]="columnDefs"
-                    [browserSearch]="false"
-                    [collapseControls]="true"
-                ></shanoir-table>
-            </td>
-        </tr>
-    </ng-container>
+        @if (pagings.get(qualityCard.id)?.items?.length > 0) {
+            <tr>
+                <td colspan="4" class="report-cell">
+                    <shanoir-table
+                        class="report"
+                        [getPage]="getPage.get(qualityCard.id).bind(this)"
+                        [columnDefs]="columnDefs"
+                        [browserSearch]="false"
+                        [collapseControls]="true"></shanoir-table>
+                </td>
+            </tr>
+        }
+    }
 </table>
 
 <div class="new">

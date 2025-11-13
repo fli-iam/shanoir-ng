@@ -15,7 +15,7 @@ import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { slideDown } from '../../shared/animations/animations';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
@@ -30,7 +30,7 @@ import { NgIf } from '@angular/common';
             multi: true,
         }
     ],
-    imports: [FormsModule, NgIf]
+    imports: [FormsModule]
 })
 
 export class SolrTextSearchComponent implements ControlValueAccessor {

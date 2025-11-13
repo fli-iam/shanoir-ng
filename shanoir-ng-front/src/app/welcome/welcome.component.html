@@ -1,70 +1,111 @@
 <div class="welcome-component">
-	<div class="header">
-		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub"/>
-		<div class="buttons">
-			<button class="left-icon alt" type="button" (click)="login()"><i class="fa-solid fa-right-to-bracket"></i>Sign in</button>
-			<button class="left-icon" type="button" (click)="toShanoir()"><i class="fa-solid fa-circle-info"></i>More info</button>
-			<a href="mailto:developers_shanoir@inria.fr">
-				<button class="left-icon" type="button"><i class="fa-solid fa-paper-plane"></i>Contact</button>
-			</a>
-		</div>
-	</div>
-	<div class="shanoir">
-		<img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
-		<div class="shanoir-text">
-			SHAring iN vivO Imaging Resources
-		</div>
-	</div>
-    <div class="stats">
-        {{ studies?.length }} shared studies
-    </div>
-    <div class="study-tab-parent">
-        <div *ngIf="studies?.length > 0" class="study-tab">
-            <div class="studyItem" *ngFor="let study of studies | slice:0:show; let index = index;">
-                <div class="title link" (click)="accessRequest(study)">
-                    <span class="studyTitle"><b>{{study.name}}</b></span>
-                    <span *ngIf="study.description" class="studyDescription">
-                        <span class="spacer"></span>{{ study.description }}
-                    </span>
-                </div>
-                <div class="details">
-                    <div class="dates">
-                        <span *ngIf="study.startDate" class="studyStartDate">
-                            <span class="label">Start date : </span>{{ study.startDate }}
-                        </span>
-                        <span *ngIf="study.startDate && study.endDate" class="studyStartDate">
-                            <span class="spacer"></span>
-                        </span>
-                        <span *ngIf="study.endDate" class="studyStartDate">
-                            <span class="label">End date : </span>{{ study.endDate }}
-                        </span>
-                    </div>
-                    <div class="status">
-                        <span class="label">id : </span>{{ study.id }}
-                        <span class="spacer"></span>
-                        <span class="label">Status : </span>{{study.studyStatus.replace('_', ' ') | titlecase }}
-                    </div>
-                    <div class="studyValues">
-                        <span class="label">Examinations : </span>{{ study.nbExaminations }}
-                        <span class="spacer"></span>
-                        <span class="label">Subjects : </span>{{ study.nbSubjects }}
-                        <span *ngIf="study.studyType">
-                            <span class="spacer"></span>
-                            Study type: {{ StudyType[study.studyType] }}
-                        </span>
-                    </div>
-                </div>
-                <div class="tags" *ngIf="study.studyTags">
-                    <div>
-                        <span class="tag" [style.border-color]="tag.color" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
-                    </div>
-                </div>
-                <hr *ngIf="index < (studies.length - 1)" />
-                <div class="accessRequest">
-                    <a class="buttonItem" type="button" (click)="accessRequest(study)">Request an access</a>
-                </div>
-            </div>
-            <div *ngIf="studies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
+    <div class="header">
+        <img
+            class="github-logo"
+            title="Shanoir on GitHub"
+            [src]="githubLogoUrl"
+            (click)="toGithub()"
+            alt="Shanoir on GitHub" />
+        <div class="buttons">
+            <button class="left-icon alt" type="button" (click)="login()">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Sign in
+            </button>
+            <button class="left-icon" type="button" (click)="toShanoir()">
+                <i class="fa-solid fa-circle-info"></i>
+                More info
+            </button>
+            <a href="mailto:developers_shanoir@inria.fr">
+                <button class="left-icon" type="button">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Contact
+                </button>
+            </a>
         </div>
+    </div>
+    <div class="shanoir">
+        <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo" />
+        <div class="shanoir-text">SHAring iN vivO Imaging Resources</div>
+    </div>
+    <div class="stats">{{ studies?.length }} shared studies</div>
+    <div class="study-tab-parent">
+        @if (studies?.length > 0) {
+            <div class="study-tab">
+                @for (study of studies | slice: 0 : show; track study; let index = $index) {
+                    <div class="studyItem">
+                        <div class="title link" (click)="accessRequest(study)">
+                            <span class="studyTitle">
+                                <b>{{ study.name }}</b>
+                            </span>
+                            @if (study.description) {
+                                <span class="studyDescription">
+                                    <span class="spacer"></span>
+                                    {{ study.description }}
+                                </span>
+                            }
+                        </div>
+                        <div class="details">
+                            <div class="dates">
+                                @if (study.startDate) {
+                                    <span class="studyStartDate">
+                                        <span class="label">Start date :</span>
+                                        {{ study.startDate }}
+                                    </span>
+                                }
+                                @if (study.startDate && study.endDate) {
+                                    <span class="studyStartDate">
+                                        <span class="spacer"></span>
+                                    </span>
+                                }
+                                @if (study.endDate) {
+                                    <span class="studyStartDate">
+                                        <span class="label">End date :</span>
+                                        {{ study.endDate }}
+                                    </span>
+                                }
+                            </div>
+                            <div class="status">
+                                <span class="label">id :</span>
+                                {{ study.id }}
+                                <span class="spacer"></span>
+                                <span class="label">Status :</span>
+                                {{ study.studyStatus.replace("_", " ") | titlecase }}
+                            </div>
+                            <div class="studyValues">
+                                <span class="label">Examinations :</span>
+                                {{ study.nbExaminations }}
+                                <span class="spacer"></span>
+                                <span class="label">Subjects :</span>
+                                {{ study.nbSubjects }}
+                                @if (study.studyType) {
+                                    <span>
+                                        <span class="spacer"></span>
+                                        Study type: {{ StudyType[study.studyType] }}
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        @if (study.studyTags) {
+                            <div class="tags">
+                                <div>
+                                    @for (tag of study.studyTags; track tag) {
+                                        <span class="tag" [style.border-color]="tag.color">{{ tag.name }}</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (index < studies.length - 1) {
+                            <hr />
+                        }
+                        <div class="accessRequest">
+                            <a class="buttonItem" type="button" (click)="accessRequest(study)">Request an access</a>
+                        </div>
+                    </div>
+                }
+                @if (studies.length > show) {
+                    <div class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
+                }
+            </div>
+        }
     </div>
 </div>

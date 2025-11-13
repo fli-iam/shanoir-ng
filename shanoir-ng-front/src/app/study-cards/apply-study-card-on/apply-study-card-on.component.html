@@ -17,85 +17,141 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="info">
     <ul class="form main">
         <li>
-            <span class="label">Nb selected dataset acquisitions : </span>
-            <span class="value">{{selectedAcquisitionIds?.size}}</span>
+            <span class="label">Nb selected dataset acquisitions :</span>
+            <span class="value">{{ selectedAcquisitionIds?.size }}</span>
         </li>
         <li>
-            <span class="label">Nb selected datasets : </span>
-            <span class="value">{{nbSelectedDatasets}}</span>
+            <span class="label">Nb selected datasets :</span>
+            <span class="value">{{ nbSelectedDatasets }}</span>
         </li>
         <li>
-            <span class="label">Study card : </span>
-            <span *ngIf="status == 'default'"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" [viewRoute]="'/study-card/details/' + studycard?.id" [viewDisabled]="!studycard" [readOnly]="!studyCards"></select-box></span>
-            <span *ngIf="status != 'default'"class="value">{{studycard?.name}}</span>
+            <span class="label">Study card :</span>
+            @if (status == "default") {
+                <span>
+                    <select-box
+                        [(ngModel)]="studycard"
+                        [options]="studycardOptions"
+                        (userChange)="updateStudyCard()"
+                        [viewRoute]="'/study-card/details/' + studycard?.id"
+                        [viewDisabled]="!studycard"
+                        [readOnly]="!studyCards"></select-box>
+                </span>
+            }
+            @if (status != "default") {
+                <span class="value">{{ studycard?.name }}</span>
+            }
         </li>
-        <li *ngIf="status == 'default' && studyCards">
-            <span class="label">Show incompatible studycards : </span>
-            <span><input type="checkbox" [(ngModel)]="showIncompatibles" (change)="updateShowIncompatible()"/></span>
-        </li>
+        @if (status == "default" && studyCards) {
+            <li>
+                <span class="label">Show incompatible studycards :</span>
+                <span>
+                    <input type="checkbox" [(ngModel)]="showIncompatibles" (change)="updateShowIncompatible()" />
+                </span>
+            </li>
+        }
     </ul>
-    <ul class="form sc-box" *ngIf="studycard" @slideRight>
-        <li>
-            <span class="label">Study card name : </span>
-            <span class="value">{{studycard.name}}</span>
-        </li>
-        <li>
-            <span class="label">Study card equipment : </span>
-            <span class="value">{{studycard.acquisitionEquipment | acqEqptLabel}}</span>
-        </li>
-        <li>
-            <span class="label">Study card study : </span>
-            <span class="value">{{studycard.study?.name}}</span>
-        </li>
-    </ul>
+    @if (studycard) {
+        <ul class="form sc-box" @slideRight>
+            <li>
+                <span class="label">Study card name :</span>
+                <span class="value">{{ studycard.name }}</span>
+            </li>
+            <li>
+                <span class="label">Study card equipment :</span>
+                <span class="value">{{ studycard.acquisitionEquipment | acqEqptLabel }}</span>
+            </li>
+            <li>
+                <span class="label">Study card study :</span>
+                <span class="value">{{ studycard.study?.name }}</span>
+            </li>
+        </ul>
+    }
 </div>
 
-<div *ngIf="status == 'default' || status == 'loading'" class="button-div">
-    <button class="apply right-icon" 
-            [class.warning]="nbIncompatible > 0" 
-            [disabled]="status == 'loading' || !studycard || !selectedAcquisitionIds || selectedAcquisitionIds.size == 0" 
+@if (status == "default" || status == "loading") {
+    <div class="button-div">
+        <button
+            class="apply right-icon"
+            [class.warning]="nbIncompatible > 0"
+            [disabled]="
+                status == 'loading' || !studycard || !selectedAcquisitionIds || selectedAcquisitionIds.size == 0
+            "
             (click)="reapplyOnSelected()">
-        Apply Studycard
-        <i class="fa-solid fa-history"></i>
-    </button>  
-    <div *ngIf="nbIncompatible > 0" class="warning left-icon">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        {{nbIncompatible}} selected dataset acquisitions are incompatible with the selected studycard, equipments differ.
+            Apply Studycard
+            <i class="fa-solid fa-history"></i>
+        </button>
+        @if (nbIncompatible > 0) {
+            <div class="warning left-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{ nbIncompatible }} selected dataset acquisitions are incompatible with the selected studycard,
+                equipments differ.
+            </div>
+        }
+        @if (nonAdminStudies?.size > 0) {
+            <div class="warning left-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{ nbNonAdminAcquisitions }} dataset acquisitions you previously selected have been removed from this
+                table. Since you don't have administration rights on
+                @if (nonAdminStudies?.size > 1) {
+                    <span>those studies</span>
+                }
+                @if (nonAdminStudies?.size <= 1) {
+                    <span>this study</span>
+                }
+                you cannot apply studycards on it. If you want to do it anyway, you will have to ask an actual
+                administrator of
+                @if (nonAdminStudies?.size > 1) {
+                    <span>those studies.</span>
+                }
+                @if (nonAdminStudies?.size <= 1) {
+                    <span>this study.</span>
+                }
+                The concerned studies
+                @if (nonAdminStudies?.size > 1) {
+                    <span>are</span>
+                }
+                @if (nonAdminStudies?.size <= 1) {
+                    <span>is</span>
+                }
+                :
+                @for (study of nonAdminStudies; track study; let i = $index) {
+                    <span>
+                        @if (i > 0) {
+                            <span>,</span>
+                        }
+                        {{ study }}
+                    </span>
+                }
+            </div>
+        }
     </div>
-    <div *ngIf="nonAdminStudies?.size > 0" class="warning left-icon">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        {{nbNonAdminAcquisitions}} dataset acquisitions you previously selected have been removed from this table. 
-        Since you don't have administration rights on 
-        <span *ngIf="nonAdminStudies?.size > 1">those studies</span> 
-        <span *ngIf="nonAdminStudies?.size <= 1">this study</span> 
-        you cannot apply studycards on it. 
-        If you want to do it anyway, you will have to ask an actual administrator of 
-        <span *ngIf="nonAdminStudies?.size > 1">those studies.</span> 
-        <span *ngIf="nonAdminStudies?.size <= 1">this study.</span> 
-        The concerned studies <span *ngIf="nonAdminStudies?.size > 1">are</span><span *ngIf="nonAdminStudies?.size <= 1">is</span>  :
-        <span *ngFor="let study of nonAdminStudies; let i = index;"><span *ngIf="i > 0">, </span>{{study}}</span>  
+}
+
+@if (status == "done") {
+    <div class="button-div done right-icon">
+        Done
+        <i class="fa-solid fa-check"></i>
     </div>
-</div>
+}
 
-<div *ngIf="status == 'done'" class="button-div done right-icon">
-    Done<i class="fa-solid fa-check"></i>
-</div>
+@if (status == "error") {
+    <div class="button-div error right-icon">
+        Error
+        <i class="fa-solid fa-exclamation-triangle"></i>
+        <div class="details">{{ errorMessage }}</div>
+    </div>
+}
 
-<div *ngIf="status == 'error'" class="button-div error right-icon">
-    Error<i class="fa-solid fa-exclamation-triangle"></i>
-    <div class="details">{{errorMessage}}</div>
-</div>
-
-<shanoir-table #table
-        *ngIf="browserPaging"
-        [getPage]="getPage.bind(this)" 
-        [columnDefs]="columnsDefs" 
+@if (browserPaging) {
+    <shanoir-table
+        #table
+        [getPage]="getPage.bind(this)"
+        [columnDefs]="columnsDefs"
         [subRowsDefs]="subRowsDefs"
         [customActionDefs]="customActionDefs"
         subRowsKey="datasets"
-		[selectionAllowed]="status == 'default'"
+        [selectionAllowed]="status == 'default'"
         [browserSearch]="false"
         [(selection)]="selectedAcquisitionIds"
-        (selectionChange)="onSelectionChange()">
-</shanoir-table>
-
+        (selectionChange)="onSelectionChange()"></shanoir-table>
+}

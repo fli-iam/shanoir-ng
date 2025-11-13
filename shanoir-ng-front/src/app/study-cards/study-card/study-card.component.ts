@@ -39,7 +39,7 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
@@ -48,7 +48,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
     templateUrl: 'study-card.component.html',
     styleUrls: ['study-card.component.css'],
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, SelectBoxComponent, NgFor, TooltipComponent, StudyCardRulesComponent, AcquisitionEquipmentPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, TooltipComponent, StudyCardRulesComponent, AcquisitionEquipmentPipe]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
 

@@ -43,7 +43,7 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { TagInputComponent } from '../../../tags/tag.input.component';
 import { CheckboxComponent } from '../../../shared/checkbox/checkbox.component';
@@ -56,7 +56,7 @@ import { SubjectTherapyListComponent } from '../../therapies/subjectTherapy/list
     templateUrl: 'animal-subject-form.component.html',
     styleUrls: ['../../../subjects/subject/subject.component.css', 'animal-subject-form.component.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, NgFor, TagInputComponent, CheckboxComponent, SubjectPathologiesListComponent, SubjectTherapyListComponent]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, TagInputComponent, CheckboxComponent, SubjectPathologiesListComponent, SubjectTherapyListComponent]
 })
 
 export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {

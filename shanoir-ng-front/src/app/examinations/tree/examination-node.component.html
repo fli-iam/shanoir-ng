@@ -12,12 +12,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div [hidden]="!downloadState?.progress">
-    <progress-bar [progress]="downloadState?.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+    <progress-bar
+        [progress]="downloadState?.progress"
+        [text]="'Preparing download'"
+        [unknownDownload]="true"></progress-bar>
 </div>
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'examination')"
-        [clickable] = "node.id != null"
+        [clickable]="node.id != null"
         [label]="node.label"
         awesome="fas fa-stethoscope"
         [(opened)]="node.opened"
@@ -30,42 +33,59 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && node.id != null">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-          <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-        <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
-        <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
-        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
-    </dropdown-menu>
-
-    <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')">
-        <dataset-acquisition-node
-                node
-                *ngFor="let datasetAcqNode of node.datasetAcquisitions; let i = index"
-                [input]="datasetAcqNode"
-                (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox"
-                (acquisitionDelete)="onAcquisitionDelete(i)"
-                [withMenu]="withMenu"
-        >
-        </dataset-acquisition-node>
-    </ng-container>
-
-    <node
-            *ngIf="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
-            label="Extra data files"
-            awesome="fa-regular fa-folder-open"
-            [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
-            [(opened)]="node.extraDataOpen">
-        <node
-                *ngFor="let file of node.extraDataFilePathList"
-                label="{{file}}"
-                awesome="fas fa-file"
-                [buttonPicto]="'fas fa-download'"
-                (buttonClick)="downloadFile(file)"
-                [hasChildren]="false">
-        </node>
+        @if (menuOpened && withMenu && node.id != null) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+                <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
+                <menu-item
+                    [disabled]="(datasetIds && datasetIds.length == 0) || downloading"
+                    label="Download"
+                    awesome="fas fa-download"
+                    (click)="download()"></menu-item>
+                @if (node.canDelete) {
+                    <menu-item
+                        label="Delete"
+                        awesome="fa-regular fa-trash-can"
+                        (click)="deleteExamination()"></menu-item>
+                }
+            </dropdown-menu>
+        }
+        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any("UNLOADED")) {
+            @for (datasetAcqNode of node.datasetAcquisitions; track datasetAcqNode; let i = $index) {
+                <dataset-acquisition-node
+                    node
+                    [input]="datasetAcqNode"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox"
+                    (acquisitionDelete)="onAcquisitionDelete(i)"
+                    [withMenu]="withMenu"></dataset-acquisition-node>
+            }
+        }
+        @if (
+            !!node.extraDataFilePathList &&
+            node.extraDataFilePathList != $any("UNLOADED") &&
+            node.extraDataFilePathList.length > 0
+        ) {
+            <node
+                label="Extra data files"
+                awesome="fa-regular fa-folder-open"
+                [hasChildren]="
+                    !!node.extraDataFilePathList &&
+                    node.extraDataFilePathList != $any('UNLOADED') &&
+                    node.extraDataFilePathList.length > 0
+                "
+                [(opened)]="node.extraDataOpen">
+                @for (file of node.extraDataFilePathList; track file) {
+                    <node
+                        label="{{ file }}"
+                        awesome="fas fa-file"
+                        [buttonPicto]="'fas fa-download'"
+                        (buttonClick)="downloadFile(file)"
+                        [hasChildren]="false"></node>
+                }
+            </node>
+        }
     </node>
-</node>
+}

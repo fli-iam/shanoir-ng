@@ -23,17 +23,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>directory_name.zip -> directory_name/dataset_name.edf</li>
             </ul>
         </li>
-        <li>Other files linked to a dataset should have the same name (extension does not matter) : dataset_name.other</li>
+        <li>
+            Other files linked to a dataset should have the same name (extension does not matter) : dataset_name.other
+        </li>
         <li>Multiple datasets can be imported at once (dataset1.edf, dataset2.edf, etc...)</li>
-
     </ul>
 
-    <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+    <upload-file
+        (fileChange)="uploadArchive($event)"
+        [loading]="archiveStatus == 'uploading'"
+        [error]="archiveStatus == 'error'"></upload-file>
     <div [hidden]="!uploadState.progress">
-        <progress-bar [progress]="uploadState?.progress"  [text]="'Preparing upload'"></progress-bar>
+        <progress-bar [progress]="uploadState?.progress" [text]="'Preparing upload'"></progress-bar>
     </div>
-    <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
-        {{errorMessage}}
-    </label>
+    @if (errorMessage) {
+        <label class="form-validation-alert" i18n="Import|ExtensionError label">
+            {{ errorMessage }}
+        </label>
+    }
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

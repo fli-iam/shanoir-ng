@@ -23,7 +23,7 @@ import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 
@@ -33,7 +33,7 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 

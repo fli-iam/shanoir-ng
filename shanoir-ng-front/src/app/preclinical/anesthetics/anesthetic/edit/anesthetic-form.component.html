@@ -13,95 +13,138 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="AnestheticFormComponent content-component">
-    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<table class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(dismiss)="goToView()"
-				(back)="goBack()">
-			</form-footer>
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'">
-						<div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'">
-						<div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'">
-						<div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<label *ngIf="!isAnestheticUnique" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
-						<li class="required">
-							<label i18n="Edit anesthetic|Name label" >Name</label>
-							<label class="label_light" *ngIf="anesthetic.name == undefined || anesthetic.name == ''">Name is automatically generated</label>
-							<label id="name" *ngIf="anesthetic.name">{{anesthetic.name}}</label>
-						</li>
-						<li class="required">
-							<label i18n="Edit anesthetic|AnestheticType label">Type</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									{{AnestheticType.getLabel(anesthetic.anestheticType)}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="anestheticType" (userChange)="onChangeType()" [options]="AnestheticType.options">
-                                    </select-box>
-									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit anesthetic|Comment label">Comment</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-										{{anesthetic?.comment}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<textarea rows="4"  id="comment" formControlName="comment"></textarea>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">Ingredients</legend>
-
-							<div [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'edit'">
-									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
-										<i class="fas fa-plus-square"></i>
-										new ingredient
-									</button>
-								</ng-template>
-								<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
-									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
-										<i class="fas fa-plus-square"></i>
-										new ingredient
-									</button>
-								</ng-template>
-							</div>
-							<div>
-								<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"
-											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (event)="refreshDisplay($event)"></anesthetic-ingredient-form>
-							</div>
-							<shanoir-table #ingredientsTable
-								[getPage]="getPage.bind(this)"
-								[columnDefs]="columnDefs">
-							</shanoir-table>
-
-						</li>
-					</ol>
-					</fieldset>
-				</td>
-			</tr>
-		</table>
-	</form>
-
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <table class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (edit)="goToEdit()"
+                    (delete)="delete()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()"></form-footer>
+                <tr>
+                    <td colspan="2">
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
+                                }
+                                @case ("edit") {
+                                    <div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
+                                }
+                                @case ("create") {
+                                    <div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
+                                }
+                            }
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <ol>
+                                @if (!isAnestheticUnique) {
+                                    <label
+                                        class="form-validation-alert"
+                                        i18n="Edit anesthetic|AnestheticUniqueError label">
+                                        This anesthetic already exists!
+                                    </label>
+                                }
+                                <li class="required">
+                                    <label i18n="Edit anesthetic|Name label">Name</label>
+                                    @if (anesthetic.name == undefined || anesthetic.name == "") {
+                                        <label class="label_light">Name is automatically generated</label>
+                                    }
+                                    @if (anesthetic.name) {
+                                        <label id="name">{{ anesthetic.name }}</label>
+                                    }
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit anesthetic|AnestheticType label">Type</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ AnestheticType.getLabel(anesthetic.anestheticType) }}
+                                            }
+                                            @default {
+                                                <select-box
+                                                    formControlName="anestheticType"
+                                                    (userChange)="onChangeType()"
+                                                    [options]="AnestheticType.options"></select-box>
+                                                @if (hasError("anestheticType", ["required"])) {
+                                                    <label
+                                                        [@slideDown]="hasError('anestheticType', ['required'])"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit anestheticType|Type required
+                                                            error@@anestheticDetailTypeRequiredError">
+                                                        Type is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit anesthetic|Comment label">Comment</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ anesthetic?.comment }}
+                                            }
+                                            @default {
+                                                <textarea rows="4" id="comment" formControlName="comment"></textarea>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">
+                                        Ingredients
+                                    </legend>
+                                    <div>
+                                        @switch (mode) {
+                                            @case ("edit") {
+                                                @if (keycloakService.isUserAdmin() || keycloakService.isUserExpert()) {
+                                                    <button
+                                                        i18n="Edit model|Add a new ingredient"
+                                                        (click)="goToAddIngredient()">
+                                                        <i class="fas fa-plus-square"></i>
+                                                        new ingredient
+                                                    </button>
+                                                }
+                                            }
+                                            @case ("create") {
+                                                @if (keycloakService.isUserAdmin() || keycloakService.isUserExpert()) {
+                                                    <button
+                                                        i18n="Edit model|Add a new ingredient"
+                                                        (click)="goToAddIngredient()">
+                                                        <i class="fas fa-plus-square"></i>
+                                                        new ingredient
+                                                    </button>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                    <div>
+                                        <anesthetic-ingredient-form
+                                            [anesthetic]="anesthetic"
+                                            [createAIMode]="createAIMode"
+                                            [toggleForm]="toggleFormAI"
+                                            [ingredientSelected]="ingredientSelected"
+                                            (event)="refreshDisplay($event)"></anesthetic-ingredient-form>
+                                    </div>
+                                    <shanoir-table
+                                        #ingredientsTable
+                                        [getPage]="getPage.bind(this)"
+                                        [columnDefs]="columnDefs"></shanoir-table>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    }
 </div>

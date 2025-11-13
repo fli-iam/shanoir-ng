@@ -31,7 +31,7 @@ import { SuperPromise } from '../../utils/super-promise';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
 
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
-import { NgFor, NgIf } from '@angular/common';
+
 import { StudyCardConditionComponent } from './condition/condition.component';
 
 
@@ -39,7 +39,7 @@ import { StudyCardConditionComponent } from './condition/condition.component';
     selector: 'study-card-rule',
     templateUrl: 'study-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
-    imports: [NgFor, StudyCardConditionComponent, NgIf, StudyCardActionComponent]
+    imports: [StudyCardConditionComponent, StudyCardActionComponent]
 })
 export class StudyCardRuleComponent implements OnChanges {
 

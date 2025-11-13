@@ -36,7 +36,7 @@ import { SubjectService } from '../shared/subject.service';
 import {Tag} from "../../tags/tag.model";
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 import {isDarkColor} from "../../utils/app.utils";
-import { NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { TagInputComponent } from '../../tags/tag.input.component';
@@ -47,7 +47,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, DatepickerComponent, CheckboxComponent, NgFor, TagInputComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, DatepickerComponent, CheckboxComponent, TagInputComponent, LocalDateFormatPipe]
 })
 
 export class SubjectComponent extends EntityComponent<Subject> implements OnDestroy {

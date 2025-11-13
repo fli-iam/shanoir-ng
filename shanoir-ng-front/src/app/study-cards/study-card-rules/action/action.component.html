@@ -12,54 +12,74 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<ng-container *ngIf="mode == 'view'">
+@if (mode == "view") {
     set
-    <span class="var">{{fieldLabel ? fieldLabel : assignment?.field}}</span>
+    <span class="var">{{ fieldLabel ? fieldLabel : assignment?.field }}</span>
     =
     <span class="value">
-        <span *ngIf="assignment?.type == 'string' && valueIsString == true">"</span>{{valueLabel ? valueLabel : assignment?.label}}<span *ngIf="assignment?.type == 'string' && valueIsString == true">"</span>
+        @if (assignment?.type == "string" && valueIsString == true) {
+            <span>"</span>
+        }
+        {{ valueLabel ? valueLabel : assignment?.label }}
+        @if (assignment?.type == "string" && valueIsString == true) {
+            <span>"</span>
+        }
     </span>
-</ng-container>
-<ng-container *ngIf="mode != 'view'">
+}
+@if (mode != "view") {
     set
-    <select-box 
-            class="var auto-width" 
-            [class.error]="fieldError"
-            [(ngModel)]="assignment.field" 
-            (userChange)="onChangeField()" 
-            (selectOption)="onSelectFieldOption($event)" 
-            (deSelectOption)="onDeSelectFieldOption($event)" 
-            [options]="fieldOptions" 
-            placeholder="select field"
-            (focusout)="fieldTouched = true"
-            [clear]="false">
-    </select-box>
+    <select-box
+        class="var auto-width"
+        [class.error]="fieldError"
+        [(ngModel)]="assignment.field"
+        (userChange)="onChangeField()"
+        (selectOption)="onSelectFieldOption($event)"
+        (deSelectOption)="onDeSelectFieldOption($event)"
+        [options]="fieldOptions"
+        placeholder="select field"
+        (focusout)="fieldTouched = true"
+        [clear]="false"></select-box>
     =
-    <auto-ajust-input 
-            *ngIf="!assigmentOptions" 
+    @if (!assigmentOptions) {
+        <auto-ajust-input
             class="value"
             [class.error]="valueError"
-            [(ngModel)]="assignment.value" 
-            placeholder="enter value" 
+            [(ngModel)]="assignment.value"
+            placeholder="enter value"
             (userChange)="onChangeValue()"
             (focusout)="valueTouched = true"
-            [disabled]="!assignment.field">
-    </auto-ajust-input>
-    <select-box 
-            *ngIf="assigmentOptions" 
+            [disabled]="!assignment.field"></auto-ajust-input>
+    }
+    @if (assigmentOptions) {
+        <select-box
             class="value auto-width"
             [class.error]="valueError"
             [(ngModel)]="assignment.value"
-            [options]="assigmentOptions" 
-            (userChange)="onChangeValue()" 
+            [options]="assigmentOptions"
+            (userChange)="onChangeValue()"
             [placeholder]="assignment.value"
             (focusout)="valueTouched = true"
-            [clear]="false">
-    </select-box>
-</ng-container>
-<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
-<div class="error-msg" *ngIf="badValueRef"><i class="fas fa-exclamation-triangle"></i>Bad reference for this action, please update the value field. <br/>Given value : "
-    <span class="hint" *ngIf="assignment && assignment.value && assignment.value['id']">Object with id = {{assignment.value['id']}} </span>
-    <span class="hint" *ngIf="assignment && assignment.value && assignment.value['name']">and name = {{assignment.value['name']}} </span>
-    <span class="hint" *ngIf="assignment && assignment.value && !assignment.value['id']">{{assignment.value}}</span>
-"</div>
+            [clear]="false"></select-box>
+    }
+}
+@if (mode != "view") {
+    <span class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
+}
+@if (badValueRef) {
+    <div class="error-msg">
+        <i class="fas fa-exclamation-triangle"></i>
+        Bad reference for this action, please update the value field.
+        <br />
+        Given value : "
+        @if (assignment && assignment.value && assignment.value["id"]) {
+            <span class="hint">Object with id = {{ assignment.value["id"] }}</span>
+        }
+        @if (assignment && assignment.value && assignment.value["name"]) {
+            <span class="hint">and name = {{ assignment.value["name"] }}</span>
+        }
+        @if (assignment && assignment.value && !assignment.value["id"]) {
+            <span class="hint">{{ assignment.value }}</span>
+        }
+        "
+    </div>
+}

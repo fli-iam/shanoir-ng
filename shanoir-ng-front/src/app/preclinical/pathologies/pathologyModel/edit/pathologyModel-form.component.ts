@@ -25,7 +25,7 @@ import { PathologyService } from '../../pathology/shared/pathology.service';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../../shared/select/select.component';
 
@@ -34,7 +34,7 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{
 

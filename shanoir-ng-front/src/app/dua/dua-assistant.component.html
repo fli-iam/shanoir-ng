@@ -12,135 +12,202 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<ng-container *ngIf="!isAuthenticated()">
+@if (!isAuthenticated()) {
     <header></header>
-</ng-container>
-<div class="content {{mode}}">
-
+}
+<div class="content {{ mode }}">
     <h2 class="header command-zone">DUA assistant</h2>
-    @if (mode == 'view') {
-        <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
-        <button class="left-icon alt" (click)="generatePDF()" [disabled]="converting"><i class="fa-regular fa-file-pdf"></i>Generate PDF</button>
-        <button class="right-icon" [routerLink]="'/dua/edit/' + id">Edit<i class="far fa-edit"></i></button>
-    } @else if (mode == 'edit') {
-        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-            <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
-            <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
-            <button class="right-icon" [routerLink]="'/dua/view/' + id">Cancel<i class="fa-solid fa-ban"></i></button>
-        </form>    
-    } @else if (mode == 'create' && !link) {
-        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-            <button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
-            <button class="right-icon" *ngIf="form" [disabled]="!form?.valid || form?.pristine" type="submit" (ngSubmit)="onSubmit()">Save<i class="fa-regular fa-floppy-disk"></i></button>
-        </form>
+    @if (mode == "view") {
+        <button class="Button left-icon back" (click)="goBack()">
+            <i class="fas fa-angle-left"></i>
+            Back
+        </button>
+        <button class="left-icon alt" (click)="generatePDF()" [disabled]="converting">
+            <i class="fa-regular fa-file-pdf"></i>
+            Generate PDF
+        </button>
+        <button class="right-icon" [routerLink]="'/dua/edit/' + id">
+            Edit
+            <i class="far fa-edit"></i>
+        </button>
+    } @else if (mode == "edit") {
+        @if (form) {
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <button class="Button left-icon back" (click)="goBack()">
+                    <i class="fas fa-angle-left"></i>
+                    Back
+                </button>
+                @if (form) {
+                    <button
+                        class="right-icon"
+                        [disabled]="!form?.valid || form?.pristine"
+                        type="submit"
+                        (ngSubmit)="onSubmit()">
+                        Save
+                        <i class="fa-regular fa-floppy-disk"></i>
+                    </button>
+                }
+                <button class="right-icon" [routerLink]="'/dua/view/' + id">
+                    Cancel
+                    <i class="fa-solid fa-ban"></i>
+                </button>
+            </form>
+        }
+    } @else if (mode == "create" && !link) {
+        @if (form) {
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <button class="Button left-icon back" (click)="goBack()">
+                    <i class="fas fa-angle-left"></i>
+                    Back
+                </button>
+                @if (form) {
+                    <button
+                        class="right-icon"
+                        [disabled]="!form?.valid || form?.pristine"
+                        type="submit"
+                        (ngSubmit)="onSubmit()">
+                        Save
+                        <i class="fa-regular fa-floppy-disk"></i>
+                    </button>
+                }
+            </form>
+        }
     }
-    
-    @if (mode == 'create' && link) {
+
+    @if (mode == "create" && link) {
         <h3 class="created-title right-icon">
-            The draft is created<i class="fa-regular fa-thumbs-up"></i>
+            The draft is created
+            <i class="fa-regular fa-thumbs-up"></i>
         </h3>
         <div>
-            You can now access the draft with this link : <a [href]="link">dua draft</a>
-            This link has been sent to {{form?.get('email')?.value ? form?.get('email')?.value + ' and ' : '' }} you by email. 
-            Anyone having the link is free to edit the document.
-            At any time you can generate a pdf document from this dua draft and upload it into you study.
+            You can now access the draft with this link :
+            <a [href]="link">dua draft</a>
+            This link has been sent to {{ form?.get("email")?.value ? form?.get("email")?.value + " and " : "" }} you by
+            email. Anyone having the link is free to edit the document. At any time you can generate a pdf document from
+            this dua draft and upload it into you study.
         </div>
     } @else {
-        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-            <ul *ngIf="mode == 'create'">
-                <li>
-                    <label>
-                        Send to
-                    </label>
-                    <input form="form" type="email" class="right-col" formControlName="email"/>
-                </li>
-            </ul>
-        </form>
-        
-        <div class="page" [class.converting]="converting" *ngIf="showPage">
-            <div #pdfContent class="inner-page">
-                <div class="document-header">
-                    <div class="other-logo-container">
-                        <img *ngIf="duaService.imagePreview" class="other-logo" [src]="duaService.imagePreview" alt="Logo"/>
-                        <div *ngIf="!duaService.imagePreview" class="logo-placeholder left-icon">
-                            <i class="fa-solid fa-circle-info"></i>
-                            The image will not be saved, please add it right before generating the pdf.
-                        </div>
-                        <upload-file *ngIf="!converting" (fileChange)="onImageLoaded($event)" accept="image/*" label="Load logo file" [noFilename]="true"></upload-file>
-                    </div>
-                    <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
-                </div>
-                <h1>Accord d'Utilisation des Données</h1>
-                <p>
-                    Je demande l'accès aux données collectées de l'étude {{dua?.studyName || '?'}} et hébergées sur la plateforme Shanoir.
-                </p>
-                <p>
-                    En acceptant cet accord, je deviens le 
-                    <a href="https://commission.europa.eu/law/law-topic/data-protection/rules-business-and-organisations/obligations/controllerprocessor/what-data-controller-or-data-processor_fr">responsable du traitement des données</a> 
-                    (tel que défini par le RGPD européen) des données auxquelles j'ai accès, 
-                    et je suis responsable d'y accéder conformément aux obligations du RGPD ainsi qu'aux conditions spécifiques suivantes :
-                </p>
-                <p>&nbsp;</p>
-                <ol>
-                    <li>1. Je me conformerai à toutes les règles et réglementations en vigueur en matière de protection de données à caractère personnel imposées par l‘institution dont je relève.</li>
-                    <li>2. Je ne poursuivrai jamais, par quelque moyen que ce soit, la finalité visant à établir ou à retrouver l'identité des personnes concernées par le traitement des données à caractère personnel.</li>
-                    <li>3. Je ne diffuserai pas ces données.</li>
-                    <li>4. Je ferai référence à la source originelle spécifique des données auxquelles j'ai eu accès lorsque je présenterai les résultats ou des algorithmes ayant bénéficié de leur utilisation.</li>
-                </ol>
-                <p>&nbsp;</p>
-                @if(mode == "view" && dua) {
-                    <div>
-                        <label>Lien Clinical Trials de l'étude : </label>
-                        <a [href]="'https://clinicaltrials.gov/' + dua.url">{{'https://clinicaltrials.gov/' + dua.url}}</a>
-                    </div>
-                    <div>
-                        <h3>Financement : </h3>
-                        {{dua.funding}}
-                    </div>
-                    <div>
-                        <h3>Remerciements : </h3>
-                        {{dua.thanks}}
-                    </div>
-                    <div>
-                        <h3>Articles : </h3>
-                        {{dua.papers}}
-                    </div>
-                } @else if (mode == 'edit' || mode == 'create') {
-                    <h1>To answer/complete</h1>
-                    <form *ngIf="form" [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
-                        <ol class="complete">
-                            <li>
-                                <label>
-                                    Lien Clinical Trials *
-                                    <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
-                                </label>
-                                <span class="right-col">
-                                    https://clinicaltrials.gov/<input type="text" formControlName="url"/>
-                                </span>
-                            </li>
-                            <li>
-                                <label>
-                                    Financement *
-                                </label>
-                                <textarea class="right-col" formControlName="funding"></textarea>
-                            </li>
-                            <li>
-                                <label>
-                                    Remerciements *
-                                </label>
-                                <textarea class="right-col" formControlName="thanks"></textarea>
-                            </li>
-                            <li>
-                                <label>
-                                    Articles à citer *
-                                </label>
-                                <textarea class="right-col" formControlName="papers"></textarea>
-                            </li>
-                        </ol>
-                    </form>
+        @if (form) {
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                @if (mode == "create") {
+                    <ul>
+                        <li>
+                            <label>Send to</label>
+                            <input form="form" type="email" class="right-col" formControlName="email" />
+                        </li>
+                    </ul>
                 }
-            </div>
-        </div>
-    }
+            </form>
+        }
 
-</div>    
+        @if (showPage) {
+            <div class="page" [class.converting]="converting">
+                <div #pdfContent class="inner-page">
+                    <div class="document-header">
+                        <div class="other-logo-container">
+                            @if (duaService.imagePreview) {
+                                <img class="other-logo" [src]="duaService.imagePreview" alt="Logo" />
+                            }
+                            @if (!duaService.imagePreview) {
+                                <div class="logo-placeholder left-icon">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    The image will not be saved, please add it right before generating the pdf.
+                                </div>
+                            }
+                            @if (!converting) {
+                                <upload-file
+                                    (fileChange)="onImageLoaded($event)"
+                                    accept="image/*"
+                                    label="Load logo file"
+                                    [noFilename]="true"></upload-file>
+                            }
+                        </div>
+                        <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo" />
+                    </div>
+                    <h1>Accord d'Utilisation des Données</h1>
+                    <p>
+                        Je demande l'accès aux données collectées de l'étude {{ dua?.studyName || "?" }} et hébergées
+                        sur la plateforme Shanoir.
+                    </p>
+                    <p>
+                        En acceptant cet accord, je deviens le
+                        <a
+                            href="https://commission.europa.eu/law/law-topic/data-protection/rules-business-and-organisations/obligations/controllerprocessor/what-data-controller-or-data-processor_fr">
+                            responsable du traitement des données
+                        </a>
+                        (tel que défini par le RGPD européen) des données auxquelles j'ai accès, et je suis responsable
+                        d'y accéder conformément aux obligations du RGPD ainsi qu'aux conditions spécifiques suivantes :
+                    </p>
+                    <p>&nbsp;</p>
+                    <ol>
+                        <li>
+                            1. Je me conformerai à toutes les règles et réglementations en vigueur en matière de
+                            protection de données à caractère personnel imposées par l‘institution dont je relève.
+                        </li>
+                        <li>
+                            2. Je ne poursuivrai jamais, par quelque moyen que ce soit, la finalité visant à établir ou
+                            à retrouver l'identité des personnes concernées par le traitement des données à caractère
+                            personnel.
+                        </li>
+                        <li>3. Je ne diffuserai pas ces données.</li>
+                        <li>
+                            4. Je ferai référence à la source originelle spécifique des données auxquelles j'ai eu accès
+                            lorsque je présenterai les résultats ou des algorithmes ayant bénéficié de leur utilisation.
+                        </li>
+                    </ol>
+                    <p>&nbsp;</p>
+                    @if (mode == "view" && dua) {
+                        <div>
+                            <label>Lien Clinical Trials de l'étude :</label>
+                            <a [href]="'https://clinicaltrials.gov/' + dua.url">
+                                {{ "https://clinicaltrials.gov/" + dua.url }}
+                            </a>
+                        </div>
+                        <div>
+                            <h3>Financement :</h3>
+                            {{ dua.funding }}
+                        </div>
+                        <div>
+                            <h3>Remerciements :</h3>
+                            {{ dua.thanks }}
+                        </div>
+                        <div>
+                            <h3>Articles :</h3>
+                            {{ dua.papers }}
+                        </div>
+                    } @else if (mode == "edit" || mode == "create") {
+                        <h1>To answer/complete</h1>
+                        @if (form) {
+                            <form [formGroup]="form" id="form" (ngSubmit)="onSubmit()">
+                                <ol class="complete">
+                                    <li>
+                                        <label>
+                                            Lien Clinical Trials *
+                                            <tool-tip>Obligatoire avec tout CPP obtenu et accessible en ligne</tool-tip>
+                                        </label>
+                                        <span class="right-col">
+                                            https://clinicaltrials.gov/
+                                            <input type="text" formControlName="url" />
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <label>Financement *</label>
+                                        <textarea class="right-col" formControlName="funding"></textarea>
+                                    </li>
+                                    <li>
+                                        <label>Remerciements *</label>
+                                        <textarea class="right-col" formControlName="thanks"></textarea>
+                                    </li>
+                                    <li>
+                                        <label>Articles à citer *</label>
+                                        <textarea class="right-col" formControlName="papers"></textarea>
+                                    </li>
+                                </ol>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

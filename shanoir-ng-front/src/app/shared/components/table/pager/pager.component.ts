@@ -13,13 +13,13 @@
  */
 
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'shanoir-pager',
     templateUrl: 'pager.component.html',
     styleUrls: ['pager.component.css'],
-    imports: [NgFor, NgIf]
+    imports: []
 })
 
 export class PagerComponent implements OnChanges {

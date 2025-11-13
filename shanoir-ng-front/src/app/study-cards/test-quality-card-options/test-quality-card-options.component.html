@@ -13,42 +13,57 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="cell">
-    <form #window class="window" [formGroup]="form" *ngIf="form">
-        <h2 class="header">Large Volume</h2>
-        <p class="msg">
-            This study contains {{nbExaminations}} examinations. The quality check could take several minutes. 
-			<br/>Do you want to test the quality card on a sample to reduce the computing time ?
-		</p>
-        <fieldset class="body">
-            <ol>
-                <li>
-                    <label>From</label>
-                    <span class="right-col">
-                        <input formControlName="from" type="number" (change)="updateValidity()" [min]="1">
-                    </span>
-                </li>
-				<li>
-                    <label>To</label>
-                    <span class="right-col">
-                        <input formControlName="to" type="number" (change)="updateValidity()" [min]="1" [max]="nbExaminations">
-                    </span>
-                </li>
-				<li>
-                    <label>Sample size</label>
-                    <span class="right-col">
-                        {{form.get('to').value - form.get('from').value + 1}} examinations
-                    </span>
-                </li>
-            </ol>
-        </fieldset>
-        <div class="footer">
-            <button type="button" type="button" class="alt left-icon" [disabled]="!form.valid" (click)="testOnInterval()">
-                <i class="fas fa-play"></i>Test on sample
-            </button>
-			<button type="button" type="button" class="alt left-icon" (click)="testOnAll()">
-                <i class="fas fa-play"></i>Test on all {{nbExaminations}} examinations
-            </button>
-            <button type="button" (click)="cancel()">Cancel</button>
-        </div>
-    </form>
+    @if (form) {
+        <form #window class="window" [formGroup]="form">
+            <h2 class="header">Large Volume</h2>
+            <p class="msg">
+                This study contains {{ nbExaminations }} examinations. The quality check could take several minutes.
+                <br />
+                Do you want to test the quality card on a sample to reduce the computing time ?
+            </p>
+            <fieldset class="body">
+                <ol>
+                    <li>
+                        <label>From</label>
+                        <span class="right-col">
+                            <input formControlName="from" type="number" (change)="updateValidity()" [min]="1" />
+                        </span>
+                    </li>
+                    <li>
+                        <label>To</label>
+                        <span class="right-col">
+                            <input
+                                formControlName="to"
+                                type="number"
+                                (change)="updateValidity()"
+                                [min]="1"
+                                [max]="nbExaminations" />
+                        </span>
+                    </li>
+                    <li>
+                        <label>Sample size</label>
+                        <span class="right-col">
+                            {{ form.get("to").value - form.get("from").value + 1 }} examinations
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+            <div class="footer">
+                <button
+                    type="button"
+                    type="button"
+                    class="alt left-icon"
+                    [disabled]="!form.valid"
+                    (click)="testOnInterval()">
+                    <i class="fas fa-play"></i>
+                    Test on sample
+                </button>
+                <button type="button" type="button" class="alt left-icon" (click)="testOnAll()">
+                    <i class="fas fa-play"></i>
+                    Test on all {{ nbExaminations }} examinations
+                </button>
+                <button type="button" (click)="cancel()">Cancel</button>
+            </div>
+        </form>
+    }
 </div>

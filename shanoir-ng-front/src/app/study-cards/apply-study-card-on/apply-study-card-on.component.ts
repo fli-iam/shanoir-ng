@@ -13,7 +13,7 @@
  */
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Location, NgIf, NgFor } from '@angular/common';
+import { Location } from '@angular/common';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
@@ -42,7 +42,7 @@ export type Status = 'default' | 'loading' | 'done' | 'error';
     templateUrl: 'apply-study-card-on.component.html',
     styleUrls: ['apply-study-card-on.component.css'],
     animations: [slideRight],
-    imports: [NgIf, SelectBoxComponent, FormsModule, NgFor, TableComponent, AcquisitionEquipmentPipe]
+    imports: [SelectBoxComponent, FormsModule, TableComponent, AcquisitionEquipmentPipe]
 })
 export class ApplyStudyCardOnComponent implements OnInit {
 

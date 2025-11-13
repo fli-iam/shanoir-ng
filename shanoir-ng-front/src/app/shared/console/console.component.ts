@@ -18,14 +18,14 @@ import { Subscription } from 'rxjs';
 import { slideDown } from '../animations/animations';
 
 import { ConsoleService, Message } from './console.service';
-import { NgIf, NgFor } from '@angular/common';
+
 
 @Component({
     selector: 'shanoir-console',
     templateUrl: './console.component.html',
     styleUrls: ['./console.component.css'],
     animations: [slideDown],
-    imports: [NgIf, NgFor]
+    imports: []
 })
 export class ConsoleComponent implements OnDestroy {
 

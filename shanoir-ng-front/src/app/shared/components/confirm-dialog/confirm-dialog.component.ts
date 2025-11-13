@@ -15,13 +15,13 @@
 import { Component } from '@angular/core';
 
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
     styleUrls: ['confirm-dialog.component.css'],
-    imports: [NgIf]
+    imports: []
 })
 export class ConfirmDialogComponent {
 

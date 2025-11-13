@@ -21,7 +21,7 @@ import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from "../shared/study-card.service";
-import { NgIf } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { RouterLink } from '@angular/router';
@@ -31,7 +31,7 @@ import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-it
 @Component({
     selector: 'card-node',
     templateUrl: 'study-card-node.component.html',
-    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
 })
 
 export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> implements OnChanges {

@@ -21,14 +21,14 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 
 @Component({
     selector: 'manufacturer-detail',
     templateUrl: 'manufacturer.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, NgSwitchDefault]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent]
 })
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {

@@ -19,7 +19,7 @@ import { AbstractInput } from '../shared/form/input.abstract';
 import { isDarkColor } from '../utils/app.utils';
 
 import { Tag } from './tag.model';
-import { NgIf, NgFor } from '@angular/common';
+
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -34,7 +34,7 @@ export type Mode =  "view" | "edit" | "create";
             multi: true
         }
     ],
-    imports: [NgIf, NgFor, FormsModule]
+    imports: [FormsModule]
 })
 
 export class TagCreatorComponent extends AbstractInput<Tag[]> {

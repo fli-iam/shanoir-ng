@@ -17,7 +17,7 @@ import { Observable, Subscription , of } from 'rxjs';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
-import { NgIf } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
@@ -26,7 +26,7 @@ import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-
     selector: 'action',
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css'],
-    imports: [NgIf, SelectBoxComponent, FormsModule, AutoAdjustInputComponent]
+    imports: [SelectBoxComponent, FormsModule, AutoAdjustInputComponent]
 })
 export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Input() assignment: StudyCardAssignment;

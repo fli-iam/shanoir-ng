@@ -28,7 +28,7 @@ import { InjectionType } from '../../shared/enum/injectionType';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({
@@ -36,7 +36,7 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 

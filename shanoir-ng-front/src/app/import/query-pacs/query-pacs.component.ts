@@ -22,7 +22,7 @@ import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
-import { NgIf } from '@angular/common';
+
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
@@ -36,7 +36,7 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
     animations: [slideDown],
-    imports: [FormsModule, ReactiveFormsModule, NgIf, TooltipComponent]
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class QueryPacsComponent{

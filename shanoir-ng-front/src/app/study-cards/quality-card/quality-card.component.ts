@@ -44,7 +44,7 @@ import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
@@ -56,7 +56,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 

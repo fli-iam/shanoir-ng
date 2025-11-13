@@ -1,99 +1,196 @@
-<form *ngIf="pipeline" [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()"
-      xmlns="http://www.w3.org/1999/html">
-    <legend>{{pipeline.name}}</legend>
+@if (pipeline) {
+    <form [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()" xmlns="http://www.w3.org/1999/html">
+        <legend>{{ pipeline.name }}</legend>
+        <div>
+            <label for="execution_name">Execution Name *</label>
+            <input
+                type="text"
+                id="execution_name"
+                formControlName="execution_name"
+                required
+                [(ngModel)]="execDefaultName" />
+        </div>
+        <div>
+            Execution parameters: please choose value for every parameter if needed.
+            <br />
+            Please note that for file parameters, the text box is used for regular expression if you want to organize
+            dataset in different arguments
+        </div>
+        @for (parameter of pipeline.parameters; track parameter) {
+            <div>
+                @if (parameter.name != "executable") {
+                    <div>
+                        <label>
+                            {{ parameter.name }}{{ !parameter.isOptional && parameter.type != "Boolean" ? "*" : "" }}
+                            <tool-tip>
+                                {{
+                                    isAFile(parameter)
+                                        ? "Regular expression to filter among the selected datasets. " +
+                                          parameter.description
+                                        : parameter.description
+                                }}
+                            </tool-tip>
+                        </label>
+                        @if (!isAFile(parameter) && parameter.type != "Boolean") {
+                            <input
+                                formControlName="{{ parameter.name }}"
+                                name="{{ parameter.name }}"
+                                id="{{ parameter.name }}" />
+                        }
+                        @if (parameter.type == "Boolean") {
+                            <span>
+                                <checkbox formControlName="{{ parameter.name }}" id="{{ parameter.name }}"></checkbox>
+                            </span>
+                        }
+                        @if (isAFile(parameter)) {
+                            <span>
+                                @if (isAFile(parameter)) {
+                                    <input
+                                        formControlName="{{ parameter.name }}"
+                                        name="{{ parameter.name }}"
+                                        id="{{ parameter.name }}" />
+                                }
+                                <ng-template #loading>Loading datasets...</ng-template>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        <div>
+            <label>
+                Group by
+                <tool-tip>
+                    Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.
+                </tool-tip>
+            </label>
+            <span class="right-col">
+                <input
+                    id="dataset"
+                    type="radio"
+                    formControlName="group_by"
+                    name="group_by"
+                    [(ngModel)]="groupBy"
+                    value="dataset" />
+                Dataset(s)
+                <input
+                    id="acquisition"
+                    type="radio"
+                    formControlName="group_by"
+                    name="group_by"
+                    [(ngModel)]="groupBy"
+                    value="acquisition" />
+                Acquisition(s)
+                <input
+                    id="examination"
+                    type="radio"
+                    formControlName="group_by"
+                    name="group_by"
+                    [(ngModel)]="groupBy"
+                    value="examination" />
+                Examination(s)
+            </span>
+        </div>
+        <div>
+            <label>
+                Dataset export format
+                <tool-tip>
+                    Selected datasets can be exported as Dicom of NIfTI. Choose what the selected pipeline expect.
+                </tool-tip>
+            </label>
+            <span class="right-col">
+                <input
+                    id="nii"
+                    type="radio"
+                    formControlName="export_format"
+                    name="export_format"
+                    [(ngModel)]="exportFormat"
+                    value="nii" />
+                NIfTI
+                <input
+                    id="dcm"
+                    type="radio"
+                    formControlName="export_format"
+                    name="export_format"
+                    [(ngModel)]="exportFormat"
+                    value="dcm" />
+                DICOM
+            </span>
+        </div>
+        @if (exportFormat == "nii") {
+            <div>
+                <label>
+                    Nifti converter
+                    <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip>
+                </label>
+                <span class="right-col">
+                    <select-box
+                        formControlName="converter"
+                        [(ngModel)]="converterId"
+                        [options]="niftiConverters"></select-box>
+                </span>
+            </div>
+        }
+    </form>
+}
+<button type="button" (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 
+@if (parametersApplied) {
+    <div class="block-div">
+        <legend>List of datasets selected for the given parameters:</legend>
+        @for (parameter of fileInputs; track parameter) {
+            <div class="parent-div">
+                <input type="hidden" [(ngModel)]="datasetsByParam[parameter.name]" />
+                <b>{{ parameter.name }} :</b>
+                <select-box
+                    placeholder="Available datasets"
+                    (addClick)="addDatasetFromParam($event, parameter.name)"
+                    [options]="datasetsOptions"></select-box>
+                <table>
+                    <tr>
+                        <th>Dataset name (id)</th>
+                        <th>Acquisition id</th>
+                        <th>Examination id</th>
+                        <th>Subject</th>
+                    </tr>
+                    @if (isLoading) {
+                        <tr>
+                            <td [attr.colspan]="4" class="empty">
+                                The data is loading
+                                <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
+                            </td>
+                        </tr>
+                    }
+                    @for (
+                        dataset of datasetsByParam[parameter.name];
+                        track dataset;
+                        let i = $index;
+                        let even = $even;
+                        let odd = $odd
+                    ) {
+                        <tr [class.even]="even" [class.odd]="odd">
+                            <td>{{ dataset.name }} ({{ dataset.id }})</td>
+                            <td>{{ dataset.datasetAcquisition?.id }}</td>
+                            <td>{{ dataset.datasetAcquisition?.examination?.id }}</td>
+                            <td>{{ dataset.subject?.name }}</td>
+                            @if (datasetsByParam[parameter.name].length > 1) {
+                                <td
+                                    class="icon icon-clickable"
+                                    (click)="removeDatasetFromParam(dataset, parameter.name)">
+                                    <i class="fas fa-times"></i>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </table>
+                <br />
+            </div>
+        }
+    </div>
+}
+
+@if (parametersApplied) {
     <div>
-        <label for="execution_name">Execution Name *</label>
-        <input type="text" id="execution_name" formControlName="execution_name" required [(ngModel)]="execDefaultName">
+        <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
     </div>
-
-    <div>
-    Execution parameters: please choose value for every parameter if needed.<br/>
-    Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments
-    </div>
-
-    <div *ngFor="let parameter of pipeline.parameters">
-        <div *ngIf="parameter.name != 'executable'">
-             <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
-                 <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
-             <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-             <span *ngIf="parameter.type == 'Boolean'">
-                 <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
-             </span>
-             <span *ngIf="isAFile(parameter)">
-                 <input *ngIf="isAFile(parameter)"
-                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-                 <ng-template #loading>Loading datasets...</ng-template>
-             </span>
-	   </div>
-    </div>
-    <div>
-        <label>Group by <tool-tip>Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.</tool-tip></label>
-        <span class="right-col">
-            <input id="dataset" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="dataset" />Dataset(s)
-            <input id="acquisition" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="acquisition" />Acquisition(s)
-            <input id="examination" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="examination" />Examination(s)
-        </span>
-    </div>
-    <div>
-    <label>Dataset export format <tool-tip>Selected datasets can be exported as Dicom of NIfTI. Choose what the selected pipeline expect.</tool-tip></label>
-    <span class="right-col">
-        <input id="nii" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="nii" />NIfTI
-        <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" />DICOM
-    </span>
-    </div>
-    <div *ngIf="exportFormat=='nii'">
-        <label>Nifti converter <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip></label>
-        <span class="right-col">
-            <select-box formControlName="converter" [(ngModel)]="converterId" [options]="niftiConverters"></select-box>
-        </span>
-    </div>
-</form>
-<button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
-
-<div *ngIf="parametersApplied" class="block-div">
-<legend> List of datasets selected for the given parameters: </legend>
-    <div *ngFor="let parameter of fileInputs" class="parent-div">
-        <input type="hidden" [(ngModel)]="datasetsByParam[parameter.name]"/>
-        <b>{{parameter.name}} :</b>
-           <select-box placeholder="Available datasets" (addClick)="addDatasetFromParam($event, parameter.name)" [options]="datasetsOptions">
-           </select-box>
-        <table>
-            <tr>
-              <th>
-              Dataset name (id)
-              </th>
-                <th>
-                    Acquisition id
-                </th>
-                <th>
-                    Examination id
-                </th>
-              <th>
-                 Subject
-                 </th>
-            </tr>
-            <tr *ngIf="isLoading">
-                <td [attr.colspan]="4" class="empty">
-                    The data is loading
-                    <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
-                </td>
-            </tr>
-                <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                    <td>{{dataset.name}} ({{dataset.id}})</td>
-                    <td>{{dataset.datasetAcquisition?.id}}</td>
-                    <td>{{dataset.datasetAcquisition?.examination?.id}}</td>
-                    <td>{{dataset.subject?.name}}</td>
-                    <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
-                        <i class="fas fa-times"></i>
-                    </td>
-                </tr>
-        </table>
-        <br/>
-    </div>
-</div>
-
-<div *ngIf="parametersApplied">
-    <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
-</div>
-
+}

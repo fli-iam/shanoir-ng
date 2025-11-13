@@ -33,7 +33,7 @@ import {
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
@@ -43,7 +43,7 @@ import { ExaminationNodeComponent } from '../../examinations/tree/examination-no
 @Component({
     selector: 'subject-node',
     templateUrl: 'subject-node.component.html',
-    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, ExaminationNodeComponent]
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, ExaminationNodeComponent]
 })
 
 export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode> implements OnChanges {

@@ -20,7 +20,7 @@ import { ColumnDefinition } from '../components/table/column.definition.type';
 import { FilterablePageable, Page } from '../components/table/pageable.model';
 import { TableComponent } from '../components/table/table.component';
 import { Option, SelectBoxComponent } from '../select/select.component';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
@@ -34,7 +34,7 @@ import { NgIf } from '@angular/common';
             multi: true,
         }
     ],
-    imports: [NgIf, SelectBoxComponent, TableComponent]
+    imports: [SelectBoxComponent, TableComponent]
 })
 
 export class MultiSelectTableComponent implements ControlValueAccessor, OnChanges {

@@ -25,7 +25,7 @@ import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../.
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { FormsModule } from '@angular/forms';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
@@ -37,7 +37,7 @@ import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component
 @Component({
     selector: 'dataset-acquisition-node',
     templateUrl: 'dataset-acquisition-node.component.html',
-    imports: [LoadingBarComponent, NgIf, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, DatasetNodeComponent]
+    imports: [LoadingBarComponent, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, DatasetNodeComponent]
 })
 
 export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<DatasetAcquisitionNode> implements OnChanges {

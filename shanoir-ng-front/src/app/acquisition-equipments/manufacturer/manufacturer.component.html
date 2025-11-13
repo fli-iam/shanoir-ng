@@ -13,46 +13,79 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form #formContainer *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete)="delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			></form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'"> 
-					<h2 class="header command-zone"i18n="View manuf|Title@@manufDetailViewTitle">Details on manufacturer</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'"> 
-					<h2 class="header command-zone"i18n="Edit manuf|Title@@manufDetailEditTitle">Edit manufacturer</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'"> 
-					<h2 class="header command-zone"i18n="Create manuf|Title@@manufDetailCreateTitle">Create manufacturer</h2>
-				</ng-template>
-			</span>
-			<help-message [help]="'equipment'"></help-message>
-			<fieldset>
-				<ol>
-					<li>
-						<label i18n="Manuf detail|Name label@@manufDetailName">Manufacturer name</label> 
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'"> 
-								{{manuf.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault> 
-								<input type="text" id="name" formControlName="name" (change)="isNameUniqueError=false"/>
-								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Manuf detail|Name required error@@manufDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Manuf detail|Name length error@@manufDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Manuf detail|Name unique error@@manufDetailNameUniqueError">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-        </div>
-    </form>
+    @if (form) {
+        <form #formContainer [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()"></form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View manuf|Title@@manufDetailViewTitle">
+                                Details on manufacturer
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit manuf|Title@@manufDetailEditTitle">
+                                Edit manufacturer
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create manuf|Title@@manufDetailCreateTitle">
+                                Create manufacturer
+                            </h2>
+                        }
+                    }
+                </span>
+                <help-message [help]="'equipment'"></help-message>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label i18n="Manuf detail|Name label@@manufDetailName">Manufacturer name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ manuf.name }}
+                                    }
+                                    @default {
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            formControlName="name"
+                                            (change)="isNameUniqueError = false" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Manuf detail|Name required error@@manufDetailNameRequiredError">
+                                                Name is required!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Manuf detail|Name length error@@manufDetailNameLengthError">
+                                                Name length must be between 2 and 200!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Manuf detail|Name unique error@@manufDetailNameUniqueError">
+                                                Name should be unique!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

@@ -26,14 +26,14 @@ import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.mode
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css', './processed-dataset-clinical-context.component.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [TooltipComponent, SelectBoxComponent, FormsModule, NgIf]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {
 

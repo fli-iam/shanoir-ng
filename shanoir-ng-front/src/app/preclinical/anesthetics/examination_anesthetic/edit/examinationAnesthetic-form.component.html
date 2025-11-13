@@ -13,112 +13,155 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form *ngIf="form && examinationAnesthetic" [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="isStandalone">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-			</form-footer>
-		</div> 
-		<span *ngIf="isStandalone"  [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'">
-				<h2 class="header command-zone"i18n="View examAnesthetic|Title@@examinationDetailViewTitle">Details on examination anesthetic</h2>
-			</ng-template>
-			<ng-template [ngSwitchCase]="'edit'">
-				<h2 class="header command-zone"i18n="Edit examAnesthetic|Title@@examinationDetailEditTitle">Edit examination anesthetic</h2>
-			</ng-template>
-			<ng-template [ngSwitchCase]="'create'">
-				<h2 class="header command-zone"i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">Create examination anesthetic</h2>
-			</ng-template>
-		</span>
-		
-
-		<fieldset>
-			<legend *ngIf="!isStandalone">Examination anesthetic</legend>
-			<ol>
-				<li >
-					<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.anesthetic?.name}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select id="anesthetic"  formControlName="anesthetic">
-								<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
-							</select>
-							<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
-								<i class="fas fa-plus-square"></i>
-								new anesthetic
-							</button>
-						</ng-template>
-					</span>
-				</li>
-				<li >
-					<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.injectionInterval | camel}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select id="injectionInterval" formControlName="injectionInterval">
-								<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
-							</select>
-						</ng-template>
-					</span>
-				</li>
-				<li >
-					<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.injectionSite | camel}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select id="injectionSite" formControlName="injectionSite">
-								<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
-							</select>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-								{{examinationAnesthetic?.injectionType | camel}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select id="injectionType" formControlName="injectionType">
-								<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
-							</select>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Edit examAnesthetic|Dose label">Dose</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.dose}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="dose" formControlName="dose"/>
-						</ng-template>
-					</span> 
-				</li>
-				<li>
-					<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.doseUnit?.value}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<select id="doseUnit" formControlName="doseUnit">
-								<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
-							</select>
-						</ng-template>
-					</span> 							
-				</li>
-			</ol>
-		</fieldset>
-	</form>   
+    @if (form && examinationAnesthetic) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            @if (isStandalone) {
+                <div>
+                    <form-footer
+                        [state]="footerState"
+                        (save)="save()"
+                        (edit)="goToEdit()"
+                        (back)="goBack()"></form-footer>
+                </div>
+            }
+            @if (isStandalone) {
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2
+                                class="header command-zone"
+                                i18n="View examAnesthetic|Title@@examinationDetailViewTitle">
+                                Details on examination anesthetic
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2
+                                class="header command-zone"
+                                i18n="Edit examAnesthetic|Title@@examinationDetailEditTitle">
+                                Edit examination anesthetic
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2
+                                class="header command-zone"
+                                i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">
+                                Create examination anesthetic
+                            </h2>
+                        }
+                    }
+                </span>
+            }
+            <fieldset>
+                @if (!isStandalone) {
+                    <legend>Examination anesthetic</legend>
+                }
+                <ol>
+                    <li>
+                        <label i18n="Edit examAnesthetic|Anesthetic label">Anesthetic</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.anesthetic?.name }}
+                                }
+                                @default {
+                                    <select id="anesthetic" formControlName="anesthetic">
+                                        @for (anesthetic of anesthetics; track anesthetic) {
+                                            <option [ngValue]="anesthetic">{{ anesthetic.name }}</option>
+                                        }
+                                    </select>
+                                    <button
+                                        i18n="Edit examAnesthetic|Add a new anesthetic"
+                                        (click)="goToAddAnesthetic()">
+                                        <i class="fas fa-plus-square"></i>
+                                        new anesthetic
+                                    </button>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.injectionInterval | camel }}
+                                }
+                                @default {
+                                    <select id="injectionInterval" formControlName="injectionInterval">
+                                        @for (interval of intervals; track interval) {
+                                            <option [value]="interval.key">{{ interval.value }}</option>
+                                        }
+                                    </select>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.injectionSite | camel }}
+                                }
+                                @default {
+                                    <select id="injectionSite" formControlName="injectionSite">
+                                        @for (site of sites; track site) {
+                                            <option [value]="site.key">{{ site.value }}</option>
+                                        }
+                                    </select>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit examAnesthetic|InjectionType label">Injection type</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.injectionType | camel }}
+                                }
+                                @default {
+                                    <select id="injectionType" formControlName="injectionType">
+                                        @for (injtype of injtypes; track injtype) {
+                                            <option [value]="injtype.key">{{ injtype.value }}</option>
+                                        }
+                                    </select>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit examAnesthetic|Dose label">Dose</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.dose }}
+                                }
+                                @default {
+                                    <input type="text" id="dose" formControlName="dose" />
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ examinationAnesthetic?.doseUnit?.value }}
+                                }
+                                @default {
+                                    <select id="doseUnit" formControlName="doseUnit">
+                                        @for (unit of units; track unit) {
+                                            <option [ngValue]="unit">{{ unit.value }}</option>
+                                        }
+                                    </select>
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+    }
 </div>

@@ -15,13 +15,13 @@
 import { Component } from '@angular/core';
 
 import { LoaderService } from './loader.service';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'loader',
     templateUrl: './loader.component.html',
     styleUrls: ['./loader.component.css'],
-    imports: [NgIf]
+    imports: []
 })
 export class LoaderComponent {
 

@@ -25,7 +25,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 
@@ -33,7 +33,7 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 

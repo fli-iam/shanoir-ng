@@ -16,7 +16,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
 import { Option } from '../select/select.component';
-import { NgFor, NgIf } from '@angular/common';
+
 
 
 @Component({
@@ -30,7 +30,7 @@ import { NgFor, NgIf } from '@angular/common';
             multi: true,
         }
     ],
-    imports: [NgFor, NgIf, FormsModule]
+    imports: [FormsModule]
 })
 
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {

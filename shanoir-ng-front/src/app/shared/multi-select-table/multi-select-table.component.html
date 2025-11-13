@@ -12,26 +12,26 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<!-- <span *ngFor="let option of selectedOptions; let i = index" 
-        class="left-icon block"
-        [style.color]="option.color"
-        [style.background-color]="option.backgroundColor">
-    <i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
-    <span class="label">{{option.label}}</span>
+<!-- <span *ngFor="let option of selectedOptions; let i = index"
+class="left-icon block"
+[style.color]="option.color"
+[style.background-color]="option.backgroundColor">
+<i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
+<span class="label">{{option.label}}</span>
 </span> -->
 
-<select-box
-    *ngIf="!readOnly"
-    [options]="options"
-    [pipe]="pipe"
-    [disabled]="disabled"
-    [placeholder]="placeholder"
-    (addClick)="onSelectOption($event?.id)">
-</select-box>
+@if (!readOnly) {
+    <select-box
+        [options]="options"
+        [pipe]="pipe"
+        [disabled]="disabled"
+        [placeholder]="placeholder"
+        (addClick)="onSelectOption($event?.id)"></select-box>
+}
 
-<shanoir-table #table
-        [getPage]="getPage.bind(this)" 
-        [columnDefs]="columnDefs"
-        [browserSearch]="false"
-        [editMode]="!readOnly">
-</shanoir-table>
+<shanoir-table
+    #table
+    [getPage]="getPage.bind(this)"
+    [columnDefs]="columnDefs"
+    [browserSearch]="false"
+    [editMode]="!readOnly"></shanoir-table>

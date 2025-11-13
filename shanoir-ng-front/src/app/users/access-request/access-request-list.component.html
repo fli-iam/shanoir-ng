@@ -13,40 +13,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Access Requests</h2>
-<form *ngFor="let accessRequest of accessRequests; let i = index" @disapearUp>
-    <ul>
-        <li>
-            <label i18n="access request|user label@@user">User</label>
-            <span class="right-col">
-                <a [routerLink]="['/user/details/', accessRequest.user.id]">
-                    {{accessRequest.user.username}}
-                </a>
-            </span>
-        </li>
-        <li>
-            <label i18n="access request|study label@@study">Study</label>
-            <span class="right-col">
-                <a [routerLink]="['/study/details/', accessRequest.studyId]">
-                    {{accessRequest.studyName}}
-                </a>
-            </span>
-        </li>
-        <li>
-            <label i18n="access request|study label@@study" class="required-label">Motivation</label>
-            <span class="right-col">
-                {{accessRequest.motivation}}
-            </span>
-        </li>
-    </ul>
-    <button type="button" (click)="decide(i, true)" class="accept right-icon">
-        Accept
-        <i class="fa-solid fa-thumbs-up"></i>
-    </button>
-    <button type="button" (click)="decide(i, false)" class="refuse right-icon">
-        Refuse
-        <i class="fa-solid fa-thumbs-down"></i>
-    </button>
-</form>
-<p *ngIf="!(accessRequests?.length > 0)">
-    No pending access request.
-</p>
+@for (accessRequest of accessRequests; track accessRequest; let i = $index) {
+    <form @disapearUp>
+        <ul>
+            <li>
+                <label i18n="access request|user label@@user">User</label>
+                <span class="right-col">
+                    <a [routerLink]="['/user/details/', accessRequest.user.id]">
+                        {{ accessRequest.user.username }}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label i18n="access request|study label@@study">Study</label>
+                <span class="right-col">
+                    <a [routerLink]="['/study/details/', accessRequest.studyId]">
+                        {{ accessRequest.studyName }}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+                <span class="right-col">
+                    {{ accessRequest.motivation }}
+                </span>
+            </li>
+        </ul>
+        <button type="button" (click)="decide(i, true)" class="accept right-icon">
+            Accept
+            <i class="fa-solid fa-thumbs-up"></i>
+        </button>
+        <button type="button" (click)="decide(i, false)" class="refuse right-icon">
+            Refuse
+            <i class="fa-solid fa-thumbs-down"></i>
+        </button>
+    </form>
+}
+@if (!(accessRequests?.length > 0)) {
+    <p>No pending access request.</p>
+}

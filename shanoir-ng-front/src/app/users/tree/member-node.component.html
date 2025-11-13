@@ -11,8 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="isAdmin && (menuOpened || treeService.isSelected(node.id, 'user'))"
         [label]="node.label"
         awesome="far fa-user"
@@ -20,19 +20,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = isAdmin && withMenu && !menuOpened"
         [route]="node.route"
         [hasChildren]="hasChildren()">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-    </dropdown-menu>
-
-    <ng-container *ngIf="node.open && node.rights && node.rights != $any('UNLOADED')">
-            <node
-                    *ngFor="let right of node.rights"
-                    [label]="right.label"
-                    awesome="fas fa-medal"
-                    [hasChildren]="false">
-            </node>
-    </ng-container>
-</node>
+        @if (isAdmin) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+            </dropdown-menu>
+        }
+        @if (node.open && node.rights && node.rights != $any("UNLOADED")) {
+            @for (right of node.rights; track right) {
+                <node [label]="right.label" awesome="fas fa-medal" [hasChildren]="false"></node>
+            }
+        }
+    </node>
+}

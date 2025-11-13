@@ -13,76 +13,117 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="TherapyFormComponent content-component">
-    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<form-footer
-				[state]="footerState"
-				(save)="save()"
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <form-footer
+                [state]="footerState"
+                (save)="save()"
                 (delete)="delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()">
-		</form-footer>
-		<table class="layout">
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'">
-						<div class="header command-zone" i18n="View therapy|Title">View therapy</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'">
-						<div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'">
-						<div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<label *ngIf="!isTherapyUnique" class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">This therapy already exists!</label>
-						<li class="required">
-							<label i18n="Edit therapy|Name label">Name</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-										{{therapy?.name}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name"/>
-									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit therapy|Name required error@@therapyDetailNameRequiredError">Name is required!</label>
-        							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit therapy|Name unique error@@therapyDetailNameUniqueError">Name should be unique!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit therapy|Location label">Type</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									{{TherapyType.getLabel(therapy.therapyType)}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="therapyType" [options]="TherapyType.options">
-                                    </select-box>
-									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit therapy|Comment label">Comment</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-										{{therapy?.comment}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<textarea rows="4" id="comment" formControlName="comment"></textarea>
-								</ng-template>
-							</span>
-
-						</li>
-					</ol>
-					</fieldset>
-				</td>
-			</tr>
-		</table>
-    </form>
+                (edit)="goToEdit()"
+                (dismiss)="goToView()"
+                (back)="goBack()"></form-footer>
+            <table class="layout">
+                <tr>
+                    <td colspan="2">
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <div class="header command-zone" i18n="View therapy|Title">View therapy</div>
+                                }
+                                @case ("edit") {
+                                    <div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
+                                }
+                                @case ("create") {
+                                    <div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
+                                }
+                            }
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <ol>
+                                @if (!isTherapyUnique) {
+                                    <label class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">
+                                        This therapy already exists!
+                                    </label>
+                                }
+                                <li class="required">
+                                    <label i18n="Edit therapy|Name label">Name</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ therapy?.name }}
+                                            }
+                                            @default {
+                                                <input type="text" id="name" formControlName="name" />
+                                                @if (hasError("name", ["required"])) {
+                                                    <label
+                                                        [@slideDown]="hasError('name', ['required'])"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit therapy|Name required
+                                                            error@@therapyDetailNameRequiredError">
+                                                        Name is required!
+                                                    </label>
+                                                }
+                                                @if (hasError("name", ["unique"])) {
+                                                    <label
+                                                        [@slideDown]="hasError('name', ['unique'])"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit therapy|Name unique error@@therapyDetailNameUniqueError">
+                                                        Name should be unique!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit therapy|Location label">Type</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ TherapyType.getLabel(therapy.therapyType) }}
+                                            }
+                                            @default {
+                                                <select-box
+                                                    formControlName="therapyType"
+                                                    [options]="TherapyType.options"></select-box>
+                                                @if (hasError("therapyType", ["required"])) {
+                                                    <label
+                                                        [@slideDown]="hasError('therapyType', ['required'])"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit therapy|therapyType required
+                                                            error@@therapyDetailTherapyTypeRequiredError">
+                                                        Type is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit therapy|Comment label">Comment</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ therapy?.comment }}
+                                            }
+                                            @default {
+                                                <textarea rows="4" id="comment" formControlName="comment"></textarea>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    }
 </div>

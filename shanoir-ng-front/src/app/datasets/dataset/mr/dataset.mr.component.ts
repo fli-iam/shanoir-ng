@@ -20,12 +20,12 @@ import { Option, SelectBoxComponent } from '../../../shared/select/select.compon
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
-import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 
 @Component({
     selector: 'mr-dataset-details',
     templateUrl: 'dataset.mr.component.html',
-    imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, FormsModule]
+    imports: [SelectBoxComponent, FormsModule]
 })
 
 export class MrDatasetComponent implements OnInit{

@@ -17,7 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Interval } from '../shared/quality-card.service';
 import { GlobalService } from '../../shared/services/global.service';
-import { NgIf } from '@angular/common';
+
 
 
 
@@ -25,7 +25,7 @@ import { NgIf } from '@angular/common';
     selector: 'test-quality-card-options',
     templateUrl: 'test-quality-card-options.component.html',
     styleUrls: ['test-quality-card-options.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule]
+    imports: [FormsModule, ReactiveFormsModule]
 })
 export class TestQualityCardOptionsComponent implements OnInit {
 

@@ -21,7 +21,7 @@ import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
-import { NgFor, NgIf } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -29,7 +29,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: 'eeg-select-series.component.html',
     styleUrls: ['eeg-select-series.component.css', '../shared/import.step.css'],
     animations: [slideDown],
-    imports: [TreeNodeComponent, NgFor, FormsModule, NgIf]
+    imports: [TreeNodeComponent, FormsModule]
 })
 export class EegSelectSeriesComponent {
 

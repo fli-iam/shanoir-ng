@@ -13,14 +13,14 @@
  */
 
 import { Component, HostBinding, Input } from '@angular/core';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
     selector: 'tool-tip',
     templateUrl: 'tooltip.component.html',
     styleUrls: ['tooltip.component.css'],
-    imports: [NgIf]
+    imports: []
 })
 
 export class TooltipComponent {

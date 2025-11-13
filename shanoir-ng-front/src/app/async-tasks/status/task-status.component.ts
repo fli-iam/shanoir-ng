@@ -28,7 +28,7 @@ import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
 import { FormsModule } from '@angular/forms';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { NgIf } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
@@ -37,7 +37,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
-    imports: [FormsModule, LoadingBarComponent, NgIf, RouterLink, TableComponent, LocalDateFormatPipe]
+    imports: [FormsModule, LoadingBarComponent, RouterLink, TableComponent, LocalDateFormatPipe]
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 

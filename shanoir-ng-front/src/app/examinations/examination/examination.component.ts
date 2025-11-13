@@ -35,7 +35,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { InstrumentAssessmentComponent } from '../instrument-assessment/instrument-assessment.component';
@@ -44,7 +44,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
 @Component({
     selector: 'examination-detail',
     templateUrl: 'examination.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, SelectBoxComponent, DatepickerComponent, NgFor, InstrumentAssessmentComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, InstrumentAssessmentComponent, LocalDateFormatPipe]
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> implements OnDestroy {

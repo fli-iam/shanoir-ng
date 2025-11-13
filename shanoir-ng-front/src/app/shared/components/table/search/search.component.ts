@@ -17,13 +17,13 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { ColumnDefinition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
 import { FormsModule } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
+
 
 @Component({
     selector: 'shanoir-table-search',
     templateUrl: 'search.component.html',
     styleUrls: ['search.component.css'],
-    imports: [FormsModule, NgIf, NgFor]
+    imports: [FormsModule]
 })
 
 export class TableSearchComponent implements OnChanges {

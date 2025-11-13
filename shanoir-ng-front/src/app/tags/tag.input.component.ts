@@ -18,7 +18,7 @@ import { Option, SelectBoxComponent } from '../shared/select/select.component';
 import { isDarkColor } from '../utils/app.utils';
 
 import { Tag } from './tag.model';
-import { NgFor } from '@angular/common';
+
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -33,7 +33,7 @@ export type Mode =  "view" | "edit" | "create";
             multi: true
         }
     ],
-    imports: [NgFor, SelectBoxComponent]
+    imports: [SelectBoxComponent]
 })
 
 export class TagInputComponent implements ControlValueAccessor, OnChanges {

@@ -12,166 +12,362 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="instance"><span class="instance-frame"><span class="instance-name"></span></span></div>
+<div class="instance">
+    <span class="instance-frame"><span class="instance-name"></span></span>
+</div>
 <div class="logo">
-    <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
-        <img [src]="shanoirLogoUrl" alt="Shanoir logo"/>
-    </a>
-    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
+    @if (isAuthenticated()) {
+        <a [routerLink]="['/home']">
+            <img [src]="shanoirLogoUrl" alt="Shanoir logo" />
+        </a>
+    }
+    @if (!isAuthenticated()) {
+        <img [src]="shanoirLogoUrl" alt="Shanoir logo" />
+    }
 </div>
 
-<div *ngIf="isAuthenticated()" class="user">
-    <div class="user-logo" [class.admin]="keycloakService.isUserAdmin()">
-        <i *ngIf="!keycloakService.isUserAdminOrExpert()" class="fas fa-user"></i>
-        <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
-        <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-cog"></i>
+@if (isAuthenticated()) {
+    <div class="user">
+        <div class="user-logo" [class.admin]="keycloakService.isUserAdmin()">
+            @if (!keycloakService.isUserAdminOrExpert()) {
+                <i class="fas fa-user"></i>
+            }
+            @if (keycloakService.isUserExpert()) {
+                <i class="fas fa-user-tie"></i>
+            }
+            @if (keycloakService.isUserAdmin()) {
+                <i class="fas fa-user-cog"></i>
+            }
+        </div>
+        <div class="welcome">
+            {{ username }}
+            @if (keycloakService.isUserAdmin()) {
+                <span class="admin-tag-sep">-</span>
+            }
+            @if (keycloakService.isUserAdmin()) {
+                <span class="admin-tag">
+                    <i class="fas fa-shield"></i>
+                    Administrator
+                </span>
+            }
+        </div>
+        <div class="user-commands">
+            <a routerLink="/user/details/{{ userId }}" routerLinkActive="active">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
     </div>
-    <div class="welcome">
-        {{username}}
-        <span class="admin-tag-sep" *ngIf="keycloakService.isUserAdmin()">- </span>
-        <span class="admin-tag" *ngIf="keycloakService.isUserAdmin()"><i class="fas fa-shield"></i>Administrator</span>
-    </div>
-    <div class="user-commands">
-        <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
-        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
-</div>
+}
 
 <ul class="menu-list">
-    <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li *ngIf="(duasToSign() + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
-        Notifications<span class="counter">{{duasToSign() + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li routerLink="/" routerLinkActive="active">
+        <i class="fas fa-home"></i>
+        Home
     </li>
-    <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
-        <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
-    </div>
-    <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
-        <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
-    </div>
+    @if (duasToSign() + accessRequestsToValidate > 0) {
+        <li (click)="state.notifOpened = !state.notifOpened; saveState()">
+            <i class="far fa-flag"></i>
+            Notifications
+            <span class="counter">{{ duasToSign() + accessRequestsToValidate }}</span>
+            <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+        </li>
+    }
+    @if (state.notifOpened && duasToSign() > 0) {
+        <div class="sub-menu" [@slideDown]="state.notifOpened">
+            <li routerLink="/dua" routerLinkActive="active">
+                <i class="fas fa-pen-alt"></i>
+                Data User Agreement
+                <span class="counter">{{ duasToSign() }}</span>
+            </li>
+        </div>
+    }
+    @if (state.notifOpened && accessRequestsToValidate > 0) {
+        <div class="sub-menu" [@slideDown]="state.notifOpened">
+            <li routerLink="/access-request/list" routerLinkActive="active">
+                <i class="fa-solid fa-user-lock"></i>
+                Access Requests
+                <span class="counter">{{ accessRequestsToValidate }}</span>
+            </li>
+        </div>
+    }
     <li class="jobs-menu">
         <a routerLink="/task" routerLinkActive="active" class="menu-link">
-            <i class="fas fa-tasks"></i>Jobs
-            <span *ngIf="notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
-                <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
-            </span>
-            <span *ngIf="notificationsService.nbNew" class="notif">
-                <i class="fa-regular fa-bell"></i>
-                {{notificationsService.nbNew}}
-            </span>
-            <span *ngIf="notificationsService.nbNewError" class="notif error">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                {{notificationsService.nbNewError}}
-            </span>
-            <span *ngIf="state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0" 
-                    class="notif button" (click)="$event.stopPropagation(); $event.preventDefault(); notificationsService.clearTaskList()" title="remove completed and error tasks">
-                <i class="fa-solid fa-broom"></i>
-                clean
-            </span>
+            <i class="fas fa-tasks"></i>
+            Jobs
+            @if (notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1) {
+                <span>
+                    <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
+                </span>
+            }
+            @if (notificationsService.nbNew) {
+                <span class="notif">
+                    <i class="fa-regular fa-bell"></i>
+                    {{ notificationsService.nbNew }}
+                </span>
+            }
+            @if (notificationsService.nbNewError) {
+                <span class="notif error">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {{ notificationsService.nbNewError }}
+                </span>
+            }
+            @if (state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0) {
+                <span
+                    class="notif button"
+                    (click)="$event.stopPropagation(); $event.preventDefault(); notificationsService.clearTaskList()"
+                    title="remove completed and error tasks">
+                    <i class="fa-solid fa-broom"></i>
+                    clean
+                </span>
+            }
         </a>
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
     <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
-        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@.disabled]="task.status == 2 || task.status == 5">
-            <span *ngIf="[1, -1].includes(task.status)" class="remove-task" (click)="notificationsService.removeTaskFromFresh(task)">
-                <i class="fa-regular fa-circle-xmark"></i>
-            </span>
-            <a routerLink="/task"  routerLinkActive="active">
-                <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5 || task.status == 3"></progress-bar>
-                <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>
-                <i *ngIf="task.status == 2" class="fa-solid fa-play status-icon"></i>
-                <i *ngIf="task.status == 1" class="fa-solid fa-check status-icon"></i>
-                <i *ngIf="task.status == -1 || task.status == 5" class="fa-solid fa-triangle-exclamation status-icon"></i>
-                {{task.creationDate | date: 'HH:mm:ss'}}
-                <ng-template [ngSwitchCase]="'downloadDataset.event'">
-                    <i class="fa-solid fa-download"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'downloadFile.event'">
-                    <i class="fa-solid fa-download"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'importDataset.event'">
-                    <i class="fa-solid fa-upload"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'executionMonitoring.event'">
-                    <i class="fa-solid fa-gears"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'solrIndexAll.event'">
-                    <i class="fa-solid fa-sun"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'copyDataset.event'">
-                    <i class="fa-solid fa-copy"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'checkQuality.event'">
-                    <i class="fa-solid fa-star"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'downloadStatistics.event'">
-                    <i class="fa-solid fa-download"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'deleteExamination.event'">
-                    <i class="fa-solid fa-trash"></i>
-                </ng-template>
-                <ng-template [ngSwitchCase]="'deleteDataset.event'">
-                    <i class="fa-solid fa-trash"></i>
-                </ng-template>
-                <ng-template ngSwitchDefault>
-                    <i class="fa-regular fa-clock"></i>
-                </ng-template>
-                {{task.eventLabel}}
-            </a>
+        @for (
+            task of notificationsService.freshCompletedTasks
+                .concat(notificationsService.tasksInProgress)
+                .concat(notificationsService.tasksInWait);
+            track task
+        ) {
+            <li [@.disabled]="task.status == 2 || task.status == 5">
+                @if ([1, -1].includes(task.status)) {
+                    <span class="remove-task" (click)="notificationsService.removeTaskFromFresh(task)">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                    </span>
+                }
+                <a routerLink="/task" routerLinkActive="active">
+                    <progress-bar
+                        [progress]="task.progress"
+                        [width]="50"
+                        [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                    @if (task.status == 4) {
+                        <i class="fa-solid fa-hourglass-half status-icon"></i>
+                    }
+                    @if (task.status == 2) {
+                        <i class="fa-solid fa-play status-icon"></i>
+                    }
+                    @if (task.status == 1) {
+                        <i class="fa-solid fa-check status-icon"></i>
+                    }
+                    @if (task.status == -1 || task.status == 5) {
+                        <i class="fa-solid fa-triangle-exclamation status-icon"></i>
+                    }
+                    {{ task.creationDate | date: "HH:mm:ss" }}
+                    @switch (task.eventType) {
+                        @case ("downloadDataset.event") {
+                            <i class="fa-solid fa-download"></i>
+                        }
+                        @case ("downloadFile.event") {
+                            <i class="fa-solid fa-download"></i>
+                        }
+                        @case ("importDataset.event") {
+                            <i class="fa-solid fa-upload"></i>
+                        }
+                        @case ("executionMonitoring.event") {
+                            <i class="fa-solid fa-gears"></i>
+                        }
+                        @case ("solrIndexAll.event") {
+                            <i class="fa-solid fa-sun"></i>
+                        }
+                        @case ("copyDataset.event") {
+                            <i class="fa-solid fa-copy"></i>
+                        }
+                        @case ("checkQuality.event") {
+                            <i class="fa-solid fa-star"></i>
+                        }
+                        @case ("downloadStatistics.event") {
+                            <i class="fa-solid fa-download"></i>
+                        }
+                        @case ("deleteExamination.event") {
+                            <i class="fa-solid fa-trash"></i>
+                        }
+                        @case ("deleteDataset.event") {
+                            <i class="fa-solid fa-trash"></i>
+                        }
+                        @default {
+                            <i class="fa-regular fa-clock"></i>
+                        }
+                    }
+                    {{ task.eventLabel }}
+                </a>
+            </li>
+        }
+    </div>
+    <li routerLink="/solr-search" routerLinkActive="active">
+        <i class="fas fa-sun"></i>
+        Dataset search (Solr)
+    </li>
+    <li (click)="state.dataOpened = !state.dataOpened; saveState()">
+        <i class="fas fa-file-medical-alt"></i>
+        Medical data
+        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    @if (state.dataOpened) {
+        <div class="sub-menu" [@slideDown]="state.dataOpened">
+            <li routerLink="/study/list" routerLinkActive="active">
+                <i class="fa-regular fa-folder-open"></i>
+                Studies
+            </li>
+            <li routerLink="/subject/list" routerLinkActive="active">
+                <i class="fas fa-user-injured"></i>
+                Subjects
+            </li>
+            <li routerLink="/examination/list" routerLinkActive="active">
+                <i class="fas fa-stethoscope"></i>
+                Examinations
+            </li>
+            <li routerLink="/dataset-acquisition/list" routerLinkActive="active">
+                <i class="fas fa-procedures"></i>
+                Dataset acquisitions
+            </li>
+            <!-- <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>       -->
+        </div>
+    }
+
+    <li (click)="state.eqOpened = !state.eqOpened; saveState()">
+        <i class="fas fa-vial"></i>
+        Medical configuration
+        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    @if (state.eqOpened) {
+        <div class="sub-menu" [@slideDown]="state.eqOpened">
+            <li routerLink="/center/list" routerLinkActive="active">
+                <i class="fa-regular fa-hospital"></i>
+                Acquisition centers
+            </li>
+            <li routerLink="/acquisition-equipment/list" routerLinkActive="active">
+                <i class="fas fa-microscope"></i>
+                Center equipments
+            </li>
+            <li routerLink="/coil/list" routerLinkActive="active">
+                <i class="fas fa-magnet"></i>
+                Coils
+            </li>
+            <li routerLink="/study-card/list" routerLinkActive="active">
+                <i class="fa-solid fa-shuffle"></i>
+                Study Cards
+            </li>
+            <li routerLink="/quality-card/list" routerLinkActive="active">
+                <i class="fa-solid fa-shuffle"></i>
+                Quality Cards
+            </li>
+        </div>
+    }
+
+    <li (click)="state.precOpened = !state.precOpened; saveState()">
+        <i class="fas fa-cat"></i>
+        Preclinical
+        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    @if (state.precOpened) {
+        <div class="sub-menu" [@slideDown]="state.precOpened">
+            <li routerLink="/preclinical-subject/list" routerLinkActive="active">
+                <i class="fas fa-hippo"></i>
+                Preclinical subjects
+            </li>
+            <li routerLink="/preclinical-examination/list" routerLinkActive="active">
+                <i class="fas fa-stethoscope"></i>
+                Preclinical examinations
+            </li>
+            <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active">
+                <i class="fas fa-virus"></i>
+                Pathology models
+            </li>
+            <li routerLink="/preclinical-therapy/list" routerLinkActive="active">
+                <i class="fas fa-pills"></i>
+                Therapies
+            </li>
+            <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active">
+                <i class="fas fa-moon"></i>
+                Anesthetics
+            </li>
+        </div>
+    }
+
+    <li (click)="state.uploadOpened = !state.uploadOpened; saveState()">
+        <i class="fas fa-upload"></i>
+        Import data
+        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    @if (state.uploadOpened) {
+        <div class="sub-menu" [@slideDown]="state.uploadOpened">
+            <li routerLink="/imports/upload" routerLinkActive="active">
+                <i class="fas fa-compact-disc"></i>
+                DICOM
+            </li>
+            @if (canUserImportFromPACS()) {
+                <li routerLink="/imports/pacs" routerLinkActive="active">
+                    <i class="fas fa-server"></i>
+                    PACS
+                </li>
+            }
+            <li routerLink="/imports/bids" routerLinkActive="active">
+                <i class="fas fa-folder-tree"></i>
+                BIDS
+            </li>
+            <li routerLink="/imports/bruker" routerLinkActive="active">
+                <i class="fas fa-atom"></i>
+                Bruker
+            </li>
+            <li routerLink="/imports/eeg" routerLinkActive="active">
+                <i class="fas fa-bolt"></i>
+                EEG
+            </li>
+            <li routerLink="/imports/processed-dataset" routerLinkActive="active">
+                <i class="fas fa-gears"></i>
+                Processed datasets
+            </li>
+            <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
+    <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
+        </div>
+    }
+    @if (isUserAdmin()) {
+        <li (click)="state.adminOpened = !state.adminOpened; saveState()">
+            <i class="fas fa-user-gear"></i>
+            Administration
+            <span class="chevron"><i class="fas fa-chevron-down"></i></span>
         </li>
-    </div>
-    <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Dataset search (Solr)</li>
-    <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
-        <li routerLink="/study/list" routerLinkActive="active"><i class="fa-regular fa-folder-open"></i>Studies</li>
-        <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
-        <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Examinations</li>
-        <li routerLink="/dataset-acquisition/list" routerLinkActive="active"><i class="fas fa-procedures"></i>Dataset acquisitions</li>
-        <!-- <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>       -->
-    </div>
-
-    <li (click)="state.eqOpened = !state.eqOpened; saveState();"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="state.eqOpened" class="sub-menu" [@slideDown]="state.eqOpened">
-        <li routerLink="/center/list" routerLinkActive="active"><i class="fa-regular fa-hospital"></i>Acquisition centers</li>
-        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Center equipments</li>
-        <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
-        <li routerLink="/study-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Study Cards</li>
-        <li routerLink="/quality-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Quality Cards</li>
-    </div>
-
-    <li (click)="state.precOpened = !state.precOpened; saveState();"><i class="fas fa-cat"></i>Preclinical<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="state.precOpened" class="sub-menu" [@slideDown]="state.precOpened">
-        <li routerLink="/preclinical-subject/list" routerLinkActive="active"><i class="fas fa-hippo"></i>Preclinical subjects</li>
-        <li routerLink="/preclinical-examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Preclinical examinations</li>
-        <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active"><i class="fas fa-virus"></i>Pathology models</li>
-        <li routerLink="/preclinical-therapy/list" routerLinkActive="active"><i class="fas fa-pills"></i>Therapies</li>
-        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>
-    </div>
-
-    <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="state.uploadOpened" class="sub-menu" [@slideDown]="state.uploadOpened">
-        <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>DICOM</li>
-        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>PACS</li>
-        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-folder-tree"></i>BIDS</li>
-        <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>Bruker</li>
-        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>EEG</li>
-        <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-gears"></i>Processed datasets</li>
-        <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
-        <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
-    </div>
-    <li (click)="state.adminOpened = !state.adminOpened; saveState();" *ngIf="isUserAdmin()"><i class="fas fa-user-gear"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="isUserAdmin() && state.adminOpened" class="sub-menu" [@slideDown]="state.adminOpened">
-        <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
-        <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
-        <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
-        <li routerLink="/download-statistics" routerLinkActive="active"><i class="fas fa-table"></i>Download statistics</li>
-    </div>
+    }
+    @if (isUserAdmin() && state.adminOpened) {
+        <div class="sub-menu" [@slideDown]="state.adminOpened">
+            <li routerLink="/user" routerLinkActive="active">
+                <i class="fas fa-users"></i>
+                Manage users
+            </li>
+            <li (click)="indexToSolr()">
+                <i class="fas fa-list-ol"></i>
+                Index to Solr
+            </li>
+            <li routerLink="/preclinical-reference" routerLinkActive="active">
+                <i class="fas fa-book"></i>
+                Preclinical References
+            </li>
+            <li routerLink="/download-statistics" routerLinkActive="active">
+                <i class="fas fa-table"></i>
+                Download statistics
+            </li>
+        </div>
+    }
 </ul>
 
 <div class="bottom-info">
-    <div><a href="https://github.com/fli-iam/shanoir-ng/commit/{{VERSION.hash?.substring(1)}}" target="_blank" [style.text-decoration]="'none'">{{VERSION.raw}}</a></div>
+    <div>
+        <a
+            href="https://github.com/fli-iam/shanoir-ng/commit/{{ VERSION.hash?.substring(1) }}"
+            target="_blank"
+            [style.text-decoration]="'none'">
+            {{ VERSION.raw }}
+        </a>
+    </div>
     <div>Copyright (C) 2009-2025 Inria</div>
-    <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>
+<div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 
 <ng-content></ng-content>

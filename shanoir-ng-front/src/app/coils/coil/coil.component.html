@@ -13,113 +13,153 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			></form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View coil|Title@@coilDetailViewTitle">Details on coil</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create coil|Title@@coilDetailCreateTitle">Create coil</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-					<li>
-						<label i18n="Coil detail|Coil name label@@examinationDetailName">Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{coil.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="name" formControlName="name"/>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Coil detail|Serial Number label@@coilDetailSerialNumber">Serial Number</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{coil.serialNumber}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="serialNb" formControlName="serialNumber"/>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Coil detail|Coil Type label@@CoilDetailCoilType">Coil Type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{coil.coilType}}
-							</ng-template>
-								<ng-template ngSwitchDefault>
-								<select-box formControlName="coilType" [optionArr]="coilTypes">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Coil detail|Coil date label@@CoilDetailNbChannels">Number of channels</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{coil.numberOfChannels}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="number" min="0" step="1" id="nbChannel" formControlName="numberOfChannels" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Coil detail|Center label@@coilDetailCenter">Acquisition Center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/center/details/', coil.center?.id]">
-									{{coil.center?.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box
-										(newClick)="openNewCenter()"
-                                        formControlName="center"
-										[optionArr]="centers">
-								</select-box>
-								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel">Center Equipment Model</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
-									{{coil.manufacturerModel | manufModelLabel}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box
-										formControlName="manufacturerModel"
-										(newClick)="openNewManufModel()"
-										[optionArr]="manufModels"
-										[pipe]="manufModelPipe">
-								</select-box>
-								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Center Equipment model is required!</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-		</div>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (edit)="goToEdit()"
+                    (delete)="delete()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()"></form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">
+                                Details on coil
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create coil|Title@@coilDetailCreateTitle">
+                                Create coil
+                            </h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label i18n="Coil detail|Coil name label@@examinationDetailName">Name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ coil.name }}
+                                    }
+                                    @default {
+                                        <input type="text" id="name" formControlName="name" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Coil detail|Serial Number label@@coilDetailSerialNumber">Serial Number</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ coil.serialNumber }}
+                                    }
+                                    @default {
+                                        <input type="text" id="serialNb" formControlName="serialNumber" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Coil detail|Coil Type label@@CoilDetailCoilType">Coil Type</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ coil.coilType }}
+                                    }
+                                    @default {
+                                        <select-box formControlName="coilType" [optionArr]="coilTypes"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Coil detail|Coil date label@@CoilDetailNbChannels">Number of channels</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ coil.numberOfChannels }}
+                                    }
+                                    @default {
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            id="nbChannel"
+                                            formControlName="numberOfChannels" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Coil detail|Center label@@coilDetailCenter">Acquisition Center</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/center/details/', coil.center?.id]">
+                                            {{ coil.center?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            (newClick)="openNewCenter()"
+                                            formControlName="center"
+                                            [optionArr]="centers"></select-box>
+                                        @if (hasError("center", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">
+                                                Center is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label
+                                i18n="
+                                    Coil detail|Coil acquisition Equipment Model
+                                    label@@examinationDetailCoilAcquisitionEquipmentModel">
+                                Center Equipment Model
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
+                                            {{ coil.manufacturerModel | manufModelLabel }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="manufacturerModel"
+                                            (newClick)="openNewManufModel()"
+                                            [optionArr]="manufModels"
+                                            [pipe]="manufModelPipe"></select-box>
+                                        @if (hasError("manufacturerModel", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Coil detail|Manufacturer model required
+                                                    error@@coilDetailManufModelRequiredError">
+                                                Center Equipment model is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

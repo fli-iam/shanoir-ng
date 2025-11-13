@@ -28,7 +28,7 @@ import { ExaminationNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from "../shared/study-user-right.enum";
 import { Study } from '../shared/study.model';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
@@ -37,7 +37,7 @@ import { ExaminationNodeComponent } from '../../examinations/tree/examination-no
 @Component({
     selector: 'reverse-study-node',
     templateUrl: 'reverse-study-node.component.html',
-    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor, ExaminationNodeComponent]
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, ExaminationNodeComponent]
 })
 
 export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<ReverseStudyNode> implements OnChanges {

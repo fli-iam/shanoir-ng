@@ -22,14 +22,14 @@ import { UserService } from '../shared/user.service';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
 import { HeaderComponent } from '../../shared/header/header.component';
-import { NgIf } from '@angular/common';
+
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 
 @Component({
     selector: 'extensionRequest',
     templateUrl: 'extension-request.component.html',
     styleUrls: ['extension-request.component.css'],
-    imports: [HeaderComponent, NgIf, FormsModule, ReactiveFormsModule, DatepickerComponent]
+    imports: [HeaderComponent, FormsModule, ReactiveFormsModule, DatepickerComponent]
 })
 
 export class ExtensionRequestComponent implements OnInit, OnDestroy {

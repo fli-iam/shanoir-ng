@@ -23,7 +23,7 @@ import { TableComponent } from '../shared/components/table/table.component';
 import { QualityCard } from '../study-cards/shared/quality-card.model';
 import { QualityCardService } from '../study-cards/shared/quality-card.service';
 import * as AppUtils from '../utils/app.utils';
-import { NgIf, NgFor } from '@angular/common';
+
 import { RouterLinkActive, RouterLink } from '@angular/router';
 import { StudyCardRulesComponent } from '../study-cards/study-card-rules/study-card-rules.component';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,7 @@ import { CheckboxComponent } from '../shared/checkbox/checkbox.component';
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
     styleUrls: ['quality-control.component.css'],
-    imports: [NgIf, NgFor, RouterLinkActive, RouterLink, StudyCardRulesComponent, FormsModule, CheckboxComponent, TableComponent]
+    imports: [RouterLinkActive, RouterLink, StudyCardRulesComponent, FormsModule, CheckboxComponent, TableComponent]
 })
 
 export class QualityControlComponent implements OnChanges {

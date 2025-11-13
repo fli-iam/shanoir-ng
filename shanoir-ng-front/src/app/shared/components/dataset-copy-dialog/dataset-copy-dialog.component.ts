@@ -14,7 +14,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
-import { NgClass, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 
 import { SolrDocument } from "../../../solr/solr.document.model";
@@ -30,7 +30,7 @@ import { KeycloakService } from "../../keycloak/keycloak.service";
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    imports: [NgFor, NgClass]
+    imports: [NgClass]
 })
 export class DatasetCopyDialogComponent implements OnInit {
     title: string;

@@ -1,46 +1,69 @@
-
 <h2>Processing</h2>
-<div *ngIf="!isSelectedDatasets">
-    <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i>No dataset is selected to run executions</strong></p>
-    <p>You should select datasets first</p>
-    <button type="button" (click)="navigateToSolr()">Select Datasets</button>
-</div>
-<div *ngIf="isSelectedDatasets">
-    <p>Please choose one of the pipelines available :</p>
-    <hr>
-    <div class="row">
-        <div class="pipeline-list">
-            <div class="pipelines">
-                <app-pipeline *ngFor="let pipeline of pipelines" [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
+@if (!isSelectedDatasets) {
+    <div>
+        <p>
+            <strong class="warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                No dataset is selected to run executions
+            </strong>
+        </p>
+        <p>You should select datasets first</p>
+        <button type="button" (click)="navigateToSolr()">Select Datasets</button>
+    </div>
+}
+@if (isSelectedDatasets) {
+    <div>
+        <p>Please choose one of the pipelines available :</p>
+        <hr />
+        <div class="row">
+            <div class="pipeline-list">
+                <div class="pipelines">
+                    @for (pipeline of pipelines; track pipeline) {
+                        <app-pipeline [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
+                    }
+                </div>
             </div>
         </div>
-    </div>
-    <div>
-      <div *ngIf="selectedPipeline else selectPipeLineMessage">
-        <h3>Pipeline description</h3>
-        <hr>
-        <h3>Name : </h3>
-        <p>{{selectedPipeline.name}}</p>
-        <h3>Description : </h3>
-        <p>{{selectedPipeline.description}}</p>
-        <hr>
-        <h3>Parameters : </h3>
-        <ul>
-          <li *ngFor="let parameter of selectedPipeline.parameters" class="parameter">
-            <p><strong>{{parameter.name}}</strong> : {{parameter.description}}</p>
-            <p>{{parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
-          </li>
-        </ul>
-        <hr>
-        <button class="execute" type="button" (click)="choosePipeLine()">Run this pipeline</button>
-      </div>
-      <ng-template #selectPipeLineMessage>
-        <p *ngIf="descriptionLoading">Loading...</p>
-        <div *ngIf="!descriptionLoading">
-          <h3>Pipeline description : </h3>
-          <hr>
-          <p class="warning"><i class="fas fa-exclamation-triangle"></i>Please select a pipeline to see its description</p>
+        <div>
+            @if (selectedPipeline) {
+                <div>
+                    <h3>Pipeline description</h3>
+                    <hr />
+                    <h3>Name :</h3>
+                    <p>{{ selectedPipeline.name }}</p>
+                    <h3>Description :</h3>
+                    <p>{{ selectedPipeline.description }}</p>
+                    <hr />
+                    <h3>Parameters :</h3>
+                    <ul>
+                        @for (parameter of selectedPipeline.parameters; track parameter) {
+                            <li class="parameter">
+                                <p>
+                                    <strong>{{ parameter.name }}</strong>
+                                    : {{ parameter.description }}
+                                </p>
+                                <p>{{ parameter.isOptional ? "Optional" : "Mandatory" }}</p>
+                            </li>
+                        }
+                    </ul>
+                    <hr />
+                    <button class="execute" type="button" (click)="choosePipeLine()">Run this pipeline</button>
+                </div>
+            } @else {
+                @if (descriptionLoading) {
+                    <p>Loading...</p>
+                }
+                @if (!descriptionLoading) {
+                    <div>
+                        <h3>Pipeline description :</h3>
+                        <hr />
+                        <p class="warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Please select a pipeline to see its description
+                        </p>
+                    </div>
+                }
+            }
         </div>
-      </ng-template>
     </div>
-</div>
+}

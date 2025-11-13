@@ -13,124 +13,187 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<form-footer
-			[state]="footerState"
-			(save)="save()"
-			(edit)="goToEdit()"
-            (delete) = "delete()"
-			(dismiss)="goToView()"
-			(back)="goBack()"
-		></form-footer>
-		<span [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'">
-				<h2 class="header command-zone"i18n="View acquisition center|Title@@centerDetailViewTitle">Details on acquisition center</h2>
-			</ng-template>
-			<ng-template [ngSwitchCase]="'edit'">
-				<h2 class="header command-zone"i18n="Edit acquisition center|Title@@centerDetailEditTitle">Edit acquisition center</h2>
-			</ng-template>
-			<ng-template [ngSwitchCase]="'create'">
-				<h2 class="header command-zone"i18n="Create acquisition center|Title@@centerDetailCreateTitle">Create acquisition center</h2>
-			</ng-template>
-		</span>
-		<help-message [help]="'institution'"></help-message>
-		<fieldset>
-			<ol>
-				<li>
-					<label i18n="Center detail|Name label@@centerDetailName">Name</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.name}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="name" formControlName="name" (change)="isNameUniqueError=false" />
-							<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
-							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
-							<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Street label@@centerDetailStreet">Street</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.street}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="street" formControlName="street"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Post code label@@centerDetailPostCode">Post code</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.postalCode}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="postalCode" formControlName="postalCode"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Town label@@centerDetailTown">Town</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.city}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="city" formControlName="city"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Country label@@centerDetailCountry">Country</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.country}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="country" formControlName="country"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Phone label@@centerDetailPhone">Phone number</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{center.phoneNumber}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="phoneNumber" formControlName="phoneNumber"/>
-							<label *ngIf="hasError('phoneNumber', ['invalidPhoneNumber'])" class="form-validation-alert" i18n="Edit center|PhoneNumberPatternError label">Invalid phone number!</label>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Center detail|Website label@@centerDetailWebsite">Website</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-                            <a href="{{center.website}}" target="_blank">{{center.website}}</a>
-                        </ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="website" formControlName="website"/>
-						</ng-template>
-					</span>
-				</li>
-			</ol>
-		</fieldset>
-		<fieldset *ngIf="mode=='view' && center.acquisitionEquipments?.length > 0" class="list">
-			<legend (click)="openAcqEq = !openAcqEq">
-				<span *ngIf="openAcqEq"><i class="fas fa-chevron-up"></i></span>
-				<span *ngIf="!openAcqEq"><i class="fas fa-chevron-down"></i></span>
-				Center Equipments
-			</legend>
-			<ul *ngIf="openAcqEq">
-				<li *ngFor="let o of center.acquisitionEquipments">
-					{{o | acqEqptLabel}}
-					<span class="link" (click)="goToAcquisitionEquipment(o)"><i class="fas fa-external-link-alt"></i></span>
-				</li>
-			</ul>
-		</fieldset>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <form-footer
+                [state]="footerState"
+                (save)="save()"
+                (edit)="goToEdit()"
+                (delete)="delete()"
+                (dismiss)="goToView()"
+                (back)="goBack()"></form-footer>
+            <span>
+                @switch (mode) {
+                    @case ("view") {
+                        <h2 class="header command-zone" i18n="View acquisition center|Title@@centerDetailViewTitle">
+                            Details on acquisition center
+                        </h2>
+                    }
+                    @case ("edit") {
+                        <h2 class="header command-zone" i18n="Edit acquisition center|Title@@centerDetailEditTitle">
+                            Edit acquisition center
+                        </h2>
+                    }
+                    @case ("create") {
+                        <h2 class="header command-zone" i18n="Create acquisition center|Title@@centerDetailCreateTitle">
+                            Create acquisition center
+                        </h2>
+                    }
+                }
+            </span>
+            <help-message [help]="'institution'"></help-message>
+            <fieldset>
+                <ol>
+                    <li>
+                        <label i18n="Center detail|Name label@@centerDetailName">Name</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.name }}
+                                }
+                                @default {
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        formControlName="name"
+                                        (change)="isNameUniqueError = false" />
+                                    @if (hasError("name", ["required"])) {
+                                        <label
+                                            class="form-validation-alert"
+                                            i18n="Edit center|Name required error@@centerDetailNameRequiredError">
+                                            Name is required!
+                                        </label>
+                                    }
+                                    @if (hasError("name", ["minlength", "maxlength"])) {
+                                        <label
+                                            class="form-validation-alert"
+                                            i18n="Edit center|Name length error@@centerDetailNameLengthError">
+                                            Name length must be between 2 and 200!
+                                        </label>
+                                    }
+                                    @if (hasError("name", ["unique"])) {
+                                        <label
+                                            class="form-validation-alert"
+                                            i18n="Edit center|Name unique error@@centerDetailNameUniqueError">
+                                            Name should be unique!
+                                        </label>
+                                    }
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Street label@@centerDetailStreet">Street</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.street }}
+                                }
+                                @default {
+                                    <input type="text" id="street" formControlName="street" />
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Post code label@@centerDetailPostCode">Post code</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.postalCode }}
+                                }
+                                @default {
+                                    <input type="text" id="postalCode" formControlName="postalCode" />
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Town label@@centerDetailTown">Town</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.city }}
+                                }
+                                @default {
+                                    <input type="text" id="city" formControlName="city" />
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Country label@@centerDetailCountry">Country</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.country }}
+                                }
+                                @default {
+                                    <input type="text" id="country" formControlName="country" />
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Phone label@@centerDetailPhone">Phone number</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ center.phoneNumber }}
+                                }
+                                @default {
+                                    <input type="text" id="phoneNumber" formControlName="phoneNumber" />
+                                    @if (hasError("phoneNumber", ["invalidPhoneNumber"])) {
+                                        <label
+                                            class="form-validation-alert"
+                                            i18n="Edit center|PhoneNumberPatternError label">
+                                            Invalid phone number!
+                                        </label>
+                                    }
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Center detail|Website label@@centerDetailWebsite">Website</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <a href="{{ center.website }}" target="_blank">{{ center.website }}</a>
+                                }
+                                @default {
+                                    <input type="text" id="website" formControlName="website" />
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+            @if (mode == "view" && center.acquisitionEquipments?.length > 0) {
+                <fieldset class="list">
+                    <legend (click)="openAcqEq = !openAcqEq">
+                        @if (openAcqEq) {
+                            <span><i class="fas fa-chevron-up"></i></span>
+                        }
+                        @if (!openAcqEq) {
+                            <span><i class="fas fa-chevron-down"></i></span>
+                        }
+                        Center Equipments
+                    </legend>
+                    @if (openAcqEq) {
+                        <ul>
+                            @for (o of center.acquisitionEquipments; track o) {
+                                <li>
+                                    {{ o | acqEqptLabel }}
+                                    <span class="link" (click)="goToAcquisitionEquipment(o)">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </fieldset>
+            }
+        </form>
+    }
 </div>

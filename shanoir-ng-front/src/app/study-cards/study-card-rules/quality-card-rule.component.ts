@@ -21,7 +21,7 @@ import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardCondition } from '../shared/study-card.model';
 
 import { ShanoirMetadataField } from './action/action.component';
-import { NgFor, NgIf } from '@angular/common';
+
 import { StudyCardConditionComponent } from './condition/condition.component';
 import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
 
@@ -30,7 +30,7 @@ import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
     selector: 'quality-card-rule',
     templateUrl: 'quality-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
-    imports: [NgFor, StudyCardConditionComponent, NgIf, ToggleSwitchComponent, FormsModule, SelectBoxComponent]
+    imports: [StudyCardConditionComponent, ToggleSwitchComponent, FormsModule, SelectBoxComponent]
 })
 export class QualityCardRuleComponent implements OnChanges {
 

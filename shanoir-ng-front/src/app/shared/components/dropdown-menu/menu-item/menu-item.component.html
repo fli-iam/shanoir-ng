@@ -11,33 +11,41 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<li class="menu-item"
+<li
+    class="menu-item"
     [class.opened]="init && opened"
     [class.closed]="!opened"
     [class.animate]="overflow"
-    [class.disabled]="disabled"
-    >
+    [class.disabled]="disabled">
     <!-- [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')" -->
-    <span
-        *ngIf="hasChildren"
-        class="label"
-        (click)="toggle()"
-        ><i class="{{awesome}}"></i>{{label}}
-        <span class="arrow">&nbsp;&#9656;</span>
-    </span>
-    <span
-        *ngIf="!hasChildren && boolVar != undefined"
-        class="label"
-        ><i class="{{awesome}}"></i>{{label}}
-        <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
-        <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>
-    </span>
-    <span
-        *ngIf="!hasChildren && boolVar == undefined"
-        class="label"
-        ><i class="{{awesome}}"></i>{{label}}
-    </span>
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened" [hidden]="!init">
-        <div class="sub-sub-content"><ng-content></ng-content></div>
-    </ul>
+    @if (hasChildren) {
+        <span class="label" (click)="toggle()">
+            <i class="{{ awesome }}"></i>
+            {{ label }}
+            <span class="arrow">&nbsp;&#9656;</span>
+        </span>
+    }
+    @if (!hasChildren && boolVar != undefined) {
+        <span class="label">
+            <i class="{{ awesome }}"></i>
+            {{ label }}
+            @if (boolVar != undefined && boolVar) {
+                <span class="arrow">&nbsp;&#x2713;</span>
+            }
+            @if (boolVar != undefined && !boolVar) {
+                <span class="arrow">&nbsp;&#x2717;</span>
+            }
+        </span>
+    }
+    @if (!hasChildren && boolVar == undefined) {
+        <span class="label">
+            <i class="{{ awesome }}"></i>
+            {{ label }}
+        </span>
+    }
+    @if (opened) {
+        <ul #contentWrapper class="sub-content" [@menuSlideRight]="opened" [hidden]="!init">
+            <div class="sub-sub-content"><ng-content></ng-content></div>
+        </ul>
+    }
 </li>

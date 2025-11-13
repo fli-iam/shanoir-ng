@@ -32,7 +32,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
-import { NgIf } from '@angular/common';
+
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { FormsModule } from '@angular/forms';
 
@@ -42,7 +42,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown, preventInitialChildAnimations],
-    imports: [NgIf, TooltipComponent, SelectBoxComponent, FormsModule, TableComponent]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent]
 })
 
 export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {

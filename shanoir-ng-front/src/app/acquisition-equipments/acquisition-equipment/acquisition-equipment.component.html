@@ -13,92 +13,164 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			></form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on center equipment</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit center equipment</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create center equipment</h2>
-				</ng-template>
-			</span>
-			<help-message [help]="'equipment'"></help-message>
-			<fieldset>
-				<ol>
-					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">Manufacturer</label>
-						<span class="right-col">
-							<a [routerLink]="['/manufacturer/details', acqEquip.manufacturerModel?.manufacturer?.id]">
-								{{acqEquip.manufacturerModel?.manufacturer?.name}}
-							</a>
-						</span>
-					</li>
-					<li>
-						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel">Manufacturer model</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
-									{{acqEquip.manufacturerModel | manufModelLabel}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="manufacturerModel" (newClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
-								</select-box>
-								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Model modality label@@acqEqptDetailModality">Model modality</label>
-						<span class="right-col">
-							{{datasetModalityTypeStr}}
-						</span>
-					</li>
-					<li>
-						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Acquisition Center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/center/details/', acqEquip.center?.id]">
-									{{acqEquip.center?.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="center" [viewRoute]="'/center/details/' + acqEquip?.center?.id" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
-								</select-box>
-								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="AcqEquip detail|Serial number label@@acqEqptDetailSerialNumber">
-							Serial Number
-							<tool-tip>Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."</tool-tip>
-						</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{acqEquip.serialNumber}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="serialNumber" formControlName="serialNumber"/>
-								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
-								<label *ngIf="hasError('serialNumber', ['spaces'])" class="form-validation-alert">There can't be spaces at the beginning neither at the end of the serial number !</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-		</div>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()"></form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View acqEquip|Title@@acqEqptDetailViewTitle">
+                                Details on center equipment
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">
+                                Edit center equipment
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">
+                                Create center equipment
+                            </h2>
+                        }
+                    }
+                </span>
+                <help-message [help]="'equipment'"></help-message>
+                <fieldset>
+                    <ol>
+                        @if (mode == "view") {
+                            <li>
+                                <label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">
+                                    Manufacturer
+                                </label>
+                                <span class="right-col">
+                                    <a
+                                        [routerLink]="[
+                                            '/manufacturer/details',
+                                            acqEquip.manufacturerModel?.manufacturer?.id,
+                                        ]">
+                                        {{ acqEquip.manufacturerModel?.manufacturer?.name }}
+                                    </a>
+                                </span>
+                            </li>
+                        }
+                        <li>
+                            <label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel">
+                                Manufacturer model
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a
+                                            [routerLink]="[
+                                                '/manufacturer-model/details/',
+                                                acqEquip.manufacturerModel?.id,
+                                            ]">
+                                            {{ acqEquip.manufacturerModel | manufModelLabel }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="manufacturerModel"
+                                            (newClick)="openNewManufModel()"
+                                            [optionArr]="manufModels"
+                                            [pipe]="manufacturerModelPipe"></select-box>
+                                        @if (hasError("manufacturerModel", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    AcqEquip detail|Manufacturer model required
+                                                    error@@acqEqptDetailManufModelRequiredError">
+                                                Manufacturer model is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        @if (mode == "view") {
+                            <li>
+                                <label i18n="AcqEquip detail|Model modality label@@acqEqptDetailModality">
+                                    Model modality
+                                </label>
+                                <span class="right-col">
+                                    {{ datasetModalityTypeStr }}
+                                </span>
+                            </li>
+                        }
+                        <li>
+                            <label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Acquisition Center</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/center/details/', acqEquip.center?.id]">
+                                            {{ acqEquip.center?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="center"
+                                            [viewRoute]="'/center/details/' + acqEquip?.center?.id"
+                                            [viewDisabled]="!acqEquip.center"
+                                            [optionArr]="centers"></select-box>
+                                        @if (hasError("center", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    AcqEquip detail|Center required
+                                                    error@@acqEqptDetailCenterRequiredError">
+                                                Center is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="AcqEquip detail|Serial number label@@acqEqptDetailSerialNumber">
+                                Serial Number
+                                <tool-tip>
+                                    Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported
+                                    from this equipment."
+                                </tool-tip>
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ acqEquip.serialNumber }}
+                                    }
+                                    @default {
+                                        <input type="text" id="serialNumber" formControlName="serialNumber" />
+                                        @if (hasError("serialNumber", ["unique"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Edit acqEquip|Model number unique
+                                                    error@@acqEqptDetailModelNumberUniqueError">
+                                                This equipment (same manufacturer model and same serial number) already
+                                                exists!
+                                            </label>
+                                        }
+                                        @if (hasError("serialNumber", ["spaces"])) {
+                                            <label class="form-validation-alert">
+                                                There can't be spaces at the beginning neither at the end of the serial
+                                                number !
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

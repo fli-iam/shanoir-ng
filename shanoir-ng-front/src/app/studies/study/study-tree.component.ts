@@ -26,7 +26,7 @@ import { environment } from "../../../environments/environment";
 
 import { TreeService } from './tree.service';
 import { DoubleAwesomeComponent } from '../../shared/double-awesome/double-awesome.component';
-import { NgIf } from '@angular/common';
+
 import { StudyNodeComponent } from '../tree/study-node.component';
 
 
@@ -34,7 +34,7 @@ import { StudyNodeComponent } from '../tree/study-node.component';
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
     styleUrls: ['study-tree.component.css'],
-    imports: [DoubleAwesomeComponent, NgIf, StudyNodeComponent]
+    imports: [DoubleAwesomeComponent, StudyNodeComponent]
 })
 
 export class StudyTreeComponent implements OnDestroy {

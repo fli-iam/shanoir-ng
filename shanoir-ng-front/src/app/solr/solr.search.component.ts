@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Clipboard } from '@angular/cdk/clipboard';
-import { formatDate, NgIf, NgFor } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -58,7 +58,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
-    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, NgIf, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, SolrTextSearchModeComponent, NgFor, LoadingBarComponent, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {

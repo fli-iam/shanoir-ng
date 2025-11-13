@@ -12,38 +12,62 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div class="cell">
-    <form #window class="window" [formGroup]="form" *ngIf="form">
-        <h2 class="header">Download Datasets</h2>
-        <div class="left-icon msg">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <b>Limited functionalities with current browser : </b>
-            Shanoir provides a way to download unlimited quantities of datasets to your computer<!-- with convenient options to organize the directories structure-->. Unfortunately your browser does not allow this advanced download functionality.
-            See the list of compatible browsers :
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" target="_blank">https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility</a>
-        </div>
-        <div class="loading" *ngIf="loading">
-            <i *ngIf="loading" class="fas fa-cog fa-spin"></i> Retrieving download informations...
-        </div>
-        <fieldset class="body" [disabled]="loading">            <ol>
-                <li *ngIf="hasDicom">
-                    <label>Dataset files format</label>
-                    <span class="right-col">
-                        <select-box formControlName="format" [options]="formatOptions"></select-box>
-                    </span>
-                </li>
-                <li *ngIf="hasDicom && form.get('format').value == 'nii'">
-                    <label>Nifti converter</label>
-                    <span class="right-col">
-                    <select-box formControlName="converter" [options]="niftiConverters"></select-box>
-                </span>
-                </li>
-            </ol>
-        </fieldset>
-        <div class="footer">
-            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="loading || (form.dirty && !form.valid)">
-                <i class="fas fa-download"></i>Download zip
-            </button>
-            <button type="button" (click)="cancel()">Cancel</button>
-        </div>
-    </form>
+    @if (form) {
+        <form #window class="window" [formGroup]="form">
+            <h2 class="header">Download Datasets</h2>
+            <div class="left-icon msg">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <b>Limited functionalities with current browser :</b>
+                Shanoir provides a way to download unlimited quantities of datasets to your computer
+                <!-- with convenient options to organize the directories structure-->
+                . Unfortunately your browser does not allow this advanced download functionality. See the list of
+                compatible browsers :
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility"
+                    target="_blank">
+                    https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility
+                </a>
+            </div>
+            @if (loading) {
+                <div class="loading">
+                    @if (loading) {
+                        <i class="fas fa-cog fa-spin"></i>
+                    }
+                    Retrieving download informations...
+                </div>
+            }
+            <fieldset class="body" [disabled]="loading">
+                <ol>
+                    @if (hasDicom) {
+                        <li>
+                            <label>Dataset files format</label>
+                            <span class="right-col">
+                                <select-box formControlName="format" [options]="formatOptions"></select-box>
+                            </span>
+                        </li>
+                    }
+                    @if (hasDicom && form.get("format").value == "nii") {
+                        <li>
+                            <label>Nifti converter</label>
+                            <span class="right-col">
+                                <select-box formControlName="converter" [options]="niftiConverters"></select-box>
+                            </span>
+                        </li>
+                    }
+                </ol>
+            </fieldset>
+            <div class="footer">
+                <button
+                    type="button"
+                    type="button"
+                    (click)="downloadNow()"
+                    class="alt left-icon"
+                    [disabled]="loading || (form.dirty && !form.valid)">
+                    <i class="fas fa-download"></i>
+                    Download zip
+                </button>
+                <button type="button" (click)="cancel()">Cancel</button>
+            </div>
+        </form>
+    }
 </div>

@@ -12,144 +12,211 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()">
-				<button *ngIf="mode != 'view'"
-						type="button"
-						class="Button right-icon show-errors"
-						(click)="onShowErrors()"
-						[disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
-					Show all errors<i class="fas fa-bug"></i>
-				</button>
-				<button
-						*ngIf="mode == 'view' && isStudyAdmin"
-						type="button"
-						class="right-icon apply test"
-						(click)="test()"
-						[disabled]="true || applying || testing"
-                        title="Coming soon">
-					Test
-                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
-                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i>
-                </button>
-				<button
-						*ngIf="mode == 'view' && isStudyAdmin"
-						type="button"
-						class="alt right-icon apply"
-						(click)="apply()"
-						[disabled]="true || applying || testing"
-                        title="Coming soon">
-					Apply now
-					<i *ngIf="!applying" class="fa-solid fa-play"></i>
-                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i>
-                </button>
-				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
-					Download error report
-					<i class="fas fa-floppy-disk"></i>
-				</button>
-			</form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone">Details on quality card</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone">Edit quality card</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone">Create quality card</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-					<li>
-						<label>Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{qualityCard.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="name"/>
-								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert">Name is required!</label>
-								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength'])" class="form-validation-alert">Too short!</label>
-								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Study</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-							    <a [routerLink]="['/study/details/', qualityCard.study?.id]" (click)="breadcrumbsService.markMilestone()">
-								    {{qualityCard.study.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box [readOnly]="forceStudyId" formControlName="study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Auto check at import</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-container *ngIf="mode == 'view'">
-								<span *ngIf="qualityCard.toCheckAtImport" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!qualityCard.toCheckAtImport" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-container>
-							<ng-container *ngIf="mode != 'view'">
-								<checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
-								<div class="info left-icon import-info" *ngIf="qualityCard.toCheckAtImport">
-									<i class="fa-solid fa-triangle-exclamation"></i>
-									Be aware that a rule with an <span class="tag"><i class="fa-solid fa-times-circle"></i>Error</span> tag
-									will block any import <b>that would match</b> this rule.
-								</div>
-							</ng-container>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset class="rules">
-				<legend>
-					Rules
-				</legend>
-				<div class="info left-icon">
-					This rule set will be applied to each given examination
-				</div>
-				<study-card-rules class="rules" [formGroup]="form"
-					cardType="qualitycard"
-					formControlName="rules"
-					[(ngModel)]="qualityCard.rules"
-					[mode]="selectMode ? 'select' : mode"
-					[allCoils]="allCoils"
-					[studyId]="qualityCard.study?.id"
-					[showErrors]="showRulesErrors"
-					(selectedRulesChange)="selectedRules = $event"
-					[addSubForm]="addConditionForm.bind(this)">
-				</study-card-rules>
-			</fieldset>
-			<fieldset *ngIf="progress > 0 && progress < 1" class="progress">
-				<progress-bar [progress]="progress"></progress-bar>
-				Computing quality checks...
-			</fieldset>
-			<fieldset class="report" *ngIf="report">
-				<legend>
-					Application Report
-					<span *ngIf="reportIsTest">(test)</span>
-				</legend>
-				<shanoir-table #table class="report"
-                    [getPage]="getPage.bind(this)"
-                    [columnDefs]="reportColumns"
-                    [browserSearch]="false"
-                    [collapseControls]="true"
-                ></shanoir-table>
-			</fieldset>
-		</div>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()">
+                    @if (mode != "view") {
+                        <button
+                            type="button"
+                            class="Button right-icon show-errors"
+                            (click)="onShowErrors()"
+                            [disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
+                            Show all errors
+                            <i class="fas fa-bug"></i>
+                        </button>
+                    }
+                    @if (mode == "view" && isStudyAdmin) {
+                        <button
+                            type="button"
+                            class="right-icon apply test"
+                            (click)="test()"
+                            [disabled]="true || applying || testing"
+                            title="Coming soon">
+                            Test
+                            @if (!testing) {
+                                <i class="fa-solid fa-play"></i>
+                            }
+                            @if (testing) {
+                                <i class="fa fa-cog fa-spin"></i>
+                            }
+                        </button>
+                    }
+                    @if (mode == "view" && isStudyAdmin) {
+                        <button
+                            type="button"
+                            class="alt right-icon apply"
+                            (click)="apply()"
+                            [disabled]="true || applying || testing"
+                            title="Coming soon">
+                            Apply now
+                            @if (!applying) {
+                                <i class="fa-solid fa-play"></i>
+                            }
+                            @if (applying) {
+                                <i class="fa fa-cog fa-spin"></i>
+                            }
+                        </button>
+                    }
+                    @if (report) {
+                        <button type="button" class="apply right-icon" (click)="downloadReport()">
+                            Download error report
+                            <i class="fas fa-floppy-disk"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone">Details on quality card</h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone">Edit quality card</h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone">Create quality card</h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label>Name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ qualityCard.name }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="name" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['required'])"
+                                                class="form-validation-alert">
+                                                Name is required!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['minlength'])"
+                                                class="form-validation-alert">
+                                                Too short!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['unique'])"
+                                                class="form-validation-alert">
+                                                Name should be unique!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Study</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a
+                                            [routerLink]="['/study/details/', qualityCard.study?.id]"
+                                            (click)="breadcrumbsService.markMilestone()">
+                                            {{ qualityCard.study.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            [readOnly]="forceStudyId"
+                                            formControlName="study"
+                                            (userChange)="onStudyChange()"
+                                            [optionArr]="studies"
+                                            [disabled]="lockStudy"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Auto check at import</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @if (qualityCard.toCheckAtImport) {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (!qualityCard.toCheckAtImport) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        }
+                                    }
+                                    @default {
+                                        <checkbox
+                                            [(ngModel)]="qualityCard.toCheckAtImport"
+                                            formControlName="toCheckAtImport"></checkbox>
+                                        @if (qualityCard.toCheckAtImport) {
+                                            <div class="info left-icon import-info">
+                                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                                Be aware that a rule with an
+                                                <span class="tag">
+                                                    <i class="fa-solid fa-times-circle"></i>
+                                                    Error
+                                                </span>
+                                                tag will block any import
+                                                <b>that would match</b>
+                                                this rule.
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+                <fieldset class="rules">
+                    <legend>Rules</legend>
+                    <div class="info left-icon">This rule set will be applied to each given examination</div>
+                    <study-card-rules
+                        class="rules"
+                        [formGroup]="form"
+                        cardType="qualitycard"
+                        formControlName="rules"
+                        [(ngModel)]="qualityCard.rules"
+                        [mode]="selectMode ? 'select' : mode"
+                        [allCoils]="allCoils"
+                        [studyId]="qualityCard.study?.id"
+                        [showErrors]="showRulesErrors"
+                        (selectedRulesChange)="selectedRules = $event"
+                        [addSubForm]="addConditionForm.bind(this)"></study-card-rules>
+                </fieldset>
+                @if (progress > 0 && progress < 1) {
+                    <fieldset class="progress">
+                        <progress-bar [progress]="progress"></progress-bar>
+                        Computing quality checks...
+                    </fieldset>
+                }
+                @if (report) {
+                    <fieldset class="report">
+                        <legend>
+                            Application Report
+                            @if (reportIsTest) {
+                                <span>(test)</span>
+                            }
+                        </legend>
+                        <shanoir-table
+                            #table
+                            class="report"
+                            [getPage]="getPage.bind(this)"
+                            [columnDefs]="reportColumns"
+                            [browserSearch]="false"
+                            [collapseControls]="true"></shanoir-table>
+                    </fieldset>
+                }
+            </div>
+        </form>
+    }
 </div>

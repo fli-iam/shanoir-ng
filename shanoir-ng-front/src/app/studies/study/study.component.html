@@ -13,401 +13,694 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail max-content">
-	<div class="layout" [ngClass]="{'left': mode=='view'}">
-		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
-			<form-footer
-					[state]="footerState"
-					(save)="save()"
-					(edit)="goToEdit()"
-					(delete) = "delete()"
-					(dismiss)="goToView()"
-					(back)="goBack()">
-				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-			</form-footer>
-
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">Edit study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
-				</ng-template>
-			</span>
-			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
-					<span class="general">General</span>
-				</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" replaceUrl="true">
-					<span class="files">Files</span>
-				</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" replaceUrl="true">
-					<span class="subjects">Subjects</span>
-				</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">
-					<span class="centers">Centers</span>
-				</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
-					<span class="members">Members</span>
-				</li>
-                <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
-                    <span class="tags">Tags</span>
-                </li>
-				<ng-container *ngIf="mode == 'view'">
-                    <li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
-					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
-				</ng-container>
-				<ng-container *ngIf="mode != 'view'">
-                    <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
-					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
-				</ng-container>
-                <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
-                    <span class="history">History</span>
-                </li>
-			</ul>
-
-			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
-				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|Name label@@studyDetailName">Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{study.name}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="name"/>
-							<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
-							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
-						</ng-template>
-						</span>
-					</li>
-                    <li>
-                        <label i18n="Study detail|Description label@@studyDetailPublicDescription">Public description</label>
-                        <span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{study.description}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<textarea type="text" formControlName="description"></textarea>
-						</ng-template>
-						</span>
+    <div class="layout" [ngClass]="{ left: mode == 'view' }">
+        @if (form) {
+            <form [formGroup]="form" novalidate [class.disabled]="footerState.loading">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (edit)="goToEdit()"
+                    (delete)="delete()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()">
+                    @if (mode == "view" && hasDownloadRight && downloadService.advancedDownloadCompat) {
+                        <button
+                            class="right-icon dl-button"
+                            type="button"
+                            (click)="downloadAll()"
+                            [disabled]="downloadState?.isActive()">
+                            Download
+                            <i class="fas fa-download"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">
+                                Details on study
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">
+                                Edit study
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">
+                                Create study
+                            </h2>
+                        }
+                    }
+                </span>
+                <ul class="tabs">
+                    <li
+                        [class.active]="activeTab == 'general'"
+                        [routerLink]="'.'"
+                        [fragment]="'general'"
+                        replaceUrl="true">
+                        <span class="general">General</span>
                     </li>
-                    <li>
-                        <label i18n="Study detail|License label@@studyDetailLicense">License</label>
-                        <span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{study.license}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="license">
-						</ng-template>
-						</span>
+                    <li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" replaceUrl="true">
+                        <span class="files">Files</span>
                     </li>
-					<li>
-						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
-						<span class="right-col">
-							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.startDate | localDateFormatPipe}}
-							</ng-container>
-							<ng-container *ngIf="mode == 'create'">
-								<datepicker formControlName="startDate"></datepicker>
-								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
-							</ng-container>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{study.endDate | localDateFormatPipe}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<datepicker formControlName="endDate"></datepicker>
-								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
-								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{studyStatusStr(study.studyStatus)}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyStatus" [options]="studyStatusOptions">
-								</select-box>
-								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Pseudonymization profile</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.profile?.profileName}}
-							</ng-container>
-							<ng-container *ngIf="mode == 'create'">
-								<select-box formControlName="profile" [options]="profileOptions">
-								</select-box>
-								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
-							</ng-container>
-						</span>
+                    <li
+                        [class.active]="activeTab == 'subjects'"
+                        [routerLink]="'.'"
+                        [fragment]="'subjects'"
+                        replaceUrl="true">
+                        <span class="subjects">Subjects</span>
                     </li>
-                    <li>
-                        <label i18n="Study detail|With examination label@@studyDetailWithExamination">Study card policy</label>
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<ng-container *ngIf="mode == 'view'">
-								    {{studyCardPolicyStr()}}
-							    </ng-container>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-                                <input type="radio" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
-                                <input type="radio" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
-                            </ng-template>
-						</span>
+                    <li
+                        [class.active]="activeTab == 'centers'"
+                        [routerLink]="'.'"
+                        [fragment]="'centers'"
+                        replaceUrl="true">
+                        <span class="centers">Centers</span>
                     </li>
-                    <li>
-                        <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
-                        <span class="right-col" *ngIf="!uploading">
-                            <table class="no-spacing">
-                                <tr *ngFor="let item of study.detailedSizes | keyvalue: valueDescOrder">
-                                    <td class="volume-storage-left">
-                                        {{ item.key }}
-                                    </td>
-                                    <td>
-                                        {{ item.value | size }}
-                                    </td>
-                                </tr>
-                                <tr *ngIf="study.totalSize > 0">
-                                     <td class="volume-storage-left volume-storage-total">
-                                        Total
-                                    </td>
-                                    <td class="volume-storage-total" >
-                                        {{ study.totalSize | size }}
-                                    </td>
-                                </tr>
-                                <tr *ngIf="!study.totalSize || study.totalSize == 0" >
-                                    <td>
-                                        0 Bytes
-                                    </td>
-                                </tr>
-                            </table>
-						</span>
-						<span class="right-col" *ngIf="uploading">
-							<i class="fas fa-spinner fa-pulse"></i>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.clinical" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.clinical" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox formControlName="clinical"></checkbox>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox formControlName="challenge"></checkbox>
-							</ng-template>
-						</span>
+                    <li
+                        [class.active]="activeTab == 'members'"
+                        [routerLink]="'.'"
+                        [fragment]="'members'"
+                        replaceUrl="true">
+                        <span class="members">Members</span>
                     </li>
-                    <li>
-                        <label i18n="Study detail|Display as public label@@studyDetailVisibleByDefault">Display as public</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <ng-template [ngSwitchCase]="'view'">
-                                <span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-                                <span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-                            </ng-template>
-                            <ng-template ngSwitchDefault>
-                                <checkbox formControlName="visibleByDefault"></checkbox>
-                            </ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
-				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
-					Data use agreement (DUA)
-					<tool-tip class="larger">
-						Adding a data use agreement (DUA) to a study changes the study member experience, for all members.
-						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
-						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
-					</tool-tip>
-				</legend>
-				<ol>
-					<li *ngIf="mode != 'create'"><button type="button" class="left-icon normal" [routerLink]="'/dua/create/' + study.id"><i class="fa-solid fa-wand-magic-sparkles"></i>Open DUA assistant</button></li>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
-						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
-							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
-							<button type="button" class="left-icon" (click)="setDuaFile()">
-								<i class="fas fa-upload"></i>Choose file
-							</button>
-						</span>
-					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
-					 		{{study.dataUserAgreementPaths[0]}}
-							<button type="button" class="dl-button" (click)="deleteDataUserAgreement()">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</span>
-					</li>
-					<li *ngIf="mode == 'view'">
-						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
-						<div [hidden]="!duaDownloadState?.progress">
-                            <progress-bar [progress]="duaDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-                        </div>
-                        <span class="right-col">
-							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
-								{{study.dataUserAgreementPaths[0]}}
-								<button type="button" class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
-							</span>
-							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
-						</span>
+                    <li
+                        class="tags"
+                        [class.active]="activeTab == 'tags'"
+                        [routerLink]="'.'"
+                        [fragment]="'tags'"
+                        replaceUrl="true">
+                        <span class="tags">Tags</span>
                     </li>
-                </ol>
-            </fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
-                <legend>Subject tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" (userChange)="onTagListChange()" formControlName="tags"></tag-creator>
-                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-            </fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
-                <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
-                <ol>
-                    <li>
-						<span *ngIf="mode == 'view'" class="left-col">
-						    <p><b>Centers</b></p>
-						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                                <li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>
-                            </ol>
-						</span>
-					</li>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
-						<span class="right-col">
-							<select-box placeholder="Select a center ..." (addClick)="onCenterAdd($event)" [options]="centerOptions">
-							</select-box>
-							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
-						</span>
-					</li>
-					<li *ngIf="mode != 'view'">
-						<span class="study-center-list">
-							<input type="hidden" formControlName="studyCenterList"/>
-							<table>
-								<tr>
-									<th>Acquisition Center</th>
-									<th></th>
-									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
-									<th></th>
-								</tr>
-                                <tr *ngIf="study.studyCenterList.length == 0">
-                                    <td>
-                                        List of center cannot be empty.
-                                    </td>
-                                </tr>
-								<tr *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-									<td>{{studyCenter.center.name}}</td>
-									<td class="icon icon-clickable center-link" (click)="goToCenter(studyCenter.center.id)">
-										<i class="fas fa-external-link-alt"></i>
-									</td>
-									<td>
-										<span class="prefix">{{study.name}}-</span><input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" (input)="onPrefixChange()" [ngModelOptions]="{standalone: true}"/>
-									</td>
-									<td *ngIf="study.studyCenterList.length > 1" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)">
-										<i class="fas fa-times"></i>
-									</td>
-								</tr>
-							</table>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
-				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
-				<ol>
-					<li *ngIf="mode != 'view'">
-                        <span class="right-col" [ngSwitch]="mode">
-                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button type="button" class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
-                            <ul class="files">
-                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button type="button" class="dl-button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                    @if (mode == "view") {
+                        @if (isStudyAdmin) {
+                            <li
+                                [class.active]="activeTab == 'quality'"
+                                [routerLink]="'.'"
+                                [fragment]="'quality'"
+                                replaceUrl="true">
+                                Quality
+                            </li>
+                        }
+                        <li
+                            [class.active]="activeTab == 'bids'"
+                            [routerLink]="'.'"
+                            [fragment]="'bids'"
+                            replaceUrl="true">
+                            BIDS
+                        </li>
+                    }
+                    @if (mode != "view") {
+                        <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
+                        <li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
+                    }
+                    @if (isStudyAdmin) {
+                        <li
+                            class="tags"
+                            [class.active]="activeTab == 'history'"
+                            [routerLink]="'.'"
+                            [fragment]="'history'"
+                            replaceUrl="true"
+                            (click)="loadHistory()">
+                            <span class="history">History</span>
+                        </li>
+                    }
+                </ul>
+                <fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
+                    <legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
+                    <ol>
+                        <li>
+                            <label i18n="Study detail|Name label@@studyDetailName">Name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ study.name }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="name" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['required'])"
+                                                class="form-validation-alert"
+                                                i18n="Edit study|Name required error@@studyDetailNameRequiredError">
+                                                Name is required!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['minlength', 'maxlength'])"
+                                                class="form-validation-alert"
+                                                i18n="Edit study|Name length error@@studyDetailNameLengthError">
+                                                Name length must be between 2 and 200!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                [@slideDown]="hasError('name', ['unique'])"
+                                                class="form-validation-alert"
+                                                i18n="Study detail|Name unique error@@studyDetailNameUniqueError">
+                                                Name should be unique!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Description label@@studyDetailPublicDescription">
+                                Public description
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ study.description }}
+                                    }
+                                    @default {
+                                        <textarea type="text" formControlName="description"></textarea>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|License label@@studyDetailLicense">License</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ study.license }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="license" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
+                            <span class="right-col">
+                                @if (mode == "view" || mode == "edit") {
+                                    {{ study.startDate | localDateFormatPipe }}
+                                }
+                                @if (mode == "create") {
+                                    <datepicker formControlName="startDate"></datepicker>
+                                    @if (hasError("startDate", ["format"])) {
+                                        <label
+                                            class="form-validation-alert"
+                                            i18n="Study detail|Date vali error@@dateValidError">
+                                            Date should be valid! Date format: {{ dateDisplay }}
+                                        </label>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ study.endDate | localDateFormatPipe }}
+                                    }
+                                    @default {
+                                        <datepicker formControlName="endDate"></datepicker>
+                                        @if (hasError("endDate", ["format"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Study detail|Date valid error@@dateValidError">
+                                                Date should be valid! Date format: {{ dateDisplay }}
+                                            </label>
+                                        }
+                                        @if (hasError("endDate", ["order"])) {
+                                            <label class="form-validation-alert">
+                                                End date must be subsequent to start date
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ studyStatusStr(study.studyStatus) }}
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="studyStatus"
+                                            [options]="studyStatusOptions"></select-box>
+                                        @if (hasError("studyStatus", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Study detail|Status required error@@studyDetailStatusRequiredError">
+                                                Status is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Pseudonymization profile</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ study.profile?.profileName }}
+                                    }
+                                    @case ("edit") {
+                                        {{ study.profile?.profileName }}
+                                    }
+                                    @case ("create") {
+                                        <select-box formControlName="profile" [options]="profileOptions"></select-box>
+                                        @if (hasError("profile", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Study detail|Profile required error@@studyDetailStatusRequiredError">
+                                                Profile is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|With examination label@@studyDetailWithExamination">
+                                Study card policy
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ studyCardPolicyStr() }}
+                                    }
+                                    @default {
+                                        <input type="radio" formControlName="studyCardPolicy" value="MANDATORY" />
+                                        Mandatory
+                                        <input type="radio" formControlName="studyCardPolicy" value="DISABLED" />
+                                        Disabled
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
+                            @if (!uploading) {
+                                <span class="right-col">
+                                    <table class="no-spacing">
+                                        @for (item of study.detailedSizes | keyvalue: valueDescOrder; track item) {
+                                            <tr>
+                                                <td class="volume-storage-left">
+                                                    {{ item.key }}
+                                                </td>
+                                                <td>
+                                                    {{ item.value | size }}
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if (study.totalSize > 0) {
+                                            <tr>
+                                                <td class="volume-storage-left volume-storage-total">Total</td>
+                                                <td class="volume-storage-total">
+                                                    {{ study.totalSize | size }}
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if (!study.totalSize || study.totalSize == 0) {
+                                            <tr>
+                                                <td>0 Bytes</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </span>
+                            }
+                            @if (uploading) {
+                                <span class="right-col">
+                                    <i class="fas fa-spinner fa-pulse"></i>
+                                </span>
+                            }
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @if (study.clinical) {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (!study.clinical) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        }
+                                    }
+                                    @default {
+                                        <checkbox formControlName="clinical"></checkbox>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @if (study.challenge) {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (!study.challenge) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        }
+                                    }
+                                    @default {
+                                        <checkbox formControlName="challenge"></checkbox>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Study detail|Display as public label@@studyDetailVisibleByDefault">
+                                Display as public
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @if (study.visibleByDefault) {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (!study.visibleByDefault) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        }
+                                    }
+                                    @default {
+                                        <checkbox formControlName="visibleByDefault"></checkbox>
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
+                    <legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
+                        Data use agreement (DUA)
+                        <tool-tip class="larger">
+                            Adding a data use agreement (DUA) to a study changes the study member experience, for all
+                            members. If a DUA is present all members of the study will have to accept the DUA after
+                            signing in the next time to Shanoir. Until the DUA is accepted, a member has no access/no
+                            rights to any data of the study, except administrators.
+                        </tool-tip>
+                    </legend>
+                    <ol>
+                        @if (mode != "create") {
+                            <li>
+                                <button type="button" class="left-icon normal" [routerLink]="'/dua/create/' + study.id">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    Open DUA assistant
+                                </button>
+                            </li>
+                        }
+                        @if (mode != "view") {
+                            <li>
+                                <label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">
+                                    Attach DUA file
+                                </label>
+                                @if (!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]) {
+                                    <span class="right-col">
+                                        <input
+                                            #duaInput
+                                            hidden
+                                            formControlName="dataUserAgreement"
+                                            type="file"
+                                            (change)="attachDataUserAgreement($event)" />
+                                        <button type="button" class="left-icon" (click)="setDuaFile()">
+                                            <i class="fas fa-upload"></i>
+                                            Choose file
+                                        </button>
+                                    </span>
+                                }
+                                @if (study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]) {
+                                    <span class="right-col">
+                                        {{ study.dataUserAgreementPaths[0] }}
+                                        <button type="button" class="dl-button" (click)="deleteDataUserAgreement()">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </span>
+                                }
+                            </li>
+                        }
+                        @if (mode == "view") {
+                            <li>
+                                <label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+                                <div [hidden]="!duaDownloadState?.progress">
+                                    <progress-bar
+                                        [progress]="duaDownloadState?.progress"
+                                        [text]="'Preparing download'"
+                                        [unknownDownload]="true"></progress-bar>
+                                </div>
+                                <span class="right-col">
+                                    @if (study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]) {
+                                        <span>
+                                            {{ study.dataUserAgreementPaths[0] }}
+                                            <button
+                                                type="button"
+                                                class="dl-button"
+                                                (click)="downloadDataUserAgreement()">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </span>
+                                    }
+                                    @if (!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]) {
+                                        <span>-</span>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
+                    <legend>Subject tags</legend>
+                    <tag-creator
+                        ngDefaultControl
+                        [mode]="mode"
+                        [tagsInUse]="subjectTagsInUse"
+                        (userChange)="onTagListChange()"
+                        formControlName="tags"></tag-creator>
+                    <subject-study-list
+                        [allowRemove]="false"
+                        [study]="study"
+                        [selectableList]="subjects"
+                        formControlName="subjectStudyList"
+                        [mode]="mode"></subject-study-list>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
+                    <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
+                    <ol>
+                        <li>
+                            @if (mode == "view") {
+                                <span class="left-col">
+                                    <p><b>Centers</b></p>
+                                    @for (
+                                        studyCenter of study.studyCenterList;
+                                        track studyCenter;
+                                        let i = $index;
+                                        let even = $even;
+                                        let odd = $odd
+                                    ) {
+                                        <ol [class.even]="even" [class.odd]="odd">
+                                            <li class="center-list">
+                                                - {{ studyCenter.center.name }}
+                                                @if (studyCenter.subjectNamePrefix) {
+                                                    <span>: {{ studyCenter.subjectNamePrefix }}</span>
+                                                }
+                                            </li>
+                                        </ol>
+                                    }
+                                </span>
+                            }
+                        </li>
+                        @if (mode != "view") {
+                            <li>
+                                <label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
+                                <span class="right-col">
+                                    <select-box
+                                        placeholder="Select a center ..."
+                                        (addClick)="onCenterAdd($event)"
+                                        [options]="centerOptions"></select-box>
+                                    @if (hasError("studyCenterList", ["noCenter"])) {
+                                        <label class="form-validation-alert right-col">
+                                            At least one center is required !
+                                        </label>
+                                    }
+                                </span>
+                            </li>
+                        }
+                        @if (mode != "view") {
+                            <li>
+                                <span class="study-center-list">
+                                    <input type="hidden" formControlName="studyCenterList" />
+                                    <table>
+                                        <tr>
+                                            <th>Acquisition Center</th>
+                                            <th></th>
+                                            <th>
+                                                Subject Prefix (optional)
+                                                <tool-tip>
+                                                    A default prefix for the new subjects created when importing
+                                                    datasets in this study
+                                                </tool-tip>
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                        @if (study.studyCenterList.length == 0) {
+                                            <tr>
+                                                <td>List of center cannot be empty.</td>
+                                            </tr>
+                                        }
+                                        @for (
+                                            studyCenter of study.studyCenterList;
+                                            track studyCenter;
+                                            let i = $index;
+                                            let even = $even;
+                                            let odd = $odd
+                                        ) {
+                                            <tr [class.even]="even" [class.odd]="odd">
+                                                <td>{{ studyCenter.center.name }}</td>
+                                                <td
+                                                    class="icon icon-clickable center-link"
+                                                    (click)="goToCenter(studyCenter.center.id)">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </td>
+                                                <td>
+                                                    <span class="prefix">{{ study.name }}-</span>
+                                                    <input
+                                                        type="text"
+                                                        [(ngModel)]="studyCenter.subjectNamePrefix"
+                                                        (input)="onPrefixChange()"
+                                                        [ngModelOptions]="{ standalone: true }" />
+                                                </td>
+                                                @if (study.studyCenterList.length > 1) {
+                                                    <td
+                                                        class="icon icon-clickable"
+                                                        (click)="removeCenterFromStudy(studyCenter.center.id)">
+                                                        <i class="fas fa-times"></i>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </table>
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
+                    <legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
+                    <ol>
+                        @if (mode != "view") {
+                            <li>
+                                <span class="right-col">
+                                    <input #input hidden type="file" (change)="attachNewFile($event)" />
+                                    <button type="button" class="left-icon" (click)="setFile()">
+                                        <i class="fas fa-upload"></i>
+                                        Upload a new file
+                                    </button>
+                                    <ul class="files">
+                                        @for (file of study.protocolFilePaths; track file) {
+                                            <li>
+                                                {{ getFileName(file) }}
+                                                <button type="button" class="dl-button" (click)="deleteFile(file)">
+                                                    <i class="fa-regular fa-trash-can"></i>
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </span>
+                            </li>
+                        }
+                        @if (mode == "view") {
+                            <li>
+                                <div [hidden]="!pdfDownloadState?.progress">
+                                    <progress-bar
+                                        [progress]="pdfDownloadState?.progress"
+                                        [text]="'Preparing download'"
+                                        [unknownDownload]="true"></progress-bar>
+                                </div>
+                                <span class="right-col">
+                                    @if (study.protocolFilePaths && study.protocolFilePaths[0]) {
+                                        <span>
+                                            <ul>
+                                                @for (file of study.protocolFilePaths; track file) {
+                                                    <li>
+                                                        {{ getFileName(file) }}
+                                                        <button
+                                                            type="button"
+                                                            class="dl-button"
+                                                            (click)="downloadFile(file)">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </span>
+                                    }
+                                    @if (!study.protocolFilePaths || !study.protocolFilePaths[0]) {
+                                        <span>-</span>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'members'" tab="members">
+                    <legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
+                    <studyuser-list
+                        formControlName="studyUserList"
+                        [users]="users"
+                        [studyCenters]="study.studyCenterList"
+                        [study]="study"
+                        [mode]="mode"></studyuser-list>
+                </fieldset>
+                @if (keycloakService.isUserAdmin() && accessRequests?.length > 0) {
+                    <fieldset class="access-requests">
+                        <legend>Pending access requests for this study</legend>
+                        <ul>
+                            @for (a of accessRequests; track a) {
+                                <li>
+                                    <span class="link left-icon" (click)="goToAccessRequest(a)">
+                                        <i class="fa-solid fa-user-lock"></i>
+                                        Request from {{ a.user.firstName }} {{ a.user.lastName }} ({{
+                                            a.user.username
+                                        }}), motivation :
+                                        <span class="motivation">{{ a.motivation }}</span>
+                                    </span>
                                 </li>
-                            </ul>
-                        </span>
-					</li>
-                    <li *ngIf="mode == 'view'">
-                        <div [hidden]="!pdfDownloadState?.progress">
-                            <progress-bar [progress]="pdfDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-                        </div>
-                        <span class="right-col">
-                            <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
-                                <ul>
-                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button type="button" class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
-                                  </li>
-                                </ul>
-							</span>
-                            <span *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-</span>
-                        </span>
-                    </li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'members'" tab="members">
-				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
-				<studyuser-list
-				    formControlName="studyUserList"
-					[users]="users"
-					[studyCenters]="study.studyCenterList"
-					[study] = "study"
-					[mode]="mode">
-				</studyuser-list>
-			</fieldset>
-			<fieldset *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
-				<legend>Pending access requests for this study</legend>
-				<ul>
-					<li *ngFor="let a of accessRequests">
-						<span class="link left-icon" (click)="goToAccessRequest(a)">
-							<i class="fa-solid fa-user-lock"></i>
-							Request from {{a.user.firstName}} {{a.user.lastName}} ({{a.user.username}}), motivation :
-							<span class="motivation"> {{a.motivation}}</span>
-						</span>
-					</li>
-				</ul>
-      		</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'quality'" tab="quality">
-				<legend>Quality control</legend>
-				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
-			</fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
-                <legend>Public Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" (userChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
-            </fieldset>
-            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
-				        <legend>BIDS tree</legend>
-                <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
-            </fieldset>
-            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'history'" tab="history">
-                <legend>History</legend>
-                <study-history #studyHistory
-                   [eventHistory]="openHistory"
-                   [study]="study">
-                </study-history>
-            </fieldset>
-		</form>
-	</div>
+                            }
+                        </ul>
+                    </fieldset>
+                }
+                <fieldset [class.hidden-tab]="activeTab != 'quality'" tab="quality">
+                    <legend>Quality control</legend>
+                    <quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
+                </fieldset>
+                <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
+                    <legend>Public Study tags</legend>
+                    <tag-creator
+                        ngDefaultControl
+                        [mode]="mode"
+                        (userChange)="onStudyTagListChange()"
+                        formControlName="studyTags"></tag-creator>
+                </fieldset>
+                @if (mode == "view") {
+                    <fieldset [class.hidden-tab]="activeTab != 'bids'" tab="bids">
+                        <legend>BIDS tree</legend>
+                        <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
+                    </fieldset>
+                }
+                @if (mode == "view") {
+                    <fieldset [class.hidden-tab]="activeTab != 'history'" tab="history">
+                        <legend>History</legend>
+                        <study-history #studyHistory [eventHistory]="openHistory" [study]="study"></study-history>
+                    </fieldset>
+                }
+            </form>
+        }
+    </div>
 </div>

@@ -46,7 +46,7 @@ import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
 import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
 import {Subject} from "../../../subjects/shared/subject.model";
-import { NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../../shared/select/select.component';
 import { ExaminationAnestheticFormComponent } from '../../anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
@@ -59,7 +59,7 @@ import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateForm
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
     styleUrls: ['animal-examination.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, NgSwitch, NgSwitchCase, RouterLink, NgSwitchDefault, NgFor, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, ExaminationNodeComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, ExaminationNodeComponent, LocalDateFormatPipe]
 })
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 

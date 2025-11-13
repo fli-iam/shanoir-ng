@@ -21,7 +21,7 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
-import { NgIf, NgFor } from '@angular/common';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
@@ -30,7 +30,7 @@ import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-it
 @Component({
     selector: 'member-node',
     templateUrl: 'member-node.component.html',
-    imports: [NgIf, TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, NgFor]
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
 })
 
 export class MemberNodeComponent extends TreeNodeAbstractComponent<MemberNode> implements OnChanges {

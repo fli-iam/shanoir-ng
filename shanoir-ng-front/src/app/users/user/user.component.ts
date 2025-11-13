@@ -28,8 +28,7 @@ import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
@@ -39,7 +38,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'user-detail',
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, DatepickerComponent, NgFor, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {

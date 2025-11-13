@@ -13,174 +13,245 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">3. Set the clinical context</div>
-<div *ngIf="reloading" class="global-loading left-icon">
-    <i class="fa fa-cog fa-spin"></i>
-    Please wait ...
-</div>
-<fieldset *ngIf="!reloading" class="step" @preventInitialChildAnimations>
-    <ol>
-        <legend>
-            Research study
-            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
-        </legend>
-        <li>
-            <label class="required-label">Select a research study</label>
-            <span class="right-col">
-                <select-box
+@if (reloading) {
+    <div class="global-loading left-icon">
+        <i class="fa fa-cog fa-spin"></i>
+        Please wait ...
+    </div>
+}
+@if (!reloading) {
+    <fieldset class="step" @preventInitialChildAnimations>
+        <ol>
+            <legend>
+                Research study
+                <tool-tip>
+                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
+                    mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                </tool-tip>
+            </legend>
+            <li>
+                <label class="required-label">Select a research study</label>
+                <span class="right-col">
+                    <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
                         [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading">
-                </select-box>
-            </span>
-        </li>
-        <li class="info" *ngIf="study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == 'MR'">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>No study cards are configured on this study, please create one before trying to import MR data.</strong>
-            <ng-container *ngIf="!isAdminOfStudy[study.id]">
-                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to create a studycard.
-            </ng-container>
-            <ng-container *ngIf="isAdminOfStudy[study.id]">
-                <br/><a (click)="createStudyCard()">Click here to create a study card</a>
-            </ng-container>
-        </li>
-        <li *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" @slideDown>
-            <label class="required-label">Select a study card</label>
-            <span class="right-col">
-                <select-box
-                        [(ngModel)]="studycard"
-                        (userChange)="onSelectStudyCard()"
-                        [viewRoute]="'/study-card/details/' + studycard?.id"
-                        (userClear)="onClearStudyCard()"
-                        [viewDisabled]="!studycard"
-                        [options]="studycardOptions"
-                        [disabled]="loading">
-                </select-box>
-            </span>
-        </li>
-        <li class="info" *ngIf="study && scHasCoilToUpdate && useStudyCard">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>That study card contains coil references that need to be precised.</strong>
-            <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank.
-            <ng-container *ngIf="!isAdminOfStudy[study.id]">
-                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
-            </ng-container>
-            <ng-container *ngIf="isAdminOfStudy[study.id]">
-                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
-            </ng-container>
-        </li>
-        <li class="info" *ngIf="scHasDifferentModality && study && useStudyCard">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>That study card would set a different modality than detected in your data.</strong>
-            <br/>Your data says <strong>{{modality}}</strong> while the study card would set <strong>{{scHasDifferentModality}}</strong> in the imported metadata.
-            <ng-container *ngIf="!isAdminOfStudy[study.id]">
-                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
-            </ng-container>
-            <ng-container *ngIf="isAdminOfStudy[study.id]">
-                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
-            </ng-container>
-        </li>
-        <li>
-            <label *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" [class.required-label]="useStudyCard">Acquisition center</label>
-            <label *ngIf="!useStudyCard || (modality != 'MR' && modality != 'bruker')" [class.required-label]="!useStudyCard">Select an acquisition center</label>
-            <span class="right-col">
-                <select-box *ngIf="(modality == 'MR' && !useStudyCard) || modality != 'MR' || center"
-                        [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
-                        [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
-                        [(ngModel)]="center"
-                        (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                        (newClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
-                        [options]="centerOptions">
-                </select-box>
-            </span>
-        </li>
-        <li class="info" *ngIf="center && !centerCompatible(center)">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>This center may not be not compatible with the imported data !</strong>
-            <ng-container *ngIf="importedCenterDataStr">
-                <br/>Your archive contains this data :
-                <code>{{importedCenterDataStr}}</code>
-            </ng-container>
-            <ng-container *ngIf="!useStudyCard">
-                <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
-            </ng-container>
-        </li>
-        <li>
-            <label *ngIf="useStudyCard && (modality == 'MR' || modality == 'bruker')" [class.required-label]="useStudyCard">Center equipment</label>
-            <label *ngIf="!useStudyCard || (modality != 'MR' && modality != 'bruker')" [class.required-label]="!useStudyCard">Select a center equipment</label>
-            <span class="right-col">
-                <select-box *ngIf="(modality == 'MR' && !useStudyCard) || modality != 'MR' || acquisitionEquipment"
-                        [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
-                        [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
-                        [(ngModel)]="acquisitionEquipment"
-                        (userChange)="onContextChange();"
-                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                        (newClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
-                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
-                </select-box>
-            </span>
-        </li>
-        <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>The center equipment may not be not compatible with the imported data !</strong>
-            <strong> selected : {{acquisitionEquipment?.serialNumber}}</strong>
-            <ng-container *ngIf="importedEquipmentDataStr">
-                <br/>Your archive contains this data :
-                <code>{{importedEquipmentDataStr}}</code>
-            </ng-container>
-            <br/>If the center equipment you need is not in the above list, you can create a new center equipment from this data by clicking on the 'add' button.
-        </li>
-    </ol>
-
-    <ol>
-        <legend>
-            Subject
-            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
-        </legend>
-        <li class="required">
-            <label class="required-label">Select a subject</label>
-            <span class="right-col">
-                <select-box class="subject-select"
+                        [disabled]="loading"></select-box>
+                </span>
+            </li>
+            @if (study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == "MR") {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>
+                        No study cards are configured on this study, please create one before trying to import MR data.
+                    </strong>
+                    @if (!isAdminOfStudy[study.id]) {
+                        <br />
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
+                        create a studycard.
+                    }
+                    @if (isAdminOfStudy[study.id]) {
+                        <br />
+                        <a (click)="createStudyCard()">Click here to create a study card</a>
+                    }
+                </li>
+            }
+            @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+                <li @slideDown>
+                    <label class="required-label">Select a study card</label>
+                    <span class="right-col">
+                        <select-box
+                            [(ngModel)]="studycard"
+                            (userChange)="onSelectStudyCard()"
+                            [viewRoute]="'/study-card/details/' + studycard?.id"
+                            (userClear)="onClearStudyCard()"
+                            [viewDisabled]="!studycard"
+                            [options]="studycardOptions"
+                            [disabled]="loading"></select-box>
+                    </span>
+                </li>
+            }
+            @if (study && scHasCoilToUpdate && useStudyCard) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>That study card contains coil references that need to be precised.</strong>
+                    <br />
+                    If you use this studycard now, the coil references in the updated metadata of your new datasets will
+                    be left blank.
+                    @if (!isAdminOfStudy[study.id]) {
+                        <br />
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
+                        update the studycard {{ studycard?.name }}.
+                    }
+                    @if (isAdminOfStudy[study.id]) {
+                        <br />
+                        <a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+                    }
+                </li>
+            }
+            @if (scHasDifferentModality && study && useStudyCard) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>That study card would set a different modality than detected in your data.</strong>
+                    <br />
+                    Your data says
+                    <strong>{{ modality }}</strong>
+                    while the study card would set
+                    <strong>{{ scHasDifferentModality }}</strong>
+                    in the imported metadata.
+                    @if (!isAdminOfStudy[study.id]) {
+                        <br />
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
+                        update the studycard {{ studycard?.name }}.
+                    }
+                    @if (isAdminOfStudy[study.id]) {
+                        <br />
+                        <a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+                    }
+                </li>
+            }
+            <li>
+                @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+                    <label [class.required-label]="useStudyCard">Acquisition center</label>
+                }
+                @if (!useStudyCard || (modality != "MR" && modality != "bruker")) {
+                    <label [class.required-label]="!useStudyCard">Select an acquisition center</label>
+                }
+                <span class="right-col">
+                    @if ((modality == "MR" && !useStudyCard) || modality != "MR" || center) {
+                        <select-box
+                            [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
+                            [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
+                            [(ngModel)]="center"
+                            (userChange)="onSelectCenter()"
+                            [viewRoute]="'/center/details/' + center?.id"
+                            [viewDisabled]="!center"
+                            (newClick)="openCreateCenter()"
+                            [newHidden]="hasCompatibleCenters"
+                            [options]="centerOptions"></select-box>
+                    }
+                </span>
+            </li>
+            @if (center && !centerCompatible(center)) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>This center may not be not compatible with the imported data !</strong>
+                    @if (importedCenterDataStr) {
+                        <br />
+                        Your archive contains this data :
+                        <code>{{ importedCenterDataStr }}</code>
+                    }
+                    @if (!useStudyCard) {
+                        <br />
+                        If the center you need is not in the above list, you can create a new center from this data by
+                        clicking on the 'add' button.
+                    }
+                </li>
+            }
+            <li>
+                @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+                    <label [class.required-label]="useStudyCard">Center equipment</label>
+                }
+                @if (!useStudyCard || (modality != "MR" && modality != "bruker")) {
+                    <label [class.required-label]="!useStudyCard">Select a center equipment</label>
+                }
+                <span class="right-col">
+                    @if ((modality == "MR" && !useStudyCard) || modality != "MR" || acquisitionEquipment) {
+                        <select-box
+                            [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
+                            [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
+                            [(ngModel)]="acquisitionEquipment"
+                            (userChange)="onContextChange()"
+                            [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id"
+                            [viewDisabled]="!acquisitionEquipment"
+                            (newClick)="openCreateAcqEqt()"
+                            [newHidden]="hasCompatibleEquipments"
+                            [options]="acquisitionEquipmentOptions"
+                            [pipe]="acqEqPipe"></select-box>
+                    }
+                </span>
+            </li>
+            @if (acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>The center equipment may not be not compatible with the imported data !</strong>
+                    <strong>selected : {{ acquisitionEquipment?.serialNumber }}</strong>
+                    @if (importedEquipmentDataStr) {
+                        <br />
+                        Your archive contains this data :
+                        <code>{{ importedEquipmentDataStr }}</code>
+                    }
+                    <br />
+                    If the center equipment you need is not in the above list, you can create a new center equipment
+                    from this data by clicking on the 'add' button.
+                </li>
+            }
+        </ol>
+        <ol>
+            <legend>
+                Subject
+                <tool-tip>
+                    It is the study subject for the current import process. He is the patient of the examination. The
+                    subject is anonymous.
+                </tool-tip>
+            </legend>
+            <li class="required">
+                <label class="required-label">Select a subject</label>
+                <span class="right-col">
+                    <select-box
+                        class="subject-select"
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
-                        (userChange)="onSelectSubject();"
-                        [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
-                        [optionArr]="subjects">
-                </select-box>
-                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
-                    <i class="fa-solid fa-user"></i>
-                    <i class="fa-solid fa-plus secondary"></i>
-                    New subject
-                </button>
-            </span>
-        </li>
-
-    </ol>
-
-
-    <ol>
-        <legend>
-            Examination
-            <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
-        </legend>
-        <li>
-            <label class="required-label">Select an examination</label>
-            <span class="right-col">
-                <select-box class="examination-select"
-                        [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
-                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
-                </select-box>
-                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
-                    <i class="fa-solid fa-stethoscope"></i>
-                    <i class="fa-solid fa-plus secondary"></i>
-                    New examination
-                </button>
-            </span>
-        </li>
-    </ol>
-</fieldset>
-<button *ngIf="!reloading" class="next alt right-icon" [disabled]="!valid" (click)="next()">Import now<i class="fa-solid fa-flag-checkered"></i></button>
+                        (userChange)="onSelectSubject()"
+                        [viewRoute]="'/subject/details/' + this.subject?.id"
+                        [viewDisabled]="!subject"
+                        [optionArr]="subjects"></select-box>
+                    <button
+                        class="new-subject"
+                        (click)="openCreateSubject()"
+                        [disabled]="!study || !acquisitionEquipment">
+                        <i class="fa-solid fa-user"></i>
+                        <i class="fa-solid fa-plus secondary"></i>
+                        New subject
+                    </button>
+                </span>
+            </li>
+        </ol>
+        <ol>
+            <legend>
+                Examination
+                <tool-tip>
+                    A MR examination defines when, where and by whom the data have been processed. The details on the
+                    MRI machine are associated to a subsequent entity: MR Dataset acquisition.
+                </tool-tip>
+            </legend>
+            <li>
+                <label class="required-label">Select an examination</label>
+                <span class="right-col">
+                    <select-box
+                        class="examination-select"
+                        [disabled]="!study || !subject || loading"
+                        [(ngModel)]="examination"
+                        (userChange)="onSelectExam()"
+                        [viewRoute]="'/examination/details/' + this.examination?.id"
+                        [viewDisabled]="!examination"
+                        [optionArr]="examinations"
+                        [pipe]="subjectExaminationLabelPipe"></select-box>
+                    <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <i class="fa-solid fa-plus secondary"></i>
+                        New examination
+                    </button>
+                </span>
+            </li>
+        </ol>
+    </fieldset>
+}
+@if (!reloading) {
+    <button class="next alt right-icon" [disabled]="!valid" (click)="next()">
+        Import now
+        <i class="fa-solid fa-flag-checkered"></i>
+    </button>
+}

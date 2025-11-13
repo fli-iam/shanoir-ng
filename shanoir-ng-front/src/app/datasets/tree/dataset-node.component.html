@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
         [tags]="node.tags"
@@ -29,31 +29,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="loadProcessings()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-          <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-        <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
-        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
-    </dropdown-menu>
-
-    <metadata-node
-            *ngIf="node.open && node.inPacs"
-            [input]="node.metadata">
-    </metadata-node>
-
-    <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
-        <processing-node
-                node
-                *ngFor="let processing of node.processings; let i = index"
-                [input]="processing"
-                (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox"
-                (processingDelete)="onProcessingDelete(i)"
-                [withMenu]="withMenu"
-        >
-        </processing-node>
-
-    </ng-container>
-</node>
+        @if (menuOpened && withMenu) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    @if (!related) {
+                        <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                    }
+                </a>
+                <menu-item
+                    [disabled]="loading"
+                    label="Download"
+                    awesome="fas fa-download"
+                    (click)="download()"></menu-item>
+                @if (node.canDelete) {
+                    <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
+                }
+            </dropdown-menu>
+        }
+        @if (node.open && node.inPacs) {
+            <metadata-node [input]="node.metadata"></metadata-node>
+        }
+        @if (node.open && node.processings && node.processings != $any("UNLOADED")) {
+            @for (processing of node.processings; track processing; let i = $index) {
+                <processing-node
+                    node
+                    [input]="processing"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox"
+                    (processingDelete)="onProcessingDelete(i)"
+                    [withMenu]="withMenu"></processing-node>
+            }
+        }
+    </node>
+}

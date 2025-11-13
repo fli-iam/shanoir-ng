@@ -13,178 +13,252 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			>
-				<button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-            </form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone">Details on dataset acquisition</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone">Edit dataset acquisition</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone">Create dataset acquisition</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-					<li *ngIf="mode != 'create'">
-						<label>Id</label>
-						<span class="right-col">
-							{{datasetAcquisition.id}}
-						</span>
-					</li>
-					<li>
-						<label>Type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.type}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="type" [optionArr]="['Mr', 'Pet', 'Ct']">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Study</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
-									{{datasetAcquisition.examination?.study?.name}}
-								</a>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-                        <label>Examination</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <ng-template [ngSwitchCase]="'view'">
-                                <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate | localDateFormatPipe}}
-                                </a>
-                            </ng-template>
-                        </span>
-                    </li>
-					<li>
-						<label>Study card</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
-									{{datasetAcquisition.studyCard?.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyCard" [optionArr]="studyCards">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-                    <li>
-                        <label>Import date</label>
-                        <span class="right-col" *ngIf="mode == 'view'">
-                                {{datasetAcquisition.importDate}}
-                        </span>
-                    </li>
-                    <li>
-                        <label>Imported by user</label>
-                        <span class="right-col" *ngIf="mode == 'view'">
-                                {{datasetAcquisition.username}}
-                        </span>
-                    </li>
-					<li>
-						<label>Center equipment</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a *ngIf="datasetAcquisition.acquisitionEquipment?.id" [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">
-									{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Rank</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.rank}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="rank" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Acquisition start time</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.acquisitionStartTime | localDateFormatPipe : true}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="acquisitionStartTime" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Software release</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.softwareRelease}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="softwareRelease" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Sorting index</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.sortingIndex}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="sortingIndex" />
-							</ng-template>
-						</span>
-					</li>
-                    <li *ngIf="mode != 'create' && datasetAcquisition.copies?.length > 0">
-                        <label>This acquisition has been copied :</label>
-                        <span class="right-col">
-                            <div *ngFor="let entityId of datasetAcquisition.copies">
-                                <a [routerLink]="['/dataset-acquisition/details/', entityId]"> [ {{ entityId }} ] </a>
-                            </div>
-                        </span>
-                    </li>
-                    <li *ngIf="mode != 'create' && datasetAcquisition.source != null">
-                        <label>This acquisition is the copy of :</label>
-                        <span class="right-col">
-                            <a [routerLink]="['/dataset-acquisition/details/', datasetAcquisition.source]"> [ {{ datasetAcquisition.source }} ] </a>
-                        </span>
-                    </li>
-				</ol>
-			</fieldset>
-
-			<ng-container *ngIf="datasetAcquisition.protocol">
-				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" formControlName="protocol"></mr-protocol>
-				<ct-protocol *ngIf="datasetAcquisition.type == 'Ct'" formControlName="protocol"></ct-protocol>
-				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" formControlName="protocol"></pet-protocol>
-				<xa-protocol *ngIf="datasetAcquisition.type == 'Xa'" formControlName="protocol"></xa-protocol>
-			</ng-container>
-
-			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-		</div>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (edit)="goToEdit()"
+                    (delete)="delete()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()">
+                    @if (mode == "view" && hasDownloadRight && !noDatasets) {
+                        <button
+                            class="right-icon dl-button"
+                            type="button"
+                            (click)="downloadAll()"
+                            [disabled]="downloadState?.isActive()">
+                            Download
+                            <i class="fas fa-download"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone">Details on dataset acquisition</h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone">Edit dataset acquisition</h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone">Create dataset acquisition</h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    <ol>
+                        @if (mode != "create") {
+                            <li>
+                                <label>Id</label>
+                                <span class="right-col">
+                                    {{ datasetAcquisition.id }}
+                                </span>
+                            </li>
+                        }
+                        <li>
+                            <label>Type</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ datasetAcquisition.type }}
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="type"
+                                            [optionArr]="['Mr', 'Pet', 'Ct']"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Study</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a
+                                            [routerLink]="[
+                                                '/study/details/',
+                                                datasetAcquisition.examination?.study?.id,
+                                            ]">
+                                            {{ datasetAcquisition.examination?.study?.name }}
+                                        </a>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Examination</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
+                                            {{
+                                                datasetAcquisition?.examination?.comment
+                                                    ? datasetAcquisition?.examination?.comment
+                                                    : (datasetAcquisition?.examination?.examinationDate
+                                                      | localDateFormatPipe)
+                                            }}
+                                        </a>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Study card</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
+                                            {{ datasetAcquisition.studyCard?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box formControlName="studyCard" [optionArr]="studyCards"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Import date</label>
+                            @if (mode == "view") {
+                                <span class="right-col">
+                                    {{ datasetAcquisition.importDate }}
+                                </span>
+                            }
+                        </li>
+                        <li>
+                            <label>Imported by user</label>
+                            @if (mode == "view") {
+                                <span class="right-col">
+                                    {{ datasetAcquisition.username }}
+                                </span>
+                            }
+                        </li>
+                        <li>
+                            <label>Center equipment</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @if (datasetAcquisition.acquisitionEquipment?.id) {
+                                            <a
+                                                [routerLink]="[
+                                                    '/acquisition-equipment/details/',
+                                                    datasetAcquisition.acquisitionEquipment.id,
+                                                ]">
+                                                {{ datasetAcquisition.acquisitionEquipment | acqEqptLabel }}
+                                            </a>
+                                        }
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="acquisitionEquipment"
+                                            [optionArr]="acquisitionEquipments"
+                                            [pipe]="acqEqPipe"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Rank</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ datasetAcquisition.rank }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="rank" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Acquisition start time</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ datasetAcquisition.acquisitionStartTime | localDateFormatPipe: true }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="acquisitionStartTime" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Software release</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ datasetAcquisition.softwareRelease }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="softwareRelease" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Sorting index</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ datasetAcquisition.sortingIndex }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="sortingIndex" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        @if (mode != "create" && datasetAcquisition.copies?.length > 0) {
+                            <li>
+                                <label>This acquisition has been copied :</label>
+                                <span class="right-col">
+                                    @for (entityId of datasetAcquisition.copies; track entityId) {
+                                        <div>
+                                            <a [routerLink]="['/dataset-acquisition/details/', entityId]">
+                                                [ {{ entityId }} ]
+                                            </a>
+                                        </div>
+                                    }
+                                </span>
+                            </li>
+                        }
+                        @if (mode != "create" && datasetAcquisition.source != null) {
+                            <li>
+                                <label>This acquisition is the copy of :</label>
+                                <span class="right-col">
+                                    <a [routerLink]="['/dataset-acquisition/details/', datasetAcquisition.source]">
+                                        [ {{ datasetAcquisition.source }} ]
+                                    </a>
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+                @if (datasetAcquisition.protocol) {
+                    @if (datasetAcquisition.type == "Mr") {
+                        <mr-protocol formControlName="protocol"></mr-protocol>
+                    }
+                    @if (datasetAcquisition.type == "Ct") {
+                        <ct-protocol formControlName="protocol"></ct-protocol>
+                    }
+                    @if (datasetAcquisition.type == "Pet") {
+                        <pet-protocol formControlName="protocol"></pet-protocol>
+                    }
+                    @if (datasetAcquisition.type == "Xa") {
+                        <xa-protocol formControlName="protocol"></xa-protocol>
+                    }
+                }
+                @if (downloadState.status > 1) {
+                    <progress-bar
+                        [progress]="downloadState?.progress"
+                        [text]="'Preparing download'"
+                        [unknownDownload]="true"></progress-bar>
+                }
+            </div>
+        </form>
+    }
 </div>

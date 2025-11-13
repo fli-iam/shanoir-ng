@@ -16,14 +16,14 @@
 import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList, AfterViewInit } from '@angular/core';
 
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
     animations: [menuSlideRight],
-    imports: [NgIf]
+    imports: []
 })
 
 export class MenuItemComponent implements AfterViewInit {

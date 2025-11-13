@@ -16,7 +16,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 
 import { slideDown } from '../../shared/animations/animations';
 import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
@@ -31,7 +31,7 @@ import { NgIf } from '@angular/common';
             multi: true,
         }
     ],
-    imports: [ToggleSwitchComponent, FormsModule, NgIf]
+    imports: [ToggleSwitchComponent, FormsModule]
 })
 
 export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChanges {

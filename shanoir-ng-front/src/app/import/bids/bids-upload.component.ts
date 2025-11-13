@@ -26,7 +26,7 @@ import { ImportService } from '../shared/import.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { FormsModule } from '@angular/forms';
 import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
-import { NgIf } from '@angular/common';
+
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -35,7 +35,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
     animations: [slideDown],
-    imports: [TooltipComponent, SelectBoxComponent, FormsModule, UploaderComponent, NgIf]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, UploaderComponent]
 })
 export class BidsUploadComponent {
 

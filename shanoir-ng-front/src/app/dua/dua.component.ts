@@ -18,14 +18,14 @@ import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
 
 import { DataUserAgreement } from './shared/dua.model';
-import { NgIf, NgFor } from '@angular/common';
+
 import { DUASigningComponent } from './dua-signing/dua-signing.component';
 
 @Component({
     selector: 'dua',
     templateUrl: 'dua.component.html',
     styleUrls: ['dua.component.css'],
-    imports: [NgIf, NgFor, DUASigningComponent]
+    imports: [DUASigningComponent]
 })
 
 export class DUAComponent {

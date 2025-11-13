@@ -26,14 +26,14 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
 import { Dataset } from '../../shared/dataset.model';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, RouterLink, NgSwitch, NgSwitchCase, NgSwitchDefault, DatepickerComponent, NgFor, SelectBoxComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, RouterLink, DatepickerComponent, SelectBoxComponent, LocalDateFormatPipe]
 })
 export class CommonDatasetComponent implements OnChanges {
 

@@ -22,7 +22,7 @@ import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
 import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({
@@ -30,7 +30,7 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
     animations: [slideDown],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ReferenceFormComponent extends EntityComponent<Reference>{
 

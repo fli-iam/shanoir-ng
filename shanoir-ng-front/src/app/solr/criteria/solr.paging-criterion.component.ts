@@ -20,7 +20,7 @@ import { slideDown, slideRight } from '../../shared/animations/animations';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 
@@ -36,7 +36,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [NgIf, NgFor, FormsModule, NgTemplateOutlet, CheckboxComponent]
+    imports: [FormsModule, NgTemplateOutlet, CheckboxComponent]
 })
 
 export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {

@@ -13,88 +13,154 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="RefFormComponent content-component">
-    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<form-footer
-				[state]="footerState"
-				(save)="save()"
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <form-footer
+                [state]="footerState"
+                (save)="save()"
                 (delete)="delete()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-		</form-footer>
-		<table class="layout">
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'"> 
-						<div class="header command-zone" i18n="View reference|Title">View Reference</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'"> 
-						<div class="header command-zone" i18n="Edit reference|Title">Edit Reference</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'"> 
-						<div class="header command-zone" i18n="Create reference|Title">Add Reference</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<li class="required">
-							<label i18n="Edit reference|Category label">Category</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{reference?.category}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<span *ngIf="!isEditableCategory">{{reference?.category}}</span>
-									<input [hidden]="!(isFreeCategory && isEditableCategory)" type="text" id="category" formControlName="category"/>
-									<select [hidden]="!(!isFreeCategory && isEditableCategory)" id="category" formControlName="category" (change)="onChangeCategory()">
-										<option *ngFor="let category of categories" [ngValue]="category">{{category}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin() && !isFreeCategory && isEditableCategory" i18n="Edit reference|Create new category" (click)="switchToCreate('category')">
-										<i class="fas fa-plus-square"></i>
-										new category
-									</button>
-									<label *ngIf="hasError('category', ['required'])" [@slideDown]="hasError('category', ['required'])" class="form-validation-alert" i18n="Edit refCategory|Category required error@@referenceDetailCategoryRequiredError">Category is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit reference|Type label">Type</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{reference?.reftype}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<span *ngIf="!isEditableRefType">{{reference?.reftype}}</span>
-									<input *ngIf="isFreeRefType && isEditableRefType" type="text" id="reftype" formControlName="reftype"/>
-									<select *ngIf="!isFreeRefType  && isEditableRefType" id="reftype" formControlName="reftype">
-										<option *ngFor="let reftype of reftypes" [ngValue]="reftype">{{reftype}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin() && !isFreeRefType && isEditableRefType" i18n="Edit reference|Create new reftype" (click)="switchToCreate('reftype')">
-										<i class="fas fa-plus-square"></i>
-										new type
-									</button>
-									<label *ngIf="hasError('reftype', ['required'])"  class="form-validation-alert" i18n="Edit reftype|TypeRequiredError label">RefType is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit reference|Value label">Value</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{reference?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="value" formControlName="value"/>
-									<label *ngIf="hasError('value', ['required'])" class="form-validation-alert" i18n="Edit reference|ValueRequiredError label">Value is required!</label>
-								</ng-template>
-							</span>
-							</li>
-					</ol>
-					</fieldset>
-				</td>
-			</tr>
-		</table>
-    </form>
+                (edit)="goToEdit()"
+                (back)="goBack()"></form-footer>
+            <table class="layout">
+                <tr>
+                    <td colspan="2">
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <div class="header command-zone" i18n="View reference|Title">View Reference</div>
+                                }
+                                @case ("edit") {
+                                    <div class="header command-zone" i18n="Edit reference|Title">Edit Reference</div>
+                                }
+                                @case ("create") {
+                                    <div class="header command-zone" i18n="Create reference|Title">Add Reference</div>
+                                }
+                            }
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <ol>
+                                <li class="required">
+                                    <label i18n="Edit reference|Category label">Category</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ reference?.category }}
+                                            }
+                                            @default {
+                                                @if (!isEditableCategory) {
+                                                    <span>{{ reference?.category }}</span>
+                                                }
+                                                <input
+                                                    [hidden]="!(isFreeCategory && isEditableCategory)"
+                                                    type="text"
+                                                    id="category"
+                                                    formControlName="category" />
+                                                <select
+                                                    [hidden]="!(!isFreeCategory && isEditableCategory)"
+                                                    id="category"
+                                                    formControlName="category"
+                                                    (change)="onChangeCategory()">
+                                                    @for (category of categories; track category) {
+                                                        <option [ngValue]="category">{{ category }}</option>
+                                                    }
+                                                </select>
+                                                @if (
+                                                    keycloakService.isUserAdmin() &&
+                                                    !isFreeCategory &&
+                                                    isEditableCategory
+                                                ) {
+                                                    <button
+                                                        i18n="Edit reference|Create new category"
+                                                        (click)="switchToCreate('category')">
+                                                        <i class="fas fa-plus-square"></i>
+                                                        new category
+                                                    </button>
+                                                }
+                                                @if (hasError("category", ["required"])) {
+                                                    <label
+                                                        [@slideDown]="hasError('category', ['required'])"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit refCategory|Category required
+                                                            error@@referenceDetailCategoryRequiredError">
+                                                        Category is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit reference|Type label">Type</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ reference?.reftype }}
+                                            }
+                                            @default {
+                                                @if (!isEditableRefType) {
+                                                    <span>{{ reference?.reftype }}</span>
+                                                }
+                                                @if (isFreeRefType && isEditableRefType) {
+                                                    <input type="text" id="reftype" formControlName="reftype" />
+                                                }
+                                                @if (!isFreeRefType && isEditableRefType) {
+                                                    <select id="reftype" formControlName="reftype">
+                                                        @for (reftype of reftypes; track reftype) {
+                                                            <option [ngValue]="reftype">{{ reftype }}</option>
+                                                        }
+                                                    </select>
+                                                }
+                                                @if (
+                                                    keycloakService.isUserAdmin() && !isFreeRefType && isEditableRefType
+                                                ) {
+                                                    <button
+                                                        i18n="Edit reference|Create new reftype"
+                                                        (click)="switchToCreate('reftype')">
+                                                        <i class="fas fa-plus-square"></i>
+                                                        new type
+                                                    </button>
+                                                }
+                                                @if (hasError("reftype", ["required"])) {
+                                                    <label
+                                                        class="form-validation-alert"
+                                                        i18n="Edit reftype|TypeRequiredError label">
+                                                        RefType is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li class="required">
+                                    <label i18n="Edit reference|Value label">Value</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ reference?.value }}
+                                            }
+                                            @default {
+                                                <input type="text" id="value" formControlName="value" />
+                                                @if (hasError("value", ["required"])) {
+                                                    <label
+                                                        class="form-validation-alert"
+                                                        i18n="Edit reference|ValueRequiredError label">
+                                                        Value is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    }
 </div>

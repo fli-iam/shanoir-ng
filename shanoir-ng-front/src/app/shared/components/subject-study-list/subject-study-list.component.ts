@@ -29,7 +29,7 @@ import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '../table/column.definition.type';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { TooltipComponent } from '../tooltip/tooltip.component';
-import { NgIf, LowerCasePipe } from '@angular/common';
+import { LowerCasePipe } from '@angular/common';
 
 
 @Component({
@@ -43,7 +43,7 @@ import { NgIf, LowerCasePipe } from '@angular/common';
             multi: true
         }
     ],
-    imports: [TooltipComponent, NgIf, SelectBoxComponent, FormsModule, TableComponent, LowerCasePipe]
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent, LowerCasePipe]
 })
 
 export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {

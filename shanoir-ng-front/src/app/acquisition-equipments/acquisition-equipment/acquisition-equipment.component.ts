@@ -30,7 +30,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
@@ -39,7 +39,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
 @Component({
     selector: 'acquisition-equipment-detail',
     templateUrl: 'acquisition-equipment.component.html',
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, HelpMessageComponent, RouterLink, NgSwitchDefault, SelectBoxComponent, TooltipComponent, ManufacturerModelPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, RouterLink, SelectBoxComponent, TooltipComponent, ManufacturerModelPipe]
 })
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {

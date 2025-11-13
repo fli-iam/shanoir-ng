@@ -27,7 +27,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 
@@ -35,7 +35,7 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'coil',
     templateUrl: 'coil.component.html',
     styleUrls: ['coil.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, RouterLink, ManufacturerModelPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, ManufacturerModelPipe]
 })
 export class CoilComponent extends EntityComponent<Coil> {
 

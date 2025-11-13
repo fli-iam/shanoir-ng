@@ -23,14 +23,14 @@ import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds } from '../mass-download.service';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
     styleUrls: ['download-setup-alt.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
 export class DownloadSetupAltComponent implements OnInit, OnDestroy {

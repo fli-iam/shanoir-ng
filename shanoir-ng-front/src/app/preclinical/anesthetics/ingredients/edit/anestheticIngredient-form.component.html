@@ -12,73 +12,150 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="toggleForm" #formContainer class="AnestheticIngredientFormComponent content-component">
-	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<table class="layout">
-			<tr><td colspan="2">
-				<div class="header command-zone" *ngIf="createAIMode" i18n="Create anestheticingredient|Title">Add ingredient</div>
-				<div class="header command-zone" *ngIf="!createAIMode" i18n="Edit anestheticingredient|Title">Edit ingredient</div>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<li class="required">
-							<label i18n="Edit anestheticingredient|Name label">Name</label>  
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{ingredient?.name?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="name" formControlName="name">
-										<option *ngFor="let name of names" [ngValue]="name">{{name.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new ingredient name" (click)="goToRefPage('anesthetic','ingredient')">
-										<i class="fas fa-plus-square"></i>
-										new ingredient name
-									</button>
-								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit anestheticIngredient|NameRequiredError label">Name is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit anestheticingredient|Concentration label">Concentration</label> 
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{ingredient?.concentration}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="number" min="0" id="concentration" formControlName="concentration"/>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit anestheticingredient|ConcentrationUnit label">Concentration Unit</label> 
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{ingredient?.concentrationUnit?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="concentrationUnit" required formControlName="concentrationUnit">
-										<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new concentration unit" (click)="goToRefPage('unit','concentration')">
-										<i class="fas fa-plus-square"></i>
-										new concentration unit
-									</button>
-								</ng-template>
-							</span>
-						</li>
-					</ol>
-					</fieldset>
-				</td>				
-			</tr>
-		</table>
-		<div class="footer command-zone">
-			<button type="button" i18n="Edit anestheticingredient|CancelButton label" class="Button right-icon" (click)="cancelIngredient()">Cancel<i class="fas fa-angle-left"></i></button>
-			<button type="button" *ngIf="canUpdateIngredient()" (click)="updateIngredient()" i18n="Edit anestheticingredient|SaveButton label" class="Button right-icon" [disabled]="!form.valid">Update<i class="far fa-save"></i></button>
-			<button type="button" *ngIf="canAddIngredient()" i18n="Edit anestheticingredient|CreateButton label" (click)="addIngredient()" class="Button right-icon" [disabled]="!form.valid">Save<i class="far fa-save"></i></button>
-			
-		</div>
-    </form>
-</div>
+@if (toggleForm) {
+    <div #formContainer class="AnestheticIngredientFormComponent content-component">
+        @if (form) {
+            <form [formGroup]="form" class="max-content" novalidate>
+                <table class="layout">
+                    <tr>
+                        <td colspan="2">
+                            @if (createAIMode) {
+                                <div class="header command-zone" i18n="Create anestheticingredient|Title">
+                                    Add ingredient
+                                </div>
+                            }
+                            @if (!createAIMode) {
+                                <div class="header command-zone" i18n="Edit anestheticingredient|Title">
+                                    Edit ingredient
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <fieldset>
+                                <ol>
+                                    <li class="required">
+                                        <label i18n="Edit anestheticingredient|Name label">Name</label>
+                                        <span class="right-col">
+                                            @switch (mode) {
+                                                @case ("view") {
+                                                    {{ ingredient?.name?.value }}
+                                                }
+                                                @default {
+                                                    <select id="name" formControlName="name">
+                                                        @for (name of names; track name) {
+                                                            <option [ngValue]="name">{{ name.value }}</option>
+                                                        }
+                                                    </select>
+                                                    @if (keycloakService.isUserAdmin()) {
+                                                        <button
+                                                            i18n="Edit anestheticingredient|Add a new ingredient name"
+                                                            (click)="goToRefPage('anesthetic', 'ingredient')">
+                                                            <i class="fas fa-plus-square"></i>
+                                                            new ingredient name
+                                                        </button>
+                                                    }
+                                                    @if (hasError("name", ["required"])) {
+                                                        <label
+                                                            class="form-validation-alert"
+                                                            i18n="Edit anestheticIngredient|NameRequiredError label">
+                                                            Name is required!
+                                                        </label>
+                                                    }
+                                                }
+                                            }
+                                        </span>
+                                    </li>
+                                    <li class="required">
+                                        <label i18n="Edit anestheticingredient|Concentration label">
+                                            Concentration
+                                        </label>
+                                        <span class="right-col">
+                                            @switch (mode) {
+                                                @case ("view") {
+                                                    {{ ingredient?.concentration }}
+                                                }
+                                                @default {
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        id="concentration"
+                                                        formControlName="concentration" />
+                                                }
+                                            }
+                                        </span>
+                                    </li>
+                                    <li class="required">
+                                        <label i18n="Edit anestheticingredient|ConcentrationUnit label">
+                                            Concentration Unit
+                                        </label>
+                                        <span class="right-col">
+                                            @switch (mode) {
+                                                @case ("view") {
+                                                    {{ ingredient?.concentrationUnit?.value }}
+                                                }
+                                                @default {
+                                                    <select
+                                                        id="concentrationUnit"
+                                                        required
+                                                        formControlName="concentrationUnit">
+                                                        @for (unit of units; track unit) {
+                                                            <option [ngValue]="unit">{{ unit.value }}</option>
+                                                        }
+                                                    </select>
+                                                    @if (keycloakService.isUserAdmin()) {
+                                                        <button
+                                                            i18n="
+                                                                Edit anestheticingredient|Add a new concentration unit
+                                                            "
+                                                            (click)="goToRefPage('unit', 'concentration')">
+                                                            <i class="fas fa-plus-square"></i>
+                                                            new concentration unit
+                                                        </button>
+                                                    }
+                                                }
+                                            }
+                                        </span>
+                                    </li>
+                                </ol>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+                <div class="footer command-zone">
+                    <button
+                        type="button"
+                        i18n="Edit anestheticingredient|CancelButton label"
+                        class="Button right-icon"
+                        (click)="cancelIngredient()">
+                        Cancel
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    @if (canUpdateIngredient()) {
+                        <button
+                            type="button"
+                            (click)="updateIngredient()"
+                            i18n="Edit anestheticingredient|SaveButton label"
+                            class="Button right-icon"
+                            [disabled]="!form.valid">
+                            Update
+                            <i class="far fa-save"></i>
+                        </button>
+                    }
+                    @if (canAddIngredient()) {
+                        <button
+                            type="button"
+                            i18n="Edit anestheticingredient|CreateButton label"
+                            (click)="addIngredient()"
+                            class="Button right-icon"
+                            [disabled]="!form.valid">
+                            Save
+                            <i class="far fa-save"></i>
+                        </button>
+                    }
+                </div>
+            </form>
+        }
+    </div>
+}

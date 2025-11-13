@@ -13,226 +13,335 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
-		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()"
-				(dismiss)="goToView()"
-			></form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
-				</ng-template>
-			</span>
-
-		<fieldset>
-			<ol>
-				<li>
-					<label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							<a [routerLink]="['/study/details/', examination.study?.id]">
-								{{examination.study?.name}}
-							</a>
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="examination.hasStudyCenterData">
-								<ng-template [ngSwitchCase]="true">
-									{{examination.study?.name}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="false">
-									<select id="study" formControlName="study" [compareWith]="compareEntities">
-										<option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
-									</select>
-									<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
-								</ng-template>
-							</div>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							<a [routerLink]="['/preclinical-subject/details/', animalSubjectId]">
-								{{examination.subject?.name}}
-							</a>
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="examination.hasStudyCenterData">
-								<ng-template [ngSwitchCase]="true">
-									{{examination.subject?.name}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="false">
-									<select-box formControlName="subject" [optionArr]="subjects">
-									</select-box>
-									<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
-								</ng-template>
-							</div>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							<a [routerLink]="['/center/details/', examination.center?.id]">
-								{{examination.center?.name}}
-							</a>
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="examination.hasStudyCenterData">
-								<ng-template [ngSwitchCase]="true">
-									{{examination.center?.name}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="false">
-									<select id="center" formControlName="center" [compareWith]="compareEntities">
-										<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
-									</select>
-									<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
-								</ng-template>
-							</div>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{examination.examinationExecutive?.name}}
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{examination.examinationDate | localDateFormatPipe}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<datepicker formControlName="examinationDate" required></datepicker>
-							<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
-							<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{examination.comment}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="comment" formControlName="comment"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{examination.note}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="note" formControlName="note"/>
-						</ng-template>
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight ({{getUnit(examination.weightUnitOfMeasure?.toString())}})</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{examination.subjectWeight}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="text" id="subjectWeight" formControlName="subjectWeight"/>
-						</ng-template>
-
-                        <span class="right-col" *ngIf="mode != 'view'">
-                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
-                            <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <div class="layout" [ngClass]="{ left: mode == 'view' }">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (edit)="goToEdit()"
+                    (back)="goBack()"
+                    (dismiss)="goToView()"></form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View examination|Title@@examinationDetailViewTitle">
+                                Details on examination
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit examination|Title@@examinationDetailEditTitle">
+                                Edit examination
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2
+                                class="header command-zone"
+                                i18n="Create examination|Title@@examinationDetailCreateTitle">
+                                Create examination
+                            </h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label i18n="Examination detail|Research study label@@examinationDetailStudy">
+                                Research study
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/study/details/', examination.study?.id]">
+                                            {{ examination.study?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <div>
+                                            @switch (examination.hasStudyCenterData) {
+                                                @case (true) {
+                                                    {{ examination.study?.name }}
+                                                }
+                                                @case (false) {
+                                                    <select
+                                                        id="study"
+                                                        formControlName="study"
+                                                        [compareWith]="compareEntities">
+                                                        @for (study of studies; track study) {
+                                                            <option [ngValue]="study">{{ study.name }}</option>
+                                                        }
+                                                    </select>
+                                                    @if (hasError("study", ["required"])) {
+                                                        <label
+                                                            class="form-validation-alert"
+                                                            i18n="
+                                                                Examination detail|Study required
+                                                                error@@examinationDetailStudyRequiredError">
+                                                            Study is required!
+                                                        </label>
+                                                    }
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                }
                             </span>
-
-					</span>
-				</li>
-				<li>
-					<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							<!--{{examination.note}}-->
-						</ng-template>
-						<!-- <ng-template ngSwitchDefault>
-							<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-							disabled>
-								<i class="fas fa-plus-square"></i>
-								new Instrument Based Assessment
-							</button>
-						</ng-template> -->
-					</span>
-				</li>
-                    <li *ngIf="mode == 'create' || mode=='edit'">
-                        <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                            <ul>
-                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
-                                </li>
-                            </ul>
-                        </span>
-                    </li>
-			</ol>
-		</fieldset>
-
-		<examination-anesthetic-form
-			[id]="examination.id"
-			[mode]="mode"
-			(examAnestheticChange)="onExamAnestheticChange($event)"
-			[embedded]="true">
-		</examination-anesthetic-form>
-
-		<!--
-			<contrast-agent-form
-			[protocol_id]="protocol_id"
-			[agent]="contrastAgent"
-			[newAgentForm]="newExamForm.controls.newAgentForm"
-			[mode]="mode"
-			[canModify]="canModify"
-			(agentChange)="onAgentChange($event)">
-		</contrast-agent-form>
--->
-
-		<physiological-data-upload-form
-			(physioDataReady)="onUploadPhysiologicalData($event)"
-			[mode]="mode"
-			[canModify]="true"
-			[examinationId]="examination.id"
-			[embedded]="true">
-		</physiological-data-upload-form>
-
-		<bloodgas-data-upload-form
-			(bloodGasDataReady)="onUploadBloodGasData($event)"
-			[mode]="mode"
-			[canModify]="true"
-			[examinationId]="examination.id"
-			[embedded]="true">
-		</bloodgas-data-upload-form>
-
-		<fieldset *ngIf="examination && mode=='view'">
-			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-			<examination-node
-					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : {examination: examination, parentNode: null}"
-					(nodeInit)="onExaminationNodeInit($event)"></examination-node>
-		</fieldset>
-	</div>
-</form>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/preclinical-subject/details/', animalSubjectId]">
+                                            {{ examination.subject?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <div>
+                                            @if (examination.hasStudyCenterData) {
+                                                {{ examination.subject?.name }}
+                                            } @else {
+                                                <select-box
+                                                    formControlName="subject"
+                                                    [optionArr]="subjects"></select-box>
+                                                @if (hasError("subject", ["required"])) {
+                                                    <label
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Examination detail|Subject required
+                                                            error@@examinationDetailSubjectRequiredError">
+                                                        Subject is required!
+                                                    </label>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/center/details/', examination.center?.id]">
+                                            {{ examination.center?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <div>
+                                            @if (examination.hasStudyCenterData) {
+                                                {{ examination.center?.name }}
+                                            } @else {
+                                                <select
+                                                    id="center"
+                                                    formControlName="center"
+                                                    [compareWith]="compareEntities">
+                                                    @for (center of centers; track center) {
+                                                        <option [ngValue]="center">{{ center.name }}</option>
+                                                    }
+                                                </select>
+                                                @if (hasError("center", ["required"])) {
+                                                    <label
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Examination detail|Center required
+                                                            error@@examinationDetailCenterRequiredError">
+                                                        Center is required!
+                                                    </label>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label
+                                i18n="
+                                    Examination detail|Examination executive
+                                    label@@examinationDetailExaminationExecutive">
+                                Examination executive
+                            </label>
+                            <span class="right-col">
+                                @if (mode == "view") {
+                                    {{ examination.examinationExecutive?.name }}
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">
+                                Examination date
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ examination.examinationDate | localDateFormatPipe }}
+                                    }
+                                    @default {
+                                        <datepicker formControlName="examinationDate" required></datepicker>
+                                        @if (hasError("examinationDate", ["format"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Date valid error@@dateValidError">
+                                                Date should be valid ! Date format: {{ dateDisplay }}
+                                            </label>
+                                        }
+                                        @if (hasError("examinationDate", ["required"])) {
+                                            <label
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Subject detail|BirthDate required
+                                                    error@@subjectDetailBirthDateRequiredError">
+                                                Required
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ examination.comment }}
+                                    }
+                                    @default {
+                                        <input type="text" id="comment" formControlName="comment" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ examination.note }}
+                                    }
+                                    @default {
+                                        <input type="text" id="note" formControlName="note" />
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">
+                                Subject weight ({{ getUnit(examination.weightUnitOfMeasure?.toString()) }})
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ examination.subjectWeight }}
+                                    }
+                                    @default {
+                                        <input type="text" id="subjectWeight" formControlName="subjectWeight" />
+                                    }
+                                }
+                                @if (mode != "view") {
+                                    <span class="right-col">
+                                        <input
+                                            id="{{ unit.KG }}"
+                                            type="radio"
+                                            formControlName="weightUnitOfMeasure"
+                                            name="weightUnitOfMeasure"
+                                            value="{{ unit.KG }}" />
+                                        {{ getUnit(unit.KG.toString()) }}
+                                        <input
+                                            id="{{ unit.G }}"
+                                            type="radio"
+                                            formControlName="weightUnitOfMeasure"
+                                            name="weightUnitOfMeasure"
+                                            value="{{ unit.G }}" />
+                                        {{ getUnit(unit.G.toString()) }}
+                                    </span>
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="Examination detail|Assessments label@@examinationDetailAssessments">
+                                Assessments
+                            </label>
+                            <!-- <span class="right-col" [ngSwitch]="mode">
+            <ng-template [ngSwitchCase]="'view'">
+              {{examination.note}}
+            </ng-template>
+            <ng-template ngSwitchDefault>
+              <button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
+                disabled>
+                <i class="fas fa-plus-square"></i>
+                new Instrument Based Assessment
+              </button>
+            </ng-template>
+          </span> -->
+                        </li>
+                        @if (mode == "create" || mode == "edit") {
+                            <li>
+                                <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">
+                                    Attach new files
+                                </label>
+                                <span class="right-col">
+                                    <input #input hidden type="file" (change)="attachNewFile($event)" />
+                                    <button (click)="setFile()" class="left-icon">
+                                        <i class="fas fa-upload"></i>
+                                        Choose file
+                                    </button>
+                                    <ul>
+                                        @for (file of examination.extraDataFilePathList; track file) {
+                                            <li>
+                                                {{ getFileName(file) }}
+                                                <button (click)="deleteFile(file)">
+                                                    <i class="fa-regular fa-trash-can"></i>
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+                <examination-anesthetic-form
+                    [id]="examination.id"
+                    [mode]="mode"
+                    (examAnestheticChange)="onExamAnestheticChange($event)"
+                    [embedded]="true"></examination-anesthetic-form>
+                <!--
+  <contrast-agent-form
+    [protocol_id]="protocol_id"
+    [agent]="contrastAgent"
+    [newAgentForm]="newExamForm.controls.newAgentForm"
+    [mode]="mode"
+    [canModify]="canModify"
+    (agentChange)="onAgentChange($event)">
+  </contrast-agent-form>
+  -->
+                <physiological-data-upload-form
+                    (physioDataReady)="onUploadPhysiologicalData($event)"
+                    [mode]="mode"
+                    [canModify]="true"
+                    [examinationId]="examination.id"
+                    [embedded]="true"></physiological-data-upload-form>
+                <bloodgas-data-upload-form
+                    (bloodGasDataReady)="onUploadBloodGasData($event)"
+                    [mode]="mode"
+                    [canModify]="true"
+                    [examinationId]="examination.id"
+                    [embedded]="true"></bloodgas-data-upload-form>
+                @if (examination && mode == "view") {
+                    <fieldset>
+                        <legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
+                        <examination-node
+                            [input]="
+                                breadcrumbsService.currentStep.data.examinationNode
+                                    ? breadcrumbsService.currentStep.data.examinationNode
+                                    : { examination: examination, parentNode: null }
+                            "
+                            (nodeInit)="onExaminationNodeInit($event)"></examination-node>
+                    </fieldset>
+                }
+            </div>
+        </form>
+    }
 </div>

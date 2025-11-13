@@ -17,13 +17,13 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, Reactive
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../shared/dataset.service';
-import { NgIf } from '@angular/common';
+
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'download-statistics',
     templateUrl: 'download-statistics.component.html',
-    imports: [FormsModule, ReactiveFormsModule, NgIf, TooltipComponent]
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class DownloadStatisticsComponent{

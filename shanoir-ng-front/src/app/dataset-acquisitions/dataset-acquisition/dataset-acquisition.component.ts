@@ -32,7 +32,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgFor } from '@angular/common';
+
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { MrProtocolComponent } from '../modality/mr/mr-protocol.component';
@@ -46,7 +46,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, FormFooterComponent, NgSwitch, NgSwitchCase, NgSwitchDefault, SelectBoxComponent, RouterLink, NgFor, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
