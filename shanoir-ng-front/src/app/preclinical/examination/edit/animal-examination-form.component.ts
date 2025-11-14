@@ -37,7 +37,6 @@ import { IdName } from '../../../shared/models/id-name.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
-import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -54,7 +53,6 @@ import {Subject} from "../../../subjects/shared/subject.model";
     styleUrls: ['animal-examination.component.css'],
     standalone: false
 })
-@ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
@@ -109,18 +107,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return Selection.fromExamination(this.examination);
     }
 
-    init() {
-        super.init();
-        if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.entity = res);
-        }
-    }
-
     initView(): Promise<void> {
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.updateExam();
+        if (!this.examination.subject) {
+            this.examination.subject = new Subject();
+        }
         //this.loadExaminationAnesthetic();
         if(this.examination && this.examination.subject && this.examination.subject.id ){
             this.animalSubjectService
@@ -137,7 +130,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        this.updateExam();
+        if (!this.examination.subject) {
+            this.examination.subject = new Subject();
+        }
         //this.loadExaminationAnesthetic(this.id);
         if(this.examination && this.examination.subject && this.examination.subject.id){
             this.animalSubjectService
@@ -158,8 +153,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     buildForm(): UntypedFormGroup {
         const numericRegex = /-?\d*\.?\d{1,2}/;
-
-        return this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
@@ -169,10 +163,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
-    }
-
-    private updateExam(): void{
-        this.examination.subject = new Subject();
+        this.subscriptions.push(
+            form.get('study').valueChanges.subscribe(() => {
+                this.getSubjects();
+            })
+        );
+        return form;
     }
 
     private getCenters(): void {
@@ -224,29 +220,29 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         });
     }
 
-    manageExaminationAnesthetic(examination_id : number) {
+    manageExaminationAnesthetic(examinationId : number) {
         if (this.examAnesthetic) {
-            this.examAnesthetic.examination_id = examination_id;
-            if (this.examAnesthetic  && this.examAnesthetic.internal_id) {
-                this.examAnestheticService.updateAnesthetic(examination_id, this.examAnesthetic);
-            } else if (this.examAnesthetic.anesthetic ){
-                this.examAnestheticService.createAnesthetic(examination_id, this.examAnesthetic);
+            this.examAnesthetic.examinationId = examinationId;
+            if (this.examAnesthetic  && this.examAnesthetic.internalId) {
+                this.examAnestheticService.updateAnesthetic(examinationId, this.examAnesthetic);
+            } else if (this.examAnesthetic.anesthetic ) {
+                this.examAnestheticService.createAnesthetic(examinationId, this.examAnesthetic);
             }
         }
     }
 
-    addExtraDataToExamination(examination_id: number, isUpdate: boolean) {
-        if (!examination_id) { return; }
+    addExtraDataToExamination(examinationId: number, isUpdate: boolean) {
+        if (!examinationId) { return; }
         //Set the upload URL model
         if (this.physioData) {
-            this.physioData.examination_id = examination_id;
+            this.physioData.examinationId = examinationId;
             //Create physio data
             if (isUpdate && this.examinationPhysioData && this.examinationPhysioData.id){
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.examinationPhysioData.id, this.physioData)
-                .subscribe(physioData => {
+                .then(physioData => {
                 	if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.subscribe(() => {
+                    	.then(() => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -258,7 +254,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
-                    	.subscribe(() => {
+                    	.then(() => {
                     		this.examinationExtradatas.push(physioData);
                     	});
                     }
@@ -268,14 +264,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             }
         }
         if (this.bloodGasData) {
-            this.bloodGasData.examination_id = examination_id;
+            this.bloodGasData.examinationId = examinationId;
             //Create blood gas data
              if (isUpdate && this.examinationBloodGasData && this.examinationBloodGasData.id){
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.examinationBloodGasData.id, this.bloodGasData)
-                	.subscribe(bloodGasData => {
+                	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.subscribe(() => {
+                    		.then(() => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }
@@ -286,7 +282,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
-                    		.subscribe(() => {
+                    		.then(() => {
                     			this.examinationExtradatas.push(bloodGasData);
                     		});
                     }

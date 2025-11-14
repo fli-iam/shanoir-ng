@@ -21,7 +21,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
 import { slideDown } from '../../../shared/animations/animations';
-import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 
 @Component({
@@ -31,7 +30,6 @@ import { EntityComponent } from '../../../shared/components/entity/entity.compon
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class ReferenceFormComponent extends EntityComponent<Reference>{
 
     categories: string[];

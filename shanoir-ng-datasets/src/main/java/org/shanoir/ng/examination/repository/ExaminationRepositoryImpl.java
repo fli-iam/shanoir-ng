@@ -1,8 +1,7 @@
 package org.shanoir.ng.examination.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -14,7 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
@@ -24,11 +25,9 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
 	}
@@ -36,7 +35,6 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, null, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
 	}
@@ -44,21 +42,19 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdInAndSubjectName(Iterable<Pair<Long, Long>> studyCenterIds,
 																			Iterable<Long> studyIds, String subjectName, Pageable pageable) {
-
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, subjectName, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
+
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdInAndSearch(Iterable<Pair<Long, Long>> studyCenterIds,
 																			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical, String searchStr, String searchField) {
-
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, searchStr, searchField);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
 
 	@Override
 	public List<Examination> findAllByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, null, null, null, null, null);
 		return pair.getFirst();
 	}

@@ -27,25 +27,29 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * One ImportJob is related to the import of ONE DICOM STUDY,
-* which equals ONE EXAM in Shanoir. We are doing this, as one
-* DICOM study can have a size of up to 10Gb nowadays. This means
-* we process already a huge amount of data for one import, that
-* can take up to 30-45 minutes. There is no sense in extending this
-* further for the future to anything like multi-exam in one import,
-* so the model has to be kept:
-* 1 ImportJob (1 DICOM study/exam) - 1 subject relation
-*                                  - 1 exam relation
-* IF in an ImportJob contains a subject object, it means to create one
-* in ms studies during the import.
-* If it contains a subjectName, an existing subject is to use.
-* Same logic for the exams.
-* 
-* @todo: later we will remove the patients list from here, that is a
-* legacy error, that has to be corrected, e.g. move the subject out into
-* import job as written above.
-* 
-* @author mkain
-*/
+ * which equals ONE EXAM in Shanoir. We are doing this, as one
+ * DICOM study can have a size of up to 10Gb nowadays. This means
+ * we process already a huge amount of data for one import, that
+ * can take up to 30-45 minutes. There is no sense in extending this
+ * further for the future to anything like multi-exam in one import,
+ * so the model has to be kept:
+ * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
+ *                                  - 1 exam relation
+ * IF in an ImportJob contains a subject object, it means to create one
+ * in ms studies during the import.
+ * If it contains a subjectName, an existing subject is to use.
+ * Same logic for the exams.
+ * 
+ * Therefore one ImportJob contains as well the DICOM StudyInstanceUID
+ * of the DICOM study (== examination in Shanoir). This is required to
+ * use the same UID in MS Import (pseudo) and in MS Datasets (exam).
+ * 
+ * @todo: later we will remove the patients list from here, that is a
+ * legacy error, that has to be corrected, e.g. move the subject out into
+ * import job as written above.
+ * 
+ * @author mkain
+ */
 public class ImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
@@ -120,6 +124,8 @@ public class ImportJob implements Serializable {
 
 	// Used by ShanoirUploader to store the upload percentage
 	private String uploadPercentage;
+
+	private String studyInstanceUID;
 
 	public long getTimestamp() {
 		return timestamp;
@@ -388,7 +394,7 @@ public class ImportJob implements Serializable {
 					Serie serie = study.getSeries().get(0);
 					modality = serie.getModality();
 					enhanced = serie.getIsEnhanced();
-					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
+					for (Iterator<Serie> iterator = series.iterator(); iterator.hasNext();) {
 						serie = (Serie) iterator.next();
 						if (iterator.hasNext()) {
 							seriesNames.append(serie.getSequenceName() + ",");
@@ -401,7 +407,7 @@ public class ImportJob implements Serializable {
 		}
 		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
 				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
+				",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID=" + studyInstanceUID + ",numberOfSeries=" + numberOfSeries +
 				",seriesNames=" + seriesNames.toString();
 	}
 
@@ -412,5 +418,13 @@ public class ImportJob implements Serializable {
 		}
 		return null;
 	}	
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
 
 }

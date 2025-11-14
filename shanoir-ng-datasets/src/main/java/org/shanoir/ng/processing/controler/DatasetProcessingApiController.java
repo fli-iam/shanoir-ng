@@ -198,7 +198,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 						new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
 			}
 		}
-		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
+		processingDownloaderService.massiveDownload(processingList, resultOnly, null, response, false, null);
 	}
 
 	@Override

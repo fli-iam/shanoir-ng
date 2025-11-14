@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.DicomProcessing;
@@ -55,6 +56,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import ch.qos.logback.core.util.StringUtil;
 
 @Service
 @Scope("prototype")
@@ -98,7 +101,8 @@ public class ImporterService {
 
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
-        instancesCreated++;
+        LOG.info("New server-instance created of ImporterService.");
+        instancesCreated = instancesCreated + 1;
     }
 
     public static int getInstancesCreated(){
@@ -106,7 +110,7 @@ public class ImporterService {
     }
 
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-        LOG.info("createAllDatasetAcquisition: " + this + " instances: " + getInstancesCreated());
+        LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
@@ -129,11 +133,11 @@ public class ImporterService {
                 if (!importJob.isFromShanoirUploader()) {
                     qualityResult = qualityService.checkQuality(examData, importJob, null);
                 } else {
-                    LOG.info("Importing Data from ShanoirUploader.");
+                    LOG.info("Importing data from ShanoirUploader.");
                     // We retrieve quality card result from ShUp import job
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
-                        LOG.info("Retrieving Quality Control result from ShanoirUploader.");
+                        LOG.info("Retrieving quality control result from ShanoirUploader.");
                         if(subject != null) {
                             subject.setQualityTag(qualityResult.get(0).getTagSet());
                             qualityResult.addUpdatedSubject(subject);
@@ -244,6 +248,8 @@ public class ImporterService {
                     } catch (PacsException e) {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
+
+                    manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
                     
                     // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
                     DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
@@ -267,6 +273,42 @@ public class ImporterService {
             }
         }
         return generatedAcquisitions;
+    }
+
+    /**
+     * This method has been added for retro-compatibility and
+     * can be removed in the future. Old versions of ShUp will
+     * not use the new generated StudyInstanceUID during the
+     * creation of the exam, they will pseudonymize and produce
+     * a new random StudyInstanceUID. This code corrects this gap
+     * that all data are all in line. Old version of ShUp will not
+     * send a StudyInstanceUID in their ImportJob.
+     * 
+     * @param examination
+     * @param importJob
+     * @param dicomAttributes
+     * @throws ShanoirException
+     */
+    private void manageStudyInstanceUIDs(Examination examination, ImportJob importJob,
+            AcquisitionAttributes<String> dicomAttributes) throws ShanoirException {
+        String studyInstanceUIDDICOM = dicomAttributes.getFirstDatasetAttributes().getString(Tag.StudyInstanceUID);
+        String studyInstanceUIDExamination = examination.getStudyInstanceUID();
+        // Only transmitted by new version of ShUp:
+        String studyInstanceUIDImportJob = importJob.getStudyInstanceUID();
+        if (StringUtil.isNullOrEmpty(studyInstanceUIDImportJob)) { // Handle old versions of ShUp: nothing in ImportJob
+            if (StringUtil.isNullOrEmpty(studyInstanceUIDExamination)
+                    || !examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)) {
+                LOG.info("Old version of ShUp used: updating StudyInstanceUID of examination from {} to {}", examination.getStudyInstanceUID(), studyInstanceUIDDICOM);
+                examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUIDDICOM);
+            } // do nothing as all in line
+        } else { // New version of ShUp, sending in ImportJob
+            if (examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)
+                    && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob)) {
+                // do nothing as all in line
+            } else {
+                throw new ShanoirException("Error with StudyInstanceUIDs.");
+            }
+        }
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
@@ -316,7 +358,7 @@ public class ImporterService {
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, "", rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());

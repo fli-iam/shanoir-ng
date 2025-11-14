@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name" [(ngModel)]="pathology.name"/>
+									<input type="text" id="name" formControlName="name"/>
 									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit pathology|Name required error@@pathologyDetailNameRequiredError">Name is required!</label>
 								</ng-template>
 							</span>

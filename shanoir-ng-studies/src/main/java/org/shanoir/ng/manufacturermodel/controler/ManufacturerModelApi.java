@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -56,7 +56,7 @@ public interface ManufacturerModelApi {
 	@GetMapping(value = "/names", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findManufacturerModelsNames();
-	
+
 	@Operation(summary = "", description = "Returns id and name of all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),
@@ -67,7 +67,7 @@ public interface ManufacturerModelApi {
 	@GetMapping(value = "/centerManuModelsNames/{centerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
-	
+
 	@Operation(summary = "", description = "Returns all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),
@@ -107,4 +107,16 @@ public interface ManufacturerModelApi {
 			@Parameter(description = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId,
 			@Parameter(description = "manufacturer model to update", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
+
+	@Operation(summary = "", description = "Deletes a manufacturer model")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer model deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "manufacturer model not found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@DeleteMapping(value = "/{manufacturerModelId}", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<Void> deleteManufacturerModel(
+			@Parameter(description = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId)
+			throws RestServiceException;
 }
