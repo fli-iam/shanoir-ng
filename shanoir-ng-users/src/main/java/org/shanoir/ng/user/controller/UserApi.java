@@ -95,7 +95,6 @@ public interface UserApi {
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
 	ResponseEntity<List<User>> findUsers();
 
