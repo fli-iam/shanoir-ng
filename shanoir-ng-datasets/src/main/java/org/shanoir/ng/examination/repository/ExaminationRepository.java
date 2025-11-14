@@ -139,7 +139,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 			""")
   	List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
-
 	@EntityGraph(attributePaths = {"datasetAcquisitions"})
 	@Query("SELECT e FROM Examination e WHERE e.id = :id")
 	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);

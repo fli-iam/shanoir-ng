@@ -55,7 +55,6 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
-
     @Autowired
     private DatasetAcquisitionRepository repository;
 
@@ -84,6 +83,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
+
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -109,6 +109,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {

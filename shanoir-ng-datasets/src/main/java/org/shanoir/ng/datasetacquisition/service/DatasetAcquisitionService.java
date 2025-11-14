@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -50,6 +51,10 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
 	List<DatasetAcquisition> findByExamination(Long examinationId);
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
+			String seriesInstanceUID);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")

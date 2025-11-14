@@ -96,8 +96,6 @@ public class DicomImporterService {
 
     private static final String CENTER_CREATION_ERROR = "An error occured during the center creation, please check your rights.";
 
-    private static final String UNKNOWN = "unknown";
-
     private static final String DOUBLE_EQUAL = "==";
 
     private static final String SEMI_COLON = ";";
@@ -307,14 +305,13 @@ public class DicomImporterService {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
         Serie serieDICOM = new Serie(attributes);
-        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examination.getId());
-        if (acquisitions != null) {
-            Optional<DatasetAcquisition> existingAcquisition = acquisitions.stream()
-                    .filter(a -> a.getSeriesInstanceUID().equals(serieDICOM.getSeriesInstanceUID()))
-                    .findFirst();
-            if (existingAcquisition.isPresent()) {
-                return existingAcquisition.get();
-            }
+        Optional<DatasetAcquisition> existingAcquisition = 
+                acquisitionService.findByExaminationAndSeriesInstanceUIDWithDatasets(
+                    examination.getId(), 
+                    serieDICOM.getSeriesInstanceUID()
+                );
+        if (existingAcquisition.isPresent()) {
+            return existingAcquisition.get();
         }
         int rank = 0;
         if (serieDICOM.getSeriesNumber() > 0) {
