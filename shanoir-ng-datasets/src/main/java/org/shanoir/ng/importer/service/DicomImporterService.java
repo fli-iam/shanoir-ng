@@ -182,11 +182,11 @@ public class DicomImporterService {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
         }
-        Subject subject = manageSubject(attributes, study);
-        Center center = manageCenterAndEquipment(attributes, study);
-        Examination examination = manageExamination(attributes, study, subject, center);
+        Long subjectId = manageSubject(attributes, study);
+        Long centerId = manageCenterAndEquipment(attributes, study);
+        Examination examination = manageExamination(attributes, study, subjectId, centerId);
         DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
-        Dataset dataset = manageDataset(attributes, subject, acquisition);
+        Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
         DatasetExpression expression = manageDatasetExpression(attributes, dataset);
         datasetExpressionRepository.save(expression);
         solrService.indexDataset(dataset.getId());
@@ -194,7 +194,7 @@ public class DicomImporterService {
         return true;
     }
 
-    private Dataset manageDataset(Attributes attributes, Subject subject, DatasetAcquisition acquisition)
+    private Dataset manageDataset(Attributes attributes, Long studyId, Long subjectId, DatasetAcquisition acquisition)
             throws Exception {
         int datasetIndex = -1; // Used for single-dataset acquisitions
         Dataset currentDataset = null;
@@ -225,11 +225,11 @@ public class DicomImporterService {
             echoTimes.add(echoTime);
             dataset.setEchoTimes(echoTimes);
             currentDataset = acquisitionContext.generateFlatDataset(
-                    serieDICOM, dataset, datasetIndex, subject.getId(),
+                    serieDICOM, dataset, datasetIndex, subjectId,
                     attributes);
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
-            currentDataset.setStudyId(subject.getStudy().getId());
+            currentDataset.setStudyId(studyId);
             currentDataset = datasetService.create(currentDataset);
         }
         return currentDataset;
@@ -346,13 +346,13 @@ public class DicomImporterService {
      * @throws AmqpException 
      * @throws JsonProcessingException 
      */
-    private Center manageCenterAndEquipment(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
+    private Long manageCenterAndEquipment(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
         InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
-        Center center = findOrCreateOrAddCenter(institutionDicom, study.getId());
+        Long centerId = findOrCreateOrAddCenter(institutionDicom, study.getId());
         String manufacturer = attributes.getString(Tag.Manufacturer);
         String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
         String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-        return center;
+        return centerId;
     }
 
     /**
@@ -369,7 +369,7 @@ public class DicomImporterService {
      * @throws AmqpException
      * @throws RestServiceException
      */
-    private Center findOrCreateOrAddCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+    private Long findOrCreateOrAddCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
         Optional<StudyCenter> studyCenterOpt = null;
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
@@ -389,39 +389,41 @@ public class DicomImporterService {
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
             }
             LOG.info("Center created or added to study with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
-            return centerRepository.findById(centerId).orElseThrow();
+            return centerId;
         } else {
-            return studyCenterOpt.get().getCenter();
+            return studyCenterOpt.get().getCenter().getId();
         }
     }
 
-    private Examination manageExamination(Attributes attributes, Study study, Subject subject, Center center) {
+    private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
         Examination examination = null;
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
-        List<Examination> examinations = examinationService.findBySubjectIdStudyId(subject.getId(), study.getId());
+        List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
         Optional<Examination> existingExamination = examinations.stream()
                 .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
                 .findFirst();
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
         } else {
+            Subject subject = subjectService.findById(subjectId).orElseThrow();
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
             examination.setExaminationDate(studyDICOM.getStudyDate());
             examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
             examination.setComment(studyDICOM.getStudyDescription());
-            examination.setCenterId(center.getId());
+            examination.setCenterId(centerId);
             examination = examinationService.save(examination);
         } // Avoid, that the examination creation makes RabbitMQ calls
         return examination;
     }
 
-    private Subject manageSubject(Attributes attributes, Study study)
+    private Long manageSubject(Attributes attributes, Study study)
             throws JsonProcessingException, RestServiceException {
         String subjectName = attributes.getString(Tag.PatientName);
         Subject subject = subjectService.findByNameAndStudyId(subjectName, study.getId());
-        if (subject == null) { // Communicate with MS Studies here, only if not existing
+        if (subject == null) {
+            // Communicate with MS Studies here, only if subject not existing
             org.shanoir.ng.importer.dto.Subject subjectDTO = new org.shanoir.ng.importer.dto.Subject();
             subjectDTO.setName(subjectName);
             subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
@@ -433,9 +435,10 @@ public class DicomImporterService {
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
             LOG.info("Subject created with ID: {}, Name: {}", subjectId, subjectName);
-            subject = subjectService.findById(subjectId).orElseThrow();
+            return subjectId;
+        } else {
+            return subject.getId();
         }
-        return subject;
     }
 
     /**
