@@ -246,7 +246,7 @@ public class CenterServiceImpl implements CenterService {
 				try {
 					updateStudyCenter(studyCenter);
 				} catch (MicroServiceCommunicationException e) {
-					LOG.error("Could not send the center name change to the other microservices !", e);
+					LOG.error("Could not send the study center change to the other microservices !", e);
 				}
 			}
 			return center;
@@ -255,7 +255,7 @@ public class CenterServiceImpl implements CenterService {
 
 	private boolean updateStudyCenter(StudyCenter studyCenter) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_CENTER_QUEUE,
+			rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_CENTER_QUEUE,
 					objectMapper.writeValueAsString(studyCenter));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {

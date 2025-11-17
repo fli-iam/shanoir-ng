@@ -238,6 +238,11 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public void receiveStudyCenterUpdate(final String studyCenterStr) throws JsonMappingException, JsonProcessingException {
 		StudyCenter studyCenter = objectMapper.readValue(studyCenterStr, StudyCenter.class);
+		saveStudyCenter(studyCenter);
+	}
+
+	@Transactional
+	private void saveStudyCenter(StudyCenter studyCenter) {
 		studyCenterRepository.save(studyCenter);
 	}
 	
