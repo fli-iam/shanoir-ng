@@ -8,10 +8,11 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -147,9 +148,11 @@ public class StudyInstanceUIDHandler {
 			if (examination != null) {
 				studyInstanceUID = findStudyInstanceUID(examination);
 				if (studyInstanceUID != null) {
-					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
-					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
-					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
+					String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
+					if (existing == null) {
+						LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
+						LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
+					}
 				}
 			}
 		}
@@ -164,12 +167,14 @@ public class StudyInstanceUIDHandler {
 	 * @param examination
 	 * @return
 	 */
-	private String findStudyInstanceUID(Examination examination) {
+	public String findStudyInstanceUID(Examination examination) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
 					|| acquisition instanceof CtDatasetAcquisition
-					|| acquisition instanceof PetDatasetAcquisition) {
+					|| acquisition instanceof PetDatasetAcquisition
+					|| acquisition instanceof XaDatasetAcquisition
+					|| acquisition instanceof GenericDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				if (!datasets.isEmpty()) {
 					Dataset dataset = datasets.get(0);

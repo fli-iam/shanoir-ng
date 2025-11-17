@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import {Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Subscription } from 'rxjs';
-import { OnDestroy } from '@angular/core';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Center } from '../../centers/shared/center.model';
@@ -29,8 +30,9 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyLight } from 'src/app/studies/shared/study.dto';
+import {CenterService} from "../../centers/shared/center.service";
+import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisition-equipment.model";
+import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -53,10 +55,14 @@ export class DicomUploadComponent implements OnDestroy {
     studyCard: StudyCard;
     center: Center;
     modality: string;
-    studyOptions: Option<StudyLight>[] = [];
+    studyOptions: Option<Study>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
     otherErrorMessage: string;
     uploadState: TaskState = new TaskState();
+    useStudyCard: boolean = true;
+    public centerOptions: Option<Center>[] = [];
+    public acquisitionEquipment: AcquisitionEquipment;
+    public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
 
     constructor(
             private importService: ImportService,
@@ -64,7 +70,9 @@ export class DicomUploadComponent implements OnDestroy {
             private studyCardService: StudyCardService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            public centerService: CenterService,
+            public acqEqPipe: AcquisitionEquipmentPipe) {
 
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
@@ -73,9 +81,9 @@ export class DicomUploadComponent implements OnDestroy {
             breadcrumbsService.currentStep.importMode = 'DICOM';
         });
 
-        this.studyService.getStudiesLight().then(allStudies => {
-            for (let study of allStudies) {
-                    let studyOption: Option<StudyLight> = new Option(study, study.name);
+        this.studyService.getAll().then(allStudies => {
+            for (const study of allStudies) {
+                    const studyOption: Option<Study> = new Option(study, study.name);
                     this.studyOptions.push(studyOption);
                 }
         });
@@ -97,7 +105,7 @@ export class DicomUploadComponent implements OnDestroy {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
         this.modality = null;
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         if (!this.multipleExamImport) {
             this.subscriptions.push(
@@ -109,7 +117,7 @@ export class DicomUploadComponent implements OnDestroy {
                     } else if (event.type === HttpEventType.UploadProgress) {
                         this.uploadState.progress = (event.loaded / (event.total + 0.05));
                     } else if (event instanceof HttpResponse) {
-                        let patientDicomList =  event.body;
+                        const patientDicomList =  event.body;
                         this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
                         this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
@@ -126,13 +134,12 @@ export class DicomUploadComponent implements OnDestroy {
             );
         } else {
             // Send to multiple
-            let job = new ImportJob();
-            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
+            const job = new ImportJob();
+            job.acquisitionEquipmentId = this.useStudyCard ? this.studyCard.acquisitionEquipment.id : this.acquisitionEquipment.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
-            job.studyCardId = this.studyCard.id;
-            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
-            job.centerId = this.studyCard.acquisitionEquipment.center.id;
+            job.studyCardId = this.useStudyCard ? this.studyCard?.id : 0;
+            job.centerId = this.useStudyCard ? this.studyCard.acquisitionEquipment.center.id : this.acquisitionEquipment.center.id;
             job.anonymisationProfileToUse = this.study.profile.profileName;
 
             this.subscriptions.push(
@@ -144,11 +151,6 @@ export class DicomUploadComponent implements OnDestroy {
                     } else if (event.type === HttpEventType.UploadProgress) {
                         this.uploadState.progress = (event.loaded / event.total);
                     } else if (event instanceof HttpResponse) {
-                        let patientDicomList =  event.body;
-                        this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
-                        if (this.modality) {
-                            this.importDataService.patientList = patientDicomList;
-                        }
                         this.setArchiveStatus('uploaded');
                     }
                 }, error => {
@@ -177,16 +179,67 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     onSelectStudy() {
-        this.studyCardService.getAllForStudy(this.study.id).then(studycards => {
-            if (!studycards) studycards = [];
-            this.studycardOptions = studycards.map(sc => {
-                let opt = new Option(sc, sc.name);
-                return opt;
+        this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
+        if (this.useStudyCard) {
+            this.studyCardService.getAllForStudy(this.study.id).then(studycards => {
+                if (!studycards) studycards = [];
+                this.studycardOptions = studycards.map(sc => {
+                    const opt = new Option(sc, sc.name);
+                    return opt;
+                });
             });
+        } else {
+            this.getCenterOptions(this.study).then(options => {
+                this.centerOptions = options;
+                return this.selectDefaultCenter(options);
+            });
+            this.getEquipmentOptions(this.center);
+        }
+    }
+
+    private getCenterOptions(study: Study): Promise<Option<Center>[]> {
+        if (study && study.id && study.studyCenterList) {
+            return this.centerService.getCentersByStudyId(study.id).then(centers => {
+                return centers.map(center => {
+                    const centerOption = new Option<Center>(center, center.name);
+                    return centerOption;
+                });
+            });
+        } else {
+            return Promise.resolve([]);
+        }
+    }
+
+    private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
+        const founded = options?.find(option => option.compatible)?.value;
+        if (founded) {
+            this.center = founded;
+            return this.onSelectCenter();
+        } else if (options?.length == 1) {
+            this.center = options[0].value;
+            return this.onSelectCenter();
+        }
+    }
+
+    public onSelectCenter(): Promise<any> {
+        this.acquisitionEquipment = null;
+        this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
+        return Promise.resolve();
+    }
+
+    private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
+        return center?.acquisitionEquipments?.map(acqEq => {
+            const option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+            option.compatible = this.acqEqCompatible();
+            return option;
         });
     }
 
-    onSelectStudyCard(){
+    acqEqCompatible(): boolean | undefined {
+        return undefined;
+    }
+
+    onSelectStudyCard() {
         this.center = this.studyCard.acquisitionEquipment.center;
     }
 
@@ -195,10 +248,17 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscription of this.subscriptions) {
+        for(const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }
 
-
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('study', this.study);
+            console.log('studyCard', this.studyCard);
+            console.log('acquisitionEquipment', this.acquisitionEquipment);
+            console.log('center', this.center);
+        }
+    }
 }

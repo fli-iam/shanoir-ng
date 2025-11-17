@@ -26,6 +26,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [(ngModel)]="node.selected"
         (chkbxChange)="selectedChange.emit()"
         [hasChildren]="hasChildren()"
+        (firstOpen)="loadProcessings()"
+        [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
@@ -36,15 +38,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
 
-    <node
+    <metadata-node
             *ngIf="node.open && node.inPacs"
-            [class.selected]="treeService.isSelected(node.id, 'dicomMetadata')"
-            (labelClick)="null"
-            [route]="'/dataset/details/dicom/' + node.id"
-            label="DICOM metadata"
-            awesome="fas fa-file-code"
-            [hasChildren]="false">
-    </node>
+            [input]="node.metadata">
+    </metadata-node>
 
     <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
         <processing-node
@@ -53,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [input]="processing"
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
-                (onProcessingDelete)="onProcessingDelete(i)"
+                (processingDelete)="onProcessingDelete(i)"
                 [withMenu]="withMenu"
         >
         </processing-node>

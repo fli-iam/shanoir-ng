@@ -43,7 +43,11 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -175,7 +179,9 @@ public class WADODownloaderService {
 	private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID ) {
 		String serieDescription = dataset.getUpdatedMetadata().getName();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-		String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+
+        dataset = dataset.getFirstRealInput();
+        String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 		String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
 		// Replace all forbidden characters.
 		name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
@@ -313,15 +319,13 @@ public class WADODownloaderService {
 		}
 		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
 		// remove this ?
-		datasets.forEach(
-			dataset -> {
-				try {
-					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
-				} catch (PacsException e) {
-					throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
-				}
+		datasets.forEach(dataset -> {
+			try {
+				dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
+			} catch (PacsException e) {
+				throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
 			}
-		);
+		});
 		LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
 		return dAcquisitionAttributes;
 	}

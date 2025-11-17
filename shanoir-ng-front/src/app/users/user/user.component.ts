@@ -16,7 +16,10 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -25,9 +28,7 @@ import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { StudyUser } from 'src/app/studies/shared/study-user.model';
-
+import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'user-detail',
@@ -43,6 +44,8 @@ export class UserComponent extends EntityComponent<User> {
     public acceptLoading: boolean = false;
     public studies = [];
     public studyToDelete = [];
+    protected showTreeByDefault: boolean = false;
+    public dateDisplay = dateDisplay;
 
     constructor(
             private route: ActivatedRoute,
@@ -89,8 +92,8 @@ export class UserComponent extends EntityComponent<User> {
         if (user.extensionRequestDemand && user.extensionRequestInfo) {
             user.expirationDate = user.extensionRequestInfo.extensionDate;
         }
-        let studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
-            let studyUserList: StudyUser[] = [];
+        const studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+            const studyUserList: StudyUser[] = [];
             this.studies = [];
             studies.forEach(s => {
                 s.studyUserList.forEach(su => {
@@ -102,7 +105,7 @@ export class UserComponent extends EntityComponent<User> {
             });
             user.studyUserList = studyUserList;
         });
-        let rolesPromise = this.getRoles().then(() => {
+        const rolesPromise = this.getRoles().then(() => {
             user.role = this.getRoleById(user.role.id);
         });
         return Promise.all([studyUsersPromise, rolesPromise]).then();
@@ -130,7 +133,7 @@ export class UserComponent extends EntityComponent<User> {
     deny(): void {
         this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
-            .then((user) => {
+            .then(() => {
                 this.consoleService.log('info', 'The request for user "' + this.user.username + '" has been denied !');
                 this.goBack();
                 this.denyLoading = false;
@@ -141,8 +144,8 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     buildForm(): UntypedFormGroup {
-        const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
-        let userForm = this.formBuilder.group({
+        const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        const userForm = this.formBuilder.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
@@ -161,7 +164,7 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     getRoleById(id: number): Role {
-        for (let role of this.roles) {
+        for (const role of this.roles) {
             if (id == role.id) {
                 return role;
             }
@@ -187,9 +190,9 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     save(): Promise<User> {
-        let a: Promise<any>[] = [];
+        const a: Promise<any>[] = [];
         a.push(super.save());
-        for (let item of this.studyToDelete) {
+        for (const item of this.studyToDelete) {
             a.push(this.studyService.deleteUserFromStudy(item.id, this.entity.id));
         }
         return Promise.all([a]).then(() => {

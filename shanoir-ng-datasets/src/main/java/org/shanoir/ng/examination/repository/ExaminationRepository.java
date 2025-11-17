@@ -14,15 +14,19 @@
 
 package org.shanoir.ng.examination.repository;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /**
  * Repository for examination.
@@ -30,6 +34,10 @@ import java.util.List;
  * @author ifakhfakh
  */
 public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
+
+	// faster than .count() as uses count(1) on database
+	@Query("SELECT COUNT(e) FROM Examination e")
+	long countExaminations();
 
 	/**
 	 * Get a list of examinations for a subject.
@@ -58,7 +66,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	List<Examination> findByIdGreaterThan(Long id);
+	List<Examination> findTop1000ByIdGreaterThanOrderByIdAsc(long examinationId);
 	
 	/**
 	 * Get a paginated list of examinations
@@ -120,4 +128,31 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
 	Page<Examination> findPageByComment(String comment, Pageable pageable);
+
+	@Query("""
+		SELECT DISTINCT 
+		ex.id                      AS id,
+		ex.study.id                AS studyId,
+		ex.centerId                AS centerId
+		FROM Examination ex
+		WHERE ex.id IN :ids
+			""")
+  	List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
+
+
+	@EntityGraph(attributePaths = {"datasetAcquisitions"})
+	@Query("SELECT e FROM Examination e WHERE e.id = :id")
+	Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
+
+	@Modifying
+	@Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
+	int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
+
+    /**
+     * Find examination by DICOM StudyInstanceUID
+     *
+     * @param studyInstanceUID the DICOM StudyInstanceUID
+     * @return the examination if found
+     */
+    Optional<Examination> findByStudyInstanceUID(String studyInstanceUID);
 }

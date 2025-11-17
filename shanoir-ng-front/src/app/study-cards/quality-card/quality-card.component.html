@@ -19,34 +19,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()">
 				<button *ngIf="mode != 'view'"
-						type="button" 
-						class="Button right-icon show-errors" 
+						type="button"
+						class="Button right-icon show-errors"
 						(click)="onShowErrors()"
 						[disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
 					Show all errors<i class="fas fa-bug"></i>
 				</button>
-				<button 
+				<button
 						*ngIf="mode == 'view' && isStudyAdmin"
 						type="button"
-						class="right-icon apply test" 
-						(click)="test()" 
-						[disabled]="applying || testing">
+						class="right-icon apply test"
+						(click)="test()"
+						[disabled]="true || applying || testing"
+                        title="Coming soon">
 					Test
                     <i *ngIf="!testing" class="fa-solid fa-play"></i>
-                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
+                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i>
                 </button>
-				<button 
+				<button
 						*ngIf="mode == 'view' && isStudyAdmin"
 						type="button"
-						class="alt right-icon apply" 
-						(click)="apply()" 
-						[disabled]="applying || testing">
+						class="alt right-icon apply"
+						(click)="apply()"
+						[disabled]="true || applying || testing"
+                        title="Coming soon">
 					Apply now
 					<i *ngIf="!applying" class="fa-solid fa-play"></i>
-                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
+                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i>
                 </button>
 				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
 					Download error report
@@ -73,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{qualityCard.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="name" [(ngModel)]="qualityCard.name" />
+								<input type="text" formControlName="name"/>
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength'])" class="form-validation-alert">Too short!</label>
 								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert">Name should be unique!</label>
@@ -89,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box [readOnly]="forceStudyId" formControlName="study" [(ngModel)]="qualityCard.study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
+								<select-box [readOnly]="forceStudyId" formControlName="study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
 						</span>
@@ -103,6 +105,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-container>
 							<ng-container *ngIf="mode != 'view'">
 								<checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+								<div class="info left-icon import-info" *ngIf="qualityCard.toCheckAtImport">
+									<i class="fa-solid fa-triangle-exclamation"></i>
+									Be aware that a rule with an <span class="tag"><i class="fa-solid fa-times-circle"></i>Error</span> tag
+									will block any import <b>that would match</b> this rule.
+								</div>
 							</ng-container>
 						</span>
 					</li>
@@ -118,8 +125,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="qualitycard"
 					formControlName="rules"
-					[(ngModel)]="qualityCard.rules" 
-					[mode]="selectMode ? 'select' : mode" 
+					[(ngModel)]="qualityCard.rules"
+					[mode]="selectMode ? 'select' : mode"
 					[allCoils]="allCoils"
 					[studyId]="qualityCard.study?.id"
 					[showErrors]="showRulesErrors"
@@ -133,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset class="report" *ngIf="report">
 				<legend>
-					Application Report 
+					Application Report
 					<span *ngIf="reportIsTest">(test)</span>
 				</legend>
 				<shanoir-table #table class="report"

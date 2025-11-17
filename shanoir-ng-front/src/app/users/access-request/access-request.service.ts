@@ -13,18 +13,20 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+
 import { IdName } from 'src/app/shared/models/id-name.model';
+import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { UserService } from '../shared/user.service';
+
 import { AccessRequest } from './access-request.model';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
-    getEntityInstance(entity?: AccessRequest): AccessRequest {
+    getEntityInstance(): AccessRequest {
         return new AccessRequest();
     }
 
@@ -36,11 +38,13 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         super(http);
     }
 
-    public inviteUser(mail: string, study: IdName): Promise<AccessRequest> {
+    public inviteUser(mail: string, func: string, study: IdName): Promise<AccessRequest> {
         const formData: FormData = new FormData();
         formData.set("email", mail);
         formData.set("studyId", "" + study.id);
         formData.set("studyName", study.name);
+        formData.set("issuer", KeycloakService.auth.authz.tokenParsed.name);
+        formData.set("role", func);
         return this.http.put(this.API_URL + "/invitation/", formData).toPromise()
             .then(response =>
             {
@@ -61,7 +65,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(const subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
     }

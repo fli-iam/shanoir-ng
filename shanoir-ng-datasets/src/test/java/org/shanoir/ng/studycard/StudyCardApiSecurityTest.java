@@ -14,14 +14,23 @@
 
 package org.shanoir.ng.studycard;
 
-import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -33,12 +42,16 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
+import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,11 +62,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.*;
-
-import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
+import jakarta.transaction.Transactional;
 
 /**
  * User security service test.
@@ -75,9 +84,6 @@ public class StudyCardApiSecurityTest {
 	@MockBean
 	private StudyCardService studyCardService;
 	
-//	@MockBean
-//	private StudyCardUniqueConstraintManager uniqueConstraintManager;
-	
 	@MockBean
 	private CardsProcessingService studyCardProcessingService;
 	
@@ -98,13 +104,18 @@ public class StudyCardApiSecurityTest {
 	
 	@MockBean
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
-//	@MockBean
-//	private WADODownloaderService downloader;
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
 	@BeforeEach
 	public void setup() {
-
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+		given(datasetAcquisitionRepository.findAllForRightsById(Utils.toList(1L))).willReturn(Utils.toList(new DatasetAcquisitionForRights(1L, 1L, 1L)));
 	}
 	
 	@Test
@@ -148,11 +159,19 @@ public class StudyCardApiSecurityTest {
 		StudyCardApply studycardApply = new StudyCardApply();
 		studycardApply.setDatasetAcquisitionIds(Utils.toList(1L));
 		studycardApply.setStudyCardId(1L);
+		StudyCard studyCard = new StudyCard();
+		studyCard.setId(1L);
+		given(studyCardService.findById(1L)).willReturn(studyCard);
 		
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		assertAccessDenied(api::applyStudyCard, studycardApply);
 		
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 		assertAccessAuthorized(api::applyStudyCard, studycardApply);
 	}
 

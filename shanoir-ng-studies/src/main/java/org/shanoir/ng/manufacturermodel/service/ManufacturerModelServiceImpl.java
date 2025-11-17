@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,34 +17,36 @@ package org.shanoir.ng.manufacturermodel.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.center.service.CenterServiceImpl;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.EntityLinkedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Manufacturer model service implementation.
- * 
+ *
  * @author msimon
  *
  */
 @Service
 public class ManufacturerModelServiceImpl implements ManufacturerModelService {
-	
+
 	@Autowired
 	private ManufacturerModelRepository manufacturerModelRepository;
 
@@ -84,10 +86,14 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 	}
 
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException  {
+	public void deleteById(final Long id) throws EntityNotFoundException, EntityLinkedException {
 		final Optional<ManufacturerModel> entity = manufacturerModelRepository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-		manufacturerModelRepository.deleteById(id);
+		try {
+			manufacturerModelRepository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new EntityLinkedException("Cannot delete entity with id = " + id + " because it is linked to other entities.", e);
+		}
 	}
 
 	@Override

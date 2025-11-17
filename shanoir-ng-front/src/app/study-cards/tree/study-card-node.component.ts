@@ -11,14 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
 
 import { CardNode } from '../../tree/tree.model';
-import { StudyCard } from '../shared/study-card.model';
-import { StudyCardService } from "../shared/study-card.service";
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { StudyCard } from '../shared/study-card.model';
+import { StudyCardService } from "../shared/study-card.service";
 
 
 @Component({
@@ -27,21 +29,18 @@ import { TreeService } from 'src/app/studies/study/tree.service';
     standalone: false
 })
 
-export class StudyCardNodeComponent implements OnChanges {
+export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> implements OnChanges {
 
     @Input() input: CardNode | StudyCard | QualityCard;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
-    node: CardNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
+    @Output() cardDelete: EventEmitter<void> = new EventEmitter();
     @Input() detailsPath: string;
-    @Input() withMenu: boolean = true;
 
     constructor(
-        private studycardService: StudyCardService,
-        private qualitycardService: QualityCardService,
-        protected treeService: TreeService) {
+            private studycardService: StudyCardService,
+            private qualitycardService: QualityCardService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -60,7 +59,7 @@ export class StudyCardNodeComponent implements OnChanges {
         service.get(this.node.id).then(entity => {
             service.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onCardDelete.emit();
+                    this.cardDelete.emit();
                 }
             });
         })

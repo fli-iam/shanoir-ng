@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -48,6 +49,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import org.shanoir.ng.study.rights.UserRights;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -80,12 +82,20 @@ public class ExaminationServiceSecurityTest {
 	
 	@MockBean
 	StudyRightsService rightsService;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	@BeforeEach
 	public void setup() {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
+		
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
 	}
 	
 	@Test

@@ -14,10 +14,14 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.dataset.service.ProcessedDatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -26,16 +30,12 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
-import org.shanoir.ng.vip.resource.ProcessingResourceService;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * center service implementation.
@@ -50,7 +50,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 	private DatasetProcessingRepository repository;
 
     @Autowired
-    private ProcessedDatasetService processedDatasetService;
+    private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
     ProcessingResourceService processingResourceService;
@@ -88,6 +88,11 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     public List<DatasetProcessing> findAllById(List<Long> idList) {
         return idList.stream().flatMap(it -> findById(it).stream()).toList();
     }
+
+    @Override
+    public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
+        return repository.findAllByInputDatasets_Id(datasetId);
+    }
     
     @Override
     public DatasetProcessing create(final DatasetProcessing entity) {
@@ -111,7 +116,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // delete associated ressources
-        processingResourceService.deleteByProcessingId(id);
+        processingResourceRepository.deleteByProcessingId(id);
 
         for (Dataset ds : entity.get().getOutputDatasets()) {
             datasetService.deleteById(ds.getId());
@@ -166,7 +171,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
             throw new RestServiceException(error);
         }
-        for(Dataset dataset : processing.getInputDatasets()){
+        for(Dataset dataset : processing.getInputDatasets()) {
             if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))){
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
                 throw new RestServiceException(error);

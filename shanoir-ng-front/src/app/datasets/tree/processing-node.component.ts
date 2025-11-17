@@ -11,13 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -26,21 +28,17 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
     standalone: false
 })
 
-export class ProcessingNodeComponent implements OnChanges {
+export class ProcessingNodeComponent extends TreeNodeAbstractComponent<ProcessingNode> implements OnChanges {
 
     @Input() input: ProcessingNode | DatasetProcessing;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: ProcessingNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
-    @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
-    @Input() withMenu: boolean = true;
+    @Output() processingDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
-        private router: Router,
-        private processingService: DatasetProcessingService,
-        protected treeService: TreeService) {
+            private router: Router,
+            private processingService: DatasetProcessingService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -50,6 +48,8 @@ export class ProcessingNodeComponent implements OnChanges {
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -75,9 +75,23 @@ export class ProcessingNodeComponent implements OnChanges {
         this.processingService.get(this.node.id).then(entity => {
             this.processingService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onProcessingDelete.emit();
+                    this.processingDelete.emit();
                 }
             });
         })
+    }
+
+    loadOutputDatasets() {
+        if (this.node.datasets == UNLOADED) {
+            this.loading = true;
+            this.processingService.getOutputDatasets(this.node.id).then(datasets => {
+                this.node.datasets = datasets.map(d => DatasetNode.fromDataset(d, true, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+                this.contentLoaded.resolve();
+            });
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 }

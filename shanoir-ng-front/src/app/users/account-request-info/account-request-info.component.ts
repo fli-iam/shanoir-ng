@@ -11,14 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
-import { Location } from '@angular/common';
+
 import { AccountRequestInfo } from './account-request-info.model';
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
 @Component ({
     selector: 'account-request-info',
@@ -38,21 +42,24 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
     form: UntypedFormGroup;
-    onChange = (_: any) => {};
-    onTouch = () => {};
+    onChange: (any) => void = () => { return; };
+    onTouch: () => void = () => { return; };
     public studyOptions:  Option<number>[];
     studyName: string;
-    presetStudyId: boolean
+    presetStudyId: boolean;
 
     constructor(private formBuilder: UntypedFormBuilder,
                 private studyService: StudyService,
                 private activatedRoute: ActivatedRoute,
                 private location: Location,
-                private confirmDialogService: ConfirmDialogService) {
+                private confirmDialogService: ConfirmDialogService,
+                private destroyRef: DestroyRef
+            ) { }
+
+    setDisabledState?(_isDisabled: boolean): void { 
+        return; 
     }
 
-    setDisabledState?(isDisabled: boolean): void {
-    }
     writeValue(obj: any): void {
         this.info = obj;
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
@@ -81,28 +88,43 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 } else {
                     this.studyOptions = [];
                     this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
-                    .then(result => this.location.back());
+                    .then(() => this.location.back());
                 }
             });
         }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
-            'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
-            'contact': [this.info.contact, [Validators.maxLength(200)]],
+            // 'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
+            // 'contact': [this.info.contact, [Validators.maxLength(200)]],
             'studyId': [this.info.studyId, [Validators.required]],
             'studyName': [this.info.studyName]
         });
-        this.form.valueChanges.subscribe(() => {
+        this.form.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
             this.valid.emit(this.form.valid);
         });
     }
 
     onInfoChange() {
+        const info: AccountRequestInfo = new AccountRequestInfo();
+        info.contact = this.form.value.contact;
+        info.function = this.form.value.function;
+        info.institution = this.form.value.institution;
+        info.studyId = this.form.value.studyId;
+        info.studyName = this.form.value.studyName;
+        this.info = info;
         this.onChange(this.info);
     }
 
-    onStudyIdChange(event) {
-        this.info.studyName = event.name;
+    onInstitutionChange(institution: string) {
+        this.info.institution = institution;
+        this.onInfoChange();
+    }
+
+    onStudyChange(option: Option<number>) {
+        this.info.studyName = option.label;
+        this.onInfoChange();
     }
 
     formErrors(field: string): any {
@@ -114,9 +136,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

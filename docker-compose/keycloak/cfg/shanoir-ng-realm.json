@@ -88,7 +88,7 @@
       },
       {
         "id": "a3899932-0518-41bc-9ccf-a5dbcb588916",
-        "name": "SERVICE",
+        "name": "ROLE_SERVICE",
         "composite": false,
         "clientRole": false,
         "containerId": "shanoir-ng",
@@ -1213,6 +1213,9 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "VIP_CLIENT_SECRET",
+      "defaultRoles": [
+        "ROLE_SERVICE"
+      ],
       "redirectUris": [
         "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],

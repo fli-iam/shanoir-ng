@@ -64,8 +64,8 @@ export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
 # creation of the admin account
-export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
-export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+export KC_BOOTSTRAP_ADMIN_USERNAME="$SHANOIR_KEYCLOAK_USER"
+export KC_BOOTSTRAP_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
@@ -79,7 +79,7 @@ auto|dev)
 	#       (the realm has to be reimported manually)
 	mkdir -p /opt/keycloak/data/import
 	cp /tmp/import/shanoir-ng-realm.json /opt/keycloak/data/import/
-	extra+=(start --optimized --import-realm)
+	extra+=(start --import-realm)
 	;;
 init)
 	# wipe out the shanoir-ng realm and recreate it
@@ -89,15 +89,7 @@ never)
 	# FIXME: should we provide a facade for these too
 	# TODO: ensure that the realm config is up-to-date
 	#-> add an optional data volume to store the config of the imported realm
-
-	# NOTE: we force using the optimized image because quarkus gets
-	#       confused by our plugin mtime being rounded (possibly somewhere
-	#       in the docker build)
-	# ex: (from "kc.sh show-config")
-	# 	kc.provider.file.shanoir-ng-keycloak-auth.jar.last-modified =  1721751809614
-	#   vs:
-	# 	kc.provider.file.shanoir-ng-keycloak-auth.jar.last-modified =  1721751809000
-	extra+=(start --optimized)
+	extra+=(start)
 	;;
 
 import)
@@ -124,9 +116,11 @@ import)
 export)
 	# Export the shanoir-ng realm
 	#
-	# The realm is exported as:
+	# The realm is exported using the 'different_files' strategy. The resulting files are:
 	#	/export/shanoir-ng-realm.json
 	#	/export/shanoir-ng-users-0.json
+	#	  :        :
+	#	/export/shanoir-ng-users-N.json
 	#
 	# Fails if the /export dir is not present or not empty
 
@@ -136,7 +130,7 @@ export)
 	elif [ -n "`ls -A "$EXPORT_DIR"`" ] ; then
 		error "export dir '$EXPORT_DIR' is not empty"
 	else
-		extra+=(export --realm shanoir-ng --dir "$EXPORT_DIR" --users same_file)
+		extra+=(export --realm shanoir-ng --dir "$EXPORT_DIR" --users different_files)
 	fi
 	;;
 esac

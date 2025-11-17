@@ -21,6 +21,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="toggleMenu()"
         [route]="node.route"
         [hasChildren]="hasChildren()"
+        (firstOpen)="loadOutputDatasets()"
+        [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
@@ -33,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let dataset of node.datasets; let i = index"
                 [input]="dataset"
-                (onSimpleDatasetDelete)="onSimpleDatasetDelete(i)"
+                (simpleDatasetDelete)="onSimpleDatasetDelete(i)"
                 [withMenu]="withMenu"
         >
         </simple-dataset-node>

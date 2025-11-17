@@ -14,14 +14,26 @@
 
 package org.shanoir.ng.dataset;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
+import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetAsyncService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -34,8 +46,11 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,13 +59,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * User security service test.
@@ -66,9 +74,12 @@ public class DatasetServiceSecurityTest {
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
 	private static final long ENTITY_ID = 1L;
-	
+
 	@Autowired
 	private DatasetService service;
+
+	@Autowired
+	private DatasetAsyncService asyncService;
 	
 	@MockBean
 	private DatasetRepository datasetRepository;
@@ -94,6 +105,19 @@ public class DatasetServiceSecurityTest {
 	@MockBean
 	private ShanoirEventService shanoirEventService;
 
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	StudyUser su1 = new StudyUser();
+	
+	@BeforeEach
+	public void setup() {
+		su1.setStudyId(1L);
+		su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+	}
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
@@ -102,7 +126,6 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
 		assertAccessDenied(service::create, mockDataset(null));
 		assertAccessDenied(service::update, mockDataset(1L));
@@ -137,7 +160,6 @@ public class DatasetServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::create, mockDataset(null));
 		assertAccessAuthorized(service::update, mockDataset(1L));
@@ -166,10 +188,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessDenied(service::findByAcquisition, 2L);
 		assertAccessDenied(service::findByAcquisition, 3L);
 		assertAccessDenied(service::findByAcquisition, 4L);
-
-		//findAll()
-		assertThat(service.findAll()).hasSize(1);
-		assertThat(service.findAll().get(0).getId()).isEqualTo(1L);
 		
 		//findByStudyId(Long)
 		assertAccessAuthorized(service::findByStudyId, 1L);
@@ -177,9 +195,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findByStudyId, 2L);
 		assertThat(service.findByStudyId(2L)).isNullOrEmpty();
 		assertAccessDenied(service::findByStudyId, 3L);
-		
-		//queryStatistics(String, String, String, String)
-		assertAccessDenied(service::queryStatistics,"", "", "", "");
 	}
 	
 	private void testFindPage() throws ShanoirException {
@@ -230,23 +245,30 @@ public class DatasetServiceSecurityTest {
 		//deleteDatasetFromPacs(Dataset)
 		//deleteByIdIn(List<Long>)
 		//deleteById(Long)
+
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
+			assertAccessDenied(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
+
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet());
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+
+			assertAccessDenied(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
+
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessAuthorized(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE));
+
+			assertAccessAuthorized(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
 			assertAccessAuthorized(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
@@ -442,6 +464,14 @@ public class DatasetServiceSecurityTest {
 		given(datasetRepository.findByDatasetAcquisitionId(2L)).willReturn(Utils.toList(dataset2));
 		given(datasetRepository.findByDatasetAcquisitionId(3L)).willReturn(Utils.toList(dataset3));
 		given(datasetRepository.findByDatasetAcquisitionId(4L)).willReturn(Utils.toList(dataset4));
-		
+
+		// rights
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(2L))).willReturn(Utils.toList(new DatasetForRights(2L, 2L, 3L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(3L))).willReturn(Utils.toList(new DatasetForRights(3L, 3L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(4L))).willReturn(Utils.toList(new DatasetForRights(4L, 4L, 4L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 3L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(3L, 3L, 1L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 2L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(2L, 2L, 3L, new HashSet())));
+		given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 2L, 3L, 4L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(2L, 2L, 3L, new HashSet()), new DatasetForRights(3L, 3L, 1L, new HashSet()), new DatasetForRights(4L, 4L, 4L, new HashSet())));
 	}
 }

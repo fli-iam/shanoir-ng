@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -80,11 +82,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     }
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		mrDatasetAcquisition.setUsername(importJob.getUsername());
 		mrDatasetAcquisition.setImportDate(LocalDate.now());
+		mrDatasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
@@ -111,6 +114,10 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
 		}
+
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
+				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		

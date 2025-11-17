@@ -13,36 +13,31 @@
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { UntypedFormGroup, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
 
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { PhysiologicalData }    from '../shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
-
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Mode } from "../../../shared/mode/mode.model";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'physiological-data-upload-form',
     templateUrl: 'physiologicalData-form.component.html',
-    providers: [ExtraDataService],
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
 
-    @Input() examination_id:number;
+    @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
+    @Input() canModify: boolean = false;
     @Output() physioDataReady = new EventEmitter();
   
     urlupload:string;
@@ -57,7 +52,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     get physioData(): PhysiologicalData { return this.entity; }
-    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
 
     // Note: should be getService(): EntityService<PhysiologicalData> {
     getService(): EntityService<any> {
@@ -65,7 +60,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     protected fetchEntity: () => Promise<PhysiologicalData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
             return this.getExaminationExtraDatas(extradatas);
         });
     }
@@ -84,7 +79,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
-    	for (let ex of extradatas) {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype == "Physiological data"){
     			return this.physioData;
@@ -115,7 +110,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.physioData.filename= this.fileToUpload.name;
-    	let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
+    	const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
     	physioDataFile.filename = this.fileToUpload.name;
     	physioDataFile.physiologicalDataFile = this.fileToUpload;
     	physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
@@ -142,7 +137,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     changePhysio(){
-        let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
+        const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
         physioDataFile.filename = this.physioData.filename;
         physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
         physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;

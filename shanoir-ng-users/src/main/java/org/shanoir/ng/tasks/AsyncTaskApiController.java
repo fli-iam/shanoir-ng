@@ -36,12 +36,21 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	@Override
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
 		Long userId = KeycloakUtil.getTokenUserId();
+		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
+				userId,
+				ShanoirEventType.IMPORT_DATASET_EVENT,
+				ShanoirEventType.COPY_DATASET_EVENT,
+				ShanoirEventType.EXECUTION_MONITORING_EVENT,
+				ShanoirEventType.CHECK_QUALITY_EVENT,
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+				ShanoirEventType.DELETE_EXAMINATION_EVENT,
+				ShanoirEventType.DELETE_NIFTI_EVENT,
+				ShanoirEventType.DELETE_DATASET_EVENT);
 
-		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(userId, ShanoirEventType.IMPORT_DATASET_EVENT, ShanoirEventType.COPY_DATASET_EVENT, ShanoirEventType.EXECUTION_MONITORING_EVENT, ShanoirEventType.CHECK_QUALITY_EVENT, ShanoirEventType.SOLR_INDEX_ALL_EVENT, ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, ShanoirEventType.DELETE_EXAMINATION_EVENT);
-    
 		// Get only event with last updates < 7 days
 		Date now = new Date();
-		Long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
+		long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
  		taskList = taskList.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
 
  		// Order by last update date
@@ -52,7 +61,6 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 			}
 		};
 		taskList.sort(comparator);
-
 		return new ResponseEntity<>(taskList, HttpStatus.OK);
 	}
 
@@ -69,10 +77,10 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	@Override
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-	long userId = KeycloakUtil.getTokenUserId();
-        UserSseEmitter emitter = new UserSseEmitter(userId);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        return new ResponseEntity<>(emitter,HttpStatus.OK);
+		long userId = KeycloakUtil.getTokenUserId();
+		UserSseEmitter emitter = new UserSseEmitter(userId);
+		emitters.add(emitter);
+		emitter.onCompletion(() -> emitters.remove(emitter));
+		return new ResponseEntity<>(emitter,HttpStatus.OK);
     }
 }

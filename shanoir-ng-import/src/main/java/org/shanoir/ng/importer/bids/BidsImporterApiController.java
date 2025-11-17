@@ -25,7 +25,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -134,27 +132,27 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// STEP 2: Subject level, analyze and create the new subject if necessary
 		Long subjectId = null;
-		for (File subjectFile : importJobDir.listFiles()) {
+		// Exclude MACOS automatically added metadata files and directories (AppleDouble and Finder)
+		for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String name) {
+				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble") ;
+			}})) {
 			String fileName = subjectFile.getName();
 			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
 				// We found a subject
-				subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
+				subjectName = subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
-				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
+				subject.setStudy(new IdName(studyId, studyName));
 				importJob.setSubjectName(subjectName);
-
-				LOG.debug("We found a subject " + subjectName);
 
 				// Create subject
 				subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 				if (subjectId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
 				}
-
-				importJob.setSubjectName(subjectName);
-
 			} else {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
 			}
@@ -166,7 +164,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 			File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File arg0, String name) {
-					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv");
+					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv") && !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
 				}
 			});
 
@@ -205,7 +203,13 @@ public class BidsImporterApiController implements BidsImporterApi {
 					importJob.setExaminationId(examId);
 
 					// STEP 4: Finish import from every bids data folder
-					for (File dataTypeFile : sessionFile.listFiles()) {
+					for (File dataTypeFile : sessionFile.listFiles(
+							new FilenameFilter() {
+								@Override
+								public boolean accept(File arg0, String name) {
+									return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+								}}
+					)) {
 						importSession(dataTypeFile, importJob);
 					}
 				} else {
@@ -223,7 +227,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 						if (examId == null) {
 							throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 						}
-						eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+						eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 						importJob.setExaminationId(examId);
 						examCreated = true;
@@ -312,26 +316,34 @@ public class BidsImporterApiController implements BidsImporterApi {
 		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
 		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile);
 
-		// Check that the list of column is known
-		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
-		int sessionIdIndex = columns.indexOf("session_id");
-		int dateIndex = columns.indexOf("acq_time");
+		// Check File is not empty
+		if (sessionFile.length() > 0) {
+			LOG.error("We found a non empty session.tsv file ");
+			// Check that the list of column is known
+			List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+			int sessionIdIndex = columns.indexOf("session_id");
+			int dateIndex = columns.indexOf("acq_time");
 
-		// If there is no date, just give up
-		if (dateIndex == -1) {
+			// If there is no date, just give up
+			if (dateIndex == -1) {
+				return examDates;
+			}
+
+			// Legal format in BIDS (are we up to date ? I don't think so)
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
+
+			while (it.hasNext()) {
+				String[] row = it.next()[0].split(CSV_SEPARATOR);
+				String sessionLabel = row[sessionIdIndex];
+				String dateAsString = row[dateIndex];
+				TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
+				examDates.put(sessionLabel, LocalDate.from(date));
+			}
+		} else {
+			LOG.error("We found an empty session.tsv file ");
 			return examDates;
 		}
 
-		// Legal format in BIDS (are we up to date ? I don't think so)
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
-
-		while (it.hasNext()) {
-			String[] row = it.next()[0].split(CSV_SEPARATOR);
-			String sessionLabel = row[sessionIdIndex];
-			String dateAsString = row[dateIndex];
-			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
-			examDates.put(sessionLabel, LocalDate.from(date));
-		}
 		return examDates;
 	}
 

@@ -11,22 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { ConsoleService } from '../../shared/console/console.service';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { environment } from '../../../environments/environment';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
+
 
 @Component({
     selector: 'examination-node',
@@ -34,34 +31,27 @@ import { ExaminationService } from '../shared/examination.service';
     standalone: false
 })
 
-export class ExaminationNodeComponent implements OnChanges {
+export class ExaminationNodeComponent extends TreeNodeAbstractComponent<ExaminationNode> implements OnChanges {
 
     @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode, hasDeleteRights: boolean, hasDownloadRights: boolean};
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
-    @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
+    @Output() examinationDelete: EventEmitter<void> = new EventEmitter();
 
-    protected downloadState: TaskState = new TaskState();
-    node: ExaminationNode;
     loading: boolean = false;
-    menuOpened: boolean = false;
     @Input() hasBox: boolean = true;
     datasetIds: number[];
     hasDicom: boolean = false;
     downloading = false;
     detailsPath: string = '/examination/details/';
-    @Input() withMenu: boolean = true;
-    private contentLoaded: SuperPromise<void> = new SuperPromise();
     preclinical: boolean;
 
     constructor(
-        private examinationService: ExaminationService,
-        private datasetAcquisitionService: DatasetAcquisitionService,
-        private examPipe: ExaminationPipe,
-        private downloadService: MassDownloadService,
-        private massDownloadService : MassDownloadService,
-        private consoleService: ConsoleService,
-        protected treeService: TreeService) {
+            private examinationService: ExaminationService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
+            private examPipe: ExaminationPipe,
+            private massDownloadService : MassDownloadService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -82,7 +72,7 @@ export class ExaminationNodeComponent implements OnChanges {
                     this.input.hasDownloadRights,
                     this.input.examination.preclinical);
             }
-            //this.node.registerOpenPromise(this.contentLoaded);
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -119,7 +109,7 @@ export class ExaminationNodeComponent implements OnChanges {
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false;
-        }).catch((reason) => {
+        }).catch(() => {
             this.loading = false;
         });
     }
@@ -135,7 +125,7 @@ export class ExaminationNodeComponent implements OnChanges {
                 return;
             } else {
                 dsAcq.datasets.forEach(ds => {
-                    datasetIds.push(ds.id);
+                    datasetIds?.push(ds.id);
                     if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
@@ -159,7 +149,7 @@ export class ExaminationNodeComponent implements OnChanges {
         this.examinationService.get(this.node.id).then(entity => {
             this.examinationService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onExaminationDelete.emit();
+                    this.examinationDelete.emit();
                 }
             });
         })

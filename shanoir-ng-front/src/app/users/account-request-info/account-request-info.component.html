@@ -12,70 +12,50 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<fieldset *ngIf="info && form" [formGroup]="form">
-    
-    <ol>
-    <li *ngIf="presetStudyId">
-        <span>You have been invited to join a study in Shanoir, you have to create an account before accessing the data.</span>
+<ol *ngIf="info && form" [formGroup]="form">
+    <li *ngIf="!presetStudyId">
+        <label *ngIf="editMode" i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">List of available studies</label> 
+        <span class="right-col">
+            <ng-container *ngIf="editMode">
+                <select-box 
+                    formControlName="studyId"
+                    [options]="studyOptions"
+                    (change)="onStudyChange($event)">
+                </select-box>
+                <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
+            </ng-container>
+            <input type = "hidden"
+                formControlName="studyName">
+            <span *ngIf="!editMode">{{info.studyName}}</span>
+        </span>
     </li>
-            <li *ngIf="!presetStudyId">
-            <label *ngIf="editMode" i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">List of available studies</label> 
-            <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <select-box 
-                        formControlName="studyId"
-                        [(ngModel)]="info.studyId"
-                        [options]="studyOptions"
-                        (change)="onStudyIdChange($event)">
-                    </select-box>
-                    <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
-                </ng-container>
-                <input type = "hidden"
-                    [(ngModel)]="info.studyName"
-                    formControlName="studyName">
-                <span *ngIf="!editMode">{{info.studyName}}</span>
-            </span>
-        </li>
-        <li *ngIf="presetStudyId">
-            <input type = "hidden"
-            [(ngModel)]="info.studyId"
+    <li *ngIf="presetStudyId" class="hidden">
+        <input type = "hidden"
             formControlName="studyId">
-            <input type = "hidden"
-           [(ngModel)]="info.studyName"
-           formControlName="studyName">
-        </li>
-        <li>
-            <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label> 
-            <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <input type="text" formControlName="institution" [(ngModel)]="info.institution" (change)="onInfoChange()"/>
-                    <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
-                    <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
-                </ng-container>
-                <span *ngIf="!editMode">{{info.institution}}</span>
-            </span>
-        </li>
-        <li>
-            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Expertise / Role in the study</label> 
-            <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <input type="text" formControlName="function" [(ngModel)]="info.function" (change)="onInfoChange()"/>
-                    <label *ngIf="hasError('function', ['required'])" class="form-validation-alert" i18n="Edit user|Function required error@@editUserFunctionRequiredError">Function is required!</label>
-                    <label *ngIf="hasError('function', ['length'])" class="form-validation-alert" i18n="Edit user|Function length error@@editUserFunctionLengthError">Function length must be less than 200!</label>
-                </ng-container>
-                <span *ngIf="!editMode">{{info.function}}</span>
-            </span>
-        </li>
-        <li>
-            <label i18n="Edit user|Contact label@@editUserContact">Shanoir study manager</label> 
-            <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <input type="text" formControlName="contact" [(ngModel)]="info.contact"  (change)="onInfoChange()"/>
-                    <label *ngIf="hasError('contact', ['required'])" class="form-validation-alert" i18n="Edit user|Contact required error@@editUserContactRequiredError">Contact is required!</label>
-                    <label *ngIf="hasError('contact', ['length'])" class="form-validation-alert" i18n="Edit user|Contact length error@@editUserContactLengthError">Contact length must be less than 200!</label>
-                </ng-container>
-                <span *ngIf="!editMode">{{info.contact}}</span>
-            </span>
-        </li>
-    </ol>
-</fieldset>
+        <input type = "hidden"
+            formControlName="studyName">
+    </li>
+    <li>
+        <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label> 
+        <span class="right-col">
+            <ng-container *ngIf="editMode">
+                <input type="text" formControlName="institution" (change)="onInstitutionChange($event.target.value)"/>
+                <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
+                <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
+            </ng-container>
+            <span *ngIf="!editMode">{{info.institution}}</span>
+        </span>
+    </li>
+    <li *ngIf="!editMode && info.function">
+        <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Function in the study</label> 
+        <span class="right-col">
+            <span>{{info.function}}</span>
+        </span>
+    </li>
+    <li *ngIf="!editMode && info.contact">
+        <label i18n="Edit user|Contact label@@editUserContact">Invitation issuer</label> 
+        <span class="right-col">
+            <span>{{info.contact}}</span>
+        </span>
+    </li>
+</ol>

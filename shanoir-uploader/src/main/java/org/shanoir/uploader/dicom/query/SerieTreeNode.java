@@ -1,6 +1,6 @@
 package org.shanoir.uploader.dicom.query;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -159,6 +159,10 @@ public class SerieTreeNode implements DicomTreeNode {
 	@XmlTransient
 	public String getDisplayString() {
 		String result = "";
+		final String seriesNumber = this.serie.getSeriesNumber();
+		if (seriesNumber != null && !seriesNumber.isEmpty()) {
+			result += seriesNumber + " ";
+		}
 		final String modality = this.serie.getModality();
 		if (modality != null && !"".equals(modality)) {
 			result += "[" + modality + "] ";
@@ -254,7 +258,7 @@ public class SerieTreeNode implements DicomTreeNode {
 		return this.serie.toString();
 	}
 
-	public void addTreeNode(String arg0, DicomTreeNode arg1) {
+	public void addTreeNode(DicomTreeNode arg1) {
 	}
 
 	public void addTreeNodes(DicomTreeNode arg0, DicomTreeNode arg1,
@@ -265,8 +269,8 @@ public class SerieTreeNode implements DicomTreeNode {
 		return null;
 	}
 
-	public HashMap<String, DicomTreeNode> getTreeNodes() {
-		return new HashMap<String, DicomTreeNode>();
+	public List<DicomTreeNode> getTreeNodes() {
+		return new ArrayList<DicomTreeNode>();
 	}
 
 	public DicomTreeNode initChildTreeNode(Object arg0) {

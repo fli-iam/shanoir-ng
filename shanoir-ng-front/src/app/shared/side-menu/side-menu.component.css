@@ -26,7 +26,7 @@ a:hover, a:active { color: inherit; }
 .menu-list li > i, .menu-list li > a i { margin-left: 6px; width: 30px; }
 .menu-list a { text-decoration: none; }
 .menu-list .sub-menu { background-color: var(--color-a-light); overflow: hidden; }
-.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 25px; }
+.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 25px; position: relative; }
 .menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
@@ -69,14 +69,19 @@ a:hover, a:active { color: inherit; }
     .instance-name::after { content: var(--instance-name); }
 
 progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; width: 160px; font-size: 10px; }
-progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
+progress-bar ::ng-deep .text, progress-bar ::ng-deep .left-text { line-height: 14px; }
 .sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
-.sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 13px; }
+.sub-menu progress-bar ::ng-deep .text, .sub-menu progress-bar ::ng-deep .left-text { line-height: 13px; }
 
 .jobs i { margin-right: 6px; width: auto !important; }
 
 .notif { font-size: 10px; color: #00ff44; vertical-align: 1px; margin-left: 8px; font-weight: bold; }
 .notif i { margin-right: 5px; width: auto !important; }
 .notif.error { color: #ff1900; }
+.notif.button { color: var(--color-b-light2); display: none; }
+.jobs-menu:hover .notif.button { display: inline-block; }
+.jobs-menu { max-width: 100%; }
+.jobs-menu progress-bar { margin-left: 10px; }
 
-.menu-link {width: 100%; display: inline-block; }
+.menu-link { display: inline-block; width: 100%; }
+.remove-task { position: absolute; left: 7px; padding-top: 1px; }

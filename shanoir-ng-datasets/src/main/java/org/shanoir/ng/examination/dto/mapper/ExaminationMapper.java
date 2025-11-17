@@ -26,7 +26,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Mapper for examinations.
@@ -53,7 +52,6 @@ public interface ExaminationMapper {
 	 * @return list of examinations DTO.
 	 */
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
-	
     
 	/**
 	 * Map list of @Examination to list of @SubjectExaminationDTO.
@@ -71,7 +69,6 @@ public interface ExaminationMapper {
 	 */
 	@Mapping(target = "copies", expression = "java(mapCopiesFromExamination(examination.getCopies()))")
 	@Mapping(target = "source", expression = "java(mapSourceFromExamination(examination.getSource()))")
-	@Transactional
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
 
 	/**

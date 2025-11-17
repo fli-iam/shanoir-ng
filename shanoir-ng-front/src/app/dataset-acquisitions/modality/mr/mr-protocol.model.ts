@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 export class MrProtocol {
 
@@ -36,6 +35,7 @@ export class MrProtocol {
     pixelSpacingY: number;
     sliceSpacing: number;
     sliceThickness: number;
+    numberOfSlices: number;
     temporalResolution: number;
     magneticFieldStrength: number;
     originMetadata: MrProtocolMetadata;

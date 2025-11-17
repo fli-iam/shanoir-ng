@@ -11,8 +11,11 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
+<div *ngIf="treeService.studyLoading" class="left-icon">
+    <i class="fa fa-cog fa-spin"></i>Loading
+</div>
 <node
-        *ngIf="node"
+        *ngIf="node && !treeService.studyLoading"
         [class.selected]="(showDetails && menuOpened) || treeService.isSelected(node.id, 'study')"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
@@ -35,7 +38,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Subjects"
             awesome="fas fa-user-injured"
             [(opened)]="node.subjectsNode.opened"
-            (openedChange)="onOpenedChange($event)"
             (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
             [hasChildren]="hasDependency(node.subjectsNode.subjects)">
 
@@ -59,19 +61,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
 
-        <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
-            <subject-node
-                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
-                    [input]="subject"
-                    [studyId]="node.id"
-                    (selectedChange)="selectedChange.emit(node)"
-                    [hasBox]="hasBox"
-                    [withMenu]="withMenu"
-                    [rights]="rights"
-                    (nodeInit)="onSubjectNodeInit()"
-            >
-            </subject-node>
-        </ng-container>
+        <div *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
+            <div *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy:trackByFn; let i = index">
+                @if (!subject.fake) {
+                    <subject-node
+                            [input]="subject"
+                            [studyId]="node.id"
+                            (selectedChange)="selectedChange.emit(node)"
+                            [hasBox]="hasBox"
+                            [withMenu]="withMenu"
+                            [rights]="rights"
+                    >
+                    </subject-node>
+                } @else {
+                    <div class="fake-node" #fakeSubject [id]="subject.id" >
+                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(subject)"></i>
+                        <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickFakeNode(subject)" [title]="subject.title + ' n°' + subject.id">
+                            <i [class]="subject.awesome" class="picto"></i>
+                            {{subject.label}}
+                        </a>
+                        <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
+                            {{tag.name}}
+                        </span>
+                        <span *ngIf="subject.qualityTag" class="tag label dark" [style.background]="subject.qualityTag == 'ERROR' ? 'red' : (subject.qualityTag == 'WARNING' ? 'orange' : 'green')">
+                            {{subject.qualityTag}}
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
 
     </node>
 
@@ -107,7 +125,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <card-node
                     *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
                     [input]="studycard"
-                    (onCardDelete)="onStudyCardDelete(i)"
+                    (cardDelete)="onStudyCardDelete(i)"
                     [withMenu]="withMenu"
                     detailsPath="study-card/details"
             >
@@ -130,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <card-node
                     *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
                     [input]="qualitycard"
-                    (onCardDelete)="onQualityCardDelete(i)"
+                    (cardDelete)="onQualityCardDelete(i)"
                     [withMenu]="withMenu"
                     detailsPath="quality-card/details"
             >
@@ -148,11 +166,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [hasChildren]="hasDependency(node.membersNode.members)">
 
         <ng-container *ngIf="node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any('UNLOADED')">
-            <member-node
-                    *ngFor="let member of node.membersNode.members"
-                    [input]="member"
-                    [withMenu]="withMenu">
-            </member-node>
+            <div *ngFor="let member of node.membersNode.members; trackBy:trackByFn; let i = index">
+                @if (!member.fake) {
+                    <member-node
+                        [input]="member"
+                        [withMenu]="withMenu">
+                    </member-node>
+                } @else {
+                    <div class="fake-node" #fakeMember [id]="member.id" >
+                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(member)"></i>
+                        <a [routerLink]="['/user/details/', member.id]" class="inner" (click)="clickFakeNode(member)" [title]="member.title + ' n°' + member.id">
+                            <i class="far fa-user picto"></i>
+                            {{member.label}}
+                        </a>
+                    </div>
+                }
+            </div>
         </ng-container>
 
     </node>

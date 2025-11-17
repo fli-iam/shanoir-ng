@@ -11,15 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
-
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, StudyNode } from 'src/app/tree/tree.model';
+import { SubjectNodeComponent } from 'src/app/subjects/tree/subject-node.component';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode } from 'src/app/tree/tree.model';
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
+
 import { environment } from "../../../environments/environment";
+
 import { TreeService } from './tree.service';
 
 
@@ -30,7 +34,7 @@ import { TreeService } from './tree.service';
     standalone: false
 })
 
-export class StudyTreeComponent {
+export class StudyTreeComponent implements OnDestroy {
 
     _selectedDatasetNodes: DatasetNode[] = [];
     selectedExaminationNodes: ExaminationNode[] = [];
@@ -39,6 +43,9 @@ export class StudyTreeComponent {
     canOpenDicomSingleExam: boolean = false;
     canOpenDicomMultiExam: boolean = false;
     protected loaded: boolean = false;
+    private subscriptions: Subscription[] = [];
+    subjectNodes: SubjectNodeComponent[] = [];
+    @ViewChild('tree') treeContainer: ElementRef;
 
     constructor(
             protected treeService: TreeService,
@@ -48,6 +55,29 @@ export class StudyTreeComponent {
             private dialogService: ConfirmDialogService) {
 
         treeService.studyNodeOpenPromise.then(() => this.loaded = true);
+
+        this.subscriptions.push(
+            treeService.onScrollToSelected.subscribe(node => {
+                setTimeout(() => {
+                    this.autoScrollTo(node);
+                });
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    private autoScrollTo(node: ShanoirNode) {
+        const nodeTop: number = node?.getTop?.();
+        const containerHeight: number = this.treeContainer.nativeElement.offsetHeight;
+        const currentScroll: number = this.treeContainer.nativeElement.scrollTop;
+        const diff: number = nodeTop - containerHeight - currentScroll;
+        if (diff > 0 || nodeTop - currentScroll < 0) {
+            this.treeContainer.nativeElement.scrollTop = diff + currentScroll + (containerHeight/2);
+        }
+
     }
 
     protected set selectedDatasetNodes(selectedDatasetNodes: DatasetNode[]) {
@@ -68,13 +98,13 @@ export class StudyTreeComponent {
     }
 
     goToProcessing() {
-        let allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
+        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
         this.processingService.setDatasets(new Set(allSelectedNodes?.map(n => n.id)));
         this.router.navigate(['pipelines']);
     }
 
     downloadSelected() {
-        let allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
+        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
         if (allSelectedNodes.find(node => !node.canDownload)) {
             this.dialogService.error('error', 'Sorry, you don\'t have the right to download all the datasets you have selected');
         } else {
@@ -100,8 +130,8 @@ export class StudyTreeComponent {
     }
 
     openInViewer() {
-        let studies: Set<string> = new Set();
-        let series: Set<string> = new Set();
+        const studies: Set<string> = new Set();
+        const series: Set<string> = new Set();
         if (this.selectedExaminationNodes?.length > 0) {
             this.selectedExaminationNodes.forEach(exam => studies.add('1.4.9.12.34.1.8527.' + exam.id));
         }
@@ -118,8 +148,8 @@ export class StudyTreeComponent {
 
     onSelectedChange(study: StudyNode) {
         let dsNodes: DatasetNode[] = [];
-        let acqNodes: DatasetAcquisitionNode[] = [];
-        let examNodes: ExaminationNode[] = [];
+        const acqNodes: DatasetAcquisitionNode[] = [];
+        const examNodes: ExaminationNode[] = [];
         if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
             study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
@@ -168,7 +198,7 @@ export class StudyTreeComponent {
                 let nodesFound: DatasetNode[] = ds.selected ? [ds] : [];
                 // get selected datasets from this node's processings datasets
                 if (ds.processings && ds.processings != 'UNLOADED') {
-                    let foundInProc: DatasetNode[] = ds.processings
+                    const foundInProc: DatasetNode[] = ds.processings
                             .map(proc => this.searchSelectedInDatasetNodes(proc.datasets))
                             .reduce((allFromProc, oneProc) => allFromProc.concat(oneProc), []);
                             nodesFound = nodesFound.concat(foundInProc);
@@ -183,6 +213,12 @@ export class StudyTreeComponent {
     resetSelection() {
         this.treeService.unSelectAll();
         this.onSelectedChange(this.treeService.studyNode);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('tree', this.treeService.studyNode);
+        }
     }
 
 }

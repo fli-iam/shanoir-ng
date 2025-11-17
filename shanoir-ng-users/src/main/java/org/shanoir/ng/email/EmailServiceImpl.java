@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import java.net.URLEncoder;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,16 +22,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -86,6 +90,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String MOTIVATION = "motivation";
 
 	private static final String STUDYCARD_URL = "studyCardUrl";
+
+	private static final String LINK = "link";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
@@ -241,6 +247,7 @@ public class EmailServiceImpl implements EmailService {
 	private void notifyAdminAccountRequestAccepted(final User user) {
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
+		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -248,6 +255,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
 			final Map<String, Object> variables = new HashMap<>();
+			if (userAdmin != null) {
+				variables.put("adminName", userAdmin.getUsername());
+			}
 			variables.put("user", user);
 			final String content = build("notifyAdminAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
@@ -275,6 +285,7 @@ public class EmailServiceImpl implements EmailService {
 	private void notifyAdminExtensionRequestAccepted(final User user) {
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
+		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -283,6 +294,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
+			if (userAdmin != null) {
+				variables.put("adminName", userAdmin.getUsername());
+			}
 			final String content = build("notifyAdminExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -519,7 +533,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
-        User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
+		User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
 
         // get study admin
         List<User> studyAdmins = this.findStudyAdmin(createdRequest.getStudyId());
@@ -576,13 +590,32 @@ public class EmailServiceImpl implements EmailService {
 			// access-request/study/1
 			variables.put(SERVER_ADDRESS, shanoirServerAddress + "access-request/study/" + email.getStudyId());
 			// account/study/1/account-request
-			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request");
+			variables.put(SERVER_ADDRESS_PUBLIC, buildInvitationLink(email));
 			final String content = build("notifyAnonymousInvitation", variables);
 			messageHelper.setText(content, true);
 		};
 		// Send the message
 		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
 		mailSender.send(messagePreparator);
+	}
+
+	private String buildInvitationLink(StudyInvitationEmail email) {
+		String link = shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request";
+		List<String> params = new ArrayList<>();
+		if (email.getFunction() != null) {
+			params.add("function=" + URLEncoder.encode(email.getFunction()));
+		}
+		if (email.getStudyName() != null) {
+			params.add("study=" + URLEncoder.encode(email.getStudyName()));
+		}
+		if (email.getInvitationIssuer() != null) {
+			params.add("from=" + URLEncoder.encode(email.getInvitationIssuer()));
+		}
+		if (!params.isEmpty()) {
+			link += "?";
+			link += String.join("&", params);
+		}
+		return link;
 	}
 
 	/**
@@ -609,5 +642,45 @@ public class EmailServiceImpl implements EmailService {
 		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
 		mailSender.send(messagePreparator);
 	}
+
+    @Override
+    public void notifyDuaDraftCreation(DuaDraftWrapper mail) {
+        Optional<User> user = userRepository.findById(mail.getSenderUserId());
+		if (user.isEmpty()) {
+			throw new IllegalStateException("cannot find the dua draft issuer, given id : " + mail.getSenderUserId());
+		} else {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(user.get().getEmail());
+				messageHelper.setTo(mail.getRecipienEmailAddress());
+				messageHelper.setSubject("[Shanoir] pleaser help configure DUA for study " + mail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(FIRSTNAME, user.get().getFirstName());
+				variables.put(LASTNAME, user.get().getLastName());
+				variables.put(STUDY_NAME, mail.getStudyName());
+				variables.put(LINK, mail.getDuaLink());
+				final String content = build("notifyDuaDraftCreation", variables);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending notifyDuaDraftCreation mail from {} for study {}", user.get().getId(), mail.getStudyName());
+			mailSender.send(messagePreparator);
+
+			messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(user.get().getEmail());
+				messageHelper.setSubject("[Shanoir] DUA draft created for study " + mail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(STUDY_NAME, mail.getStudyName());
+				variables.put(LINK, mail.getDuaLink());
+				final String content = build("notifyStudyAdminDuaDraftCreation", variables);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending notifyStudyAdminDuaDraftCreation mail to {} for study {}", user.get().getId(), mail.getStudyName());
+			mailSender.send(messagePreparator);
+		}
+    }
 
 }

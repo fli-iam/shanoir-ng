@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import org.apache.commons.lang3.EnumUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Scanning Sequence.
  * 
@@ -37,9 +41,18 @@ public enum MrScanningSequence {
 	// Research Mode
 	RM(5),
 
-	// Unknown, for the moment it is a test
-	S(6);
+	// Spectroscopy
+	S(6),
 	
+	// Fast Field Echo (Philips)
+	FFE(7),
+	
+	// Could not map correctly
+	UNKNOWN(8);
+	
+	/** Logger. */
+	private static final Logger LOG = LoggerFactory.getLogger(MrScanningSequence.class);
+
 	private int id;
 
 	/**
@@ -68,7 +81,7 @@ public enum MrScanningSequence {
 				return scanningSequence;
 			}
 		}
-		throw new IllegalArgumentException("No matching scanning sequence for id " + id);
+		return UNKNOWN;
 	}
 	
 	/**
@@ -82,7 +95,12 @@ public enum MrScanningSequence {
 		if (type == null) {
 			return null;
 		}
-		return MrScanningSequence.valueOf(type);
+		if (EnumUtils.isValidEnum(MrScanningSequence.class, type)) {
+			return MrScanningSequence.valueOf(type);
+		} else {
+			LOG.warn("MrScanningSequence of type: " + type + " set to UNKNOWN.");
+			return UNKNOWN;
+		}
 	}
 	
 	/**

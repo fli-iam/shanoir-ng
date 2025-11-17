@@ -19,8 +19,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -87,17 +92,17 @@ public class NIfTIConverterService {
 	    switch (converter) {
 			case MCVERTER_2_0_7:
 			case MCVERTER_2_1_0:
-			conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
-			break;
-		case DICOMIFIER:
-			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder, NiftiConverter.DICOMIFIER.getPath(), DICOM_TO_NIFTI_METHOD);
-			break;
-		case MRICONVERTER:
-			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());
-			break;
-		default:
-			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
-			break;
+				conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
+				break;
+			case DICOMIFIER:
+				conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder, NiftiConverter.DICOMIFIER.getPath(), DICOM_TO_NIFTI_METHOD);
+				break;
+			case MRICONVERTER:
+				conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());
+				break;
+			default:
+				conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
+				break;
 		}
 		// Here we should check logs to check which converter failed or not.
 		LOG.error(conversionLogs);

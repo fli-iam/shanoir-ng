@@ -1,9 +1,17 @@
 package org.shanoir.ng.bids.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.bids.BidsDeserializer;
@@ -23,17 +31,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class BidsApiController implements BidsApi {
@@ -78,7 +79,8 @@ public class BidsApiController implements BidsApi {
 	@Override
     public void exportBIDSFile(
     		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
+    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, 
+			HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
 		if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
@@ -169,8 +171,7 @@ public class BidsApiController implements BidsApi {
 			try(Stream<Path> walker = Files.walk(pp)) {
 				
 				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
-				walker.filter(path -> !path.toFile().isDirectory())
-				.forEach(path -> {
+				walker.filter(path -> !path.toFile().isDirectory()).forEach(path -> {
 					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 					try {
 						zos.putNextEntry(zipEntry);

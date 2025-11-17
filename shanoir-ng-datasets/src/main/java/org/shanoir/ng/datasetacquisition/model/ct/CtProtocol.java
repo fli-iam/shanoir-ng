@@ -14,11 +14,13 @@
 
 package org.shanoir.ng.datasetacquisition.model.ct;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * CT protocol.
@@ -37,6 +39,14 @@ public class CtProtocol extends AbstractEntity {
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
 	private CtDatasetAcquisition ctDatasetAcquisition;
+
+	/** (0054, 0081) Number of Slices */
+	private Integer numberOfSlices;
+
+	/**
+	 * The unit of measure of the slice thickness must be in mm.
+	 */
+	private Double sliceThickness;
 
 	public CtProtocol() {
 
@@ -61,4 +71,19 @@ public class CtProtocol extends AbstractEntity {
 		this.ctDatasetAcquisition = ctDatasetAcquisition;
 	}
 
+    public Integer getNumberOfSlices() {
+        return numberOfSlices;
+    }
+
+    public void setNumberOfSlices(Integer numberOfSlices) {
+        this.numberOfSlices = numberOfSlices;
+    }
+
+    public Double getSliceThickness() {
+        return sliceThickness;
+    }
+
+    public void setSliceThickness(Double sliceThickness) {
+        this.sliceThickness = sliceThickness;
+    }
 }

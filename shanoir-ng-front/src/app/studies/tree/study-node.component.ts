@@ -11,15 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
+
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
+import { isDarkColor } from 'src/app/utils/app.utils';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
+    MemberNode,
     QualityCardNode,
+    ShanoirNode,
     StudyCardNode,
     StudyNode,
     SubjectNode,
@@ -39,37 +46,32 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     standalone: false
 })
 
-export class StudyNodeComponent implements OnChanges {
+export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> implements OnChanges {
 
     @Input() input: StudyNode | { study: Study, rights: StudyUserRight[] };
-    @Output() nodeInit: EventEmitter<StudyNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<StudyNode> = new EventEmitter();
-    node: StudyNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     subjectsMenuOpened: boolean = false;
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
-    @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
-    @Input() withMenu: boolean = true;
     idPromise: SuperPromise<number> = new SuperPromise();
     protected rights: StudyUserRight[];
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
-    protected nbSubjectsInit: number = 0;
-    private subjectsInited: SuperPromise<void>;
+    @ViewChildren('fakeSubject') fakeSubjectNodes: QueryList<ElementRef>;
+    @ViewChildren('fakeMember') fakeMemberNodes: QueryList<ElementRef>;
 
     constructor(
-        private router: Router,
-        private studyCardService: StudyCardService,
-        private qualityCardService: QualityCardService,
-        private keycloakService: KeycloakService,
-        private studyRightsService: StudyRightsService,
-        protected treeService: TreeService) {
+            private router: Router,
+            private studyCardService: StudyCardService,
+            private qualityCardService: QualityCardService,
+            private keycloakService: KeycloakService,
+            private studyRightsService: StudyRightsService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
 
+        super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
                     ? Promise.resolve(StudyUserRight.all())
@@ -86,24 +88,45 @@ export class StudyNodeComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
+            const id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
-                this.subjectsInited = new SuperPromise();
-                this.nbSubjectsInit = 0;
                 this.node = this.input;
             } else if (this.input.study && this.input.rights) {
-                this.subjectsInited = new SuperPromise();
-                this.nbSubjectsInit = 0;
                 this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
                 throw new Error('Illegal argument type');
             }
             this.sortSubjects({field: 'name', way: 'asc'});
-            this.node.subjectsNode.registerOpenPromise(this.subjectsInited);
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath + this.node.id;
+            setTimeout(() => {
+                if (this.fakeSubjectNodes.length > 0) {
+                    this.setFakeTops();
+                }
+                this.subscriptions.push(this.fakeSubjectNodes.changes.subscribe(() => this.setFakeTops()));
+            });
         }
+    }
+
+    /**
+     * Tells the top position of the fake nodes so the auto-scroll doesn't have to wait for the real node to be loaded
+     */
+    private setFakeTops() {
+        this.fakeSubjectNodes.forEach(fake => {
+            const id: number = fake.nativeElement.getAttribute('id');
+            if (!!this.node.subjectsNode.subjects && this.node.subjectsNode.subjects != UNLOADED) {
+                const node: SubjectNode = this.node.subjectsNode.subjects?.find(n => n.id == id);
+                node.getTop = () => fake.nativeElement?.offsetTop;
+            }
+        });
+        this.fakeMemberNodes.forEach(fake => {
+            const id: number = fake.nativeElement.getAttribute('id');
+            if (!!this.node.membersNode.members && this.node.membersNode.members != UNLOADED) {
+                const node: MemberNode = this.node.membersNode.members?.find(n => n.id == id);
+                if (node) node.getTop = () => fake.nativeElement?.offsetTop;
+            }
+        });
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
@@ -176,16 +199,20 @@ export class StudyNodeComponent implements OnChanges {
         }
     }
 
-    onSubjectNodeInit() {
-        this.nbSubjectsInit++;
-        if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
-            this.subjectsInited.resolve();
-        }
+    trackByFn(index, item: Entity) {
+        return item.id;
     }
 
-    onOpenedChange(state) {
-        if (!state) {
-            this.nbSubjectsInit = 0;
-        }
+    protected clickFakeNode(node: ShanoirNode) {
+        node.fake = false;
+    }
+
+    protected clickFakeOpen(node: ShanoirNode) {
+        node.opened = true;
+        node.fake = false;
+    }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
     }
 }

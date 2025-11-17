@@ -11,15 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
-import { DatasetService, Format } from '../shared/dataset.service';
-import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
-import {TaskState} from "../../async-tasks/task.model";
+import { DatasetService } from '../shared/dataset.service';
+import { DatasetProcessingService } from '../shared/dataset-processing.service';
 
 
 @Component({
@@ -28,25 +30,21 @@ import {TaskState} from "../../async-tasks/task.model";
     standalone: false
 })
 
-export class DatasetNodeComponent implements OnChanges {
+export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {
 
     @Input() input: DatasetNode | Dataset;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
-    loading: boolean = false;
-    protected menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
-    @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
-    @Input() withMenu: boolean = true;
-    public downloadState: TaskState = new TaskState();
+    @Output() datasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService,
-        private downloadService: MassDownloadService,
-        protected treeService: TreeService) {
+            private router: Router,
+            private datasetService: DatasetService,
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService,
+            private processingService: DatasetProcessingService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -56,6 +54,8 @@ export class DatasetNodeComponent implements OnChanges {
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -86,7 +86,7 @@ export class DatasetNodeComponent implements OnChanges {
         this.datasetService.get(this.node.id).then(entity => {
             this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onDatasetDelete.emit();
+                    this.datasetDelete.emit();
                 }
             });
         })
@@ -94,5 +94,19 @@ export class DatasetNodeComponent implements OnChanges {
 
     onProcessingDelete(index: number) {
         (this.node.processings as ProcessingNode[]).splice(index, 1) ;
+    }
+
+    loadProcessings() {
+        if (this.node.processings == UNLOADED) {
+            this.loading = true;
+            this.processingService.findByInputDatasetId(this.node.id).then(processings => {
+                this.node.processings = processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+                this.contentLoaded.resolve();
+            });
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 }

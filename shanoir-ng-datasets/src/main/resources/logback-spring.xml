@@ -28,6 +28,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </filter>
     </appender>
 
+    <appender name="RUNNER" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><pattern>${CONSOLE_LOG_PATTERN}</pattern></encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
     <appender name="EVENT_FILE_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/shanoir-ng-logs/shanoir-events.log</file>
         <append>true</append>
@@ -38,6 +46,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <appender name="DIMSE_FILE_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/shanoir-ng-logs/shanoir-dimse.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ECC_FILE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/shanoir-ng-logs/shanoir-ecc.log</file>
         <append>true</append>
         <encoder>
             <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} - %msg%n</pattern>
@@ -59,12 +75,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>
 	
-    <logger name="org.shanoir.ng.dataset.service.CreateStatisticsService" level="INFO" additivity="false">
-        <appender-ref ref="FILE" />
-    </logger>
-	
     <logger name="org.shanoir.ng.dicom.DIMSEService" level="INFO" additivity="false">
         <appender-ref ref="DIMSE_FILE_LOG" />
+    </logger>
+    
+    <logger name="org.shanoir.ng.examination.schedule.ExaminationsConsistencyChecker" level="INFO" additivity="false">
+        <appender-ref ref="ECC_FILE_LOG" />
+    </logger>
+
+    <logger name="org.shanoir.ng.solr.runner" level="INFO" additivity="false">
+        <appender-ref ref="RUNNER" />
+    </logger>
+
+    <logger name="org.shanoir.ng.vip.monitoring.schedule" level="INFO" additivity="false">
+        <appender-ref ref="RUNNER" />
     </logger>
 
     <root level="INFO">

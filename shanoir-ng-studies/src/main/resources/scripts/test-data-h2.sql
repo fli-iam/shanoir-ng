@@ -13,11 +13,11 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, mono_center, study_type, challenge)
+	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, study_type, challenge)
 VALUES 
-	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 1, 0),
-	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 1, 0),
-	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1, 0);
+	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 0),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0);
 
 INSERT INTO study_user
 	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
@@ -74,12 +74,12 @@ VALUES
 	(3, 2, 1, 2, 'coil 3', 4, '234567891');
 
 INSERT INTO subject
-	(id, name, identifier, birth_date )
+	(id, name, identifier, birth_date, study_id, physically_involved)
 VALUES
-	(1,'subject1', 'sub1', parsedatetime('2013/01/01', 'yyyy/MM/dd')),
-	(2,'subject2', 'sub2', parsedatetime('2001/02/01', 'yyyy/MM/dd')),
-	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd')),
-	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'));
+	(1,'subject1', 'sub1', parsedatetime('2013/01/01', 'yyyy/MM/dd'), 1, 0),
+	(2,'subject2', 'sub2', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 1, 0),
+	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0),
+	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0);
 
 INSERT INTO subject_study
 	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)

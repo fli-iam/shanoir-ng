@@ -19,6 +19,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
@@ -31,7 +32,6 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-
 
 @Component({
     selector: 'dataset-acquisition-detail',
@@ -109,11 +109,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
-            'study-card': [this.datasetAcquisition.studyCard],
-            'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
+            'studyCard': [this.datasetAcquisition.studyCard],
+            'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
-            'software-release': [this.datasetAcquisition.softwareRelease],
-            'sorting-index': [this.datasetAcquisition.sortingIndex],
+            'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
+            'softwareRelease': [this.datasetAcquisition.softwareRelease],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex],
             'protocol': [this.datasetAcquisition.protocol]
         });
     }

@@ -13,22 +13,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ol>
+	<li *ngIf="mode == 'edit' && !studyOptions" class="info-txt">
+		<h3>Invite a new user</h3>
+		Username or email address : <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
+		<tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
+		<br/>Function in the study (researcher, mri manipulator, ...) : <input type="text" [(ngModel)]="invitationFunction" placeholder="function in the study">
+		<br/><button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
+    </li>
 	<li *ngIf="mode != 'view' && studyOptions">
 		<label>List of studies</label>
 		<span class="right-col">
-			<select-box placeholder="Add a study ..." (onAddClick)="onStudyAdd($event)" [options]="studyOptions">
+			<select-box placeholder="Add a study ..." (addClick)="onStudyAdd($event)" [options]="studyOptions">
 			</select-box>
 		</span>
 	</li>
-	<li *ngIf="mode == 'edit' && !studyOptions">
-           <span>Invite a new user : </span>
-           <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
-           <button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
-           <tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
-    </li>
 	<li>
 		<shanoir-table #memberTable
-			[getPage]="getPage.bind(this)" 
+			[getPage]="getPage.bind(this)"
 			[columnDefs]="columnDefs"
 			(rowClick)="onUserClick($event)"
 			[selectedId]="pannelStudyUser?.id">
@@ -91,21 +92,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label>Can see all</label>
 							<span class="right-col">
-								<checkbox 
+								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
-									(onChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
-									[disabled]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.user.id == getLoggedUserId()"
+									(userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
+									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId())"
 								></checkbox>
 							</span>
 						</li>
 						<li>
 							<label>Can download</label>
 							<span class="right-col">
-								<checkbox 
+								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
-									(onChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -115,7 +116,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
-									(onChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -123,9 +124,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label>Can administrate</label>
 							<span class="right-col">
 								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'" 
+									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
-									(onChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
+									(userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>
@@ -137,9 +138,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="all-centers" *ngIf="mode == 'edit' || pannelStudyUser.centers?.length == 0">
 							<label>All centers (default)</label>
 							<checkbox
-								[mode]="mode == 'view' ? mode : 'edit'" 
+								[mode]="mode == 'view' ? mode : 'edit'"
 								[ngModel]="!(pannelStudyUser.centers?.length > 0)"
-								(onChange)="onToggleAllCenters($event)"
+								(userChange)="onToggleAllCenters($event)"
 							></checkbox>
 						</li>
 					</ul>
@@ -148,9 +149,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label>{{center.name}}</label>
 							<span class="right-col">
 								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'" 
+									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="hasCenter(center, pannelStudyUser)"
-									(onChange)="onEditCenter(center, pannelStudyUser, $event)"
+									(userChange)="onEditCenter(center, pannelStudyUser, $event)"
 								></checkbox>
 							</span>
 						</li>

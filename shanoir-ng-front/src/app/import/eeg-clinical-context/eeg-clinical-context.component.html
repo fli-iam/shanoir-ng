@@ -39,15 +39,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label [class.required-label]="!useStudyCard">Select a center</label>
             <span class="right-col">
-                <select-box *ngIf="!useStudyCard || center"
-                        [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
-                        [readOnly]="useStudyCard"
+                <select-box
+                        [disabled]="!study || loading"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
+                        (newClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
+
             </span>
         </li>
         <li class="info" *ngIf="center && !centerCompatible(center)">
@@ -62,17 +62,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ng-container>
         </li>
         <li>
+        <li>
             <label [class.required-label]="!useStudyCard">Select a center equipment</label>
             <span class="right-col">
-                <select-box *ngIf="!useStudyCard || acquisitionEquipment"
-                        [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
-                        [readOnly]="useStudyCard"
+                <select-box
+                        [disabled]="!center || loading"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
                         [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
+                        (newClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
+
             </span>
         </li>
         <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
@@ -100,57 +101,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
                         [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
+                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
+                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New subject
+                </button>
             </span>
         </li>
-        <li *ngIf="editSubjectStudy" class="required">
-            <label class="required-label">Subject Type</label>
-            <span class="right-col">
-                <select-box
-                    *ngIf="subject && subject.subjectStudy"
-                    [(ngModel)]="subject.subjectStudy.subjectType"
-                    [ngModelOptions]="{standalone: true}"
-                    [options]="subjectTypes"
-                    (userChange)="onContextChange();">
-                </select-box>
-                <select-box
-                    *ngIf="!subject || !subject.subjectStudy"
-                    [disabled]="true">
-                </select-box>
-            </span>
-        </li>
-    </ol>
-    <ol class="subject-study">
-        <legend
-                class="clickable"
-                [class.disabled]="!subject || !subject.subjectStudy"
-                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
-            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
-        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
-            <li>
-                <label>Common name</label>
-                <span class="right-col">{{subject.name}}</span>
-            </li>
-            <li>
-                <label>Subject identifier for this study</label>
-                <span class="right-col">
-                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier"
-                    [ngModelOptions]="{standalone: true}"/>
-                </span>
-            </li>
-            <li>
-                <label>Physically involved</label>
-                <span class="right-col">
-                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
-                </span>
-            </li>
-            <li>
-                <label>Tags</label>
-                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="study?.tags"></tag-list>
-            </li>
-        </div>
     </ol>
 
     <ol>
@@ -163,8 +122,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + examination?.id" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
+                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
+                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New examination
+                </button>
             </span>
         </li>
     </ol>
@@ -179,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box
                     [(ngModel)]="coordsystem"
-                    (userChange)="onSelectCoord(); onContextChange();"
+                    (userChange)="onContextChange();"
                     [ngModelOptions]="{standalone: true}"
                     [options]="coordSystemOptions">
                 </select-box>

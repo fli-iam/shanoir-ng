@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
@@ -37,7 +39,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class ExaminationServiceTest {
 	@InjectMocks
 	private ExaminationServiceImpl examinationService;
 	
-	@MockBean
+	@Mock
 	private StudyRightsService rightsService;
 
 	@Mock
@@ -82,6 +83,13 @@ public class ExaminationServiceTest {
 
 	@Mock
 	private ObjectMapper mapper;
+
+	@Mock
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Mock
+	private DICOMWebService dicomWebService;
+
 
 	@BeforeEach
 	public void setup() throws ShanoirException {

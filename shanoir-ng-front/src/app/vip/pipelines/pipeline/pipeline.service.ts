@@ -12,44 +12,42 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Injectable} from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import {Observable} from "rxjs";
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { firstValueFrom } from "rxjs";
+
 import * as AppUtils from "../../../utils/app.utils";
-import {Pipeline} from "../../models/pipeline";
+import { Pipeline } from "../../models/pipeline";
 
 @Injectable()
 export class PipelineService {
 
-  pipelineUrl: String = AppUtils.BACKEND_API_VIP_PIPE_URL;
+    pipelineUrl: string = AppUtils.BACKEND_API_VIP_PIPE_URL;
 
-  constructor(protected httpClient: HttpClient) {}
-
-  /**
-   * Show the definition of a pipeline
-   *
-   * @param pipelineIdentifier
-   *
-   */
-  public getPipeline(pipelineIdentifier: string ): Observable<Pipeline> {
-
-    if (pipelineIdentifier === null || pipelineIdentifier === undefined) {
-      throw new Error('Required parameter pipelineIdentifier was null or undefined when calling getPipeline.');
+    constructor(protected httpClient: HttpClient) {
     }
-    return this.httpClient.get<Pipeline>(`${this.pipelineUrl}/${pipelineIdentifier}`);
-  }
 
-  /**
-  * List pipelines
-  * All the pipelines that the user can execute must be returned. It is up to the platform to return pipelines that the user cannot execute. When studyIdentifier is present, all the pipelines that the user can execute in the study must be returned. In this case, execution rights denote the rights to execute the pipeline in the study.
-  * @param studyIdentifier
-  * @param property A pipeline property to filter the returned pipelines. It must listed in the \&quot;supportedPipelineProperties\&quot; of the getPlatformProperties method. All the returned pipelines must have this property set. Use also the \&quot;propertyValue\&quot; to filter on this property value.
-  * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
-   *
-  */
+    /**
+     * Show the definition of a pipeline
+     *
+     * @param pipelineIdentifier
+     */
+    public getPipeline(pipelineIdentifier: string): Promise<Pipeline> {
 
-  public listPipelines(): Observable<Array<Pipeline>> {
-    return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
-  }
+        if (pipelineIdentifier === null || pipelineIdentifier === undefined) {
+            throw new Error('Required parameter pipelineIdentifier was null or undefined when calling getPipeline.');
+        }
+        return firstValueFrom(this.httpClient.get<Pipeline>(`${this.pipelineUrl}/${pipelineIdentifier}`));
+    }
 
+    /**
+     * List all the pipelines that the user can execute. It is up to the platform to return pipelines that the user cannot execute. When studyIdentifier is present, all the pipelines that the user can execute in the study must be returned. In this case, execution rights denote the rights to execute the pipeline in the study.*
+     *
+     * @param studyIdentifier
+     * @param property A pipeline property to filter the returned pipelines. It must listed in the \&quot;supportedPipelineProperties\&quot; of the getPlatformProperties method. All the returned pipelines must have this property set. Use also the \&quot;propertyValue\&quot; to filter on this property value.
+     * @param propertyValue A property value on which to filter the returned pipelines. The \&quot;property\&quot; parameter must also be present. All the returned pipelines must have this property equal to the value given in this parameter.
+     */
+    public listPipelines(): Promise<Pipeline[]> {
+        return firstValueFrom(this.httpClient.get<Pipeline[]>(`${this.pipelineUrl}`));
+    }
 }

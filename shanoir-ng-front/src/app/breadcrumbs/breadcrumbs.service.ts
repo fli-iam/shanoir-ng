@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,26 +17,27 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+
 import { ImportMode } from '../import/import.component';
+import {SuperPromise} from "../utils/super-promise";
 
 @Injectable()
 export class BreadcrumbsService implements OnDestroy {
 
     steps: Step[] = [];
-    
+
     private popFoundedStepIndex: number;
     public currentStepIndex: number;
-    private nextLabel: string;
-    private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
-    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
+    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE' | 'FOCUS'}> = new BehaviorSubject({steps: this.steps});
+    private nextPrefill: { field: string; value: any; readOnly: boolean; }[] = [];
 
     constructor(
-            private router: Router, 
-            private locationStrategy: LocationStrategy,
-            private titleService: Title) {
-        
+        private router: Router,
+        locationStrategy: LocationStrategy,
+        private titleService: Title) {
+
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
@@ -45,13 +46,12 @@ export class BreadcrumbsService implements OnDestroy {
                     break;
                 }
             }
-            // this.saveSession();
         });
 
         this.subscriptions.push(router.events.subscribe(event => {
             if (event instanceof NavigationEnd
-                    // navigating inside a page is not changing page
-                    && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) { 
+                // navigating inside a page is not changing page
+                && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) {
 
                 if(this.ignoreNavigationEnd) {
                     this.ignoreNavigationEnd = false;
@@ -68,21 +68,19 @@ export class BreadcrumbsService implements OnDestroy {
                     locationStrategy.replaceState(this.steps[this.popFoundedStepIndex].timestamp, 'todo', this.router.url, '');
                 } else {
                     this.removeStepsAfter(this.currentStepIndex);
-                    this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
+                    this.steps.push(new Step(null, this.router.url, timestamp));
                     this.onUpdateSteps.next({steps: this.steps, operation: 'ADD'});
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
-                    titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
                 }
-                if (this.nextMilestone) this.processMilestone();
-                this.nextMilestone = false;
-                this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                // this.saveSession();
+                this.nextPrefill.forEach(prefill => {
+                    this.currentStep.addPrefilled(prefill.field, prefill.value, prefill.readOnly);
+                });
+                this.nextPrefill = [];
             }
         }));
-        // this.loadSession();
     }
 
     ngOnDestroy(): void {
@@ -97,27 +95,26 @@ export class BreadcrumbsService implements OnDestroy {
         for (let i=index+1; i<this.steps.length; i++) {
             this.steps[i].disabled = true;
         }
-        this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
+        this.onUpdateSteps.next({steps: this.steps, operation: 'FOCUS'});
     }
 
     public nameStep(label: string) {
-        this.nextLabel = label;
-        // this.saveSession();
+        setTimeout(() => {
+            this.currentStep.label = label;
+            this.titleService.setTitle('Shanoir' + (label ? ' - ' + label : ''));
+        });
     }
 
     public markMilestone() {
-        this.nextMilestone = true;
-        // this.saveSession();
-    }
-
-    public resetMilestone() {
-        this.nextMilestone = false;
+        setTimeout(() => {
+            this.processMilestone();
+        });
     }
 
     public currentStepAsMilestone(label?: string) {
         this.processMilestone(label);
     }
-    
+
     private processMilestone(label?: string) {
         this.currentStep.milestone = true;
         if (label) this.currentStep.label = label;
@@ -176,40 +173,6 @@ export class BreadcrumbsService implements OnDestroy {
         return false;
     }
 
-    // public saveSession() {
-    //     let stepsJSON = [];
-    //     for(let step of this.steps) {
-    //         stepsJSON.push(step.save())
-    //     }
-
-    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
-    //         steps: stepsJSON, 
-    //         popFoundedStepIndex: this.popFoundedStepIndex,
-    //         replace: this.replace,
-    //         currentStepIndex: this.currentStepIndex,
-    //         nextLabel: this.nextLabel,
-    //         nextMilestone: this.nextMilestone }));
-    // }
-
-    // public loadSession() {
-    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
-    //     if(json == null) {
-    //         return;
-    //     }
-    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
-    //     this.replace = json.replace;
-    //     this.currentStepIndex = json.currentStepIndex;
-    //     this.nextLabel = json.nextLabel;
-    //     this.nextMilestone = json.nextMilestone;
-    //     this.steps = [];
-    //     for(let step of json.steps) {
-    //         this.steps.push(Step.load(step));
-    //     }
-
-    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
-    //     this.ignoreNavigationEnd = true;
-    // }
-
     public findImportMode(): ImportMode {
         for (let i=this.currentStepIndex; i>=0; i--) {
             if (this.steps[i].importStart) return this.steps[i].importMode;
@@ -217,20 +180,26 @@ export class BreadcrumbsService implements OnDestroy {
         return null;
     }
 
+    public addNextStepPrefilled(field: string, value: any, readOnly: boolean = false) {
+        this.nextPrefill.push({ field, value, readOnly });
+    }
+
 }
 
 export class Step {
-
     constructor(
-            public label: string,
-            public route: string,
-            public timestamp: number) {}
+        public label: string,
+        public route: string,
+        public timestamp: number) {}
 
     public id = new Date().getTime();
     public subscribers: number = 0;
     public disabled: boolean = false;
     public displayWaitStatus: boolean = true;
-    public prefilled: any[] = [];
+    public prefilled: { field: string, value: SuperPromise<any>}[] = [];
+
+    private resolvedPrefilledValues: Record<string, {value: any, readonly?: boolean}> = {};
+
     public waitStep: Step;
     private onSaveSubject: Subject<any> = new Subject<any>();
     public milestone: boolean = false;
@@ -238,6 +207,8 @@ export class Step {
     public data: any = {};
     public importStart: boolean = false;
     public importMode: ImportMode;
+
+    public uniqueId: number = Math.floor(Math.random() * 1000000);
 
     private onSave(): Subject<any> {
         this.subscribers++;
@@ -267,17 +238,51 @@ export class Step {
         return this.waitStep != null && this.waitStep != undefined;
     }
 
-    public addPrefilled(field: string, value: any) {
-        this.prefilled.push({field: field, value: value});
-    }
-
     public isPrefilled(field: string): boolean {
         return this.prefilled.filter(obj => obj.field == field).length > 0;
     }
 
-    public getPrefilledValue(field: string): any {
-        let found: any[] = this.prefilled.filter(obj => obj.field == field);
-        return found && found.length > 0 ? found[0].value : undefined;
+    public addPrefilled(field: string, value: any, readOnly: boolean = false) {
+        const found = this.prefilled.find(obj => obj.field === field);
+        if (found) {
+            this.resolvedPrefilledValues[field] = {value: value, readonly: readOnly};
+            found.value.resolve(value);
+        } else {
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
+            this.prefilled.push({ field, value: superPro });
+            this.resolvedPrefilledValues[field] = {value: value, readonly: readOnly};
+            superPro.resolve(value);
+        }
+    }
+
+    public getPrefilled(field: string): Promise<{value: any, readonly?: boolean}> {
+        const found = this.prefilled.find(obj => obj.field === field);
+        if (found) {
+            return SuperPromise.timeoutPromise().then(() => {
+                return this.resolvedPrefilledValues[field];
+            });
+        } else {
+            const superPro = new SuperPromise<{value: any, readonly?: boolean}>();
+            this.prefilled.push({ field, value: superPro });
+            return superPro;
+        }
+    }
+
+    public removePrefilled(field: string) {
+        const found = this.prefilled.find(obj => obj.field === field);
+        if (found) {
+            this.prefilled = this.prefilled.filter(obj => obj.field !== field);
+            delete this.resolvedPrefilledValues[field];
+        }
+    }
+
+
+    public getPrefilledKeys(): string[] {
+        return Object.entries(this.resolvedPrefilledValues).map(([key,]) => key);
+    }
+
+    getPrefilledValue(field: string): Promise<any> {
+        return this.getPrefilled(field).then(res => res?.value);
     }
 
     public resetWait() {

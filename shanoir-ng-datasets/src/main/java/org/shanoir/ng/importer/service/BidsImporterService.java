@@ -1,14 +1,33 @@
 package org.shanoir.ng.importer.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.tomcat.util.json.JSONParser;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.model.*;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -34,16 +53,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BidsImporterService {
@@ -95,57 +107,58 @@ public class BidsImporterService {
 
 			// Check data type according to data type
 			switch (workfolder.getName()) {
-			case "anat":
-				importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "func":
-				importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "dwi":
-				importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "fmap":
-				importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "perf":
-				importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "meg":
-				importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
-				break;
-			case "ieeg":
-				importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
-				break;
-			case "eeg":
-				importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
-				break;
-			case "ct":
-				importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
-				break;
-			case "beh":
-				importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
-				break;
-			case "pet":
-				importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
-				break;
-			case "micr":
-				importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
-				break;
-			case "nirs":
-				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
-				break;
-			case "xa":
-				importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
-				break;
-			default:
-				if (event != null) {
-					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
-					event.setStatus(ShanoirEvent.ERROR);
-					event.setMessage("The data type folder is not recognized. Please update your BIDS archive following the rules.");
-					event.setProgress(-1f);
-					eventService.publishEvent(event);
-				}
-				break;
+				case "anat":
+					importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "func":
+					importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "dwi":
+					importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "fmap":
+					importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "perf":
+					importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
+					break;
+				case "meg":
+					importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
+					break;
+				case "ieeg":
+					importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
+					break;
+				case "eeg":
+					importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
+					break;
+				case "ct":
+					importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
+					break;
+				case "beh":
+					importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
+					break;
+				case "pet":
+					importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
+					break;
+				case "micr":
+					importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
+					break;
+				case "nirs":
+					importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
+					break;
+				case "xa":
+					importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
+					break;
+				default:
+					if (event != null) {
+						String msg = "The data type folder is not recognized (given: " + workfolder.getName() + "). Please update your BIDS archive following the rules.";
+						LOG.error(msg);
+						event.setStatus(ShanoirEvent.ERROR);
+						event.setMessage(msg);
+						event.setProgress(-1f);
+						eventService.publishEvent(event);
+					}
+					break;
 			}
 		} catch (Exception e) {
 			LOG.error("An unexpected exception occured during the import of a BIDS dataset.", e);
@@ -181,7 +194,10 @@ public class BidsImporterService {
 		Set<Dataset> datasets = new HashSet<>();
 		float progress = 0f;
 
-		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
+		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
+			public boolean accept(File arg0, String name) {
+				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+			}});
 		
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
 		
@@ -254,8 +270,11 @@ public class BidsImporterService {
 			files.add(dsFile);
 			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file
-				JSONParser json = new JSONParser(new FileReader(importedFile));
-				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				//JSONParser json = new JSONParser(new FileReader(importedFile));
+				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				ObjectMapper jsonMapper = new ObjectMapper();
+				// Parse JSON file into a LinkedHashMap
+				LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
 				if (jsonObject.get("DeviceSerialNumber") != null) {
 					String code = (String) jsonObject.get("DeviceSerialNumber");
 					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;

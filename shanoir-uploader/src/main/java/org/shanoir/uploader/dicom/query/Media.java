@@ -1,8 +1,8 @@
 package org.shanoir.uploader.dicom.query;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
@@ -17,13 +17,13 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
 public class Media implements DicomTreeNode {
 
 	/** The related patients. */
-	private LinkedHashMap<String, DicomTreeNode> relatedPatients;
+	private List<DicomTreeNode> relatedPatients;
 
 	/**
 	 * Creates a new Media object.
 	 */
 	public Media() {
-		this.relatedPatients = new LinkedHashMap<String, DicomTreeNode>();
+		this.relatedPatients = new ArrayList<DicomTreeNode>();
 	}
 
 	/**
@@ -34,8 +34,8 @@ public class Media implements DicomTreeNode {
 	 * @param patient
 	 *            patient
 	 */
-	public void addTreeNode(final String id, final DicomTreeNode patient) {
-		this.relatedPatients.put(id, patient);
+	public void addTreeNode(final DicomTreeNode patient) {
+		this.relatedPatients.add(patient);
 		((PatientTreeNode) patient).setParent(this);
 	}
 
@@ -47,7 +47,7 @@ public class Media implements DicomTreeNode {
 	 *
 	 * @return the child
 	 */
-	public TreeNode getChild(final Object id) {
+	public TreeNode getChild(final int id) {
 		return (TreeNode) relatedPatients.get(id);
 	}
 
@@ -57,7 +57,7 @@ public class Media implements DicomTreeNode {
 	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
 	 */
 	public Iterator getChildren() {
-		return relatedPatients.entrySet().iterator();
+		return relatedPatients.iterator();
 	}
 
 	/*
@@ -92,7 +92,7 @@ public class Media implements DicomTreeNode {
 	 *
 	 * @return Returns the relatedPatients.
 	 */
-	public HashMap<String, DicomTreeNode> getTreeNodes() {
+	public List<DicomTreeNode> getTreeNodes() {
 		return relatedPatients;
 	}
 
@@ -133,7 +133,7 @@ public class Media implements DicomTreeNode {
 	@Override
 	public String toString() {
 		String result = "[Media:";
-		final Iterator<DicomTreeNode> it = this.getTreeNodes().values().iterator();
+		final Iterator<DicomTreeNode> it = this.getTreeNodes().iterator();
 		while (it.hasNext()) {
 			result += ("\t" + it.next().toString());
 		}
@@ -157,7 +157,7 @@ public class Media implements DicomTreeNode {
 	 */
 	public DicomTreeNode getFirstTreeNode() {
 		if (getTreeNodes() != null && !getTreeNodes().isEmpty()) {
-			return getTreeNodes().values().iterator().next();
+			return getTreeNodes().iterator().next();
 		}
 		return null;
 	}
@@ -174,13 +174,13 @@ public class Media implements DicomTreeNode {
 	 *            the serie
 	 */
 	public void addTreeNodes(final DicomTreeNode patient, final DicomTreeNode study, final DicomTreeNode serie) {
-		if (!getTreeNodes().containsKey(patient.getId())) {
-			addTreeNode(patient.getId(), patient);
+		if (!getTreeNodes().contains(patient)) {
+			addTreeNode(patient);
 		}
-		if (!patient.getTreeNodes().containsKey(study.getId())) {
-			patient.addTreeNode(study.getId(), study);
+		if (!patient.getTreeNodes().contains(study)) {
+			patient.addTreeNode(study);
 		}
-		study.addTreeNode(serie.getId(), serie);
+		study.addTreeNode(serie);
 	}
 
 	/**

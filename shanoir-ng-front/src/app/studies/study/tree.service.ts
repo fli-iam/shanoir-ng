@@ -14,39 +14,43 @@
 
 import { Injectable } from "@angular/core";
 import { ActivatedRoute, ActivationStart, Router } from '@angular/router';
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-import { Center } from 'src/app/centers/shared/center.model';
-import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { Examination } from 'src/app/examinations/shared/examination.model';
-import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
-import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
-import { Subject } from "src/app/subjects/shared/subject.model";
-import { User } from 'src/app/users/shared/user.model';
-import { Study } from "../shared/study.model";
+import { Subject as RxjsSubject } from 'rxjs';
 
+import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Center } from 'src/app/centers/shared/center.model';
 import { Coil } from "src/app/coils/shared/coil.model";
 import { CoilService } from "src/app/coils/shared/coil.service";
+import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { Examination } from 'src/app/examinations/shared/examination.model';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
+import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
+import { Subject } from "src/app/subjects/shared/subject.model";
+import { User } from 'src/app/users/shared/user.model';
+
+import { SuperPromise } from '../../utils/super-promise';
+import { Study } from "../shared/study.model";
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
-import { WaitBurstEnd } from "src/app/utils/wait-burst-end";
+
+export type DatasetForChain =  {id: number, outProcessing?: ProcessingForChain, acqId?: number, examId?: number, subjectId?: number, studyId?: number};
+export type ProcessingForChain =  {id: number, outDataset: DatasetForChain};
 
 @Injectable()
 export class TreeService {
-
-    _selection: Selection = null;
+    
+    private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
     study: Study;
@@ -55,30 +59,31 @@ export class TreeService {
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
+    public previouslyOpened: boolean = false;
     selectedNode: ShanoirNode;
-
+    onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
+    studyLoading: boolean = false;
+    reopenAfterNavigation: boolean = false;
+    
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
     }
     
-    get selection(): Selection {
-        return this._selection;
-    }
-
-    set selection(selection: Selection) {
-        this._selection = selection;
-        if (this.treeOpened) {
-            this.changeSelection();
-        }
-    }   
-
     get treeOpened(): boolean {
         return this._treeOpened;
     }
 
     set treeOpened(opened: boolean) {
+        this.previouslyOpened = this._treeOpened;
         if (!this._treeOpened && opened) {
             this.changeSelection();
+            if (this.selection?.studyId && this.selection?.studyId?.includes(this.studyNode?.id)) {
+                this.studyNodeInit.then(() => {
+                    this._treeOpened = opened;
+                });
+            } else {
+                this._treeOpened = opened;
+            }
         }
         this._treeOpened = opened;
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
@@ -91,21 +96,13 @@ export class TreeService {
     get canDownloadStudy(): boolean {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
-    
-    private openCloseBurst: WaitBurstEnd = new WaitBurstEnd(this.setTreeAvailable.bind(this), 100);
-    private _lastTreeAvailable: boolean;
  
     get treeAvailable(): boolean {
         return this._treeAvailable;
     }
 
     set treeAvailable(treeAvailable: boolean) {
-        this._lastTreeAvailable = treeAvailable;
-        this.openCloseBurst.fire();
-    }
-
-    setTreeAvailable() {
-        this._treeAvailable = this._lastTreeAvailable; 
+        this._treeAvailable = treeAvailable;
     }
 
     constructor(
@@ -127,8 +124,17 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
+                if (this.reopenAfterNavigation) {
+                    this.treeOpened = true;
+                    this.reopenAfterNavigation = false;
+                }
                 setTimeout(() => {
-                    this.treeAvailable = event?.snapshot?.data?.['treeAvailable'];
+                    const newState: boolean = event?.snapshot?.data?.['treeAvailable'];
+                    if (newState && !this.treeAvailable) {
+                        this.treeAvailable = true;
+                    } else if (!newState && this.treeAvailable) {
+                        this.treeAvailable = false;
+                    }
                 });
             }
         });
@@ -136,19 +142,53 @@ export class TreeService {
 
     updateTree() {
         // update everything
-        let studyId: number = this.study?.id;
+        const studyId: number = this.study?.id;
         this.study = null;
         this.initStudy(studyId).then(() => {
             this.changeSelection();
         });
     }
 
+    collapseAll() {
+        this.collapseNode(this.studyNode, false);
+    }
+
+    private collapseNode(node: ShanoirNode, collapseRoot: boolean = true): Promise<void> {
+        return Promise.all(
+            Object.getOwnPropertyNames(node).map(propLabel => {
+                const prop = node[propLabel];
+                if (prop instanceof ShanoirNode && propLabel != 'parent') {
+                    return this.collapseNode(prop);
+                } else if (Array.isArray(prop) && prop[0] instanceof ShanoirNode) {
+                    return Promise.all(prop.map(el => this.collapseNode(el))).then();
+                }
+            })
+        ).then(() => {
+            if (collapseRoot) {
+                return node.close();
+            }
+        });
+        
+    }
+
+    scrollToSelected() {
+        return this.selectNode(this.selection).then(() => {
+            this.scrollTo(this.selectedNode);
+        })
+    }
+
+    scrollTo(node: ShanoirNode) {
+        setTimeout(() => {
+            this.onScrollToSelected.next(node);
+        })
+    }
+
     removeCurrentNode() {
         if (this.selectedNode?.parent) {
             const route: string = this.selectedNode.route;
-            Object.entries(this.selectedNode.parent).forEach((entry, index) => {
+            Object.entries(this.selectedNode.parent).forEach((entry, ) => {
                 if (Array.isArray(entry[1])) {
-                    let i: number = entry[1].findIndex(node => node.route == route);
+                    const i: number = entry[1].findIndex(node => node.route == route);
                     entry[1].splice(i, 1);
                 }
             });
@@ -167,101 +207,106 @@ export class TreeService {
         activatedRoute.snapshot.data['treeAvailable'] = true;
     }
     
-    private changeSelection(): void {
+    private changeSelection(): Promise<ShanoirNode> {
         if (this.selection?.type == 'study') {
-            this.initStudy(this.selection.id).then(() => {
+            return this.initStudy(this.selection.id).then(() => {
                 this.studyNode.subjectsNode.open();
                 this.selectedNode = this.studyNode;
                 this.treeAvailable = !!this.selectedNode;
+                return this.studyNode;
             });
         } else {
             let studyLoaded: Promise<void>;
-            if (this.study?.id && this.selection.studyId?.includes(this.study?.id)) {
+            if (this.study?.id && this.selection?.studyId?.includes(this.study?.id)) {
                 studyLoaded = Promise.resolve();
-            } else if (this.selection.studyId?.[0]) {
+            } else if (this.selection?.studyId?.[0]) {
                 studyLoaded = this.initStudy(this.selection.studyId[0]);
             } else {
                 this.treeAvailable = false;
             }
             
-            Promise.all([studyLoaded]).then(() => {
+            return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
                 this.selectedNode = node;
                 this.treeAvailable = !!this.selectedNode;
+                return node;
             });
             
         }
     }
 
-    selectNode(selection: Selection): Promise<ShanoirNode> {
-        if (selection?.type == 'dataset') {
-            return this.selectDataset(selection.entity as Dataset);
-        } else if (selection?.type == 'dicomMetadata') {
-            return this.selectDicomMetadata(selection.entity as Dataset);
-        } else if (selection?.type == 'subject') {
-            return this.selectSubject(selection.id);
-        } else if (selection?.type == 'acquisition') {
-            return this.selectAcquisition(selection.entity as DatasetAcquisition);
-        } else if (selection?.type == 'processing') {
-            return this.selectProcessing(selection.entity as DatasetProcessing);
-        } else if (selection?.type == 'examination') {
-            return this.selectExamination(selection.entity as Examination);
-        } else if (selection?.type == 'center') {
-            return this.selectCenter(selection.id);
-        } else if (selection?.type == 'equipment') {
-            return this.selectEquipment(selection.entity as AcquisitionEquipment);
-        } else if (selection?.type == 'qualitycard') {
-            return this.selectQualitycard(selection.id);
-        } else if (selection?.type == 'studycard') {
-            return this.selectStudycard(selection.id);
-        } else if (selection?.type == 'user') {
-            return this.selectUser(selection.id);
-        } else if (selection?.type == 'coil') {
-            return this.selectCoil(selection.entity as Coil);
+    select(selection: Selection): Promise<void> {
+        if (selection.equals(this.selection)) return Promise.resolve();
+        this.selection = selection;
+        if (this.treeOpened) {
+            return this.changeSelection().then(() => {
+                this.scrollToSelected();
+            });
         }
+    }
+
+    private selectNode(selection: Selection): Promise<ShanoirNode> {
+        let node: Promise<ShanoirNode>;
+        if (selection?.type == 'dataset') {
+            node = this.selectDataset(selection.entity as Dataset);
+        } else if (selection?.type == 'dicomMetadata') {
+            node = this.selectDicomMetadata(selection.entity as Dataset);
+        } else if (selection?.type == 'subject') {
+            node = this.selectSubject(selection.id);
+        } else if (selection?.type == 'acquisition') {
+            node = this.selectAcquisition(selection.entity as DatasetAcquisition);
+        } else if (selection?.type == 'processing') {
+            node = this.selectProcessing(selection.entity as DatasetProcessing);
+        } else if (selection?.type == 'examination') {
+            node = this.selectExamination(selection.entity as Examination);
+        } else if (selection?.type == 'center') {
+            node = this.selectCenter(selection.id);
+        } else if (selection?.type == 'equipment') {
+            node = this.selectEquipment(selection.entity as AcquisitionEquipment);
+        } else if (selection?.type == 'qualitycard') {
+            node = this.selectQualitycard(selection.id);
+        } else if (selection?.type == 'studycard') {
+            node = this.selectStudycard(selection.id);
+        } else if (selection?.type == 'user') {
+            node = this.selectUser(selection.id);
+        } else if (selection?.type == 'coil') {
+            node = this.selectCoil(selection.entity as Coil);
+        } else node = Promise.resolve(null);
+        node.then(n => {
+            if(n) n.fake = false;
+        });
+        return node;
     }
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
         return this.studyNodeOpenPromise.then(() => {
             return this.studyNode.subjectsNode.open().then(() => {
-                return this.findDatasetParent(dataset).then(ret => {
+                return this.findDatasetChainFromBottomDataset(dataset).then(ret => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
-                            return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
+                            return sn.id == ret.subjectId;
                         });
                         if (subjectNode) {
+                            subjectNode.fake = false;
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
-                                    let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
+                                    const examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.examId);
                                     if (examNode) {
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
-                                                let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
+                                                const acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.acqId);
                                                 if (acqNode) {
+                                                    this.scrollTo(acqNode);
                                                     return acqNode.open()?.then(() => {
                                                         if (acqNode.datasets != UNLOADED) {
-                                                            let dsNode: DatasetNode = acqNode.datasets?.find(acqDs => acqDs.id == ret.topParent.id);
+                                                            const dsNode: DatasetNode = acqNode.datasets?.find(acqDs => acqDs.id == ret.id);
                                                             if (dsNode) {
+                                                                this.scrollTo(dsNode);
                                                                 return dsNode.open().then(() => {
-                                                                    if (ret.topParent.id != (typeof dataset == 'number' ? dataset : dataset.id)) { // if sub processing/datasets 
-                                                                        if (dsNode.processings != UNLOADED) {
-                                                                            let procNode: ProcessingNode = dsNode.processings.find(proc => {
-                                                                                if (proc.datasets != UNLOADED) {
-                                                                                    proc.datasets?.find(outDs => outDs.id == (typeof dataset == 'number' ? dataset : dataset.id));
-                                                                                }
-                                                                            });
-                                                                            if (procNode) {
-                                                                                return procNode.open().then(() => {
-                                                                                    if (procNode.datasets != UNLOADED) {
-                                                                                        return procNode.datasets?.find(dsNd => dsNd.id == (typeof dataset == 'number' ? dataset : dataset.id));
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        }
-                                                                    } else {
-                                                                        return dsNode;
-                                                                    }
+                                                                    return this.openDatasetProcessingChain(dsNode, ret);
                                                                 });
                                                             }
                                                         }
@@ -279,27 +324,65 @@ export class TreeService {
         });
     }
 
+    private openDatasetProcessingChain(dsNode: DatasetNode, chain: DatasetForChain): any {
+        if (chain.outProcessing) { // if sub processing/datasets 
+            if (dsNode.processings != UNLOADED) {
+                const procNode: ProcessingNode = dsNode.processings.find(proc => {
+                    return proc.id == chain.outProcessing.id;
+                });
+                if (procNode) {
+                    return procNode.open().then(() => {
+                        if (procNode.datasets != UNLOADED) {
+                            const childDsNode: DatasetNode = procNode.datasets?.find(dsNd => dsNd.id == chain.outProcessing?.outDataset?.id);
+                            return this.openDatasetProcessingChain(childDsNode, chain.outProcessing.outDataset);
+                        }
+                    });
+                }
+            }
+        } else {
+            return dsNode;
+        }
+    }
+
     private selectDicomMetadata(ds: number | Dataset): Promise<MetadataNode> {
         return this.selectDataset(ds).then(parentDsNode => {
-            parentDsNode?.open();
-            return new MetadataNode(parentDsNode, parentDsNode?.id, 'Dicom Metadata')
+            return parentDsNode?.open().then(() => {
+                return parentDsNode.metadata;
+            });
         });
     }
 
-    private findDatasetParent(childDataset: number | Dataset, botomChild?: Dataset): Promise<{topParent: Dataset, bottomChild: Dataset}> {
-        let childDatasetPromise: Promise<Dataset>;
-        if (typeof childDataset == 'number') {
-            childDatasetPromise = this.datasetService.get(childDataset);
+    public findDatasetChainFromBottomDataset(dataset: Dataset | number): Promise<DatasetForChain> {
+        let datasetPromise: Promise<Dataset>;
+        if (typeof dataset == 'number') {
+            datasetPromise = this.datasetService.get(dataset);
         } else {
-            childDatasetPromise = Promise.resolve(childDataset);
+            datasetPromise = Promise.resolve(dataset);
         }
-        return childDatasetPromise.then(ds => {
-            if (!botomChild) botomChild = ds;
-            if (ds.datasetProcessing) {
-                if (!(ds.datasetProcessing.inputDatasets?.length > 0)) throw Error('no input ds on this processing');
-                return this.findDatasetParent(ds.datasetProcessing.inputDatasets[0].id, botomChild);
+        return datasetPromise.then(ds => {
+            if (ds?.hasProcessing) {
+                return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
-                return {topParent: ds, bottomChild: botomChild};
+                return Promise.resolve({id: ds?.id,
+                    acqId: ds.datasetAcquisition?.id,
+                    examId: ds.datasetAcquisition?.examination?.id,
+                    subjectId: ds.datasetAcquisition?.examination?.subject?.id || ds.subject?.id,
+                    studyId: ds.datasetAcquisition?.examination?.study?.id || ds.study?.id});
+            }
+        });
+    }
+
+    private findDatasetChain(bottomChain: DatasetForChain): Promise<DatasetForChain> {
+        if (!bottomChain) return Promise.reject('cannot have null or undefined as input');
+        return this.datasetService.get(bottomChain.id).then(ds => {
+            if (ds.hasProcessing) {
+                return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: bottomChain}})
+            } else {
+                bottomChain.acqId = ds.datasetAcquisition?.id;
+                bottomChain.examId = ds.datasetAcquisition?.examination?.id;
+                bottomChain.subjectId = ds.datasetAcquisition?.examination?.subject?.id || ds.subject?.id;
+                bottomChain.studyId = ds.datasetAcquisition?.examination?.study?.id || ds.study?.id;
+                return Promise.resolve(bottomChain);
             }
         });
     }
@@ -312,7 +395,7 @@ export class TreeService {
             processingPromise = Promise.resolve(processing);
         }
         return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
@@ -333,12 +416,14 @@ export class TreeService {
                 }
                 return acqPromise.then(dsa => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
                         if (subjectNode) {
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
-                                    let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
+                                    const examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
                                     if (examNode) {
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 return examNode.datasetAcquisitions?.find(dsan => dsan.id == dsa.id);
@@ -365,8 +450,9 @@ export class TreeService {
                 }
                 return examPromise.then(exam => {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
-                        let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
+                        const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
                         if (subjectNode) {
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     return subjectNode.examinations?.find(en => en.id == exam.id);
@@ -407,7 +493,7 @@ export class TreeService {
                     : Promise.resolve(equipment)
                 ).then(acqEq => {
                     if (this.studyNode.centersNode.centers != UNLOADED) {
-                        let centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => acqEq.center.id == cn.id);
+                        const centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => acqEq.center.id == cn.id);
                         return centerNode?.open().then(() => {
                             if (centerNode.acquisitionEquipments != UNLOADED) {
                                 return centerNode.acquisitionEquipments?.find(aen => aen.id == acqEq.id);
@@ -427,7 +513,7 @@ export class TreeService {
                     : Promise.resolve(coil)
                 ).then(coil => {
                     if (this.studyNode.centersNode.centers != UNLOADED) {
-                        let centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => coil.center.id == cn.id);
+                        const centerNode: CenterNode = this.studyNode.centersNode.centers?.find(cn => coil.center.id == cn.id);
                         return centerNode?.open().then(() => {
                             if (centerNode.coils != UNLOADED) {
                                 return centerNode.coils?.find(cn => cn.id == coil.id);
@@ -474,15 +560,16 @@ export class TreeService {
         if (this.study?.id == id) {
             return Promise.resolve();
         } else {
+            this.studyLoading = true;
             this.studyNodeOpenPromise = new SuperPromise(); 
             this.studyNodeInit = new SuperPromise();
-            let studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
+            const studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
                 this.study = study;
                 this.studyPromise = new SuperPromise();
                 this.studyPromise.resolve(study);
             });
 
-            let rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
+            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
                 ? Promise.resolve(StudyUserRight.all())
                 : this.studyRightsService.getMyRightsForStudy(id)
             ).then(rights => {
@@ -495,13 +582,17 @@ export class TreeService {
                     return this.studyNode.open().then(() => {
                         this.studyNodeOpenPromise.resolve();
                     });
+                }).finally(() => {
+                    this.studyLoading = false;
                 });
+            }).finally(() => {
+                this.studyLoading = false;
             });
         }
     }
 
     public buildStudyNode(study: Study, rights: StudyUserRight[]): StudyNode {
-        let studyNode: StudyNode = new StudyNode(
+        const studyNode: StudyNode = new StudyNode(
             null,
             study.id,
             study.name,
@@ -513,7 +604,7 @@ export class TreeService {
             rights
         );
             
-        let subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
+        const subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
             if(subjectStudy.subject.preclinical){
                 return PreclinicalSubjectNode.fromSubjectStudy(
                     subjectStudy, 
@@ -529,14 +620,18 @@ export class TreeService {
                     this.canDownloadStudy
                 );
             }
+        }).map(s => {
+            s.fake = !this.isSelected(s.id, 'subject');
+            return s;
         });
-        let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
+        const centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
             return new CenterNode(studyNode, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
         });
-        let members: MemberNode[] = study.studyUserList.map(studyUser => {
+        const members: MemberNode[] = study.studyUserList.map(studyUser => {
             let memberNode: MemberNode = null;
-            let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
+            const rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
             memberNode = new MemberNode(studyNode, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
+            memberNode.fake = !this.isSelected(memberNode.id, 'user');
             return memberNode;
         });
         members.sort((a: MemberNode, b: MemberNode) => {
@@ -567,6 +662,18 @@ export class TreeService {
             }
         });
     }
+
+    memberStudyOpenedAndTreeActive(userId: number): boolean {
+        return this.treeOpened && this.treeAvailable
+            && this.studyNode?.membersNode?.members 
+            && this.studyNode?.membersNode?.members != UNLOADED
+            && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
+    }
+
+    closeTemporarily() {
+        this.treeOpened = false;
+        this.reopenAfterNavigation = true;
+    }
 }
 
 
@@ -580,6 +687,10 @@ export class Selection {
         public studyId: number[],
         public entity?: Entity
     ) {}
+
+    equals(otherSelection: Selection): boolean {
+        return otherSelection && this.id == otherSelection.id && this.type == otherSelection.type;
+    }
 
     isSelected(id: number, type: NodeType): boolean {
         return id == this.id && type == this.type;
@@ -606,7 +717,7 @@ export class Selection {
     }
 
     static fromDataset(dataset: Dataset): Selection {
-        return new Selection(dataset.id, 'dataset', dataset.datasetProcessing ? dataset.datasetProcessing.outputDatasets?.map(ods => ods.study.id) : [dataset.datasetAcquisition.examination.study.id], dataset);
+        return new Selection(dataset.id, 'dataset', dataset.datasetProcessing ? [dataset.study.id] : [dataset.datasetAcquisition.examination.study.id], dataset);
     }
 
     static fromProcessing(processing: DatasetProcessing): Selection {

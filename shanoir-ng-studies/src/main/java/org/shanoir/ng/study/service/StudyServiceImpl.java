@@ -33,6 +33,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -66,6 +67,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
+import org.shanoir.ng.utils.EqualCheckInterface;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -269,6 +271,24 @@ public class StudyServiceImpl implements StudyService {
 		return studyDb;
 	}
 
+	private class StudyEqualCheck implements EqualCheckInterface<StudyCenter> {
+
+        @Override
+        public boolean check(StudyCenter a, StudyCenter b) {
+            boolean result =  a != null && b != null && (
+					a.getId() != null && a.getId().equals(b.getId()) || (
+						a.getCenter() != null && a.getCenter().getId() != null 
+						&& b.getCenter() != null && b.getCenter().getId() != null 
+						&& a.getCenter().getId().equals(b.getCenter().getId())
+						&& a.getStudy() != null && a.getStudy().getId() != null
+						&& b.getStudy() != null && b.getStudy().getId() != null
+						&& a.getStudy().getId().equals(b.getStudy().getId())
+					) 
+			);
+			return result;
+        }
+	}
+
 	@Override
 	@Transactional(rollbackOn = {ShanoirException.class})
 	public Study update(Study study) throws ShanoirException {
@@ -293,13 +313,15 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
 		studyDb.setWithExamination(study.isWithExamination());
-		studyDb.setMonoCenter(study.isMonoCenter());
 
 		if (study.getStudyCenterList() != null) {
-			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
 			}
+			for (StudyCenter studyCenter : study.getStudyCenterList()) {
+				studyCenter.setStudy(studyDb);
+			}
+			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList(), new StudyEqualCheck());
 		}
 
 		if (study.getTags() != null) {
@@ -372,16 +394,6 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		if (study.getSubjectStudyList() != null) {
-			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
-			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
-			subjectStudyListDb.clear();
-			subjectStudyListDb.addAll(subjectStudyListNew);
-			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
-				dbSubjectStudy.setStudy(studyDb);
-			}
-			studyDb = studyRepository.save(studyDb);
-		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
@@ -394,10 +406,6 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
 
 		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
@@ -497,6 +505,20 @@ public class StudyServiceImpl implements StudyService {
 		}
 		setNumberOfSubjectsAndExaminations(studies);
 		setFilePaths(studies);
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studies);
+	}
+
+	@Override
+	public List<IdName> findAllNames() {
+		List<IdName> studies;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			studies = studyRepository.findAllIdAndName();
+		} else {
+			studies = studyRepository
+					.findIdAndNameByUserAndRight(
+							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+		}
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
 	}
@@ -835,14 +857,14 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
-					if(!detailedStorageVolumes.containsKey(study.getId())){
-						return;
-					}
-					Long filesSize = this.getStudyFilesSize(study);
-					StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
-					dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-					dto.setTotal(filesSize + dto.getTotal());
-				}
+			if(!detailedStorageVolumes.containsKey(study.getId())) {
+				return;
+			}
+			Long filesSize = this.getStudyFilesSize(study);
+			StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+			dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+			dto.setTotal(filesSize + dto.getTotal());
+		}
 		);
 
 		return detailedStorageVolumes;
@@ -881,5 +903,11 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Tag> getTagsFromStudy(Long studyId) {
 		return tagRepository.findByStudyId(studyId);
+	}
+
+	@Override
+	@Transactional
+	public List<Long> queryStudiesByRight(StudyUserRight right) {
+		return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
 	}
 }

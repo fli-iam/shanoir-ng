@@ -27,7 +27,6 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.model.Cardinality;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
@@ -74,7 +73,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
-		@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		    @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
         try {
             if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
                 throw new RestServiceException(
@@ -252,8 +251,12 @@ public class StudyCardApiController implements StudyCardApi {
         }
         
         // Update solr metadata
-        solrService.updateDatasetsAsync(datasetIds);
-        
+        try {
+            solrService.updateDatasetsAsync(datasetIds);
+        }catch (Exception e){
+            LOG.error("Solr update failed for datasets {}", datasetIds, e);
+        }
+
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 

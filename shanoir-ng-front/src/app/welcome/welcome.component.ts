@@ -1,21 +1,23 @@
+
 import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    HostListener,
-    Inject,
-    OnInit,
-    Renderer2,
-    ViewChild,
-    ViewEncapsulation
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnInit,
+  Renderer2,
+  ViewChild,
+  ViewEncapsulation,
+  DOCUMENT
 } from '@angular/core';
+
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { ImagesUrlUtil } from "../shared/utils/images-url.util";
+import { StudyType } from "../studies/shared/study-type.enum";
+import { StudyLight } from "../studies/shared/study.dto";
+import { StudyService } from "../studies/shared/study.service";
 import * as AppUtils from "../utils/app.utils";
-import {ImagesUrlUtil} from "../shared/utils/images-url.util";
-import {StudyService} from "../studies/shared/study.service";
-import {StudyLight} from "../studies/shared/study.dto";
-import {StudyType} from "../studies/shared/study-type.enum";
-import {isDarkColor} from "../utils/app.utils";
-import {DOCUMENT} from "@angular/common";
+import { isDarkColor } from "../utils/app.utils";
 
 @Component({
     selector: 'app-welcome',
@@ -37,6 +39,7 @@ export class WelcomeComponent implements OnInit {
 	constructor(
 		private studyService: StudyService,
         private _renderer2: Renderer2,
+        private confirmDialogService: ConfirmDialogService,
         @Inject(DOCUMENT) private _document: Document
 	) { }
 
@@ -45,11 +48,11 @@ export class WelcomeComponent implements OnInit {
     }
 
     addSchemaToDOM(): void {
-        let script = this._renderer2.createElement('script');
+        const script = this._renderer2.createElement('script');
         script.type = `application/ld+json`;
 
         let datasetStr: string = "";
-        let shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
+        const shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
         this.studies?.forEach( study => {
 
@@ -168,7 +171,14 @@ export class WelcomeComponent implements OnInit {
 	}
 
 	accessRequest(study: any): void {
-		window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request";
+        this.confirmDialogService.choose('Do you already have a Shanoir account ?', null, {yes: 'Yes, log in', no: 'No, request an account', cancel: 'Cancel'})
+        .then(choice => {
+            if (choice == 'yes') {
+                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/access-request/study/" + study.id;
+            } else if (choice == 'no') {
+                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request?study=" + study.name + "&function=consumer";
+            }
+        });
 	}
 
 	getFontColor(colorInp: string): boolean {
@@ -176,8 +186,8 @@ export class WelcomeComponent implements OnInit {
 	}
 
 	@HostListener('window:scroll', ['$event']) onWindowScroll(e) {
-		let scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
-		let end = this.showMore?.nativeElement?.offsetTop;
+		const scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
+		const end = this.showMore?.nativeElement?.offsetTop;
 		if (scroll > end && this.studies.length > this.show) this.increaseShow();
 	}
 }

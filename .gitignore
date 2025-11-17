@@ -19,6 +19,7 @@ target
 **/.classpath
 .factorypath
 .project
+docker-compose-dev-debug.yml
 .vscode
 bin/
 docker-compose/database/3_init_preclinical.sql
@@ -28,7 +29,6 @@ shanoir-uploader/src/main/resources/key
 shanoir-uploader/src/main/resources/profile.OFSEP/key
 shanoir-uploader/src/main/resources/profile.OFSEP-Qualif/key
 shanoir-uploader/src/main/resources/pseudonymus
-shanoir-uploader/src/test/resources/acr_phantom_t1/
 shanoir-ng-tests/tests/geckodriver.log
 shanoir-ng-users/shanoir-events-log.log
 shanoir-ng-preclinical/nullbruker/
@@ -40,6 +40,8 @@ shanoir-ng-front/.angular
 *.project
 **/webapp
 *.js
+# ESLint config file
+!shanoir-ng-front/eslint.config.js
 .attach_pid*
 .env.bak
 /docker-compose/nginx/webapp/

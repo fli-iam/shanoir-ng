@@ -47,7 +47,7 @@ import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.PatientNameSorter;
-import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
 import org.shanoir.ng.importer.dicom.StudyDateSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -187,10 +187,10 @@ public class QueryPACSService {
 		Association association = connectAssociation(calling, called, true);
 		ImportJob importJob = new ImportJob();
 		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
-			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
-			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())
-			|| StringUtils.isNotBlank(dicomQuery.getStudyDescription())
-			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
+				|| StringUtils.isNotBlank(dicomQuery.getPatientID())
+				|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())
+				|| StringUtils.isNotBlank(dicomQuery.getStudyDescription())
+				|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
 			// patient root query level
 			if (!dicomQuery.isStudyRootQuery()) {
 				queryPatientLevel(association, dicomQuery, importJob);
@@ -199,6 +199,7 @@ public class QueryPACSService {
 				queryStudyLevel(association, dicomQuery, importJob);
 			}
 		} else {
+			releaseAssociation(association);
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
 		releaseAssociation(association);
@@ -504,6 +505,7 @@ public class QueryPACSService {
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
+			new DicomParam(Tag.AcquisitionTime),
 			new DicomParam(Tag.ProtocolName),
 			new DicomParam(Tag.Manufacturer),
 			new DicomParam(Tag.ManufacturerModelName),
@@ -513,7 +515,8 @@ public class QueryPACSService {
 		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
 			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
-			series.sort(new SeriesNumberOrDescriptionSorter());
+			series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+			LOG.info("{} series returned by DICOM server", series.size());
 			study.setSeries(series);
 		}
 	}
@@ -521,14 +524,9 @@ public class QueryPACSService {
 	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
-			if (serie.getNumberOfSeriesRelatedInstances() > 0) {
-				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
-				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-				serie.setIgnored(true);
-				serie.setSelected(false);
-			}
+			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
+			DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
+			DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 		} else {
 			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 			serie.setIgnored(true);
@@ -570,9 +568,15 @@ public class QueryPACSService {
 					}
 				}
 			});
-			instances.sort(new InstanceNumberSorter());
-			serie.setInstances(instances);
-			LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+			if (!instances.isEmpty()) {
+				instances.sort(new InstanceNumberSorter());
+				serie.setInstances(instances);
+				LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+			} else {
+				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+				serie.setIgnored(true);
+				serie.setSelected(false);
+			}
 		}
 	}
 

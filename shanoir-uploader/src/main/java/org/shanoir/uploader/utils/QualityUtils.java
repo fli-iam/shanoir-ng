@@ -17,7 +17,6 @@ import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
@@ -43,11 +42,10 @@ public class QualityUtils {
 
 	private static DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
+	public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
 
-		ExaminationData examinationData = new ExaminationData();
-		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
+		ExaminationData examinationData = new ExaminationData();
 		final File importJobDir = new File(importJob.getWorkFolder());
 		List<QualityCard> qualityCards = new ArrayList<>();
 		
@@ -58,17 +56,15 @@ public class QualityUtils {
 			logger.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
 			throw e;
 		}
-		
 
 		// If no quality cards are found for the study we skip the quality control
 		if (qualityCards == null || qualityCards.isEmpty()) {
 			logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
-
 			return qualityCardResult;
 		}
 		
 		// Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, true);
+		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
 		// Construct Dicom datasets from images
 		for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
@@ -92,9 +88,7 @@ public class QualityUtils {
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
 		examinationData.setStudyId(importJob.getStudyId());
-		// Set an Id to the subjectStudy to retrieve the qualityTag
-		subjectStudy.setId(importJob.getSubject().getId());
-		examinationData.setSubjectStudy(subjectStudy);
+		examinationData.setSubjectId(importJob.getSubject().getId());
 
 		try {
 			qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
@@ -103,7 +97,6 @@ public class QualityUtils {
 			throw e;
 		}
 		
-	
 		return qualityCardResult;
 	}
 
@@ -162,4 +155,5 @@ public class QualityUtils {
 
 		return scrollPane;
 	}
+
 }

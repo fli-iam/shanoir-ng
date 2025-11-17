@@ -11,41 +11,62 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Field } from '../../shared/reflect/field.decorator';
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { Tag } from "../../tags/tag.model";
+import { QualityTag } from "../../study-cards/shared/quality-card.model";
+import { SimpleStudy, Study } from "../../studies/shared/study.model";
+
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudy } from './subject-study.model';
-import { Sex } from './subject.types';
+import { Sex, SubjectType } from './subject.types';
 
 
 export class Subject extends Entity {
 
-    id: number;
-    examinations: Examination[];
-    name: string;
-    identifier: string;
-    birthDate: Date;
-    preclinical: boolean;
-    languageHemisphericDominance: "Left" | "Right";
-    manualHemisphericDominance: "Left" | "Right";
-    imagedObjectCategory: ImagedObjectCategory;
-    sex: Sex;
-    selected: boolean = false;
-    subjectStudyList: SubjectStudy[] = [];
+    @Field() id: number;
+    @Field() examinations: Examination[];
+    @Field() name: string;
+    @Field() identifier: string;
+    @Field() birthDate: Date;
+    @Field() preclinical: boolean;
+    @Field() languageHemisphericDominance: "Left" | "Right";
+    @Field() manualHemisphericDominance: "Left" | "Right";
+    @Field() imagedObjectCategory: ImagedObjectCategory;
+    @Field() sex: Sex;
+    @Field() selected: boolean = false;
+    @Field() subjectStudyList: SubjectStudy[] = [];
+    @Field() isAlreadyAnonymized: boolean = false;
+    @Field() subjectType: SubjectType;
+    @Field() physicallyInvolved: boolean;
+    @Field() tags: Tag[];
+    @Field() qualityTag: QualityTag;
+    @Field() study: Study;
 
-    public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
-        let subject = new Subject();
+    public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
+        const subject = new Subject();
         subject.id = id;
         subject.name = name;
         subject.identifier = identifier;
-        subject.subjectStudyList = [subjectStudy];
+        subject.study = new Study()
+        subject.study.id = study.id;
         return subject;
     }
 }
 
-export interface SimpleSubject {
+export class SimpleSubject {
     id: number;
     name: string;
     identifier: string;
     subjectStudyList: SubjectStudy[];
+    study: SimpleStudy;
+
+    constructor(subject: Subject) {
+        this.id = subject.id ? subject.id : null;
+        this.name = subject.name;
+        this.identifier = subject.identifier;
+        this.subjectStudyList = null;
+        this.study = subject.study;
+    }
 }

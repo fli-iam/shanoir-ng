@@ -16,7 +16,9 @@ package org.shanoir.ng.subject.controler;
 
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+
 import io.swagger.v3.oas.annotations.Parameter;
+
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -48,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import jakarta.transaction.Transactional;
+
 @Controller
 public class SubjectApiController implements SubjectApi {
 
@@ -73,11 +77,10 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Void> deleteSubject(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
-			// Delete all associated bids folders
+			// Delete all associated BIDS folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
-
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -95,6 +98,7 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
 		List<Subject> subjects = new ArrayList<>();
 		if(preclinical && clinical){
@@ -133,7 +137,7 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@RequestBody Subject subject,
 			@RequestParam(required = false) Long centerId,
-			final BindingResult result) throws RestServiceException {
+			final BindingResult result) throws ShanoirException, RestServiceException {
 		validate(subject, result);
 		Subject createdSubject;
 		if (centerId == null) {
@@ -164,7 +168,7 @@ public class SubjectApiController implements SubjectApi {
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
-			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
+			throw new RestServiceException(e, new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 
@@ -173,7 +177,6 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
-		
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
@@ -196,6 +199,7 @@ public class SubjectApiController implements SubjectApi {
 
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
+	@Transactional
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		// Get all allowed studies

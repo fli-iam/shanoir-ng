@@ -11,28 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, Input, ViewChild, ViewContainerRef, OnChanges} from '@angular/core'
+import {Component, ViewChild} from '@angular/core'
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
-
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
-import { ServiceLocator } from '../../../utils/locator.service';
-import { ConsoleService } from '../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
 
 @Component({
     selector: 'animal-examination-list',
     templateUrl: 'animal-examination-list.component.html',
-    providers: [ExaminationService],
     standalone: false
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
@@ -57,7 +54,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Id", field: "id" },
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : "",
@@ -135,20 +132,17 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                .then(examAnesthetics => {
                if (examAnesthetics && examAnesthetics.length > 0) {
                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                    const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
                     this.examAnestheticsService.deleteAnesthetic(examAnesthetic);
                }
         });
         this.extradataService.getExtraDatas(examinationId).then(extradatas => {
             if(extradatas && extradatas.length > 0){
-            	for (let data of extradatas) {
-            		this.extradataService.deleteExtradata(data).then((res) => {});
+            	for (const data of extradatas) {
+            		this.extradataService.deleteExtradata(data).then(() => { return; });
             	}
             }
         });
 
     }
-
-
-
 }

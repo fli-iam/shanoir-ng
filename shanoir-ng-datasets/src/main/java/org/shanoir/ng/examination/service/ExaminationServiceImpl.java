@@ -14,21 +14,32 @@
 
 package org.shanoir.ng.examination.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -36,7 +47,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SecurityService;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +57,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -55,12 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Examination service implementation.
@@ -83,16 +87,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private SecurityService securityService;
 
 	@Autowired
-	private SolrService solrService;
-
-	@Autowired
 	private ShanoirEventService eventService;
 
 	@Autowired
 	private SubjectRepository subjectService;
 
-	@Autowired
-	private DatasetService datasetService;
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
 
@@ -103,7 +102,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private ObjectMapper objectMapper;
 	@Value("${datasets-data}")
 	private String dataDir;
-	
+
+	@Autowired
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Autowired
+	private DICOMWebService dicomWebService;
+
 	@Override
 	public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
@@ -114,6 +119,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
+			LOG.error("Can't delete examination with id " + id + " because it has been copied.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -136,16 +142,19 @@ public class ExaminationServiceImpl implements ExaminationService {
 						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
 						eventService.publishEvent(event);
 					}
-					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
+					this.datasetAcquisitionService.deleteByIdCascade(dsAcq.getId(), event);
 				}
 				if (event != null) {
-					event.setObjectId(String.valueOf(event.getId()));
 					event.setProgress(1f);
 					event.setMessage("Examination with id " + id + " successfully deleted.");
 					event.setStatus(ShanoirEvent.SUCCESS);
 					eventService.publishEvent(event);
 				}
 			}
+			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+			if (examination.getSource() == null)
+				dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
+
 			examinationRepository.deleteById(id);
 		}
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
@@ -170,6 +179,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during deletion of examination with id : " + examinationId);
+			LOG.error("Exception e : " , e);
 		}
 	}
 
@@ -187,15 +197,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
+		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+		Set<Long> unrestrictedStudies = new HashSet<Long>();
+		securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 		if (searchStr != null && searchStr.length() >= 1) {
-			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-			Set<Long> unrestrictedStudies = new HashSet<Long>();
-			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 			return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
 		} else {
-			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-			Set<Long> unrestrictedStudies = new HashSet<Long>();
-			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
 			return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
 		}
 	}

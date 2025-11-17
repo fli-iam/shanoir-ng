@@ -1,13 +1,8 @@
 package org.shanoir.ng.dicom.web;
 
-import jakarta.mail.BodyPart;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import jakarta.mail.BodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The StowRSMultipartRelatedRequestFilter handles a POST request of
@@ -64,9 +65,9 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
 	
     @Override
     public void doFilter(
-      ServletRequest request, 
-      ServletResponse response,
-      FilterChain chain) throws IOException, ServletException {
+			ServletRequest request, 
+			ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
     	HttpServletRequest httpRequest = (HttpServletRequest) request;
     	if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
     			&& httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
@@ -75,10 +76,11 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
     			MimeMultipart multipart = new MimeMultipart(datasource);
     			int count = multipart.getCount();
+                boolean nonOhifRequest = "true".equalsIgnoreCase(httpRequest.getParameter("nonOhifRequest"));
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
+    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream(), nonOhifRequest)) {
     						throw new ServletException("Error in importDicomSEGAndSR.");
     					}
     				} else {

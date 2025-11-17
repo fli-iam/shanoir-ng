@@ -3,8 +3,17 @@ package org.shanoir.uploader.model.rest;
 import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
-
+/**
+ * Light implementation of Study object from ms studies.
+ * ShUp has no dependency to ms studies, what is wanted
+ * so far, to keep the coupling more lose. ShUp is a tool
+ * for imports: dependency to ms import and ms datasets.
+ */
 public class Study implements Comparable<Study> {
+
+	public static final String SC_MANDATORY = "MANDATORY";
+
+	public static final String SC_DISABLED = "DISABLED";
 
 	private Long id;
 
@@ -17,6 +26,8 @@ public class Study implements Comparable<Study> {
 	private List<StudyCenter> studyCenterList;
 
 	private Boolean compatible;
+
+	private String studyCardPolicy;
 
 	public Long getId() {
 		return id;
@@ -66,6 +77,14 @@ public class Study implements Comparable<Study> {
 		this.compatible = compatible;
 	}
 
+	public String getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(String studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
+	}
+
 	public String toString() {
 		if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
 			if (compatible) {
@@ -80,6 +99,14 @@ public class Study implements Comparable<Study> {
 
 	public int compareTo(Study o) {
 		return Long.compare(this.getId(), o.getId());
+	}
+
+	public boolean isWithStudyCards() {
+		if(SC_MANDATORY.equals(studyCardPolicy)) {
+			return true;
+		} else if(SC_DISABLED.equals(studyCardPolicy)) {
+			return false;
+		} else { return true; }
 	}
 
 }

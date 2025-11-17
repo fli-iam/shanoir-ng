@@ -21,7 +21,6 @@ import java.util.Set;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
@@ -70,7 +69,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @NamedEntityGraph(name = "Study.All", attributeNodes = { @NamedAttributeNode("studyUserList"),
 		@NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjectStudyList"),
-		@NamedAttributeNode("experimentalGroupsOfSubjects"), @NamedAttributeNode("studyTags"),
+		@NamedAttributeNode("studyTags"),
 		@NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
 		@NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile"),
 		@NamedAttributeNode("examinations") })
@@ -99,14 +98,6 @@ public class Study extends HalEntity {
 	/** End date. */
 	@LocalDateAnnotations
 	private LocalDate endDate;
-
-	/** Associated experimental groups of subjects. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
-
-	/** The is mono center. */
-	@NotNull
-	private boolean monoCenter;
 
 	@Column(unique = true)
 	@Unique
@@ -293,36 +284,6 @@ public class Study extends HalEntity {
 
 	public void setNbSubjects(int nbSubjects) {
 		this.nbSubjects = nbSubjects;
-	}
-
-	/**
-	 * @return the experimentalGroupsOfSubjects
-	 */
-	public List<ExperimentalGroupOfSubjects> getExperimentalGroupsOfSubjects() {
-		return experimentalGroupsOfSubjects;
-	}
-
-	/**
-	 * @param experimentalGroupsOfSubjects
-	 *            the experimentalGroupsOfSubjects to set
-	 */
-	public void setExperimentalGroupsOfSubjects(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects) {
-		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
-	}
-
-	/**
-	 * @return the monoCenter
-	 */
-	public boolean isMonoCenter() {
-		return monoCenter;
-	}
-
-	/**
-	 * @param monoCenter
-	 *            the monoCenter to set
-	 */
-	public void setMonoCenter(boolean monoCenter) {
-		this.monoCenter = monoCenter;
 	}
 
 	/**

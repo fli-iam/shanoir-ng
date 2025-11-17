@@ -17,12 +17,13 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.quality.QualityTag;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * One ImportJob is related to the import of ONE DICOM STUDY,
@@ -38,6 +39,10 @@ import org.shanoir.ng.shared.quality.QualityTag;
  * in ms studies during the import.
  * If it contains a subjectName, an existing subject is to use.
  * Same logic for the exams.
+ * 
+ * Therefore one ImportJob contains as well the DICOM StudyInstanceUID
+ * of the DICOM study (== examination in Shanoir). This is required to
+ * use the same UID in MS Import (pseudo) and in MS Datasets (exam).
  * 
  * @todo: later we will remove the patients list from here, that is a
  * legacy error, that has to be corrected, e.g. move the subject out into
@@ -56,36 +61,36 @@ public class ImportJob implements Serializable {
 
 	private boolean fromDicomZip;
 
-    private boolean fromShanoirUploader;
+	private boolean fromShanoirUploader;
 
-    private boolean fromPacs;
-    
+	private boolean fromPacs;
+	
 	private String workFolder;
 
 	// @todo: remove this list here later
-    private List<Patient> patients;
+	private List<Patient> patients;
 
 	// DICOM patient for this import job
 	private Patient patient;
 
 	private PatientVerification patientVerification;
-    
+	
 	// DICOM study for this import job
 	private Study study;
 
 	// series to import with this import job
-	private Set<Serie> selectedSeries;
+	private List<Serie> selectedSeries;
 
 	// Shanoir study
-    private Long studyId;
-    
+	private Long studyId;
+	
 	private String studyName;
 
-    private Long studyCardId;
-    
+	private Long studyCardId;
+	
 	private String studyCardName;
 	
-    private Long acquisitionEquipmentId;
+	private Long acquisitionEquipmentId;
 	
 	// subject: use already existing
 	private String subjectName;
@@ -94,14 +99,14 @@ public class ImportJob implements Serializable {
 	private Subject subject;
 
 	// examination: use already existing
-    private Long examinationId;
+	private Long examinationId;
 
 	private String examinationComment;
 
 	private String anonymisationProfileToUse;
 
-    private String archive;
-    
+	private String archive;
+	
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;
@@ -114,15 +119,23 @@ public class ImportJob implements Serializable {
 
 	private QualityTag qualityTag;
 
+	// Used by ShanoirUploader to store the upload state
+	private UploadState uploadState;
+
+	// Used by ShanoirUploader to store the upload percentage
+	private String uploadPercentage;
+
+	private String studyInstanceUID;
+
 	public long getTimestamp() {
-        return timestamp;
-    }
+		return timestamp;
+	}
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
 
-    public String getArchive() {
+	public String getArchive() {
 		return archive;
 	}
 
@@ -170,7 +183,7 @@ public class ImportJob implements Serializable {
 		this.examinationId = examinationId;
 	}
 
-    public String getWorkFolder() {
+	public String getWorkFolder() {
 		return workFolder;
 	}
 
@@ -210,7 +223,7 @@ public class ImportJob implements Serializable {
 		this.studyCardId = studyCardId;
 	}
 
-    public String getAnonymisationProfileToUse() {
+	public String getAnonymisationProfileToUse() {
 		return anonymisationProfileToUse;
 	}
 
@@ -258,50 +271,6 @@ public class ImportJob implements Serializable {
 		this.username = username;
 	}
 
-	@Override
-	public String toString() {
-		String importType;
-		if (fromDicomZip) {
-			importType = "ZIP";
-		} else if (fromShanoirUploader) {
-			importType = "SHUP";
-		} else if (fromPacs) {
-			importType = "PACS";
-		} else {
-			importType = "UNSUPPORTED";
-		}
-		int numberOfSeries = 0;
-		StringBuffer seriesNames = new StringBuffer();
-		seriesNames.append("[");
-		String modality = "unknown";
-		boolean enhanced = false;
-		if (CollectionUtils.isNotEmpty(patients)) {
-			Patient patient = patients.get(0);
-			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
-				Study study = patient.getStudies().get(0);
-				List<Serie> series = study.getSeries();
-				if (CollectionUtils.isNotEmpty(series)) {
-					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
-					Serie serie = study.getSeries().get(0);
-					modality = serie.getModality();
-					enhanced = serie.getIsEnhanced();
-					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
-						serie = (Serie) iterator.next();
-						if (iterator.hasNext()) {
-							seriesNames.append(serie.getSequenceName() + ",");
-						} else {
-							seriesNames.append(serie.getSequenceName() + "]");
-						}
-					}
-				}
-			}
-		}
-		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
-				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
-				",seriesNames=" + seriesNames.toString();
-	}
-
 	public Long getCenterId() {
 		return centerId;
 	}
@@ -334,15 +303,15 @@ public class ImportJob implements Serializable {
 		this.patient = patient;
 	}
 
-	public Set<Serie> getSelectedSeries() {
+	public List<Serie> getSelectedSeries() {
 		return selectedSeries;
 	}
 
-	public void setSelectedSeries(Set<Serie> selectedSeries) {
+	public void setSelectedSeries(List<Serie> selectedSeries) {
 		this.selectedSeries = selectedSeries;
 	}
 
-    public DicomQuery getDicomQuery() {
+	public DicomQuery getDicomQuery() {
 		return dicomQuery;
 	}
 
@@ -382,5 +351,80 @@ public class ImportJob implements Serializable {
 		this.qualityTag = qualityTag;
 	}
 
-}
+	public UploadState getUploadState() {
+		return uploadState;
+	}
 
+	public void setUploadState(UploadState uploadState) {
+		this.uploadState = uploadState;
+	}
+
+	public String getUploadPercentage() {
+		return uploadPercentage;
+	}
+
+	public void setUploadPercentage(String uploadPercentage) {
+		this.uploadPercentage = uploadPercentage;
+	}
+
+	@Override
+	public String toString() {
+		String importType;
+		if (fromDicomZip) {
+			importType = "ZIP";
+		} else if (fromShanoirUploader) {
+			importType = "SHUP";
+		} else if (fromPacs) {
+			importType = "PACS";
+		} else {
+			importType = "UNSUPPORTED";
+		}
+		int numberOfSeries = 0;
+		StringBuffer seriesNames = new StringBuffer();
+		seriesNames.append("[");
+		String modality = "unknown";
+		boolean enhanced = false;
+		if (CollectionUtils.isNotEmpty(patients)) {
+			Patient patient = patients.get(0);
+			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
+				Study study = patient.getStudies().get(0);
+				List<Serie> series = study.getSeries();
+				if (CollectionUtils.isNotEmpty(series)) {
+					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
+					Serie serie = study.getSeries().get(0);
+					modality = serie.getModality();
+					enhanced = serie.getIsEnhanced();
+					for (Iterator<Serie> iterator = series.iterator(); iterator.hasNext();) {
+						serie = (Serie) iterator.next();
+						if (iterator.hasNext()) {
+							seriesNames.append(serie.getSequenceName() + ",");
+						} else {
+							seriesNames.append(serie.getSequenceName() + "]");
+						}
+					}
+				}
+			}
+		}
+		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+				",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID=" + studyInstanceUID + ",numberOfSeries=" + numberOfSeries +
+				",seriesNames=" + seriesNames.toString();
+	}
+
+	@JsonIgnore
+	public Serie getFirstSelectedSerie() {
+		if (CollectionUtils.isNotEmpty(selectedSeries)) {
+			return selectedSeries.iterator().next();
+		}
+		return null;
+	}	
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
+}

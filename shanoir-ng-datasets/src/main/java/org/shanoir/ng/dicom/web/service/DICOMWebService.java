@@ -2,7 +2,6 @@ package org.shanoir.ng.dicom.web.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,6 +9,7 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.FileBody;
 import org.apache.hc.client5.http.entity.mime.InputStreamBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.entity.mime.MultipartPart;
@@ -157,9 +157,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * With DICOMWeb for viewer OHIF, no need to transfer private tags,
+	 * so we exclude it here. Fix for Github issue #2805.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @return
+	 */
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata?excludeprivate=false";
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -176,6 +184,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * This method is used by the viewer OHIF to display the actual images.
+	 * The raw pixel data are searched in dcm4chee arc light behind Shanoir
+	 * and send as byte array to OHIF.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @param frame
+	 * @return
+	 */
 	public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
 			String sopInstanceUID, String frame) {
 		try {
@@ -187,7 +206,9 @@ public class DICOMWebService {
 				if (entity != null) {
 					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
-					responseHeaders.setContentLength(entity.getContentLength());
+					if (!entity.isChunked() && entity.getContentLength() >= 0) {
+						responseHeaders.setContentLength(entity.getContentLength());
+					}					
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				
@@ -199,6 +220,16 @@ public class DICOMWebService {
 		return null;
 	}
 	
+	/**
+	 * This method is used by OHIF viewer, double-click on DICOM SEG.
+	 * ShanoirUploader is calling it to get a DICOM instance,
+	 * when running its job to check examination consistency.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @return
+	 */
 	public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
@@ -208,7 +239,9 @@ public class DICOMWebService {
 				if (entity != null) {
 					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
-					responseHeaders.setContentLength(entity.getContentLength());
+					if (!entity.isChunked() && entity.getContentLength() >= 0) {
+						responseHeaders.setContentLength(entity.getContentLength());
+					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findInstance: empty response entity.");				
@@ -232,23 +265,42 @@ public class DICOMWebService {
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-			try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
-				ContentBody contentBody = new InputStreamBody(
-						new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
-				// build MultipartPart
-				MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-				partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-				partBuilder.setBody(contentBody);
-				MultipartPart multipartPart = partBuilder.build();
-				multipartEntityBuilder.addPart(multipartPart);
-			} catch(Exception e) {
-				LOG.error(e.getMessage(), e);
-				throw new ShanoirException(e.getMessage());
-			}
+			addFileToMultipart(dicomFile, multipartEntityBuilder);
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+	}
+
+	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
+		if (dicomFile == null || !dicomFile.exists()) {
+			LOG.error("sendDicomFileToPacs called with null, or file: not existing.");
+			throw new ShanoirException("sendDicomFileToPacs called with null, or file: not existing.");
+		}
+		LOG.info("Start: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+		multipartEntityBuilder.setBoundary(BOUNDARY);
+		multipartEntityBuilder.setMimeSubtype(RELATED);
+		addFileToMultipart(dicomFile, multipartEntityBuilder);
+		HttpEntity entity = multipartEntityBuilder.build();
+		sendMultipartRequest(entity);
+		LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+	}
+
+	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
+		try {
+			FileBody fileBody = new FileBody(
+                	dicomFile,
+                	ContentType.create(CONTENT_TYPE_DICOM)
+            );
+            MultipartPartBuilder partBuilder = MultipartPartBuilder.create()
+                	.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
+                	.setBody(fileBody);
+            multipartEntityBuilder.addPart(partBuilder.build());
+		} catch(Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -294,39 +346,51 @@ public class DICOMWebService {
 		}
 	}
 
+	public void rejectExaminationFromPacs(String studyInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + REJECT_SUFFIX;
+		rejectURLFromPacs(rejectURL);
+	}
+
+	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
+		rejectURLFromPacs(rejectURL);
+	}
+
 	public void rejectDatasetFromPacs(String url) throws ShanoirException {
 		String rejectURL;
 		if (wadoURLHandler.isWADO_URI(url)) {
 			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
 		} else {
-			url = url.substring(0, url.indexOf("/instances"));
 			rejectURL = url + REJECT_SUFFIX;
 		}
+		rejectURLFromPacs(rejectURL);
+	}
 
+	private void rejectURLFromPacs(String url) throws ShanoirException {
 		// STEP 1: Reject from the PACS
-		HttpPost post = new HttpPost(rejectURL);
+		HttpPost post = new HttpPost(url);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
 			if (HttpStatus.OK.value() == response.getCode()) {
-				LOG.info("Rejected from PACS: " + url);
+				LOG.debug("Rejected from PACS: " + post);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-						+ " for rejectURL: " + rejectURL);
+						+ " for rejectURL: " + url);
+				// in case one URL is Not Found (no DICOM instance present), we continue with deletion
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
 				} else {
 					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-							+ " for rejectURL: " + rejectURL);
+							+ " for rejectURL: " + url);
 				}
 			}
 		} catch (IOException e) {
-			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
+			LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);
 			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
 	}
 
-	@Scheduled(cron = "0 0 */6 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.info("Scheduled call to delete all rejected instances from pacs.");

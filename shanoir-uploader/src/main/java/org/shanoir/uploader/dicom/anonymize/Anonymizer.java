@@ -15,13 +15,13 @@ public class Anonymizer {
 	private static final Logger logger = LoggerFactory.getLogger(Anonymizer.class);
 
 	public boolean pseudonymize(final File uploadFolder,
-			final String profile, final String subjectName)
+			final String profile, final String subjectName, final String studyInstanceUID)
 			throws IOException {
 		ArrayList<File> dicomFiles = new ArrayList<File>();
 		getListOfDicomFiles(uploadFolder, dicomFiles);
 		try {
 			AnonymizationService anonymizationService = new AnonymizationServiceImpl();
-			anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName);
+			anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName, studyInstanceUID);
 			logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
 		} catch (Exception e) {
 			logger.error("pseudonymization service: ", e);

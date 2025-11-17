@@ -42,6 +42,8 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -66,6 +68,8 @@ public class StudySecurityService {
 
 	@Autowired
 	StudyTagRepository studyTagRepository;
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudySecurityService.class);
 
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -118,13 +122,11 @@ public class StudySecurityService {
 	}
 
 	public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {
-
 		List<Long> invalidStudyIds = new ArrayList<>();
-
-		for(Long id : studyIds){
-			 if(!this.hasRightOnStudy(id, rightStr)){
-				 invalidStudyIds.add(id);
-			 }
+		for (Long id : studyIds) {
+			if (!this.hasRightOnStudy(id, rightStr)) {
+				invalidStudyIds.add(id);
+			}
 		}
 		studyIds.removeAll(invalidStudyIds);
 		return true;
@@ -210,21 +212,32 @@ public class StudySecurityService {
 	 * @return true or false
 	 * @throws EntityNotFoundException
 	 */
-	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
+	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) {
 		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
-			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
-		}
-		if (subject.getSubjectStudyList() == null) {
+			LOG.error("Subject not found with id: " + subjectId);
 			return false;
 		}
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		if (subject.getStudy() != null) {
+			if (hasPrivilege(subject.getStudy(), right)) {
+				return true;
+			}
+		}
+		// @todo: remove later usage of subject study list
+		if (subject.getSubjectStudyList() == null) {
+			return false;
+		}
 		for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 			if (hasPrivilege(subjectStudy.getStudy(), right)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public boolean hasRightOnSubjectForOneStudy(Subject subject, String rightStr) {
+		return hasRightOnSubjectForOneStudy(subject.getId(), rightStr);
 	}
 
 	/**
@@ -238,7 +251,7 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectsForOneStudy(List<SimpleSubjectDTO> subjectDTOs, String rightStr) throws EntityNotFoundException {
-		if (subjectDTOs == null) return true;
+		if (subjectDTOs == null || subjectDTOs.isEmpty()) return true;
 		List<Long> subjectIds = new ArrayList<>();
 		for (SimpleSubjectDTO dto : subjectDTOs) {
 			subjectIds.add(dto.getId());	
@@ -248,11 +261,16 @@ public class StudySecurityService {
 			return true;
 		}
 		for (Subject subject : subjects) {
-			if (subject.getSubjectStudyList() == null) {
+			boolean hasRight = false;
+			StudyUserRight right = StudyUserRight.valueOf(rightStr);
+			if (subject.getStudy() != null) {
+				if (hasPrivilege(subject.getStudy(), right)) {
+					hasRight = true;
+				} 
+			// @todo: remove later usage of subject study list
+			} else if (subject.getSubjectStudyList() == null) {
 				return false;
 			}
-			StudyUserRight right = StudyUserRight.valueOf(rightStr);
-			boolean hasRight = false;
 			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				if (hasPrivilege(subjectStudy.getStudy(), right)) {
 					hasRight = true;
@@ -277,12 +295,21 @@ public class StudySecurityService {
 	public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
 		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
-			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
+			throw new EntityNotFoundException("Subject not found with id: " + subjectId);
 		}
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-			if (!hasPrivilege(subjectStudy.getStudy(), right)) {
+		if (subject.getStudy() != null) {
+			// As the subject is already from the database, study object is valid
+			if (!hasPrivilege(subject.getStudy(), right)) {
 				return false;
+			}
+		// @todo: remove later usage of subject study list
+		} else {
+			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				// As the subject is already from the database, study object is valid
+				if (!hasPrivilege(subjectStudy.getStudy(), right)) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -301,15 +328,35 @@ public class StudySecurityService {
 	 * @return true or false
 	 */
 	public boolean hasRightOnTrustedSubjectForOneStudy(Subject subject, String rightStr) {
-		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		if (subject != null && subject.getSubjectStudyList() != null) {
-			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				if (hasPrivilege(subjectStudy.getStudy(), right)) {
-					return true;
-				}
-			}
+		if (subject == null || rightStr == null) {
+			return false;
 		}
-		return false;
+		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		if (subject.getStudy() != null) {
+			return hasPrivilegeOnStudy(subject.getStudy().getId(), right);
+		}
+		// @todo: remove later usage of subject study list
+		if (subject.getSubjectStudyList() != null) {
+			return subject.getSubjectStudyList().stream()
+					.map(SubjectStudy::getStudy)
+					.map(Study::getId)
+					.allMatch(studyId -> hasPrivilegeOnStudy(studyId, right));
+		}
+	    return false;
+	}
+
+	/**
+	 * For security reasons, we have to go to the database here,
+	 * if not any user can send a json and create a subject.
+	 * 
+	 * @param studyId
+	 * @param right
+	 * @return
+	 */
+	private boolean hasPrivilegeOnStudy(Long studyId, StudyUserRight right) {
+		return studyRepository.findById(studyId)
+				.map(study -> hasPrivilege(study, right))
+				.orElse(false);
 	}
 
 	/**
@@ -333,19 +380,16 @@ public class StudySecurityService {
 			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				if (hasPrivilege(subjectStudy.getStudy(), right)) {
 					res = true;
-				}
-				else {
+				} else {
 					toRemove.add(subjectStudy.getId());
 				}
 			}
-
 			ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
 			while(iter.hasNext()){
 				if(toRemove.contains(iter.next().getId())) {
 					iter.remove();
 				}
 			}
-
 			return res;
 		}
 		return false;
@@ -477,36 +521,6 @@ public class StudySecurityService {
 		}
 		ids = newList;
 		return true;
-	}
-
-	/**
-	 * Check that the connected user has the given right for all the studies linked
-	 * inside the given list.
-	 * 
-	 * @param subjectStudyList
-	 *            the list of subject-study relationship objects
-	 * @param rightStr
-	 *            the right
-	 * @return true or false
-	 */
-	public boolean checkRightOnEverySubjectStudyList(Iterable<SubjectStudy> subjectStudyList, String rightStr) {
-		if (subjectStudyList == null) {
-			return false;
-		}
-		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		List<Long> ids = new ArrayList<>();
-		for (SubjectStudy subjectStudy : subjectStudyList) {
-			ids.add(subjectStudy.getStudy().getId());
-		}
-		int nbStudies = 0;
-		for (Study study : studyRepository.findAllById(ids)) {
-			study.setStudyUserList(studyUserRepository.findByStudy_Id(study.getId()));
-			nbStudies++;
-			if (!hasPrivilege(study, right)) {
-				return false;
-			}
-		}
-		return nbStudies == ids.size();
 	}
 	
 	/**

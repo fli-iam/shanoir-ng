@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,18 +15,20 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -43,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Acquisition equipment service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -51,9 +53,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
-	
+
 	@Autowired
 	private AcquisitionEquipmentRepository repository;
+
+	@Autowired
+	private ManufacturerModelRepository manufacturerModelRepository;
+
+	@Autowired
+	private ManufacturerRepository manufacturerRepository;
 
 	@Autowired
 	private CenterRepository centerRepository;
@@ -89,9 +97,13 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
+		return this.repository.findAllBySerialNumber(serialNumber);
+	}
+
+	public List<AcquisitionEquipment> findAllBySerialNumberContaining(String serialNumber) {
 		return this.repository.findBySerialNumberContaining(serialNumber);
 	}
-	
+
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
 		AcquisitionEquipment newDbAcEq = repository.save(entity);
 		try {
@@ -137,32 +149,35 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	@Override
-	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-		Long centerId,
-		EquipmentDicom equipmentDicom) {
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(
+			Long centerId, EquipmentDicom equipmentDicom) {
 		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
-		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
-		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
+		LOG.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom called with: " + equipmentDicom.toString());
+		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all values
+			AcquisitionEquipment acquisitionEquipment;
 			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
-			List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
+			List<AcquisitionEquipment> equipments = findAllBySerialNumberContaining(dicomSerialNumber);
 			if (equipments == null || equipments.isEmpty()) {
 				// second try: remove spaces and leading zeros
 				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
-				equipments = findAllBySerialNumber(dicomSerialNumber);
+				equipments = findAllBySerialNumberContaining(dicomSerialNumber);
 				// nothing found with device serial number from DICOM
 				if (equipments == null || equipments.isEmpty()) {
 					equipments = new ArrayList<AcquisitionEquipment>();
-					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+					acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+					equipments.add(acquisitionEquipment);
 				} else {
 					matchOrRemoveEquipments(equipmentDicom, equipments);
 					if (equipments.isEmpty()) {
-						autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+						acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+						equipments.add(acquisitionEquipment);
 					}
 				}
 			} else {
 				matchOrRemoveEquipments(equipmentDicom, equipments);
 				if (equipments.isEmpty()) {
-					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+					acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+					equipments.add(acquisitionEquipment);
 				}
 			}
 			return equipments;
@@ -170,43 +185,49 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return null;
 	}
 
-	private void autoCreateNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+	private AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom) {
+		Optional<ManufacturerModel> manufacturerModelOpt =
+	        	manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
+		ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
+			Manufacturer manufacturer = manufacturerRepository
+					.findByNameIgnoreCase(equipmentDicom.getManufacturer())
+					.orElseGet(() -> {
+						Manufacturer newManufacturer = new Manufacturer();
+						newManufacturer.setName(equipmentDicom.getManufacturer());
+						return manufacturerRepository.save(newManufacturer);
+					});
+			ManufacturerModel newManufacturerModel = new ManufacturerModel();
+			newManufacturerModel.setName(equipmentDicom.getManufacturerModelName());
+			newManufacturerModel.setManufacturer(manufacturer);
+			Integer modalityTypeId = DatasetModalityType.getIdFromModalityName(equipmentDicom.getModality());
+			newManufacturerModel.setDatasetModalityType(DatasetModalityType.getType(modalityTypeId));
+			String magneticFieldStrength = equipmentDicom.getMagneticFieldStrength();
+			if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
+				magneticFieldStrength = "0.0";
+			}
+			newManufacturerModel.setMagneticField(Double.valueOf(magneticFieldStrength));
+			return manufacturerModelRepository.save(newManufacturerModel);
+		});
 		AcquisitionEquipment equipment = new AcquisitionEquipment();
-		Manufacturer manufacturer = new Manufacturer();
-		manufacturer.setName(equipmentDicom.getManufacturer());
-		ManufacturerModel manufacturerModel = new ManufacturerModel();
-		manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
-		manufacturerModel.setManufacturer(manufacturer);
 		equipment.setManufacturerModel(manufacturerModel);
-		Optional<Center> center = centerRepository.findById(centerId);
-		equipment.setCenter(center.orElseThrow());
-		AcquisitionEquipment newDbAcEq = repository.save(equipment);
-		equipments.add(newDbAcEq);
+		equipment.setCenter(centerRepository.findById(centerId).orElseThrow());
+		equipment.setSerialNumber(equipmentDicom.getDeviceSerialNumber());
+		return repository.save(equipment);
 	}
 
 	private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
-		for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
-			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
-			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
-			if (manufacturerModel != null) {
-				if (equipmentDicom.getManufacturerModelName().contains(manufacturerModel.getName())) {
-					Manufacturer manufacturer = manufacturerModel.getManufacturer();
-					if (manufacturer != null) {
-						if (equipmentDicom.getManufacturer().contains(manufacturer.getName())) {
-							// keep in list, as matching equipment found with high probability
-						} else {
-							iterator.remove();
-						}
-					} else {
-						iterator.remove();
-					}
-				} else {
-					iterator.remove();
-				}
-			} else {
-				iterator.remove();
-			}
-		}
+		String manufacturerModelNameLower = equipmentDicom.getManufacturerModelName().toLowerCase();
+		equipments = equipments.stream()
+				.filter(equipment -> {
+					ManufacturerModel model = equipment.getManufacturerModel();
+					return model != null &&
+							biDirectionalContains(model.getName().toLowerCase(), manufacturerModelNameLower);
+				})
+				.collect(Collectors.toList());
+	}
+
+	private boolean biDirectionalContains(String name1, String name2) {
+		return name1.contains(name2) || name2.contains(name1);
 	}
 
 }

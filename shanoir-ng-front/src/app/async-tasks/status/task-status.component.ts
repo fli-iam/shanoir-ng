@@ -13,19 +13,19 @@
  */
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
+
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {Task} from '../task.model';
 import {TaskService} from "../task.service";
-import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
-import * as AppUtils from "../../utils/app.utils";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
-
 
 @Component({
     selector: 'task-status',
@@ -48,8 +48,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     ];
     report: BrowserPaging<any>;
     reportActions: any = [{title: "Download as csv", awesome: "fa-solid fa-download", action: () => this.downloadReport()}];
-    // @ts-ignore
-    browserCompatible: boolean = window.showDirectoryPicker;
+    browserCompatible: boolean = !!(window as any).showDirectoryPicker;
     loading: boolean = false;
 
     constructor(
@@ -59,10 +58,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private http: HttpClient,
         private keycloakService: KeycloakService,
         private consoleService: ConsoleService
-    ) { }
-
-    ngOnInit() {
-    }
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
@@ -71,7 +67,9 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
                 let reportArray: [];
                 try {
                     reportArray = JSON.parse(this.task.report);
-                } catch (e) {}
+                } catch {
+                    reportArray = null;
+                }
                 if (reportArray && Array.isArray(reportArray)) {
                     this.report = new BrowserPaging(reportArray, this.reportColumns);
                     if (this.tableRefresh) this.tableRefresh();
@@ -87,7 +85,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }

@@ -28,27 +28,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	            <span class="right-col">
 	            <select-box
 	                    formControlName="studyId"
-	                    [(ngModel)]="accessRequest.studyId" 
 	                    [options]="studyOptions"
 	                    (userChange)="changeStudy($event)">
 	            </select-box>
 	            </span>
-	            <input type="hidden"
-                 formControlName="studyName"
-                 [(ngModel)]="accessRequest.studyName"
-                >
+	            <input type="hidden" formControlName="studyName">
 	        </li>
 	       <li *ngIf="mode == 'create' && fromStudy">
 	            <span> You have requested to join a study on shanoir, please add a message for the study administrator and confirm you access request.</span>
 	            <br/>
 	            <br/>
-                <input type = hidden
-                        formControlName="studyId"
-                        [(ngModel)]="accessRequest.studyId"/>
-                <input type="hidden"
-                 formControlName="studyName"
-                 [(ngModel)]="accessRequest.studyName"
-                >
+                <input type="hidden" formControlName="studyId"/>
+                <input type="hidden" formControlName="studyName">
             </li>
 	        <li *ngIf="mode == 'view'">
                 <label i18n="access request|user label@@user">User</label>
@@ -62,19 +53,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{accessRequest.studyName}}
                 </span>
 	        </li>
-	        <li *ngIf="mode == 'create'">
-
-	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
-	            <span class="right-col">
-	                <textarea formControlName="motivation" [(ngModel)]="accessRequest.motivation"></textarea>
-	            </span>
-	        </li>
+            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.function">
+                <label>Function</label>
+                <span class="right-col">
+                    {{accessRequest.user.accountRequestInfo.function}}
+                </span>
+            </li>
+            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.institution">
+                <label>Institution</label>
+                <span class="right-col">
+                    {{accessRequest.user.accountRequestInfo.institution}}
+                </span>
+            </li>
+            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.contact">
+                <label>Contact</label>
+                <span class="right-col">
+                    {{accessRequest.user.accountRequestInfo.contact}}
+                </span>
+            </li>
 	        <li *ngIf="mode == 'view'">
-                <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+                <label>Motivation</label>
                 <span class="right-col">
                     {{accessRequest.motivation}}
                 </span>
             </li>
+            <li *ngIf="mode == 'create'">
+	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
+	            <span class="right-col">
+	                <textarea formControlName="motivation"></textarea>
+	            </span>
+	        </li>
 	    </ul>
         <button *ngIf="mode == 'view'" type="button" (click)="acceptRequest()" class="accept right-icon">
             Accept
