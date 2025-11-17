@@ -59,6 +59,9 @@ public class Study extends IdName {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyTag> studyTags;
 
+	@OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<StudyCenter> studyCenterList;
+
 	/**
 	 * @return the tags
 	 */
@@ -146,6 +149,14 @@ public class Study extends IdName {
 
 	public void setStudyTags(Set<StudyTag> studyTags) {
 		this.studyTags = studyTags;
+	}
+
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 }
