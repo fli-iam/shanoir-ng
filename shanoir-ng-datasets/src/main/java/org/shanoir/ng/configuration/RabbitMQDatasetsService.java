@@ -43,7 +43,6 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
@@ -228,22 +227,16 @@ public class RabbitMQDatasetsService {
 		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitListener(queues = RabbitMQConfiguration.CENTER_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public void receiveCenterNameUpdate(final String centerStr) {
-		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
-	}
-
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_CENTER_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveStudyCenterUpdate(final String studyCenterStr) throws JsonMappingException, JsonProcessingException {
-		StudyCenter studyCenter = objectMapper.readValue(studyCenterStr, StudyCenter.class);
-		saveStudyCenter(studyCenter);
+	public void receiveCenterUpdate(final String centerStr) throws JsonMappingException, JsonProcessingException {
+		Center center = objectMapper.readValue(centerStr, Center.class);
+		saveCenter(center);
 	}
 
 	@Transactional
-	private void saveStudyCenter(StudyCenter studyCenter) {
-		studyCenterRepository.save(studyCenter);
+	private void saveCenter(Center center) {
+		centerRepository.save(center);
 	}
 	
 	@Transactional

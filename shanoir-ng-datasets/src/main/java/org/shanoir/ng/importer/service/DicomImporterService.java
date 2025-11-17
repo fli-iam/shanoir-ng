@@ -405,7 +405,8 @@ public class DicomImporterService {
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
         } else {
-            Subject subject = subjectService.findById(subjectId).orElseThrow();
+            Subject subject = new Subject();
+            subject.setId(subjectId);
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);

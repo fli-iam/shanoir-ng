@@ -166,16 +166,12 @@ public class CenterServiceImpl implements CenterService {
 		if (centerDb == null) {
 			throw new EntityNotFoundException(center.getClass(), center.getId());
 		}
-		String previousName = centerDb.getName();
 		updateValues(center, centerDb);
 		Center updatedCenter = centerRepository.save(centerDb);
-		// send name update via rabbitmq
-		if (!previousName.equals(updatedCenter.getName())) {
-			try {
-				updateName(new IdName(center.getId(), center.getName()));
-			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not send the center name change to the other microservices !", e);
-			}
+		try {
+			updateCenter(updatedCenter);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not send the center change to the other microservices !", e);
 		}
 		return updatedCenter;
 	}
@@ -183,9 +179,9 @@ public class CenterServiceImpl implements CenterService {
 	public Center create(Center center) {
 		Center newDbCenter = centerRepository.save(center);
 		try {
-			updateName(new IdName(newDbCenter.getId(), newDbCenter.getName()));
+			updateCenter(newDbCenter);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center name creation to the other microservices !", e);
+			LOG.error("Could not send the center creation to the other microservices !", e);
 		}
 		return newDbCenter;
 	}
@@ -195,13 +191,13 @@ public class CenterServiceImpl implements CenterService {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
 	
-	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+	private boolean updateCenter(Center center) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(idName));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
+					objectMapper.writeValueAsString(center));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center.");
 		}
 	}
 	
@@ -243,23 +239,8 @@ public class CenterServiceImpl implements CenterService {
 				studyCenter.setCenter(center);
 				center.getStudyCenterList().add(studyCenter);
 				update(center);
-				try {
-					updateStudyCenter(studyCenter);
-				} catch (MicroServiceCommunicationException e) {
-					LOG.error("Could not send the study center change to the other microservices !", e);
-				}
 			}
 			return center;
-		}
-	}
-
-	private boolean updateStudyCenter(StudyCenter studyCenter) throws MicroServiceCommunicationException{
-		try {
-			rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_CENTER_QUEUE,
-					objectMapper.writeValueAsString(studyCenter));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study center.");
 		}
 	}
 
