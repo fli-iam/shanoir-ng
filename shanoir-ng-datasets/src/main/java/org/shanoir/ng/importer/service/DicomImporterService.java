@@ -374,7 +374,7 @@ public class DicomImporterService {
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
             Center center = centerOpt.get();
-            studyCenterOpt = studyCenterRepository.findByStudyIdCenterId(studyId, center.getId());
+            studyCenterOpt = studyCenterRepository.findByStudy_IdAndCenter_Id(studyId, center.getId());
         }
         if (studyCenterOpt == null || studyCenterOpt.isEmpty()) {
             // Communicate with MS Studies here, if not existing or not yet in study
