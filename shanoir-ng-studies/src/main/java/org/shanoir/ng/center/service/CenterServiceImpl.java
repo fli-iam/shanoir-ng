@@ -193,7 +193,7 @@ public class CenterServiceImpl implements CenterService {
 	
 	private boolean updateCenter(Center center) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
+			rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(center));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
