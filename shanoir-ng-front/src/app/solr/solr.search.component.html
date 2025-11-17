@@ -89,14 +89,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </div>
             @if (dateOpen) {
-                <div class="date-content" @slideDown>
+                <div class="date-content">
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
                             <datepicker formControlName="startDate"></datepicker>
                         }
                         @if (hasError("startDate", ["format"])) {
-                            <label class="form-validation-alert">
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
@@ -107,12 +107,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <datepicker formControlName="endDate"></datepicker>
                         }
                         @if (hasError("endDate", ["format"])) {
-                            <label class="form-validation-alert">
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
                         @if (hasError("endDate", ["order"])) {
-                            <label class="form-validation-alert">End date must be subsequent to start date</label>
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
                         }
                     </div>
                 </div>
@@ -132,14 +132,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </div>
             @if (importDateOpen) {
-                <div class="date-content" @slideDown>
+                <div class="date-content">
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
                             <datepicker formControlName="importStartDate"></datepicker>
                         }
                         @if (hasError("importStartDate", ["format"])) {
-                            <label class="form-validation-alert">
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
@@ -150,12 +150,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <datepicker formControlName="importEndDate"></datepicker>
                         }
                         @if (hasError("importEndDate", ["format"])) {
-                            <label class="form-validation-alert">
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
                         @if (hasError("importEndDate", ["order"])) {
-                            <label class="form-validation-alert">End date must be subsequent to start date</label>
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
                         }
                     </div>
                 </div>

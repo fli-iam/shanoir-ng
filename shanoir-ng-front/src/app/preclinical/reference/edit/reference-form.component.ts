@@ -20,7 +20,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
@@ -28,7 +27,6 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     selector: 'reference-form',
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ReferenceFormComponent extends EntityComponent<Reference>{

@@ -17,7 +17,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
@@ -31,7 +30,6 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
 @Component({
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class TherapyFormComponent extends EntityComponent<Therapy>{

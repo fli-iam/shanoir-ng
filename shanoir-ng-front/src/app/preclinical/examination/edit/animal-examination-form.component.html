@@ -73,6 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     </select>
                                                     @if (hasError("study", ["required"])) {
                                                         <label
+                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                             class="form-validation-alert"
                                                             i18n="
                                                                 Examination detail|Study required
@@ -106,6 +107,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     [optionArr]="subjects"></select-box>
                                                 @if (hasError("subject", ["required"])) {
                                                     <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="
                                                             Examination detail|Subject required
@@ -143,6 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 </select>
                                                 @if (hasError("center", ["required"])) {
                                                     <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="
                                                             Examination detail|Center required
@@ -182,6 +185,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <datepicker formControlName="examinationDate" required></datepicker>
                                         @if (hasError("examinationDate", ["format"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Date valid error@@dateValidError">
                                                 Date should be valid ! Date format: {{ dateDisplay }}
@@ -189,6 +193,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("examinationDate", ["required"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="
                                                     Subject detail|BirthDate required

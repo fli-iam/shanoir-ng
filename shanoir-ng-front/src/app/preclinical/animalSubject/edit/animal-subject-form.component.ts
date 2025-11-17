@@ -24,7 +24,6 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { Selection } from 'src/app/studies/study/tree.service';
 
-import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { Study } from '../../../studies/shared/study.model';
@@ -55,7 +54,6 @@ import { SubjectTherapyListComponent } from '../../therapies/subjectTherapy/list
     selector: 'animal-subject-form',
     templateUrl: 'animal-subject-form.component.html',
     styleUrls: ['../../../subjects/subject/subject.component.css', 'animal-subject-form.component.css'],
-    animations: [slideDown, preventInitialChildAnimations],
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, TagInputComponent, CheckboxComponent, SubjectPathologiesListComponent, SubjectTherapyListComponent]
 })
 

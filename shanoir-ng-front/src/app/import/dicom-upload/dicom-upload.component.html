@@ -139,20 +139,34 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <progress-bar [progress]="uploadState?.progress" [text]="'Preparing upload'"></progress-bar>
     </div>
     @if (extensionError == true) {
-        <label class="form-validation-alert" i18n="Import|ExtensionError label">A DICOM zip archive is required!</label>
+        <label
+            animate.enter="slide-down-error" animate.leave="slide-up-error" 
+            class="form-validation-alert" 
+            i18n="Import|ExtensionError label">
+            A DICOM zip archive is required!
+        </label>
     }
     @if (dicomDirMissingError == true) {
-        <label class="form-validation-alert" i18n="Import|DicomDirMissingError label">
+        <label
+            animate.enter="slide-down-error" animate.leave="slide-up-error" 
+            class="form-validation-alert" 
+            i18n="Import|DicomDirMissingError label">
             DICOMDIR is missing in .zip file!
         </label>
     }
     @if (fileTooBigError) {
-        <label class="form-validation-alert" i18n="Import|fileTooBigError label">
+        <label 
+            animate.enter="slide-down-error" animate.leave="slide-up-error" 
+            class="form-validation-alert" 
+            i18n="Import|fileTooBigError label">
             The uploaded file is too big, it should be less then 5Gb.
         </label>
     }
     @if (otherErrorMessage) {
-        <label class="form-validation-alert" i18n="Import label">
+        <label 
+            animate.enter="slide-down-error" animate.leave="slide-up-error" 
+            class="form-validation-alert" 
+            i18n="Import label">
             {{ otherErrorMessage }}
         </label>
     }

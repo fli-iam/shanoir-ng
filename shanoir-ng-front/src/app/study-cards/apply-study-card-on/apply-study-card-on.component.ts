@@ -22,7 +22,6 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import { slideRight } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
@@ -41,7 +40,6 @@ export type Status = 'default' | 'loading' | 'done' | 'error';
     selector: 'apply-study-card-on',
     templateUrl: 'apply-study-card-on.component.html',
     styleUrls: ['apply-study-card-on.component.css'],
-    animations: [slideRight],
     imports: [SelectBoxComponent, FormsModule, TableComponent, AcquisitionEquipmentPipe]
 })
 export class ApplyStudyCardOnComponent implements OnInit {

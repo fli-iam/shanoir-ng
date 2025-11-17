@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <study-node
             [input]="treeService.studyNode"
             [hasBox]="true"
-            [withMenu]="false"
+            [withMenu]="true"
             (nodeInit)="treeService.studyNodeInit.resolve()"
             (selectedChange)="onSelectedChange($event)"></study-node>
     }

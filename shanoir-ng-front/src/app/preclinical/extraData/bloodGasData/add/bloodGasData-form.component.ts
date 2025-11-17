@@ -21,7 +21,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasData } from '../shared/bloodGasData.model';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
@@ -31,7 +30,6 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
 @Component({
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {

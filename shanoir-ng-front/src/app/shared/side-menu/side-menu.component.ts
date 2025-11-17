@@ -21,7 +21,6 @@ import { VERSION } from '../../../environments/version';
 import { SolrService } from '../../solr/solr.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { UserService } from '../../users/shared/user.service';
-import { disapearUp, slideDown } from '../animations/animations';
 import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 import { ConsoleService } from '../console/console.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
@@ -34,7 +33,6 @@ import { LoadingBarComponent } from '../components/loading-bar/loading-bar.compo
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
-    animations: [slideDown, disapearUp],
     imports: [RouterLink, RouterLinkActive, LoadingBarComponent, DatePipe]
 })
 

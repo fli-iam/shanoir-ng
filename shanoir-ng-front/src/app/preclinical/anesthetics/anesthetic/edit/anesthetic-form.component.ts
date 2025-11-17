@@ -16,7 +16,6 @@ import { Component, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
@@ -39,7 +38,6 @@ import { AnestheticIngredientFormComponent } from '../../ingredients/edit/anesth
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, AnestheticIngredientFormComponent, TableComponent]
 })
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {

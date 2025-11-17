@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
+<div #formContainer class="content-component detail">
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
             <div class="layout" [ngClass]="{ left: mode == 'view' }">
@@ -77,6 +77,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             [options]="catOptions"></select-box>
                                         @if (hasError("subject.imagedObjectCategory", ["required"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="
                                                     Subject detail|ImagedObjectCategory required
@@ -96,6 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" id="name" formControlName="name" />
                                         @if (hasError("subject.name", ["required"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="
                                                     Subject detail|Name required error@@subjectDetailNameRequiredError">
@@ -104,6 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("subject.name", ["minlength", "maxlength"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">
                                                 Length must be between 2 and 64 !
@@ -111,6 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("subject.name", ["unique"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
                                                 This name is already taken !
@@ -124,7 +128,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         @if (animalSelected()) {
-                            <li [@slideDown]="animalSelected()">
+                            <li>
                                 <label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
                                 <span class="right-col">
                                     @switch (mode) {
@@ -154,7 +158,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </fieldset>
                 <!-- Animal subject properties group -->
                 @if (animalSelected()) {
-                    <fieldset formGroupName="animalSubject" [@slideDown]="animalSelected()">
+                    <fieldset formGroupName="animalSubject">
                         @if (mode !== "view") {
                             <legend i18n="Animal subject detail|Animal properties@@animalSubjectDetailAnimal">
                                 Animal Properties
@@ -175,7 +179,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="species"></select-box>
                                             @if (hasError("animalSubject.specie", ["required"])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.specie', ['required'])"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Edit subjectSpecie|Specie required
@@ -201,7 +205,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="strains"></select-box>
                                             @if (hasError("animalSubject.strain", ["required"])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.strain', ['required'])"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Edit subjectStrain|Strain required
@@ -227,7 +231,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="biotypes"></select-box>
                                             @if (hasError("animalSubject.biotype", ["required"])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.biotype', ['required'])"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Edit subjectBiotype|Biotype required
@@ -253,7 +257,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="providers"></select-box>
                                             @if (hasError("animalSubject.provider", ["required"])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.provider', ['required'])"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Edit subjectProvider|Provider required
@@ -279,7 +283,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="stabulations"></select-box>
                                             @if (hasError("animalSubject.stabulation", ["required"])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.stabulation', ['required'])"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Edit subjectStabulation|Stabulation required

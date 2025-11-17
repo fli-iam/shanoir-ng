@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 @if (isOpened()) {
-    <div [@slideLeft]="isOpened()" class="frame {{ getMsg()?.type }}">
+    <div animate.enter="slide-right" animate.leave="slide-left" class="frame {{ getMsg()?.type }}">
         <div class="icon">
             <p><i class="fas fa-exclamation-circle"></i></p>
         </div>

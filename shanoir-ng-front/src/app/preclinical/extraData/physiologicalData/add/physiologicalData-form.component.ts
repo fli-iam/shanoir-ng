@@ -23,7 +23,6 @@ import { PhysiologicalData }    from '../shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
@@ -31,7 +30,6 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
 @Component({
     selector: 'physiological-data-upload-form',
     templateUrl: 'physiologicalData-form.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {

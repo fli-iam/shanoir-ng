@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, HostListener, ViewContainerRef, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewContainerRef, OnInit, AfterViewInit, HostBinding } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 
@@ -40,12 +40,13 @@ import { ServiceLocator } from './utils/locator.service';
     imports: [SideMenuComponent, BreadcrumbsComponent, StudyTreeComponent, RouterOutlet, ConsoleComponent, MsgBoxComponent, LoaderComponent]
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
 
     protected menuOpen: boolean = true;
     protected consoleToggle: (open: boolean) => void = () => { return };
     protected consoleOpened: boolean = false;
     protected consoleDeployed: boolean = false;
+    @HostBinding('class.viewInitialized') protected viewInitialized: boolean = false;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -61,6 +62,11 @@ export class AppComponent implements OnInit {
             private notificationsService: NotificationsService) {
         
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
+    }
+
+    ngAfterViewInit(): void {
+        // Don't play animations on page load
+        setTimeout(() => this.viewInitialized = true, 500);
     }
 
     ngOnInit() {

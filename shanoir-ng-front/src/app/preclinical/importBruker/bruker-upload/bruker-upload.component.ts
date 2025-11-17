@@ -17,7 +17,6 @@ import { Router } from '@angular/router';
 
 import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { slideDown } from '../../../shared/animations/animations';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
@@ -30,7 +29,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
     styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
-    animations: [slideDown],
     imports: [UploaderComponent, CheckboxComponent]
 })
 export class BrukerUploadComponent {

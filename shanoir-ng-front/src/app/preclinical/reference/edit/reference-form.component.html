@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 }
                                                 @if (hasError("category", ["required"])) {
                                                     <label
-                                                        [@slideDown]="hasError('category', ['required'])"
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="
                                                             Edit refCategory|Category required
@@ -127,6 +127,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 }
                                                 @if (hasError("reftype", ["required"])) {
                                                     <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="Edit reftype|TypeRequiredError label">
                                                         RefType is required!
@@ -147,6 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 <input type="text" id="value" formControlName="value" />
                                                 @if (hasError("value", ["required"])) {
                                                     <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="Edit reference|ValueRequiredError label">
                                                         Value is required!

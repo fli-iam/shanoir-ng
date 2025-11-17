@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
+<div #formContainer class="content-component detail">
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
             <div class="layout" [ngClass]="{ left: mode == 'view' }">
@@ -76,6 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             [options]="catOptions"></select-box>
                                         @if (hasError("imagedObjectCategory", ["required"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="
                                                     Subject detail|ImagedObjectCategory required
@@ -90,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ol>
                     <ol>
                         @if (humanSelected()) {
-                            <div [@slideDown]="humanSelected()">
+                            <div>
                                 @if (mode == "create" && humanSelected() && importMode != "EEG") {
                                     <li>
                                         <label
@@ -116,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     </li>
                                 }
                                 @if (!subject.isAlreadyAnonymized && mode == "create") {
-                                    <li class="info" [@slideDown]="!subject.isAlreadyAnonymized && mode == 'create'">
+                                    <li class="info">
                                         <span class="icon"><i class="fas fa-info-circle"></i></span>
                                         A subject global identifier will be automatically generated using the first
                                         name, the last name and the birth date of the subject. This can help you to
@@ -146,6 +147,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             }
                                             @if (hasError("firstName", ["required"])) {
                                                 <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Subject detail|FirstName required
@@ -155,6 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             }
                                             @if (hasError("firstName", ["minlength", "maxlength"])) {
                                                 <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Subject detail|Name Length error@@subjectDetailNameLengthError">
@@ -182,6 +185,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             }
                                             @if (hasError("lastName", ["required"])) {
                                                 <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Subject detail|LastName required
@@ -191,6 +195,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             }
                                             @if (hasError("lastName", ["minlength", "maxlength"])) {
                                                 <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Subject detail|Name Length error@@subjectDetailNameLengthError">
@@ -216,6 +221,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" id="name" formControlName="name" />
                                         @if (hasError("name", ["required"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="
                                                     Subject detail|Name required error@@subjectDetailNameRequiredError">
@@ -224,6 +230,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("name", ["minlength", "maxlength"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">
                                                 Length must be between 2 and 64 !
@@ -231,6 +238,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("name", ["unique"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
                                                 This name is already taken !
@@ -238,6 +246,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("name", ["subjectNamePrefix"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
                                                 The name should not be equal to the study prefix.
@@ -245,6 +254,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("name", ["pattern"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name chars error@@subjectDetailNameCharsError">
                                                 Forbidden characters
@@ -252,6 +262,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError("name", ["notEmptyValidator"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Name empty error@@subjectDetailNameCharsError">
                                                 Name must contain more than one character
@@ -262,7 +273,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         @if (subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != "view") {
-                            <li class="info" @slideDown>
+                            <li class="info">
                                 <span class="icon"><i class="fas fa-info-circle"></i></span>
                                 This study is configured to use prefixes for subject names, here the prefix is
                                 <b>{{ subjectNamePrefix }}</b>
@@ -271,7 +282,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </li>
                         }
                         @if (humanSelected()) {
-                            <div [@slideDown]="humanSelected()">
+                            <div>
                                 @if (mode == "create" || mode == "view") {
                                     <li>
                                         <label
@@ -290,6 +301,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     <datepicker formControlName="birthDate"></datepicker>
                                                     @if (hasError("birthDate", ["format"])) {
                                                         <label
+                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                             class="form-validation-alert"
                                                             i18n="Subject detail|Date valid error@@dateValidError">
                                                             Date should be valid! Date format: {{ dateDisplay }}
@@ -297,6 +309,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     }
                                                     @if (hasError("birthDate", ["required"])) {
                                                         <label
+                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                             class="form-validation-alert"
                                                             i18n="
                                                                 Subject detail|BirthDate required
@@ -371,7 +384,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                     </ol>
                     @if (!humanSelected()) {
-                        <ol [@slideDown]="!humanSelected()">
+                        <ol>
                             @if (mode == "create") {
                                 <li>
                                     <label
@@ -383,6 +396,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <datepicker formControlName="birthDate"></datepicker>
                                         @if (hasError("birthDate", ["format"])) {
                                             <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Subject detail|Date valid error@@dateValidError">
                                                 Date should be valid! Date format: {{ dateDisplay }}
@@ -449,6 +463,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             {{ studyNameForSubject() }}
                                             @if (hasError("study", ["required"])) {
                                                 <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     class="form-validation-alert"
                                                     i18n="
                                                         Subject detail|Study required
@@ -463,6 +478,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </ol>
                         @if (hasError("subjectStudyList", ["required"])) {
                             <label
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                 class="form-validation-alert"
                                 i18n="
                                     Subject detail|Subject StudyList required

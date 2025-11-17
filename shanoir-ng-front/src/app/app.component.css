@@ -32,24 +32,25 @@ shanoir-console { position: absolute; bottom: 0; z-index: 1; }
 .tree-frame { position: relative; }
 
 
-.slide-right {
+:host(.viewInitialized) .slide-right {
     animation: slideRight 500ms ease-in-out both;
 }
+
 @keyframes slideRight {
     from { width: 0; }
     to   { width: 300px; }
 }
 
-/* animation de sortie */
-.slide-left {
+:host(.viewInitialized) .slide-left {
   animation: slideLeft 500ms ease-in-out both;
 }
+
 @keyframes slideLeft {
     from { width: 300px; }
     to   { width: 0; }
 }
 
-.main-content {
+:host(.viewInitialized) .main-content {
     transition: margin-left 0.5s ease-in-out;
 }
 

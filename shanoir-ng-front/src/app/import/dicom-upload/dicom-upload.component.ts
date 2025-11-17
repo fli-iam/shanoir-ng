@@ -21,7 +21,6 @@ import { FormsModule } from '@angular/forms';
 import { TaskState } from 'src/app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { Study } from '../../studies/shared/study.model';
@@ -44,7 +43,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
     imports: [CheckboxComponent, FormsModule, SelectBoxComponent, UploaderComponent, LoadingBarComponent]
 })
 export class DicomUploadComponent implements OnDestroy {

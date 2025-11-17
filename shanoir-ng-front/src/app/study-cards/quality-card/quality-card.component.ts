@@ -25,7 +25,6 @@ import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
@@ -54,7 +53,6 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {

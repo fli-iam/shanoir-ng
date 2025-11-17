@@ -21,7 +21,6 @@ import { FormsModule } from '@angular/forms';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
-import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
@@ -41,7 +40,6 @@ import { PagerComponent } from './pager/pager.component';
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [slideDown],
     imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {

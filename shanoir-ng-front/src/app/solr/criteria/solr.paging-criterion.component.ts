@@ -17,7 +17,6 @@ import shajs from 'sha.js';
 import { Router } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 
-import { slideDown, slideRight } from '../../shared/animations/animations';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -28,7 +27,6 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
     selector: 'solr-paging-criterion',
     templateUrl: 'solr.paging-criterion.component.html',
     styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'],
-    animations: [slideDown, slideRight],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

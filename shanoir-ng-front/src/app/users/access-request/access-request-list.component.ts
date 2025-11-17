@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { disapearUp } from '../../shared/animations/animations';
 import { UserService } from '../shared/user.service';
 
 import { AccessRequest } from './access-request.model';
@@ -26,7 +25,6 @@ import { AccessRequestService } from './access-request.service';
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
-    animations: [disapearUp],
     imports: [FormsModule, RouterLink]
 })
 

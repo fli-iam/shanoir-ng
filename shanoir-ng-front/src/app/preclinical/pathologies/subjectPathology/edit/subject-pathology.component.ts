@@ -19,7 +19,6 @@ import { DatePipe } from '@angular/common';
 
 import { Reference } from '../../../../preclinical/reference/shared/reference.model';
 import { ReferenceService } from '../../../../preclinical/reference/shared/reference.service';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -35,7 +34,6 @@ import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.
 @Component({
     selector: 'subject-pathology',
     templateUrl: 'subject-pathology.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectPathologyComponent extends EntityComponent<SubjectPathology> {

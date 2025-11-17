@@ -20,7 +20,6 @@ import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { CoordSystems } from '../../enum/coord-system.enum';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
@@ -40,7 +39,6 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations],
     imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent]
 })
 

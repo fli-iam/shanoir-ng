@@ -19,7 +19,6 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
 import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/preclinicalSubject.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
@@ -34,7 +33,6 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'pre-clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations],
     imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {

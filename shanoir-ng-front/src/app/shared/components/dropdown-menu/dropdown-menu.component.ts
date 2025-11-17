@@ -15,7 +15,6 @@
 import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { menuAnimDur, menuSlideRight } from '../../animations/animations';
 import { GlobalService } from '../../services/global.service';
 
 import { MenuItemComponent } from './menu-item/menu-item.component';
@@ -26,7 +25,6 @@ import { MenuItemComponent } from './menu-item/menu-item.component';
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
-    animations: [menuSlideRight],
     imports: []
 })
 export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewInit {
@@ -44,7 +42,6 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewIni
     @Output() openInputChange: EventEmitter<boolean> = new EventEmitter();
     public parent: any;
     public hasChildren: boolean = true;
-    public overflow: boolean = false;
     private globalClickSubscription: Subscription;
 
     constructor(public elementRef: ElementRef, private globalService: GlobalService) {
@@ -86,16 +83,14 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewIni
     private openAction() {
         this.opened = true;
         this.openInputChange.emit(this.opened);
-        setTimeout(() => this.overflow = false, menuAnimDur);
     }
 
     public close(callback: () => void = () => { return; }) {
         if (this.hasChildren && this.opened) {
             this.closeChildren(() => {
-                this.overflow = true;
                 this.opened = false;
                 this.openInputChange.emit(this.opened);
-                setTimeout(callback, menuAnimDur);
+                setTimeout(callback);
             });
         } else {
             callback();

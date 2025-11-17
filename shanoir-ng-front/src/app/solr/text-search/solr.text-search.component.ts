@@ -14,15 +14,10 @@
 import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-import { slideDown } from '../../shared/animations/animations';
-
-
-
 @Component({
     selector: 'solr-text-search',
     templateUrl: 'solr.text-search.component.html',
     styleUrls: ['solr.text-search.component.css'],
-    animations: [slideDown],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

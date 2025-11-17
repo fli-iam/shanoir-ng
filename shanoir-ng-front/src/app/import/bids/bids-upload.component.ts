@@ -19,7 +19,6 @@ import { FormsModule } from '@angular/forms';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
-import { slideDown } from '../../shared/animations/animations';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -34,7 +33,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bids-upload',
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
-    animations: [slideDown],
     imports: [TooltipComponent, SelectBoxComponent, FormsModule, UploaderComponent]
 })
 export class BidsUploadComponent {

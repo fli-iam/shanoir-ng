@@ -24,7 +24,6 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { slideDown } from '../../../../shared/animations/animations';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 
@@ -33,7 +32,6 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 @Component({
     selector: 'anesthetic-ingredient-form',
     templateUrl: 'anestheticIngredient-form.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule]
 })
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges {

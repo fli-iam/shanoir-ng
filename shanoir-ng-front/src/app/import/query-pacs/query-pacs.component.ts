@@ -17,7 +17,6 @@ import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Va
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
@@ -34,7 +33,6 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     selector: 'query-pacs',
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 

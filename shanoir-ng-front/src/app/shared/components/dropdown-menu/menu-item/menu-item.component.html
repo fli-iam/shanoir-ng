@@ -15,7 +15,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     class="menu-item"
     [class.opened]="init && opened"
     [class.closed]="!opened"
-    [class.animate]="overflow"
     [class.disabled]="disabled">
     <!-- [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')" -->
     @if (hasChildren) {
@@ -44,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     }
     @if (opened) {
-        <ul #contentWrapper class="sub-content" [@menuSlideRight]="opened" [hidden]="!init">
+        <ul #contentWrapper class="sub-content" animate.enter="slide-right" [hidden]="!init">
             <div class="sub-sub-content"><ng-content></ng-content></div>
         </ul>
     }

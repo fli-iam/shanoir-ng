@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             (newOption)="isUserAdmin() ? goToAddPathologyModel() : null"></select-box>
                                         @if (hasError("pathologyModel", ["required"])) {
                                             <label
-                                                [@slideDown]="hasError('pathologyModel', ['required'])"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert">
                                                 Pathology model is required!
                                             </label>
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             (newOption)="isUserAdmin() ? goToAddLocation() : null"></select-box>
                                         @if (hasError("location", ["required"])) {
                                             <label
-                                                [@slideDown]="hasError('location', ['required'])"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert">
                                                 Location is required!
                                             </label>
@@ -99,7 +99,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <datepicker formControlName="startDate"></datepicker>
                                         @if (hasError("startDate", ["date-format"])) {
                                             <label
-                                                [@slideDown]="hasError('startDate', ['date-format'])"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert">
                                                 Start date is required!
                                             </label>
@@ -119,7 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <datepicker formControlName="endDate"></datepicker>
                                         @if (hasError("endDate", ["date-format"])) {
                                             <label
-                                                [@slideDown]="hasError('endDate', ['date-format'])"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                 class="form-validation-alert">
                                                 End date is required!
                                             </label>

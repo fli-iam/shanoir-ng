@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     }
 </div>
 @if (open && range) {
-    <div class="body content" @slideDown>
+    <div class="body content">
         <span>from :</span>
         <input type="number" [(ngModel)]="range.lowerBound" (change)="change()" />
         <span>to :</span>

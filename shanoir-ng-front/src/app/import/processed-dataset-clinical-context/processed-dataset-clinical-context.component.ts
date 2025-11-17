@@ -20,7 +20,6 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ProcessedContextData } from '../shared/import.data-service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
@@ -32,7 +31,6 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css', './processed-dataset-clinical-context.component.css'],
-    animations: [slideDown, preventInitialChildAnimations],
     imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {

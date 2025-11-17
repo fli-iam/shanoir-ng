@@ -22,7 +22,6 @@ import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
 import { PathologyService } from '../../pathology/shared/pathology.service';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
@@ -32,7 +31,6 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
 @Component({
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{

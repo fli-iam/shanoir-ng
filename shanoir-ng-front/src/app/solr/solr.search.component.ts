@@ -25,7 +25,6 @@ import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acqui
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
-import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
@@ -57,7 +56,6 @@ export type TextualFacet = typeof TextualFacetNames[number];
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 

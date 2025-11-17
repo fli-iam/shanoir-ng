@@ -20,7 +20,6 @@ import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
@@ -35,7 +34,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'eeg-upload',
     templateUrl: 'eeg-upload.component.html',
     styleUrls: ['eeg-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
     imports: [UploaderComponent, LoadingBarComponent]
 })
 export class EegUploadComponent implements OnDestroy {

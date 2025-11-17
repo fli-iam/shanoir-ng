@@ -16,7 +16,6 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
@@ -29,7 +28,6 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
     styleUrls: ['select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
     imports: [TreeNodeComponent, FormsModule, PapayaComponent, LocalDateFormatPipe]
 })
 export class SelectSeriesComponent {

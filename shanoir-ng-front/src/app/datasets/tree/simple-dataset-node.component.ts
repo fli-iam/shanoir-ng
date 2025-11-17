@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -33,7 +33,7 @@ import { ProcessingNodeComponent } from './processing-node.component';
 @Component({
     selector: 'simple-dataset-node',
     templateUrl: 'dataset-node.component.html',
-    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, ProcessingNodeComponent]
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, forwardRef(() => ProcessingNodeComponent)]
 })
 
 export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {

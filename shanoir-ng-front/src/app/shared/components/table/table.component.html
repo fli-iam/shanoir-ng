@@ -356,7 +356,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [ngTemplateOutletContext]="{ rowItem: item, i: i, columnDefinitions: columnDefs }"></ng-template>
             </tr>
             @if (subRowsDefs && subRowOpen[i]) {
-                <tr class="sub-container-tr" @slideDown>
+                <tr class="sub-container-tr">
                     <td class="sub-container-margin-td"></td>
                     <td [attr.colspan]="nbColumns" class="sub-container-td">
                         <table class="sub-container-table">

@@ -99,7 +99,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <label>Data successfully imported.</label>
 }
 @if (errorMessage) {
-    <label class="form-validation-alert" i18n="Import|ExtensionError label">
+    <label class="form-validation-alert" 
+        animate.enter="slide-down-error" animate.leave="slide-up-error" 
+        i18n="Import|ExtensionError label">
         {{ errorMessage }}
     </label>
 }

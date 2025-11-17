@@ -18,7 +18,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { Reference } from '../../reference/shared/reference.model';
 import { ReferenceService } from '../../reference/shared/reference.service';
@@ -34,7 +33,6 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     selector: 'contrast-agent-form',
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
-    animations: [slideDown],
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{

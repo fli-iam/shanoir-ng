@@ -208,3 +208,39 @@ node node { margin-left: 18px; }
 .modal-host { background-color: var(--color-overlay); display: table; position: fixed; top: 0; bottom: 0; left: 0; right: 0; height: 100%; width: 100%; z-index: 10000; }
 .modal-host .modal-cell  { display: table-cell; vertical-align: middle; text-align: center; max-height: 100vh; overflow: auto; }
 .modal-host .modal-window  { display: inline-block; background-color: var(--very-light-grey); width: fit-content; border-radius: 2px; }
+
+.slide-down-error {
+    animation: 300ms ease-in-out both slideDownError;
+}
+
+.slide-up-error {
+    animation: 300ms ease-in-out both slideUpError;
+}
+
+@keyframes slideDownError {
+    from { max-height: 0; }
+    to   { max-height: 20px; }
+}
+
+@keyframes slideUpError {
+    from { max-height: 20px; }
+    to   { max-height: 0; }
+}
+
+.slide-down {
+    animation: 500ms ease-in-out both slideDown;
+}
+
+.slide-up {
+    animation: 500ms ease-out both slideUp;
+}
+
+@keyframes slideDown {
+    from { max-height: 0; }
+    to   { max-height: 100vh; }
+}
+
+@keyframes slideUp {
+    from { max-height: 100vh; }
+    to   { max-height: 0; }
+}

@@ -112,6 +112,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("firstName", ["required"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
                                     First Name is required!
@@ -119,6 +120,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("firstName", ["length"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                                     First Name length must be between 2 and 50!
@@ -139,6 +141,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("lastName", ["required"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
                                     Last Name is required!
@@ -146,6 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("lastName", ["length"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name length error@@editUserLastNameLengthError">
                                     Last Name length must be between 2 and 50!
@@ -174,6 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("email", ["required"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email required error@@editUserEmailRequiredError">
                                     Email is required!
@@ -181,6 +186,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("email", ["pattern"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email pattern error@@editUserEmailPatternError">
                                     Email should be valid!
@@ -188,6 +194,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             @if (hasError("email", ["unique"])) {
                                 <label
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email unique error@@editUserEmailUniqueError">
                                     Email should be unique!
@@ -209,6 +216,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <datepicker formControlName="expirationDate"></datepicker>
                                 @if (hasError("expirationDate", ["format"])) {
                                     <label
+                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Date valid error@@editUserDateValidError">
                                         Date should be valid! Date format: {{ dateDisplay }}
@@ -216,6 +224,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 }
                                 @if (hasError("expirationDate", ["future"])) {
                                     <label
+                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Date valid error@@editUserDateFutureError">
                                         This date should be in the future!
@@ -238,6 +247,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </select>
                                 @if (hasError("role", ["required"])) {
                                     <label
+                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Role required error@@editUserRoleRequiredError">
                                         Role is required!
