@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -63,6 +64,9 @@ public class CenterServiceImpl implements CenterService {
 	
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private CenterMapper centerMapper;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
@@ -194,7 +198,7 @@ public class CenterServiceImpl implements CenterService {
 	private boolean updateCenter(Center center) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(center));
+					objectMapper.writeValueAsString(centerMapper.centerToCenterDTOFlat(center)));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center.");
