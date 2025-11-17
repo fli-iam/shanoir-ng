@@ -70,7 +70,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byDicom/{studyId}", produces = { "application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_IMPORT')")
-	ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+	ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description = "institution dicom to find or create a center", required = true)
 			@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException;

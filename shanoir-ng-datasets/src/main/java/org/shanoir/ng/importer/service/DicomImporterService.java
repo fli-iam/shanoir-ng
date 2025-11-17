@@ -47,8 +47,10 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
+import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
@@ -120,6 +122,9 @@ public class DicomImporterService {
 
     @Autowired
     private CenterRepository centerRepository;
+
+    @Autowired
+    private StudyCenterRepository studyCenterRepository;
 
     @Autowired
     private DICOMWebService dicomWebService;
@@ -343,18 +348,36 @@ public class DicomImporterService {
      */
     private Center manageCenterAndEquipment(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
         InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
-        Center center = findOrCreateCenter(institutionDicom, study.getId());
+        Center center = findOrCreateOrAddCenter(institutionDicom, study.getId());
         String manufacturer = attributes.getString(Tag.Manufacturer);
         String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
         String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
         return center;
     }
 
-    private Center findOrCreateCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+    /**
+     * This method calls MS Studies (domain owner of centers and study_center)
+     * to either create a new center and propagate it to MS Datasets, or to add
+     * an existing center to study_center. To avoid thousands of RabbitMQ messages
+     * a local lookup is made into the replication tables, and if the center exists
+     * and is already in the study, we send no message to MS Studies to avoid overhead.
+     * 
+     * @param institutionDicom
+     * @param studyId
+     * @return
+     * @throws JsonProcessingException
+     * @throws AmqpException
+     * @throws RestServiceException
+     */
+    private Center findOrCreateOrAddCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+        Optional<StudyCenter> studyCenterOpt = null;
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
-            return centerOpt.get();
-        } else {// Communicate with MS Studies here, only if not existing
+            Center center = centerOpt.get();
+            studyCenterOpt = studyCenterRepository.findByStudyIdCenterId(studyId, center.getId());
+        }
+        if (studyCenterOpt == null || studyCenterOpt.isEmpty()) {
+            // Communicate with MS Studies here, if not existing or not yet in study
             CreateCenterForStudyMessage message = new CreateCenterForStudyMessage();
             message.setStudyId(studyId);
             message.setInstitutionDicom(institutionDicom);
@@ -365,8 +388,10 @@ public class DicomImporterService {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
             }
-            LOG.info("Center created with ID: {}, Name: {}", centerId, institutionDicom.getInstitutionName());
+            LOG.info("Center created or added to study with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             return centerRepository.findById(centerId).orElseThrow();
+        } else {
+            return studyCenterOpt.get().getCenter();
         }
     }
 

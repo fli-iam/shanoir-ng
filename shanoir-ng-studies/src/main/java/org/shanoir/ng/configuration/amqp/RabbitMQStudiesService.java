@@ -1,6 +1,5 @@
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +10,11 @@ import java.util.regex.Pattern;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
 import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
@@ -23,7 +24,6 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
-import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -231,18 +231,13 @@ public class RabbitMQStudiesService {
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
-			Center center = new Center();
-			center.setName(message.getInstitutionDicom().getInstitutionName());
-			center.setStreet(message.getInstitutionDicom().getInstitutionAddress());
-			StudyCenter studyCenter = new StudyCenter();
-			Study study = studyService.findById(message.getStudyId());
-			studyCenter.setStudy(study);
-			studyCenter.setCenter(center);
-			List<StudyCenter> studyCenterList = new ArrayList<>();
-			studyCenterList.add(studyCenter);
-			center.setStudyCenterList(studyCenterList);
-			center = createCenter(center);
-			return center.getId();
+			Center center = findOrCreateOrAddCenterByInstitutionDicom(message.getStudyId(), message.getInstitutionDicom());
+			if (center != null) {
+				return center.getId();
+			} else {
+				LOG.error("Error while creating a new center.");
+				return null;
+			}
 		} catch (Exception e) {
 			LOG.error("Error while creating a new center: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
@@ -250,8 +245,13 @@ public class RabbitMQStudiesService {
 	}
 
 	@Transactional
-	private Center createCenter(Center center) {
-		return centerService.create(center);
+	private Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) {
+		try {
+			return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom);
+		} catch (EntityNotFoundException e) {
+			LOG.error("Error while creating a new center: ", e);
+		}
+		return null;
 	}
 
 }

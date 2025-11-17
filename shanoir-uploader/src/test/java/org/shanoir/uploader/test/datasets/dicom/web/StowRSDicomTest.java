@@ -3,12 +3,7 @@ package org.shanoir.uploader.test.datasets.dicom.web;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -16,6 +11,8 @@ import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.test.AbstractTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StowRSDicomTest extends AbstractTest {
 

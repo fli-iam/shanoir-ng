@@ -23,13 +23,17 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -68,6 +72,9 @@ public class CenterServiceImpl implements CenterService {
 	
 	@Autowired
 	private StudyUserRepository studyUserRepo;
+
+	@Autowired
+	private StudyService studyService;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 	
@@ -202,6 +209,58 @@ public class CenterServiceImpl implements CenterService {
 		final Optional<Center> entity = centerRepository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
 		centerRepository.deleteById(id);
+	}
+
+	@Override
+	public Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) throws EntityNotFoundException {
+		Optional<Center> centerOpt = findByName(institutionDicom.getInstitutionName());
+		if (centerOpt.isEmpty()) {
+			Center center = new Center();
+			center.setName(institutionDicom.getInstitutionName());
+			center.setStreet(institutionDicom.getInstitutionAddress());
+			StudyCenter studyCenter = new StudyCenter();
+			Study study = studyService.findById(studyId);
+			studyCenter.setStudy(study);
+			studyCenter.setCenter(center);
+			List<StudyCenter> studyCenterList = new ArrayList<>();
+			studyCenterList.add(studyCenter);
+			center.setStudyCenterList(studyCenterList);
+			return create(center);
+		} else {
+			Center center = centerOpt.orElseThrow();
+			boolean centerInStudy = false;
+			List<StudyCenter> studyCenterList = center.getStudyCenterList();
+			for (StudyCenter studyCenter : studyCenterList) {
+				if (studyCenter.getStudy().getId().equals(studyId)) {
+					centerInStudy = true;
+					break;
+				}
+			}
+			if(!centerInStudy) {
+				StudyCenter studyCenter = new StudyCenter();
+				Study study = studyService.findById(studyId);
+				studyCenter.setStudy(study);
+				studyCenter.setCenter(center);
+				center.getStudyCenterList().add(studyCenter);
+				update(center);
+				try {
+					updateStudyCenter(studyCenter);
+				} catch (MicroServiceCommunicationException e) {
+					LOG.error("Could not send the center name change to the other microservices !", e);
+				}
+			}
+			return center;
+		}
+	}
+
+	private boolean updateStudyCenter(StudyCenter studyCenter) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_CENTER_QUEUE,
+					objectMapper.writeValueAsString(studyCenter));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study center.");
+		}
 	}
 
 }

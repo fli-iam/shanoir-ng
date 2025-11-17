@@ -43,9 +43,11 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
+import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
@@ -104,6 +106,9 @@ public class RabbitMQDatasetsService {
 	private CenterRepository centerRepository;
 
 	@Autowired
+	private StudyCenterRepository studyCenterRepository;
+
+	@Autowired
 	private DatasetRepository datasetRepository;
 
 	@Autowired
@@ -154,27 +159,19 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public String receiveStudyUpdate(final String studyAsString) {
 		try {
-
 			Study updated = objectMapper.readValue(studyAsString, Study.class);
-
 			bidsService.deleteBidsFolder(updated.getId(), null);
-
 			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
-
 			List<String> errors = studyService.validate(updated, current);
-
 			if(!errors.isEmpty()){
 				return errors.get(0);
 			}
-
 			studyService.updateStudy(updated, current);
-			
 			try {
 				solrService.updateStudyAsync(current.getId());
 			}catch (Exception e){
 				LOG.error("Solr update failed for study {}", current.getId(), e);
 			}
-
 		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);
 			return ex.getMessage();
@@ -235,6 +232,13 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_CENTER_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitHandler
+	public void receiveStudyCenterUpdate(final String studyCenterStr) throws JsonMappingException, JsonProcessingException {
+		StudyCenter studyCenter = objectMapper.readValue(studyCenterStr, StudyCenter.class);
+		studyCenterRepository.save(studyCenter);
 	}
 	
 	@Transactional

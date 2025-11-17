@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
@@ -103,6 +104,9 @@ public interface CenterService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and #center.getId() == null")
 	Center create(Center center);
 	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) throws EntityNotFoundException;
+
 	/**
 	 * Update an entity.
 	 *
