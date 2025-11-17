@@ -129,16 +129,10 @@ public class StudyServiceImpl implements StudyService {
 	private ObjectMapper objectMapper;
 
 	@Autowired
-	private SubjectService subjectService;
-
-	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
-
-	@Autowired
-	private StudyCenterRepository studyCenterRepository;
 
 	@Autowired
 	private ShanoirEventService eventService;
