@@ -121,6 +121,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
+							<label>Can execute</label>
+							<span class="right-col">
+								<checkbox
+									[mode]="mode == 'view' ? mode : 'edit'"
+									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
+									(userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, pannelStudyUser, $event)"
+								></checkbox>
+							</span>
+						</li>
+						<li>
 							<label>Can administrate</label>
 							<span class="right-col">
 								<checkbox
