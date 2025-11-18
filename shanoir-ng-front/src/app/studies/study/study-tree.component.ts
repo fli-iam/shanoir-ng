@@ -24,6 +24,8 @@ import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 
 import { environment } from "../../../environments/environment";
 
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { RightsError } from 'src/app/shared/models/error.model';
 import { TreeService } from './tree.service';
 
 
@@ -52,7 +54,8 @@ export class StudyTreeComponent implements OnDestroy {
             private processingService: ExecutionDataService,
             private router: Router,
             private downloadService: MassDownloadService,
-            private dialogService: ConfirmDialogService) {
+            private dialogService: ConfirmDialogService,
+            private datasetService: DatasetService) {
 
         treeService.studyNodeOpenPromise.then(() => this.loaded = true);
 
@@ -98,35 +101,47 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     goToProcessing() {
-        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
-        this.processingService.setDatasets(new Set(allSelectedNodes?.map(n => n.id)));
-        this.router.navigate(['pipelines']);
+        this.getSelectedDatasetIdsIncludingExamAndAcq().then(allSelectedIds => {
+            this.processingService.setDatasets(allSelectedIds);
+            this.router.navigate(['pipelines']);
+        }).catch(e => {
+            if (e instanceof RightsError) {
+                this.dialogService.error('error', 'Sorry, you don\'t have the right to download all the datasets you have selected');
+            }
+        });
     }
 
     downloadSelected() {
-        const allSelectedNodes: DatasetNode[] = this.getSelectedDatasetNodesIncludingExamAndAcq();
-        if (allSelectedNodes.find(node => !node.canDownload)) {
-            this.dialogService.error('error', 'Sorry, you don\'t have the right to download all the datasets you have selected');
-        } else {
-            this.downloadService.downloadByIds(allSelectedNodes?.map(n => n.id), this.downloadState);
-        }
-    }
-
-    getSelectedDatasetNodesIncludingExamAndAcq(): DatasetNode[] {
-        let allSelectedNodes: DatasetNode[] = []; // selected datasets + datasets in selected exams and acq
-        /** Concat all selected */
-        allSelectedNodes = allSelectedNodes.concat(this.selectedDatasetNodes);
-        this.selectedAcquisitionNodes.forEach(acqNode => {
-            if (acqNode.datasets != 'UNLOADED') allSelectedNodes = allSelectedNodes.concat(acqNode.datasets);
-        });
-        this.selectedExaminationNodes.forEach(examNode => {
-            if (examNode.datasetAcquisitions != 'UNLOADED') {
-                examNode.datasetAcquisitions.forEach(acqNode => {
-                    if (acqNode.datasets != 'UNLOADED') allSelectedNodes = allSelectedNodes.concat(acqNode.datasets);
-                });
+        this.getSelectedDatasetIdsIncludingExamAndAcq().then(allSelectedIds => {
+            this.downloadService.downloadByIds(Array.from(allSelectedIds), this.downloadState);
+        }).catch(e => {
+            if (e instanceof RightsError) {
+                this.dialogService.error('error', 'Sorry, you don\'t have the right to download all the datasets you have selected');
             }
         });
-        return allSelectedNodes;
+    }
+
+    getSelectedDatasetIdsIncludingExamAndAcq(): Promise<Set<number>> /* throws RightsError */ {        
+        // Check directly selected datasets for download rights
+        if (this.selectedDatasetNodes.find(dsNode => !dsNode.canDownload)) {
+            return Promise.reject(new RightsError());
+        }
+        else if (this.selectedAcquisitionNodes?.length > 0 || this.selectedExaminationNodes?.length > 0) {
+            return this.datasetService.getDownloadData(
+                this.selectedAcquisitionNodes.map(acqNode => acqNode.id),
+                this.selectedExaminationNodes.map(examNode => examNode.id)
+            ).then(results => {
+                const denied = results.filter(res => !res.canDownload);
+                if (denied.length > 0) {
+                    throw new RightsError();
+                } else {
+                    const allIds: Set<number> = new Set();
+                    this.selectedDatasetNodes.forEach(dsNode => allIds.add(dsNode.id));
+                    results.forEach(res => allIds.add(res.id));
+                    return allIds;
+                }
+            });
+        }
     }
 
     openInViewer() {

@@ -166,8 +166,12 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+    getDownloadData(acquisitionIds: number[], examinationIds: number[]): Promise<{id: number, canDownload: boolean}[]> {
+        const formData = {examinationIds: examinationIds, acquisitionIds: acquisitionIds};
+        return firstValueFrom(this.http.post<{id: number, canDownload: boolean}[]>(
+            AppUtils.BACKEND_API_DATASET_URL + '/getDownloadData',
+            formData
+        ));
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {

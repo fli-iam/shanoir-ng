@@ -15,9 +15,11 @@
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
@@ -144,5 +146,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			+ "LEFT JOIN e.study s "
 			+ "WHERE s.id = :studyId")
 	List<DatasetLight> findAllLightByStudyId(Long studyId);
+
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("
+			+ "ds.id, ex.study.id, ex.centerId) "
+			+ "FROM Dataset ds "
+			+ "LEFT JOIN ds.datasetAcquisition da "
+			+ "LEFT JOIN da.examination ex "
+			+ "WHERE da.id in :acquisitionIds "
+			+ "OR ex.id in :examinationIds")
+    Set<DatasetStudyCenter> getDatasetsByAcquisitionAndExaminationIds(
+			@Param("acquisitionIds") List<Long> acquisitionIds,
+            @Param("examinationIds") List<Long> examinationIds);
 
 }

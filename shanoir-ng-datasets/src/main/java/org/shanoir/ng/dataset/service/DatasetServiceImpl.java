@@ -13,16 +13,21 @@
  */
 package org.shanoir.ng.dataset.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.ListUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -44,8 +49,10 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
@@ -63,9 +70,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Dataset service implementation.
@@ -81,6 +88,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
+
+	@Autowired
+	private StudyRightsService studyRightService;
 
 	@Autowired
 	private ShanoirEventService shanoirEventService;
@@ -494,5 +504,25 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,
+			List<Long> examinationIds) {
+
+		UserRights userRights = studyRightService.getUserRights();
+		Set<DatasetStudyCenter> dsList = repository.getDatasetsByAcquisitionAndExaminationIds(acquisitionIds, examinationIds);
+		List<DatasetDownloadData> downloadDataList = new ArrayList<>();
+		for (DatasetStudyCenter dsData : dsList) {
+			DatasetDownloadData downloadData = new DatasetDownloadData();
+			downloadData.setId(dsData.getDatasetId());
+			boolean canDownload =
+					userRights.hasStudyRights(dsData.getStudyId(), StudyUserRight.CAN_DOWNLOAD)
+					&& (!userRights.hasCenterRestrictionsFor(dsData.getStudyId()) ||
+						userRights.hasStudyCenterRights(dsData.getStudyId(), dsData.getCenterId()));
+			downloadData.setCanDownload(canDownload);
+			downloadDataList.add(downloadData);
+		}
+		return downloadDataList;
 	}
 }
