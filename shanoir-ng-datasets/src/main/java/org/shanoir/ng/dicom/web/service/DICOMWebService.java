@@ -305,7 +305,7 @@ public class DICOMWebService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void sendDicomInputStreamToPacs(InputStream inputStream) throws ShanoirException {
-		LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
+		LOG.debug("Start: STOW-RS sending dicom file input stream to PACS.");
 		try {
 			// create content body
 			ContentBody contentBody = new InputStreamBody(
@@ -326,7 +326,7 @@ public class DICOMWebService {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
-		LOG.info("Finished: STOW-RS sending dicom file input stream to PACS.");
+		LOG.debug("Finished: STOW-RS sending dicom file input stream to PACS.");
 	}
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
