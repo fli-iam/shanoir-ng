@@ -348,7 +348,7 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue subjectNameUpdateQueue() {
+	public static Queue subjectUpdateQueue() {
 		return new Queue(SUBJECT_UPDATE_QUEUE, true);
 	}
 

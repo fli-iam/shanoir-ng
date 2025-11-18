@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
@@ -63,11 +64,14 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * The DicomImporterService is used by the STOWRSMultipartRequestFilter.
@@ -156,6 +160,21 @@ public class DicomImporterService {
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
 
+   	private ConcurrentHashMap<String, Integer> studyInstanceUIDNumberOfFilesCache;
+	
+	@PostConstruct
+	public void init() {
+		studyInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
+		LOG.info("DICOMWeb cache created: studyInstanceUIDNumberOfFilesCache");
+	}
+
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void clearStudyInstanceUIDNumberOfFilesCache() {
+		studyInstanceUIDNumberOfFilesCache.clear();
+		LOG.info("DICOMWeb cache cleared: studyInstanceUIDNumberOfFilesCache");
+	}
+
+
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
@@ -191,7 +210,18 @@ public class DicomImporterService {
         datasetExpressionRepository.save(expression);
         solrService.indexDataset(dataset.getId());
         sendToPacs(metaInformationAttributes, attributes);
+        countNumberOfFilesPerStudy(examination);
         return true;
+    }
+
+    private void countNumberOfFilesPerStudy(Examination examination) {
+        Integer numberOfFiles = studyInstanceUIDNumberOfFilesCache.get(examination.getStudyInstanceUID());
+        if (numberOfFiles == null) {
+            studyInstanceUIDNumberOfFilesCache.put(examination.getStudyInstanceUID(), Integer.valueOf(1));
+        } else {
+            studyInstanceUIDNumberOfFilesCache.put(examination.getStudyInstanceUID(), Integer.valueOf(numberOfFiles+1));
+        }
+        LOG.info(studyInstanceUIDNumberOfFilesCache.toString());
     }
 
     private Dataset manageDataset(Attributes attributes, Long studyId, Long subjectId, DatasetAcquisition acquisition)
@@ -425,6 +455,7 @@ public class DicomImporterService {
         Subject subject = subjectService.findByNameAndStudyId(subjectName, study.getId());
         if (subject == null) {
             // Communicate with MS Studies here, only if subject not existing
+            // Use convertSendAndReceive to assure, that subject created in MS Studies
             org.shanoir.ng.importer.dto.Subject subjectDTO = new org.shanoir.ng.importer.dto.Subject();
             subjectDTO.setName(subjectName);
             subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
@@ -435,7 +466,15 @@ public class DicomImporterService {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
-            LOG.info("Subject created with ID: {}, Name: {}", subjectId, subjectName);
+            LOG.info("Subject created in MS Studies with ID: {}, Name: {}", subjectId, subjectName);
+            // We create subject here ourselves to avoid 1) transactional issues
+            // and 2) to much RabbitMQ communication
+            subject = new Subject();
+            subject.setId(subjectId); // use same as MS Studies
+            subject.setName(subjectName);
+            subject.setStudy(study);
+            subjectService.save(subject);
+            LOG.info("Subject created in MS Datasets with ID: {}, Name: {}", subjectId, subjectName);
             return subjectId;
         } else {
             return subject.getId();

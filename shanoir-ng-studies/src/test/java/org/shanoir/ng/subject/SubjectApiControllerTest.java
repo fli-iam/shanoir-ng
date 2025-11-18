@@ -99,7 +99,7 @@ public class SubjectApiControllerTest {
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());
 		Subject subject = new Subject();
 		subject.setId(Long.valueOf(123));
-		given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject );
+		given(subjectServiceMock.create(Mockito.any(Subject.class), true)).willReturn(subject );
 		given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
 	}
 

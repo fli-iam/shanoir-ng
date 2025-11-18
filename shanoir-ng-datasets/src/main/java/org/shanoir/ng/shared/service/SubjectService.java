@@ -106,12 +106,16 @@ public class SubjectService {
 	    try {
 	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
 	    } catch (AmqpException | JsonProcessingException e) {
-	        throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+	        throw new MicroServiceCommunicationException("Error while communicating with MS Studies to send study card tags.", e);
 	    }
 	}
 
     public Optional<Subject> findById(Long subjectId) {
         return subjectRepository.findById(subjectId);
+    }
+
+    public Subject save(Subject subject) {
+        return subjectRepository.save(subject);
     }
 
 }

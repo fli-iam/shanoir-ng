@@ -145,9 +145,9 @@ public class SubjectApiController implements SubjectApi {
 			if (subject.getName() != null) {
 				subject.setName(subject.getName().trim());
 			}
-			createdSubject = subjectService.create(subject);
+			createdSubject = subjectService.create(subject, true);
 		} else {
-			createdSubject = subjectService.createAutoIncrement(subject, centerId);
+			createdSubject = subjectService.createAutoIncrement(subject, centerId, true);
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
