@@ -114,6 +114,7 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     			}
 			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
+				throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
 			}
     		return;
     	}
