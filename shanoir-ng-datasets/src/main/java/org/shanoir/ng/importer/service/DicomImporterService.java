@@ -175,7 +175,6 @@ public class DicomImporterService {
 		LOG.info("DICOMWeb cache cleared: studyInstanceUIDNumberOfFilesCache");
 	}
 
-
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
