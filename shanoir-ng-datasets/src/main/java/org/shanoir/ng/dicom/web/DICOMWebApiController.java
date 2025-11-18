@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -75,44 +76,53 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override
 	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
-		Page<Examination> examinations = null;
-		int offset = Integer.valueOf(allParams.get(OFFSET));
-		int limit = Integer.valueOf(allParams.get(LIMIT));
-		Pageable pageable = PageRequest.of(offset, limit);
+		int offset = Integer.parseInt(allParams.getOrDefault(OFFSET, "0"));
+        int limit = Integer.parseInt(allParams.getOrDefault(LIMIT, "100"));
+        Pageable pageable = PageRequest.of(offset, limit);
+
 		String includeField = allParams.get(INCLUDEFIELD);
-		// 1. Search for studies==examinations with patient name
-		// (DICOM patientID does not make sense in case of Shanoir)
-		String patientIDTagParam = allParams.get(PATIENT_ID);
-		String patientNameParam = allParams.get(PATIENT_NAME);
-		if (patientIDTagParam != null || patientNameParam != null) {
-			String subjectName;
-			if (patientIDTagParam != null) {
-				subjectName = patientIDTagParam;
-			} else {
-				subjectName = patientNameParam;
-			}
-			// Remove leading and trailing asterix here to search with subject name
-			subjectName = subjectName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
-			examinations = examinationService.findPage(pageable, subjectName);
-		} else {
-			// 2. Manage still existing case with single study instance UID
-			List<Examination> examinationList = new ArrayList<>();
-			String studyInstanceUID = allParams.get(STUDY_INSTANCE_UID);
-			if (studyInstanceUID != null) {
-				String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
+        String patientIDTagParam = allParams.get(PATIENT_ID);
+        String patientNameParam = allParams.get(PATIENT_NAME);
+
+        Page<Examination> examinations = null;
+        String subjectName = null;
+
+        // Helper to strip leading/trailing asterisks
+        Function<String, String> stripWildcards = s -> s.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
+
+        if (patientNameParam != null && !patientNameParam.isEmpty()) {
+            // Case 1: Search by Patient Name
+            subjectName = stripWildcards.apply(patientNameParam);
+            examinations = examinationService.findPage(pageable, subjectName);
+        } else if (patientIDTagParam != null && !patientIDTagParam.isEmpty()) {
+            // Case 2: Search by Patient ID
+            patientIDTagParam = stripWildcards.apply(patientIDTagParam);
+            String studyMeta = dicomWebService.findStudyByDicomPatientId(patientIDTagParam);
+            JsonNode studyNode = mapper.readTree(studyMeta).path(0).path("00100010").path("Value").path(0).path("Alphabetic");
+            subjectName = studyNode.asText();
+            examinations = examinationService.findPage(pageable, subjectName);
+        } else {
+            // Case 3: Search by single StudyInstanceUID or fallback
+            String studyInstanceUID = allParams.get(STUDY_INSTANCE_UID);
+            List<Examination> examinationList = new ArrayList<>();
+
+            // Extract real StudyInstanceUID from Examination ID
+            if (studyInstanceUID != null && !studyInstanceUID.isEmpty()) {
+                String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf('.') + 1);
 				Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
-				examinationList.add(examination);
+				if (examination != null)
+                    examinationList.add(examination);
 			}
-			// 3. Manage case, that nothing specific was found and return depending on pageable
-			if (examinationList.isEmpty()) {
-				examinations = examinationService.findPage(pageable, null);
-			} else {
-				examinations = new PageImpl<>(examinationList);
-			}
-		}
-		if (examinations == null || examinations.getContent().isEmpty()) {
+
+            examinations = examinationList.isEmpty()
+                ? examinationService.findPage(pageable, null)
+                : new PageImpl<>(examinationList);
+        }
+
+        // Return 204 No Content if no examinations found
+        if (examinations == null || examinations.getContent().isEmpty())
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+
 		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
 		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
 	}
