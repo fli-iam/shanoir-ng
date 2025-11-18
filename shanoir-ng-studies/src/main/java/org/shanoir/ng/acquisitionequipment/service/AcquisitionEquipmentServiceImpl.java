@@ -15,9 +15,9 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
@@ -216,19 +216,18 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
-		for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
-			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
-			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
-			if (manufacturerModel != null) {
-				if (equipmentDicom.getManufacturerModelName().toLowerCase().contains(manufacturerModel.getName().toLowerCase())) {
-					// Issue #3012: we ignore the manufacturer name here
-				} else {
-					iterator.remove();
-				}
-			} else {
-				iterator.remove();
-			}
-		}
+		String manufacturerModelNameLower = equipmentDicom.getManufacturerModelName().toLowerCase();
+		equipments = equipments.stream()
+				.filter(equipment -> {
+					ManufacturerModel model = equipment.getManufacturerModel();
+					return model != null &&
+							biDirectionalContains(model.getName().toLowerCase(), manufacturerModelNameLower);
+				})
+				.collect(Collectors.toList());
+	}
+
+	private boolean biDirectionalContains(String name1, String name2) {
+		return name1.contains(name2) || name2.contains(name1);
 	}
 
 }
