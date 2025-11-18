@@ -326,7 +326,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Table content -->
 @if (items?.length > 0) {
     <tbody (mousemove)="moveDrag($event)">
-        @for (item of items; track item; let i = $index) {
+        @for (item of items; track (item.id ?? $index); let i = $index) {
             <tr
                 [class.odd]="i % 2 != 0"
                 [class.even]="i % 2 == 0"

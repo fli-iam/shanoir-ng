@@ -264,7 +264,7 @@ export class ExecutionComponent implements OnInit {
     getDefaultExecutionName(): string {
         return this.cleanProcessingName(this.pipeline.name
         + "_" + this.pipeline.version
-        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HHmmss', 'en-US'));
+        + "_" + formatDate(new Date(), 'dd-MM-yyyy_HHmmss', 'en-US'));
 
     }
 

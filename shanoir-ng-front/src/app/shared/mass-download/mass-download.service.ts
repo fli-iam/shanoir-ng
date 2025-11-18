@@ -139,7 +139,7 @@ export class MassDownloadService {
     }
 
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
-        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm\'ss', 'en-US');
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-yyyy_HH\'h\'mm\'ss', 'en-US');
         return handle.getDirectoryHandle(dirName, { create: true })
     }
 
