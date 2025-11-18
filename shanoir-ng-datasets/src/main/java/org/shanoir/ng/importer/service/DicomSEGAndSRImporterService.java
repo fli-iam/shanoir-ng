@@ -122,20 +122,29 @@ public class DicomSEGAndSRImporterService {
 	 * @param datasetAttributes
 	 */
 	private Examination modifyDicom(Attributes datasetAttributes) {
-		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
-		Examination examination = examinationRepository.findById(examinationID).get();
-		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
-		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
-		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
-		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
-		String subjectName = "error_subject_name_not_found_in_db";
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
+		String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		Examination examination = null;
+		if (studyInstanceUID.contains(StudyInstanceUIDHandler.PREFIX)) {
+			try {
+				Long examinationID = Long.valueOf(studyInstanceUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+			 	examination = examinationRepository.findById(examinationID).orElseThrow();
+				// replace artificial examinationUID with real StudyInstanceUID in DICOM server
+				String studyInstanceUIDPACS = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(studyInstanceUID);
+				datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUIDPACS);
+				// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
+				Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
+				String subjectName = "error_subject_name_not_found_in_db";
+				if (subjectOpt.isPresent()) {
+					subjectName = subjectOpt.get().getName();
+				}
+				datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
+				datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
+			} catch(NumberFormatException e) {
+				examination = examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElseThrow();
+			}
+		} else {
+			examination = examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElseThrow();
 		}
-		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
-		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
 		// set user name, as person, who created the measurement/segmentation
 		final String userName = KeycloakUtil.getTokenUserName();
 		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
