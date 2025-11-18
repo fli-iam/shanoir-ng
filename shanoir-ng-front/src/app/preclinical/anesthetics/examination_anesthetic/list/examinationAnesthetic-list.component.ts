@@ -26,7 +26,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
     selector: 'examination-anesthetics-list',
     templateUrl: 'examinationAnesthetic-list.component.html',
     styleUrls: ['examinationAnesthetic-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
   @ViewChild('examinationAnestheticTable') table: TableComponent; 

@@ -1,5 +1,6 @@
 import {Injectable, OnDestroy} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
 
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import * as AppUtils from "../../utils/app.utils";
@@ -21,8 +22,7 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
         const params = { 'params': pageable.toParams() };
         params['params']['searchStr'] = searchStr;
         params['params']['searchField'] = searchField;
-        return this.http.get<Page<ShanoirEvent>>(this.API_URL + '/' + studyId, params)
-            .toPromise()
+        return firstValueFrom(this.http.get<Page<ShanoirEvent>>(this.API_URL + '/' + studyId, params))
             .then(this.mapPage);
     }
 

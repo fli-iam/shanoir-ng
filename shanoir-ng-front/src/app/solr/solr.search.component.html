@@ -13,45 +13,49 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <form class="row" [formGroup]="form">
-
     <div class="left">
         <h2>Solr Search</h2>
 
         <div class="reset">
-            <button type="button" (click)="removeAllFacets(); refreshTable()" class="left-icon" [disabled]="(!selections || selections.length == 0) && (!solrRequest.searchText || solrRequest.searchText.trim().length == 0)">
-                <i class="fas fa-snowplow"></i>Reset
+            <button
+                type="button"
+                (click)="removeAllFacets(); refreshTable()"
+                class="left-icon"
+                [disabled]="
+                    (!selections || selections.length == 0) &&
+                    (!solrRequest.searchText || solrRequest.searchText.trim().length == 0)
+                ">
+                <i class="fas fa-snowplow"></i>
+                Reset
             </button>
         </div>
 
         <solr-paging-criterion
-                label="Study"
-                awesome="fa-regular fa-folder-open"
-                facetName="studyName"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.studyName"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('studyName')">
-        </solr-paging-criterion>
+            label="Study"
+            awesome="fa-regular fa-folder-open"
+            facetName="studyName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.studyName"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('studyName')"></solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Subject"
-                awesome="fa-solid fa-user-injured"
-                facetName="subjectName"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.subjectName"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('subjectName')">
-        </solr-paging-criterion>
+            label="Subject"
+            awesome="fa-solid fa-user-injured"
+            facetName="subjectName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.subjectName"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('subjectName')"></solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Dataset"
-                awesome="fa-solid fa-brain"
-                facetName="datasetName"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.datasetName"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('datasetName')">
-        </solr-paging-criterion>
+            label="Dataset"
+            awesome="fa-solid fa-brain"
+            facetName="datasetName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.datasetName"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('datasetName')"></solr-paging-criterion>
 
         <solr-paging-criterion
             label="Processed Dataset"
@@ -59,19 +63,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             facetName="processed"
             [getPage]="getFacetFieldPage.bind(this)"
             [(ngModel)]="solrRequest.processed"
-            [ngModelOptions]="{standalone: true}"
-            (userChange)="updateSelections(); refreshTable('processed')">
-        </solr-paging-criterion>
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('processed')"></solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Tags"
-                awesome="fa-solid fa-tags"
-                facetName="tags"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.tags"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('tags')">
-        </solr-paging-criterion>
+            label="Tags"
+            awesome="fa-solid fa-tags"
+            facetName="tags"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.tags"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('tags')"></solr-paging-criterion>
 
         <div class="dates">
             <div class="title" (click)="dateOpen = !dateOpen">
@@ -79,20 +81,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-regular fa-calendar-days"></i>
                     Exam Date
                 </span>
-                <span *ngIf="!dateOpen" class="date-colapse"><i class="fas fa-chevron-down"></i></span>
-                <span *ngIf="dateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
+                @if (!dateOpen) {
+                    <span class="date-colapse"><i class="fas fa-chevron-down"></i></span>
+                }
+                @if (dateOpen) {
+                    <span class="date-colapse"><i class="fas fa-chevron-up"></i></span>
+                }
             </div>
-            <div class="date-content" *ngIf="dateOpen" @slideDown>
-                <div class="date-from">
-                    <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" formControlName="startDate"></datepicker>
-                    <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>
+            @if (dateOpen) {
+                <div class="date-content">
+                    <div class="date-from">
+                        <span class="left-title">from :</span>
+                        @if (viewChecked) {
+                            <datepicker formControlName="startDate"></datepicker>
+                        }
+                        @if (hasError("startDate", ["format"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                Date should be valid! Date format: {{ dateDisplay }}
+                            </label>
+                        }
+                    </div>
+                    <div class="date-to">
+                        <span class="left-title">to :</span>
+                        @if (viewChecked) {
+                            <datepicker formControlName="endDate"></datepicker>
+                        }
+                        @if (hasError("endDate", ["format"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                Date should be valid! Date format: {{ dateDisplay }}
+                            </label>
+                        }
+                        @if (hasError("endDate", ["order"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
+                        }
+                    </div>
                 </div>
-                <div class="date-to">
-                    <span class="left-title">to :</span> <datepicker *ngIf="viewChecked" formControlName="endDate"></datepicker>
-                    <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>
-                    <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
-                </div>
-            </div>
+            }
         </div>
         <div class="dates">
             <div class="title" (click)="importDateOpen = !importDateOpen">
@@ -100,51 +124,70 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-regular fa-calendar-days"></i>
                     Import Date
                 </span>
-                <span *ngIf="!importDateOpen" class="date-colapse"><i class="fas fa-chevron-down"></i></span>
-                <span *ngIf="importDateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
+                @if (!importDateOpen) {
+                    <span class="date-colapse"><i class="fas fa-chevron-down"></i></span>
+                }
+                @if (importDateOpen) {
+                    <span class="date-colapse"><i class="fas fa-chevron-up"></i></span>
+                }
             </div>
-            <div class="date-content" *ngIf="importDateOpen" @slideDown>
-                <div class="date-from">
-                    <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" formControlName="importStartDate"></datepicker>
-                    <label *ngIf="hasError('importStartDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>
+            @if (importDateOpen) {
+                <div class="date-content">
+                    <div class="date-from">
+                        <span class="left-title">from :</span>
+                        @if (viewChecked) {
+                            <datepicker formControlName="importStartDate"></datepicker>
+                        }
+                        @if (hasError("importStartDate", ["format"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                Date should be valid! Date format: {{ dateDisplay }}
+                            </label>
+                        }
+                    </div>
+                    <div class="date-to">
+                        <span class="left-title">to :</span>
+                        @if (viewChecked) {
+                            <datepicker formControlName="importEndDate"></datepicker>
+                        }
+                        @if (hasError("importEndDate", ["format"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                Date should be valid! Date format: {{ dateDisplay }}
+                            </label>
+                        }
+                        @if (hasError("importEndDate", ["order"])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
+                        }
+                    </div>
                 </div>
-                <div class="date-to">
-                    <span class="left-title">to :</span> <datepicker *ngIf="viewChecked" formControlName="importEndDate"></datepicker>
-                    <label *ngIf="hasError('importEndDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>
-                    <label *ngIf="hasError('importEndDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
-                </div>
-            </div>
+            }
         </div>
 
         <solr-paging-criterion
-                label="Examination"
-                awesome="fa-solid fa-stethoscope"
-                facetName="examinationComment"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.examinationComment"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('examinationComment')">
-        </solr-paging-criterion>
+            label="Examination"
+            awesome="fa-solid fa-stethoscope"
+            facetName="examinationComment"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.examinationComment"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('examinationComment')"></solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Acquisition Center"
-                awesome="fa-regular fa-hospital"
-                facetName="centerName"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.centerName"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('centerName')">
-        </solr-paging-criterion>
+            label="Acquisition Center"
+            awesome="fa-regular fa-hospital"
+            facetName="centerName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.centerName"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('centerName')"></solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Modality"
-                awesome="fa-solid fa-list-check"
-                facetName="datasetType"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.datasetType"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="updateSelections(); refreshTable('datasetType')">
-        </solr-paging-criterion>
+            label="Modality"
+            awesome="fa-solid fa-list-check"
+            facetName="datasetType"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.datasetType"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('datasetType')"></solr-paging-criterion>
 
         <solr-paging-criterion
             label="Mr Dataset Nature"
@@ -152,9 +195,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             facetName="datasetNature"
             [getPage]="getFacetFieldPage.bind(this)"
             [(ngModel)]="solrRequest.datasetNature"
-            [ngModelOptions]="{standalone: true}"
-            (userChange)="updateSelections(); refreshTable('datasetNature')">
-        </solr-paging-criterion>
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('datasetNature')"></solr-paging-criterion>
 
         <solr-paging-criterion
             label="Center equipment"
@@ -162,9 +204,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             facetName="acquisitionEquipmentName"
             [getPage]="getFacetFieldPage.bind(this)"
             [(ngModel)]="solrRequest.acquisitionEquipmentName"
-            [ngModelOptions]="{standalone: true}"
-            (userChange)="updateSelections(); refreshTable('acquisitionEquipmentName')">
-        </solr-paging-criterion>
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('acquisitionEquipmentName')"></solr-paging-criterion>
 
         <solr-paging-criterion
             label="Subject type"
@@ -172,95 +213,109 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             facetName="subjectType"
             [getPage]="getFacetFieldPage.bind(this)"
             [(ngModel)]="solrRequest.subjectType"
-            [ngModelOptions]="{standalone: true}"
-            (userChange)="updateSelections(); refreshTable('subjectType')">
-        </solr-paging-criterion>
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('subjectType')"></solr-paging-criterion>
 
         <solr-range-criterion
-                [range]="solrRequest.sliceThickness"
-                awesome="fa-solid fa-pizza-slice"
-                label="Slice Thickness"
-                (userChange)="updateSelections(); refreshTable()">
-        </solr-range-criterion>
+            [range]="solrRequest.sliceThickness"
+            awesome="fa-solid fa-pizza-slice"
+            label="Slice Thickness"
+            (userChange)="updateSelections(); refreshTable()"></solr-range-criterion>
 
         <solr-range-criterion
-                [range]="solrRequest.pixelBandwidth"
-                awesome="fa-solid fa-wave-square"
-                label="Pixel Bandwidth"
-                (userChange)="updateSelections(); refreshTable()">
-        </solr-range-criterion>
+            [range]="solrRequest.pixelBandwidth"
+            awesome="fa-solid fa-wave-square"
+            label="Pixel Bandwidth"
+            (userChange)="updateSelections(); refreshTable()"></solr-range-criterion>
 
         <solr-range-criterion
-                [range]="solrRequest.magneticFieldStrength"
-                awesome="fa-solid fa-magnet"
-                label="Mag. Field Strength"
-                (userChange)="updateSelections(); refreshTable()">
-        </solr-range-criterion>
+            [range]="solrRequest.magneticFieldStrength"
+            awesome="fa-solid fa-magnet"
+            label="Mag. Field Strength"
+            (userChange)="updateSelections(); refreshTable()"></solr-range-criterion>
     </div>
     <div class="right">
-
         <solr-text-search
-                [(ngModel)]="solrRequest.searchText"
-                [ngModelOptions]="{standalone: true}"
-                (type)="syntaxError = false"
-                (userChange)="refreshTable()"
-                [syntaxError]="syntaxError"
-                [syntaxErrorMsg]="syntaxErrorMsg"
-                (expertModeChange)="setExpertMode($event)">
-        </solr-text-search>
+            [(ngModel)]="solrRequest.searchText"
+            [ngModelOptions]="{ standalone: true }"
+            (type)="syntaxError = false"
+            (userChange)="refreshTable()"
+            [syntaxError]="syntaxError"
+            [syntaxErrorMsg]="syntaxErrorMsg"
+            (expertModeChange)="setExpertMode($event)"></solr-text-search>
 
         <solr-text-search-mode
-                [(ngModel)]="solrRequest.expertMode"
-                [ngModelOptions]="{standalone: true}"
-                (userChange)="refreshTable()">
-        </solr-text-search-mode>
+            [(ngModel)]="solrRequest.expertMode"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="refreshTable()"></solr-text-search-mode>
 
-        <div *ngIf="selections" class="selections">
-            <span class="selection" *ngFor="let sel of selections; let i = index">
-                <span class="clickable" (click)="removeSelection(i); refreshTable();">
-                    <i class="fas fa-times"></i>
-                </span>
-                {{sel.label}}
-            </span>
-        </div>
+        @if (selections) {
+            <div class="selections">
+                @for (sel of selections; track sel; let i = $index) {
+                    <span class="selection">
+                        <span class="clickable" (click)="removeSelection(i); refreshTable()">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        {{ sel.label }}
+                    </span>
+                }
+            </div>
+        }
 
         <div [hidden]="!progressState?.progress">
-            <progress-bar [progress]="progressState.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+            <progress-bar
+                [progress]="progressState.progress"
+                [text]="'Preparing download'"
+                [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">
             <div class="tab-labels">
                 <span class="left-icon" (click)="openResultTab()" [class.tab-opened]="tab == 'results'">
-                    <i class="fas fa-search"></i>Results
+                    <i class="fas fa-search"></i>
+                    Results
                 </span>
-                <span class="selected left-icon" *ngIf="viewChecked" (click)="openSelectionTab()" [class.tab-opened]="tab == 'selected'" [class.disabled]="!selectedDatasetIds || selectedDatasetIds.size == 0">
-                    <i class="fas fa-shopping-cart"></i>Selection ({{selectedDatasetIds ? selectedDatasetIds.size : 0}})
-                </span>
+                @if (viewChecked) {
+                    <span
+                        class="selected left-icon"
+                        (click)="openSelectionTab()"
+                        [class.tab-opened]="tab == 'selected'"
+                        [class.disabled]="!selectedDatasetIds || selectedDatasetIds.size == 0">
+                        <i class="fas fa-shopping-cart"></i>
+                        Selection ({{ selectedDatasetIds ? selectedDatasetIds.size : 0 }})
+                    </span>
+                }
             </div>
-            <div class="tab-body" [hidden]="tab != 'results'" *ngIf="loaded">
-                <shanoir-table #table
-                    [getPage]="getPage.bind(this)"
-                    [maxResults]="50"
-                    [columnDefs]="columnDefs"
-                    [customActionDefs]="customActionDefs"
-                    [browserSearch]="false"
-                    [rowRoute]="rowClick.bind(this)"
-                    [selectionAllowed]="true"
-                    [selection]="selectedDatasetIds"
-                    (selectionChange)="onSelectionChange($event)">
-                </shanoir-table>
-            </div>
-            <div class="tab-body selected" [hidden]="tab != 'selected'" *ngIf="loaded">
-                <shanoir-table #selectionTable
-                    [getPage]="getSelectedPage.bind(this)"
-                    [maxResults]="50"
-                    [columnDefs]="selectionColumnDefs"
-                    [customActionDefs]="selectionCustomActionDefs"
-                    [rowRoute]="rowClick.bind(this)"
-                    [browserSearch]="false">
-                </shanoir-table>
-            </div>
-            <div *ngIf="!loaded">Loading ...</div>
+            @if (loaded) {
+                <div class="tab-body" [hidden]="tab != 'results'">
+                    <shanoir-table
+                        #table
+                        [getPage]="getPage.bind(this)"
+                        [maxResults]="50"
+                        [columnDefs]="columnDefs"
+                        [customActionDefs]="customActionDefs"
+                        [browserSearch]="false"
+                        [rowRoute]="rowClick.bind(this)"
+                        [selectionAllowed]="true"
+                        [selection]="selectedDatasetIds"
+                        (selectionChange)="onSelectionChange($event)"></shanoir-table>
+                </div>
+            }
+            @if (loaded) {
+                <div class="tab-body selected" [hidden]="tab != 'selected'">
+                    <shanoir-table
+                        #selectionTable
+                        [getPage]="getSelectedPage.bind(this)"
+                        [maxResults]="50"
+                        [columnDefs]="selectionColumnDefs"
+                        [customActionDefs]="selectionCustomActionDefs"
+                        [rowRoute]="rowClick.bind(this)"
+                        [browserSearch]="false"></shanoir-table>
+                </div>
+            }
+            @if (!loaded) {
+                <div>Loading ...</div>
+            }
         </div>
     </div>
 </form>

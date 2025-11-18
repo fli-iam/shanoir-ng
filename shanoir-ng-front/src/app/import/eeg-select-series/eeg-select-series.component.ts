@@ -13,21 +13,21 @@
  */
 import { Component, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
+
 @Component({
     selector: 'eeg-select-series',
     templateUrl: 'eeg-select-series.component.html',
     styleUrls: ['eeg-select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [TreeNodeComponent, FormsModule]
 })
 export class EegSelectSeriesComponent {
 

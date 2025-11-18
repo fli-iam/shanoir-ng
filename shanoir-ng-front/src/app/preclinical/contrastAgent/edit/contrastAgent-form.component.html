@@ -13,153 +13,211 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="ContrastAgentFormComponent content-component">
-	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>validate> 
-		<table class="layout">
-			<div *ngIf="isStandalone">
-				<form-footer
-					[state]="footerState"
-					(save)="save()"
-					(edit)="goToEdit()"
-					(back)="goBack()">
-				</form-footer>
-			</div>
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'"> 
-						<div class="header command-zone" i18n="View contrastagent|Title">View contrast agent</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'"> 
-						<div class="header command-zone" i18n="Edit contrastagent|Title">Edit contrast agent</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'"> 
-						<div class="header command-zone" i18n="Create contrastagent|Title">Add contrast agent</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<li class="required">
-							<label i18n="Edit contrastagent|Name label">Name</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.name?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="name" formControlName="name">
-										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
-									</select>
-									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">
-										<i class="fas fa-plus-square"></i>
-										new contrast agent name
-									</button>
-									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit ContrastAgent|Name required error@@constrastAgentDetailNameRequiredError">Name is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|ManufacturedName label">Manufactured Name</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.manufacturedName}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="manufacturedName" formControlName="manufacturedName"/>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|Dose label">Dose</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.dose}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="dose" formControlName="dose"/>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|DoseUnit label">Dose Unit</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.doseUnit?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="doseUnit" formControlName="doseUnit">
-										<option *ngFor="let unit of doseUnits" [ngValue]="unit">{{unit?.value}}</option>
-									</select>
-								</ng-template>
-							</span>							
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|Concentration label">Concentration</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.concentration}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="concentration" formControlName="concentration"/>
-								</ng-template>
-							</span> 							
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|ConcentrationUnit label">Concentration Unit</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent?.concentrationUnit?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="concentrationUnit" formControlName="concentrationUnit">
-										<option *ngFor="let unit of concentration_units" [ngValue]="unit">{{unit?.value}}</option>
-									</select>
-								</ng-template>
-							</span>							
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent.injectionInterval.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="injectionInterval" formControlName="injectionInterval">
-										<option *ngFor="let interval of intervals" [value]="interval.key">{{interval?.value}}</option>
-									</select>
-								</ng-template>
-							</span>	
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent.injectionSite.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="injectionSite" formControlName="injectionSite">
-										<option *ngFor="let site of sites" [value]="site.key">{{site?.value}}</option>
-									</select>
-								</ng-template>
-							</span>	
-						</li>
-						<li>
-							<label i18n="Edit contrastagent|InjectionType label">Injection type</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{agent.injectionType.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="injectionType" formControlName="injectionType">
-										<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype?.value}}</option>
-									</select>
-								</ng-template>
-							</span>	
-						</li>						
-					</ol>
-					</fieldset>
-				</td>
-			</tr>
-		</table>
-	</form>  
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            validate>
+            <table class="layout">
+                @if (isStandalone) {
+                    <div>
+                        <form-footer
+                            [state]="footerState"
+                            (save)="save()"
+                            (edit)="goToEdit()"
+                            (back)="goBack()"></form-footer>
+                    </div>
+                }
+                <tr>
+                    <td colspan="2">
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <div class="header command-zone" i18n="View contrastagent|Title">
+                                        View contrast agent
+                                    </div>
+                                }
+                                @case ("edit") {
+                                    <div class="header command-zone" i18n="Edit contrastagent|Title">
+                                        Edit contrast agent
+                                    </div>
+                                }
+                                @case ("create") {
+                                    <div class="header command-zone" i18n="Create contrastagent|Title">
+                                        Add contrast agent
+                                    </div>
+                                }
+                            }
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <ol>
+                                <li class="required">
+                                    <label i18n="Edit contrastagent|Name label">Name</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.name?.value }}
+                                            }
+                                            @default {
+                                                <select id="name" formControlName="name">
+                                                    @for (name of agentNames; track name) {
+                                                        <option [ngValue]="name">{{ name?.value }}</option>
+                                                    }
+                                                </select>
+                                                <button
+                                                    i18n="Edit contrastagent|Add a new contrast agent name"
+                                                    (click)="goToAddContrastAgent()">
+                                                    <i class="fas fa-plus-square"></i>
+                                                    new contrast agent name
+                                                </button>
+                                                @if (hasError("name", ["required"])) {
+                                                    <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit ContrastAgent|Name required
+                                                            error@@constrastAgentDetailNameRequiredError">
+                                                        Name is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|ManufacturedName label">Manufactured Name</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.manufacturedName }}
+                                            }
+                                            @default {
+                                                <input
+                                                    type="text"
+                                                    id="manufacturedName"
+                                                    formControlName="manufacturedName" />
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|Dose label">Dose</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.dose }}
+                                            }
+                                            @default {
+                                                <input type="text" id="dose" formControlName="dose" />
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|DoseUnit label">Dose Unit</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.doseUnit?.value }}
+                                            }
+                                            @default {
+                                                <select id="doseUnit" formControlName="doseUnit">
+                                                    @for (unit of doseUnits; track unit) {
+                                                        <option [ngValue]="unit">{{ unit?.value }}</option>
+                                                    }
+                                                </select>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|Concentration label">Concentration</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.concentration }}
+                                            }
+                                            @default {
+                                                <input type="text" id="concentration" formControlName="concentration" />
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|ConcentrationUnit label">Concentration Unit</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent?.concentrationUnit?.value }}
+                                            }
+                                            @default {
+                                                <select id="concentrationUnit" formControlName="concentrationUnit">
+                                                    @for (unit of concentration_units; track unit) {
+                                                        <option [ngValue]="unit">{{ unit?.value }}</option>
+                                                    }
+                                                </select>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent.injectionInterval.value }}
+                                            }
+                                            @default {
+                                                <select id="injectionInterval" formControlName="injectionInterval">
+                                                    @for (interval of intervals; track interval) {
+                                                        <option [value]="interval">{{ interval }}</option>
+                                                    }
+                                                </select>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent.injectionSite.value }}
+                                            }
+                                            @default {
+                                                <select id="injectionSite" formControlName="injectionSite">
+                                                    @for (site of sites; track site) {
+                                                        <option [value]="site">{{ site }}</option>
+                                                    }
+                                                </select>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label i18n="Edit contrastagent|InjectionType label">Injection type</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ agent.injectionType.value }}
+                                            }
+                                            @default {
+                                                <select id="injectionType" formControlName="injectionType">
+                                                    @for (injtype of injtypes; track injtype) {
+                                                        <option [value]="injtype">{{ injtype }}</option>
+                                                    }
+                                                </select>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    }
 </div>

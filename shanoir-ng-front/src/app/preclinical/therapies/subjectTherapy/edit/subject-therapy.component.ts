@@ -13,26 +13,28 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 import { Reference } from 'src/app/preclinical/reference/shared/reference.model';
 import { ReferenceService } from 'src/app/preclinical/reference/shared/reference.service';
 import { Frequency } from 'src/app/preclinical/shared/enum/frequency';
 
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Therapy } from '../../therapy/shared/therapy.model';
 import { TherapyService } from '../../therapy/shared/therapy.service';
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
+import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';
 
 @Component({
     selector: 'subject-pathology',
     templateUrl: 'subject-therapy.component.html',
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
 

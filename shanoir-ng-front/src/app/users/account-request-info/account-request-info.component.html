@@ -12,50 +12,92 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<ol *ngIf="info && form" [formGroup]="form">
-    <li *ngIf="!presetStudyId">
-        <label *ngIf="editMode" i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">List of available studies</label> 
-        <span class="right-col">
-            <ng-container *ngIf="editMode">
-                <select-box 
-                    formControlName="studyId"
-                    [options]="studyOptions"
-                    (change)="onStudyChange($event)">
-                </select-box>
-                <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
-            </ng-container>
-            <input type = "hidden"
-                formControlName="studyName">
-            <span *ngIf="!editMode">{{info.studyName}}</span>
-        </span>
-    </li>
-    <li *ngIf="presetStudyId" class="hidden">
-        <input type = "hidden"
-            formControlName="studyId">
-        <input type = "hidden"
-            formControlName="studyName">
-    </li>
-    <li>
-        <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label> 
-        <span class="right-col">
-            <ng-container *ngIf="editMode">
-                <input type="text" formControlName="institution" (change)="onInstitutionChange($event.target.value)"/>
-                <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
-                <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
-            </ng-container>
-            <span *ngIf="!editMode">{{info.institution}}</span>
-        </span>
-    </li>
-    <li *ngIf="!editMode && info.function">
-        <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Function in the study</label> 
-        <span class="right-col">
-            <span>{{info.function}}</span>
-        </span>
-    </li>
-    <li *ngIf="!editMode && info.contact">
-        <label i18n="Edit user|Contact label@@editUserContact">Invitation issuer</label> 
-        <span class="right-col">
-            <span>{{info.contact}}</span>
-        </span>
-    </li>
-</ol>
+@if (info && form) {
+    <ol [formGroup]="form">
+        @if (!presetStudyId) {
+            <li>
+                @if (editMode) {
+                    <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">
+                        List of available studies
+                    </label>
+                }
+                <span class="right-col">
+                    @if (editMode) {
+                        <select-box
+                            formControlName="studyId"
+                            [options]="studyOptions"
+                            (change)="onStudyChange($event)"></select-box>
+                        @if (hasError("studyId", ["required"])) {
+                            <label
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                class="form-validation-alert"
+                                i18n="Edit user|Study required error@@editUserStudyRequiredError">
+                                Study is required!
+                            </label>
+                        }
+                    }
+                    <input type="hidden" formControlName="studyName" />
+                    @if (!editMode) {
+                        <span>{{ info.studyName }}</span>
+                    }
+                </span>
+            </li>
+        }
+        @if (presetStudyId) {
+            <li class="hidden">
+                <input type="hidden" formControlName="studyId" />
+                <input type="hidden" formControlName="studyName" />
+            </li>
+        }
+        <li>
+            <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">
+                Institution / Employer
+            </label>
+            <span class="right-col">
+                @if (editMode) {
+                    <input
+                        type="text"
+                        formControlName="institution"
+                        (change)="onInstitutionChange($event.target.value)" />
+                    @if (hasError("institution", ["required"])) {
+                        <label
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                            class="form-validation-alert"
+                            i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">
+                            Institution is required!
+                        </label>
+                    }
+                    @if (hasError("institution", ["length"])) {
+                        <label
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                            class="form-validation-alert"
+                            i18n="Edit user|Institution length error@@editUserInstitutionLengthError">
+                            Institution length must be less than 200!
+                        </label>
+                    }
+                }
+                @if (!editMode) {
+                    <span>{{ info.institution }}</span>
+                }
+            </span>
+        </li>
+        @if (!editMode && info.function) {
+            <li>
+                <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">
+                    Function in the study
+                </label>
+                <span class="right-col">
+                    <span>{{ info.function }}</span>
+                </span>
+            </li>
+        }
+        @if (!editMode && info.contact) {
+            <li>
+                <label i18n="Edit user|Contact label@@editUserContact">Invitation issuer</label>
+                <span class="right-col">
+                    <span>{{ info.contact }}</span>
+                </span>
+            </li>
+        }
+    </ol>
+}

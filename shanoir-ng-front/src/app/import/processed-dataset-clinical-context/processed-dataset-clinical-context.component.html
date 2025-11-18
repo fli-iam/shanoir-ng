@@ -13,90 +13,122 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">2. Set the clinical context of the processed dataset</div>
-<fieldset class="step" @preventInitialChildAnimations>
+<fieldset class="step">
     <ol>
         <legend>
             Research study
-            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+            <tool-tip>
+                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
+                mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+            </tool-tip>
         </legend>
         <li>
             <label class="required-label">Select a research study</label>
             <span class="right-col">
                 <select-box
-                        [(ngModel)]="study"
-                        (userChange)="onSelectStudy(); onContextChange();"
-                        [viewRoute]="'/study/details/' + study?.id"
-                        [viewDisabled]="!study"
-                        [options]="studyOptions"
-                        [disabled]="loading">
-                </select-box>
-
+                    [(ngModel)]="study"
+                    (userChange)="onSelectStudy(); onContextChange()"
+                    [viewRoute]="'/study/details/' + study?.id"
+                    [viewDisabled]="!study"
+                    [options]="studyOptions"
+                    [disabled]="loading"></select-box>
             </span>
         </li>
-
     </ol>
 
     <ol>
         <legend>
             Subject
-            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
+            <tool-tip>
+                It is the study subject for the current import process. He is the patient of the examination. The
+                subject is anonymous.
+            </tool-tip>
         </legend>
         <li class="required">
             <label class="required-label">Select a subject</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="loading || !study"
-                        [(ngModel)]="subject"
-                        (userChange)="onContextChange();"
-                        [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
-                        [optionArr]="subjects">
-                </select-box>
+                    [disabled]="loading || !study"
+                    [(ngModel)]="subject"
+                    (userChange)="onContextChange()"
+                    [viewRoute]="'/subject/details/' + subject?.id"
+                    [viewDisabled]="!subject"
+                    [optionArr]="subjects"></select-box>
             </span>
         </li>
     </ol>
     <ol>
-        <legend>
-            Processed dataset details
-        </legend>
+        <legend>Processed dataset details</legend>
         <li>
             <label class="required-label">Dataset Type</label>
             <span class="right-col">
-                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [options]="DatasetType.options">
-                </select-box>
+                <select-box
+                    [(ngModel)]="datasetType"
+                    (userChange)="onContextChange()"
+                    [newDisabled]="true"
+                    [options]="DatasetType.options"></select-box>
             </span>
         </li>
         <li>
             <label class="required-label">Processed Dataset Type</label>
             <span class="right-col">
-                <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [options]="ProcessedDatasetType.options"
-                        >
-                </select-box>
+                <select-box
+                    [(ngModel)]="processedDatasetType"
+                    (userChange)="onContextChange()"
+                    [newDisabled]="true"
+                    [options]="ProcessedDatasetType.options"></select-box>
             </span>
         </li>
         <li>
             <label class="required-label">Name</label>
-            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (change)="onContextChange()"/>
+            <input
+                required
+                type="text"
+                id="processedDatasetName"
+                [(ngModel)]="processedDatasetName"
+                (change)="onContextChange()" />
         </li>
         <li>
             <label>Comment</label>
-            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment" (change)="onContextChange()"/>
+            <input
+                type="text"
+                id="processedDatasetComment"
+                [(ngModel)]="processedDatasetComment"
+                (change)="onContextChange()" />
         </li>
     </ol>
-    <ol *ngIf="subject">
-        <legend>
-            Dataset processing
-            <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
-        </legend>
-        <li>
-            <label class="required-label">Dataset processing</label>
-            <span>
-                <span *ngIf="datasetProcessing">{{datasetProcessing.comment ? datasetProcessing.comment : datasetProcessing.datasetProcessingType}} ({{(datasetProcessing.id)}})</span>
-                <span *ngIf="!datasetProcessing" class="right-button"><button (click)="openCreateDatasetProcessing()">Create processing</button></span>
-            </span>
-        </li>
-    </ol>
-
+    @if (subject) {
+        <ol>
+            <legend>
+                Dataset processing
+                <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
+            </legend>
+            <li>
+                <label class="required-label">Dataset processing</label>
+                <span>
+                    @if (datasetProcessing) {
+                        <span>
+                            {{
+                                datasetProcessing.comment
+                                    ? datasetProcessing.comment
+                                    : datasetProcessing.datasetProcessingType
+                            }}
+                            ({{ datasetProcessing.id }})
+                        </span>
+                    }
+                    @if (!datasetProcessing) {
+                        <span class="right-button">
+                            <button (click)="openCreateDatasetProcessing()">Create processing</button>
+                        </span>
+                    }
+                </span>
+            </li>
+        </ol>
+    }
 </fieldset>
-<button *ngIf="!reloading" class="next alt right-icon" [disabled]="!valid" (click)="next()">Import now<i class="fa-solid fa-flag-checkered"></i></button>
+@if (!reloading) {
+    <button class="next alt right-icon" [disabled]="!valid" (click)="next()">
+        Import now
+        <i class="fa-solid fa-flag-checkered"></i>
+    </button>
+}

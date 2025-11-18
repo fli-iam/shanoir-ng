@@ -11,11 +11,14 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<div *ngIf="treeService.studyLoading" class="left-icon">
-    <i class="fa fa-cog fa-spin"></i>Loading
-</div>
-<node
-        *ngIf="node && !treeService.studyLoading"
+@if (treeService.studyLoading) {
+    <div class="left-icon">
+        <i class="fa fa-cog fa-spin"></i>
+        Loading
+    </div>
+}
+@if (node && !treeService.studyLoading) {
+    <node
         [class.selected]="(showDetails && menuOpened) || treeService.isSelected(node.id, 'study')"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
@@ -23,166 +26,216 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [route]="node.route"
         [hasChildren]="true"
-        [clickable]="showDetails"
-        >
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened && withMenu">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-    </dropdown-menu>
-
-    <node
-            *ngIf="node.open"
-            class="subjects"
-            label="Subjects"
-            awesome="fas fa-user-injured"
-            [(opened)]="node.subjectsNode.opened"
-            (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
-            [hasChildren]="hasDependency(node.subjectsNode.subjects)">
-
-        <div class="overmenu">
-            <span *ngIf="!(subjectsOrder.field == 'name' && subjectsOrder.way == 'asc')" class="filter" (click)="sortSubjects({field: 'name', way : 'asc'})" title="sort by name ascending">
-                <i class="fa-solid fa-arrow-down-a-z"></i>
-            </span>
-            <span *ngIf="subjectsOrder.field == 'name' && subjectsOrder.way == 'asc'" class="filter" (click)="sortSubjects({field: 'name', way : 'desc'})" title="sort by name descending">
-                <i class="fa-solid fa-arrow-down-z-a"></i>
-            </span>
-            <span *ngIf="!(subjectsOrder.field == 'id' && subjectsOrder.way == 'desc')" class="filter" (click)="sortSubjects({field: 'id', way : 'desc'})" title="sort by id ascending">
-                <i class="fa-solid fa-arrow-down-1-9"></i>
-            </span>
-            <span *ngIf="subjectsOrder.field == 'id' && subjectsOrder.way == 'desc'" class="filter" (click)="sortSubjects({field: 'id', way : 'asc'})" title="sort by id descending">
-                <i class="fa-solid fa-arrow-down-9-1"></i>
-            </span>
-            <span class="filter">
-                filter :
-                <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
-                <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
-            </span>
-        </div>
-
-        <div *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
-            <div *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy:trackByFn; let i = index">
-                @if (!subject.fake) {
-                    <subject-node
-                            [input]="subject"
-                            [studyId]="node.id"
-                            (selectedChange)="selectedChange.emit(node)"
-                            [hasBox]="hasBox"
+        [clickable]="showDetails">
+        @if (showDetails && menuOpened && withMenu) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+            </dropdown-menu>
+        }
+        @if (node.open) {
+            <node
+                class="subjects"
+                label="Subjects"
+                awesome="fas fa-user-injured"
+                [(opened)]="node.subjectsNode.opened"
+                (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
+                [hasChildren]="hasDependency(node.subjectsNode.subjects)">
+                <div class="overmenu">
+                    @if (!(subjectsOrder.field == "name" && subjectsOrder.way == "asc")) {
+                        <span
+                            class="filter"
+                            (click)="sortSubjects({ field: 'name', way: 'asc' })"
+                            title="sort by name ascending">
+                            <i class="fa-solid fa-arrow-down-a-z"></i>
+                        </span>
+                    }
+                    @if (subjectsOrder.field == "name" && subjectsOrder.way == "asc") {
+                        <span
+                            class="filter"
+                            (click)="sortSubjects({ field: 'name', way: 'desc' })"
+                            title="sort by name descending">
+                            <i class="fa-solid fa-arrow-down-z-a"></i>
+                        </span>
+                    }
+                    @if (!(subjectsOrder.field == "id" && subjectsOrder.way == "desc")) {
+                        <span
+                            class="filter"
+                            (click)="sortSubjects({ field: 'id', way: 'desc' })"
+                            title="sort by id ascending">
+                            <i class="fa-solid fa-arrow-down-1-9"></i>
+                        </span>
+                    }
+                    @if (subjectsOrder.field == "id" && subjectsOrder.way == "desc") {
+                        <span
+                            class="filter"
+                            (click)="sortSubjects({ field: 'id', way: 'asc' })"
+                            title="sort by id descending">
+                            <i class="fa-solid fa-arrow-down-9-1"></i>
+                        </span>
+                    }
+                    <span class="filter">
+                        filter :
+                        <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()" />
+                        <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
+                    </span>
+                </div>
+                @if (
+                    node.subjectsNode.opened &&
+                    node.subjectsNode.subjects &&
+                    node.subjectsNode.subjects != $any("UNLOADED")
+                ) {
+                    <div>
+                        @for (
+                            subject of filteredNodes || node.subjectsNode.subjects;
+                            track trackByFn(i, asNode(subject));
+                            let i = $index
+                        ) {
+                            <div>
+                                @if (!asNode(subject).fake) {
+                                    <subject-node
+                                        [input]="subject"
+                                        [studyId]="node.id"
+                                        (selectedChange)="selectedChange.emit(node)"
+                                        [hasBox]="hasBox"
+                                        [withMenu]="withMenu"
+                                        [rights]="rights"></subject-node>
+                                } @else {
+                                    <div class="fake-node" #fakeSubject [id]="asNode(subject).id">
+                                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(asNode(subject))"></i>
+                                        <a
+                                            [routerLink]="['/subject/details/', asNode(subject).id]"
+                                            class="inner"
+                                            (click)="clickFakeNode(asNode(subject))"
+                                            [title]="asNode(subject).title + ' n°' + asNode(subject).id">
+                                            <i [class]="asNode(subject).awesome" class="picto"></i>
+                                            {{ asNode(subject).label }}
+                                        </a>
+                                        @for (tag of asNode(subject).tags; track tag) {
+                                            <span
+                                                class="tag label"
+                                                [class.dark]="getFontColor(tag.color)"
+                                                [style.background]="tag.color">
+                                                {{ tag.name }}
+                                            </span>
+                                        }
+                                        @if (asNode(subject).qualityTag) {
+                                            <span
+                                                class="tag label dark"
+                                                [style.background]="
+                                                    asNode(subject).qualityTag == 'ERROR'
+                                                        ? 'red'
+                                                        : asNode(subject).qualityTag == 'WARNING'
+                                                          ? 'orange'
+                                                          : 'green'
+                                                ">
+                                                {{ asNode(subject).qualityTag }}
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </node>
+        }
+        @if (node.open) {
+            <node
+                class="centers"
+                label="Centers"
+                awesome="fa-regular fa-hospital"
+                [(opened)]="node.centersNode.opened"
+                [hasChildren]="hasDependency(node.centersNode.centers)">
+                @if (
+                    node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any("UNLOADED")
+                ) {
+                    @for (center of node.centersNode.centers; track center) {
+                        <center-node [input]="center" [withMenu]="withMenu"></center-node>
+                    }
+                }
+            </node>
+        }
+        @if (node.open) {
+            <node
+                class="studycards"
+                label="Study Cards"
+                awesome="fa-solid fa-shuffle"
+                (firstOpen)="loadStudyCards()"
+                [(opened)]="node.studyCardsNode.opened"
+                [hasChildren]="hasDependency(node.studyCardsNode.cards)"
+                [dataLoading]="studyCardsLoading">
+                @if (
+                    node.studyCardsNode.opened &&
+                    node.studyCardsNode.cards &&
+                    node.studyCardsNode.cards != $any("UNLOADED")
+                ) {
+                    @for (studycard of node.studyCardsNode.cards; track studycard; let i = $index) {
+                        <card-node
+                            [input]="studycard"
+                            (cardDelete)="onStudyCardDelete(i)"
                             [withMenu]="withMenu"
-                            [rights]="rights"
-                    >
-                    </subject-node>
-                } @else {
-                    <div class="fake-node" #fakeSubject [id]="subject.id" >
-                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(subject)"></i>
-                        <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickFakeNode(subject)" [title]="subject.title + ' n°' + subject.id">
-                            <i [class]="subject.awesome" class="picto"></i>
-                            {{subject.label}}
-                        </a>
-                        <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
-                            {{tag.name}}
-                        </span>
-                        <span *ngIf="subject.qualityTag" class="tag label dark" [style.background]="subject.qualityTag == 'ERROR' ? 'red' : (subject.qualityTag == 'WARNING' ? 'orange' : 'green')">
-                            {{subject.qualityTag}}
-                        </span>
-                    </div>
+                            detailsPath="study-card/details"></card-node>
+                    }
                 }
-            </div>
-        </div>
-
-    </node>
-
-    <node
-            *ngIf="node.open"
-            class="centers"
-            label="Centers"
-            awesome="fa-regular fa-hospital"
-            [(opened)]="node.centersNode.opened"
-            [hasChildren]="hasDependency(node.centersNode.centers)">
-
-        <ng-container *ngIf="node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any('UNLOADED')">
-            <center-node
-                    *ngFor="let center of node.centersNode.centers"
-                    [input]="center"
-                    [withMenu]="withMenu">
-            </center-node>
-        </ng-container>
-
-    </node>
-
-    <node
-            *ngIf="node.open"
-            class="studycards"
-            label="Study Cards"
-            awesome="fa-solid fa-shuffle"
-            (firstOpen)="loadStudyCards()"
-            [(opened)]="node.studyCardsNode.opened"
-            [hasChildren]="hasDependency(node.studyCardsNode.cards)"
-            [dataLoading]="studyCardsLoading">
-
-        <ng-container *ngIf="node.studyCardsNode.opened && node.studyCardsNode.cards && node.studyCardsNode.cards != $any('UNLOADED')">
-            <card-node
-                    *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
-                    [input]="studycard"
-                    (cardDelete)="onStudyCardDelete(i)"
-                    [withMenu]="withMenu"
-                    detailsPath="study-card/details"
-            >
-            </card-node>
-        </ng-container>
-
-    </node>
-
-    <node
-            *ngIf="node.open"
-            class="studycards"
-            label="Quality Cards"
-            awesome="fa-solid fa-shuffle"
-            (firstOpen)="loadQualityCards()"
-            [(opened)]="node.qualityCardsNode.opened"
-            [hasChildren]="hasDependency(node.qualityCardsNode.cards)"
-            [dataLoading]="qualityCardsLoading">
-
-        <ng-container *ngIf="node.qualityCardsNode.opened && node.qualityCardsNode.cards && node.qualityCardsNode.cards != $any('UNLOADED')">
-            <card-node
-                    *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
-                    [input]="qualitycard"
-                    (cardDelete)="onQualityCardDelete(i)"
-                    [withMenu]="withMenu"
-                    detailsPath="quality-card/details"
-            >
-            </card-node>
-        </ng-container>
-
-    </node>
-
-    <node
-            *ngIf="node.open"
-            class="members"
-            label="Members"
-            awesome="far fa-user"
-            [(opened)]="node.membersNode.opened"
-            [hasChildren]="hasDependency(node.membersNode.members)">
-
-        <ng-container *ngIf="node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any('UNLOADED')">
-            <div *ngFor="let member of node.membersNode.members; trackBy:trackByFn; let i = index">
-                @if (!member.fake) {
-                    <member-node
-                        [input]="member"
-                        [withMenu]="withMenu">
-                    </member-node>
-                } @else {
-                    <div class="fake-node" #fakeMember [id]="member.id" >
-                        <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(member)"></i>
-                        <a [routerLink]="['/user/details/', member.id]" class="inner" (click)="clickFakeNode(member)" [title]="member.title + ' n°' + member.id">
-                            <i class="far fa-user picto"></i>
-                            {{member.label}}
-                        </a>
-                    </div>
+            </node>
+        }
+        @if (node.open) {
+            <node
+                class="studycards"
+                label="Quality Cards"
+                awesome="fa-solid fa-shuffle"
+                (firstOpen)="loadQualityCards()"
+                [(opened)]="node.qualityCardsNode.opened"
+                [hasChildren]="hasDependency(node.qualityCardsNode.cards)"
+                [dataLoading]="qualityCardsLoading">
+                @if (
+                    node.qualityCardsNode.opened &&
+                    node.qualityCardsNode.cards &&
+                    node.qualityCardsNode.cards != $any("UNLOADED")
+                ) {
+                    @for (qualitycard of node.qualityCardsNode.cards; track qualitycard; let i = $index) {
+                        <card-node
+                            [input]="qualitycard"
+                            (cardDelete)="onQualityCardDelete(i)"
+                            [withMenu]="withMenu"
+                            detailsPath="quality-card/details"></card-node>
+                    }
                 }
-            </div>
-        </ng-container>
-
+            </node>
+        }
+        @if (node.open) {
+            <node
+                class="members"
+                label="Members"
+                awesome="far fa-user"
+                [(opened)]="node.membersNode.opened"
+                [hasChildren]="hasDependency(node.membersNode.members)">
+                @if (
+                    node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any("UNLOADED")
+                ) {
+                    @for (member of node.membersNode.members; track trackByFn(i, asNode(member)); let i = $index) {
+                        <div>
+                            @if (!asNode(member).fake) {
+                                <member-node [input]="member" [withMenu]="withMenu"></member-node>
+                            } @else {
+                                <div class="fake-node" #fakeMember [id]="asNode(member).id">
+                                    <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(asNode(member))"></i>
+                                    <a
+                                        [routerLink]="['/user/details/', asNode(member).id]"
+                                        class="inner"
+                                        (click)="clickFakeNode(asNode(member))"
+                                        [title]="asNode(member).title + ' n°' + asNode(member).id">
+                                        <i class="far fa-user picto"></i>
+                                        {{ asNode(member).label }}
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </node>
+        }
     </node>
-</node>
+}

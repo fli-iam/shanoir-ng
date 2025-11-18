@@ -13,150 +13,181 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">3. Set the clinical context</div>
-<div *ngIf="reloading" class="global-loading left-icon">
-    <i class="fa fa-cog fa-spin"></i>
-    Please wait ...
-</div>
-<fieldset *ngIf="!reloading" class="step" @preventInitialChildAnimations>
-    <ol>
-        <legend>
-            Research study
-            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
-        </legend>
-        <li>
-            <label class="required-label">Select a research study</label>
-            <span class="right-col">
-                <select-box
+@if (reloading) {
+    <div class="global-loading left-icon">
+        <i class="fa fa-cog fa-spin"></i>
+        Please wait ...
+    </div>
+}
+@if (!reloading) {
+    <fieldset class="step">
+        <ol>
+            <legend>
+                Research study
+                <tool-tip>
+                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
+                    mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                </tool-tip>
+            </legend>
+            <li>
+                <label class="required-label">Select a research study</label>
+                <span class="right-col">
+                    <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
                         [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading">
-                </select-box>
-            </span>
-        </li>
-        <li>
-            <label [class.required-label]="!useStudyCard">Select a center</label>
-            <span class="right-col">
-                <select-box
+                        [disabled]="loading"></select-box>
+                </span>
+            </li>
+            <li>
+                <label [class.required-label]="!useStudyCard">Select a center</label>
+                <span class="right-col">
+                    <select-box
                         [disabled]="!study || loading"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
-                        (newClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
-                        [options]="centerOptions">
-                </select-box>
-
-            </span>
-        </li>
-        <li class="info" *ngIf="center && !centerCompatible(center)">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>This center may not be not compatible with the imported data !</strong>
-            <ng-container *ngIf="importedCenterDataStr">
-                <br/>Your archive contains this data :
-                <code>{{importedCenterDataStr}}</code>
-            </ng-container>
-            <ng-container *ngIf="!useStudyCard">
-                <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
-            </ng-container>
-        </li>
-        <li>
-        <li>
-            <label [class.required-label]="!useStudyCard">Select a center equipment</label>
-            <span class="right-col">
-                <select-box
+                        [viewRoute]="'/center/details/' + center?.id"
+                        [viewDisabled]="!center"
+                        (newClick)="openCreateCenter()"
+                        [newHidden]="hasCompatibleCenters"
+                        [options]="centerOptions"></select-box>
+                </span>
+            </li>
+            @if (center && !centerCompatible(center)) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>This center may not be not compatible with the imported data !</strong>
+                    @if (importedCenterDataStr) {
+                        <br />
+                        Your archive contains this data :
+                        <code>{{ importedCenterDataStr }}</code>
+                    }
+                    @if (!useStudyCard) {
+                        <br />
+                        If the center you need is not in the above list, you can create a new center from this data by
+                        clicking on the 'add' button.
+                    }
+                </li>
+            }
+            <li></li>
+            <li>
+                <label [class.required-label]="!useStudyCard">Select a center equipment</label>
+                <span class="right-col">
+                    <select-box
                         [disabled]="!center || loading"
                         [(ngModel)]="acquisitionEquipment"
-                        (userChange)="onContextChange();"
-                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
-                        (newClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
-                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
-                </select-box>
-
-            </span>
-        </li>
-        <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>The center equipment may not be not compatible with the imported data !</strong>
-            <strong> selected : {{acquisitionEquipment.serialNumber}}</strong>
-            <ng-container *ngIf="importedEquipmentDataStr">
-                <br/>Your archive contains this data :
-                <code>{{importedEquipmentDataStr}}</code>
-            </ng-container>
-            <br/>If the center equipment you need is not in the above list, you can create a new center equipment from this data by clicking on the 'add' button.
-        </li>
-    </ol>
-
-    <ol>
-        <legend>
-            Subject
-            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
-        </legend>
-        <li class="required">
-            <label class="required-label">Select a subject</label>
-            <span class="right-col">
-                <select-box
+                        (userChange)="onContextChange()"
+                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id"
+                        [viewDisabled]="!acquisitionEquipment"
+                        (newClick)="openCreateAcqEqt()"
+                        [newHidden]="hasCompatibleEquipments"
+                        [options]="acquisitionEquipmentOptions"
+                        [pipe]="acqEqPipe"></select-box>
+                </span>
+            </li>
+            @if (acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)) {
+                <li class="info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>The center equipment may not be not compatible with the imported data !</strong>
+                    <strong>selected : {{ acquisitionEquipment.serialNumber }}</strong>
+                    @if (importedEquipmentDataStr) {
+                        <br />
+                        Your archive contains this data :
+                        <code>{{ importedEquipmentDataStr }}</code>
+                    }
+                    <br />
+                    If the center equipment you need is not in the above list, you can create a new center equipment
+                    from this data by clicking on the 'add' button.
+                </li>
+            }
+        </ol>
+        <ol>
+            <legend>
+                Subject
+                <tool-tip>
+                    It is the study subject for the current import process. He is the patient of the examination. The
+                    subject is anonymous.
+                </tool-tip>
+            </legend>
+            <li class="required">
+                <label class="required-label">Select a subject</label>
+                <span class="right-col">
+                    <select-box
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
-                        (userChange)="onSelectSubject();"
-                        [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
-                        [optionArr]="subjects">
-                </select-box>
-                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
-                    <i class="fa-solid fa-user"></i>
-                    <i class="fa-solid fa-plus secondary"></i>
-                    New subject
-                </button>
-            </span>
-        </li>
-    </ol>
+                        (userChange)="onSelectSubject()"
+                        [viewRoute]="'/subject/details/' + subject?.id"
+                        [viewDisabled]="!subject"
+                        [optionArr]="subjects"></select-box>
+                    <button
+                        class="new-subject"
+                        (click)="openCreateSubject()"
+                        [disabled]="!study || !acquisitionEquipment">
+                        <i class="fa-solid fa-user"></i>
+                        <i class="fa-solid fa-plus secondary"></i>
+                        New subject
+                    </button>
+                </span>
+            </li>
+        </ol>
+        <ol>
+            <legend>
+                Examination
+                <tool-tip>
+                    A MR examination defines when, where and by whom the data have been processed. The details on the
+                    MRI machine are associated to a subsequent entity: MR Dataset acquisition.
+                </tool-tip>
+            </legend>
+            <li>
+                <label class="required-label">Select an examination</label>
+                <span class="right-col">
+                    <select-box
+                        [disabled]="!study || !subject || loading"
+                        [(ngModel)]="examination"
+                        (userChange)="onSelectExam()"
+                        [viewRoute]="'/examination/details/' + examination?.id"
+                        [viewDisabled]="!examination"
+                        [optionArr]="examinations"
+                        [pipe]="subjectExaminationLabelPipe"></select-box>
+                    <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <i class="fa-solid fa-plus secondary"></i>
+                        New examination
+                    </button>
+                </span>
+            </li>
+        </ol>
+        @if (hasPosition) {
+            <ol>
+                <legend>
+                    Coordinates system
+                    <tool-tip>The coordinates sytem where the electrodes are set</tool-tip>
+                </legend>
+                <li class="required">
+                    <label class="required-label">Select a coordinate system</label>
+                    <span class="right-col">
+                        <select-box
+                            [(ngModel)]="coordsystem"
+                            (userChange)="onContextChange()"
+                            [ngModelOptions]="{ standalone: true }"
+                            [options]="coordSystemOptions"></select-box>
+                    </span>
+                </li>
+            </ol>
+        }
+    </fieldset>
+}
 
-    <ol>
-        <legend>
-            Examination
-            <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
-        </legend>
-        <li>
-            <label class="required-label">Select an examination</label>
-            <span class="right-col">
-                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + examination?.id" [viewDisabled]="!examination"
-                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
-                </select-box>
-                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
-                    <i class="fa-solid fa-stethoscope"></i>
-                    <i class="fa-solid fa-plus secondary"></i>
-                    New examination
-                </button>
-            </span>
-        </li>
-    </ol>
+<legend>Linked events</legend>
+@if (columnDefs) {
+    <shanoir-table #eventsTable [getPage]="getPage.bind(this)" [columnDefs]="columnDefs"></shanoir-table>
+}
 
-    <ol *ngIf="hasPosition">
-        <legend>
-            Coordinates system
-            <tool-tip> The coordinates sytem where the electrodes are set</tool-tip>
-        </legend>
-        <li class="required">
-            <label class="required-label">Select a coordinate system</label>
-            <span class="right-col">
-                <select-box
-                    [(ngModel)]="coordsystem"
-                    (userChange)="onContextChange();"
-                    [ngModelOptions]="{standalone: true}"
-                    [options]="coordSystemOptions">
-                </select-box>
-            </span>
-        </li>
-    </ol>
-
-</fieldset>
-
-<legend> Linked events </legend>
-<shanoir-table #eventsTable *ngIf="columnDefs"
-    [getPage]="getPage.bind(this)"
-    [columnDefs]="columnDefs">
-</shanoir-table>
-
-<button *ngIf="!reloading" class="next alt right-icon" [disabled]="!valid" (click)="next()">Import now<i class="fa-solid fa-flag-checkered"></i></button>
+@if (!reloading) {
+    <button class="next alt right-icon" [disabled]="!valid" (click)="next()">
+        Import now
+        <i class="fa-solid fa-flag-checkered"></i>
+    </button>
+}

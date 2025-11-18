@@ -13,23 +13,24 @@
  */
 
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
-import { Option } from '../../select/select.component';
+import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds } from '../mass-download.service';
+
 
 
 @Component({
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
     styleUrls: ['download-setup-alt.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
 export class DownloadSetupAltComponent implements OnInit, OnDestroy {

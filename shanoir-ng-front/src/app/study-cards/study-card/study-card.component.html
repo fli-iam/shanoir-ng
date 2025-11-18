@@ -12,138 +12,192 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete)="delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()">
-				<button *ngIf="mode != 'view'"
-						type="button"
-						class="Button right-icon show-errors"
-						(click)="onShowErrors()"
-						[disabled]="!footerState.dirty || footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
-					Show all errors<i class="fas fa-bug"></i>
-				</button>
-				<button *ngIf="selectMode"
-						class="Button right-icon"
-						(click)="clickImportRules()"
-						[disabled]="selectedRules.length <= 0">
-					Import selected rules<i class="fas fa-file-import"></i>
-				</button>
-				<button *ngIf="mode == 'view' && isAdminOrExpert"
-						type="button"
-						class="Button right-icon"
-						(click)="goToApply()">
-					Reapply study card<i class="fas fa-cogs"></i>
-				</button>
-			</form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone">Details on study card</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone">Edit study card</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone">Create study card</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-					<li>
-						<label>Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="name"/>
-								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert">Name is required!</label>
-								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength'])" class="form-validation-alert">Too short!</label>
-								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Study</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-							    <a [routerLink]="['/study/details/', studyCard.study?.id]">
-								    {{studyCard.study.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [optionArr]="studies" [disabled]="lockStudy">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Acquisition Center(s)</label>
-						<span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.acquisitionEquipment?.center?.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<span class="center" *ngFor="let center of centers">
-									{{center.name}}
-								</span>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Center equipment</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-							    <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
-								    {{studyCard.acquisitionEquipment | acqEqptLabel}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment"
-										(userChange)="onChangeAcqEq()"
-										[options]="acquisitionEquipments"
-										(newClick)="createAcqEq()">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset class="rules">
-				<legend>
-					Rules
-					<tool-tip [large]="true">
-						There are two differents types of rules for a studycard :
-						<ul>
-							<li>
-								<span class="bold">Rules that apply to every dataset of the acquisition :</span>
-								each dataset is checked regarding the conditions of that one rule and updated regarding the assignments of that one rule.
-							</li>
-							<li>
-								<span class="bold">Rules that apply to the acquisition :</span>
-								conditions on the acquisition's metadata can be set as well as the minimal number of datasets that fullfil one given condition,
-								then an assignment is applied to that acquisition.
-							</li>
-						</ul>
-					</tool-tip>
-				</legend>
-				<study-card-rules class="rules" [formGroup]="form"
-					cardType="studycard"
-					formControlName="rules"
-					[mode]="selectMode ? 'select' : mode"
-					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
-					[allCoils]="allCoils"
-					[showErrors]="showRulesErrors"
-					(selectedRulesChange)="selectedRules = $event"
-					(importRules)="importRules()"
-					[addSubForm]="addConditionForm.bind(this)">
-				</study-card-rules>
-			</fieldset>
-		</div>
-	</form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()">
+                    @if (mode != "view") {
+                        <button
+                            type="button"
+                            class="Button right-icon show-errors"
+                            (click)="onShowErrors()"
+                            [disabled]="
+                                !footerState.dirty ||
+                                footerState.valid ||
+                                showRulesErrors ||
+                                studyCard.rules?.length == 0
+                            ">
+                            Show all errors
+                            <i class="fas fa-bug"></i>
+                        </button>
+                    }
+                    @if (selectMode) {
+                        <button
+                            class="Button right-icon"
+                            (click)="clickImportRules()"
+                            [disabled]="selectedRules.length <= 0">
+                            Import selected rules
+                            <i class="fas fa-file-import"></i>
+                        </button>
+                    }
+                    @if (mode == "view" && isAdminOrExpert) {
+                        <button type="button" class="Button right-icon" (click)="goToApply()">
+                            Reapply study card
+                            <i class="fas fa-cogs"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone">Details on study card</h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone">Edit study card</h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone">Create study card</h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label>Name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ studyCard.name }}
+                                    }
+                                    @default {
+                                        <input type="text" formControlName="name" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert">
+                                                Name is required!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert">
+                                                Too short!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert">
+                                                Name should be unique!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Study</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/study/details/', studyCard.study?.id]">
+                                            {{ studyCard.study.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="study"
+                                            [optionArr]="studies"
+                                            [disabled]="lockStudy"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label>Acquisition Center(s)</label>
+                            @if (studyCard.study) {
+                                <span class="right-col">
+                                    @switch (mode) {
+                                        @case ("view") {
+                                            {{ studyCard.acquisitionEquipment?.center?.name }}
+                                        }
+                                        @default {
+                                            @for (center of centers; track center) {
+                                                <span class="center">
+                                                    {{ center.name }}
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                </span>
+                            }
+                        </li>
+                        <li>
+                            <label>Center equipment</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a
+                                            [routerLink]="[
+                                                '/acquisition-equipment/details/',
+                                                studyCard.acquisitionEquipment?.id,
+                                            ]">
+                                            {{ studyCard.acquisitionEquipment | acqEqptLabel }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="acquisitionEquipment"
+                                            (userChange)="onChangeAcqEq()"
+                                            [options]="acquisitionEquipments"
+                                            (newClick)="createAcqEq()"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+                <fieldset class="rules">
+                    <legend>
+                        Rules
+                        <tool-tip [large]="true">
+                            There are two differents types of rules for a studycard :
+                            <ul>
+                                <li>
+                                    <span class="bold">Rules that apply to every dataset of the acquisition :</span>
+                                    each dataset is checked regarding the conditions of that one rule and updated
+                                    regarding the assignments of that one rule.
+                                </li>
+                                <li>
+                                    <span class="bold">Rules that apply to the acquisition :</span>
+                                    conditions on the acquisition's metadata can be set as well as the minimal number of
+                                    datasets that fullfil one given condition, then an assignment is applied to that
+                                    acquisition.
+                                </li>
+                            </ul>
+                        </tool-tip>
+                    </legend>
+                    <study-card-rules
+                        class="rules"
+                        [formGroup]="form"
+                        cardType="studycard"
+                        formControlName="rules"
+                        [mode]="selectMode ? 'select' : mode"
+                        [manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
+                        [allCoils]="allCoils"
+                        [showErrors]="showRulesErrors"
+                        (selectedRulesChange)="selectedRules = $event"
+                        (importRules)="importRules()"
+                        [addSubForm]="addConditionForm.bind(this)"></study-card-rules>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

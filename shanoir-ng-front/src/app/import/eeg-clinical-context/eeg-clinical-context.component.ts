@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Event } from '../../datasets/dataset/eeg/dataset.eeg.model';
@@ -19,27 +20,26 @@ import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { CoordSystems } from '../../enum/coord-system.enum';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { IdName } from '../../shared/models/id-name.model';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 
 @Component({
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent]
 })
 
 export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {

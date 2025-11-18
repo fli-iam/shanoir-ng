@@ -16,43 +16,92 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <fieldset class="step dicom">
     <p>Please select a BRUKER zip archive to import.</p>
     <p>When uploaded, Bruker archive will be automatically converted to DICOM.</p>
-    <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Important notice :</strong> this archive must contain at least one 2dseq file!</p>
-    <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-    <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
-        A Bruker zip archive is required!
-    </label>
-    <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">
-        DICOMDIR is missing in .zip file!
-    </label>  
-    <br/>
-    <ul class="progress" [ngSwitch]="uploadProgress">
-        <li *ngIf="uploadProgress >= 1"><i class="fas fa-angle-right"></i>
-            Uploading bruker archive
-            <span *ngIf="uploadProgress == 1"><i class="fa fa-cog fa-spin"></i></span>
-            <span class="done" [class.error]="archiveStatus == 'error'">
-                <span *ngIf="uploadProgress >= 3"><i class="fas fa-check"></i></span>
-                <span *ngIf="uploadProgress == 2"><i class="fas fa-times"></i> error !</span>
-            </span>
-        </li>
-        
-        <li *ngIf="uploadProgress >= 1"><i class="fas fa-angle-right"></i>
-            Converting to Dicom
-            <span *ngIf="uploadProgress == 3"><i class="fa fa-cog fa-spin"></i></span>
-            <span class="done" [class.error]="archiveStatus == 'error'">
-                <span *ngIf="uploadProgress >= 5"><i class="fas fa-check"></i></span>
-                <span *ngIf="uploadProgress == 4"><i class="fas fa-times"></i> error !</span>
-            </span>
-        </li>
-    </ul>
-        
-    <p *ngIf="modality" class="modality">
-        The modality of the dataset(s) that you are importing is
-        <span *ngIf="modality=='MR'">MRI</span>
-        <span *ngIf="modality=='PET'">PET</span>
+    <p>
+        <strong class="warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Important notice :
+        </strong>
+        this archive must contain at least one 2dseq file!
     </p>
+    <upload-file
+        (fileChange)="uploadArchive($event)"
+        [loading]="archiveStatus == 'uploading'"
+        [error]="archiveStatus == 'error'"></upload-file>
+    @if (extensionError == true) {
+        <label 
+            animate.enter="slide-down-error" animate.leave="slide-up-error"
+            class="form-validation-alert" 
+            i18n="Import|ExtensionError label">
+            A Bruker zip archive is required!
+        </label>
+    }
+    @if (dicomDirMissingError == true) {
+        <label 
+            animate.enter="slide-down-error" animate.leave="slide-up-error"
+            class="form-validation-alert" 
+            i18n="Import|DicomDirMissingError label">
+            DICOMDIR is missing in .zip file!
+        </label>
+    }
+    <br />
+    <ul class="progress">
+        @if (uploadProgress >= 1) {
+            <li>
+                <i class="fas fa-angle-right"></i>
+                Uploading bruker archive
+                @if (uploadProgress == 1) {
+                    <span><i class="fa fa-cog fa-spin"></i></span>
+                }
+                <span class="done" [class.error]="archiveStatus == 'error'">
+                    @if (uploadProgress >= 3) {
+                        <span><i class="fas fa-check"></i></span>
+                    }
+                    @if (uploadProgress == 2) {
+                        <span>
+                            <i class="fas fa-times"></i>
+                            error !
+                        </span>
+                    }
+                </span>
+            </li>
+        }
+
+        @if (uploadProgress >= 1) {
+            <li>
+                <i class="fas fa-angle-right"></i>
+                Converting to Dicom
+                @if (uploadProgress == 3) {
+                    <span><i class="fa fa-cog fa-spin"></i></span>
+                }
+                <span class="done" [class.error]="archiveStatus == 'error'">
+                    @if (uploadProgress >= 5) {
+                        <span><i class="fas fa-check"></i></span>
+                    }
+                    @if (uploadProgress == 4) {
+                        <span>
+                            <i class="fas fa-times"></i>
+                            error !
+                        </span>
+                    }
+                </span>
+            </li>
+        }
+    </ul>
+
+    @if (modality) {
+        <p class="modality">
+            The modality of the dataset(s) that you are importing is
+            @if (modality == "MR") {
+                <span>MRI</span>
+            }
+            @if (modality == "PET") {
+                <span>PET</span>
+            }
+        </p>
+    }
 </fieldset>
 <div>
     <checkbox [disabled]="uploadProgress < 5" (userChange)="storeArchiveChanged($event)"></checkbox>
-    <label i18n="Store bruker archive|Store bruker archive label@@StoreBrukerArchive"> Store bruker archive </label>
+    <label i18n="Store bruker archive|Store bruker archive label@@StoreBrukerArchive">Store bruker archive</label>
 </div>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

@@ -21,7 +21,8 @@ import {
     OnDestroy,
     OnInit,
     SimpleChanges,
-    ViewChild
+    ViewChild,
+    inject
 } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
@@ -31,13 +32,12 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
 
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
-import { ServiceLocator } from '../../../utils/locator.service';
 import { ConsoleService } from '../../console/console.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
+import { getDeclaredFields } from '../../reflect/field.decorator';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
-import { getDeclaredFields } from '../../reflect/field.decorator';
 
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
@@ -93,15 +93,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     constructor(
         protected activatedRoute: ActivatedRoute,
         private readonly ROUTING_NAME: string) {
-        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
+        this.confirmDialogService = inject(ConfirmDialogService);
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
-        this.router = ServiceLocator.injector.get(Router);
-        this.location = ServiceLocator.injector.get(Location);
-        this.keycloakService = ServiceLocator.injector.get(KeycloakService);
-        this.formBuilder = ServiceLocator.injector.get(UntypedFormBuilder);
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
-        this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
-        this.treeService = ServiceLocator.injector.get(TreeService);
+        this.router = inject(Router);
+        this.location = inject(Location);
+        this.keycloakService = inject(KeycloakService);
+        this.formBuilder = inject(UntypedFormBuilder);
+        this.consoleService = inject(ConsoleService);
+        this.breadcrumbsService = inject(BreadcrumbsService);
+        this.treeService = inject(TreeService);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
 

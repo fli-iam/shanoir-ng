@@ -22,10 +22,11 @@ import { FilterablePageable, Page } from '../../../shared/components/table/pagea
 import{ Channel , EegDataset }from '../eeg/dataset.eeg.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
+
 @Component({
     selector: 'eeg-dataset-details',
     templateUrl: 'dataset.eeg.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class EegDatasetComponent implements OnInit  {

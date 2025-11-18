@@ -16,43 +16,60 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <navbar *ngIf="isAuthenticated()"></navbar>
 <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
 <div class="main-content">
-    <router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 </div> -->
-<ng-container *ngIf="isAuthenticated()">
-    <div class="side-menu" *ngIf="menuOpen" @slideRight>
-        <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false">
-        </side-menu>
-    </div>
-    <div class="main-content"
-            [class.reduce-height]="consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false"
-            [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
-        <div *ngIf="treeService.treeOpened && treeService.treeAvailable" class="tree-close-button" (click)="toggleTree(false)" title="open tree">
-            <i class="fas fa-chevron-left"></i>
+@if (isAuthenticated()) {
+    @if (menuOpen) {
+        <div class="side-menu" animate.enter="slide-right" animate.leave="slide-left">
+            <side-menu [class.reduce-height]="consoleOpened ? true : false"></side-menu>
         </div>
-        <div *ngIf="!treeService.treeOpened && treeService.treeAvailable" class="tree-close-button" (click)="toggleTree(true)" title="close tree">
-            <i class="fas fa-chevron-right"></i>
-        </div>
-        <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
-        <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
-        <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-        <div class="lower-content">
-            <div class="tree-frame" *ngIf="treeService.treeOpened && treeService.studyNode && treeService.treeAvailable">
-                <study-tree>
-                </study-tree>
+    }
+    <div
+        class="main-content"
+        [class.reduce-height]="consoleOpened && consoleDeployed"
+        [class.open]="menuOpen">
+        @if (treeService.treeOpened && treeService.treeAvailable) {
+            <div class="tree-close-button" (click)="toggleTree(false)" title="open tree">
+                <i class="fas fa-chevron-left"></i>
             </div>
+        }
+        @if (!treeService.treeOpened && treeService.treeAvailable) {
+            <div class="tree-close-button" (click)="toggleTree(true)" title="close tree">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        }
+        @if (menuOpen) {
+            <div class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
+        }
+        @if (!menuOpen) {
+            <div class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
+        }
+        @if (isAuthenticated()) {
+            <breadcrumbs></breadcrumbs>
+        }
+        <div class="lower-content">
+            @if (treeService.treeOpened && treeService.studyNode && treeService.treeAvailable) {
+                <div class="tree-frame">
+                    <study-tree></study-tree>
+                </div>
+            }
             <div class="content">
                 <router-outlet></router-outlet>
             </div>
         </div>
     </div>
-    <shanoir-console #console></shanoir-console>
-</ng-container>
+    <shanoir-console
+        [class.hidden]="!menuOpen && !consoleDeployed"
+        (registerToggle)="registerConsoleToggle($event)" 
+        (consoleOpened)="consoleOpened = $event"
+        (consoleDeployed)="onConsoleDeployed($event)"></shanoir-console>
+}
 
-<ng-container *ngIf="!isAuthenticated()">
+@if (!isAuthenticated()) {
     <div>
         <router-outlet></router-outlet>
     </div>
-</ng-container>
+}
 
 <msg-box></msg-box>
 <loader></loader>

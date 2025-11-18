@@ -16,11 +16,11 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
 import {Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { Study } from '../../studies/shared/study.model';
@@ -28,11 +28,14 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Center } from '../../centers/shared/center.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
 import {CenterService} from "../../centers/shared/center.service";
 import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisition-equipment.model";
 import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -40,8 +43,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [CheckboxComponent, FormsModule, SelectBoxComponent, UploaderComponent, LoadingBarComponent]
 })
 export class DicomUploadComponent implements OnDestroy {
 
@@ -109,27 +111,28 @@ export class DicomUploadComponent implements OnDestroy {
         formData.append('file', file[0], file[0].name);
         if (!this.multipleExamImport) {
             this.subscriptions.push(
-            this.importService.uploadFile(formData)
-                .subscribe(
-                    event => {
-                    if (event.type === HttpEventType.Sent) {
+                this.importService.uploadFile(formData).subscribe({
+                    next: event => {
+                        if (event.type === HttpEventType.Sent) {
+                            this.uploadState.progress = 0;
+                        } else if (event.type === HttpEventType.UploadProgress) {
+                            this.uploadState.progress = (event.loaded / (event.total + 0.05));
+                        } else if (event instanceof HttpResponse) {
+                            const patientDicomList =  event.body;
+                            this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
+                            this.importDataService.patientList = patientDicomList;
+                            this.setArchiveStatus('uploaded');
+                            this.uploadState.progress = 1;
+                        }
+                    }, 
+                    error: error => {
+                        this.setArchiveStatus('error');
                         this.uploadState.progress = 0;
-                    } else if (event.type === HttpEventType.UploadProgress) {
-                        this.uploadState.progress = (event.loaded / (event.total + 0.05));
-                    } else if (event instanceof HttpResponse) {
-                        const patientDicomList =  event.body;
-                        this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
-                        this.importDataService.patientList = patientDicomList;
-                        this.setArchiveStatus('uploaded');
-                        this.uploadState.progress = 1;
+                        if (error && error.error && error.error.message) {
+                            this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
+                        }
+                        this.fileTooBigError = error.status === 413;
                     }
-                }, error => {
-                    this.setArchiveStatus('error');
-                    this.uploadState.progress = 0;
-                    if (error && error.error && error.error.message) {
-                        this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
-                    }
-                    this.fileTooBigError = error.status === 413;
                 })
             );
         } else {
@@ -144,26 +147,28 @@ export class DicomUploadComponent implements OnDestroy {
 
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
-                .subscribe(
-                    event => {
-                    if (event.type === HttpEventType.Sent) {
-                        this.uploadState.progress = -1;
-                    } else if (event.type === HttpEventType.UploadProgress) {
-                        this.uploadState.progress = (event.loaded / event.total);
-                    } else if (event instanceof HttpResponse) {
-                        this.setArchiveStatus('uploaded');
-                    }
-                }, error => {
-                    this.setArchiveStatus('error');
-                    this.uploadState.progress = 0;
-                    if (error?.error?.message) {
-                        if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
-                            this.dicomDirMissingError = true;
-                        } else {
-                            this.otherErrorMessage = error.error.message;
+                .subscribe({
+                    next: event => {
+                        if (event.type === HttpEventType.Sent) {
+                            this.uploadState.progress = -1;
+                        } else if (event.type === HttpEventType.UploadProgress) {
+                            this.uploadState.progress = (event.loaded / event.total);
+                        } else if (event instanceof HttpResponse) {
+                            this.setArchiveStatus('uploaded');
                         }
-                    } else {
-                        this.fileTooBigError = error.status === 413;
+                    }, 
+                    error: error => {
+                        this.setArchiveStatus('error');
+                        this.uploadState.progress = 0;
+                        if (error?.error?.message) {
+                            if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
+                                this.dicomDirMissingError = true;
+                            } else {
+                                this.otherErrorMessage = error.error.message;
+                            }
+                        } else {
+                            this.fileTooBigError = error.status === 413;
+                        }
                     }
                 })
             );

@@ -14,7 +14,7 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { formatDate } from '@angular/common';
 import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -25,7 +25,6 @@ import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acqui
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
-import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
@@ -42,10 +41,14 @@ import { Study } from "../studies/shared/study.model";
 import { StudyService } from "../studies/shared/study.service";
 import { ServiceLocator } from "../utils/locator.service";
 import { ExecutionDataService } from '../vip/execution.data-service';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
+import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.component';
+import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
+import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 export type TextualFacet = typeof TextualFacetNames[number];
@@ -53,8 +56,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -114,7 +116,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             this.studies = studies;
         });
 
-        const input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        const input: string = this.router.lastSuccessfulNavigation?.extras && this.router.lastSuccessfulNavigation?.extras.state ? this.router.lastSuccessfulNavigation?.extras.state['input'] : null;
         if (input) {
             // TODO
         }
@@ -665,7 +667,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     copyToStudy() {
-        const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
+        const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.createComponent(DatasetCopyDialogComponent);
         modalRef.instance.title = "Copy of datasets to study";
         modalRef.instance.studies = this.studies;
         modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);

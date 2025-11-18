@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'center')"
         [label]="node.label"
         awesome="fa-regular fa-hospital"
@@ -23,28 +23,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-    </dropdown-menu>
-
-    <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">
-        <equipment-node
-                node
-                *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
-                [input]="acquisitionEquipment"
-                (equipmentDelete)="onEquipmentDelete(i)"
-                (nodeSelect)="equipementNodeSelect.emit($event)"
-                [withMenu]="withMenu">
-        </equipment-node>
-    </ng-container>
-    <ng-container *ngIf="node.open && node.coils && node.coils != $any('UNLOADED')">
-        <coil-node
-                node
-                *ngFor="let coil of node.coils; let i = index"
-                [input]="coil">
-        </coil-node>
-    </ng-container>
-</node>
+        @if (menuOpened && withMenu && withMenu) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+            </dropdown-menu>
+        }
+        @if (node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any("UNLOADED")) {
+            @for (acquisitionEquipment of node.acquisitionEquipments; track acquisitionEquipment; let i = $index) {
+                <equipment-node
+                    node
+                    [input]="acquisitionEquipment"
+                    (equipmentDelete)="onEquipmentDelete(i)"
+                    (nodeSelect)="equipementNodeSelect.emit($event)"
+                    [withMenu]="withMenu"></equipment-node>
+            }
+        }
+        @if (node.open && node.coils && node.coils != $any("UNLOADED")) {
+            @for (coil of node.coils; track coil; let i = $index) {
+                <coil-node node [input]="coil"></coil-node>
+            }
+        }
+    </node>
+}

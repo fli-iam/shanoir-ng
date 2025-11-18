@@ -12,85 +12,115 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 *ngIf="mode == 'create'" class="header command-zone">Request An Access</h2>
-<h2 *ngIf="mode == 'edit'" class="header command-zone">Edit Access Request</h2>
-<h2 *ngIf="mode == 'view'" class="header command-zone">Access Request</h2>
+@if (mode == "create") {
+    <h2 class="header command-zone">Request An Access</h2>
+}
+@if (mode == "edit") {
+    <h2 class="header command-zone">Edit Access Request</h2>
+}
+@if (mode == "view") {
+    <h2 class="header command-zone">Access Request</h2>
+}
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
-        <form-footer
-            [state]="footerState"
-            (save)="save()"
-            (back)="goBack()"
-        ></form-footer>
-	    <ul>
-	        <li *ngIf="mode == 'create' && !fromStudy">
-	            <label i18n="access request|study label@@study" class="required-label">Study</label>
-	            <span class="right-col">
-	            <select-box
-	                    formControlName="studyId"
-	                    [options]="studyOptions"
-	                    (userChange)="changeStudy($event)">
-	            </select-box>
-	            </span>
-	            <input type="hidden" formControlName="studyName">
-	        </li>
-	       <li *ngIf="mode == 'create' && fromStudy">
-	            <span> You have requested to join a study on shanoir, please add a message for the study administrator and confirm you access request.</span>
-	            <br/>
-	            <br/>
-                <input type="hidden" formControlName="studyId"/>
-                <input type="hidden" formControlName="studyName">
-            </li>
-	        <li *ngIf="mode == 'view'">
-                <label i18n="access request|user label@@user">User</label>
-                <span class="right-col">
-                    {{accessRequest.user.username}}
-                </span>
-            </li>
-	        <li *ngIf="mode == 'view'">
-	            <label i18n="access request|study label@@study">Study</label>
-                <span class="right-col">
-                    {{accessRequest.studyName}}
-                </span>
-	        </li>
-            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.function">
-                <label>Function</label>
-                <span class="right-col">
-                    {{accessRequest.user.accountRequestInfo.function}}
-                </span>
-            </li>
-            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.institution">
-                <label>Institution</label>
-                <span class="right-col">
-                    {{accessRequest.user.accountRequestInfo.institution}}
-                </span>
-            </li>
-            <li *ngIf="mode == 'view' && accessRequest.user?.accountRequestInfo?.contact">
-                <label>Contact</label>
-                <span class="right-col">
-                    {{accessRequest.user.accountRequestInfo.contact}}
-                </span>
-            </li>
-	        <li *ngIf="mode == 'view'">
-                <label>Motivation</label>
-                <span class="right-col">
-                    {{accessRequest.motivation}}
-                </span>
-            </li>
-            <li *ngIf="mode == 'create'">
-	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
-	            <span class="right-col">
-	                <textarea formControlName="motivation"></textarea>
-	            </span>
-	        </li>
-	    </ul>
-        <button *ngIf="mode == 'view'" type="button" (click)="acceptRequest()" class="accept right-icon">
-            Accept
-            <i class="fa-solid fa-thumbs-up"></i>
-        </button>
-        <button *ngIf="mode == 'view'" type="button" (click)="refuseRequest()" class="refuse right-icon">
-            Refuse
-            <i class="fa-solid fa-thumbs-down"></i>
-        </button>
-    </form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <form-footer [state]="footerState" (save)="save()" (back)="goBack()"></form-footer>
+            <ul>
+                @if (mode == "create" && !fromStudy) {
+                    <li>
+                        <label i18n="access request|study label@@study" class="required-label">Study</label>
+                        <span class="right-col">
+                            <select-box
+                                formControlName="studyId"
+                                [options]="studyOptions"
+                                (userChange)="changeStudy($event)"></select-box>
+                        </span>
+                        <input type="hidden" formControlName="studyName" />
+                    </li>
+                }
+                @if (mode == "create" && fromStudy) {
+                    <li>
+                        <span>
+                            You have requested to join a study on shanoir, please add a message for the study
+                            administrator and confirm you access request.
+                        </span>
+                        <br />
+                        <br />
+                        <input type="hidden" formControlName="studyId" />
+                        <input type="hidden" formControlName="studyName" />
+                    </li>
+                }
+                @if (mode == "view") {
+                    <li>
+                        <label i18n="access request|user label@@user">User</label>
+                        <span class="right-col">
+                            {{ accessRequest.user.username }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "view") {
+                    <li>
+                        <label i18n="access request|study label@@study">Study</label>
+                        <span class="right-col">
+                            {{ accessRequest.studyName }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "view" && accessRequest.user?.accountRequestInfo?.function) {
+                    <li>
+                        <label>Function</label>
+                        <span class="right-col">
+                            {{ accessRequest.user.accountRequestInfo.function }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "view" && accessRequest.user?.accountRequestInfo?.institution) {
+                    <li>
+                        <label>Institution</label>
+                        <span class="right-col">
+                            {{ accessRequest.user.accountRequestInfo.institution }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "view" && accessRequest.user?.accountRequestInfo?.contact) {
+                    <li>
+                        <label>Contact</label>
+                        <span class="right-col">
+                            {{ accessRequest.user.accountRequestInfo.contact }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "view") {
+                    <li>
+                        <label>Motivation</label>
+                        <span class="right-col">
+                            {{ accessRequest.motivation }}
+                        </span>
+                    </li>
+                }
+                @if (mode == "create") {
+                    <li>
+                        <label i18n="access request|Motivation label@@motivation" class="required-label">
+                            Motivation
+                        </label>
+                        <span class="right-col">
+                            <textarea formControlName="motivation"></textarea>
+                        </span>
+                    </li>
+                }
+            </ul>
+            @if (mode == "view") {
+                <button type="button" (click)="acceptRequest()" class="accept right-icon">
+                    Accept
+                    <i class="fa-solid fa-thumbs-up"></i>
+                </button>
+            }
+            @if (mode == "view") {
+                <button type="button" (click)="refuseRequest()" class="refuse right-icon">
+                    Refuse
+                    <i class="fa-solid fa-thumbs-down"></i>
+                </button>
+            }
+        </form>
+    }
 </div>

@@ -12,9 +12,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span #container class="help" [class.opened]="opened" (click)="onClick()" (mouseleave)="onLeave()" (mouseover)="onOver()">
+<span
+    #container
+    class="help"
+    [class.opened]="opened"
+    (click)="onClick()"
+    (mouseleave)="onLeave()"
+    (mouseover)="onOver()">
     <i class="fas fa-info"></i>
-    <div class="content" *ngIf="opened">
-        <ng-content></ng-content>
-    </div>
+    @if (opened) {
+        <div class="content">
+            <ng-content></ng-content>
+        </div>
+    }
 </span>

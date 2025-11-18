@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [awesome]="awesome"
@@ -22,14 +22,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = !menuOpened"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-  
-    <ng-container *ngIf="node.open && node.studies && node.studies != $any('UNLOADED')">
-        <reverse-study-node
-                *ngFor="let studyNode of node.studies"
-                [input]="studyNode"
-                [subjectId]="node.id"
-                (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox">
-        </reverse-study-node>
-    </ng-container>
-</node>
+        @if (node.open && node.studies && node.studies != $any("UNLOADED")) {
+            @for (studyNode of node.studies; track studyNode) {
+                <reverse-study-node
+                    [input]="studyNode"
+                    [subjectId]="node.id"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox"></reverse-study-node>
+            }
+        }
+    </node>
+}

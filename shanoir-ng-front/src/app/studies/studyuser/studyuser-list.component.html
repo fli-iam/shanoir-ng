@@ -13,151 +13,199 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ol>
-	<li *ngIf="mode == 'edit' && !studyOptions" class="info-txt">
-		<h3>Invite a new user</h3>
-		Username or email address : <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
-		<tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
-		<br/>Function in the study (researcher, mri manipulator, ...) : <input type="text" [(ngModel)]="invitationFunction" placeholder="function in the study">
-		<br/><button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
+    @if (mode == "edit" && !studyOptions) {
+        <li class="info-txt">
+            <h3>Invite a new user</h3>
+            Username or email address :
+            <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username" />
+            <tool-tip>
+                If an user with such email/username already exists, he will be directly added to the study, otherwise an
+                email with an invitation will be sent.
+            </tool-tip>
+            <br />
+            Function in the study (researcher, mri manipulator, ...) :
+            <input type="text" [(ngModel)]="invitationFunction" placeholder="function in the study" />
+            <br />
+            <button type="button" class="invite-button right-icon" (click)="inviteUser()">
+                Invite & Add
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </li>
+    }
+    @if (mode != "view" && studyOptions) {
+        <li>
+            <label>List of studies</label>
+            <span class="right-col">
+                <select-box
+                    placeholder="Add a study ..."
+                    (addClick)="onStudyAdd($event)"
+                    [options]="studyOptions"></select-box>
+            </span>
+        </li>
+    }
+    <li>
+        <shanoir-table
+            #memberTable
+            [getPage]="getPage.bind(this)"
+            [columnDefs]="columnDefs"
+            (rowClick)="onUserClick($event)"
+            [selectedId]="pannelStudyUser?.id"></shanoir-table>
+        @if (pannelStudyUser) {
+            <span class="right-col">
+                <div class="pannel">
+                    <div class="close" (click)="closePannel()"><i class="fas fa-times"></i></div>
+                    @if (isAdmin) {
+                        <fieldset>
+                            <legend>General</legend>
+                            <ul>
+                                <li>
+                                    <label>Username</label>
+                                    <span class="right-col">{{ pannelStudyUser.userName }}</span>
+                                </li>
+                                <li>
+                                    <label>First name</label>
+                                    <span class="right-col">{{ pannelStudyUser.user?.firstName }}</span>
+                                </li>
+                                <li>
+                                    <label>Last name</label>
+                                    <span class="right-col">{{ pannelStudyUser.user?.lastName }}</span>
+                                </li>
+                                <li>
+                                    <label>Email</label>
+                                    <span class="right-col">{{ pannelStudyUser.user?.email }}</span>
+                                </li>
+                                <li>
+                                    <label>Receive Import Mail</label>
+                                    <span class="right-col">
+                                        <checkbox
+                                            [mode]="mode == 'view' ? mode : 'edit'"
+                                            [(ngModel)]="pannelStudyUser.receiveNewImportReport"></checkbox>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>Receive Member Mail</label>
+                                    <span class="right-col">
+                                        <checkbox
+                                            [mode]="mode == 'view' ? mode : 'edit'"
+                                            [(ngModel)]="pannelStudyUser.receiveStudyUserReport"></checkbox>
+                                    </span>
+                                </li>
+                            </ul>
+                        </fieldset>
+                    }
+                    <fieldset>
+                        <legend>General rights</legend>
+                        <ul>
+                            <li>
+                                <label>Role</label>
+                                <span class="right-col left-icon fix-icon user-icon">
+                                    @if (pannelStudyUser.user?.role?.id == 2) {
+                                        <i class="fas fa-user"></i>
+                                    }
+                                    @if (pannelStudyUser.user?.role?.id == 3) {
+                                        <i class="fas fa-user-tie"></i>
+                                    }
+                                    @if (pannelStudyUser.user?.role?.id == 1) {
+                                        <i class="fas fa-user-cog"></i>
+                                    }
+                                    {{ pannelStudyUser.user?.role?.displayName }}
+                                </span>
+                            </li>
+                            <li>
+                                <label>DUA</label>
+                                <span class="right-col fix-icon">
+                                    @if (pannelStudyUser.confirmed) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    }
+                                    @if (!pannelStudyUser.confirmed) {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                                </span>
+                            </li>
+                            <li>
+                                <label>Can see all</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
+                                        [disabled]="
+                                            newUser.includes(pannelStudyUser.user) ||
+                                            (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) &&
+                                                pannelStudyUser.userId == getLoggedUserId())
+                                        "></checkbox>
+                                </span>
+                            </li>
+                            <li>
+                                <label>Can download</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="
+                                            pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)
+                                        "
+                                        (userChange)="
+                                            onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)
+                                        "></checkbox>
+                                </span>
+                            </li>
+                            <li>
+                                <label>Can import</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
+                                        (userChange)="
+                                            onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)
+                                        "></checkbox>
+                                </span>
+                            </li>
+                            <li>
+                                <label>Can administrate</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="
+                                            pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)
+                                        "
+                                        (userChange)="
+                                            onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)
+                                        "></checkbox>
+                                </span>
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Center rights</legend>
+                        <ul>
+                            @if (mode == "edit" || pannelStudyUser.centers?.length == 0) {
+                                <li class="all-centers">
+                                    <label>All centers (default)</label>
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="!(pannelStudyUser.centers?.length > 0)"
+                                        (userChange)="onToggleAllCenters($event)"></checkbox>
+                                </li>
+                            }
+                        </ul>
+                        @if (pannelStudyUser.centers?.length > 0) {
+                            <ul>
+                                @for (center of centers; track center) {
+                                    <li>
+                                        <label>{{ center.name }}</label>
+                                        <span class="right-col">
+                                            <checkbox
+                                                [mode]="mode == 'view' ? mode : 'edit'"
+                                                [ngModel]="hasCenter(center, pannelStudyUser)"
+                                                (userChange)="onEditCenter(center, pannelStudyUser, $event)"></checkbox>
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </fieldset>
+                </div>
+            </span>
+        }
     </li>
-	<li *ngIf="mode != 'view' && studyOptions">
-		<label>List of studies</label>
-		<span class="right-col">
-			<select-box placeholder="Add a study ..." (addClick)="onStudyAdd($event)" [options]="studyOptions">
-			</select-box>
-		</span>
-	</li>
-	<li>
-		<shanoir-table #memberTable
-			[getPage]="getPage.bind(this)"
-			[columnDefs]="columnDefs"
-			(rowClick)="onUserClick($event)"
-			[selectedId]="pannelStudyUser?.id">
-		</shanoir-table>
-		<span class="right-col" *ngIf="pannelStudyUser">
-			<div class="pannel">
-				<div class="close" (click)="closePannel()"><i class="fas fa-times"></i></div>
-				<fieldset *ngIf="isAdmin">
-					<legend>General</legend>
-					<ul>
-						<li>
-							<label>Username</label>
-							<span class="right-col">{{pannelStudyUser.userName}}</span>
-						</li>
-						<li>
-							<label>First name</label>
-							<span class="right-col">{{pannelStudyUser.user?.firstName}}</span>
-						</li>
-						<li>
-							<label>Last name</label>
-							<span class="right-col">{{pannelStudyUser.user?.lastName}}</span>
-						</li>
-						<li>
-							<label>Email</label>
-							<span class="right-col">{{pannelStudyUser.user?.email}}</span>
-						</li>
-						<li>
-							<label>Receive Import Mail</label>
-							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveNewImportReport"></checkbox>
-							</span>
-						</li>
-						<li>
-							<label>Receive Member Mail</label>
-							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveStudyUserReport"></checkbox>
-							</span>
-						</li>
-					</ul>
-				</fieldset>
-				<fieldset>
-					<legend>General rights</legend>
-					<ul>
-						<li>
-							<label>Role</label>
-							<span class="right-col left-icon fix-icon user-icon">
-								<i *ngIf="pannelStudyUser.user?.role?.id == 2" class="fas fa-user"></i>
-								<i *ngIf="pannelStudyUser.user?.role?.id == 3" class="fas fa-user-tie"></i>
-								<i *ngIf="pannelStudyUser.user?.role?.id == 1" class="fas fa-user-cog"></i>
-								{{pannelStudyUser.user?.role?.displayName}}
-							</span>
-						</li>
-						<li>
-							<label>DUA</label>
-							<span class="right-col fix-icon">
-								<span *ngIf="pannelStudyUser.confirmed" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!pannelStudyUser.confirmed" class="bool-false"><i class="fas fa-times"></i></span>
-							</span>
-						</li>
-						<li>
-							<label>Can see all</label>
-							<span class="right-col">
-								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'"
-									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
-									(userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
-									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId())"
-								></checkbox>
-							</span>
-						</li>
-						<li>
-							<label>Can download</label>
-							<span class="right-col">
-								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'"
-									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
-									(userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
-								></checkbox>
-							</span>
-						</li>
-						<li>
-							<label>Can import</label>
-							<span class="right-col">
-								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'"
-									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
-									(userChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
-								></checkbox>
-							</span>
-						</li>
-						<li>
-							<label>Can administrate</label>
-							<span class="right-col">
-								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'"
-									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
-									(userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
-								></checkbox>
-							</span>
-						</li>
-					</ul>
-				</fieldset>
-				<fieldset>
-					<legend>Center rights</legend>
-					<ul>
-						<li class="all-centers" *ngIf="mode == 'edit' || pannelStudyUser.centers?.length == 0">
-							<label>All centers (default)</label>
-							<checkbox
-								[mode]="mode == 'view' ? mode : 'edit'"
-								[ngModel]="!(pannelStudyUser.centers?.length > 0)"
-								(userChange)="onToggleAllCenters($event)"
-							></checkbox>
-						</li>
-					</ul>
-					<ul *ngIf="pannelStudyUser.centers?.length > 0">
-						<li *ngFor="let center of centers">
-							<label>{{center.name}}</label>
-							<span class="right-col">
-								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'"
-									[ngModel]="hasCenter(center, pannelStudyUser)"
-									(userChange)="onEditCenter(center, pannelStudyUser, $event)"
-								></checkbox>
-							</span>
-						</li>
-					</ul>
-				</fieldset>
-			</div>
-		</span>
-	</li>
 </ol>

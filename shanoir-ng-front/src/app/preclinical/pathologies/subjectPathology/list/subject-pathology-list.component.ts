@@ -24,6 +24,7 @@ import { SuperPromise } from 'src/app/utils/super-promise';
 
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { SubjectPathology } from '../shared/subjectPathology.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 
 @Component({
@@ -36,7 +37,7 @@ import { SubjectPathology } from '../shared/subjectPathology.model';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class SubjectPathologiesListComponent implements ControlValueAccessor {

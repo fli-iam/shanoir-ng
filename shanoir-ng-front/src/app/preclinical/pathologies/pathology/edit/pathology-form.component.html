@@ -13,50 +13,66 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="PathologyFormComponent content-component">
-    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()">
-		</form-footer>
-		<table class="layout">
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'"> 
-						<div class="header command-zone" i18n="View pathology|Title">View pathology</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'"> 
-						<div class="header command-zone" i18n="Edit pathology|Title">Edit pathology</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'"> 
-						<div class="header command-zone" i18n="Create pathology|Title">Add pathology</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<!-- <label *ngIf="isPathologyUnique==false" class="form-validation-alert" i18n="Edit pathology|PathologyUniqueError label">This pathology already exists!</label> -->
-						<li class="required">
-							<label i18n="Edit pathology|Name label">Name</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
-										{{pathology?.name}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name"/>
-									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit pathology|Name required error@@pathologyDetailNameRequiredError">Name is required!</label>
-								</ng-template>
-							</span>
-						</li>
-					</ol>
-					</fieldset>
-				</td>				
-			</tr>
-		</table>
-    </form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            <form-footer
+                [state]="footerState"
+                (save)="save()"
+                (delete)="delete()"
+                (edit)="goToEdit()"
+                (dismiss)="goToView()"
+                (back)="goBack()"></form-footer>
+            <table class="layout">
+                <tr>
+                    <td colspan="2">
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    <div class="header command-zone" i18n="View pathology|Title">View pathology</div>
+                                }
+                                @case ("edit") {
+                                    <div class="header command-zone" i18n="Edit pathology|Title">Edit pathology</div>
+                                }
+                                @case ("create") {
+                                    <div class="header command-zone" i18n="Create pathology|Title">Add pathology</div>
+                                }
+                            }
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <ol>
+                                <!-- <label *ngIf="isPathologyUnique==false" class="form-validation-alert" i18n="Edit pathology|PathologyUniqueError label">This pathology already exists!</label> -->
+                                <li class="required">
+                                    <label i18n="Edit pathology|Name label">Name</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ pathology?.name }}
+                                            }
+                                            @default {
+                                                <input type="text" id="name" formControlName="name" />
+                                                @if (hasError("name", ["required"])) {
+                                                    <label
+                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        class="form-validation-alert"
+                                                        i18n="
+                                                            Edit pathology|Name required
+                                                            error@@pathologyDetailNameRequiredError">
+                                                        Name is required!
+                                                    </label>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    }
 </div>

@@ -17,11 +17,13 @@ import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-n
 import { TreeService } from 'src/app/studies/study/tree.service';
 import { CoilNode } from 'src/app/tree/tree.model';
 
+import { TreeNodeComponent } from '../../../shared/components/tree/tree-node.component';
+
 
 @Component({
     selector: 'coil-node',
     templateUrl: 'coil-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent]
 })
 
 export class CoilNodeComponent extends TreeNodeAbstractComponent<CoilNode> implements OnChanges {

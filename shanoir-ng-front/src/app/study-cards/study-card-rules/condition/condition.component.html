@@ -13,37 +13,79 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <span>if,&nbsp;</span>
-<span class="view" *ngIf="mode == 'view'">
-    <span class="cardinality-type" *ngIf="condition.cardinality == -1">for every</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality == 0">for no</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
-    <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
-    <span class="var" *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
-    <span class="var" *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'">{{fieldLabel}}</span>
-    <span class="method">
-        <i *ngIf="condition.operation == 'EQUALS'" class="fa-solid fa-equals"></i>
-        <i *ngIf="condition.operation == 'NOT_EQUALS'" class="fa-solid fa-not-equal"></i>
-        <i *ngIf="condition.operation == 'SMALLER_THAN'" class="fa-solid fa-less-than"></i>
-        <i *ngIf="condition.operation == 'BIGGER_THAN'" class="fa-solid fa-greater-than"></i>
-        <ng-container *ngIf="!(['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(condition.operation))">
-            {{condition.operation}}
-        </ng-container>
+@if (mode == "view") {
+    <span class="view">
+        @if (condition.cardinality == -1) {
+            <span class="cardinality-type">for every</span>
+        }
+        @if (condition.cardinality == 0) {
+            <span class="cardinality-type">for no</span>
+        }
+        @if (condition.cardinality > 0) {
+            <span class="cardinality-type">for at least</span>
+        }
+        @if (condition.cardinality > 0) {
+            <span class="cardinality">{{ condition.cardinality }}</span>
+        }
+        <span>
+            dataset
+            @if (condition.cardinality > 1) {
+                s
+            }
+            in the exam,
+        </span>
+        @if (condition.scope == "StudyCardDICOMConditionOnDatasets") {
+            <span class="var" title="{{ condition.dicomTag | dicomTagLabel }}">
+                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel) }}
+            </span>
+        }
+        @if (condition.scope != "StudyCardDICOMConditionOnDatasets") {
+            <span class="var">{{ fieldLabel }}</span>
+        }
+        <span class="method">
+            @if (condition.operation == "EQUALS") {
+                <i class="fa-solid fa-equals"></i>
+            }
+            @if (condition.operation == "NOT_EQUALS") {
+                <i class="fa-solid fa-not-equal"></i>
+            }
+            @if (condition.operation == "SMALLER_THAN") {
+                <i class="fa-solid fa-less-than"></i>
+            }
+            @if (condition.operation == "BIGGER_THAN") {
+                <i class="fa-solid fa-greater-than"></i>
+            }
+            @if (!["EQUALS", "NOT_EQUALS", "SMALLER_THAN", "BIGGER_THAN"].includes(condition.operation)) {
+                {{ condition.operation }}
+            }
+        </span>
+        @if (condition.type == "string") {
+            <span class="multi-value">
+                @for (value of condition.values; track value; let i = $index) {
+                    <div class="value">
+                        @if (i > 0) {
+                            <span class="or">or</span>
+                        }
+                        "{{ value }}"
+                    </div>
+                }
+            </span>
+        }
+        @if (condition.type == "Coil") {
+            <span class="multi-value">
+                @for (coil of condition.values; track coil; let i = $index) {
+                    <div class="value">
+                        @if (i > 0) {
+                            <span class="or">or</span>
+                        }
+                        {{ coil['name'] || coil['id'] || coil }}
+                    </div>
+                }
+            </span>
+        }
     </span>
-    <span class="multi-value" *ngIf="condition.type == 'string'">
-        <div class="value" *ngFor="let value of condition.values; let i=index;">
-            <span *ngIf="i > 0" class="or">or</span>
-            "{{value}}"
-        </div>
-    </span>
-    <span class="multi-value" *ngIf="condition.type == 'Coil'">
-        <div class="value" *ngFor="let coil of condition.values; let i=index;">
-            <span *ngIf="i > 0" class="or">or</span>
-            {{coil.name || coil.id}}
-        </div>
-    </span>
-</span>
-<ng-container *ngIf="mode != 'view' && init">
+}
+@if (mode != "view" && init) {
     <select-box
         class="cardinality-type auto-width"
         [(ngModel)]="cardinalityType"
@@ -51,97 +93,126 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [clear]="false"
         placeholder="select cardinality"
         [search]="false"
-        [options]="[{label: 'for no', value: 'NONE'}, {label: 'for every', value: 'ALL'}, {label: 'for at least', value: 'AT_LEAST'}]">
-    </select-box>
-    <input type="number"
-        class="cardinality auto-width"
-        *ngIf="cardinalityType == 'AT_LEAST'"
-        [(ngModel)]="condition.cardinality"
-        [class.error]="cardinalityError"
-        min="1" 
-        [style.width]="(condition.cardinality ? ((condition.cardinality+'').length + 3) : '4') + 'ch'">
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
-    <select-box 
+        [options]="[
+            { label: 'for no', value: 'NONE' },
+            { label: 'for every', value: 'ALL' },
+            { label: 'for at least', value: 'AT_LEAST' },
+        ]"></select-box>
+    @if (cardinalityType == "AT_LEAST") {
+        <input
+            type="number"
+            class="cardinality auto-width"
+            [(ngModel)]="condition.cardinality"
+            [class.error]="cardinalityError"
+            min="1"
+            [style.width]="(condition.cardinality ? (condition.cardinality + '').length + 3 : '4') + 'ch'" />
+    }
+    <span>
+        dataset
+        @if (condition.cardinality > 1) {
+            s
+        }
+        in the exam,
+    </span>
+    <select-box
         class="type auto-width"
-        [ngModel]="condition.scope" 
-        (userChange)="onConditionTypeChange($event)" 
+        [ngModel]="condition.scope"
+        (userChange)="onConditionTypeChange($event)"
         [options]="conditionTypeOptions"
-        placeholder="select conditition type" 
-        [clear]="false">
-    </select-box>
-    <select-box 
-            *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'"
-            class="var auto-width" 
+        placeholder="select conditition type"
+        [clear]="false"></select-box>
+    @if (condition.scope == "StudyCardDICOMConditionOnDatasets") {
+        <select-box
+            class="var auto-width"
             [class.error]="tagError"
             [(ngModel)]="condition.dicomTag"
-            (userChange)="onDicomFieldChange($event)" 
-            [options]="tagOptions" 
-            placeholder="select dicom tag" 
+            (userChange)="onDicomFieldChange($event)"
+            [options]="tagOptions"
+            placeholder="select dicom tag"
             (focusout)="tagTouched = true"
-            [clear]="false">
-    </select-box>
-    <select-box 
-            *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'"
-            class="var auto-width" 
+            [clear]="false"></select-box>
+    }
+    @if (condition.scope != "StudyCardDICOMConditionOnDatasets") {
+        <select-box
+            class="var auto-width"
             [class.error]="shanoirFieldError"
-            [(ngModel)]="condition.shanoirField" 
-            (userChange)="onFieldChange()" 
-            [options]="fieldOptions" 
-            placeholder="select shanoir metadata field" 
+            [(ngModel)]="condition.shanoirField"
+            (userChange)="onFieldChange()"
+            [options]="fieldOptions"
+            placeholder="select shanoir metadata field"
             (focusout)="shanoirFieldTouched = true"
-            [clear]="false">
-    </select-box>
-    <select-box 
-            [readOnly]="condition.shanoirField && shanoirFieldOptions?.length > 0"
-            class="method auto-width"
-            [class.error]="operationError"
-            [(ngModel)]="condition.operation" 
-            (userChange)="onOperationChange()" 
-            [options]="operations" 
-            placeholder="select operation" 
-            (focusout)="operationTouched = true"
-            [clear]="false">
-    </select-box>
-    <ng-container *ngIf="condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT'"> 
+            [clear]="false"></select-box>
+    }
+    <select-box
+        [readOnly]="condition.shanoirField && shanoirFieldOptions?.length > 0"
+        class="method auto-width"
+        [class.error]="operationError"
+        [(ngModel)]="condition.operation"
+        (userChange)="onOperationChange()"
+        [options]="operations"
+        placeholder="select operation"
+        (focusout)="operationTouched = true"
+        [clear]="false"></select-box>
+    @if (condition?.operation != "PRESENT" && condition?.operation != "ABSENT") {
         <form [formGroup]="form">
-            <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
-                <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
-                    <auto-ajust-input 
-                            [formControlName]="i"
-                            class="value"
-                            [(ngModel)]="condition.values[i]"
-                            (userChange)="onConditionChange()"
-                            placeholder="enter value"
-                            (focusout)="valueTouched = true">
-                    </auto-ajust-input>
-                    <span *ngIf="condition.values.length > 1" class="delete-value" (click)="onTextValueRemove(i)"><i class="far fa-times-circle"></i></span>
+            @if (condition.scope == "StudyCardDICOMConditionOnDatasets" || !(shanoirFieldOptions?.length > 0)) {
+                <span formArrayName="values" class="multi-value edit">
+                    @for (value of condition.values; track trackByFn(i); let i = $index) {
+                        <span class="one-value">
+                            <auto-ajust-input
+                                [formControlName]="i"
+                                class="value"
+                                [(ngModel)]="condition.values[i]"
+                                (userChange)="onConditionChange()"
+                                placeholder="enter value"
+                                (focusout)="valueTouched = true"></auto-ajust-input>
+                            @if (condition.values.length > 1) {
+                                <span class="delete-value" (click)="onTextValueRemove(i)">
+                                    <i class="far fa-times-circle"></i>
+                                </span>
+                            }
+                        </span>
+                    }
+                    @if (!(condition.values[condition.values.length - 1]?.toString().length == 0)) {
+                        <div class="add-cond-value-frame">
+                            <span class="add-cond-value" (click)="onTextValueAdd()">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                Add a possible value
+                            </span>
+                        </div>
+                    }
                 </span>
-                <div *ngIf="!(condition.values[condition.values.length - 1]?.toString().length == 0)" class="add-cond-value-frame">
-                    <span class="add-cond-value" (click)="onTextValueAdd()">
-                        <i class="fa-solid fa-circle-plus"></i>Add a possible value
-                    </span>
-                </div>
-            </span>
-            <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
-                <select-box 
-                        *ngFor="let value of condition.values; let i  = index"
-                        [formControlName]="i"
-                        class="value auto-width one-value" 
-                        [(ngModel)]="condition.values[i]" 
-                        (userChange)="onConditionValueChange()" 
-                        (selectOption)="onConditionOptionSelect($event)" 
-                        (userClear)="onConditionOptionUnselect($event)" 
-                        [options]="shanoirFieldOptions" 
-                        placeholder="select value" 
-                        (focusout)="valueTouched = true">
-                </select-box>
-                <div *ngIf="condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length" class="add-cond-value-frame">
-                    <span class="add-cond-value" (click)="condition.values?.push(null)">
-                        <i class="fa-solid fa-plus"></i>Add a possible value
-                    </span>
-                </div>
-            </span>
+            }
+            @if (condition.scope != "StudyCardDICOMConditionOnDatasets" && shanoirFieldOptions?.length > 0) {
+                <span formArrayName="values" class="multi-value edit">
+                    @for (value of condition.values; track value; let i = $index) {
+                        <select-box
+                            [formControlName]="i"
+                            class="value auto-width one-value"
+                            [(ngModel)]="condition.values[i]"
+                            (userChange)="onConditionValueChange()"
+                            (selectOption)="onConditionOptionSelect($event)"
+                            (userClear)="onConditionOptionUnselect($event)"
+                            [options]="shanoirFieldOptions"
+                            placeholder="select value"
+                            (focusout)="valueTouched = true"></select-box>
+                    }
+                    @if (
+                        condition.values[condition.values.length - 1] &&
+                        condition.values.length < shanoirFieldOptions.length
+                    ) {
+                        <div class="add-cond-value-frame">
+                            <span class="add-cond-value" (click)="condition.values?.push(null)">
+                                <i class="fa-solid fa-plus"></i>
+                                Add a possible value
+                            </span>
+                        </div>
+                    }
+                </span>
+            }
         </form>
-    </ng-container>
-</ng-container>
-<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
+    }
+}
+@if (mode != "view") {
+    <span class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
+}

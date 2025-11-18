@@ -12,47 +12,69 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="BloodGasDataFormComponent content-component" >
-	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="isStandalone" class="footer command-zone">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-			</form-footer>
-		</div>
-		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'"> 
-				<div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
-			</ng-template>
-			<ng-template ngSwitchDefault> 
-				<div class="header command-zone" i18n="Edit bloodgasdata|Title">Add blood gas data</div>
-			</ng-template>
-		</span>
-
-		<fieldset>
-			<legend *ngIf="!isStandalone">Blood gas data</legend>
-			<ol>
-				<li  class="required">
-					<label i18n="Edit bloodgasdata|File label">File</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template  [ngSwitchCase]="'view'">
-							{{bloodGasData?.filename}}
-                           <button *ngIf="bloodGasData?.filename" class="button-picto clickable" (click)="downloadFile()">
-                                <i class="fas fa-download"></i>
-                            </button>
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'create'">
-							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'edit'">
-							{{bloodGasData?.filename}}
-							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
-						</ng-template>
-					</span>
-				</li>				
-			</ol>
-		</fieldset>
-	</form>
+<div #formContainer class="BloodGasDataFormComponent content-component">
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            @if (isStandalone) {
+                <div class="footer command-zone">
+                    <form-footer
+                        [state]="footerState"
+                        (save)="save()"
+                        (edit)="goToEdit()"
+                        (back)="goBack()"></form-footer>
+                </div>
+            }
+            @if (isStandalone) {
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ("view") {
+                            <div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
+                        }
+                        @default {
+                            <div class="header command-zone" i18n="Edit bloodgasdata|Title">Add blood gas data</div>
+                        }
+                    }
+                </span>
+            }
+            <fieldset>
+                @if (!isStandalone) {
+                    <legend>Blood gas data</legend>
+                }
+                <ol>
+                    <li class="required">
+                        <label i18n="Edit bloodgasdata|File label">File</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ bloodGasData?.filename }}
+                                    @if (bloodGasData?.filename) {
+                                        <button class="button-picto clickable" (click)="downloadFile()">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    }
+                                }
+                                @case ("create") {
+                                    <input
+                                        type="file"
+                                        id="bloodgasdataFile"
+                                        name="bloodgasdataFile"
+                                        (change)="fileChangeEvent($event.target.files)"
+                                        placeholder="Upload file..." />
+                                }
+                                @case ("edit") {
+                                    {{ bloodGasData?.filename }}
+                                    <input
+                                        type="file"
+                                        id="bloodgasdataFile"
+                                        name="bloodgasdataFile"
+                                        (change)="fileChangeEvent($event.target.files)"
+                                        placeholder="Upload file..." />
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+    }
 </div>

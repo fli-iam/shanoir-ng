@@ -48,6 +48,7 @@ import { StudyCardRuleComponent } from './study-card-rule.component';
 import { ShanoirMetadataField } from './action/action.component';
 import { QualityCardRuleComponent } from './quality-card-rule.component';
 
+
 @Component({
     selector: 'study-card-rules',
     templateUrl: 'study-card-rules.component.html',
@@ -59,7 +60,7 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
             useExisting: forwardRef(() => StudyCardRulesComponent),
         }
     ],
-    standalone: false
+    imports: [StudyCardRuleComponent, QualityCardRuleComponent]
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     

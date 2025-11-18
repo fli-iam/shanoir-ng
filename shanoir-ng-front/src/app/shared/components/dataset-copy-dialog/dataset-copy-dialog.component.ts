@@ -13,23 +13,24 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 
-import {Study} from "../../../studies/shared/study.model";
+import { SolrDocument } from "../../../solr/solr.document.model";
+import { StudyRightsService } from "../../../studies/shared/study-rights.service";
+import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
+import { Study } from "../../../studies/shared/study.model";
+import { StudyService } from "../../../studies/shared/study.service";
 import * as AppUtils from "../../../utils/app.utils";
-import {KeycloakService} from "../../keycloak/keycloak.service";
-import {StudyUserRight} from "../../../studies/shared/study-user-right.enum";
-import {StudyRightsService} from "../../../studies/shared/study-rights.service";
-import {ServiceLocator} from "../../../utils/locator.service";
-import {ConsoleService} from "../../console/console.service";
-import {StudyService} from "../../../studies/shared/study.service";
-import {SolrDocument} from "../../../solr/solr.document.model";
+import { ConsoleService } from "../../console/console.service";
+import { KeycloakService } from "../../keycloak/keycloak.service";
 
 @Component({
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    standalone: false
+    imports: [NgClass]
 })
 export class DatasetCopyDialogComponent implements OnInit {
     title: string;
@@ -46,7 +47,7 @@ export class DatasetCopyDialogComponent implements OnInit {
     subjectIds: string[]=[];
     lines: SolrDocument[];
     subjectIdStudyId: string[]=[];
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     constructor(private http: HttpClient,
                 private studyRightsService: StudyRightsService,
                 private studyService: StudyService,
@@ -86,8 +87,7 @@ export class DatasetCopyDialogComponent implements OnInit {
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
-                    .toPromise()
+                return firstValueFrom(this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'}))
                     .then( () => {
                         this.close();
                         this.consoleService.log('info', 'The copy of ' + this.datasetsIds.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');

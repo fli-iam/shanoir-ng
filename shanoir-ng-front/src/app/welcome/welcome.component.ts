@@ -10,6 +10,7 @@ import {
   ViewEncapsulation,
   DOCUMENT
 } from '@angular/core';
+import { SlicePipe, TitleCasePipe } from '@angular/common';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { ImagesUrlUtil } from "../shared/utils/images-url.util";
@@ -24,7 +25,7 @@ import { isDarkColor } from "../utils/app.utils";
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [SlicePipe, TitleCasePipe]
 })
 export class WelcomeComponent implements OnInit {
 

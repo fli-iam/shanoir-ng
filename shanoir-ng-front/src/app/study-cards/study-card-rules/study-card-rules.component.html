@@ -11,58 +11,76 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<ng-container *ngFor="let rule of rules; let i = index;">
-	<study-card-rule #studyCardRule
-		*ngIf="cardType == 'studycard'"
-		[class.appear]="canAnimateEnter(i)"
-		[class.select-mode]="mode == 'select'"
-		[class.selected]="selectedRules.get(i) != undefined"
-		[rule]="rule" 
-		[assignmentFields]="assignmentFields" 
-		[conditionFields]="conditionFields" 
-		[mode]="mode == 'select' ? 'view' : mode" 
-		(userChange)="onChangeCallback(rules)" 
-		(moveUp)="moveUp(i)"
-		(moveDown)="moveDown(i)"
-		(copy)="copy(i)"
-		(delete)="delete(i)"
-		[showErrors]="showErrors"
-		(click)="clickRule(i)"
-		[addSubForm]="addSubForm">
-	</study-card-rule>
-	<quality-card-rule #qualityCardRule
-		*ngIf="cardType == 'qualitycard'"
-		[class.appear]="canAnimateEnter(i)"
-		[class.select-mode]="mode == 'select'"
-		[class.selected]="selectedRules.get(i) != undefined"
-		[rule]="rule" 
-		[conditionFields]="conditionFields" 
-		[mode]="mode == 'select' ? 'view' : mode" 
-		(userChange)="onChangeCallback(rules)" 
-		(moveUp)="moveUp(i)"
-		(moveDown)="moveDown(i)"
-		(copy)="copy(i)"
-		(delete)="delete(i)"
-		[showErrors]="showErrors"
-		(click)="clickRule(i)"
-		[addSubForm]="addSubForm">
-	</quality-card-rule>
-</ng-container>
-<div *ngIf="mode == 'edit' || mode == 'create'" class="add-container">
-	<span (click)="addNewRule('DatasetAcquisition')" class="acquisition" *ngIf="cardType == 'studycard'">
-		<i class="fa-solid fa-bed-pulse"></i>
-		<div>Add a rule on <span class="entity">acquisition</span></div>
-	</span>
-	<span (click)="addNewRule('Dataset')" class="dataset" *ngIf="cardType == 'studycard'">
-		<i class="fa-solid fa-brain"></i>
-		<div>Add a rule on <span class="entity">dataset</span></div>
-	</span>
-	<span (click)="addNewExamRule()" class="dataset" *ngIf="cardType == 'qualitycard'">
-		<i class="fas fa-plus"></i>
-		<div>Add a rule</div>
-	</span>
-	<span (click)="importRules.emit()" *ngIf="cardType == 'studycard'">
-		<i class="fas fa-file-import"></i>
-		<div>Import a rule</div>
-	</span>
-</div>
+@for (rule of rules; track rule; let i = $index) {
+    @if (cardType == "studycard") {
+        <study-card-rule
+            #studyCardRule
+            [class.appear]="canAnimateEnter(i)"
+            [class.select-mode]="mode == 'select'"
+            [class.selected]="selectedRules.get(i) != undefined"
+            [rule]="rule"
+            [assignmentFields]="assignmentFields"
+            [conditionFields]="conditionFields"
+            [mode]="mode == 'select' ? 'view' : mode"
+            (userChange)="onChangeCallback(rules)"
+            (moveUp)="moveUp(i)"
+            (moveDown)="moveDown(i)"
+            (copy)="copy(i)"
+            (delete)="delete(i)"
+            [showErrors]="showErrors"
+            (click)="clickRule(i)"
+            [addSubForm]="addSubForm"></study-card-rule>
+    }
+    @if (cardType == "qualitycard") {
+        <quality-card-rule
+            #qualityCardRule
+            [class.appear]="canAnimateEnter(i)"
+            [class.select-mode]="mode == 'select'"
+            [class.selected]="selectedRules.get(i) != undefined"
+            [rule]="rule"
+            [conditionFields]="conditionFields"
+            [mode]="mode == 'select' ? 'view' : mode"
+            (userChange)="onChangeCallback(rules)"
+            (moveUp)="moveUp(i)"
+            (moveDown)="moveDown(i)"
+            (copy)="copy(i)"
+            (delete)="delete(i)"
+            [showErrors]="showErrors"
+            (click)="clickRule(i)"
+            [addSubForm]="addSubForm"></quality-card-rule>
+    }
+}
+@if (mode == "edit" || mode == "create") {
+    <div class="add-container">
+        @if (cardType == "studycard") {
+            <span (click)="addNewRule('DatasetAcquisition')" class="acquisition">
+                <i class="fa-solid fa-bed-pulse"></i>
+                <div>
+                    Add a rule on
+                    <span class="entity">acquisition</span>
+                </div>
+            </span>
+        }
+        @if (cardType == "studycard") {
+            <span (click)="addNewRule('Dataset')" class="dataset">
+                <i class="fa-solid fa-brain"></i>
+                <div>
+                    Add a rule on
+                    <span class="entity">dataset</span>
+                </div>
+            </span>
+        }
+        @if (cardType == "qualitycard") {
+            <span (click)="addNewExamRule()" class="dataset">
+                <i class="fas fa-plus"></i>
+                <div>Add a rule</div>
+            </span>
+        }
+        @if (cardType == "studycard") {
+            <span (click)="importRules.emit()">
+                <i class="fas fa-file-import"></i>
+                <div>Import a rule</div>
+            </span>
+        }
+    </div>
+}

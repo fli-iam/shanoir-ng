@@ -12,257 +12,530 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<form-footer
-				[state]="footerState"
-				(save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			>
-			<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="download()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
-			</form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit subject|Title@@subjectDetailEditTitle">Edit subject</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
-				<ol>
-					<li>
-						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory">Imaged object category</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.imagedObjectCategory}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="imagedObjectCategory" [options]="catOptions">
-								</select-box>
-								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-				<ol>
-					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
-						<li *ngIf="mode == 'create' && humanSelected() && importMode != 'EEG'">
-							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
-							<span class="right-col">
-								<input type="radio" formControlName="isAlreadyAnonymized" [value]="true" [checked]="subject.isAlreadyAnonymized == true"
-								/>Yes
-								<input type="radio" formControlName="isAlreadyAnonymized" [value]="false" [checked]="subject.isAlreadyAnonymized == false"
-								/>No
-							</span>
-						</li>
-						<li class="info" *ngIf="!subject.isAlreadyAnonymized && mode == 'create'" [@slideDown]="!subject.isAlreadyAnonymized && mode == 'create'">
-							<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
-							This can help you to identify a subject that has already been inserted into the database.
-							<br/>To ensure anonymity, the first name and the last name will not be saved.
-							<br/>Note that the birth date will be set to January 1st of the birth year for the same reason.
-						</li>
-						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
-							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First name</label>
-							<span class="right-col">
-								<input *ngIf="importMode != 'DICOM'" type="text" id="firstName" formControlName="firstName" />
-                                <div *ngIf="importMode == 'DICOM'"> {{ firstName }} </div>
-								<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
-								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
-							</span>
-						</li>
-						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
-							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last name</label>
-							<span class="right-col">
-                                <input *ngIf="importMode != 'DICOM'" type="text" id="lastName" formControlName="lastName" />
-                                <div *ngIf="importMode == 'DICOM'"> {{ lastName }} </div>
-								<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
-								<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
-							</span>
-						</li>
-					</div>
-                    <li>
-                        <label i18n="Subject detail|Name label@@subjectDetailName">Common name</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <ng-template [ngSwitchCase]="'view'">
-                                {{subject.name}}
-                            </ng-template>
-                            <ng-template [ngSwitchCase]="'edit'">
-                                {{subject.name}}
-                            </ng-template>
-                            <ng-template ngSwitchDefault>
-                                <input type="text" id="name" formControlName="name"/>
-                                <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
-                                <label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
-                                <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-                                <label *ngIf="hasError('name', ['subjectNamePrefix'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">The name should not be equal to the study prefix.</label>
-                                <label *ngIf="hasError('name', ['pattern'])" class="form-validation-alert" i18n="Subject detail|Name chars error@@subjectDetailNameCharsError">Forbidden characters</label>
-                                <label *ngIf="hasError('name', ['notEmptyValidator'])" class="form-validation-alert" i18n="Subject detail|Name empty error@@subjectDetailNameCharsError">Name must contain more than one character</label>
-                            </ng-template>
-                        </span>
-					</li>
-					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'" @slideDown>
-						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>.
-						However the prefix is optional and if you know what you are doing please just ignore this message.
-					</li>
-					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
-						<li *ngIf="mode == 'create' || mode == 'view'">
-							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
-							<span [ngSwitch]="mode" class="right-col">
-								<ng-template [ngSwitchCase]="'view'">
-									{{subject.birthDate | localDateFormatPipe}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="'create'">
-									<datepicker formControlName="birthDate"></datepicker>
-									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
-									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									{{subject.sex}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="'edit'">
-									{{subject.sex}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select-box formControlName="sex" [options]="genderOptions">
-									</select-box>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual hemispheric dominance</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									{{subject.manualHemisphericDominance}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select-box formControlName="manualHemisphericDominance" [optionArr]="['Left', 'Right']">
-									</select-box>
-								</ng-template>
-							</span>
-						</li>
-						<li>
-							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language hemispheric dominance</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									{{subject.languageHemisphericDominance}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select-box formControlName="languageHemisphericDominance" [optionArr]="['Left','Right']">
-									</select-box>
-								</ng-template>
-							</span>
-						</li>
-					</div>
-				</ol>
-				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
-					<li *ngIf="mode == 'create'">
-						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
-						<span class="right-col">
-							<datepicker formControlName="birthDate"></datepicker>
-							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
-						</span>
-					</li>
-				</ol>
-				<ol class="subject-study">
-					<div>
+<div #formContainer class="content-component detail">
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout" [ngClass]="{ left: mode == 'view' }">
+                <form-footer
+                    [state]="footerState"
+                    (save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()">
+                    @if (mode == "view" && hasDownloadRight) {
+                        <button
+                            class="right-icon dl-button"
+                            type="button"
+                            (click)="download()"
+                            [disabled]="downloadState.isActive()">
+                            Download
+                            <i class="fas fa-download"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View subject|Title@@subjectDetailViewTitle">
+                                Details on subject
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit subject|Title@@subjectDetailEditTitle">
+                                Edit subject
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create subject|Title@@subjectDetailCreateTitle">
+                                Create subject
+                            </h2>
+                        }
+                    }
+                </span>
+                <fieldset>
+                    @if (mode !== "view") {
+                        <legend i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
+                    }
+                    <ol>
                         <li>
-                            <label>Subject type</label>
-                            <span class="right-col" [ngSwitch]="mode">
-                                <ng-template [ngSwitchCase]="'view'">
-                                    {{subject.subjectType}}
-                                </ng-template>
-                                <ng-template ngSwitchDefault>
-                                    <select-box formControlName="subjectType"
-                                                [options]="subjectTypes">
-                                    </select-box>
-                                </ng-template>
-						    </span>
+                            <label
+                                i18n="
+                                    Subject detail|Subject Imaged object category
+                                    label@@SubjectDetailSubjectImagedObjectCategory">
+                                Imaged object category
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ subject.imagedObjectCategory }}
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="imagedObjectCategory"
+                                            [options]="catOptions"></select-box>
+                                        @if (hasError("imagedObjectCategory", ["required"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Subject detail|ImagedObjectCategory required
+                                                    error@@subjectDetailImagedObjectCategoryRequiredError">
+                                                Imaged object category is required!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
                         </li>
+                    </ol>
+                    <ol>
+                        @if (humanSelected()) {
+                            <div>
+                                @if (mode == "create" && humanSelected() && importMode != "EEG") {
+                                    <li>
+                                        <label
+                                            i18n="
+                                                Subject detail|Subject is already anonymized
+                                                label@@SubjectDetailSubjectIsAlreadyAnonymized">
+                                            Is the subject already anonymized?
+                                        </label>
+                                        <span class="right-col">
+                                            <input
+                                                type="radio"
+                                                formControlName="isAlreadyAnonymized"
+                                                [value]="true"
+                                                [checked]="subject.isAlreadyAnonymized == true" />
+                                            Yes
+                                            <input
+                                                type="radio"
+                                                formControlName="isAlreadyAnonymized"
+                                                [value]="false"
+                                                [checked]="subject.isAlreadyAnonymized == false" />
+                                            No
+                                        </span>
+                                    </li>
+                                }
+                                @if (!subject.isAlreadyAnonymized && mode == "create") {
+                                    <li class="info">
+                                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                        A subject global identifier will be automatically generated using the first
+                                        name, the last name and the birth date of the subject. This can help you to
+                                        identify a subject that has already been inserted into the database.
+                                        <br />
+                                        To ensure anonymity, the first name and the last name will not be saved.
+                                        <br />
+                                        Note that the birth date will be set to January 1st of the birth year for the
+                                        same reason.
+                                    </li>
+                                }
+                                @if (!subject.isAlreadyAnonymized && mode == "create" && importMode != "EEG") {
+                                    <li>
+                                        <label
+                                            i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName"
+                                            [class.required-label]="
+                                                subject.imagedObjectCategory == 'LIVING_HUMAN_BEING'
+                                            ">
+                                            First name
+                                        </label>
+                                        <span class="right-col">
+                                            @if (importMode != "DICOM") {
+                                                <input type="text" id="firstName" formControlName="firstName" />
+                                            }
+                                            @if (importMode == "DICOM") {
+                                                <div>{{ firstName }}</div>
+                                            }
+                                            @if (hasError("firstName", ["required"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        Subject detail|FirstName required
+                                                        error@@subjectDetailFirstNameRequiredError">
+                                                    First name is required!
+                                                </label>
+                                            }
+                                            @if (hasError("firstName", ["minlength", "maxlength"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        Subject detail|Name Length error@@subjectDetailNameLengthError">
+                                                    Length must be between 2 and 64!
+                                                </label>
+                                            }
+                                        </span>
+                                    </li>
+                                }
+                                @if (!subject.isAlreadyAnonymized && mode == "create" && importMode != "EEG") {
+                                    <li>
+                                        <label
+                                            i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName"
+                                            [class.required-label]="
+                                                subject.imagedObjectCategory == 'LIVING_HUMAN_BEING'
+                                            ">
+                                            Last name
+                                        </label>
+                                        <span class="right-col">
+                                            @if (importMode != "DICOM") {
+                                                <input type="text" id="lastName" formControlName="lastName" />
+                                            }
+                                            @if (importMode == "DICOM") {
+                                                <div>{{ lastName }}</div>
+                                            }
+                                            @if (hasError("lastName", ["required"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        Subject detail|LastName required
+                                                        error@@subjectDetailLastNameRequiredError">
+                                                    Last name is required!
+                                                </label>
+                                            }
+                                            @if (hasError("lastName", ["minlength", "maxlength"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        Subject detail|Name Length error@@subjectDetailNameLengthError">
+                                                    Length must be between 2 and 64!
+                                                </label>
+                                            }
+                                        </span>
+                                    </li>
+                                }
+                            </div>
+                        }
                         <li>
-                            <label>Physically involved</label>
-                            <span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									<span *ngIf="subject.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
-									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<checkbox formControlName="physicallyInvolved"></checkbox>
-								</ng-template>
-							</span>
+                            <label i18n="Subject detail|Name label@@subjectDetailName">Common name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ subject.name }}
+                                    }
+                                    @case ("edit") {
+                                        {{ subject.name }}
+                                    }
+                                    @default {
+                                        <input type="text" id="name" formControlName="name" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    Subject detail|Name required error@@subjectDetailNameRequiredError">
+                                                Common Name is required !
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">
+                                                Length must be between 2 and 64 !
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
+                                                This name is already taken !
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["subjectNamePrefix"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
+                                                The name should not be equal to the study prefix.
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["pattern"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name chars error@@subjectDetailNameCharsError">
+                                                Forbidden characters
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["notEmptyValidator"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name empty error@@subjectDetailNameCharsError">
+                                                Name must contain more than one character
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
                         </li>
-					</div>
-				</ol>
-			</fieldset>
-			<fieldset *ngIf="!forceStudy">
-                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
-				<ol>
-					<li>
-						<label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
-								<select-box
-                                    formControlName="study"
-                                    [optionArr]="studies"
-                                    (userChange)="onSelectStudy()">
-                                </select-box>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-                                {{ studyNameForSubject() }}
-								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
-			</fieldset>
-			<fieldset *ngIf="forceStudy">
-                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
-				<ol>
-					<li>
-						<label>Study</label>
-						<span class="right-col">{{forceStudy.name}}</span>
-					</li>
-				</ol>
-			</fieldset>
-            <fieldset>
-                <ol *ngIf="subject.identifier != null">
-                    <li>
-                        <label>Subject identifier for this study</label>
-                        <span class="right-col">
-                            {{subject.identifier}}
-                        </span>
-                    </li>
-                </ol>
-				<ol>
-					<li>
-						<label>Tags</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								    <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
-                                        {{tag.name}}
+                        @if (subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != "view") {
+                            <li class="info">
+                                <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                This study is configured to use prefixes for subject names, here the prefix is
+                                <b>{{ subjectNamePrefix }}</b>
+                                . However the prefix is optional and if you know what you are doing please just ignore
+                                this message.
+                            </li>
+                        }
+                        @if (humanSelected()) {
+                            <div>
+                                @if (mode == "create" || mode == "view") {
+                                    <li>
+                                        <label
+                                            i18n="Subject detail|Birth date label@@subjectDetailBirthDate"
+                                            [class.required-label]="
+                                                subject.imagedObjectCategory == 'LIVING_HUMAN_BEING'
+                                            ">
+                                            Birth date
+                                        </label>
+                                        <span class="right-col">
+                                            @switch (mode) {
+                                                @case ("view") {
+                                                    {{ subject.birthDate | localDateFormatPipe }}
+                                                }
+                                                @case ("create") {
+                                                    <datepicker formControlName="birthDate"></datepicker>
+                                                    @if (hasError("birthDate", ["format"])) {
+                                                        <label
+                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                            class="form-validation-alert"
+                                                            i18n="Subject detail|Date valid error@@dateValidError">
+                                                            Date should be valid! Date format: {{ dateDisplay }}
+                                                        </label>
+                                                    }
+                                                    @if (hasError("birthDate", ["required"])) {
+                                                        <label
+                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                            class="form-validation-alert"
+                                                            i18n="
+                                                                Subject detail|BirthDate required
+                                                                error@@subjectDetailBirthDateRequiredError">
+                                                            You need to enter a birth date for a living humain being!
+                                                        </label>
+                                                    }
+                                                }
+                                            }
+                                        </span>
+                                    </li>
+                                }
+                                <li>
+                                    <label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ subject.sex }}
+                                            }
+                                            @case ("edit") {
+                                                {{ subject.sex }}
+                                            }
+                                            @default {
+                                                <select-box
+                                                    formControlName="sex"
+                                                    [options]="genderOptions"></select-box>
+                                            }
+                                        }
                                     </span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<tag-list [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
-							</ng-template>
-						</span>
-                    </li>
-				</ol>
-			</fieldset>
-		</div>
-	</form>
+                                </li>
+                                <li>
+                                    <label
+                                        i18n="
+                                            Subject detail|Manual Hemispheric Dominance
+                                            label@@subjectDetailManualHemisphericDominance">
+                                        Manual hemispheric dominance
+                                    </label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ subject.manualHemisphericDominance }}
+                                            }
+                                            @default {
+                                                <select-box
+                                                    formControlName="manualHemisphericDominance"
+                                                    [optionArr]="['Left', 'Right']"></select-box>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                                <li>
+                                    <label
+                                        i18n="
+                                            Subject detail|Language Hemispheric Dominance
+                                            label@@subjectDetailLanguageHemisphericDominance">
+                                        Language hemispheric dominance
+                                    </label>
+                                    <span class="right-col">
+                                        @switch (mode) {
+                                            @case ("view") {
+                                                {{ subject.languageHemisphericDominance }}
+                                            }
+                                            @default {
+                                                <select-box
+                                                    formControlName="languageHemisphericDominance"
+                                                    [optionArr]="['Left', 'Right']"></select-box>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            </div>
+                        }
+                    </ol>
+                    @if (!humanSelected()) {
+                        <ol>
+                            @if (mode == "create") {
+                                <li>
+                                    <label
+                                        class="date-label"
+                                        i18n="Subject detail|Birth date label@@subjectDetailBirthDate">
+                                        Date of creation
+                                    </label>
+                                    <span class="right-col">
+                                        <datepicker formControlName="birthDate"></datepicker>
+                                        @if (hasError("birthDate", ["format"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Date valid error@@dateValidError">
+                                                Date should be valid! Date format: {{ dateDisplay }}
+                                            </label>
+                                        }
+                                    </span>
+                                </li>
+                            }
+                        </ol>
+                    }
+                    <ol class="subject-study">
+                        <div>
+                            <li>
+                                <label>Subject type</label>
+                                <span class="right-col">
+                                    @switch (mode) {
+                                        @case ("view") {
+                                            {{ subject.subjectType }}
+                                        }
+                                        @default {
+                                            <select-box
+                                                formControlName="subjectType"
+                                                [options]="subjectTypes"></select-box>
+                                        }
+                                    }
+                                </span>
+                            </li>
+                            <li>
+                                <label>Physically involved</label>
+                                <span class="right-col">
+                                    @switch (mode) {
+                                        @case ("view") {
+                                            @if (subject.physicallyInvolved) {
+                                                <span class="bool-true"><i class="fas fa-check"></i></span>
+                                            }
+                                            @if (!subject.physicallyInvolved) {
+                                                <span class="bool-false"><i class="fas fa-times"></i></span>
+                                            }
+                                        }
+                                        @default {
+                                            <checkbox formControlName="physicallyInvolved"></checkbox>
+                                        }
+                                    }
+                                </span>
+                            </li>
+                        </div>
+                    </ol>
+                </fieldset>
+                @if (!forceStudy) {
+                    <fieldset>
+                        <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
+                        <ol>
+                            <li>
+                                <label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+                                <span class="right-col">
+                                    @switch (mode) {
+                                        @case ("create") {
+                                            <select-box
+                                                formControlName="study"
+                                                [optionArr]="studies"
+                                                (userChange)="onSelectStudy()"></select-box>
+                                        }
+                                        @default {
+                                            {{ studyNameForSubject() }}
+                                            @if (hasError("study", ["required"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        Subject detail|Study required
+                                                        error@@subjectDetailStudyRequiredError">
+                                                    Study is required!
+                                                </label>
+                                            }
+                                        }
+                                    }
+                                </span>
+                            </li>
+                        </ol>
+                        @if (hasError("subjectStudyList", ["required"])) {
+                            <label
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                class="form-validation-alert"
+                                i18n="
+                                    Subject detail|Subject StudyList required
+                                    error@@subjectDetailSubjectStudyListRequiredError">
+                                Study is required!
+                            </label>
+                        }
+                    </fieldset>
+                }
+                @if (forceStudy) {
+                    <fieldset>
+                        <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
+                        <ol>
+                            <li>
+                                <label>Study</label>
+                                <span class="right-col">{{ forceStudy.name }}</span>
+                            </li>
+                        </ol>
+                    </fieldset>
+                }
+                <fieldset>
+                    @if (subject.identifier != null) {
+                        <ol>
+                            <li>
+                                <label>Subject identifier for this study</label>
+                                <span class="right-col">
+                                    {{ subject.identifier }}
+                                </span>
+                            </li>
+                        </ol>
+                    }
+                    <ol>
+                        <li>
+                            <label>Tags</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        @for (tag of subject.tags; track tag) {
+                                            <span
+                                                class="tag"
+                                                [class.dark]="getFontColor(tag.color)"
+                                                [style.background]="tag.color">
+                                                {{ tag.name }}
+                                            </span>
+                                        }
+                                    }
+                                    @default {
+                                        <tag-list
+                                            [availableTags]="subject.study?.tags"
+                                            formControlName="tags"></tag-list>
+                                    }
+                                }
+                            </span>
+                        </li>
+                    </ol>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

@@ -12,86 +12,161 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-		<div class="layout">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete)="delete()"
-				(edit)="goToEdit()"
-				(dismiss)="goToView()"
-				(back)="goBack()"
-			></form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View manufModel|Title@@manufModelDetailViewTitle">Details on manufacturer model</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit manufModel|Title@@manufModelDetailEditTitle">Edit manufacturer model</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create manufModel|Title@@manufModelDetailCreateTitle">Create manufacturer model</h2>
-				</ng-template>
-			</span>
-			<help-message [help]="'equipment'"></help-message>
-			<fieldset>
-				<ol>
-                    <li>
-						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">Modality type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{manufModel.datasetModalityType}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="datasetModalityType" [options]="datasetModalityTypes"
-									(userChange)="onModalityChange($event)">
-								</select-box>
-							</ng-template>
-						</span>
-                    </li>
-					<li>
-						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">Manufacturer</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/manufacturer/details/', manufModel?.manufacturer?.id]">
-									{{manufModel.manufacturer?.name}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="manufacturer" (newClick)="openNewManuf()" [optionArr]="manufs">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="ManufModel detail|Model name label@@manufModelDetailName">Model name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{manufModel.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="name" formControlName="name"/>
-								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-                    <li *ngIf="isMR">
-						<label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField">Magnetic field ({{getUnit("TESLA")}})</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{manufModel.magneticField}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" pattern="[0-9]+([.][0-9]+)?" id="magneticField" formControlName="magneticField"/>
-								<label *ngIf="hasError('magneticField', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field required error@@manufModelDetailMagneticFieldRequiredError">Magnetic field is required!</label>
-								<label *ngIf="hasError('magneticField', ['pattern'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field pattern error@@manufModelDetailMagneticFieldPatternError">Magnetic field should be a number!</label>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-        </div>
-    </form>
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (save)="save()"
+                    (delete)="delete()"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (back)="goBack()"></form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View manufModel|Title@@manufModelDetailViewTitle">
+                                Details on manufacturer model
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit manufModel|Title@@manufModelDetailEditTitle">
+                                Edit manufacturer model
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create manufModel|Title@@manufModelDetailCreateTitle">
+                                Create manufacturer model
+                            </h2>
+                        }
+                    }
+                </span>
+                <help-message [help]="'equipment'"></help-message>
+                <fieldset>
+                    <ol>
+                        <li>
+                            <label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">
+                                Modality type
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ manufModel.datasetModalityType }}
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="datasetModalityType"
+                                            [options]="datasetModalityTypes"
+                                            (userChange)="onModalityChange($event)"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">
+                                Manufacturer
+                            </label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        <a [routerLink]="['/manufacturer/details/', manufModel?.manufacturer?.id]">
+                                            {{ manufModel.manufacturer?.name }}
+                                        </a>
+                                    }
+                                    @default {
+                                        <select-box
+                                            formControlName="manufacturer"
+                                            (newClick)="openNewManuf()"
+                                            [optionArr]="manufs"></select-box>
+                                    }
+                                }
+                            </span>
+                        </li>
+                        <li>
+                            <label i18n="ManufModel detail|Model name label@@manufModelDetailName">Model name</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ("view") {
+                                        {{ manufModel.name }}
+                                    }
+                                    @default {
+                                        <input type="text" id="name" formControlName="name" />
+                                        @if (hasError("name", ["required"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    ManufModel detail|Name required
+                                                    error@@manufModelDetailNameRequiredError">
+                                                Name is required!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["minlength", "maxlength"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    ManufModel detail|Name length error@@manufModelDetailNameLengthError">
+                                                Name length must be between 2 and 200!
+                                            </label>
+                                        }
+                                        @if (hasError("name", ["unique"])) {
+                                            <label
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="
+                                                    ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">
+                                                Name should be unique!
+                                            </label>
+                                        }
+                                    }
+                                }
+                            </span>
+                        </li>
+                        @if (isMR) {
+                            <li>
+                                <label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField">
+                                    Magnetic field ({{ getUnit("TESLA") }})
+                                </label>
+                                <span class="right-col">
+                                    @switch (mode) {
+                                        @case ("view") {
+                                            {{ manufModel.magneticField }}
+                                        }
+                                        @default {
+                                            <input
+                                                type="text"
+                                                pattern="[0-9]+([.][0-9]+)?"
+                                                id="magneticField"
+                                                formControlName="magneticField" />
+                                            @if (hasError("magneticField", ["required"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        ManufModel detail|Magnetic field required
+                                                        error@@manufModelDetailMagneticFieldRequiredError">
+                                                    Magnetic field is required!
+                                                </label>
+                                            }
+                                            @if (hasError("magneticField", ["pattern"])) {
+                                                <label
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                    class="form-validation-alert"
+                                                    i18n="
+                                                        ManufModel detail|Magnetic field pattern
+                                                        error@@manufModelDetailMagneticFieldPatternError">
+                                                    Magnetic field should be a number!
+                                                </label>
+                                            }
+                                        }
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </fieldset>
+            </div>
+        </form>
+    }
 </div>

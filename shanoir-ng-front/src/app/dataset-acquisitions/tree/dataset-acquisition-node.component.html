@@ -12,14 +12,18 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div [hidden]="!progressStatus?.progress">
-    <progress-bar [progress]="progressStatus?.progress" [text]="'Preparing download'" [unknownDownload]="true"
-        [class.error]="progressStatus?.status == -1" [class.done]="progressStatus?.status == 1"></progress-bar>
+    <progress-bar
+        [progress]="progressStatus?.progress"
+        [text]="'Preparing download'"
+        [unknownDownload]="true"
+        [class.error]="progressStatus?.status == -1"
+        [class.done]="progressStatus?.status == 1"></progress-bar>
 </div>
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'acquisition')"
         [label]="node.label"
-        [clickable] = "node.id != null"
+        [clickable]="node.id != null"
         awesome="fas fa-procedures"
         [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened"
@@ -31,27 +35,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="loadDatasets()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && node.id != null">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-            <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
-            <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteAcquisition()"></menu-item>
-    </dropdown-menu>
-
-    <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')">
-        <dataset-node
-            node
-            *ngFor="let dsNode of node.datasets; let i = index"
-            [input]="dsNode"
-            [related]="node.id == null"
-            (selectedChange)="selectedChange.emit()"
-            [hasBox]="hasBox"
-            (datasetDelete)="onDatasetDelete(i)"
-            [withMenu]="withMenu"
-        >
-        </dataset-node>
-
-    </ng-container>
-</node>
+        @if (menuOpened && withMenu && withMenu && node.id != null) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+                <menu-item
+                    [disabled]="(datasetIds && datasetIds.length == 0) || downloading"
+                    label="Download"
+                    awesome="fas fa-download"
+                    (click)="download()"></menu-item>
+                @if (node.canDelete) {
+                    <menu-item
+                        label="Delete"
+                        awesome="fa-regular fa-trash-can"
+                        (click)="deleteAcquisition()"></menu-item>
+                }
+            </dropdown-menu>
+        }
+        @if (node.open && node.datasets && node.datasets != $any("UNLOADED")) {
+            @for (dsNode of node.datasets; track dsNode; let i = $index) {
+                <dataset-node
+                    node
+                    [input]="dsNode"
+                    [related]="node.id == null"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox"
+                    (datasetDelete)="onDatasetDelete(i)"
+                    [withMenu]="withMenu"></dataset-node>
+            }
+        }
+    </node>
+}

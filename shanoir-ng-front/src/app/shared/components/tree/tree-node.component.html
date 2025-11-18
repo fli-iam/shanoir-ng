@@ -13,48 +13,100 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <span class="arrow" (click)="toggle()">
-    <span *ngIf="hasChildren==true && isOpen"><i class="fas fa-angle-down"></i></span>
-    <span *ngIf="hasChildren==true && !isOpen"><i class="fas fa-angle-right"></i></span>
-    <span *ngIf="hasChildren=='unknown' && !isOpen && !dataLoading"><i class="fas fa-angle-right"></i></span>
+    @if (hasChildren == true && isOpen) {
+        <span><i class="fas fa-angle-down"></i></span>
+    }
+    @if (hasChildren == true && !isOpen) {
+        <span><i class="fas fa-angle-right"></i></span>
+    }
+    @if (hasChildren == "unknown" && !isOpen && !dataLoading) {
+        <span><i class="fas fa-angle-right"></i></span>
+    }
 </span>
-<div class="node" [class.clickable-node]="isClickable()" title="{{title}}">
-    <span *ngIf="dataLoading">
-        <div class="fa fa-cog fa-spin"></div>
-    </span>
-    <a *ngIf="!dataLoading && pictoUrl" [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
-        <img class="picto" src="{{pictoUrl}}" alt="node pictogram"/>
-    </a>
-    <a *ngIf="!dataLoading && awesome" [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
-        <i class="{{awesome}}"></i>
-    </a>
-    <a *ngIf="!downloadable" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
-        <i class="fa-solid fa-lock"></i>
-    </a>
-    <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
-    <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
-    <span *ngIf="editable && buttonPicto" class="button-picto clickable" (click)="buttonClick.emit()">
-        <i class="{{buttonPicto}}"></i>
-    </span>
-    <span *ngIf="!editable" class="label">
-        <a (click)="labelClick.emit()" [routerLink]="route" (dblclick)="toggle()" [class.clickable]="isClickable()">{{label}}</a>
-        <span *ngIf="buttonPicto" class="button-picto clickable" (click)="buttonClick.emit()">
-            <i class="{{buttonPicto}}"></i>
+<div class="node" [class.clickable-node]="isClickable()" title="{{ title }}">
+    @if (dataLoading) {
+        <span>
+            <div class="fa fa-cog fa-spin"></div>
         </span>
-        <span class="button-picto clickable overmenu">
-            <ng-content select=".overmenu"></ng-content>
+    }
+    @if (!dataLoading && pictoUrl) {
+        <a
+            [routerLink]="route"
+            (click)="labelClick.emit()"
+            (dblclick)="toggle()"
+            class="picto"
+            [class.clickable]="isClickable()">
+            <img class="picto" src="{{ pictoUrl }}" alt="node pictogram" />
+        </a>
+    }
+    @if (!dataLoading && awesome) {
+        <a
+            [routerLink]="route"
+            (click)="labelClick.emit()"
+            (dblclick)="toggle()"
+            class="picto"
+            [class.clickable]="isClickable()">
+            <i class="{{ awesome }}"></i>
+        </a>
+    }
+    @if (!downloadable) {
+        <a (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
+            <i class="fa-solid fa-lock"></i>
+        </a>
+    }
+    @if (hasBox) {
+        <input
+            #box
+            class="box"
+            type="checkbox"
+            [(ngModel)]="value"
+            (change)="chkbxChange.emit(value)"
+            class="clickable" />
+    }
+    @if (editable) {
+        <input #editableLabel type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
+    }
+    @if (editable && buttonPicto) {
+        <span class="button-picto clickable" (click)="buttonClick.emit()">
+            <i class="{{ buttonPicto }}"></i>
         </span>
-    </span>
-    <span>
+    }
+    @if (!editable) {
+        <span class="label">
+            <a (click)="labelClick.emit()" [routerLink]="route" (dblclick)="toggle()" [class.clickable]="isClickable()">
+                {{ label }}
+            </a>
+            @if (buttonPicto) {
+                <span class="button-picto clickable" (click)="buttonClick.emit()">
+                    <i class="{{ buttonPicto }}"></i>
+                </span>
+            }
+            <span class="button-picto clickable overmenu">
+                <ng-content select=".overmenu"></ng-content>
+            </span>
+        </span>
+    }
+    <span class="menu-container">
         <ng-content select="dropdown-menu"></ng-content>
     </span>
-    <span *ngIf="qualityTag" class="tag label dark" [style.background]="qualityTag == 'ERROR' ? 'red' : (qualityTag == 'WARNING' ? 'orange' : 'green')">
-        {{qualityTag}}
-    </span>
-    <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of tags">
-        {{tag.name}}
-    </span>
-    <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
+    @if (qualityTag) {
+        <span
+            class="tag label dark"
+            [style.background]="qualityTag == 'ERROR' ? 'red' : qualityTag == 'WARNING' ? 'orange' : 'green'">
+            {{ qualityTag }}
+        </span>
+    }
+    @for (tag of tags; track tag) {
+        <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color">
+            {{ tag.name }}
+        </span>
+    }
+    @if (tooltip) {
+        <tool-tip>{{ tooltip }}</tool-tip>
+    }
 </div>
-<div #childrentWrapper *ngIf="isOpen" class="content">
-    <ng-content></ng-content>
-</div>
+@if (isOpen) {
+    <div #childrentWrapper class="content">
+        <ng-content></ng-content>
+    </div>
+}

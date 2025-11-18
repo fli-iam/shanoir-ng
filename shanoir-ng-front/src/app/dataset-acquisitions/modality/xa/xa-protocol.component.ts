@@ -29,8 +29,7 @@ import {XaProtocol} from './xa-protocol.model';
             useExisting: forwardRef(() => XaProtocolComponent),
             multi: true,
         }
-    ],
-    standalone: false
+    ]
 })
 export class XaProtocolComponent implements ControlValueAccessor {
 

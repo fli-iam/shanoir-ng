@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
-import { FormArray, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, race } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { FormArray, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { firstValueFrom, Observable, race } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
@@ -25,7 +25,6 @@ import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
@@ -44,14 +43,17 @@ import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 
 @Component({
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 
@@ -240,7 +242,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
-        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.createComponent(TestQualityCardOptionsComponent);
         modalRef.instance.nbExaminations = nbExaminations;
         return this.waitForEnd(modalRef);
     }
@@ -251,12 +253,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             modalRef.instance.test, 
             modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
-        result.pipe(take(1)).subscribe(ret => {
-            modalRef.destroy();
-            resPromise.resolve(ret);
-        }, error => {
-            modalRef.destroy();
-            resPromise.reject(error);
+        firstValueFrom(result)
+            .then(ret => {
+                modalRef.destroy();
+                resPromise.resolve(ret);
+            })
+            .catch(error => {
+                modalRef.destroy();
+                resPromise.reject(error);
         });
         return resPromise;
     }

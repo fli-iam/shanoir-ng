@@ -11,10 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { KeyValue } from "@angular/common";
+import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
@@ -28,14 +28,13 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
-import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from "../../shared/models/profile.model";
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
@@ -50,6 +49,18 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
+import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { LoadingBarComponent } from "../../shared/components/loading-bar/loading-bar.component";
+import { TagCreatorComponent } from "../../tags/tag.creator.component";
+import { SubjectStudyListComponent } from "../../shared/components/subject-study-list/subject-study-list.component";
+import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
+import { QualityControlComponent } from "../../quality-control/quality-control.component";
+import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
+import { StudyHistoryComponent } from "../study-history/study-history.component";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { SizePipe } from "../../shared/utils/size.pipe";
 
 import { Selection } from './tree.service';
 
@@ -57,8 +68,7 @@ import { Selection } from './tree.service';
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

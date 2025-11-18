@@ -16,6 +16,7 @@ import { Component, Input, Output, HostListener, HostBinding, EventEmitter, forw
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 
+
 @Component({
     selector: 'toggle-switch',
     templateUrl: 'switch.component.html',
@@ -27,7 +28,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
             multi: true,
         }
     ],
-    standalone: false
+    imports: []
 })
 
 export class ToggleSwitchComponent implements ControlValueAccessor { 

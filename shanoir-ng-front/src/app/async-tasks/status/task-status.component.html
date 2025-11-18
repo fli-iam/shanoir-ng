@@ -18,20 +18,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ol>
             <li>
                 <label>Id</label>
-                <span class="right-col">{{task.idAsString}}</span>
+                <span class="right-col">{{ task.idAsString }}</span>
             </li>
             <li>
                 <label>Label</label>
-                <span class="right-col">{{task.eventLabel}}</span>
+                <span class="right-col">{{ task.eventLabel }}</span>
             </li>
             <li>
                 <label>Status</label>
                 <span class="right-col">
-                    <progress-bar [progress]="task?.progress" [warning]="task.status == 5 || task.status == 3"></progress-bar>
-                    <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && (task?.status == -1 || task.status == 3) && browserCompatible" class="alt left-icon normal" (click)="retry()">
-                        <i class="fas fa-download"></i>
-                        Retry / Resume
-                    </button>
+                    <progress-bar
+                        [progress]="task?.progress"
+                        [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                    @if (
+                        task.eventType == "downloadDataset.event" &&
+                        (task?.status == -1 || task.status == 3) &&
+                        browserCompatible
+                    ) {
+                        <button [disabled]="loading" class="alt left-icon normal" (click)="retry()">
+                            <i class="fas fa-download"></i>
+                            Retry / Resume
+                        </button>
+                    }
                 </span>
             </li>
             <li class="message-li">
@@ -42,48 +50,59 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </div>
                 </span>
             </li>
-            <li *ngIf="task.route">
-                <label>Link</label>
-                <span class="right-col left-icon">
-                    <a *ngIf="task._eventType != 'downloadStatistics.event'" [routerLink]="task.route">
-                        <i class="fa-solid fa-link"></i>
-                        {{task.route}}
-                    </a>
-                    <a *ngIf="task._eventType == 'downloadStatistics.event'" (click)="downloadStats($event)" href="#">
-                        <i class="fa-solid fa-link"></i>
-                        {{task.route}}
-                    </a>
-                </span>
-            </li>
+            @if (task.route) {
+                <li>
+                    <label>Link</label>
+                    <span class="right-col left-icon">
+                        @if (task._eventType != "downloadStatistics.event") {
+                            <a [routerLink]="task.route">
+                                <i class="fa-solid fa-link"></i>
+                                {{ task.route }}
+                            </a>
+                        }
+                        @if (task._eventType == "downloadStatistics.event") {
+                            <a (click)="downloadStats($event)" href="#">
+                                <i class="fa-solid fa-link"></i>
+                                {{ task.route }}
+                            </a>
+                        }
+                    </span>
+                </li>
+            }
             <li>
                 <label>Creation</label>
-                <span class="right-col">{{task.creationDate | localDateFormatPipe: true}}</span>
+                <span class="right-col">{{ task.creationDate | localDateFormatPipe: true }}</span>
             </li>
             <li>
                 <label>Last update</label>
-                <span class="right-col">{{task.lastUpdate | localDateFormatPipe: true}}</span>
+                <span class="right-col">{{ task.lastUpdate | localDateFormatPipe: true }}</span>
             </li>
-            <li class="message-li" *ngIf="task.report && task._eventType != 'checkQuality.event' && task._eventType != 'importDataset.event'">
-                <label>Report</label>
-                <span class="right-col">
-                    <div class="message">
-                        <pre><code>{{task?.report}}</code></pre>
-                    </div>
-                </span>
-            </li>
+            @if (task.report && task._eventType != "checkQuality.event" && task._eventType != "importDataset.event") {
+                <li class="message-li">
+                    <label>Report</label>
+                    <span class="right-col">
+                        <div class="message">
+                            <pre><code>{{task?.report}}</code></pre>
+                        </div>
+                    </span>
+                </li>
+            }
         </ol>
-        <ol *ngIf="report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
-            <legend>Report</legend>
-            <li>
-                <shanoir-table #table class="report"
-                    [getPage]="getPage.bind(this)"
-                    [columnDefs]="reportColumns"
-                    [customActionDefs]="reportActions"
-                    [browserSearch]="false"
-                    [collapseControls]="true"
-                    (registerRefresh)="registerTableRefresh($event)"
-                ></shanoir-table>
-            </li>
-        </ol>
+        @if (report && (task._eventType == "checkQuality.event" || task._eventType == "importDataset.event")) {
+            <ol>
+                <legend>Report</legend>
+                <li>
+                    <shanoir-table
+                        #table
+                        class="report"
+                        [getPage]="getPage.bind(this)"
+                        [columnDefs]="reportColumns"
+                        [customActionDefs]="reportActions"
+                        [browserSearch]="false"
+                        [collapseControls]="true"
+                        (registerRefresh)="registerTableRefresh($event)"></shanoir-table>
+                </li>
+            </ol>
+        }
     </fieldset>
 </form>

@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
 
 import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTO } from './study-card.dto.model';
@@ -27,13 +27,12 @@ export class StudyCardService extends EntityService<StudyCard> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
 
-    private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
+    private studyCardDTOService: StudyCardDTOService = inject(StudyCardDTOService);
 
     getEntityInstance() { return new StudyCard(); }
 
     getAllForStudy(studyId: number): Promise<StudyCard[]> {
-        return this.http.get<any[]>(this.API_URL + '/byStudy/' + studyId)
-            .toPromise()
+        return firstValueFrom(this.http.get<any[]>(this.API_URL + '/byStudy/' + studyId))
             .then(this.mapEntityList);
     }
 
@@ -55,8 +54,7 @@ export class StudyCardService extends EntityService<StudyCard> {
     }
 
     applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]): Promise<any> {
-        return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
-            .toPromise()
+        return firstValueFrom(this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds})))
             .then();
     }
 }

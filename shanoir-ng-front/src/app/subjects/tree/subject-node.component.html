@@ -11,8 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [tags]="node.tags"
@@ -25,25 +25,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
-        <a [routerLink]="detailsPath" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-      <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
-      <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
-    </dropdown-menu>
-
-    <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">
-        <examination-node
-                node
-                *ngFor="let examinationNode of node.examinations;let i = index"
-                [input]="examinationNode"
-                (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox"
-                (examinationDelete)="onExaminationDelete(i)"
-                [withMenu]="withMenu"
-        >
-        </examination-node>
-    </ng-container>
-</node>
+        @if (menuOpened && withMenu) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+                <menu-item
+                    [disabled]="loading"
+                    label="Download"
+                    awesome="fas fa-download"
+                    (click)="loading ? null : download()"></menu-item>
+                <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
+            </dropdown-menu>
+        }
+        @if (node.open && node.examinations && node.examinations != $any("UNLOADED")) {
+            @for (examinationNode of node.examinations; track examinationNode; let i = $index) {
+                <examination-node
+                    node
+                    [input]="examinationNode"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox"
+                    (examinationDelete)="onExaminationDelete(i)"
+                    [withMenu]="withMenu"></examination-node>
+            }
+        }
+    </node>
+}

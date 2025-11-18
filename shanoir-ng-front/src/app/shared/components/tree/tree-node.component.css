@@ -20,3 +20,4 @@ tool-tip { color: var(--greyer); vertical-align: initial; }
 a { text-decoration: none; color: inherit; }
 .overmenu { visibility: hidden; display: inline-block; }
 .label:hover .overmenu { visibility: visible; }
+.menu-container { position: relative; }

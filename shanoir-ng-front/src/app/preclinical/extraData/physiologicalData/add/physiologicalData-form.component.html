@@ -13,101 +13,182 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="PhysiologicalDataFormComponent content-component">
-	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="isStandalone" class="footer command-zone">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-			</form-footer>
-		</div>  
-
-		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'"> 
-				<div class="header command-zone" i18n="View physiodata|Title">View physiological data</div>
-			</ng-template>
-			<ng-template ngSwitchDefault> 
-				<div class="header command-zone" i18n="Edit physiodata|Title">Add physiological data</div>
-			</ng-template>
-		</span>
-
-		<fieldset>
-			<legend *ngIf="!isStandalone">Physiological data</legend>
-			<ol>
-				<li>   
-					<label i18n="Edit physiodata|hasHeartRate label">Heart Rate data</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_heart_rate)}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_heart_rate" [value]="true" i18n="Edit physioData|hasHeartRate label" [checked]="physioData.has_heart_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_heart_rate" [value]="false" i18n="Edit physioData|hasNotHeartRate label" [checked]="physioData.has_heart_rate" (change)="changePhysio()" />No
-						</ng-template>
-					</span>	
-				</li>
-				<li>   
-					<label i18n="Edit physiodata|hasRespiratoryRate label">Respiratory Rate data</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_respiratory_rate)}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_respiratory_rate" [value]="true" i18n="Edit physioData|hasRespiratoryRate label" [checked]="physioData.has_respiratory_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_respiratory_rate" [value]="false" i18n="Edit physioData|hasNotRespiratoryRate label" [checked]="physioData.has_respiratory_rate" (change)="changePhysio()"/>No
-						</ng-template>
-					</span>	
-				</li>
-				<li>   
-					<label i18n="Edit physiodata|hasSao2 label">SaO2 data</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_sao2)}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_sao2" [value]="true" i18n="Edit physioData|hasSao2 label" [checked]="physioData.has_sao2 == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_sao2" [value]="false" i18n="Edit physioData|hasNotSao2 label" [checked]="physioData.has_sao2" (change)="changePhysio()" />No
-						</ng-template>
-					</span>	
-					<span class="right-col">
-					</span>
-				</li>
-				<li>   
-					<label i18n="Edit physiodata|hasTemperature label">Temperature data</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_temperature)}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_temperature" [value]="true" i18n="Edit physioData|hasTemperature label" [checked]="physioData.has_temperature == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_temperature" [value]="false" i18n="Edit physioData|hasNotTemperature label" [checked]="physioData.has_temperature" (change)="changePhysio()"/>No
-						</ng-template>
-					</span>
-					<span class="right-col">
-						
-					</span>
-				</li>
-				<li  class="required">
-					<label i18n="Edit physiodata|File label">File</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template  [ngSwitchCase]="'view'">
-                            {{physioData.filename}}
-                            <button *ngIf="physioData?.filename" class="button-picto clickable" (click)="downloadFile()">
-                                <i class="fas fa-download"></i>
-                            </button>
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'create'">
-							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'edit'">
-							{{physioData.filename}}
-							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
-						</ng-template>
-					</span>
-					
-				</li>				
-			</ol>
-		</fieldset>
-	</form>  
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            @if (isStandalone) {
+                <div class="footer command-zone">
+                    <form-footer
+                        [state]="footerState"
+                        (save)="save()"
+                        (edit)="goToEdit()"
+                        (back)="goBack()"></form-footer>
+                </div>
+            }
+            @if (isStandalone) {
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ("view") {
+                            <div class="header command-zone" i18n="View physiodata|Title">View physiological data</div>
+                        }
+                        @default {
+                            <div class="header command-zone" i18n="Edit physiodata|Title">Add physiological data</div>
+                        }
+                    }
+                </span>
+            }
+            <fieldset>
+                @if (!isStandalone) {
+                    <legend>Physiological data</legend>
+                }
+                <ol>
+                    <li>
+                        <label i18n="Edit physiodata|hasHeartRate label">Heart Rate data</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ isYesOrNo(physioData.has_heart_rate) }}
+                                }
+                                @default {
+                                    <input
+                                        type="radio"
+                                        formControlName="has_heart_rate"
+                                        [value]="true"
+                                        i18n="Edit physioData|hasHeartRate label"
+                                        [checked]="physioData.has_heart_rate == true"
+                                        (change)="changePhysio()" />
+                                    Yes
+                                    <input
+                                        type="radio"
+                                        formControlName="has_heart_rate"
+                                        [value]="false"
+                                        i18n="Edit physioData|hasNotHeartRate label"
+                                        [checked]="physioData.has_heart_rate"
+                                        (change)="changePhysio()" />
+                                    No
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit physiodata|hasRespiratoryRate label">Respiratory Rate data</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ isYesOrNo(physioData.has_respiratory_rate) }}
+                                }
+                                @default {
+                                    <input
+                                        type="radio"
+                                        formControlName="has_respiratory_rate"
+                                        [value]="true"
+                                        i18n="Edit physioData|hasRespiratoryRate label"
+                                        [checked]="physioData.has_respiratory_rate == true"
+                                        (change)="changePhysio()" />
+                                    Yes
+                                    <input
+                                        type="radio"
+                                        formControlName="has_respiratory_rate"
+                                        [value]="false"
+                                        i18n="Edit physioData|hasNotRespiratoryRate label"
+                                        [checked]="physioData.has_respiratory_rate"
+                                        (change)="changePhysio()" />
+                                    No
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Edit physiodata|hasSao2 label">SaO2 data</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ isYesOrNo(physioData.has_sao2) }}
+                                }
+                                @default {
+                                    <input
+                                        type="radio"
+                                        formControlName="has_sao2"
+                                        [value]="true"
+                                        i18n="Edit physioData|hasSao2 label"
+                                        [checked]="physioData.has_sao2 == true"
+                                        (change)="changePhysio()" />
+                                    Yes
+                                    <input
+                                        type="radio"
+                                        formControlName="has_sao2"
+                                        [value]="false"
+                                        i18n="Edit physioData|hasNotSao2 label"
+                                        [checked]="physioData.has_sao2"
+                                        (change)="changePhysio()" />
+                                    No
+                                }
+                            }
+                        </span>
+                        <span class="right-col"></span>
+                    </li>
+                    <li>
+                        <label i18n="Edit physiodata|hasTemperature label">Temperature data</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ isYesOrNo(physioData.has_temperature) }}
+                                }
+                                @default {
+                                    <input
+                                        type="radio"
+                                        formControlName="has_temperature"
+                                        [value]="true"
+                                        i18n="Edit physioData|hasTemperature label"
+                                        [checked]="physioData.has_temperature == true"
+                                        (change)="changePhysio()" />
+                                    Yes
+                                    <input
+                                        type="radio"
+                                        formControlName="has_temperature"
+                                        [value]="false"
+                                        i18n="Edit physioData|hasNotTemperature label"
+                                        [checked]="physioData.has_temperature"
+                                        (change)="changePhysio()" />
+                                    No
+                                }
+                            }
+                        </span>
+                        <span class="right-col"></span>
+                    </li>
+                    <li class="required">
+                        <label i18n="Edit physiodata|File label">File</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ("view") {
+                                    {{ physioData.filename }}
+                                    @if (physioData?.filename) {
+                                        <button class="button-picto clickable" (click)="downloadFile()">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    }
+                                }
+                                @case ("create") {
+                                    <input
+                                        type="file"
+                                        id="physioDataFile"
+                                        name="physioDataFile"
+                                        (change)="fileChangeEvent($event.target.files)"
+                                        placeholder="Upload file..." />
+                                }
+                                @case ("edit") {
+                                    {{ physioData.filename }}
+                                    <input
+                                        type="file"
+                                        id="physioDataFile"
+                                        name="physioDataFile"
+                                        (change)="fileChangeEvent($event.target.files)"
+                                        placeholder="Upload file..." />
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+    }
 </div>

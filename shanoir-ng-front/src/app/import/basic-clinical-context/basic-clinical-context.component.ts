@@ -12,25 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Center } from '../../centers/shared/center.model';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
 
 
 @Component({
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class BasicClinicalContextComponent extends AbstractClinicalContextComponent {
 

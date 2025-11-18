@@ -12,186 +12,292 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<fieldset *ngIf="parentFormGroup" [formGroup]="parentFormGroup">
-	<ol>
-	   <li *ngIf="mode == 'view' && dataset && dataset.datasetProcessing">
-            <legend>Processed dataset</legend>
-            <label>Processing</label>
+@if (parentFormGroup) {
+    <fieldset [formGroup]="parentFormGroup">
+        <ol>
+            @if (mode == "view" && dataset && dataset.datasetProcessing) {
+                <li>
+                    <legend>Processed dataset</legend>
+                    <label>Processing</label>
+                    <span class="right-col">
+                        <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
+                            Dataset processing n°{{ dataset.datasetProcessing?.id }}
+                        </a>
+                    </span>
+                </li>
+            }
+            <li>
+                <label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ("create") {
+                            <span i18n="Dataset detail|Dataset id generated@@datasetIdGenerated">
+                                Automatically generated
+                            </span>
+                        }
+                        @default {
+                            {{ dataset.id }}
+                        }
+                    }
+                </span>
+            </li>
+            @if (mode == "view" && dataset && dataset.datasetAcquisition) {
+                <li>
+                    <label>Dataset Acquisition</label>
+                    <span class="right-col">
+                        <a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
+                            Dataset acquisition n°{{ dataset.datasetAcquisition?.id }}
+                        </a>
+                    </span>
+                </li>
+            }
+            @if (mode == "view" && dataset && dataset.datasetAcquisition && dataset.datasetAcquisition.examination) {
+                <li>
+                    <label>Examination</label>
+                    <span class="right-col">
+                        <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
+                            {{
+                                dataset.datasetAcquisition?.examination?.comment
+                                    ? dataset.datasetAcquisition?.examination?.comment
+                                    : (dataset.datasetAcquisition?.examination?.examinationDate | localDateFormatPipe)
+                            }}
+                        </a>
+                    </span>
+                </li>
+            }
+            <li>
+                <label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
+                <span class="right-col">
+                    <a [routerLink]="[getSubjectLink()]">
+                        {{ dataset.subject?.name }}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
+                <span class="right-col">
+                    <a [routerLink]="['/study/details/', dataset.study?.id]">
+                        {{ dataset.study?.name }}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ("view") {
+                            {{ dataset.creationDate | localDateFormatPipe }}
+                        }
+                        @default {
+                            <datepicker formControlName="creationDate"></datepicker>
+                        }
+                    }
+                </span>
+            </li>
+            <li>
+                <label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
+                <span class="right-col">
+                    {{ dataset.type }}
+                </span>
+            </li>
+            @if (mode != "create" && dataset.copies?.length > 0) {
+                <li>
+                    <label>This dataset has been copied :</label>
+                    <span class="right-col">
+                        @for (entityId of dataset.copies; track entityId) {
+                            <div>
+                                <a [routerLink]="['/dataset/details/', entityId]">[ {{ entityId }} ]</a>
+                            </div>
+                        }
+                    </span>
+                </li>
+            }
+            @if (mode != "create" && dataset.source != null) {
+                <li>
+                    <label>This dataset is the copy of :</label>
+                    <span class="right-col">
+                        <a [routerLink]="['/dataset/details/', dataset.source]">[ {{ dataset.source }} ]</a>
+                    </span>
+                </li>
+            }
+        </ol>
+    </fieldset>
+}
+
+<fieldset>
+    <legend>Dataset Metadata</legend>
+    <ol>
+        <li>
+            <label i18n="Dataset detail|Dataset name label@@datasetDetailCreation">Name</label>
             <span class="right-col">
-                <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
-					Dataset processing n°{{dataset.datasetProcessing?.id}}
-                </a>
+                @switch (mode) {
+                    @case ("view") {
+                        {{ dataset.name }}
+                    }
+                    @default {
+                        <input
+                            type="text"
+                            [ngModel]="
+                                dataset.updatedMetadata.name
+                                    ? dataset.updatedMetadata.name
+                                    : dataset.originMetadata.name
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.name = $event"
+                            (change)="updateForm()"
+                            [ngModelOptions]="{ standalone: true }" />
+                    }
+                }
             </span>
         </li>
         <li>
-			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'create'">
-					<span i18n="Dataset detail|Dataset id generated@@datasetIdGenerated">Automatically generated</span>
-				</ng-template>
-				<ng-template ngSwitchDefault>
-					{{dataset.id}}
-				</ng-template>
-			</span>
-		</li>
-		<li *ngIf="mode == 'view' && dataset && dataset.datasetAcquisition">
-			<label>Dataset Acquisition</label>
-			<span class="right-col">
-				<a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
-					Dataset acquisition n°{{dataset.datasetAcquisition?.id}}
-				</a>
-			</span>
-		</li>
-		<li *ngIf="mode == 'view' && dataset && dataset.datasetAcquisition && dataset.datasetAcquisition.examination">
-            <label>Examination</label>
+            <label i18n="Dataset detail|Dataset comments@@datasetComments">Comment</label>
             <span class="right-col">
-                <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
-					{{dataset.datasetAcquisition?.examination?.comment ? dataset.datasetAcquisition?.examination?.comment : dataset.datasetAcquisition?.examination?.examinationDate  | localDateFormatPipe}}
-                </a>
+                @switch (mode) {
+                    @case ("view") {
+                        {{
+                            dataset.updatedMetadata.comment
+                                ? dataset.updatedMetadata.comment
+                                : dataset.originMetadata.comment
+                        }}
+                    }
+                    @default {
+                        <input
+                            type="text"
+                            [ngModel]="
+                                dataset.updatedMetadata.comment
+                                    ? dataset.updatedMetadata.comment
+                                    : dataset.originMetadata.comment
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.comment = $event"
+                            (change)="updateForm()"
+                            [ngModelOptions]="{ standalone: true }" />
+                    }
+                }
             </span>
         </li>
-		<li>
-			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
-			<span class="right-col">
-				<a [routerLink]="[getSubjectLink()]">
-					{{dataset.subject?.name}}
-				</a>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
-			<span class="right-col">
-				<a [routerLink]="['/study/details/', dataset.study?.id]">
-					{{dataset.study?.name}}
-				</a>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
-			<span [ngSwitch]="mode" class="right-col">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | localDateFormatPipe}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<datepicker formControlName="creationDate"></datepicker>
-				</ng-template>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
-			<span class="right-col">
-					{{dataset.type}}
-			</span>
-		</li>
-
-        <li *ngIf="mode != 'create' && dataset.copies?.length > 0">
-            <label>This dataset has been copied :</label>
+        <li>
+            <label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
             <span class="right-col">
-                <div *ngFor="let entityId of dataset.copies">
-                    <a [routerLink]="['/dataset/details/', entityId]"> [ {{ entityId }} ] </a>
-                </div>
+                @switch (mode) {
+                    @case ("view") {
+                        {{
+                            ExploredEntity.getLabel(
+                                dataset.updatedMetadata.exploredEntity
+                                    ? dataset.updatedMetadata.exploredEntity
+                                    : dataset.originMetadata.exploredEntity
+                            )
+                        }}
+                    }
+                    @default {
+                        <select-box
+                            [ngModel]="
+                                dataset.updatedMetadata.exploredEntity
+                                    ? dataset.updatedMetadata.exploredEntity
+                                    : dataset.originMetadata.exploredEntity
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
+                            (userChange)="updateForm()"
+                            [ngModelOptions]="{ standalone: true }"
+                            [options]="exploredEntityOptions"></select-box>
+                    }
+                }
             </span>
         </li>
-        <li *ngIf="mode != 'create' && dataset.source != null">
-            <label>This dataset is the copy of :</label>
+        <li>
+            <label i18n="Dataset detail|Dataset cardinality of related subjects@@datasetCardinalityOfRelatedSubjects">
+                Cardinality of related subjects
+            </label>
             <span class="right-col">
-                <a [routerLink]="['/dataset/details/', dataset.source]"> [ {{ dataset.source }} ] </a>
+                @switch (mode) {
+                    @case ("view") {
+                        {{
+                            CardinalityOfRelatedSubjects.getLabel(
+                                dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    ? dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    : dataset.originMetadata.cardinalityOfRelatedSubjects
+                            )
+                        }}
+                    }
+                    @default {
+                        <input
+                            type="radio"
+                            name="card"
+                            id="card_single"
+                            [ngModel]="
+                                dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    ? dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    : dataset.originMetadata.cardinalityOfRelatedSubjects
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
+                            (change)="updateForm()"
+                            value="SINGLE_SUBJECT_DATASET"
+                            [ngModelOptions]="{ standalone: true }" />
+                        Single subject
+                        <input
+                            type="radio"
+                            name="card"
+                            id="card_multiple"
+                            [ngModel]="
+                                dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    ? dataset.updatedMetadata.cardinalityOfRelatedSubjects
+                                    : dataset.originMetadata.cardinalityOfRelatedSubjects
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
+                            (change)="updateForm()"
+                            value="MULTIPLE_SUBJECTS_DATASET"
+                            [ngModelOptions]="{ standalone: true }" />
+                        Multiple subjects
+                    }
+                }
             </span>
         </li>
-
+        <li>
+            <label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
+            <span class="right-col">
+                @switch (mode) {
+                    @case ("view") {
+                        {{
+                            ProcessedDatasetType.getLabel(
+                                dataset.updatedMetadata.processedDatasetType
+                                    ? dataset.updatedMetadata.processedDatasetType
+                                    : dataset.originMetadata.processedDatasetType
+                            )
+                        }}
+                    }
+                    @default {
+                        <select-box
+                            [ngModel]="
+                                dataset.updatedMetadata.processedDatasetType
+                                    ? dataset.updatedMetadata.processedDatasetType
+                                    : dataset.originMetadata.processedDatasetType
+                            "
+                            (ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event"
+                            (userChange)="updateForm()"
+                            [ngModelOptions]="{ standalone: true }"
+                            [options]="processedDatasetTypeOptions"></select-box>
+                    }
+                }
+            </span>
+        </li>
+        @if (dataset.datasetAcquisition?.acquisitionStartTime) {
+            <li>
+                <label>Acquisition start time</label>
+                <span class="right-col">
+                    {{ dataset.datasetAcquisition.acquisitionStartTime | localDateFormatPipe: true }}
+                </span>
+            </li>
+        }
+        @if (dataset.datasetAcquisition?.protocol?.sliceThickness) {
+            <li>
+                <label>Slice thickness (mm)</label>
+                <span class="right-col">{{ dataset.datasetAcquisition.protocol.sliceThickness }}</span>
+            </li>
+        }
+        @if (dataset.datasetAcquisition?.protocol?.numberOfSlices) {
+            <li>
+                <label>Number of slices</label>
+                <span class="right-col">{{ dataset.datasetAcquisition.protocol.numberOfSlices }}</span>
+            </li>
+        }
     </ol>
-</fieldset>
-
-<fieldset>
-	<legend>Dataset Metadata</legend>
-	<ol>
-		<li>
-			<label i18n="Dataset detail|Dataset name label@@datasetDetailCreation">Name</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.name}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<input type="text"
-						[ngModel]="dataset.updatedMetadata.name ? dataset.updatedMetadata.name : dataset.originMetadata.name"
-						(ngModelChange)="dataset.updatedMetadata.name = $event"
-						(change)="updateForm()"
-						[ngModelOptions]="{standalone: true}" />
-				</ng-template>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset comments@@datasetComments">Comment</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<input type="text"
-						[ngModel]="dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment"
-						(ngModelChange)="dataset.updatedMetadata.comment = $event"
-						(change)="updateForm()"
-						[ngModelOptions]="{standalone: true}" />
-				</ng-template>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{ExploredEntity.getLabel(dataset.updatedMetadata.exploredEntity? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity)}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<select-box
-							[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity"
-							(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
-							(userChange)="updateForm()"
-							[ngModelOptions]="{standalone: true}"
-							[options]="exploredEntityOptions">
-					</select-box>
-				</ng-template>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset cardinality of related subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of related subjects</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{ CardinalityOfRelatedSubjects.getLabel(dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects)}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<input type="radio" name="card" id="card_single"
-						[ngModel]="dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects"
-						(ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
-						(change)="updateForm()"
-						value="SINGLE_SUBJECT_DATASET"
-						[ngModelOptions]="{standalone: true}" />Single subject
-					<input type="radio" name="card" id="card_multiple"
-						[ngModel]="dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects"
-						(ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
-						(change)="updateForm()"
-						value="MULTIPLE_SUBJECTS_DATASET"
-						[ngModelOptions]="{standalone: true}" />Multiple subjects
-				</ng-template>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{ ProcessedDatasetType.getLabel(dataset.updatedMetadata.processedDatasetType? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType)}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<select-box
-							[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType"
-							(ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event"
-							(userChange)="updateForm()"
-							[ngModelOptions]="{standalone: true}"
-							[options]="processedDatasetTypeOptions">
-					</select-box>
-				</ng-template>
-			</span>
-		</li>
-		<li *ngIf="dataset.datasetAcquisition?.acquisitionStartTime">
-			<label>Acquisition start time</label>
-			<span class="right-col">
-				{{dataset.datasetAcquisition.acquisitionStartTime | localDateFormatPipe : true}}
-			</span>
-		</li>
-		<li *ngIf="dataset.datasetAcquisition?.protocol?.sliceThickness">
-			<label>Slice thickness (mm)</label>
-			<span class="right-col">{{dataset.datasetAcquisition.protocol.sliceThickness}}</span>
-		</li>
-		<li *ngIf="dataset.datasetAcquisition?.protocol?.numberOfSlices">
-			<label>Number of slices</label>
-			<span class="right-col">{{dataset.datasetAcquisition.protocol.numberOfSlices}}</span>
-		</li>
-	</ol>
 </fieldset>

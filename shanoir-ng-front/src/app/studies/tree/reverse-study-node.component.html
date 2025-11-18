@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="showDetails && menuOpened"
         [label]="node.label"
         [tags]="node.tags"
@@ -24,21 +24,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasDependency(node.examinations)"
         [clickable]="showDetails"
         [dataLoading]="loading">
-
-        <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
-            <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-                <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-            </a>
-            <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
-        </dropdown-menu>
-
-        <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">
-            <examination-node
+        @if (showDetails && menuOpened) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+                <menu-item
+                    [disabled]="loading"
+                    label="Download"
+                    awesome="fas fa-download"
+                    (click)="loading ? null : download()"></menu-item>
+            </dropdown-menu>
+        }
+        @if (node.open && node.examinations && node.examinations != $any("UNLOADED")) {
+            @for (examinationNode of node.examinations; track examinationNode) {
+                <examination-node
                     node
-                    *ngFor="let examinationNode of node.examinations"
                     [input]="examinationNode"
                     (selectedChange)="selectedChange.emit()"
-                    [hasBox]="hasBox">
-            </examination-node>
-        </ng-container>
-</node>
+                    [hasBox]="hasBox"></examination-node>
+            }
+        }
+    </node>
+}

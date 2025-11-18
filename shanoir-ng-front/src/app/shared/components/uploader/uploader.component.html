@@ -12,10 +12,19 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<input #input hidden type="file" (change)="changeFile($event)" [accept]="accept"/>
+<input #input hidden type="file" (change)="changeFile($event)" [accept]="accept" />
 <button (click)="click()" [disabled]="loading || disabled" class="left-icon">
-    <i *ngIf="!loading" class="fas fa-upload"></i>
-    <i *ngIf="loading" class="fas fa-cog fa-spin"></i>
-    {{label || 'Choose file'}}
+    @if (!loading) {
+        <i class="fas fa-upload"></i>
+    }
+    @if (loading) {
+        <i class="fas fa-cog fa-spin"></i>
+    }
+    {{ label || "Choose file" }}
 </button>
-<div class="filename" *ngIf="!loading && filename && !noFilename" [class.error]="error"><i class="far fa-file-archive"></i>{{filename}}</div>
+@if (!loading && filename && !noFilename) {
+    <div class="filename" [class.error]="error">
+        <i class="far fa-file-archive"></i>
+        {{ filename }}
+    </div>
+}

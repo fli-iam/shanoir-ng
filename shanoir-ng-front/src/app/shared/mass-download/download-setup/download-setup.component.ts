@@ -13,23 +13,28 @@
  */
 
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
-import { Option } from '../../select/select.component';
+import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
+import { TooltipComponent } from '../../components/tooltip/tooltip.component';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { TreeNodeComponent } from '../../components/tree/tree-node.component';
+import { SizePipe } from '../../utils/size.pipe';
 
 @Component({
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
     styleUrls: ['download-setup.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent, CheckboxComponent, TreeNodeComponent, NgTemplateOutlet, SizePipe]
 })
 
 export class DownloadSetupComponent implements OnInit, OnDestroy {

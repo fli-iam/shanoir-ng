@@ -14,7 +14,7 @@
 
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import * as AppUtils from '../../utils/app.utils';
 
@@ -52,23 +52,21 @@ export class ImportService {
     }
 
     analyseEegFile(importJob: EegImportJob): Promise<EegImportJob> {
-        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_ANALYSE_EEG_URL, importJob).toPromise();
+        return firstValueFrom(this.http.post<EegImportJob>(AppUtils.BACKEND_API_ANALYSE_EEG_URL, importJob));
     }
 
     uploadBidsFile(formData: FormData, studyId: number, studyName: string, centerId: number): Promise<object> {
-        return this.http.post<object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + studyName + '/' + centerId, formData).toPromise();
+        return firstValueFrom(this.http.post<object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + studyName + '/' + centerId, formData));
     }
 
     uploadProcessedDataset(formData: FormData): Promise<string> {
-        return this.http.post<string>(AppUtils.BACKEND_API_UPLOAD_PROCESSED_DATASET_URL, formData, { responseType: 'text' as 'json'} )
-            .toPromise();
+        return firstValueFrom(this.http.post<string>(AppUtils.BACKEND_API_UPLOAD_PROCESSED_DATASET_URL, formData, { responseType: 'text' as 'json'} ));
     }
 
     async startImportJob(importJob: ImportJob): Promise<object> {
         try {
             // importJob.patients.forEach(patient => patient.subject.subjectStudyList.forEach(subjectStudy => subjectStudy.subject = null));
-            return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
-                .toPromise();
+            return firstValueFrom(this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob)));
         }
         catch (error) {
             return Promise.reject(error.message || error);
@@ -77,8 +75,7 @@ export class ImportService {
 
     async startEegImportJob(importJob: EegImportJob): Promise<object> {
         try {
-            return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
-            .toPromise();
+            return firstValueFrom(this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob)));
         }
         catch (error) {
             return Promise.reject(error.message || error);
@@ -87,8 +84,7 @@ export class ImportService {
 
     async startProcessedDatasetImportJob(importJob: ProcessedDatasetImportJob): Promise<object> {
         try {
-            return this.http.post(AppUtils.BACKEND_API_PROCESSED_DATASET_URL, JSON.stringify(importJob))
-            .toPromise();
+            return firstValueFrom(this.http.post(AppUtils.BACKEND_API_PROCESSED_DATASET_URL, JSON.stringify(importJob)));
         }
         catch (error) {
             return Promise.reject(error.message || error);
@@ -103,9 +99,8 @@ export class ImportService {
      */
     downloadImage(url: string, path: string): Promise<ArrayBuffer> {
         if (!url) throw Error('Cannot download a image without an url');
-        return this.http.get(url,
-            { observe: 'response', params: { path: encodeURIComponent(path) }, responseType: 'arraybuffer' })
-            .toPromise()
+        return firstValueFrom(this.http.get(url,
+            { observe: 'response', params: { path: encodeURIComponent(path) }, responseType: 'arraybuffer' }))
             .then(response => response.body);
     }
 
@@ -115,7 +110,6 @@ export class ImportService {
 
     queryPACS(dicomQuery: DicomQuery): Promise<ImportJob> {
         this._dicomQuery = dicomQuery;
-        return this.http.post<ImportJob>(AppUtils.BACKEND_API_QUERY_PACS, dicomQuery)
-            .toPromise();
+        return firstValueFrom(this.http.post<ImportJob>(AppUtils.BACKEND_API_QUERY_PACS, dicomQuery));
     }
 }

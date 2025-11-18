@@ -13,42 +13,78 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" class="max-content" [formGroup]="form" [class.disabled]="footerState && footerState.loading">
-		<div class="layout">
-			<form-footer
-					[state]="footerState"
-					(edit)="goToEdit()"
-					(dismiss)="goToView()"
-                    (delete) = "delete()"
-					(back)="goBack()"
-					(save)="save()">
-				<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
-            	<!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download processed data<i class="fas fa-download"></i></button> -->
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.inPacs" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
-            </form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</h2>
-				</ng-template>
-			</span>
-
-			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
-			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
-            <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
-
-
-			<!-- TODO : other types -->
-
-			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">
-				<legend>Preview</legend>
-				<papaya [loadingCallback]="papayaLoadCallback"></papaya>
-			</fieldset>
-		</div>
-	</form>
+    @if (form) {
+        <form class="max-content" [formGroup]="form" [class.disabled]="footerState && footerState.loading">
+            <div class="layout">
+                <form-footer
+                    [state]="footerState"
+                    (edit)="goToEdit()"
+                    (dismiss)="goToView()"
+                    (delete)="delete()"
+                    (back)="goBack()"
+                    (save)="save()">
+                    @if (mode == "view" && hasDownloadRight) {
+                        <button
+                            class="right-icon dl-button"
+                            type="button"
+                            (click)="downloadAll()"
+                            [disabled]="downloadState.isActive()">
+                            Download
+                            <i class="fas fa-download"></i>
+                        </button>
+                    }
+                    <!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download processed data<i class="fas fa-download"></i></button> -->
+                    @if (mode == "view" && hasDownloadRight && dataset.inPacs) {
+                        <button type="button" class="right-icon" (click)="seeDicomMetadata()">
+                            Show DICOM metadata
+                            <i class="fas fa-file-code"></i>
+                        </button>
+                    }
+                </form-footer>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            <h2 class="header command-zone" i18n="View dataset|Title@@datasetDetailViewTitle">
+                                Details on {{ dataset.datasetProcessing ? "processed " : "" }}dataset
+                            </h2>
+                        }
+                        @case ("edit") {
+                            <h2 class="header command-zone" i18n="Edit dataset|Title@@datasetDetailEditTitle">
+                                Edit {{ dataset.datasetProcessing ? "processed " : "" }}dataset
+                            </h2>
+                        }
+                        @case ("create") {
+                            <h2 class="header command-zone" i18n="Create dataset|Title@@datasetDetailCreateTitle">
+                                Create dataset
+                            </h2>
+                        }
+                    }
+                </span>
+                <common-dataset-details
+                    [mode]="mode"
+                    [dataset]="dataset"
+                    [parentFormGroup]="form"></common-dataset-details>
+                @if (dataset.type == "Mr") {
+                    <mr-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
+                }
+                @if (dataset.type == "Eeg") {
+                    <eeg-dataset-details [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
+                }
+                <!-- TODO : other types -->
+                @if (
+                    mode == "view" &&
+                    !isMRS &&
+                    hasDownloadRight &&
+                    dataset.type != "Eeg" &&
+                    dataset.type != "BIDS" &&
+                    dataset.type != "Measurement"
+                ) {
+                    <fieldset>
+                        <legend>Preview</legend>
+                        <papaya [loadingCallback]="papayaLoadCallback"></papaya>
+                    </fieldset>
+                }
+            </div>
+        </form>
+    }
 </div>

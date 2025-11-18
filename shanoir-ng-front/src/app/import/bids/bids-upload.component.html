@@ -17,64 +17,91 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p>This import allows to import a single subject from a BIDS dataset.</p>
     <p>Select a subject folder from a BIDS dataset and zip it.</p>
     <p>The files should be organized like this:</p>
-    <p>import.zip <br/>
-     - sub-[SubjectName] <br/>
-     - - ses-[examination-comment] <br/>
-     - - - [anat/func/dwi/eeg/ieeg/pet/nirs..] <br/>
-     - - - - [list of data files] <br/>
-     </p>
-        <u>1) Subject: </u><br/>
-        The subject will be automaticaly created, based on the subject name.
-     <p>
-        <u>2) Examination: </u><br/>
-        The examination will be automatically created based on examination comment.<br/>
-        Examination date will be gathered from sessions.tsv or scans.tsv files. If not existing, from the session folder creation date.
-     </p>
-     <p>
-        <u>3) Data type: </u><br/>
+    <p>
+        import.zip
+        <br />
+        - sub-[SubjectName]
+        <br />
+        - - ses-[examination-comment]
+        <br />
+        - - - [anat/func/dwi/eeg/ieeg/pet/nirs..]
+        <br />
+        - - - - [list of data files]
+        <br />
+    </p>
+    <u>1) Subject:</u>
+    <br />
+    The subject will be automaticaly created, based on the subject name.
+    <p>
+        <u>2) Examination:</u>
+        <br />
+        The examination will be automatically created based on examination comment.
+        <br />
+        Examination date will be gathered from sessions.tsv or scans.tsv files. If not existing, from the session folder
+        creation date.
+    </p>
+    <p>
+        <u>3) Data type:</u>
+        <br />
         The data type folder (anat, func, etc) will define the type of dataset created in Shanoir.
-     </p>
-     <p>
-       <u> 4) Equipment </u><br/>
-        The center equipment will be automatically referenced from the json metadata files, if existing. <br/>
-        - "DeviceSerialNumber" will be used to check for a match in Shanoir database. <br/>
-        - If not existing, an "unknown" equipment will be used.<br/><br/>
-     </p>
-     <ol>
+    </p>
+    <p>
+        <u>4) Equipment</u>
+        <br />
+        The center equipment will be automatically referenced from the json metadata files, if existing.
+        <br />
+        - "DeviceSerialNumber" will be used to check for a match in Shanoir database.
+        <br />
+        - If not existing, an "unknown" equipment will be used.
+        <br />
+        <br />
+    </p>
+    <ol>
         <legend>
             Research study
-            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+            <tool-tip>
+                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
+                mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+            </tool-tip>
         </legend>
         <li>
             <label class="required-label">Select a research study</label>
             <span class="right-col">
                 <select-box
-                        [(ngModel)]="study"
-                        (userChange)="onSelectStudy();"
-                        [viewRoute]="'/study/details/' + study?.id"
-                        [viewDisabled]="!study"
-                        [options]="studyOptions">
-                </select-box>
+                    [(ngModel)]="study"
+                    (userChange)="onSelectStudy()"
+                    [viewRoute]="'/study/details/' + study?.id"
+                    [viewDisabled]="!study"
+                    [options]="studyOptions"></select-box>
             </span>
         </li>
         <li>
             <label class="required-label">Select an associated center</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!study || !centerOptions || this.study.studyCenterList.length == 1)"
-                        [(ngModel)]="center"
-                        [viewRoute]="'/center/details/' + center?.id"
-                        [viewDisabled]="!center"
-                        [options]="centerOptions">
-                </select-box>
+                    [disabled]="!study || !centerOptions || this.study.studyCenterList.length == 1"
+                    [(ngModel)]="center"
+                    [viewRoute]="'/center/details/' + center?.id"
+                    [viewDisabled]="!center"
+                    [options]="centerOptions"></select-box>
             </span>
+        </li>
     </ol>
 </fieldset>
 
-<upload-file [disabled]="!center" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+<upload-file
+    [disabled]="!center"
+    (fileChange)="uploadArchive($event)"
+    [loading]="archiveStatus == 'uploading'"
+    [error]="archiveStatus == 'error'"></upload-file>
 
-<label *ngIf="archiveStatus == 'uploaded'" > Data successfully imported.</label>
-<label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
-{{errorMessage}}
-</label>
-
+@if (archiveStatus == "uploaded") {
+    <label>Data successfully imported.</label>
+}
+@if (errorMessage) {
+    <label class="form-validation-alert" 
+        animate.enter="slide-down-error" animate.leave="slide-up-error" 
+        i18n="Import|ExtensionError label">
+        {{ errorMessage }}
+    </label>
+}

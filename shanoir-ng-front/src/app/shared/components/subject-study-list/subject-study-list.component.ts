@@ -12,22 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { combineLatest, Subscription , Subject as RxjsSubject} from 'rxjs';
 import { Router } from '@angular/router';
+import { LowerCasePipe } from '@angular/common';
 
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { isDarkColor } from '../../../utils/app.utils';
 import { AbstractInput } from '../../form/input.abstract';
-import { Option } from '../../select/select.component';
+import { Option, SelectBoxComponent } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '../table/column.definition.type';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 
 @Component({
@@ -41,7 +43,7 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
             multi: true
         }
     ],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent, LowerCasePipe]
 })
 
 export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {

@@ -12,53 +12,82 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<fieldset *ngIf="dataset">
-	<legend>Mr Dataset Data</legend>
-	<ol>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time ({{getUnit("MS")}})</label>
-			<span class="right-col">
-				<span class="multi" *ngFor="let echoTime of dataset.echoTime">{{echoTime.echoTimeValue}}</span>
-			</span>
-		</li>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle ({{getUnit("DEGREES")}})</label>
-			<span class="right-col">
-				<span class="multi" *ngFor="let flipAngle of dataset.flipAngle">{{flipAngle.flipAngleValue}}</span>
-			</span>
-		</li>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time ({{getUnit("MS")}})</label>
-			<span class="right-col">
-				<span class="multi" *ngFor="let inversionTime of dataset.inversionTime">{{inversionTime.inversionTimeValue}}</span>
-			</span>
-		</li>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time ({{getUnit("MS")}})</label>
-			<span class="right-col">
-				<span class="multi" *ngFor="let repetitionTime of dataset.repetitionTime">{{repetitionTime.repetitionTimeValue}}</span>
-			</span>
-		</li>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
-			<span class="right-col">
-				{{dataset.mrQualityProcedureType}}<!-- TODO : 'enum' -->
-			</span>
-		</li>
-	</ol>
-</fieldset>
-<fieldset *ngIf="dataset">
-	<legend>Mr Dataset Metadata</legend>
-	<ol>
-		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Mr Dataset Nature</label>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{natureLabel}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<select-box [(ngModel)]="dataset.updatedMrMetadata.mrDatasetNature" [options]="natureOptions" (userChange)="updateForm()">
-					</select-box>
-				</ng-template>
-			</span>
-		</li>
-	</ol>
-</fieldset>
+@if (dataset) {
+    <fieldset>
+        <legend>Mr Dataset Data</legend>
+        <ol>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">
+                    Echo Time ({{ getUnit("MS") }})
+                </label>
+                <span class="right-col">
+                    @for (echoTime of dataset.echoTime; track echoTime) {
+                        <span class="multi">{{ echoTime.echoTimeValue }}</span>
+                    }
+                </span>
+            </li>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">
+                    Flip Angle ({{ getUnit("DEGREES") }})
+                </label>
+                <span class="right-col">
+                    @for (flipAngle of dataset.flipAngle; track flipAngle) {
+                        <span class="multi">{{ flipAngle.flipAngleValue }}</span>
+                    }
+                </span>
+            </li>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">
+                    Inversion Time ({{ getUnit("MS") }})
+                </label>
+                <span class="right-col">
+                    @for (inversionTime of dataset.inversionTime; track inversionTime) {
+                        <span class="multi">{{ inversionTime.inversionTimeValue }}</span>
+                    }
+                </span>
+            </li>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">
+                    Repetition Time ({{ getUnit("MS") }})
+                </label>
+                <span class="right-col">
+                    @for (repetitionTime of dataset.repetitionTime; track repetitionTime) {
+                        <span class="multi">{{ repetitionTime.repetitionTimeValue }}</span>
+                    }
+                </span>
+            </li>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">
+                    Quality Procedure Type
+                </label>
+                <span class="right-col">
+                    {{ dataset.mrQualityProcedureType }}
+                    <!-- TODO : 'enum' -->
+                </span>
+            </li>
+        </ol>
+    </fieldset>
+}
+@if (dataset) {
+    <fieldset>
+        <legend>Mr Dataset Metadata</legend>
+        <ol>
+            <li>
+                <label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Mr Dataset Nature</label>
+                <span>
+                    @switch (mode) {
+                        @case ("view") {
+                            {{ natureLabel }}
+                        }
+                        @default {
+                            <select-box
+                                [(ngModel)]="dataset.updatedMrMetadata.mrDatasetNature"
+                                [options]="natureOptions"
+                                (userChange)="updateForm()"></select-box>
+                        }
+                    }
+                </span>
+            </li>
+        </ol>
+    </fieldset>
+}

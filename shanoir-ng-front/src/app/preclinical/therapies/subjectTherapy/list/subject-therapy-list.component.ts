@@ -24,6 +24,7 @@ import { SuperPromise } from 'src/app/utils/super-promise';
 
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -35,7 +36,7 @@ import { SubjectTherapy } from '../shared/subjectTherapy.model';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [TableComponent]
 })
 export class SubjectTherapyListComponent implements ControlValueAccessor {
 

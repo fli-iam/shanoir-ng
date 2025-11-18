@@ -12,104 +12,171 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="root" [class.disabled]="disabled" *ngIf="!readOnly">
-    <span class="frame" *ngIf="!compactMode"> 
-        <span class="input-container left-icon" [style.color]="selectionColor ? selectedOption?.color : null">
-            <span  *ngIf="selectedOption?.awesome" (click)="isOpen() ? close() : open()"><i class="{{selectedOption?.awesome}}"></i></span>
-            <span class="fake-input">
-                {{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}
+@if (!readOnly) {
+    <div class="root" [class.disabled]="disabled">
+        @if (!compactMode) {
+            <span class="frame">
+                <span class="input-container left-icon" [style.color]="selectionColor ? selectedOption?.color : null">
+                    @if (selectedOption?.awesome) {
+                        <span (click)="isOpen() ? close() : open()"><i class="{{ selectedOption?.awesome }}"></i></span>
+                    }
+                    <span class="fake-input">
+                        {{ inputText ? inputText : placeholder ? placeholder : "Select an option..." }}
+                    </span>
+                    @if (options?.length > 0) {
+                        <input
+                            #input
+                            type="text"
+                            tabindex="-1"
+                            class="label"
+                            [class.icon]="selectedOption?.awesome"
+                            [ngModel]="inputText"
+                            (ngModelChange)="onTypeText($event)"
+                            [placeholder]="placeholder ? placeholder : 'Select an option...'"
+                            (click)="isOpen() ? close() : open()"
+                            (focus)="onInputFocus()"
+                            [readOnly]="!search" />
+                    }
+                </span>
+                @if (options?.length == 0) {
+                    <span class="label empty">Empty list</span>
+                }
+                <span class="commands">
+                    @if (inputText && clear) {
+                        <span class="clear button" (click)="onClear()"><i class="fas fa-times"></i></span>
+                    }
+                    <span class="open button" (click)="isOpen() ? close() : open()">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                    @if (viewRoute) {
+                        <a
+                            [routerLink]="viewRoute"
+                            (click)="clickView()"
+                            [class.disabled]="viewDisabled || !selectedOption"
+                            class="button">
+                            <i class="fa-regular fa-eye"></i>
+                        </a>
+                    }
+                    @if (newClick.observed && !newHidden && !disabled) {
+                        <span (click)="clickNew()" [class.disabled]="newDisabled" class="button new-file">
+                            <i class="far fa-file"></i>
+                            <i class="fas fa-plus"></i>
+                        </span>
+                    }
+                    @if (addClick.observed && !addHidden) {
+                        <span (click)="clickAdd()" [class.disabled]="addDisabled" class="button">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                    }
+                </span>
             </span>
-            <input #input
-                *ngIf="options?.length > 0"
-                type="text" 
-                tabindex="-1" 
-                class="label" 
-                [class.icon]="selectedOption?.awesome"
-                [ngModel]="inputText" 
-                (ngModelChange)="onTypeText($event)" 
-                [placeholder]="placeholder ? placeholder : 'Select an option...'" 
-                (click)="isOpen() ? close() : open()"
-                (focus)="onInputFocus()"
-                [readOnly]="!search">
-        </span>
-        <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
-        <span class="commands">
-            <span class="clear button" *ngIf="inputText && clear" (click)="onClear()"><i class="fas fa-times"></i></span>
-            <span class="open button" (click)="isOpen() ? close() : open()"><i class="fas fa-chevron-down"></i></span>
-            <a [routerLink]="viewRoute" *ngIf="viewRoute" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fa-regular fa-eye"></i></a>
-            <span *ngIf="newClick.observers.length > 0 && !newHidden && !disabled" (click)="clickNew()" [class.disabled]="newDisabled" class="button new-file"><i class="far fa-file"></i><i class="fas fa-plus"></i></span>
-            <span *ngIf="addClick.observers.length > 0 && !addHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
-        </span>
-    </span>
-    <span class="frame" *ngIf="compactMode">
-        <span class="commands">
-            <span class="open button compact-button" (click)="isOpen() ? close() : open()"><i class="fas fa-plus"></i></span>
-        </span>
-    </span>
-    <div *ngIf="displayedOptions?.length > 0" 
-            [class.hidden-list]="hideToComputeHeight" 
-            class="list" 
-            [class.down]="way=='down'" 
-            [class.up]="way=='up'" 
-            (wheel)="onWheel($event)" 
-            [class.scrollable]="scrollable" 
-            [style.width]="maxWidth + 'px'"
-            (mouseleave)="focusedOptionIndex = null"
-            (dragover)="allowDrop($event)"
-            (dragend)="dragging = false">
-        <ng-container *ngFor="let option of displayedOptions; let i = index">
-            <div class="section option" *ngIf="(i == 0 && option.section) || displayedOptions[i-1]?.section != option.section">
-                <span class="inner-option left-icon">
-                    {{option.section}}
+        }
+        @if (compactMode) {
+            <span class="frame">
+                <span class="commands">
+                    <span class="open button compact-button" (click)="isOpen() ? close() : open()">
+                        <i class="fas fa-plus"></i>
+                    </span>
                 </span>
+            </span>
+        }
+        @if (displayedOptions?.length > 0) {
+            <div
+                [class.hidden-list]="hideToComputeHeight"
+                class="list"
+                [class.down]="way == 'down'"
+                [class.up]="way == 'up'"
+                (wheel)="onWheel($event)"
+                [class.scrollable]="scrollable"
+                [style.width]="maxWidth + 'px'"
+                (mouseleave)="focusedOptionIndex = null"
+                (dragover)="allowDrop($event)"
+                (dragend)="dragging = false">
+                @for (option of displayedOptions; track option; let i = $index) {
+                    @if ((i == 0 && option.section) || displayedOptions[i - 1]?.section != option.section) {
+                        <div class="section option">
+                            <span class="inner-option left-icon">
+                                {{ option.section }}
+                            </span>
+                        </div>
+                    }
+                    <div
+                        class="option"
+                        (click)="onUserSelectedOption(option, $event)"
+                        [class.selected]="isOptionSelected(option)"
+                        [class.disabled]="option.disabled"
+                        [class.compatible]="option.compatible"
+                        [class.not-compatible]="option.compatible != undefined && !option.compatible"
+                        [class.focused]="i == focusedOptionIndex"
+                        (mousemove)="focusedOptionIndex = i"
+                        [style.color]="option.color">
+                        <span [style.background-color]="option.backgroundColor" class="inner-option">
+                            @if (option.awesome) {
+                                <i class="{{ option.awesome }}"></i>
+                            }
+                            {{ option.label }}
+                        </span>
+                    </div>
+                }
+                @if (scrollable) {
+                    <div class="scrollbar">
+                        <div
+                            class="top-scroll-button"
+                            (mousedown)="scrollButtonOn('up')"
+                            (mouseup)="scrollButtonOff()"
+                            (mouseleave)="scrollButtonOff()">
+                            <i class="fas fa-chevron-up"></i>
+                        </div>
+                        <div class="scrollzone" (click)="onScrollZoneClick($event)">
+                            <div
+                                class="lift"
+                                [style.top.px]="liftHeight"
+                                draggable="true"
+                                (dragstart)="onDragStart($event)"></div>
+                        </div>
+                        <div
+                            class="bottom-scroll-button"
+                            (mousedown)="scrollButtonOn('down')"
+                            (mouseup)="scrollButtonOff()"
+                            (mouseleave)="scrollButtonOff()">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                }
+                @if (dragging) {
+                    <div class="list-drag-extend" (dragover)="allowDrop($event)"></div>
+                }
             </div>
-            <div class="option" 
-                    (click)="onUserSelectedOption(option, $event)" 
-                    [class.selected]="isOptionSelected(option)" 
-                    [class.disabled]="option.disabled" 
-                    [class.compatible]="option.compatible"
-                    [class.not-compatible]="option.compatible != undefined && !option.compatible"
-                    [class.focused]="i == focusedOptionIndex"
-                    (mousemove)="focusedOptionIndex = i"
-                    [style.color]="option.color">
-                <span [style.background-color]="option.backgroundColor" class="inner-option">
-                    <i *ngIf="option.awesome" class="{{option.awesome}}"></i>
-                    {{option.label}}
-                </span>
+        }
+        @if (noResult) {
+            <div class="list down empty empty-list">
+                No results
+                @if (options?.length > 0) {
+                    -
+                    <span class="reset" (click)="onTypeText(null)">reset search</span>
+                }
             </div>
-        </ng-container>
-        <div *ngIf="scrollable" class="scrollbar">
-            <div class="top-scroll-button" 
-                    (mousedown)="scrollButtonOn('up')" 
-                    (mouseup)="scrollButtonOff()"
-                    (mouseleave)="scrollButtonOff()"
-                ><i class="fas fa-chevron-up"></i></div>
-            <div class="scrollzone" (click)="onScrollZoneClick($event)">
-                <div class="lift" [style.top.px]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
-            </div>
-            <div class="bottom-scroll-button"
-                    (mousedown)="scrollButtonOn('down')" 
-                    (mouseup)="scrollButtonOff()"
-                    (mouseleave)="scrollButtonOff()"
-                ><i class="fas fa-chevron-down"></i></div>
-        </div>
-        <div *ngIf="dragging" class="list-drag-extend" (dragover)="allowDrop($event)"></div>
+        }
     </div>
-    <div *ngIf="noResult" class="list down empty empty-list">
-        No results <ng-container *ngIf="options?.length > 0"> - <span class="reset" (click)="onTypeText(null)">reset search</span></ng-container>
-    </div>
-</div>
+}
 <div #hiddenOption id="hiddenOption" class="option"></div>
 
-
-<div class="root" [class.disabled]="disabled" *ngIf="readOnly">
-    <span class="frame">
-        <a [routerLink]="viewRoute" class="input-container left-icon" [style.color]="selectedOption?.color">
-            <span  *ngIf="selectedOption?.awesome"><i class="{{selectedOption?.awesome}}"></i></span>
-            {{inputText}}
-        </a>
-        <span class="commands">
-            <span *ngIf="viewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fa-regular fa-eye"></i></span>
+@if (readOnly) {
+    <div class="root" [class.disabled]="disabled">
+        <span class="frame">
+            <a [routerLink]="viewRoute" class="input-container left-icon" [style.color]="selectedOption?.color">
+                @if (selectedOption?.awesome) {
+                    <span><i class="{{ selectedOption?.awesome }}"></i></span>
+                }
+                {{ inputText }}
+            </a>
+            <span class="commands">
+                @if (viewClick.observed && !viewHidden) {
+                    <span (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button">
+                        <i class="fa-regular fa-eye"></i>
+                    </span>
+                }
+            </span>
         </span>
-    </span>
-</div>
+    </div>
+}
