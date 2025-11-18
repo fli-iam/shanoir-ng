@@ -45,6 +45,7 @@ import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
@@ -546,9 +547,10 @@ public class DicomImporterService {
      * @param attributes
      * @param measurementDataset
      * @throws MalformedURLException
+     * @throws ShanoirException 
      */
     public DatasetExpression manageDatasetExpression(Attributes attributes, Dataset dataset)
-            throws MalformedURLException {
+            throws MalformedURLException, ShanoirException {
         DatasetExpression currentExpression = null;
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
@@ -581,10 +583,10 @@ public class DicomImporterService {
      * @param expression
      * @return
      * @throws MalformedURLException
+     * @throws ShanoirException 
      */
     private void addDatasetFile(Attributes attributes, DatasetExpression expression)
-            throws MalformedURLException {
-        DatasetFile datasetFile = new DatasetFile();
+            throws MalformedURLException, ShanoirException {
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
@@ -593,13 +595,22 @@ public class DicomImporterService {
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());
-        datasetFile.setPath(wadoURL.toString());
-        datasetFile.setPacs(true);
-        datasetFile.setDatasetExpression(expression);
+        String newPath = wadoURL.toString();
         List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
         if (datasetFilesDb == null) {
             datasetFilesDb = new ArrayList<DatasetFile>();
         }
+        // Check if a DatasetFile with this path already exists
+        boolean pathExists = datasetFilesDb.stream()
+                .anyMatch(existingFile -> newPath.equals(existingFile.getPath()));
+        if (pathExists) {
+            LOG.error("DatasetFile with path {} already exists in expression, skipping duplicate", newPath);
+			throw new ShanoirException("DatasetFile with path " + newPath + " already exists in expression, skipping duplicate");
+        }
+        DatasetFile datasetFile = new DatasetFile();
+        datasetFile.setPath(newPath);
+        datasetFile.setPacs(true);
+        datasetFile.setDatasetExpression(expression);
         datasetFilesDb.add(datasetFile);
         expression.setDatasetFiles(datasetFilesDb);
     }
