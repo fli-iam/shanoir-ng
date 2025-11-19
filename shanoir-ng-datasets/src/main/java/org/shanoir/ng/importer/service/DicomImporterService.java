@@ -107,6 +107,8 @@ public class DicomImporterService {
 
     private static final String SEMI_COLON = ";";
 
+    private static final String DELIMITER = ":";
+
     @Value("${shanoir.import.series.seriesProperties}")
     private String seriesProperties;
 
@@ -411,18 +413,21 @@ public class DicomImporterService {
             CreateCenterForStudyMessage message = new CreateCenterForStudyMessage();
             message.setStudyId(studyId);
             message.setInstitutionDicom(institutionDicom);
-            Long centerId = (Long) rabbitTemplate.convertSendAndReceive(
+            String returnMessage = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.CENTER_CREATE_QUEUE,
                     objectMapper.writeValueAsString(message));
-            if (centerId == null) {
+            if (returnMessage == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
             }
+            String[] parts = returnMessage.split(DELIMITER);
+            Long centerId = Long.parseLong(parts[0]);
+            Long studyCenterId = Long.parseLong(parts[1]);
             LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             Center center = new Center();
             center.setId(centerId);
             center.setName(institutionDicom.getInstitutionName());
-            isCenterInStudy(studyId, center);
+            addCenterToStudy(studyId, center, studyCenterId);
             centerRepository.save(center);
             LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             return centerId;
@@ -431,25 +436,15 @@ public class DicomImporterService {
         }
     }
 
-	private boolean isCenterInStudy(Long studyId, Center center) {
-		List<StudyCenter> studyCenterList = center.getStudyCenterList();
-		if (studyCenterList != null && !studyCenterList.isEmpty()) {
-			for (StudyCenter studyCenter : studyCenterList) {
-				if (studyCenter.getStudy().getId().equals(studyId)) {
-					return true;
-				}
-			}
-		}
-		if (studyCenterList == null) {
-			studyCenterList = new ArrayList<>();
-			center.setStudyCenterList(studyCenterList);
-		}
+	private void addCenterToStudy(Long studyId, Center center, Long studyCenterId) {
+		List<StudyCenter> studyCenterList = new ArrayList<>();
+		center.setStudyCenterList(studyCenterList);
 		StudyCenter studyCenter = new StudyCenter();
 		Study study = studyService.findById(studyId);
+        studyCenter.setId(studyCenterId);
 		studyCenter.setStudy(study);
 		studyCenter.setCenter(center);
 		center.getStudyCenterList().add(studyCenter);
-		return false;
 	}
 
     private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
@@ -617,7 +612,7 @@ public class DicomImporterService {
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
         final StringBuffer wadoStrBuf = new StringBuffer();
-        wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+        wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + DELIMITER + dcm4cheePortWeb);
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());

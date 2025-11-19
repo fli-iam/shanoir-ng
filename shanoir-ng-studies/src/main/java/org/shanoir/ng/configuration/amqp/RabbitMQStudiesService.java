@@ -50,6 +50,8 @@ public class RabbitMQStudiesService {
 
 	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
+	private static final String DELIMITER = ":";
+
 	@Autowired
 	private StudyRepository studyRepo;
 
@@ -227,13 +229,17 @@ public class RabbitMQStudiesService {
 
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public Long createCenter(final String messageStr) {
+	public String createCenter(final String messageStr) {
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
 			Center center = findOrCreateOrAddCenterByInstitutionDicom(message.getStudyId(), message.getInstitutionDicom());
 			if (center != null) {
-				return center.getId();
+				Long studyCenterId = center.getStudyCenterList().stream()
+						.filter(sc -> sc.getStudy().getId().equals(message.getStudyId()))
+						.findFirst().orElseThrow().getId();
+				String returnMessage = center.getId() + DELIMITER + studyCenterId;
+				return returnMessage;
 			} else {
 				LOG.error("Error while creating a new center.");
 				return null;

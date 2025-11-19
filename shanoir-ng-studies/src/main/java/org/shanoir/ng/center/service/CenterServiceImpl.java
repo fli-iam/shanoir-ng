@@ -209,7 +209,7 @@ public class CenterServiceImpl implements CenterService {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
 	
-	// Method only used by Unit tests
+	// Method only used by unit tests
 	public void deleteById(final Long id) throws EntityNotFoundException  {
 		final Optional<Center> entity = centerRepository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
