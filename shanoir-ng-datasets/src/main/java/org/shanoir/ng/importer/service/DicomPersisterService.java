@@ -79,7 +79,7 @@ public class DicomPersisterService {
 				}
 				// Iterate over all dataset files (DICOM files), in case all files might be
 				// distributed over multiple parent directories and therefore require multiple
-				// calls to sendDicomFilesToPacs (advantage: do not create to big multiparts)
+				// calls to sendDicomFilesToPacs (advantage: do not create too big multiparts)
 				File lastParentFile = null;
 				for (DatasetFile datasetFile : datasetFiles) {
 					String path = datasetFile.getPath();
