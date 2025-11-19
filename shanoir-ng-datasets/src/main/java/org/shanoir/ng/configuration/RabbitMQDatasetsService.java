@@ -239,6 +239,17 @@ public class RabbitMQDatasetsService {
 		centerRepository.save(center);
 	}
 	
+	@RabbitListener(queues = RabbitMQConfiguration.CENTER_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitHandler
+	public void receiveCenterDelete(final Long centerId) throws JsonMappingException, JsonProcessingException {
+		deleteCenter(centerId);
+	}
+
+	@Transactional
+	private void deleteCenter(Long centerId) {
+		centerRepository.deleteById(centerId);
+	}
+
 	@Transactional
 	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();

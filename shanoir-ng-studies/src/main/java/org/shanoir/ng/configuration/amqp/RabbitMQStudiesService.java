@@ -225,7 +225,7 @@ public class RabbitMQStudiesService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.CREATE_CENTER_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitListener(queues = RabbitMQConfiguration.CENTER_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public Long createCenter(final String messageStr) {
 		try {

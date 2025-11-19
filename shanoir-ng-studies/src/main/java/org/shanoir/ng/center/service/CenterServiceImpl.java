@@ -109,6 +109,7 @@ public class CenterServiceImpl implements CenterService {
 			throw new UndeletableDependenciesException(errorMap);
 		}
 		centerRepository.deleteById(id);
+		deleteCenterInMSDatasets(id);
 	}
 
 	@Override
@@ -186,6 +187,15 @@ public class CenterServiceImpl implements CenterService {
 		}
 	}
 
+	private void deleteCenterInMSDatasets(Long centerId) {
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_DELETE_QUEUE,
+					objectMapper.writeValueAsString(centerId));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send center change to MS Datasets !", e);
+		}
+	}
+
 	public Center create(Center center, boolean withAMQP) {
 		Center createdCenter = centerRepository.save(center);
 		if (withAMQP) {
@@ -199,6 +209,7 @@ public class CenterServiceImpl implements CenterService {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
 	}
 	
+	// Method only used by Unit tests
 	public void deleteById(final Long id) throws EntityNotFoundException  {
 		final Optional<Center> entity = centerRepository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));

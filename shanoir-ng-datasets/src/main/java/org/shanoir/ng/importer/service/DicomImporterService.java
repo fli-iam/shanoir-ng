@@ -412,7 +412,7 @@ public class DicomImporterService {
             message.setStudyId(studyId);
             message.setInstitutionDicom(institutionDicom);
             Long centerId = (Long) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.CREATE_CENTER_QUEUE,
+                    RabbitMQConfiguration.CENTER_CREATE_QUEUE,
                     objectMapper.writeValueAsString(message));
             if (centerId == null) {
                 throw new RestServiceException(

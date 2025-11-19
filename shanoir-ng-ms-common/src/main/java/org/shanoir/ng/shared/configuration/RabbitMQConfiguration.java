@@ -100,9 +100,13 @@ public class RabbitMQConfiguration {
 	/** Center name updated => notify MS Datasets to change database. */
 	public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
 
-	public static final String STUDY_CENTER_QUEUE = "study-center-queue";
+	/** Center created => notify MS Datasets to change database. */
+	public static final String CENTER_CREATE_QUEUE = "center-create-queue";
 
-	public static final String CREATE_CENTER_QUEUE = "create-center-queue";
+	/** Center deleted => notify MS Datasets to change database. */
+	public static final String CENTER_DELETE_QUEUE = "center-delete-queue";
+
+	public static final String STUDY_CENTER_QUEUE = "study-center-queue";
 	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
@@ -358,8 +362,13 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue createCenterQueue() {
-		return new Queue(CREATE_CENTER_QUEUE, true);
+	public static Queue centerCreateQueue() {
+		return new Queue(CENTER_CREATE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue centerDeleteQueue() {
+		return new Queue(CENTER_DELETE_QUEUE, true);
 	}
 
 	@Bean
