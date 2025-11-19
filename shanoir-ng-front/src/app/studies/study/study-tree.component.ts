@@ -15,19 +15,17 @@ import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angu
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { SubjectNodeComponent } from 'src/app/subjects/tree/subject-node.component';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode } from 'src/app/tree/tree.model';
-import { ExecutionDataService } from 'src/app/vip/execution.data-service';
-
+import { TaskState } from '../../async-tasks/task.model';
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { MassDownloadService } from '../../shared/mass-download/mass-download.service';
+import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode } from '../../tree/tree.model';
+import { ExecutionDataService } from '../../vip/execution.data-service';
+import { DatasetService } from '../../datasets/shared/dataset.service';
+import { RightsError } from '../../shared/models/error.model';
 import { environment } from "../../../environments/environment";
 
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { RightsError } from 'src/app/shared/models/error.model';
 import { TreeService } from './tree.service';
-
 
 @Component({
     selector: 'study-tree',
@@ -144,6 +142,7 @@ export class StudyTreeComponent implements OnDestroy {
         } else {
             return Promise.resolve(new Set(this.selectedDatasetNodes.map(dsNode => dsNode.id)));
         }
+    }
 
     openInViewer() {
         const studies: Set<string> = new Set();
