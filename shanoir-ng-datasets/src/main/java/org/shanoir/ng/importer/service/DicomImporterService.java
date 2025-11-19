@@ -418,12 +418,39 @@ public class DicomImporterService {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), CENTER_CREATION_ERROR, null));
             }
-            LOG.info("Center created or added to study with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            Center center = new Center();
+            center.setId(centerId);
+            center.setName(institutionDicom.getInstitutionName());
+            isCenterInStudy(studyId, center);
+            centerRepository.save(center);
+            LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             return centerId;
         } else {
             return studyCenterOpt.get().getCenter().getId();
         }
     }
+
+	private boolean isCenterInStudy(Long studyId, Center center) {
+		List<StudyCenter> studyCenterList = center.getStudyCenterList();
+		if (studyCenterList != null && !studyCenterList.isEmpty()) {
+			for (StudyCenter studyCenter : studyCenterList) {
+				if (studyCenter.getStudy().getId().equals(studyId)) {
+					return true;
+				}
+			}
+		}
+		if (studyCenterList == null) {
+			studyCenterList = new ArrayList<>();
+			center.setStudyCenterList(studyCenterList);
+		}
+		StudyCenter studyCenter = new StudyCenter();
+		Study study = studyService.findById(studyId);
+		studyCenter.setStudy(study);
+		studyCenter.setCenter(center);
+		center.getStudyCenterList().add(studyCenter);
+		return false;
+	}
 
     private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
         Examination examination = null;

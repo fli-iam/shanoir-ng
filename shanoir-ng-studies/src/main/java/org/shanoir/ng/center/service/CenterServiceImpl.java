@@ -28,7 +28,6 @@ import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -165,44 +164,39 @@ public class CenterServiceImpl implements CenterService {
 	}
 	
 	@Override
-	public Center update(Center center) throws EntityNotFoundException {		
+	public Center update(Center center, boolean withAMQP) throws EntityNotFoundException {		
 		final Center centerDb = centerRepository.findById(center.getId()).orElse(null);
 		if (centerDb == null) {
 			throw new EntityNotFoundException(center.getClass(), center.getId());
 		}
 		updateValues(center, centerDb);
 		Center updatedCenter = centerRepository.save(centerDb);
-		try {
-			updateCenter(updatedCenter);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center change to the other microservices !", e);
+		if (withAMQP) {
+			updateCenterInMSDatasets(updatedCenter);
 		}
 		return updatedCenter;
 	}
 
-	public Center create(Center center) {
-		Center newDbCenter = centerRepository.save(center);
+	private void updateCenterInMSDatasets(Center center) {
 		try {
-			updateCenter(newDbCenter);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center creation to the other microservices !", e);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
+					objectMapper.writeValueAsString(centerMapper.centerToCenterDTOFlat(center)));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send center change to MS Datasets !", e);
 		}
-		return newDbCenter;
+	}
+
+	public Center create(Center center, boolean withAMQP) {
+		Center createdCenter = centerRepository.save(center);
+		if (withAMQP) {
+			updateCenterInMSDatasets(createdCenter);
+		}
+		return createdCenter;
 	}
 
 	@Override
 	public Optional<Center> findByName(String name) {
 		return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
-	}
-	
-	private boolean updateCenter(Center center) throws MicroServiceCommunicationException{
-		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(centerMapper.centerToCenterDTOFlat(center)));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center.");
-		}
 	}
 	
 	public void deleteById(final Long id) throws EntityNotFoundException  {
@@ -212,40 +206,42 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
-	public Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) throws EntityNotFoundException {
+	public Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom, boolean withAMQP) throws EntityNotFoundException {
 		Optional<Center> centerOpt = findByName(institutionDicom.getInstitutionName());
 		if (centerOpt.isEmpty()) {
 			Center center = new Center();
 			center.setName(institutionDicom.getInstitutionName());
 			center.setStreet(institutionDicom.getInstitutionAddress());
-			StudyCenter studyCenter = new StudyCenter();
-			Study study = studyService.findById(studyId);
-			studyCenter.setStudy(study);
-			studyCenter.setCenter(center);
-			List<StudyCenter> studyCenterList = new ArrayList<>();
-			studyCenterList.add(studyCenter);
-			center.setStudyCenterList(studyCenterList);
-			return create(center);
+			isCenterInStudy(studyId, center);
+			return create(center, withAMQP);
 		} else {
 			Center center = centerOpt.orElseThrow();
-			boolean centerInStudy = false;
-			List<StudyCenter> studyCenterList = center.getStudyCenterList();
-			for (StudyCenter studyCenter : studyCenterList) {
-				if (studyCenter.getStudy().getId().equals(studyId)) {
-					centerInStudy = true;
-					break;
-				}
-			}
-			if(!centerInStudy) {
-				StudyCenter studyCenter = new StudyCenter();
-				Study study = studyService.findById(studyId);
-				studyCenter.setStudy(study);
-				studyCenter.setCenter(center);
-				center.getStudyCenterList().add(studyCenter);
-				update(center);
+			if (!isCenterInStudy(studyId, center)) {
+				update(center, withAMQP);
 			}
 			return center;
 		}
+	}
+
+	private boolean isCenterInStudy(Long studyId, Center center) {
+		List<StudyCenter> studyCenterList = center.getStudyCenterList();
+		if (studyCenterList != null && !studyCenterList.isEmpty()) {
+			for (StudyCenter studyCenter : studyCenterList) {
+				if (studyCenter.getStudy().getId().equals(studyId)) {
+					return true;
+				}
+			}
+		}
+		if (studyCenterList == null) {
+			studyCenterList = new ArrayList<>();
+			center.setStudyCenterList(studyCenterList);
+		}
+		StudyCenter studyCenter = new StudyCenter();
+		Study study = studyService.findById(studyId);
+		studyCenter.setStudy(study);
+		studyCenter.setCenter(center);
+		center.getStudyCenterList().add(studyCenter);
+		return false;
 	}
 
 }

@@ -113,7 +113,7 @@ public class CenterApiController implements CenterApi {
 			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 		try {
-			final Center center = centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom);
+			final Center center = centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, true);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(center), HttpStatus.OK);			
 		} catch (EntityNotFoundException e) {
@@ -173,7 +173,7 @@ public class CenterApiController implements CenterApi {
 		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 		/* Save center in db. */
-		final Center createdCenter = centerService.create(center);
+		final Center createdCenter = centerService.create(center, true);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
 	}
@@ -191,7 +191,7 @@ public class CenterApiController implements CenterApi {
 			validate(center, result);
 
 			/* Update center in db. */
-			centerService.update(center);
+			centerService.update(center, true);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {

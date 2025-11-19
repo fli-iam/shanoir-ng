@@ -30,6 +30,7 @@ import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
@@ -266,8 +267,9 @@ public class DicomSEGAndSRImporterService {
 	 * @param dataset
 	 * @param datasetAttributes
 	 * @throws MalformedURLException
+	 * @throws ShanoirException 
 	 */
-	private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
+	private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
 		Dataset newMsOrSegDataset = null;
 		if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
 			newMsOrSegDataset = new SegmentationDataset();

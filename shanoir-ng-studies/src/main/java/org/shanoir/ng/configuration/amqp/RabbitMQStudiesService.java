@@ -247,7 +247,7 @@ public class RabbitMQStudiesService {
 	@Transactional
 	private Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) {
 		try {
-			return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom);
+			return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, false);
 		} catch (EntityNotFoundException e) {
 			LOG.error("Error while creating a new center: ", e);
 		}
