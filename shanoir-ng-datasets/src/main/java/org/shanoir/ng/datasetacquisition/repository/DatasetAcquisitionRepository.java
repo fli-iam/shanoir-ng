@@ -66,6 +66,11 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 			@Param("examinationId") Long examinationId,
 			@Param("seriesInstanceUID") String seriesInstanceUID);
 
+	@Query("SELECT da FROM DatasetAcquisition da " +
+			"LEFT JOIN FETCH da.datasets " +
+			"WHERE da.id = :id")
+	Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+
 }
 
 

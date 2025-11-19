@@ -145,7 +145,6 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 				throw new ServletException("Not supported DICOM modality sent: " + modality);
 			}
 		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
 			throw e;
 		}
 	}

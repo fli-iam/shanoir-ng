@@ -360,7 +360,7 @@ public class DicomImporterService {
         acquisition.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
         // @todo: take care of acquisition equipment
         acquisition.setAcquisitionEquipmentId(0L);
-        return acquisitionService.create(acquisition);
+        return acquisitionService.create(acquisition, false);
     }
 
     /**

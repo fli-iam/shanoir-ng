@@ -57,11 +57,14 @@ public interface DatasetAcquisitionService {
 			String seriesInstanceUID);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    public DatasetAcquisition findByIdWithDatasets(Long id);
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
 	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
-	DatasetAcquisition create(DatasetAcquisition entity);
+	DatasetAcquisition create(DatasetAcquisition entity, boolean withAMQP);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
 	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;

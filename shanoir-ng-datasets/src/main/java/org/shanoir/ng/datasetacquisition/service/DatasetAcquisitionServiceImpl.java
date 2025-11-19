@@ -160,10 +160,18 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean withAMQP) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        if (withAMQP) {
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        }
         return savedEntity;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByIdWithDatasets(Long id) {
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override
