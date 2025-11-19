@@ -141,8 +141,9 @@ export class StudyTreeComponent implements OnDestroy {
                     return allIds;
                 }
             });
+        } else {
+            return Promise.resolve(new Set(this.selectedDatasetNodes.map(dsNode => dsNode.id)));
         }
-    }
 
     openInViewer() {
         const studies: Set<string> = new Set();
