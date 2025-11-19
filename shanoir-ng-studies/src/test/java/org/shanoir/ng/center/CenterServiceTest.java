@@ -136,14 +136,14 @@ public class CenterServiceTest {
 
 	@Test
 	public void saveTest() {
-		centerService.create(createCenter());
+		centerService.create(createCenter(), true);
 
 		Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
 	}
 
 	@Test
 	public void updateTest() throws EntityNotFoundException {
-		final Center updatedCenter = centerService.update(createCenter());
+		final Center updatedCenter = centerService.update(createCenter(), true);
 		Assertions.assertNotNull(updatedCenter);
 		Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
 

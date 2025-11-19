@@ -103,7 +103,7 @@ public class CenterApiControllerTest {
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
 		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
-		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
+		given(centerServiceMock.create(Mockito.any(Center.class), true)).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
