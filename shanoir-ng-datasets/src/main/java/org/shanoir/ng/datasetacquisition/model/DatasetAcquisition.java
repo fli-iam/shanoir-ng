@@ -128,8 +128,11 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     /**
      * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
      * dcm4chee arc light, and generated during pseudonymization.
+	 * Not unique, as we can have STOW-RS imports of the same DICOM study,
+	 * that are imported into 2 Shanoir studies (== research project) and
+	 * keep the same SeriesInstanceUID, but are 2 different acquisitions.
      */
-    @Column(name = "series_instance_uid", unique = true)
+    @Column(name = "series_instance_uid")
     private String seriesInstanceUID;
 
 	public DatasetAcquisition() {

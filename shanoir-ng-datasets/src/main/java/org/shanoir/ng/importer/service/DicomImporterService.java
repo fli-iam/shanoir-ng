@@ -464,6 +464,7 @@ public class DicomImporterService {
             examination.setComment(studyDICOM.getStudyDescription());
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
+            LOG.info("Examination created: {}", examination.toString());
         } // Avoid, that the examination creation makes RabbitMQ calls
         return examination;
     }
