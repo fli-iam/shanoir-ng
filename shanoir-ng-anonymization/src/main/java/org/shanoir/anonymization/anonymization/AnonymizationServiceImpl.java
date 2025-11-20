@@ -84,7 +84,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     @Override
     public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-            String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
+                                    String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
         String patientName = patientLastName + "^" + patientFirstName + "^^^";
         anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
     }
@@ -124,7 +124,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     }
 
     private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID,
-            String patientBirthDate) {
+                                          String patientBirthDate) {
         anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
         anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
 
@@ -159,8 +159,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * @throws Exception
      */
     public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
-            String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
+                                     String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
+                                     Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
         try {
@@ -194,6 +194,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             if (patientNameAttr != null && !patientNameAttr.isEmpty()) {
                 patientNameArrayAttr = patientNameAttr.split("\\^");
             }
+            if (!datasetAttributes.contains(Tag.PatientID)) {
+                datasetAttributes.setString(Tag.PatientID, VR.LO, datasetAttributes.getString(Tag.PatientName));
+            }
             String patientIDAttr = datasetAttributes.getString(Tag.PatientID);
             String patientBirthNameAttr = datasetAttributes.getString(Tag.PatientBirthName);
             // temporarily keep the patient birth date for isShanoirAnonymization
@@ -220,10 +223,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                         action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
                     }
                     anonymizeTag(tagInt, action, datasetAttributes);
-                // even: public tags
+                    // even: public tags
                 } else if (anonymizationMap.containsKey(tagString)) {
                     switch (tagInt) {
-                        case Tag.SOPInstanceUID -> anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
+                        case Tag.SOPInstanceUID ->
+                                anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
                         case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
                         case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
                         case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
@@ -303,7 +307,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * @throws Exception
      */
     private String checkForPHIInPrivateTags(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
-            String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
+                                            String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
         // check for patient name elements
         for (int i = 0; i < patientNameArrayAttr.length; i++) {
             String patientNamePart = patientNameArrayAttr[i];
