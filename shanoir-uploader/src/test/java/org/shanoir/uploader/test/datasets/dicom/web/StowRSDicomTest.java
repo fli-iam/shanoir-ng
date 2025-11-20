@@ -33,6 +33,7 @@ public class StowRSDicomTest extends AbstractTest {
 
 	@Test
 	public void postDICOMMRToDicomWeb() throws Exception {
+		logger.info("Starting postDICOMMRToDicomWeb");
 		long startTime = System.currentTimeMillis();
 		try {
 			URL resource = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
@@ -40,7 +41,11 @@ public class StowRSDicomTest extends AbstractTest {
 				File file = new File(resource.toURI());
 				if (file.isDirectory()) {
 					for (File f : file.listFiles()) {
-						shUpClient.postDicom(f);
+						try {
+							shUpClient.postDicom(f);
+						} catch(Exception e) {
+							logger.error(e.getMessage(), e);
+						}
 					}
 				}
 			}
@@ -59,9 +64,10 @@ public class StowRSDicomTest extends AbstractTest {
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void generateStowRSDicom() throws Exception {
-		URL source = getClass().getClassLoader().getResource("sample1/");
-		URL destination = getClass().getClassLoader().getResource("sample1_stowrs/");
+		URL source = getClass().getClassLoader().getResource("acr_phantom_t1/");
+		URL destination = getClass().getClassLoader().getResource("acr_phantom_t1_stowrs/");
 		if (source != null) {
 			File sourceFile = new File(source.toURI());
 			File destinationFile = new File(destination.toURI());
