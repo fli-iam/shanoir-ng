@@ -26,6 +26,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -151,7 +152,7 @@ export class UserComponent extends EntityComponent<User> {
 
     buildForm(): UntypedFormGroup {
         const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        let userForm = this.formBuilder.group({
+        const userForm = this.formBuilder.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.usualCharsValidator()]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.usualCharsValidator()]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
