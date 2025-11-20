@@ -163,17 +163,17 @@ public class DicomImporterService {
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
 
-   	private ConcurrentHashMap<String, Integer> studyInstanceUIDNumberOfFilesCache;
+   	private ConcurrentHashMap<String, Integer> seriesInstanceUIDNumberOfFilesCache;
 	
 	@PostConstruct
 	public void init() {
-		studyInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
+		seriesInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
 		LOG.info("DICOMWeb cache created: studyInstanceUIDNumberOfFilesCache");
 	}
 
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void clearStudyInstanceUIDNumberOfFilesCache() {
-		studyInstanceUIDNumberOfFilesCache.clear();
+		seriesInstanceUIDNumberOfFilesCache.clear();
 		LOG.info("DICOMWeb cache cleared: studyInstanceUIDNumberOfFilesCache");
 	}
 
@@ -197,6 +197,7 @@ public class DicomImporterService {
         Long subjectId = manageSubject(attributes, study);
         Long centerId = manageCenterAndEquipment(attributes, study);
         Examination examination = manageExamination(attributes, study, subjectId, centerId);
+        String seriesDescription = attributes.getString(Tag.SeriesDescription);
         if(!DicomUtils.checkSerieIsIgnored(attributes)) {
             DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
@@ -204,23 +205,23 @@ public class DicomImporterService {
             datasetExpressionRepository.save(expression);
             solrService.indexDataset(dataset.getId());
             sendToPacs(metaInformationAttributes, attributes);
-            countNumberOfFilesPerStudy(examination);
+            countNumberOfFilesPerSerie(acquisition, seriesDescription);
             return true;
         } else {
-            String seriesDescription = attributes.getString(Tag.SeriesDescription);
             LOG.error("DICOM file of serie {} ignored.", seriesDescription);
             return false;
         }
     }
 
-    private void countNumberOfFilesPerStudy(Examination examination) {
-        Integer numberOfFiles = studyInstanceUIDNumberOfFilesCache.get(examination.getStudyInstanceUID());
+    private void countNumberOfFilesPerSerie(DatasetAcquisition acquisition, String seriesDescription) {
+        String key = acquisition.getSeriesInstanceUID() + DELIMITER + seriesDescription;
+        Integer numberOfFiles = seriesInstanceUIDNumberOfFilesCache.get(key);
         if (numberOfFiles == null) {
-            studyInstanceUIDNumberOfFilesCache.put(examination.getStudyInstanceUID(), Integer.valueOf(1));
+            seriesInstanceUIDNumberOfFilesCache.put(key, Integer.valueOf(1));
         } else {
-            studyInstanceUIDNumberOfFilesCache.put(examination.getStudyInstanceUID(), Integer.valueOf(numberOfFiles+1));
+            seriesInstanceUIDNumberOfFilesCache.put(key, Integer.valueOf(numberOfFiles+1));
         }
-        LOG.info(studyInstanceUIDNumberOfFilesCache.toString());
+        LOG.info(seriesInstanceUIDNumberOfFilesCache.toString());
     }
 
     private Dataset manageDataset(Attributes attributes, Long studyId, Long subjectId, DatasetAcquisition acquisition)

@@ -46,8 +46,8 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	@Override
 	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
 			Attributes attributes) throws Exception {
-		LOG.info("Generating GenericDatasetAcquisition for: {} - {} - Rank: {}",
-				serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating GenericDatasetAcquisition for: {} - {} - {} - Rank: {}",
+				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
 		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setImportDate(LocalDate.now());

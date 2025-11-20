@@ -70,8 +70,8 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 	@Override
 	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
 			Attributes attributes) throws Exception {
-		LOG.info("Generating XaDatasetAcquisition for: {} - {} - Rank: {}",
-				serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating XaDatasetAcquisition for: {} - {} - {} - Rank: {}",
+				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
 		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
 		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setImportDate(LocalDate.now());

@@ -111,8 +111,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Override
 	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(
 			String userName, Serie serie, int rank,	Attributes attributes) throws IOException {
-		LOG.info("Generating MrDatasetAcquisition for: {} - {} - Rank: {}",
-				serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating MrDatasetAcquisition for: {} - {} - {} - Rank: {}",
+				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		mrDatasetAcquisition.setUsername(userName);
 		mrDatasetAcquisition.setImportDate(LocalDate.now());

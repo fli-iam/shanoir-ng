@@ -76,8 +76,8 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Override
 	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
 			Attributes attributes) throws Exception {
-		LOG.info("Generating CtDatasetAcquisition for: {} - {} - Rank: {}",
-				serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating CtDatasetAcquisition for: {} - {} - {} - Rank: {}",
+				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
 		CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
 		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setImportDate(LocalDate.now());

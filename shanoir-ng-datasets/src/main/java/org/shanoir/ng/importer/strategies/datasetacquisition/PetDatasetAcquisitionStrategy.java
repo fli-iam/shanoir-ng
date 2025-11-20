@@ -70,8 +70,8 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	@Override
 	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
 			Attributes attributes) throws Exception {
-		LOG.info("Generating PetDatasetAcquisition for: {} - {} - Rank: {}",
-				serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating PetDatasetAcquisition for: {} - {} - {} - Rank: {}",
+				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
 		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
 		datasetAcquisition.setUsername(userName);
 		datasetAcquisition.setImportDate(LocalDate.now());
