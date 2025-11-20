@@ -126,6 +126,25 @@ public class DICOMWebService {
 		return null;
 	}
 
+    public String findStudyByDicomPatientId(String patientId) {
+        try {
+            String url = this.serverURL + "?PatientID=" + patientId;
+            HttpGet httpGet = new HttpGet(url);
+			httpGet.setHeader("Accept-Charset", "UTF-8");
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					return EntityUtils.toString(entity, "UTF-8");
+				} else {
+					LOG.error("DICOMWeb: findStudy: empty response entity for Patient ID: " + patientId);
+				}
+			}
+        } catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+    }
+
 	public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";

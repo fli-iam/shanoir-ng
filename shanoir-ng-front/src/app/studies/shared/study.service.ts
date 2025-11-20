@@ -25,8 +25,8 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import * as AppUtils from '../../utils/app.utils';
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
-import {Subject} from "../../subjects/shared/subject.model";
+import { SubjectDTO } from "../../subjects/shared/subject.dto";
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";

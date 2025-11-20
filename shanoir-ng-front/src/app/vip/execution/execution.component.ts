@@ -219,7 +219,7 @@ export class ExecutionComponent implements OnInit {
         const candidate = new ExecutionCandidateDto();
         candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         candidate.pipelineIdentifier = this.pipeline.identifier
-        candidate.studyIdentifier = [...this.selectedDatasets][0].studyId;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+        candidate.studyIdentifier = [...this.selectedDatasets][0].study?.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
         candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
