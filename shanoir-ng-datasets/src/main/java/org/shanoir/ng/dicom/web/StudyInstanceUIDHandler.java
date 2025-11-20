@@ -168,6 +168,9 @@ public class StudyInstanceUIDHandler {
 	 * @return
 	 */
 	public String findStudyInstanceUID(Examination examination) {
+		String studyInstanceUIDDb = examination.getStudyInstanceUID();
+		if (studyInstanceUIDDb != null && !studyInstanceUIDDb.isEmpty())
+			return studyInstanceUIDDb;
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
@@ -226,4 +229,5 @@ public class StudyInstanceUIDHandler {
 		Long id = Long.parseLong(examinationUIDWithoutPrefix);
 		return id;
 	}
+
 }
