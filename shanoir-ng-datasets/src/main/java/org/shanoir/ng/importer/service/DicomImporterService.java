@@ -22,7 +22,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
-import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -40,6 +39,7 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
@@ -180,15 +180,6 @@ public class DicomImporterService {
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
-        // DicomEnhanced: get attributes differently
-        final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-                || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
-            MultiframeExtractor emf = new MultiframeExtractor();
-            attributes = emf.extract(attributes, 0);
-        }
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
@@ -206,14 +197,20 @@ public class DicomImporterService {
         Long subjectId = manageSubject(attributes, study);
         Long centerId = manageCenterAndEquipment(attributes, study);
         Examination examination = manageExamination(attributes, study, subjectId, centerId);
-        DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
-        Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
-        DatasetExpression expression = manageDatasetExpression(attributes, dataset);
-        datasetExpressionRepository.save(expression);
-        solrService.indexDataset(dataset.getId());
-        sendToPacs(metaInformationAttributes, attributes);
-        countNumberOfFilesPerStudy(examination);
-        return true;
+        if(!DicomUtils.checkSerieIsIgnored(attributes)) {
+            DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
+            Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
+            DatasetExpression expression = manageDatasetExpression(attributes, dataset);
+            datasetExpressionRepository.save(expression);
+            solrService.indexDataset(dataset.getId());
+            sendToPacs(metaInformationAttributes, attributes);
+            countNumberOfFilesPerStudy(examination);
+            return true;
+        } else {
+            String seriesDescription = attributes.getString(Tag.SeriesDescription);
+            LOG.error("DICOM file of serie {} ignored.", seriesDescription);
+            return false;
+        }
     }
 
     private void countNumberOfFilesPerStudy(Examination examination) {

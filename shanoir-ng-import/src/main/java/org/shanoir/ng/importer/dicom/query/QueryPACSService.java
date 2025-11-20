@@ -54,6 +54,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -523,7 +524,7 @@ public class QueryPACSService {
 
 	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
 		Serie serie = new Serie(serieAttr);
-		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
+		if (!DicomUtils.checkSerieIsIgnored(serieAttr)) {
 			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
 			DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 			DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);

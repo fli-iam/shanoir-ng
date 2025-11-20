@@ -21,6 +21,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -103,9 +104,14 @@ public class Serie {
 		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		modality = attributes.getString(Tag.Modality);
 		protocolName = attributes.getString(Tag.ProtocolName);
-		sequenceName = attributes.getString(Tag.SequenceName);
-		isEnhanced = Boolean.FALSE;
-		isMultiFrame = Boolean.FALSE;
+		isEnhanced = DicomUtils.checkDicomIsEnhanced(attributes);
+		multiFrameCount = DicomUtils.getDicomMultiFrameCount(attributes, isEnhanced);
+        if (multiFrameCount > 1) {
+            isMultiFrame = true;
+        } else {
+            isMultiFrame = false;
+        }
+        sequenceName = DicomUtils.getDicomSequenceName(attributes, isEnhanced);
 		isSpectroscopy = Boolean.FALSE;
 		isCompressed = Boolean.FALSE;
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
