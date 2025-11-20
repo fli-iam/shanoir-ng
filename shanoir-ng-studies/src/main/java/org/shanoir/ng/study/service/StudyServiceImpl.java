@@ -59,6 +59,7 @@ import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
@@ -125,6 +126,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private SubjectService subjectService;
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
