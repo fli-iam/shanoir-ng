@@ -38,7 +38,6 @@ import { Profile } from "../../shared/models/profile.model";
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
@@ -72,7 +71,6 @@ export class StudyComponent extends EntityComponent<Study> {
     protected dateDisplay = dateDisplay;
 
     subjects: IdName[];
-    selectedCenter: IdName;
     users: User[] = [];
     uploading: boolean = false;
     protected protocolFiles: File[];
@@ -168,10 +166,10 @@ export class StudyComponent extends EntityComponent<Study> {
             pro.profileName = "Profile Neurinfo";
             this.study.profile = pro;
         }
-        this.study.subjectStudyList = this.study.subjectStudyList.sort(
-            function(a: SubjectStudy, b:SubjectStudy) {
-                const aname = a.studyIdentifier ? a.studyIdentifier : a.subject.name;
-                const bname = b.studyIdentifier ? b.studyIdentifier : b.subject.name;
+        this.study.subjects = this.study.subjects.sort(
+            function(a: Subject, b:Subject) {
+                const aname = a.studyIdentifier ? a.studyIdentifier : a.name;
+                const bname = b.studyIdentifier ? b.studyIdentifier : b.name;
                 return aname.localeCompare(bname);
             });
 
@@ -215,8 +213,6 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         }
         this.getCenters().then(() => {
-            const option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
-            if (option) this.selectedCenter = option.value;
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         });
         return Promise.resolve();
@@ -227,7 +223,6 @@ export class StudyComponent extends EntityComponent<Study> {
         this.isStudyAdmin = true;
         this.getCenters();
         this.getProfiles();
-        this.selectedCenter = null;
         this.protocolFiles = [];
         this.dataUserAgreement = null;
         this.getAllSubjects();
@@ -261,9 +256,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'selectedCenter': [this.selectedCenter, [Validators.required]],
             'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
-            'subjectStudyList': [this.study.subjectStudyList],
+            'subjects': [this.study.subjects],
             'tags': [this.study.tags],
             'studyTags': [this.study.studyTags],
             'challenge': [this.study.challenge],
@@ -320,14 +314,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-        return false;
-        /* 
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
-        */
     }
 
     private newStudy(): Study {
@@ -381,12 +372,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.router.navigate(['/center/details/' + id]);
     }
 
-    onCenterAdd(): void {
-        if (this.selectedCenter) {
+    onCenterAdd(selectedCenter: Center): void {
+        if (selectedCenter) {
             const studyCenter: StudyCenter = new StudyCenter();
             studyCenter.center = new Center();
-            studyCenter.center.id = this.selectedCenter.id;
-            studyCenter.center.name = this.selectedCenter.name;
+            studyCenter.center.id = selectedCenter.id;
+            studyCenter.center.name = selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
             this.study.studyCenterList = [...this.study.studyCenterList];
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
@@ -489,6 +480,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachNewFile(event: any) {
         const fileToAdd = event.target.files[0];
         this.protocolFiles.push(fileToAdd);
+        if (!this.study.protocolFilePaths) this.study.protocolFilePaths = [];
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
@@ -526,7 +518,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        const newStudy: boolean = !this.study?.id; 
+        const newStudy: boolean = !this.study?.id;
         return super.save(() => {
             const uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
@@ -583,12 +575,7 @@ export class StudyComponent extends EntityComponent<Study> {
     onTagListChange() {
         // hack : force change detection
         this.study.tags = [].concat(this.study.tags);
-        // hack : force change detection for the subject-study tag list
-        this.study.subjectStudyList.forEach(subjStu => {
-            subjStu.study.tags = this.study.tags;
-        });
-        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
-
+        this.study.subjects = [].concat(this.study.subjects);
         this.updateSubjectTagsInUse();
     }
 
@@ -596,10 +583,10 @@ export class StudyComponent extends EntityComponent<Study> {
         // hack : force change detection
         this.study.studyTags = [].concat(this.study.studyTags);
         // hack : force change detection for the subject-study tag list
-        this.study.subjectStudyList.forEach(subjStu => {
-            subjStu.study.studyTags = this.study.studyTags;
+        this.study.subjects.forEach(subjects => {
+            subjects.study.studyTags = this.study.studyTags;
         });
-        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+        this.study.subjects = [].concat(this.study.subjects);
     }
 
     goToAccessRequest(accessRequest : AccessRequest) {
@@ -609,7 +596,7 @@ export class StudyComponent extends EntityComponent<Study> {
     reloadSubjectStudies() {
         setTimeout(() => {
             this.studyService.get(this.id).then(study => {
-                this.study.subjectStudyList = study.subjectStudyList;
+                this.study.subjects = study.subjects;
             });
         }, 1000);
     }
@@ -620,8 +607,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private updateSubjectTagsInUse() {
         let tags: Tag[] = [];
-        this.study.subjectStudyList.forEach(ss => {
-            tags = tags.concat(ss.tags);
+        this.study.subjects.forEach(s => {
+            tags = tags.concat(s.tags);
         });
         this.subjectTagsInUse = tags;
     }

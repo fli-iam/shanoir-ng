@@ -75,6 +75,8 @@ public class ImportJob implements Serializable {
     private String username;
 
     private QualityTag qualityTag;
+
+    private String studyInstanceUID;
     
     public long getTimestamp() {
         return timestamp;
@@ -205,6 +207,14 @@ public class ImportJob implements Serializable {
         this.anonymisationProfileToUse = anonymisationProfileToUse;
     }
 
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
+
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
+
     public String getSubjectName() {
         return subjectName;
     }
@@ -266,4 +276,5 @@ public class ImportJob implements Serializable {
             return getPatients().get(0).getStudies().get(0);
         }
     }
+
 }

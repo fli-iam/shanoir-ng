@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,9 +15,9 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Acquisition equipment service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
-	
+
 	@Autowired
 	private AcquisitionEquipmentRepository repository;
 
@@ -97,9 +97,13 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
+		return this.repository.findAllBySerialNumber(serialNumber);
+	}
+
+	public List<AcquisitionEquipment> findAllBySerialNumberContaining(String serialNumber) {
 		return this.repository.findBySerialNumberContaining(serialNumber);
 	}
-	
+
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
 		AcquisitionEquipment newDbAcEq = repository.save(entity);
 		try {
@@ -152,11 +156,11 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all values
 			AcquisitionEquipment acquisitionEquipment;
 			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
-			List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
+			List<AcquisitionEquipment> equipments = findAllBySerialNumberContaining(dicomSerialNumber);
 			if (equipments == null || equipments.isEmpty()) {
 				// second try: remove spaces and leading zeros
 				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
-				equipments = findAllBySerialNumber(dicomSerialNumber);
+				equipments = findAllBySerialNumberContaining(dicomSerialNumber);
 				// nothing found with device serial number from DICOM
 				if (equipments == null || equipments.isEmpty()) {
 					equipments = new ArrayList<AcquisitionEquipment>();
@@ -182,7 +186,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	private AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom) {
-		Optional<ManufacturerModel> manufacturerModelOpt = 
+		Optional<ManufacturerModel> manufacturerModelOpt =
 	        	manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
 		ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
 			Manufacturer manufacturer = manufacturerRepository
@@ -212,19 +216,18 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
-		for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
-			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
-			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
-			if (manufacturerModel != null) {
-				if (equipmentDicom.getManufacturerModelName().toLowerCase().contains(manufacturerModel.getName().toLowerCase())) {
-					// Issue #3012: we ignore the manufacturer name here
-				} else {
-					iterator.remove();
-				}
-			} else {
-				iterator.remove();
-			}
-		}
+		String manufacturerModelNameLower = equipmentDicom.getManufacturerModelName().toLowerCase();
+		equipments = equipments.stream()
+				.filter(equipment -> {
+					ManufacturerModel model = equipment.getManufacturerModel();
+					return model != null &&
+							biDirectionalContains(model.getName().toLowerCase(), manufacturerModelNameLower);
+				})
+				.collect(Collectors.toList());
+	}
+
+	private boolean biDirectionalContains(String name1, String name2) {
+		return name1.contains(name2) || name2.contains(name1);
 	}
 
 }

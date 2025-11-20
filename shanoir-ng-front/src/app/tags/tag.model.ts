@@ -12,14 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Entity } from '../shared/components/entity/entity.abstract';
-import { Id } from '../shared/models/id.model';
+import { Field } from '../shared/reflect/field.decorator';
 
 export class Tag extends Entity {
 
-    id: number;
-    color: string;
-    name: string;
-    
+    @Field() id: number;
+    @Field() color: string;
+    @Field() name: string;
+
+    public static makeTag(id: number, name: string, color: string): Tag {
+        const tag = new Tag();
+        tag.id = id;
+        tag.name = name;
+        tag.color = color;
+        return tag;
+    }
+
     public equals(tag: Tag): boolean {
         if (!tag) return false;
         else if (this.id && tag.id) {
@@ -35,21 +43,4 @@ export class Tag extends Entity {
         t.color = this.color;
         t.name = this.name;
     }
-}
-
-
-export class SubjectStudyTagDTO {
-
-    constructor(
-        public subjectStudy: Id,
-        public tag: Tag
-    ) {}
-}
-
-export class StudyTagDTO {
-
-  constructor(
-    public subjectStudy: Id,
-    public tag: Tag
-  ) {}
 }

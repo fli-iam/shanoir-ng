@@ -11,12 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-
-import { GlobalService } from 'src/app/shared/services/global.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Interval } from '../shared/quality-card.service';
+import { GlobalService } from '../../shared/services/global.service';
+
 
 
 @Component({
@@ -33,8 +34,10 @@ export class TestQualityCardOptionsComponent implements OnInit {
     form: UntypedFormGroup
     @ViewChild('window') window: ElementRef;
 
-    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
-        globalService.onNavigate.subscribe(() => {
+    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService, private destroyRef: DestroyRef) {
+        globalService.onNavigate
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
             this.cancel();
         });
     }

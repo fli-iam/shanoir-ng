@@ -29,19 +29,19 @@
                           <li class="required">
                               <label i18n="Extension request|Email label@@ExtensionRequestMotivation" class="required-label">Email adress associated to the account.</label>
                               <span class="right-col">
-                              <input type="text" autosize id="email" formControlName="email" [(ngModel)]="extensionRequestInfo.email"/>
+                              <input type="text" autosize id="email" formControlName="email"/>
                               </span>
                           </li>
                           <li class="required">
                               <label i18n="Extension request|Expiration date label@@ExtensionRequestExpirationDate" class="required-label">New expiration Date</label>
                               <span class="right-col">
-                              <datepicker [(ngModel)]="extensionRequestInfo.extensionDate" formControlName="extensionDate"></datepicker>
+                              <datepicker formControlName="extensionDate"></datepicker>
                               </span>
                           </li>
                           <li class="required">
                               <label i18n="Extension request|Motivation label@@ExtensionRequestMotivation" class="required-label">Why do you want to extend your account?</label>
                               <span class="right-col">
-                              <textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="extensionRequestInfo.extensionMotivation"></textarea>
+                              <textarea autosize id="extensionMotivation" formControlName="extensionMotivation"></textarea>
                               </span>
                           </li>
                       </ol>
