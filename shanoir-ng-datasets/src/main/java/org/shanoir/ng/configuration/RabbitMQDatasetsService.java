@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
@@ -69,8 +68,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -277,35 +274,6 @@ public class RabbitMQDatasetsService {
 		} catch (IOException e) {
 			LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR);
-		}
-	}
-
-	/**
-	 * Receives a shanoirEvent as a json object, concerning a dataset acquisition to
-	 * create
-	 * 
-	 * @param studyStr the task as a json string.
-	 */
-	@RabbitListener(bindings = @QueueBinding(key = ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"), exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true", autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory")
-	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
-	public void createDatasetAcquisition(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event = objectMapper.readValue(studyStr, ShanoirEvent.class);
-			Long acquisitionId = Long.valueOf(event.getObjectId());
-			DatasetAcquisition acq = datasetAcquisitionService.findByIdWithDatasets(acquisitionId);
-			if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
-				List<Long> datasetIds = acq.getDatasets().stream()
-						.map(Dataset::getId)
-						.collect(Collectors.toList());
-				solrService.indexDatasets(datasetIds);
-				LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), acquisitionId);
-			} else {
-				LOG.warn("No datasets found for acquisition {}", acquisitionId);
-			}
-		} catch (Exception e) {
-			LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
 

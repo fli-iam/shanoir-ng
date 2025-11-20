@@ -153,21 +153,32 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
     	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-    	for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
-    	}
+        result.forEach(a -> indexDatasets(a));
     	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity, boolean withAMQP) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        if (withAMQP) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        if (indexDatasetsToSolr) {
+            indexDatasets(savedEntity);
         }
         return savedEntity;
     }
 
+    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
+                    .map(Dataset::getId)
+                    .collect(Collectors.toList());
+            solrService.indexDatasets(datasetIds);
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+        } else {
+            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+        }
+    }
+ 
     @Override
     @Transactional(readOnly = true)
     public DatasetAcquisition findByIdWithDatasets(Long id) {

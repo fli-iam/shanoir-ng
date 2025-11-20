@@ -140,9 +140,6 @@ public class RabbitMQConfiguration {
 	/** Study deleted => Delete associated datasets. */
 	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 	
-	/** Create DS acquisition => Index datasets in solr. */
-	public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
-
 	/** Queue to retrieve informations about studyc cards. */
 	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
@@ -369,11 +366,6 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue centerDeleteQueue() {
 		return new Queue(CENTER_DELETE_QUEUE, true);
-	}
-
-	@Bean
-	public static Queue createDatasetAcquisitionQueue() {
-		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
 
 	@Bean

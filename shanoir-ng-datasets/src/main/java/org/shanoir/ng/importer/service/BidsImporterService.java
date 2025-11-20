@@ -30,7 +30,7 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -39,7 +39,6 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +76,7 @@ public class BidsImporterService {
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	private DatasetAcquisitionService datasetAcquisitionService;
 	
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
@@ -291,8 +290,8 @@ public class BidsImporterService {
 		datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
 		datasetAcquisition.setUsername(importJob.getUsername());
 		
-		datasetAcquisitionRepository.save(datasetAcquisition);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+		datasetAcquisitionService.create(datasetAcquisition, true);
+
 		event.setStatus(ShanoirEvent.SUCCESS);
 		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
 				+" Successfully created datasets for subject [" + importJob.getSubjectName()

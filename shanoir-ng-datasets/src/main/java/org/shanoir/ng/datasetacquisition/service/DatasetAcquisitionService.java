@@ -64,7 +64,7 @@ public interface DatasetAcquisitionService {
 	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
-	DatasetAcquisition create(DatasetAcquisition entity, boolean withAMQP);
+	DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
 	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
