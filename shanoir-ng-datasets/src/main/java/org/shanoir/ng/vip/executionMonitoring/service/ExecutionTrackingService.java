@@ -1,6 +1,8 @@
-package org.shanoir.ng.vip.execution.service;
+package org.shanoir.ng.vip.executionMonitoring.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 
 public interface ExecutionTrackingService {
@@ -20,4 +22,12 @@ public interface ExecutionTrackingService {
      * @param newProcessing
      */
     void completeTracking(ExecutionMonitoring executionMonitoring, DatasetProcessing newProcessing);
+
+    /**
+     * Download the tracking file relative to the given pipeline name and put it in the Http resposne as a .zip archive
+     *
+     * @param pipelineName
+     * @param response
+     */
+    void downloadTrackingFile(String pipelineName, HttpServletResponse response) throws RestServiceException;
 }

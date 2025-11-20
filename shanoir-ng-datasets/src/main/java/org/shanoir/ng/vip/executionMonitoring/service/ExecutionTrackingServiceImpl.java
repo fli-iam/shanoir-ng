@@ -1,12 +1,18 @@
-package org.shanoir.ng.vip.execution.service;
+package org.shanoir.ng.vip.executionMonitoring.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -14,6 +20,8 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
@@ -28,6 +36,9 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
     public enum execStatus {VALID, SENT}
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     public void updateTrackingFile(ExecutionMonitoring executionMonitoring, execStatus execStatus) {
         try {
@@ -73,9 +84,42 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         }
     }
 
-    /**
-     * Create a new line for the execution input
-     */
+    public void downloadTrackingFile(String pipelineName, HttpServletResponse response) throws RestServiceException {
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition",
+                "attachment;filename=" + correctPipelineName(pipelineName));
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            String filePath = getTrackingFilePath(pipelineName);
+            File trackingFile = new File(filePath);
+            if(trackingFile.exists()) {
+                ZipEntry zipEntry = new ZipEntry(correctPipelineName(pipelineName));
+                zipEntry.setTime(System.currentTimeMillis());
+
+                zipOutputStream.putNextEntry(zipEntry);
+                try (FileInputStream fis = new FileInputStream(trackingFile)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) >= 0) {
+                        zipOutputStream.write(buffer, 0, length);
+                    }
+                }
+                zipOutputStream.write(objectMapper.writeValueAsString(trackingFile).getBytes());
+                zipOutputStream.closeEntry();
+            } else {
+                LOG.info("Tracking file {} not found", filePath);
+            }
+        } catch (Exception e) {
+            response.setContentType(null);
+            LOG.error("Unexpected error while downloading dataset files.", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Unexpected error while downloading tracking file."));
+        }    }
+
+
+        /**
+         * Create a new line for the execution input
+         */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));) {
 
@@ -174,8 +218,21 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Get the path of the tracking file relative to pipeline linked to the execution monitoring
      */
     private String getTrackingFilePath(ExecutionMonitoring executionMonitoring) {
-        String pipelineName = executionMonitoring.getPipelineIdentifier().replaceAll("[^a-zA-Z0-9_-]", "_").replaceAll("_+", "_").replaceAll("^_+|_+$", "");
-        return trackingFilePrefixe + "/" + pipelineName + ".csv";
+        return getTrackingFilePath(executionMonitoring.getPipelineIdentifier());
+    }
+
+    /**
+     * Get the path of the tracking file relative to the given pipeline name
+     */
+    private String getTrackingFilePath(String pipelineName) {
+        return trackingFilePrefixe + "/" + correctPipelineName(pipelineName) + ".csv";
+    }
+
+    /**
+     * Get the path of the tracking file relative to the given pipeline name
+     */
+    private String correctPipelineName(String pipelineName) {
+        return pipelineName.replaceAll("[^a-zA-Z0-9_-]", "_").replaceAll("_+", "_").replaceAll("^_+|_+$", "");
     }
 
     /**

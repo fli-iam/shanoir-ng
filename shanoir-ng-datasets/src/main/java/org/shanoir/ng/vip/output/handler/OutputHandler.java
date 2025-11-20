@@ -1,6 +1,6 @@
 package org.shanoir.ng.vip.output.handler;
 
-import org.shanoir.ng.vip.execution.service.ExecutionTrackingServiceImpl;
+import org.shanoir.ng.vip.executionMonitoring.service.ExecutionTrackingServiceImpl;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.springframework.beans.factory.annotation.Autowired;

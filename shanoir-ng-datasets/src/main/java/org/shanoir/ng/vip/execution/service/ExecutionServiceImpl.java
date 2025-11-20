@@ -17,6 +17,7 @@ import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
+import org.shanoir.ng.vip.executionMonitoring.service.ExecutionTrackingServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
