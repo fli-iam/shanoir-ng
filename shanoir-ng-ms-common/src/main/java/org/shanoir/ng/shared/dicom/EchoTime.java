@@ -45,13 +45,4 @@ public class EchoTime {
     public void setEchoTime(Double echoTime) {
         this.echoTime = echoTime;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + echoNumber;
-        result = prime * result + echoTime.hashCode();
-        return result;
-    }
 }

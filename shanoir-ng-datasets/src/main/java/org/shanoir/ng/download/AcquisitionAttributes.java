@@ -104,6 +104,16 @@ public class AcquisitionAttributes<T> {
         }
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        for (T id : datasetMap.keySet()) {
+            Attributes attributes = datasetMap.get(id).orElse(null);
+            hash = 31 * hash + (attributes != null ? attributes.hashCode() : 0);
+        }
+        return hash;
+    }
+
     public Class<?> getParametrizedType() {
         if (this.datasetMap != null && !this.datasetMap.keySet().isEmpty()) {
             return this.datasetMap.keySet().iterator().next().getClass();
