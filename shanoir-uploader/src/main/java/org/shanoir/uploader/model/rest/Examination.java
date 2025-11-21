@@ -117,7 +117,7 @@ public class Examination {
     }
 
     public String toString() {
-        final String examinationDate = ShUpConfig.formatter.format(this.getExaminationDate());
+        final String examinationDate = ShUpConfig.FORMATTER.format(this.getExaminationDate());
         return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";
     }
 
