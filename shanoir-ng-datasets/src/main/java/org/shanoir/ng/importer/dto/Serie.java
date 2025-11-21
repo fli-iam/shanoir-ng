@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,225 +28,225 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Serie {
 
-	@JsonProperty("selected")
-	private Boolean selected = null;
+    @JsonProperty("selected")
+    private Boolean selected = null;
 
-	@JsonProperty("seriesInstanceUID")
-	private String seriesInstanceUID = null;
+    @JsonProperty("seriesInstanceUID")
+    private String seriesInstanceUID = null;
 
-	@JsonProperty("modality")
-	private String modality = null;
+    @JsonProperty("modality")
+    private String modality = null;
 
-	@JsonProperty("protocolName")
-	private String protocolName = null;
+    @JsonProperty("protocolName")
+    private String protocolName = null;
 
-	@JsonProperty("seriesDescription")
-	private String seriesDescription = null;
+    @JsonProperty("seriesDescription")
+    private String seriesDescription = null;
 
-	@JsonProperty("seriesDate")
-	@LocalDateAnnotations
-	private LocalDate seriesDate = null;
+    @JsonProperty("seriesDate")
+    @LocalDateAnnotations
+    private LocalDate seriesDate = null;
 
-	@JsonProperty("seriesNumber")
-	private Integer seriesNumber = null;
+    @JsonProperty("seriesNumber")
+    private Integer seriesNumber = null;
 
-	@JsonProperty("sequenceName")
-	private String sequenceName;
+    @JsonProperty("sequenceName")
+    private String sequenceName;
 
-	@JsonProperty("numberOfSeriesRelatedInstances")
-	private Integer numberOfSeriesRelatedInstances = null;
+    @JsonProperty("numberOfSeriesRelatedInstances")
+    private Integer numberOfSeriesRelatedInstances = null;
 
-	@JsonProperty("sopClassUID")
-	private String sopClassUID = null;
+    @JsonProperty("sopClassUID")
+    private String sopClassUID = null;
 
-	@JsonProperty("equipment")
-	private EquipmentDicom equipment = null;
+    @JsonProperty("equipment")
+    private EquipmentDicom equipment = null;
 
-	@JsonProperty("isCompressed")
-	private Boolean isCompressed = null;
+    @JsonProperty("isCompressed")
+    private Boolean isCompressed = null;
 
-	@JsonProperty("isMultiFrame")
-	private Boolean isMultiFrame = null;
+    @JsonProperty("isMultiFrame")
+    private Boolean isMultiFrame = null;
 
-	@JsonProperty("multiFrameCount")
-	private Integer multiFrameCount;
+    @JsonProperty("multiFrameCount")
+    private Integer multiFrameCount;
 
-	@JsonProperty("isEnhanced")
-	private Boolean isEnhanced;
-	
-	@JsonProperty("isSpectroscopy")
-	private Boolean isSpectroscopy;
+    @JsonProperty("isEnhanced")
+    private Boolean isEnhanced;
 
-	@JsonProperty("images")
-	private List<Image> images = null;
+    @JsonProperty("isSpectroscopy")
+    private Boolean isSpectroscopy;
 
-	@JsonProperty("imagesNumber")
-	private Integer imagesNumber = null;
+    @JsonProperty("images")
+    private List<Image> images = null;
 
-	@JsonProperty("datasets")
-	private List<Dataset> datasets = null;
+    @JsonProperty("imagesNumber")
+    private Integer imagesNumber = null;
 
-	public Boolean getSelected() {
-		return selected;
-	}
+    @JsonProperty("datasets")
+    private List<Dataset> datasets = null;
 
-	public void setSelected(Boolean selected) {
-		this.selected = selected;
-	}
+    public Boolean getSelected() {
+        return selected;
+    }
 
-	public String getSeriesInstanceUID() {
-		return seriesInstanceUID;
-	}
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
 
-	public void setSeriesInstanceUID(String seriesInstanceUID) {
-		this.seriesInstanceUID = seriesInstanceUID;
-	}
+    public String getSeriesInstanceUID() {
+        return seriesInstanceUID;
+    }
 
-	public String getModality() {
-		return modality;
-	}
+    public void setSeriesInstanceUID(String seriesInstanceUID) {
+        this.seriesInstanceUID = seriesInstanceUID;
+    }
 
-	public void setModality(String modality) {
-		this.modality = modality;
-	}
+    public String getModality() {
+        return modality;
+    }
 
-	public String getProtocolName() {
-		return protocolName;
-	}
+    public void setModality(String modality) {
+        this.modality = modality;
+    }
 
-	public void setProtocolName(String protocolName) {
-		this.protocolName = protocolName;
-	}
+    public String getProtocolName() {
+        return protocolName;
+    }
 
-	public String getSeriesDescription() {
-		return seriesDescription;
-	}
+    public void setProtocolName(String protocolName) {
+        this.protocolName = protocolName;
+    }
 
-	public void setSeriesDescription(String seriesDescription) {
-		this.seriesDescription = seriesDescription;
-	}
+    public String getSeriesDescription() {
+        return seriesDescription;
+    }
 
-	public LocalDate getSeriesDate() {
-		return seriesDate;
-	}
+    public void setSeriesDescription(String seriesDescription) {
+        this.seriesDescription = seriesDescription;
+    }
 
-	public void setSeriesDate(LocalDate seriesDate) {
-		this.seriesDate = seriesDate;
-	}
+    public LocalDate getSeriesDate() {
+        return seriesDate;
+    }
 
-	public Integer getSeriesNumber() {
-		return seriesNumber;
-	}
+    public void setSeriesDate(LocalDate seriesDate) {
+        this.seriesDate = seriesDate;
+    }
 
-	public void setSeriesNumber(Integer seriesNumber) {
-		this.seriesNumber = seriesNumber;
-	}
+    public Integer getSeriesNumber() {
+        return seriesNumber;
+    }
 
-	public Integer getNumberOfSeriesRelatedInstances() {
-		return numberOfSeriesRelatedInstances;
-	}
+    public void setSeriesNumber(Integer seriesNumber) {
+        this.seriesNumber = seriesNumber;
+    }
 
-	public void setNumberOfSeriesRelatedInstances(Integer numberOfSeriesRelatedInstances) {
-		this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
-	}
+    public Integer getNumberOfSeriesRelatedInstances() {
+        return numberOfSeriesRelatedInstances;
+    }
 
-	public String getSopClassUID() {
-		return sopClassUID;
-	}
+    public void setNumberOfSeriesRelatedInstances(Integer numberOfSeriesRelatedInstances) {
+        this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
+    }
 
-	public void setSopClassUID(String sopClassUID) {
-		this.sopClassUID = sopClassUID;
-	}
+    public String getSopClassUID() {
+        return sopClassUID;
+    }
 
-	public EquipmentDicom getEquipment() {
-		return equipment;
-	}
+    public void setSopClassUID(String sopClassUID) {
+        this.sopClassUID = sopClassUID;
+    }
 
-	public void setEquipment(EquipmentDicom equipment) {
-		this.equipment = equipment;
-	}
+    public EquipmentDicom getEquipment() {
+        return equipment;
+    }
 
-	public Boolean getIsCompressed() {
-		return isCompressed;
-	}
+    public void setEquipment(EquipmentDicom equipment) {
+        this.equipment = equipment;
+    }
 
-	public void setIsCompressed(Boolean isCompressed) {
-		this.isCompressed = isCompressed;
-	}
+    public Boolean getIsCompressed() {
+        return isCompressed;
+    }
 
-	public Boolean getIsMultiFrame() {
-		return isMultiFrame;
-	}
+    public void setIsCompressed(Boolean isCompressed) {
+        this.isCompressed = isCompressed;
+    }
 
-	public void setIsMultiFrame(Boolean isMultiFrame) {
-		this.isMultiFrame = isMultiFrame;
-	}
+    public Boolean getIsMultiFrame() {
+        return isMultiFrame;
+    }
 
-	public List<Image> getImages() {
-		return images;
-	}
+    public void setIsMultiFrame(Boolean isMultiFrame) {
+        this.isMultiFrame = isMultiFrame;
+    }
 
-	public void setImages(List<Image> images) {
-		this.images = images;
-	}
+    public List<Image> getImages() {
+        return images;
+    }
 
-	public Integer getImagesNumber() {
-		return imagesNumber;
-	}
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 
-	public void setImagesNumber(Integer imagesNumber) {
-		this.imagesNumber = imagesNumber;
-	}
+    public Integer getImagesNumber() {
+        return imagesNumber;
+    }
 
-	public List<Dataset> getDatasets() {
-		return datasets;
-	}
+    public void setImagesNumber(Integer imagesNumber) {
+        this.imagesNumber = imagesNumber;
+    }
 
-	public void setDatasets(List<Dataset> datasets) {
-		this.datasets = datasets;
-	}
+    public List<Dataset> getDatasets() {
+        return datasets;
+    }
 
-	public Integer getMultiFrameCount() {
-		return multiFrameCount;
-	}
+    public void setDatasets(List<Dataset> datasets) {
+        this.datasets = datasets;
+    }
 
-	public void setMultiFrameCount(Integer multiFrameCount) {
-		this.multiFrameCount = multiFrameCount;
-	}
+    public Integer getMultiFrameCount() {
+        return multiFrameCount;
+    }
 
-	public String getSequenceName() {
-		return sequenceName;
-	}
+    public void setMultiFrameCount(Integer multiFrameCount) {
+        this.multiFrameCount = multiFrameCount;
+    }
 
-	public void setSequenceName(String sequenceName) {
-		this.sequenceName = sequenceName;
-	}
+    public String getSequenceName() {
+        return sequenceName;
+    }
 
-	public DatasetFile getFirstDatasetFileForCurrentSerie() {
-		if (getDatasets() == null
-				|| getDatasets().get(0) == null
-				|| getDatasets().get(0).getExpressionFormats() == null
-				|| getDatasets().get(0).getExpressionFormats().get(0) == null
-				|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
-				|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
-			return null;
-		}
-		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
-	}
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
+    }
 
-	public Boolean getIsEnhanced() {
-		return isEnhanced;
-	}
+    public DatasetFile getFirstDatasetFileForCurrentSerie() {
+        if (getDatasets() == null
+                || getDatasets().get(0) == null
+                || getDatasets().get(0).getExpressionFormats() == null
+                || getDatasets().get(0).getExpressionFormats().get(0) == null
+                || getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
+                || getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
+            return null;
+        }
+        return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
+    }
 
-	public void setIsEnhanced(Boolean isEnhanced) {
-		this.isEnhanced = isEnhanced;
-	}
+    public Boolean getIsEnhanced() {
+        return isEnhanced;
+    }
 
-	public Boolean getIsSpectroscopy() {
-		return isSpectroscopy;
-	}
+    public void setIsEnhanced(Boolean isEnhanced) {
+        this.isEnhanced = isEnhanced;
+    }
 
-	public void setIsSpectroscopy(Boolean isSpectroscopy) {
-		this.isSpectroscopy = isSpectroscopy;
-	}	
+    public Boolean getIsSpectroscopy() {
+        return isSpectroscopy;
+    }
+
+    public void setIsSpectroscopy(Boolean isSpectroscopy) {
+        this.isSpectroscopy = isSpectroscopy;
+    }
 }

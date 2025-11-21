@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -43,118 +43,118 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Center service test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class CenterServiceTest {
 
-	private static final Long CENTER_ID = 1L;
-	private static final String UPDATED_CENTER_NAME = "test";
+    private static final Long CENTER_ID = 1L;
+    private static final String UPDATED_CENTER_NAME = "test";
 
-	@Mock
-	private CenterMapper centerMapper;
+    @Mock
+    private CenterMapper centerMapper;
 
-	@Mock
-	private CenterRepository centerRepository;
+    @Mock
+    private CenterRepository centerRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private CenterServiceImpl centerService;
-	
-	@Mock
-	private ObjectMapper objectMapper;
+    @InjectMocks
+    private CenterServiceImpl centerService;
 
-	@BeforeEach
-	public void setup() {
-		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
-		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
-		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(ModelsUtil.createCenter()));
-		given(centerRepository.save(Mockito.any(Center.class))).willReturn(createCenter());
-	}
+    @Mock
+    private ObjectMapper objectMapper;
 
-	@Test
-	public void deleteByBadIdTest() throws EntityNotFoundException {
-		assertThrows(EntityNotFoundException.class, () -> {
-			centerService.deleteById(2L);
-		});
-	}
-	
-	@Test
-	public void deleteByIdTest() throws EntityNotFoundException {
-		centerService.deleteById(CENTER_ID);
+    @BeforeEach
+    public void setup() {
+        given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
+        given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
+        given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(ModelsUtil.createCenter()));
+        given(centerRepository.save(Mockito.any(Center.class))).willReturn(createCenter());
+    }
 
-		Mockito.verify(centerRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+    @Test
+    public void deleteByBadIdTest() throws EntityNotFoundException {
+        assertThrows(EntityNotFoundException.class, () -> {
+            centerService.deleteById(2L);
+        });
+    }
 
-	@Test
-	public void deleteByIdWithAcquisitionEquipmentTest() throws EntityNotFoundException {
-		final Center center = ModelsUtil.createCenter();
-		center.getAcquisitionEquipments().add(ModelsUtil.createAcquisitionEquipment());
-		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
-		centerService.deleteById(CENTER_ID);
-	}
+    @Test
+    public void deleteByIdTest() throws EntityNotFoundException {
+        centerService.deleteById(CENTER_ID);
 
-	@Test
-	public void deleteByIdWithStudyTest() throws EntityNotFoundException {
-		final Center center = ModelsUtil.createCenter();
-		center.getStudyCenterList().add(new StudyCenter());
-		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
-		centerService.deleteById(CENTER_ID);
-	}
+        Mockito.verify(centerRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Center> centers = centerService.findAll();
-		Assertions.assertNotNull(centers);
-		Assertions.assertTrue(centers.size() == 1);
+    @Test
+    public void deleteByIdWithAcquisitionEquipmentTest() throws EntityNotFoundException {
+        final Center center = ModelsUtil.createCenter();
+        center.getAcquisitionEquipments().add(ModelsUtil.createAcquisitionEquipment());
+        given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
+        centerService.deleteById(CENTER_ID);
+    }
 
-		Mockito.verify(centerRepository, Mockito.times(1)).findAll();
-	}
+    @Test
+    public void deleteByIdWithStudyTest() throws EntityNotFoundException {
+        final Center center = ModelsUtil.createCenter();
+        center.getStudyCenterList().add(new StudyCenter());
+        given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
+        centerService.deleteById(CENTER_ID);
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Center center = centerService.findById(CENTER_ID).orElse(null);
-		Assertions.assertNotNull(center);
-		Assertions.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
+    @Test
+    public void findAllTest() {
+        final List<Center> centers = centerService.findAll();
+        Assertions.assertNotNull(centers);
+        Assertions.assertTrue(centers.size() == 1);
 
-		Mockito.verify(centerRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(centerRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findIdsAndNamesTest() {
-		final List<IdName> centers = centerService.findIdsAndNames();
-		Assertions.assertNotNull(centers);
-		Assertions.assertTrue(centers.size() == 1);
+    @Test
+    public void findByIdTest() {
+        final Center center = centerService.findById(CENTER_ID).orElse(null);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
 
-		Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
-	}
+        Mockito.verify(centerRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() {
-		centerService.create(createCenter());
+    @Test
+    public void findIdsAndNamesTest() {
+        final List<IdName> centers = centerService.findIdsAndNames();
+        Assertions.assertNotNull(centers);
+        Assertions.assertTrue(centers.size() == 1);
 
-		Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
-	}
+        Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
+    }
 
-	@Test
-	public void updateTest() throws EntityNotFoundException {
-		final Center updatedCenter = centerService.update(createCenter());
-		Assertions.assertNotNull(updatedCenter);
-		Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
+    @Test
+    public void saveTest() {
+        centerService.create(createCenter());
 
-		Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
-	}
+        Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
+    }
 
-	private Center createCenter() {
-		final Center center = new Center();
-		center.setId(CENTER_ID);
-		center.setName(UPDATED_CENTER_NAME);
-		return center;
-	}
+    @Test
+    public void updateTest() throws EntityNotFoundException {
+        final Center updatedCenter = centerService.update(createCenter());
+        Assertions.assertNotNull(updatedCenter);
+        Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
+
+        Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
+    }
+
+    private Center createCenter() {
+        final Center center = new Center();
+        center.setId(CENTER_ID);
+        center.setName(UPDATED_CENTER_NAME);
+        return center;
+    }
 
 }

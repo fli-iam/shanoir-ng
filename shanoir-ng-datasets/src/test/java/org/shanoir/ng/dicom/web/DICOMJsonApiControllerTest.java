@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -56,39 +56,39 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class DICOMJsonApiControllerTest {
 
-	private static final String REQUEST_PATH = "/dicomjson/studies";
+    private static final String REQUEST_PATH = "/dicomjson/studies";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private ExaminationToStudyDTOMapper examinationToStudyDTOMapperMock;
+    @MockBean
+    private ExaminationToStudyDTOMapper examinationToStudyDTOMapperMock;
 
-	@MockBean
-	private ExaminationService examinationServiceMock;
-	
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+    @MockBean
+    private ExaminationService examinationServiceMock;
 
-	@BeforeEach
-	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-		doNothing().when(examinationServiceMock).deleteById(1L, null);
-		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(""), Mockito.eq(""))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
-		Examination exam = new Examination();
-		exam.setId(Long.valueOf(123));
-		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
-	}
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSRImporterService;
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void findStudiesTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept("application/dicom+json")
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
-		.andExpect(status().isNoContent());
-	}
+    @BeforeEach
+    public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+        doNothing().when(examinationServiceMock).deleteById(1L, null);
+        given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(""), Mockito.eq(""))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+        Examination exam = new Examination();
+        exam.setId(Long.valueOf(123));
+        given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findStudiesTest() throws Exception {
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept("application/dicom+json")
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
+                .andExpect(status().isNoContent());
+    }
 
 }

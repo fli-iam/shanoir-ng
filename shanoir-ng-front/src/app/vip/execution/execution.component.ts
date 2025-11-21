@@ -1,32 +1,46 @@
-import {Component, OnInit} from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { formatDate } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import {
     UntypedFormControl,
     UntypedFormGroup,
     ValidatorFn,
     Validators
 } from '@angular/forms';
-import {Router} from '@angular/router';
-import { formatDate } from '@angular/common';
+import { Router } from '@angular/router';
 
-import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
-import {Execution} from 'src/app/vip/models/execution';
-import {ParameterType} from 'src/app/vip/models/parameterType';
-import {Pipeline} from 'src/app/vip/models/pipeline';
-import {ExecutionService} from 'src/app/vip/execution/execution.service';
-import {DatasetLight, DatasetService} from 'src/app/datasets/shared/dataset.service';
-import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
-import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
-import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
-import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
+import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { DatasetLight, DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { DatasetProcessingType } from 'src/app/enum/dataset-processing-type.enum';
+import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
+import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
+import { ExecutionService } from 'src/app/vip/execution/execution.service';
+import { Execution } from 'src/app/vip/models/execution';
+import { ParameterType } from 'src/app/vip/models/parameterType';
+import { Pipeline } from 'src/app/vip/models/pipeline';
 
-import {ExecutionDataService} from '../execution.data-service';
-import {Option} from '../../shared/select/select.component';
-import {DatasetParameterDTO} from "../models/dataset-parameter.dto";
-import {GroupByEnum} from "../models/groupby.enum";
-import {PipelineParameter} from "../models/pipelineParameter";
-import {ServiceLocator} from "../../utils/locator.service";
-import {ConsoleService} from "../../shared/console/console.service";
-import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
+import { ConsoleService } from "../../shared/console/console.service";
+import { Option } from '../../shared/select/select.component';
+import { ServiceLocator } from "../../utils/locator.service";
+import { ExecutionDataService } from '../execution.data-service';
+import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
+import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
+import { GroupByEnum } from "../models/groupby.enum";
+import { PipelineParameter } from "../models/pipelineParameter";
 
 @Component({
     selector: 'app-execution',

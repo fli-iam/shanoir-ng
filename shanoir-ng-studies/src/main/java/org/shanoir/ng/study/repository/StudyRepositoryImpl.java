@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.study.repository;
 
 import jakarta.persistence.EntityManager;
@@ -19,53 +33,53 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-	private static final Logger LOG = LoggerFactory.getLogger(StudyRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StudyRepositoryImpl.class);
 
-	@Override
-	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
+    @Override
+    public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 
-		//"getStudyStatistics" is the name of the MySQL procedure
-		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStudyStatistics"); 
+        //"getStudyStatistics" is the name of the MySQL procedure
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStudyStatistics");
 
-		//Declare the parameters in the same order
-		query.registerStoredProcedureParameter(1, Long.class, ParameterMode.IN);
+        //Declare the parameters in the same order
+        query.registerStoredProcedureParameter(1, Long.class, ParameterMode.IN);
 
-		//Pass the parameter values
-		query.setParameter(1, studyId);
+        //Pass the parameter values
+        query.setParameter(1, studyId);
 
-		//Execute query
-		query.execute();
-		
-		@SuppressWarnings("unchecked")
-		List<Object[]> results = query.getResultList();
+        //Execute query
+        query.execute();
 
-		List<StudyStatisticsDTO> studyStatisticsList = new ArrayList<>();
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
 
-		for (Object[] row : results) {
+        List<StudyStatisticsDTO> studyStatisticsList = new ArrayList<>();
 
-			StudyStatisticsDTO dto = new StudyStatisticsDTO();
+        for (Object[] row : results) {
 
-			dto.setStudyId((Long) row[0]);
-			dto.setCenterId((Long) row[1]);
-			dto.setCenterName((String) row[2]);
-			dto.setCenterPrefix((String) row[3]);
-			dto.setSubjectId((Long) row[4]);
-			dto.setCommonName((String) row[5]);
-			dto.setExaminationId((Long) row[6]);
-			dto.setExaminationComment((String) row[7]);
-			dto.setExaminationDate((Date) row[8]);
-			dto.setDatasetAcquisitionId((Long) row[9]);
-			dto.setImportDate((Date) row[10]);
-			dto.setDatasetId((Long) row[11]);
-			dto.setDatasetName((String) row[12]);
-			dto.setModality((String) row[13]);
-			dto.setQuality((String) row[14]);
+            StudyStatisticsDTO dto = new StudyStatisticsDTO();
 
-			studyStatisticsList.add(dto);
+            dto.setStudyId((Long) row[0]);
+            dto.setCenterId((Long) row[1]);
+            dto.setCenterName((String) row[2]);
+            dto.setCenterPrefix((String) row[3]);
+            dto.setSubjectId((Long) row[4]);
+            dto.setCommonName((String) row[5]);
+            dto.setExaminationId((Long) row[6]);
+            dto.setExaminationComment((String) row[7]);
+            dto.setExaminationDate((Date) row[8]);
+            dto.setDatasetAcquisitionId((Long) row[9]);
+            dto.setImportDate((Date) row[10]);
+            dto.setDatasetId((Long) row[11]);
+            dto.setDatasetName((String) row[12]);
+            dto.setModality((String) row[13]);
+            dto.setQuality((String) row[14]);
 
-		}
+            studyStatisticsList.add(dto);
 
-		return studyStatisticsList;
-	}
+        }
+
+        return studyStatisticsList;
+    }
 
 }
