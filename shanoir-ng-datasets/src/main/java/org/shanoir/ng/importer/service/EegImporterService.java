@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -69,7 +83,7 @@ public class EegImporterService {
 
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
-        if(Objects.isNull(importJob.getShanoirEvent())){
+        if (Objects.isNull(importJob.getShanoirEvent())) {
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         } else {
             event = importJob.getShanoirEvent();
@@ -180,7 +194,7 @@ public class EegImporterService {
                 }
 
                 // Fill dataset with informations
-                datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+                datasetToCreate.setChannelCount(datasetDto.getChannels() != null ? datasetDto.getChannels().size() : 0);
                 datasetToCreate.setChannels(datasetDto.getChannels());
                 datasetToCreate.setEvents(datasetDto.getEvents());
                 datasetToCreate.setCreationDate(LocalDate.now());
@@ -201,7 +215,7 @@ public class EegImporterService {
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 

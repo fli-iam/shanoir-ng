@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,24 +29,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class XaProtocolStrategy {
 
-	private static final Logger LOG = LoggerFactory.getLogger(XaProtocolStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XaProtocolStrategy.class);
 
-	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {		
-		XaProtocol protocol = new XaProtocol();
-		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
+    public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {
+        XaProtocol protocol = new XaProtocol();
+        Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 
-		// Slice thickness
-		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
-		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
-		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
-		protocol.setSliceThickness(sliceThickness);
+        // Slice thickness
+        Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
+        sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
+        LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
+        protocol.setSliceThickness(sliceThickness);
 
-		/** Number of Slices */
-		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
-		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
-		protocol.setNumberOfSlices(numberOfSlices);
-		
-		return protocol;
-	}
+        /** Number of Slices */
+        Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
+        LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
+        protocol.setNumberOfSlices(numberOfSlices);
+
+        return protocol;
+    }
 
 }
