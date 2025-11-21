@@ -16,6 +16,8 @@ package org.shanoir.ng.shared.core.model;
 
 import java.io.Serializable;
 
+import org.hibernate.Hibernate;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -52,5 +54,37 @@ public abstract class AbstractEntity implements Serializable {
      */
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (Hibernate.getClass(this) != Hibernate.getClass(obj)) {
+            return false;
+        }
+        AbstractEntity entity = (AbstractEntity) obj;
+        if (this.getId() == null || entity.getId() == null) {
+            return false;
+        } else {
+            return this.getId().equals(entity.getId());
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        if (getId() != null) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getId().hashCode();
+            return result;
+        }
+        // ID is not set, return a unique constant hash code to avoid
+        // all objects having the same hash code of 31.
+        return System.identityHashCode(this);
     }
 }
