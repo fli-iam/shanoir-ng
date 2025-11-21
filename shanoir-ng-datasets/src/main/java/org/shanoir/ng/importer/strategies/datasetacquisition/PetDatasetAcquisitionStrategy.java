@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
+public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
 
     /** Logger. */

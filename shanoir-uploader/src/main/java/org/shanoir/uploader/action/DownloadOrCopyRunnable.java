@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
  * OR copies the DICOM files from the CD/DVD/local file system to an upload
  * folder.
  * Multiple DICOM-studies/exams are managed within one thread, each as an
- * ImportJob. This class creates the import-job.json (and upload-job.xml +
- * nominative-upload-job.xml for legacy reasons). The .xmls will be removed
+ * ImportJob. This class creates the import-job.json (and upload-job.xml
+            +  * nominative-upload-job.xml for legacy reasons). The .xmls will be removed
  * later.
  *
  * @author mkain

@@ -67,7 +67,7 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
             datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
         } else if ("XA".equals(modality)) {
             datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
-        }else {
+        } else {
             // By default we just create a generic dataset acquisition
             datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
         }

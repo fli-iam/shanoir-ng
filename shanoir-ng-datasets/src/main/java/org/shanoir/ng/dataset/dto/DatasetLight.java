@@ -49,7 +49,7 @@ public class DatasetLight {
             Long subjectId, String subjectName,
             LocalDate creationDate,
             boolean hasProcessings
-    ) throws NoSuchMethodException,InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    ) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         this.hasProcessings = hasProcessings;
         this.id = id;
         this.name = name;

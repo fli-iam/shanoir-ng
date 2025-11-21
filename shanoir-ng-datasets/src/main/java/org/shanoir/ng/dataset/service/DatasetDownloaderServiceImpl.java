@@ -82,7 +82,7 @@ public class DatasetDownloaderServiceImpl {
     protected static final String CONVERSION_FAILED_ERROR_MSG = "Nifti conversion failed, you may try to select another one.";
 
     @Autowired
-    DatasetService datasetService;
+    protected DatasetService datasetService;
 
     @Autowired
     protected WADODownloaderService downloader;
@@ -141,7 +141,7 @@ public class DatasetDownloaderServiceImpl {
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId, datasetDownloadName.get(dataset.getId()));
 
             }
-            if(!filesByAcquisitionId.isEmpty()){
+            if (!filesByAcquisitionId.isEmpty()) {
                 DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
             }
 
@@ -173,14 +173,14 @@ public class DatasetDownloaderServiceImpl {
         int count = 0;
         for (Dataset dataset : datasets) {
             String datasetName = dataset.getName();
-            if(datasetDownloadName.containsValue(datasetName)) {
+            if (datasetDownloadName.containsValue(datasetName)) {
                 if (datasetName.contains(".")) {
                     datasetDownloadName.put(dataset.getId(), datasetName.replaceFirst("\\.", "_" + count + "."));
                 } else {
                     datasetDownloadName.put(dataset.getId(), datasetName + "_" + count);
                 }
                 count++;
-            }else {
+            } else {
                 datasetDownloadName.put(dataset.getId(), dataset.getName());
             }
         }
@@ -311,7 +311,7 @@ public class DatasetDownloaderServiceImpl {
 
     protected String getSubjectName(Dataset dataset) {
         String subjectName = "unknownSubject";
-        if(dataset.getSubjectId() != null){
+        if (dataset.getSubjectId() != null) {
             Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
             if (subjectOpt.isPresent()) {
                 subjectName = subjectOpt.get().getName();

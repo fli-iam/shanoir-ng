@@ -112,12 +112,12 @@ public class PathologyServiceImpl implements PathologyService {
          * ObjectMapper().writeValueAsString(pathology));
          * rabbitTemplate.convertAndSend(RabbitMqConfiguration.pathologyQueueOut().
          * getName(), new ObjectMapper().writeValueAsString(pathology)); return true; }
-         * catch (AmqpException e) { LOG.error("Cannot send Pathology " +
-         * pathology.getId() + " save/update to Shanoir Old on queue : " +
-         * RabbitMqConfiguration.queueOut().getName(), e); } catch
-         * (JsonProcessingException e) { LOG.error("Cannot send Pathology " +
-         * pathology.getId() +
-         * " save/update because of an error while serializing Pathology.", e); } return
+         * catch (AmqpException e) { LOG.error("Cannot send Pathology "
+            +          * pathology.getId() + " save/update to Shanoir Old on queue : "
+            +          * RabbitMqConfiguration.queueOut().getName(), e); } catch
+         * (JsonProcessingException e) { LOG.error("Cannot send Pathology "
+            +          * pathology.getId()
+            +          * " save/update because of an error while serializing Pathology.", e); } return
          * false;
          */
     }

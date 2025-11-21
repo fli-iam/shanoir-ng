@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import java.io.ByteArrayInputStream;
@@ -452,9 +466,9 @@ public class DicomSEGAndSRImporterService {
          */
         ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
         // close calls to the outer stream, close the inner stream
-        try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
+        try (DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
             dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-            try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
+            try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
                 dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }

@@ -66,7 +66,7 @@ public final class DicomSerieAndInstanceAnalyzer {
 
     /**
      * By default raw data storage and sub-types are ignored.
-     * 
+     *
      * We ignore (even if very rare) DICOMDIR instances, as they
      * are not images.
      *

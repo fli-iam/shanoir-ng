@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web.service;
 
 import java.io.ByteArrayInputStream;
@@ -316,7 +330,7 @@ public class DICOMWebService {
                     .addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
                     .setBody(fileBody);
             multipartEntityBuilder.addPart(partBuilder.build());
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new ShanoirException(e.getMessage());
         }
@@ -341,7 +355,7 @@ public class DICOMWebService {
             multipartEntityBuilder.addPart(multipartPart);
             HttpEntity entity = multipartEntityBuilder.build();
             sendMultipartRequest(entity);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new ShanoirException(e.getMessage());
         }
@@ -350,7 +364,7 @@ public class DICOMWebService {
 
     private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
         HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
         httpPost.setEntity(entity);
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             int code = response.getCode();
@@ -377,8 +391,8 @@ public class DICOMWebService {
 
     public void rejectDatasetFromPacs(String url) throws ShanoirException {
         String rejectURL;
-        if (wadoURLHandler.isWADO_URI(url)) {
-            rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
+        if (wadoURLHandler.isWadoUri(url)) {
+            rejectURL = wadoURLHandler.convertWadoUriToWadoRs(url) + REJECT_SUFFIX;
         } else {
             rejectURL = url + REJECT_SUFFIX;
         }
@@ -409,7 +423,7 @@ public class DICOMWebService {
         }
     }
 
-    @Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
+    @Scheduled(cron = "0 */30 * * * *", zone = "Europe/Paris")
     public void deleteDicomFilesFromPacs() throws ShanoirException {
         // Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
         LOG.info("Scheduled call to delete all rejected instances from pacs.");

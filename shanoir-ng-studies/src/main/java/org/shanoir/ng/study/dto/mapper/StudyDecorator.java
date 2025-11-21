@@ -76,7 +76,7 @@ public abstract class StudyDecorator implements StudyMapper {
     }
 
     @Override
-    public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
+    public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
         final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
         simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
         //simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
@@ -85,7 +85,7 @@ public abstract class StudyDecorator implements StudyMapper {
     }
 
     @Override
-    public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (final List<Study> studies) {
+    public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(final List<Study> studies) {
         List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
         for (Study study: studies) {
             final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);

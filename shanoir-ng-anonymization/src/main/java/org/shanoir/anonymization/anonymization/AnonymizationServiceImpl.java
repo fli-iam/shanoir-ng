@@ -494,7 +494,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             if (Tag.StudyInstanceUID == tagInt) {
                 LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
             }
-            UIDs.put(attributes.getString(tagInt), value);
+            uids.put(attributes.getString(tagInt), value);
         }
         anonymizeTagAccordingToVR(attributes, tagInt, value);
     }

@@ -84,9 +84,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ExaminationApiControllerTest {
 
     @TempDir
-    public File tempFolder;
+    private File tempFolder;
 
-    public String tempFolderPath;
+    private String tempFolderPath;
 
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
@@ -132,10 +132,10 @@ public class ExaminationApiControllerTest {
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    ExaminationRepository examRepo;
+    private ExaminationRepository examRepo;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -153,7 +153,7 @@ public class ExaminationApiControllerTest {
         given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
 
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
         // Test event here
     }
@@ -176,7 +176,7 @@ public class ExaminationApiControllerTest {
         // WHEN we delete the examination
         try {
             mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+                    .andExpect(status().isNoContent());
 
             // Test events
             ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
@@ -202,7 +202,7 @@ public class ExaminationApiControllerTest {
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ExaminationApiControllerTest {
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(PageRequest.of(0, 10))))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class ExaminationApiControllerTest {
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         // Check event here to verify that the message is well set to event
         ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
@@ -251,7 +251,7 @@ public class ExaminationApiControllerTest {
         given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
-        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -266,7 +266,7 @@ public class ExaminationApiControllerTest {
 
             // WHEN The file is added to the examination
             mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
-            .andExpect(status().isUnprocessableEntity());
+                    .andExpect(status().isUnprocessableEntity());
 
             Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
 
@@ -286,7 +286,7 @@ public class ExaminationApiControllerTest {
         try {
             // THEN we have a "no content" answer.
             mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
-            .andExpect(status().isNoContent());
+                    .andExpect(status().isNoContent());
         } catch (Exception e) {
             System.out.println(e);
             fail();

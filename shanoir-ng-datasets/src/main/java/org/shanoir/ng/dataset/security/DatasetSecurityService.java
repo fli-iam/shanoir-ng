@@ -60,25 +60,25 @@ public class DatasetSecurityService {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
-    DatasetRepository datasetRepository;
+    private DatasetRepository datasetRepository;
 
     @Autowired
-    DatasetAcquisitionRepository datasetAcquisitionRepository;
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     @Autowired
-    StudyCardRepository studyCardRepository;
+    private StudyCardRepository studyCardRepository;
 
     @Autowired
-    QualityCardRepository qualityCardRepository;
+    private QualityCardRepository qualityCardRepository;
 
     @Autowired
-    ExaminationRepository examinationRepository;
+    private ExaminationRepository examinationRepository;
 
     @Autowired
-    SubjectRepository subjectRepository;
+    private SubjectRepository subjectRepository;
 
     @Autowired
-    StudyRightsService commService;
+    private StudyRightsService commService;
 
     @Autowired
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
@@ -111,7 +111,7 @@ public class DatasetSecurityService {
         if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
             return true;
         }
-        if (studyIds == null|| studyIds.isEmpty()) {
+        if (studyIds == null || studyIds.isEmpty()) {
             return false;
         }
 
@@ -533,8 +533,8 @@ public class DatasetSecurityService {
         if (datasetAcq.getExamination().getStudyId().equals(dbDatasetAcq.getExamination().getStudyId())) { // study hasn't changed
             return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
         } else { // study has changed : check user has right on both studies
-            return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr) &&
-                    this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
+            return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr)
+                    && this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
         }
     }
 
@@ -567,8 +567,8 @@ public class DatasetSecurityService {
         if (datasetAcqDto.getExamination().getStudyId().equals(dbDatasetAcq.getExamination().getStudyId())) { // study hasn't changed
             return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr);
         } else { // study has changed : check user has right on both studies
-            return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr) &&
-                    this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
+            return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr)
+                    && this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
         }
     }
 
@@ -652,7 +652,7 @@ public class DatasetSecurityService {
         for (Dataset dataset : page) {
             Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
             Long centerId = dataset.getDatasetAcquisition().getExamination().getCenterId();
-            if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+            if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 return false;
             }
         }
@@ -851,7 +851,7 @@ public class DatasetSecurityService {
         if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
             return true;
         }
-           if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return true;
         }
         List<Long> examinationIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
@@ -861,7 +861,7 @@ public class DatasetSecurityService {
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
-            if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+            if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 examsToRemove.add(exam.getId());
             }
         }
@@ -973,7 +973,7 @@ public class DatasetSecurityService {
         for (ExaminationDTO exam : list) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
-            if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+            if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 examsToRemove.add(exam);
             }
         }
@@ -1067,7 +1067,7 @@ public class DatasetSecurityService {
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
-            if(!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+            if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 return false;
             }
         }

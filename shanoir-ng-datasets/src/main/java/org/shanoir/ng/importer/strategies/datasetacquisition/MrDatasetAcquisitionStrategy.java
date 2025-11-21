@@ -65,7 +65,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     @Autowired
     private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
-    private static final Map<String, BidsDataType> dataTypeMapping;
+    private static Map<String, BidsDataType> dataTypeMapping;
+
     static {
         Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
         aMap.put("ANGIO_TIME", BidsDataType.ANAT);
@@ -77,7 +78,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         aMap.put("T1", BidsDataType.ANAT);
         aMap.put("T2", BidsDataType.ANAT);
         aMap.put("T2_STAR", BidsDataType.ANAT);
-        //TODO: To be completed by an expert
         dataTypeMapping = Collections.unmodifiableMap(aMap);
     }
 
@@ -104,7 +104,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         mrDatasetAcquisition.setDatasets(genericizedList);
 
         // total acquisition time
-        if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
+        if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
             Double totalAcquisitionTime = null;
             if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
                 Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());

@@ -69,7 +69,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     @Autowired
     private ExaminationService examinationService;
 
-    public DatasetProcessingApiController(){
+    public DatasetProcessingApiController() {
 
     }
 
@@ -178,7 +178,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Override
     public void massiveDownloadByProcessingIds(
-            @Parameter(description = "ids of processing", required=true) @Valid
+            @Parameter(description = "ids of processing", required = true) @Valid
             @RequestBody List<Long> processingIds,
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly") boolean resultOnly,
@@ -188,12 +188,12 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         for (Long processingId : processingIds) {
             DatasetProcessing processing = null;
             try {
-                if(processingId == null){
+                if (processingId == null) {
                     throw new Exception();
                 }
                 processing = datasetProcessingService.findById(processingId).get();
                 processingList.add(processing);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
             }
@@ -203,7 +203,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Override
     public void massiveDownloadProcessingByExaminationIds(
-            @Parameter(description = "ids of examination", required=true) @Valid
+            @Parameter(description = "ids of examination", required = true) @Valid
             @RequestBody List<Long> examinationIds,
             @Parameter(description = "comment of the desired processings") @Valid
             @RequestParam(value = "processingComment", required = false) String processingComment,
@@ -215,20 +215,19 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         for (Long examinationId : examinationIds) {
             Examination examination = null;
             try {
-                if(examinationId == null){
+                if (examinationId == null) {
                     throw new Exception();
                 }
                 examination = examinationService.findById(examinationId);
-
-                if(Objects.isNull(examination)){
+                if (Objects.isNull(examination)) {
                     throw new Exception();
                 }
                 examinationList.add(examination);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.FORBIDDEN.value(), examinationId + " is not a valid examination id."));
             }
         }
-        processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm" , response, false, null);
+        processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm", response, false, null);
     }
 }

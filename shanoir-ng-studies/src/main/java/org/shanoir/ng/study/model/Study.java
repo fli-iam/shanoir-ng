@@ -78,7 +78,7 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
         @ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
-@JsonIdentityInfo(scope=Study.class, generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+@JsonIdentityInfo(scope = Study.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Study extends HalEntity {
 
     /**
@@ -124,7 +124,7 @@ public class Study extends HalEntity {
     private LocalDate startDate;
 
     /** Relations between the investigators, the centers and the studies. */
-    @OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyCenter> studyCenterList;
 
     @NotNull
@@ -152,7 +152,7 @@ public class Study extends HalEntity {
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubjectStudy> subjectStudyList;
 
-    @OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjects;
 
     @Transient

@@ -105,7 +105,7 @@ public class ImporterService {
         instancesCreated = instancesCreated + 1;
     }
 
-    public static int getInstancesCreated(){
+    public static int getInstancesCreated() {
         return ImporterService.instancesCreated;
     }
 
@@ -138,7 +138,7 @@ public class ImporterService {
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
                         LOG.info("Retrieving quality control result from ShanoirUploader.");
-                        if(subject != null) {
+                        if (subject != null) {
                             subject.setQualityTag(qualityResult.get(0).getTagSet());
                             qualityResult.addUpdatedSubject(subject);
                         }
@@ -165,7 +165,7 @@ public class ImporterService {
                             datasetAcquisitionService.deleteById(acquisition.getId(), null);
                         }
                         // revert quality tag
-                        if(subject != null) {
+                        if (subject != null) {
                             subject.setQualityTag(tagSave);
                             subjectService.update(qualityResult.getUpdatedSubjects());
                         }
@@ -180,7 +180,7 @@ public class ImporterService {
             event.setStatus(ShanoirEvent.SUCCESS);
 
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
@@ -240,7 +240,7 @@ public class ImporterService {
         for (Patient patient : importJob.getPatients()) {
             for (Study study : patient.getStudies()) {
                 float progress = 0.5f;
-                for (Serie serie : study.getSelectedSeries() ) {
+                for (Serie serie : study.getSelectedSeries()) {
                     // get dicomAttributes
                     AcquisitionAttributes<String> dicomAttributes = null;
                     try {
@@ -266,7 +266,7 @@ public class ImporterService {
                     }
                     rank++;
                     progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription()+ " to examination " + importJob.getExaminationId());
+                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                 }
@@ -302,10 +302,9 @@ public class ImporterService {
                 examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUIDDICOM);
             } // do nothing as all in line
         } else { // New version of ShUp, sending in ImportJob
-            if (examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)
-                    && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob)) {
+            if (!(examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)
+                    && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob))) {
                 // do nothing as all in line
-            } else {
                 throw new ShanoirException("Error with StudyInstanceUIDs.");
             }
         }
@@ -343,12 +342,12 @@ public class ImporterService {
         for (Patient patient : patients) {
             for (Study study : patient.getStudies()) {
                 float progress = 0.75f;
-                for (Serie serie : study.getSelectedSeries() ) {
+                for (Serie serie : study.getSelectedSeries()) {
                     if (serie.getSelected() != null && serie.getSelected()) {
                         persistSerieInPacs(serie);
                     }
                     progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Saving serie " + serie.getSeriesDescription()+ " into pacs");
+                    event.setMessage("Saving serie " + serie.getSeriesDescription() + " into pacs");
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                 }
@@ -406,9 +405,9 @@ public class ImporterService {
             final boolean success = Utils.deleteFolder(new File(workFolder));
             if (!success) {
                 if (new File(workFolder).exists()) {
-                    LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
+                    LOG.error("cleanTempFiles: " + workFolder + " could not be deleted");
                 } else {
-                    LOG.error("cleanTempFiles: " + workFolder + " does not exist" );
+                    LOG.error("cleanTempFiles: " + workFolder + " does not exist");
                 }
             }
         } else {
@@ -416,7 +415,7 @@ public class ImporterService {
         }
     }
 
-    public void createFailedJob(String datasetFilePath){
+    public void createFailedJob(String datasetFilePath) {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
         eventService.publishEvent(event);
     }

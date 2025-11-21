@@ -30,10 +30,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
-    @Query(value="SELECT COUNT(*) FROM dataset as ds " +
-            "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
-            "INNER JOIN examination as ex ON acq.examination_id=ex.id " +
-            "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM dataset as ds "
+            + "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id "
+            + "INNER JOIN examination as ex ON acq.examination_id=ex.id "
+            + "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
     Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
     Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
@@ -44,14 +44,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds " +
-            "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
-            "INNER JOIN examination ex ON acq.examination_id = ex.id " +
-            "WHERE ex.study_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT ds.id FROM dataset ds "
+            + "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
+            + "INNER JOIN examination ex ON acq.examination_id = ex.id "
+            + "WHERE ex.study_id = ?1", nativeQuery = true)
     List<Long> findIdsByStudyId(Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds " +
-            "WHERE ds.subject_id IN (?1)", nativeQuery = true)
+    @Query(value = "SELECT ds.id FROM dataset ds "
+            + "WHERE ds.subject_id IN (?1)", nativeQuery = true)
     List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
     Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
@@ -62,33 +62,33 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
-    @Query(value="SELECT ds.id FROM dataset ds " +
-            "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
-            "LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id " +
-            "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id " +
-            "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id " +
-            "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id " +
-            "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
+    @Query(value = "SELECT ds.id FROM dataset ds "
+            + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
+            + "LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id "
+            + "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id "
+            + "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id "
+            + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
+            + "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
 
-    @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-            "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
-            "GROUP BY expr.datasetExpressionFormat")
+    @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
+            + "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL "
+            + "GROUP BY expr.datasetExpressionFormat")
     List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
 
-    @Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-            "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
-            "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
+    @Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
+            + "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL "
+            + "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
     List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
     boolean existsByTagsContains(StudyTag tag);
 
-    @Query(value="SELECT ds.id FROM dataset as ds " +
-            "INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
-            "WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
+    @Query(value = "SELECT ds.id FROM dataset as ds "
+            + "INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id "
+            + "WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
     List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
 
     @Query("""

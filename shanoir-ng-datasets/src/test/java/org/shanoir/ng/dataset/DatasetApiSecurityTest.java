@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -90,14 +89,15 @@ public class DatasetApiSecurityTest {
     private DatasetApi api;
 
     @MockBean
-    StudyRightsService rightsService;
+    private StudyRightsService rightsService;
+
     @MockBean
-    CreateStatisticsService createStatisticsService;
+    private CreateStatisticsService createStatisticsService;
 
     @MockBean
     private StudyUserRightsRepository rightsRepository;
 
-    MockHttpServletResponse response;
+    private MockHttpServletResponse response;
 
     @MockBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
@@ -282,7 +282,7 @@ public class DatasetApiSecurityTest {
         //massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
-        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L,null);
+        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
         assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);

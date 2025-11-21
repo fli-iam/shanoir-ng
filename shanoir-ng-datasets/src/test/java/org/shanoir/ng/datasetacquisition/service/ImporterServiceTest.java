@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.datasetacquisition.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +84,7 @@ public class ImporterServiceTest {
 
     @InjectMocks
     @Spy
-    ImporterService service = new ImporterService();
+    private ImporterService service = new ImporterService();
 
     @Mock
     private ExaminationService examinationService;
@@ -94,13 +108,13 @@ public class ImporterServiceTest {
     private ShanoirEventService taskService;
 
     @Mock
-    StudyUserRightsRepository studyUserRightRepo;
+    private StudyUserRightsRepository studyUserRightRepo;
 
     @Mock
-    QualityCardService qualityCardService;
+    private QualityCardService qualityCardService;
 
     @Mock
-    QualityService qualityService;
+    private QualityService qualityService;
 
     @Mock
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
@@ -117,7 +131,7 @@ public class ImporterServiceTest {
     public void setUp() throws IOException {
         exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
-        exam.setId(1l);
+        exam.setId(1L);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
     }
 
@@ -155,7 +169,7 @@ public class ImporterServiceTest {
         patients.add(patient);
 
         ImportJob importJob = new ImportJob();
-        importJob.setPatients(patients );
+        importJob.setPatients(patients);
         importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
         importJob.setExaminationId(Long.valueOf(2));
         importJob.setSubjectName("subjectName");
@@ -191,8 +205,8 @@ public class ImporterServiceTest {
 
         try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
             dicomProcessingMock
-                .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()))
-                .thenReturn(acquisitionAttributes);
+                    .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()))
+                    .thenReturn(acquisitionAttributes);
             when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(""), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
             when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
             when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));

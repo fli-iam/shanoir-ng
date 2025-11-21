@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.examination.schedule;
 
 import java.io.File;
@@ -126,13 +140,13 @@ public class ExaminationsConsistencyChecker {
             LOG.info("Summary: total examinations checked: " + totalExaminationsChecked);
             LOG.info("Summary: time required for entire check: " + duration + " milliseconds.");
             if (totalExaminationsChecked > 0) {
-                LOG.info("Summary: average per examination: " + duration/totalExaminationsChecked + " milliseconds.");
+                LOG.info("Summary: average per examination: " + duration / totalExaminationsChecked + " milliseconds.");
             }
             LOG.info("Summary: number of empty examinations: " + emptyExaminations.size());
             LOG.info("STOP...");
             LOG.info("---------------");
             LOG.info("---------------");
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.info("STOPPED with exception...");
             LOG.error(e.getMessage(), e);
         }
@@ -157,7 +171,7 @@ public class ExaminationsConsistencyChecker {
                         examinationLastChecked.setExaminationId(examination.getId());
                         boolean checked = checkExamination(examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
                         // In case exam is from today: stop
-                        if(!checked) return;
+                        if (!checked) return;
                     }
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -170,7 +184,7 @@ public class ExaminationsConsistencyChecker {
         }
     }
 
-    private boolean checkExamination(Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
+    private boolean checkExamination(Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID, List<Long> emptyExaminations) {
         LOG.debug("Processing examination with ID: " + examination.getId());
         long startTime = System.currentTimeMillis();
         String[] line = new String[8];
@@ -228,7 +242,7 @@ public class ExaminationsConsistencyChecker {
     @Transactional(value = TxType.REQUIRES_NEW)
     private void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
         String studyInstanceUID = studyInstanceUIDs.iterator().next();
-        if(examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
+        if (examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
             examination.setStudyInstanceUID(studyInstanceUID);
             examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUID);
             LOG.debug("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
@@ -267,12 +281,13 @@ public class ExaminationsConsistencyChecker {
             line[7] = "1";
             emptyExaminations.add(examination.getId());
             LOG.warn("Examination {}: no acquisitions.", examination.getId());
-            List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
-            if (extraDataFilePaths != null && !extraDataFilePaths.isEmpty()) {
-                // keep examination for extra data
-            } else {
-                // potentially delete empty examination later
-            }
+            // List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
+            // if (extraDataFilePaths != null && !extraDataFilePaths.isEmpty()) {
+            //     // keep examination for extra data
+            // }
+            // else {
+            //     // potentially delete empty examination later
+            // }
         }
         return true;
     }
@@ -283,9 +298,10 @@ public class ExaminationsConsistencyChecker {
             datasets.stream().forEach(d -> {
                 checkDataset(d, filesInPACS);
             });
-        } else {
-            // potentially delete empty acquisition later
         }
+        // else {
+        //     // potentially delete empty acquisition later
+        // }
     }
 
     private void checkDataset(Dataset dataset, List<String> filesInPACS) {
@@ -296,9 +312,10 @@ public class ExaminationsConsistencyChecker {
                     checkExpression(e, filesInPACS);
                 }
             });
-        } else {
-            // potentially delete empty dataset later
         }
+        // else {
+        //     // potentially delete empty dataset later
+        // }
     }
 
     private void checkExpression(DatasetExpression expression, List<String> filesInPACS) {
@@ -311,9 +328,10 @@ public class ExaminationsConsistencyChecker {
                     }
                 }
             });
-        } else {
-            // potentially delete empty expression later
         }
+        // else {
+        //     // potentially delete empty expression later
+        // }
     }
 
 }

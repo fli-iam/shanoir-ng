@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web;
 
 import java.io.ByteArrayInputStream;
@@ -72,7 +86,7 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
         if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
                 && httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
                 && httpRequest.getContentType().contains(MediaType.MULTIPART_RELATED_VALUE)) {
-            try(ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
+            try (ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
                 ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
                 MimeMultipart multipart = new MimeMultipart(datasource);
                 int count = multipart.getCount();
@@ -80,7 +94,7 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
                 for (int i = 0; i < count; i++) {
                     BodyPart bodyPart = multipart.getBodyPart(i);
                     if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-                        if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream(), nonOhifRequest)) {
+                        if (!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream(), nonOhifRequest)) {
                             throw new ServletException("Error in importDicomSEGAndSR.");
                         }
                     } else {

@@ -1,5 +1,15 @@
 /**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
  *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 package org.shanoir.ng.solr.solrj;
 
@@ -127,12 +137,12 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     @Autowired
     private SolrClient solrClient;
 
-    public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+    public void addToIndex(final ShanoirSolrDocument document) throws SolrServerException, IOException {
         solrClient.addBean(document);
         solrClient.commit();
     }
 
-    public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+    public void addAllToIndex(final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
         solrClient.addBeans(documents);
         solrClient.commit();
     }
@@ -429,7 +439,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     }
 
     private Map<String, FacetPageable> cleanFacetPage(QueryResponse response, ShanoirSolrQuery shanoirQuery) {
-        if(Objects.nonNull(shanoirQuery.getFacetPaging())) {
+        if (Objects.nonNull(shanoirQuery.getFacetPaging())) {
             Map<String, FacetPageable> filteredFacetPaging = new HashMap<>();
 
             for (Map.Entry<String, FacetPageable> entry : shanoirQuery.getFacetPaging().entrySet()) {
@@ -513,7 +523,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         SolrDocumentList documents = response.getResults();
         if (documents == null) documents = new SolrDocumentList();
         List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
-        for(SolrDocument document : documents) {
+        for (SolrDocument document : documents) {
             ShanoirSolrDocument solrDoc = new ShanoirSolrDocument();
             solrDoc.setId((String) document.getFirstValue("id"));
             solrDoc.setDatasetId((Long) document.getFirstValue("datasetId"));
@@ -527,7 +537,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             solrDoc.setAcquisitionEquipmentName((String) document.getFirstValue("acquisitionEquipmentName"));
             solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
             solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
-            solrDoc.setSortingIndex( (Integer) document.getFirstValue("sortingIndex"));
+            solrDoc.setSortingIndex((Integer) document.getFirstValue("sortingIndex"));
             if (document.getFieldValues("tags") != null) {
                 solrDoc.setTags(document.getFieldValues("tags").stream()
                         .map(object -> Objects.toString(object, null))

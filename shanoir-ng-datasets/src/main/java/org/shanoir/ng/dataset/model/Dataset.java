@@ -70,25 +70,25 @@ import jakarta.persistence.Transient;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type", defaultImpl=GenericDataset.class, visible=true)
+@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type", defaultImpl = GenericDataset.class, visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = CalibrationDataset.class, name = DatasetType.Names.Calibration),
-        @JsonSubTypes.Type(value = CtDataset.class, name = DatasetType.Names.Ct),
-        @JsonSubTypes.Type(value = EegDataset.class, name = DatasetType.Names.Eeg),
-        @JsonSubTypes.Type(value = MegDataset.class, name = DatasetType.Names.Meg),
-        @JsonSubTypes.Type(value = MeshDataset.class, name = DatasetType.Names.Mesh),
-        @JsonSubTypes.Type(value = MrDataset.class, name = DatasetType.Names.Mr),
-        @JsonSubTypes.Type(value = GenericDataset.class, name = DatasetType.Names.Generic),
-        @JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = DatasetType.Names.ParameterQuantification),
-        @JsonSubTypes.Type(value = PetDataset.class, name = DatasetType.Names.Pet),
-        @JsonSubTypes.Type(value = RegistrationDataset.class, name = DatasetType.Names.Registration),
-        @JsonSubTypes.Type(value = SegmentationDataset.class, name = DatasetType.Names.Segmentation),
-        @JsonSubTypes.Type(value = SpectDataset.class, name = DatasetType.Names.Spect),
-        @JsonSubTypes.Type(value = StatisticalDataset.class, name = DatasetType.Names.Statistical),
-        @JsonSubTypes.Type(value = TemplateDataset.class, name = DatasetType.Names.Template),
+        @JsonSubTypes.Type(value = CalibrationDataset.class, name = DatasetType.Names.CALIBRATION),
+        @JsonSubTypes.Type(value = CtDataset.class, name = DatasetType.Names.CT),
+        @JsonSubTypes.Type(value = EegDataset.class, name = DatasetType.Names.EEG),
+        @JsonSubTypes.Type(value = MegDataset.class, name = DatasetType.Names.MEG),
+        @JsonSubTypes.Type(value = MeshDataset.class, name = DatasetType.Names.MESH),
+        @JsonSubTypes.Type(value = MrDataset.class, name = DatasetType.Names.MR),
+        @JsonSubTypes.Type(value = GenericDataset.class, name = DatasetType.Names.GENERIC),
+        @JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = DatasetType.Names.PARAMETER_QUANTIFICATION),
+        @JsonSubTypes.Type(value = PetDataset.class, name = DatasetType.Names.PET),
+        @JsonSubTypes.Type(value = RegistrationDataset.class, name = DatasetType.Names.REGISTRATION),
+        @JsonSubTypes.Type(value = SegmentationDataset.class, name = DatasetType.Names.SEGMENTATION),
+        @JsonSubTypes.Type(value = SpectDataset.class, name = DatasetType.Names.SPECT),
+        @JsonSubTypes.Type(value = StatisticalDataset.class, name = DatasetType.Names.STATISTICAL),
+        @JsonSubTypes.Type(value = TemplateDataset.class, name = DatasetType.Names.TEMPLATE),
         @JsonSubTypes.Type(value = BidsDataset.class, name = DatasetType.Names.BIDS),
-        @JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.Measurement),
-        @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.Xa) })
+        @JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.MEASUREMENT),
+        @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.XA) })
 public abstract class Dataset extends AbstractEntity {
 
     /**
@@ -179,7 +179,7 @@ public abstract class Dataset extends AbstractEntity {
 
     @JsonIgnore
     @Transient
-    public String SOPInstanceUID;
+    private String sopInstanceUID;
 
     public Dataset() {
     }
@@ -509,11 +509,11 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public String getSOPInstanceUID() {
-        return SOPInstanceUID;
+        return sopInstanceUID;
     }
 
-    public void setSOPInstanceUID(String sOPInstanceUID) {
-        SOPInstanceUID = sOPInstanceUID;
+    public void setSOPInstanceUID(String sopInstanceUid) {
+        this.sopInstanceUID = sopInstanceUid;
     }
 
     public boolean getInPacs() {
