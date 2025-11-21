@@ -1,5 +1,11 @@
 package org.shanoir.ng.vip.processingResource.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -12,8 +18,6 @@ import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceReposi
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 public class ProcessingResourceServiceImpl implements ProcessingResourceService {
@@ -80,9 +84,11 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
                         entityId = ds.getId();
                         break;
                     default:
-                        throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
+                        throw new IllegalStateException("Unrecognized groupBy [" + dto.getGroupBy() + "] for dataset [" + ds.getId() + "]");
                 }
-
+                if (entityId == null) {
+                    throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
+                }
                 datasetsByEntityId.putIfAbsent(entityId, new ArrayList<>());
                 datasetsByEntityId.get(entityId).add(ds);
             }
