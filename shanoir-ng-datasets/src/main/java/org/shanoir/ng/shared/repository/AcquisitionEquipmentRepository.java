@@ -23,6 +23,6 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
 
-    AcquisitionEquipment findByNameFirst(String name);
+    AcquisitionEquipment findFirstByName(String name);
 
 }

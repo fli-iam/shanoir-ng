@@ -369,7 +369,7 @@ public class DicomImporterService {
         EquipmentDicom equipmentDicom = serieDICOM.getEquipment();
         String centerName = attributes.getString(Tag.InstitutionName);
         String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
-        AcquisitionEquipment equipment = acquisitionEquipmentRepository.findByNameFirst(equipmentName);
+        AcquisitionEquipment equipment = acquisitionEquipmentRepository.findFirstByName(equipmentName);
         if (equipment == null) {
             CreateEquipmentForCenterMessage message = new CreateEquipmentForCenterMessage(centerId,
                     equipmentDicom);
