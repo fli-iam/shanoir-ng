@@ -108,13 +108,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
 			+ "ds.id, dm.name, TYPE(ds), "
-			+ "ds.datasetAcquisition.examination.study.id, "
+			+ "s.id, s.name, "
+			+ "sub.id, sub.name, "
+			+ "ds.creationDate, "
 			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
 			+ "FROM Dataset ds "
 			+ "LEFT JOIN ds.originMetadata dm "
 			+ "LEFT JOIN ds.datasetAcquisition da "
 			+ "LEFT JOIN da.examination e "
 			+ "LEFT JOIN e.study s "
+			+ "LEFT JOIN e.subject sub "
 			+ "WHERE ds.id IN :ids")
 	List<DatasetLight> findAllLightById(List<Long> ids);
 
@@ -135,13 +138,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
 			+ "ds.id, dm.name, TYPE(ds), "
-			+ "ds.datasetAcquisition.examination.study.id, "
+			+ "s.id, s.name, "
+			+ "sub.id, sub.name, "
+			+ "ds.creationDate, "
 			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
 			+ "FROM Dataset ds "
 			+ "LEFT JOIN ds.originMetadata dm "
 			+ "LEFT JOIN ds.datasetAcquisition da "
 			+ "LEFT JOIN da.examination e "
 			+ "LEFT JOIN e.study s "
+			+ "LEFT JOIN e.subject sub "
 			+ "WHERE s.id = :studyId")
 	List<DatasetLight> findAllLightByStudyId(Long studyId);
 
