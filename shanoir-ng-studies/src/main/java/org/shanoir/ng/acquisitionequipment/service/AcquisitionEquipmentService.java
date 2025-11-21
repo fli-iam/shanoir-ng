@@ -56,6 +56,8 @@ public interface AcquisitionEquipmentService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
 	AcquisitionEquipment create(AcquisitionEquipment entity);
+	
+	public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP);
 
 	/**
 	 * Update an entity.

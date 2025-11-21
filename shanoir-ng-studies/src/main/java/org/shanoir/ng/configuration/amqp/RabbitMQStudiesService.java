@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -17,6 +20,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
+import org.shanoir.ng.shared.message.CreateEquipmentForCenterMessage;
 import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -72,6 +76,9 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	ShanoirEventService eventService;
+
+	@Autowired
+	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
@@ -258,6 +265,30 @@ public class RabbitMQStudiesService {
 			LOG.error("Error while creating a new center: ", e);
 		}
 		return null;
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitHandler
+	public Long createEquipment(final String messageStr) {
+		try {
+			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+			CreateEquipmentForCenterMessage message = mapper.readValue(messageStr, CreateEquipmentForCenterMessage.class);
+			AcquisitionEquipment equipment = createEquipmentByEquipmentDicom(message.getCenterId(), message.getEquipmentDicom());
+			if (equipment != null) {
+				return equipment.getId();
+			} else {
+				LOG.error("Error while creating a new equipment.");
+				return null;
+			}
+		} catch (Exception e) {
+			LOG.error("Error while creating a new equipment: ", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	@Transactional
+	private AcquisitionEquipment createEquipmentByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom) {
+		return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
 	}
 
 }

@@ -219,7 +219,7 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveAcEqUpdate(final String acEqStr) {
 		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);

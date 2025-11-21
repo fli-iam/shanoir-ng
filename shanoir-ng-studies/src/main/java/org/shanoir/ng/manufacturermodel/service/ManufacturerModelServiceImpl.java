@@ -132,7 +132,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 				IdName acEq = new IdName();
 				acEq.setId(acEqItem.getId());
 				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-				rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
+				rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
 			}
 
 			return true;

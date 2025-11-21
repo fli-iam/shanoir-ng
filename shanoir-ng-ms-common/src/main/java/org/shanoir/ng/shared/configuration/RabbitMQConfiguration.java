@@ -143,11 +143,13 @@ public class RabbitMQConfiguration {
 	/** Queue to retrieve informations about studyc cards. */
 	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
+	public static final String ACQUISITION_EQUIPMENT_CREATE_QUEUE = "acquisition-equipment-create-queue";
+
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
 
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
-	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
+	public static final String ACQUISITION_EQUIPMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 
 	/** Queue to send dua draft by mail */
 	public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
@@ -374,12 +376,18 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue acquisitionEquipementCenterQueue() {
+	public static Queue acquisitionEquipmentCreateQueue() {
 		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
 	}
+
 	@Bean
-	public static Queue acquisitionEquipementUpdateQueue() {
-		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
+	public static Queue acquisitionEquipmentCenterQueue() {
+		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue acquisitionEquipmentUpdateQueue() {
+		return new Queue(ACQUISITION_EQUIPMENT_UPDATE_QUEUE, true);
 	}
 
 	@Bean
