@@ -123,12 +123,7 @@
 		    <artifactId>spring-data-solr</artifactId>
 		    <version>${spring.data.solr.version}</version>
 		</dependency>
-<<<<<<< HEAD
 
-		<!-- Orika dependency for deep copy -->
-=======
-
->>>>>>> upstream/develop
 		<dependency>
 		    <groupId>com.opencsv</groupId>
 		    <artifactId>opencsv</artifactId>
