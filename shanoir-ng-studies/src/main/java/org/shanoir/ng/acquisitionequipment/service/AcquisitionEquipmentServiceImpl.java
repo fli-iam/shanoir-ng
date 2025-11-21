@@ -133,7 +133,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		try {
 			updateName(updated);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center name creation to the other microservices !", e);
+			LOG.error("Could not send the center name update to the other microservices !", e);
 		}
 		return repository.save(entityDb);
 	}
@@ -214,7 +214,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 			try {
 				updateName(equipment);
 			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not send the center name creation to the other microservices !", e);
+				LOG.error("Could not send the center creation to the other microservices !", e);
 			}
 		}
 		return equipment;
