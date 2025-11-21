@@ -22,6 +22,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
@@ -43,6 +44,9 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;
+
+	@Autowired
+	private SubjectMapper subjectMapper;
 
 	@Autowired
 	private TagMapper tagMapper;
@@ -108,6 +112,7 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getTags() != null) {
 				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
 			}
+			studyDTO.setSubjects(subjectMapper.subjectsToSubjectDTOs(study.getSubjects()));
 		}
 		return studyDTO;
 	}

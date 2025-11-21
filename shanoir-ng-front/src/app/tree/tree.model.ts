@@ -22,10 +22,9 @@ import { SubjectExamination } from "../examinations/shared/subject-examination.m
 import { StudyUserRight } from "../studies/shared/study-user-right.enum";
 import { SimpleStudy } from "../studies/shared/study.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
-import { SubjectStudy } from "../subjects/shared/subject-study.model";
-import { SubjectStudyPipe } from "../subjects/shared/subject-study.pipe";
 import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
+import {Subject} from "../subjects/shared/subject.model";
 
 export abstract class ShanoirNode {
 
@@ -208,7 +207,13 @@ export abstract class SubjectNode extends ShanoirNode {
     ) {
         super(parent, id, label);
         if (!tags) tags = [];
-        else tags = tags.map(t => t.clone());
+        else tags = tags.map(t => {
+            const tag: Tag = new Tag();
+            tag.id = t.id;
+            tag.color = t.color;
+            tag.name = t.name;
+            return tag;
+        });
         if (qualityTag) {
             const tag: Tag = new Tag();
             tag.id = -1;
@@ -234,14 +239,14 @@ export class ClinicalSubjectNode extends SubjectNode {
     public awesome = "fas fa-user-injured";
     qualityTag: QualityTag;
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
         return new ClinicalSubjectNode(
             parent,
-            subjectStudy.subject.id,
-            new SubjectStudyPipe().transform(subjectStudy),
-            subjectStudy.tags,
+            subject.id,
+            subject.name,
+            subject.tags,
             UNLOADED,
-            subjectStudy.qualityTag,
+            subject.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -253,14 +258,14 @@ export class PreclinicalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
         return new PreclinicalSubjectNode(
             parent,
-            subjectStudy.subject.id,
-            new SubjectStudyPipe().transform(subjectStudy),
-            subjectStudy.tags,
+            subject.id,
+            subject.name,
+            subject.tags,
             UNLOADED,
-            subjectStudy.qualityTag,
+            subject.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -529,7 +534,7 @@ export class ReverseSubjectNode extends ShanoirNode {
         public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public studies: ReverseStudyNode[] | UNLOADED
+        public studies: ReverseStudyNode | UNLOADED
     ) {
         super(parent, id, label);
     }
