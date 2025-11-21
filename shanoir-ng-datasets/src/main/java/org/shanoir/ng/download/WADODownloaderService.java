@@ -278,7 +278,7 @@ public class WADODownloaderService {
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
 		if (url != null) {
 			String urlStr = url.toString();
-			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURLHandler.convertWADO_URI_TO_WADO_RS(urlStr);
+			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURLHandler.convertWadoUriToWadoRs(urlStr);
 			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
 			return downloadMetadataFromPACS(urlStr);
 		} else {
