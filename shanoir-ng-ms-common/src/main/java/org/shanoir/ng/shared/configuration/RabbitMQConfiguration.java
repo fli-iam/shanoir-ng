@@ -377,7 +377,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue acquisitionEquipmentCreateQueue() {
-		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
+		return new Queue(ACQUISITION_EQUIPMENT_CREATE_QUEUE, true);
 	}
 
 	@Bean
