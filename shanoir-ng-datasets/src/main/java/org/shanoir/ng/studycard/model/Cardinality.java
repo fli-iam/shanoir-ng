@@ -73,14 +73,6 @@ public class Cardinality {
     }
 
     @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + number;
-        result = 31 * result + (isMultiplier ? 1 : 0);
-        return result;
-    }
-
-    @Override
     public String toString() {
         return getNumber() + (isMultiplier() ? "N" : "");
     }
