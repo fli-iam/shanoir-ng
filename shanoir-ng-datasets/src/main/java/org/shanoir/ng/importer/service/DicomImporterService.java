@@ -368,26 +368,31 @@ public class DicomImporterService {
 
         EquipmentDicom equipmentDicom = serieDICOM.getEquipment();
         String centerName = attributes.getString(Tag.InstitutionName);
-        String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
-        AcquisitionEquipment equipment = acquisitionEquipmentRepository.findFirstByName(equipmentName);
-        if (equipment == null) {
-            CreateEquipmentForCenterMessage message = new CreateEquipmentForCenterMessage(centerId,
-                    equipmentDicom);
-            Long equipmentId = (Long) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE,
-                    objectMapper.writeValueAsString(message));
-            if (equipmentId == null) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EQUIPMENT_CREATION_ERROR, null));
+        if (equipmentDicom.isComplete() && centerName != null && !centerName.isEmpty()) {
+            String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
+            AcquisitionEquipment equipment = acquisitionEquipmentRepository.findFirstByName(equipmentName);
+            if (equipment == null) {
+                CreateEquipmentForCenterMessage message = new CreateEquipmentForCenterMessage(centerId,
+                        equipmentDicom);
+                Long equipmentId = (Long) rabbitTemplate.convertSendAndReceive(
+                        RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE,
+                        objectMapper.writeValueAsString(message));
+                if (equipmentId == null) {
+                    throw new RestServiceException(
+                            new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EQUIPMENT_CREATION_ERROR, null));
+                }
+                LOG.info("Equipment created in MS Studies with ID: {}, Name: {}", equipmentId, equipmentName);
+                equipment = new AcquisitionEquipment();
+                equipment.setId(equipmentId);
+                equipment.setName(equipmentName);
+                equipment = acquisitionEquipmentRepository.save(equipment);
+                LOG.info("Equipment created in MS Datasets with ID: {}, Name: {}", equipment.getId(), equipment.getName());
             }
-            LOG.info("Equipment created in MS Studies with ID: {}, Name: {}", equipmentId, equipmentName);
-            equipment = new AcquisitionEquipment();
-            equipment.setId(equipmentId);
-            equipment.setName(equipmentName);
-            equipment = acquisitionEquipmentRepository.save(equipment);
-            LOG.info("Equipment created in MS Datasets with ID: {}, Name: {}", equipment.getId(), equipment.getName());
+            acquisition.setAcquisitionEquipmentId(equipment.getId());
+        } else {
+            LOG.info("EquipmentDicom incomplete to auto-create acquisition equipment, set to 0L.");
+            acquisition.setAcquisitionEquipmentId(0L);
         }
-        acquisition.setAcquisitionEquipmentId(equipment.getId());
         return acquisitionService.create(acquisition, false);
     }
 
