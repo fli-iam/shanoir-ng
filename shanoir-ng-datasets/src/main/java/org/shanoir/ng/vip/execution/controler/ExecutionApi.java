@@ -27,6 +27,7 @@ import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,7 @@ public interface ExecutionApi {
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExecutionCandidate(#candidate))")
     ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException;
 

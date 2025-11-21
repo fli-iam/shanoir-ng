@@ -63,9 +63,19 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
 
-            String ids = String.join(",", Stream.concat(processingList.stream().map(DatasetProcessing::getInputDatasets), processingList.stream().map(DatasetProcessing::getOutputDatasets)).map(dataset -> ((Dataset) dataset).getId().toString()).collect(Collectors.toList()));
-            ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, ids,
-                    KeycloakUtil.getTokenUserId(), ids + "." + format, ShanoirEvent.IN_PROGRESS);
+            String ids = Stream.concat(
+                            processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
+                            processingList.stream().flatMap(p -> p.getOutputDatasets().stream())
+                    )
+                    .map(dataset -> dataset.getId().toString())
+                    .collect(Collectors.joining(","));
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DOWNLOAD_DATASET_EVENT,
+                    ids,
+                    KeycloakUtil.getTokenUserId(),
+                    ids + "." + format,
+                    ShanoirEvent.IN_PROGRESS
+            );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         } catch (Exception e) {
@@ -87,9 +97,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             Map<Long, String> outputsDownloadName = getDatasetDownloadName(outputs);
 
             for (Dataset dataset : inputs) {
+                format = dataset.getName().endsWith(".nii") || dataset.getName().endsWith(".nii.gz") ? "nii" : "dcm";
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
             }
             for (Dataset dataset : outputs) {
+                format = dataset.getName().endsWith(".nii") || dataset.getName().endsWith(".nii.gz") ? "nii" : "dcm";
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
             }
         }

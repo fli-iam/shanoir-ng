@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.DicomProcessing;
@@ -56,6 +57,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import ch.qos.logback.core.util.StringUtil;
+
 @Service
 @Scope("prototype")
 public class ImporterService {
@@ -89,7 +92,7 @@ public class ImporterService {
 
     @Autowired
     private StudyCardRepository studyCardRepository;
-
+   
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
@@ -98,15 +101,16 @@ public class ImporterService {
 
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
-        instancesCreated++;
+        LOG.info("New server-instance created of ImporterService.");
+        instancesCreated = instancesCreated + 1;
     }
 
-    public static int getInstancesCreated() {
+    public static int getInstancesCreated(){
         return ImporterService.instancesCreated;
     }
 
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-        LOG.info("createAllDatasetAcquisition: " + this + " instances: " + getInstancesCreated());
+        LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
@@ -124,23 +128,23 @@ public class ImporterService {
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
                 QualityCardResult qualityResult;
-
+                
                 // If import comes from ShanoirUploader, the check quality at import has already been done
                 if (!importJob.isFromShanoirUploader()) {
                     qualityResult = qualityService.checkQuality(examData, importJob, null);
                 } else {
-                    LOG.info("Importing Data from ShanoirUploader.");
+                    LOG.info("Importing data from ShanoirUploader.");
                     // We retrieve quality card result from ShUp import job
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
-                        LOG.info("Retrieving Quality Control result from ShanoirUploader.");
-                        if (subject != null) {
+                        LOG.info("Retrieving quality control result from ShanoirUploader.");
+                        if(subject != null) {
                             subject.setQualityTag(qualityResult.get(0).getTagSet());
                             qualityResult.addUpdatedSubject(subject);
                         }
                     }
                 }
-
+                                				
                 // Has quality check passed ?
                 if (qualityResult != null && !qualityResult.isEmpty() && qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -152,7 +156,7 @@ public class ImporterService {
                         // add tag to subject-study
                         subjectService.update(qualityResult.getUpdatedSubjects());
                     }
-                    generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
+                	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs
@@ -161,7 +165,7 @@ public class ImporterService {
                             datasetAcquisitionService.deleteById(acquisition.getId(), null);
                         }
                         // revert quality tag
-                        if (subject != null) {
+                        if(subject != null) {
                             subject.setQualityTag(tagSave);
                             subjectService.update(qualityResult.getUpdatedSubjects());
                         }
@@ -176,7 +180,7 @@ public class ImporterService {
             event.setStatus(ShanoirEvent.SUCCESS);
 
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
+                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
@@ -189,7 +193,7 @@ public class ImporterService {
                     return;
                 }
                 MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
-
+    
                 // Add bruker archive as extra data
                 String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
                 if (fileName != null) {
@@ -213,7 +217,7 @@ public class ImporterService {
             event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            LOG.warn(msg, e);
+            LOG.warn(msg, e);	
             // Send mail
             mailService.sendFailureMail(importJob, userId, msg);
             throw new ShanoirException(msg, e);
@@ -222,13 +226,13 @@ public class ImporterService {
             event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
+            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
             // Send mail
             mailService.sendFailureMail(importJob, userId, e.getMessage());
             throw new ShanoirException(event.getMessage(), e);
         }
     }
-
+    
     private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob, ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
@@ -236,7 +240,7 @@ public class ImporterService {
         for (Patient patient : importJob.getPatients()) {
             for (Study study : patient.getStudies()) {
                 float progress = 0.5f;
-                for (Serie serie : study.getSelectedSeries()) {
+                for (Serie serie : study.getSelectedSeries() ) {
                     // get dicomAttributes
                     AcquisitionAttributes<String> dicomAttributes = null;
                     try {
@@ -245,28 +249,66 @@ public class ImporterService {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
 
+                    manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
+                    
                     // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
                     DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
-
+                    
                     // apply study card if needed
-                    if (studyCard != null) {
+                    if (studyCard != null) { 
                         importJob.setStudyCardName(studyCard.getName());
                         studyCard.apply(acquisition, dicomAttributes);
                     }
-
+                    
                     // add acq to collection
                     if (acquisition != null) {
                         generatedAcquisitions.add(acquisition);
                     }
                     rank++;
                     progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
+                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription()+ " to examination " + importJob.getExaminationId());
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                 }
             }
         }
         return generatedAcquisitions;
+    }
+
+    /**
+     * This method has been added for retro-compatibility and
+     * can be removed in the future. Old versions of ShUp will
+     * not use the new generated StudyInstanceUID during the
+     * creation of the exam, they will pseudonymize and produce
+     * a new random StudyInstanceUID. This code corrects this gap
+     * that all data are all in line. Old version of ShUp will not
+     * send a StudyInstanceUID in their ImportJob.
+     * 
+     * @param examination
+     * @param importJob
+     * @param dicomAttributes
+     * @throws ShanoirException
+     */
+    private void manageStudyInstanceUIDs(Examination examination, ImportJob importJob,
+            AcquisitionAttributes<String> dicomAttributes) throws ShanoirException {
+        String studyInstanceUIDDICOM = dicomAttributes.getFirstDatasetAttributes().getString(Tag.StudyInstanceUID);
+        String studyInstanceUIDExamination = examination.getStudyInstanceUID();
+        // Only transmitted by new version of ShUp:
+        String studyInstanceUIDImportJob = importJob.getStudyInstanceUID();
+        if (StringUtil.isNullOrEmpty(studyInstanceUIDImportJob)) { // Handle old versions of ShUp: nothing in ImportJob
+            if (StringUtil.isNullOrEmpty(studyInstanceUIDExamination)
+                    || !examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)) {
+                LOG.info("Old version of ShUp used: updating StudyInstanceUID of examination from {} to {}", examination.getStudyInstanceUID(), studyInstanceUIDDICOM);
+                examinationRepository.updateStudyInstanceUID(examination.getId(), studyInstanceUIDDICOM);
+            } // do nothing as all in line
+        } else { // New version of ShUp, sending in ImportJob
+            if (examination.getStudyInstanceUID().equals(studyInstanceUIDDICOM)
+                    && examination.getStudyInstanceUID().equals(studyInstanceUIDImportJob)) {
+                // do nothing as all in line
+            } else {
+                throw new ShanoirException("Error with StudyInstanceUIDs.");
+            }
+        }
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
@@ -278,10 +320,10 @@ public class ImporterService {
             return null;
         }
     }
-
+    
     /**
      *  Persist Dicom images in the Shanoir Pacs
-     * @throws Exception
+     * @throws Exception 
      */
     private void persistSerieInPacs(Serie serie) throws Exception {
         long startTime = System.currentTimeMillis();
@@ -292,31 +334,31 @@ public class ImporterService {
                 + duration + " millis for serie: " + serie.getSeriesInstanceUID()
                 + "(" + serie.getSeriesDescription() + ")");
     }
-
+    
      /**
      *  Persist Dicom images in the Shanoir Pacs
-     * @throws Exception
+     * @throws Exception 
      */
     private void persistPatientInPacs(List<Patient> patients, ShanoirEvent event) throws Exception {
         for (Patient patient : patients) {
             for (Study study : patient.getStudies()) {
                 float progress = 0.75f;
-                for (Serie serie : study.getSelectedSeries()) {
+                for (Serie serie : study.getSelectedSeries() ) {
                     if (serie.getSelected() != null && serie.getSelected()) {
                         persistSerieInPacs(serie);
                     }
                     progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Saving serie " + serie.getSeriesDescription() + " into pacs");
+                    event.setMessage("Saving serie " + serie.getSeriesDescription()+ " into pacs");
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                 }
             }
-        }
+        }           
     }
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, "", rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
@@ -327,7 +369,7 @@ public class ImporterService {
         }
         return null;
     }
-
+    
     private StudyCard getStudyCard(Long studyCardId) {
         StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
         if (studyCard == null) {
@@ -341,7 +383,7 @@ public class ImporterService {
 
     /**
      * Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-     *
+     * 
      * @param serie
      * @return
      */
@@ -364,9 +406,9 @@ public class ImporterService {
             final boolean success = Utils.deleteFolder(new File(workFolder));
             if (!success) {
                 if (new File(workFolder).exists()) {
-                    LOG.error("cleanTempFiles: " + workFolder + " could not be deleted");
+                    LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
                 } else {
-                    LOG.error("cleanTempFiles: " + workFolder + " does not exist");
+                    LOG.error("cleanTempFiles: " + workFolder + " does not exist" );
                 }
             }
         } else {
@@ -374,9 +416,9 @@ public class ImporterService {
         }
     }
 
-    public void createFailedJob(String datasetFilePath) {
+    public void createFailedJob(String datasetFilePath){
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
         eventService.publishEvent(event);
     }
-
+    
 }

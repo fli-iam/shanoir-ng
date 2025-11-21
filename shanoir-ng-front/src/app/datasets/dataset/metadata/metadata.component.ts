@@ -15,7 +15,9 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaging } from "../../../shared/components/table/browser-paging.model";
 import { ColumnDefinition } from "../../../shared/components/table/column.definition.type";
@@ -23,6 +25,7 @@ import { Page, Pageable } from "../../../shared/components/table/pageable.model"
 import { TableComponent } from "../../../shared/components/table/table.component";
 import { DicomService } from '../../../study-cards/shared/dicom.service';
 import { DatasetService } from '../../shared/dataset.service';
+
 import { DicomMetadata } from "./dicom-metadata.model";
 
 
@@ -75,16 +78,16 @@ export class MetadataComponent implements OnDestroy {
             if (!data) {
                 return;
             }
-            let metadata = Object.entries(data[0]);
+            const metadata = Object.entries(data[0]);
             metadata.forEach(entry => {
 
-                let met = new DicomMetadata();
+                const met = new DicomMetadata();
 
-                let group = entry[0].toString().substring(0,4);
-                let element = entry[0].toString().substring(4);
+                const group = entry[0].toString().substring(0,4);
+                const element = entry[0].toString().substring(4);
                 met.tag = group + ',' + element;
 
-                let code = parseInt(entry[0], 16);
+                const code = parseInt(entry[0], 16);
                 met.keyword = tags.find(tag => tag.code == code)?.label;
 
                 met.value = entry[1]['Value']?.toString()

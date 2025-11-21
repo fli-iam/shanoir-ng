@@ -148,7 +148,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/massiveDownloadByProcessingIds")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.HasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByProcessingIds(
             @Parameter(description = "id of the processing", required = true) @Valid
             @RequestBody List<Long> processingIds,

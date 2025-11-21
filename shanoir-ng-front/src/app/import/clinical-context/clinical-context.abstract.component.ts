@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Directive, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Directive, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -25,6 +25,7 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
+import { PreclinicalSubject } from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 import { ConsoleService } from '../../shared/console/console.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ShanoirError } from '../../shared/models/error.model';
@@ -40,7 +41,6 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -67,10 +67,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public isAdminOfStudy: boolean[] = [];
     public scHasDifferentModality: string;
     public modality: string;
-    openSubjectStudy: boolean = false;
     loading: number = 0;
     reloading: boolean = false;
-    editSubjectStudy: boolean = true;
     protected stepTs: number;
 
     constructor(
@@ -94,10 +92,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return;
         }
         breadcrumbsService.nameStep('3. Context');
-
-        this.preConstructor();
-        this.postConstructor()
+        this.postConstructor();
     }
+
+    public postConstructor() {
+        return null;
+    };
 
     ngOnInit(): void {
         this.stepTs = this.breadcrumbsService.currentStep.timestamp;
@@ -124,23 +124,19 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return false;
     }
 
-    public preConstructor() {};
-
-    public postConstructor() {};
-
     protected reloadSavedData(): Promise<void> {
         this.reloading = true;
-        let promises: Promise<any>[] = [];
-        let study = this.importDataService.contextBackup(this.stepTs).study;
-        let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
-        let center = this.importDataService.contextBackup(this.stepTs).center;
-        let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
-        let subject = this.importDataService.contextBackup(this.stepTs).subject;
-        let examination = this.importDataService.contextBackup(this.stepTs).examination;
+        const promises: Promise<any>[] = [];
+        const study = this.importDataService.contextBackup(this.stepTs).study;
+        const studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
+        const center = this.importDataService.contextBackup(this.stepTs).center;
+        const acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
+        const subject = this.importDataService.contextBackup(this.stepTs).subject;
+        const examination = this.importDataService.contextBackup(this.stepTs).examination;
         this.study = study;
-        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+        const useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
 
-        let studyOption = this.studyOptions.find(s => s.value.id == study.id);
+        const studyOption = this.studyOptions.find(s => s.value.id == study.id);
         if (studyOption) {
             this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
         }
@@ -175,7 +171,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     private restoreCenter(center: Center, acquisitionEquipment: AcquisitionEquipment) {
         if (center) {
             this.center = center;
-            let centerOption = this.centerOptions.find(c => c.value.id == center.id);
+            const centerOption = this.centerOptions.find(c => c.value.id == center.id);
             if (centerOption) {
                 this.center = centerOption.value;
             }
@@ -191,7 +187,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
                 if (selectDefault) {
-                    let compatibleFounded = this.studyOptions.find(study => study.compatible);
+                    const compatibleFounded = this.studyOptions.find(study => study.compatible);
                     if (compatibleFounded) {
                         this.study = compatibleFounded.value;
                         return this.onSelectStudy();
@@ -205,12 +201,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 this.allCenters = allCenters;
-                for (let study of allStudies) {
-                    let studyOption: Option<Study> = new Option(study, study.name);
+                for (const study of allStudies) {
+                    const studyOption: Option<Study> = new Option(study, study.name);
                     studyOption.compatible = false;
                     if (study.studyCenterList) {
-                        for (let studyCenter of study.studyCenterList) {
-                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id);
+                        for (const studyCenter of study.studyCenterList) {
+                            const center: Center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
                                 studyCenter.center = center;
                                 studyOption.compatible = true;
@@ -227,11 +223,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     /* Please return undefined if you don't know */
-    acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
+    acqEqCompatible(_acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
         return undefined;
     }
 
-    centerCompatible(center: Center): boolean | undefined {
+    centerCompatible(_center: Center): boolean | undefined {
         return undefined;
     }
 
@@ -246,7 +242,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
-        let studyEquipments: AcquisitionEquipment[] = [];
+        const studyEquipments: AcquisitionEquipment[] = [];
         if (!study) return Promise.resolve([]);
         /* find equipments for this study - needed for checking studycards compatibilities */
         study.studyCenterList.forEach(studyCenter => {
@@ -256,7 +252,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
         /* build the studycards options and set their compatibilies */
         return this.centerService.getCentersByStudyId(study.id).then(centers => {
-            let accessibleCenterIds = centers.map(center => center.id);
+            const accessibleCenterIds = centers.map(center => center.id);
             return this.studycardService.getAllForStudy(study.id).then(studyCards => {
                 if (!studyCards) studyCards = [];
 
@@ -265,8 +261,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 return studyCards.filter(studyCard => {
                     return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
                 }).map(studyCard => {
-                    let opt = new Option(studyCard, studyCard.name);
-                    let scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
+                    const opt = new Option(studyCard, studyCard.name);
+                    const scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
                     opt.compatible = this.acqEqCompatible(scEq);
                     return opt;
                 });
@@ -275,7 +271,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private selectDefaultStudyCard(options: Option<StudyCard>[]): Promise<void> {
-        let founded = options?.find(option => option.compatible)?.value;
+        const founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.studycard = founded;
             return this.onSelectStudyCard();
@@ -290,7 +286,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return this.centerService.getCentersByStudyId(study.id).then(centers => {
                 centers.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
                 return centers.map(center => {
-                    let centerOption = new Option<Center>(center, center.name);
+                    const centerOption = new Option<Center>(center, center.name);
                     if (!this.useStudyCard) {
                         centerOption.compatible = center && this.centerCompatible(center);
                     }
@@ -318,7 +314,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
-        let founded = options?.find(option => option.compatible)?.value;
+        const founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.center = founded;
             return this.onSelectCenter();
@@ -329,7 +325,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     protected getSubjectList(studyId: number): Promise<Subject[]> {
-        this.openSubjectStudy = false;
         if (!studyId) {
             return Promise.resolve([]);
         } else {
@@ -348,7 +343,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.center = this.studycard.acquisitionEquipment.center;
                 eqFound = this.studycard.acquisitionEquipment;
             } else {
-                let scFound: StudyCenter = studyCenterList?.find(sc => {
+                const scFound: StudyCenter = studyCenterList?.find(sc => {
                     eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
                     return (!!eqFound);
                 })
@@ -363,7 +358,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
         center?.acquisitionEquipments?.sort((a, b) => a.manufacturerModel?.manufacturer?.name?.trim().localeCompare(b.manufacturerModel?.manufacturer?.name.trim()));
         return center?.acquisitionEquipments?.map(acqEq => {
-            let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+            const option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
             option.compatible = this.acqEqCompatible(acqEq);
             return option;
         });
@@ -375,8 +370,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (options?.length == 1) {
             newValue = options[0].value;
         }
-
-        let founded = options?.find(option => option.compatible)?.value;
+        const founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             newValue = founded;
         }
@@ -406,11 +400,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 });
                 this.getEquipmentOptions(this.center);
             }
-            let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
+            const subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
                 this.subjects = subjects ? subjects : [];
                 this.subjects?.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
             });
-            let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+            this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
                 this.study.tags = tags ? tags : [];
             });
             return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
@@ -438,7 +432,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     onToggleUseStudyCard() {
         if (!this.useStudyCard) this.studycard = null;
         else {
-            let studycardOpt = this.studycardOptions.find(sco => sco.compatible == true);
+            const studycardOpt = this.studycardOptions.find(sco => sco.compatible == true);
             if (studycardOpt) {
                 this.studycard = studycardOpt.value;
                 this.onSelectStudyCard();
@@ -451,7 +445,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.center) {
             this.loading++;
             this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;
-            this.openSubjectStudy = false;
+            this.acquisitionEquipment = null;
+            if (this.center) {
+                this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
+            }
 
             this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
             this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
@@ -474,7 +471,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                     });
         } else {
             this.loading--;
-            this.openSubjectStudy = false;
             return Promise.resolve();
         }
     }
@@ -496,10 +492,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public openCreateCenter = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center/create']).then(success => {
-
-            this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledCenter());
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.breadcrumbsService.addNextStepPrefilled("entity", this.getPrefilledCenter());
+        this.router.navigate(['/center/create']).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).center = this.updateStudyCenter(entity as Center);
@@ -509,32 +504,28 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private getPrefilledCenter(): Center {
-        let studyCenter = new StudyCenter();
+        const studyCenter = new StudyCenter();
         studyCenter.study = this.study;
-        let newCenter = new Center();
+        const newCenter = new Center();
         newCenter.studyCenterList = [studyCenter];
         if (this.importedCenterDataStr != null) {
             newCenter.name = this.importedCenterDataStr.split(' - ')[0] != "null" ? this.importedCenterDataStr.split(' - ')[0] : "";
             newCenter.street = this.importedCenterDataStr.split(' - ')[1] != "null" ? this.importedCenterDataStr.split(' - ')[1] : "";
         }
-        this.breadcrumbsService.currentStep.addPrefilled("entity", newCenter);
         return newCenter;
     }
 
     private updateStudyCenter(center: Center): Center {
         if (!center) return;
-        let studyCenter: StudyCenter = center.studyCenterList[0];
+        const studyCenter: StudyCenter = center.studyCenterList[0];
         if (studyCenter) this.study.studyCenterList.push(studyCenter);
         return center;
     }
 
     public openCreateAcqEqt() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(success => {
-
-            this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
-
-            this.fillCreateAcqEqStep(this.breadcrumbsService.currentStep);
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledAcquisitionEquipment());
+        this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).acquisitionEquipment = (entity as AcquisitionEquipment);
@@ -543,11 +534,17 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    protected fillCreateSubjectStep(step: Step) {}
+    protected getPrefilledSubject() {
+        return;
+    }
 
-    protected fillCreateExaminationStep(step: Step) {}
+    protected getPrefilledExamination() {
+        return;
+    }
 
-    protected fillCreateAcqEqStep(step: Step) {}
+    protected getPrefilledAcquisitionEquipment() {
+        return;
+    }
 
     protected getCreateSubjectRoute(): string {
         return '/subject/create';
@@ -558,13 +555,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public openCreateSubject = () => {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        let createSubjectRoute: string = this.getCreateSubjectRoute();
-        this.router.navigate([createSubjectRoute]).then(success => {
-            this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
+        const importStep: Step = this.breadcrumbsService.currentStep;
+        const createSubjectRoute: string = this.getCreateSubjectRoute();
+        this.prefillSubject();
+        this.router.navigate([createSubjectRoute]).then(() => {
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-
                     let sub: Subject;
                     if (entity instanceof Subject) {
                         sub = entity;
@@ -577,11 +573,15 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         })
     }
 
+    protected prefillSubject() {
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledSubject());
+    }
+
     public openCreateExam = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        let createExamRoute: string = this.getCreateExamRoute();
-        this.router.navigate([createExamRoute]).then(success => {
-            this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        const createExamRoute: string = this.getCreateExamRoute();
+        this.breadcrumbsService.addNextStepPrefilled('entity', this.getPrefilledExamination());
+        this.router.navigate([createExamRoute]).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
@@ -595,11 +595,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
         // Add the new created exam to the select box and select it
-        let subjectExam = new SubjectExamination();
+        const subjectExam = new SubjectExamination();
         subjectExam.id = examination.id;
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
         subjectExam.preclinical = examination.preclinical;
+        subjectExam.studyInstanceUID = examination.studyInstanceUID;
         return subjectExam;
     }
 
@@ -612,15 +613,15 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     get importedCenterDataStr(): string {
-        return null;
+        return;
     }
 
     get importedEquipmentDataStr(): string {
-        return null;
+        return;
     }
 
     get valid(): boolean {
-        let context = this.getContext();
+        const context = this.getContext();
         return (
             !!context.study
             && !!context.center
@@ -632,7 +633,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
-            let context = this.getContext();
+            const context = this.getContext();
             console.log('context', context);
         }
     }
@@ -660,8 +661,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {
         if (!studycard) return false;
-        for (let rule of studycard.rules) {
-            for (let ass of rule.assignments) {
+        for (const rule of studycard.rules) {
+            for (const ass of rule.assignments) {
                 if (ass.field?.endsWith('_COIL') && !(ass.value instanceof Coil)) {
                     return true;
                 }
@@ -672,8 +673,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     private hasDifferentModality(studycard: StudyCard): any {
         if (!studycard) return false;
-        for (let rule of studycard.rules) {
-            for (let ass of rule.assignments) {
+        for (const rule of studycard.rules) {
+            for (const ass of rule.assignments) {
                 if (ass.field == 'MODALITY_TYPE'
                         && this.modality && typeof ass.value == 'string' && ass.value
                         && (ass.value as string).split('_')[0] != this.modality.toUpperCase()) {
@@ -694,8 +695,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public editStudyCard(studycard: StudyCard) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/edit/' + studycard.id]).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
@@ -705,8 +706,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public createStudyCard() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(() => {
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
                     this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
@@ -717,8 +718,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        this.onContextChange();
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }
 }
+
+

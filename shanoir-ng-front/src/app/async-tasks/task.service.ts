@@ -13,10 +13,11 @@
  */
 
 import { Injectable } from '@angular/core';
-
 import { HttpClient, HttpResponse } from '@angular/common/http';
+
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
+
 import { Task } from './task.model';
 
 @Injectable()
@@ -38,11 +39,11 @@ export class TaskService extends EntityService<Task> {
     }
 
     public toRealObject(entity: any): Task {
-        let trueObject = Object.assign(new Task(), entity);
+        const trueObject = Object.assign(new Task(), entity);
         trueObject.completeId = entity.idAsString;
         Object.keys(entity).forEach(key => {
             if (key != 'idAsString') {
-                let value = entity[key];
+                const value = entity[key];
                 if (['creationDate', 'lastUpdate'].includes(key) && value) {
                     trueObject[key] = new Date(value);
                 }
@@ -52,7 +53,7 @@ export class TaskService extends EntityService<Task> {
     }
 
     public downloadStats(item: Task) {
-        let endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + item.route;
+        const endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + item.route;
         this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
             .toPromise()
             .then((response: HttpResponse<Blob>) => {

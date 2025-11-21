@@ -12,11 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { EntityListComponent } from "./entity-list.component.abstract";
-import { Entity } from "./entity.abstract";
+import { OnInit, Directive } from "@angular/core";
+
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
-import { OnInit, Directive } from "@angular/core";
+
+import { EntityListComponent } from "./entity-list.component.abstract";
+import { Entity } from "./entity.abstract";
+
 
 @Directive()
 export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
@@ -25,6 +28,7 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
     protected browserPaging: BrowserPaging<T>;
 
     ngOnInit() {
+        super.ngOnInit();
         this.loadEntities();
     }
     

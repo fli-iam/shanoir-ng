@@ -193,10 +193,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M9</version>
-				<configuration>
-					<useSystemClassLoader>false</useSystemClassLoader><!-- due to a bug with openJDK -->
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

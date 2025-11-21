@@ -13,8 +13,9 @@
  */
 
 import {Pipe, PipeTransform} from "@angular/core";
-import {BROWSER_LANGUAGE, dateFormat} from "./localDate.abstract";
 import { DatePipe } from '@angular/common';
+
+import {BROWSER_LANGUAGE, dateFormat} from "./localDate.abstract";
 
 @Pipe({
     name: 'localDateFormatPipe',

@@ -1,17 +1,3 @@
-/**
- * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
- * Contact us on https://project.inria.fr/shanoir/
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
-
 package org.shanoir.uploader.dicom.anonymize;
 
 import java.io.File;
@@ -26,35 +12,35 @@ import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 
 public class Anonymizer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Anonymizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Anonymizer.class);
 
-    public boolean pseudonymize(final File uploadFolder,
-            final String profile, final String subjectName)
-            throws IOException {
-        ArrayList<File> dicomFiles = new ArrayList<File>();
-        getListOfDicomFiles(uploadFolder, dicomFiles);
-        try {
-            AnonymizationService anonymizationService = new AnonymizationServiceImpl();
-            anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName);
-            LOG.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
-        } catch (Exception e) {
-            LOG.error("pseudonymization service: ", e);
-            return false;
-        }
-        return true;
-    }
+	public boolean pseudonymize(final File uploadFolder,
+			final String profile, final String subjectName, final String studyInstanceUID)
+			throws IOException {
+		ArrayList<File> dicomFiles = new ArrayList<File>();
+		getListOfDicomFiles(uploadFolder, dicomFiles);
+		try {
+			AnonymizationService anonymizationService = new AnonymizationServiceImpl();
+			anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName, studyInstanceUID);
+			logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
+		} catch (Exception e) {
+			logger.error("pseudonymization service: ", e);
+			return false;
+		}
+		return true;
+	}
 
-    private void getListOfDicomFiles(final File folder, ArrayList<File> dicomFiles) throws IOException {
-        File[] listOfFiles = folder.listFiles();
-        for (File file : listOfFiles) {
-            if (file.isFile() && file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
-                dicomFiles.add(file);
-            } else {
-                if (file.isDirectory()) {
-                    getListOfDicomFiles(file, dicomFiles);
-                }
-            }
-        }
-    }
+	private void getListOfDicomFiles(final File folder, ArrayList<File> dicomFiles) throws IOException {
+		File[] listOfFiles = folder.listFiles();
+		for (File file : listOfFiles) {
+			if (file.isFile() && file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+				dicomFiles.add(file);
+			} else {
+				if (file.isDirectory()) {
+					getListOfDicomFiles(file, dicomFiles);
+				}
+			}
+		}
+	}
 
 }

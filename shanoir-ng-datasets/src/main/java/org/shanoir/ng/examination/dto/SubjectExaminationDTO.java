@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,101 +21,112 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
  * Simple examination DTO with information for subject.
- *
+ * 
  * @author msimon
  *
  */
 public class SubjectExaminationDTO {
 
-    private String comment;
+	private String comment;
 
-    @LocalDateAnnotations
-    private LocalDate examinationDate;
+	@LocalDateAnnotations
+	private LocalDate examinationDate;
 
-    private Long id;
+	private Long id;
+	
+	private List<String> extraDataFilePathList;
+	
+	private Long centerId;
+	
+	private Long studyId;
 
-    private List<String> extraDataFilePathList;
+	private boolean preclinical;
 
-    private Long centerId;
+	private String studyInstanceUID;
 
-    private Long studyId;
+	/**
+	 * @return the comment
+	 */
+	public String getComment() {
+		return comment;
+	}
 
-    private boolean preclinical;
+	/**
+	 * @param comment
+	 *            the comment to set
+	 */
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
-    /**
-     * @return the comment
-     */
-    public String getComment() {
-        return comment;
-    }
+	/**
+	 * @return the examinationDate
+	 */
+	public LocalDate getExaminationDate() {
+		return examinationDate;
+	}
 
-    /**
-     * @param comment
-     *            the comment to set
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+	/**
+	 * @param examinationDate
+	 *            the examinationDate to set
+	 */
+	public void setExaminationDate(LocalDate examinationDate) {
+		this.examinationDate = examinationDate;
+	}
 
-    /**
-     * @return the examinationDate
-     */
-    public LocalDate getExaminationDate() {
-        return examinationDate;
-    }
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
 
-    /**
-     * @param examinationDate
-     *            the examinationDate to set
-     */
-    public void setExaminationDate(LocalDate examinationDate) {
-        this.examinationDate = examinationDate;
-    }
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public List<String> getExtraDataFilePathList() {
+		return extraDataFilePathList;
+	}
 
-    /**
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
+	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+		this.extraDataFilePathList = extraDataFilePathList;
+	}
 
-    /**
-     * @param id
-     *            the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getCenterId() {
+		return centerId;
+	}
 
-    public List<String> getExtraDataFilePathList() {
-        return extraDataFilePathList;
-    }
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
 
-    public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
-        this.extraDataFilePathList = extraDataFilePathList;
-    }
+	public Long getStudyId() {
+		return studyId;
+	}
 
-    public Long getCenterId() {
-        return centerId;
-    }
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
 
-    public void setCenterId(Long centerId) {
-        this.centerId = centerId;
-    }
+	public boolean getPreclinical() {
+		return preclinical;
+	}
 
-    public Long getStudyId() {
-        return studyId;
-    }
+	public void setPreclinical(boolean preclinical) {
+		this.preclinical = preclinical;
+	}
 
-    public void setStudyId(Long studyId) {
-        this.studyId = studyId;
-    }
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
 
-    public boolean getPreclinical() {
-        return preclinical;
-    }
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
 
-    public void setPreclinical(boolean preclinical) {
-        this.preclinical = preclinical;
-    }
 }

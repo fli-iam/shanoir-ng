@@ -13,13 +13,14 @@
  */
 
 import {Injectable, OnDestroy} from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import * as AppUtils from "../../utils/app.utils";
-import { HttpClient } from "@angular/common/http";
-import {ShanoirEvent} from "./shanoir-event.model";
 import {Page, Pageable} from "../../shared/components/table/pageable.model";
-import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
-import {DatasetAcquisitionDTO} from "../../dataset-acquisitions/shared/dataset-acquisition.dto";
+
+import {ShanoirEvent} from "./shanoir-event.model";
+
 
 @Injectable()
 export class ShanoirEventService extends EntityService<ShanoirEvent> implements OnDestroy {
@@ -31,7 +32,7 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
     }
 
     getPage(pageable : Pageable, studyId: number, searchStr : string, searchField : string): Promise<Page<ShanoirEvent>> {
-        let params = { 'params': pageable.toParams() };
+        const params = { 'params': pageable.toParams() };
         params['params']['searchStr'] = searchStr;
         params['params']['searchField'] = searchField;
         return this.http.get<Page<ShanoirEvent>>(this.API_URL + '/' + studyId, params)
@@ -39,7 +40,7 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
             .then(this.mapPage);
     }
 
-    getEntityInstance(entity?: ShanoirEvent): ShanoirEvent {
+    getEntityInstance(): ShanoirEvent {
         return new ShanoirEvent();
     }
 }

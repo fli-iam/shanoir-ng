@@ -12,7 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { allOfEnum } from "src/app/utils/app.utils";
+
 export enum InjectionInterval {
-    BEFORE = <any> "Before",
-    DURING = <any> "During"
+    BEFORE = "Before",
+    DURING = "During"
+}
+
+export namespace InjectionInterval {
+    export function all(): InjectionInterval[] {
+        return allOfEnum<InjectionInterval>(InjectionInterval);
+    }
 }

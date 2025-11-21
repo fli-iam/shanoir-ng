@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li *ngIf="hasDicom && form.get('format')?.value == 'nii'">
                 <label>Nifti converter</label>
                 <span class="right-col">
-                    <select-box formControlName="converter" [options]="niftiConverters" [(ngModel)]="converter"></select-box>
+                    <select-box formControlName="converter" [options]="niftiConverters"></select-box>
                 </span>
                 </li>
                 <li *ngIf="winOs">

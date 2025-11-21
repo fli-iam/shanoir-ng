@@ -14,12 +14,11 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 
+import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 
 import { Therapy } from './therapy.model';
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 
 @Injectable()
 export class TherapyService  extends EntityService<Therapy>{

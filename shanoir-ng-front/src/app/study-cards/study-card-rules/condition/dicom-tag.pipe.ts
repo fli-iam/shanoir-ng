@@ -13,6 +13,7 @@
  */
 
 import { Pipe, PipeTransform } from '@angular/core';
+
 import { DicomTag } from '../../shared/study-card.model';
 
 
@@ -25,7 +26,7 @@ export class DicomTagPipe implements PipeTransform {
     transform(tag: DicomTag): string {
         if (tag) {
             if (typeof tag.code != 'number') throw new Error('dicom tag code should be a number');
-            let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
+            const hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
             return hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4);
             //return tag.label + ' (' + hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ')';
         }

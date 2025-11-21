@@ -3,9 +3,14 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "paths": {
+      "@env/*": ["src/environments/*"],
+      "file-saver-es": ["@types/file-saver"],
+      "wicg-file-system-access": ["@types/wicg-file-system-access"]
+    },
+    "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -23,13 +28,5 @@
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true
-  },
-  "paths": {
-    "file-saver-es": [
-      "@types/file-saver"
-    ],
-    "wicg-file-system-access": [
-      "@types/wicg-file-system-access"
-    ]
-  } 
+  }
 }

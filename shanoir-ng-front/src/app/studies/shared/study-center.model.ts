@@ -13,6 +13,7 @@
  */
 import { Center } from '../../centers/shared/center.model';
 import { IdName } from '../../shared/models/id-name.model';
+
 import { Study } from './study.model';
 
 

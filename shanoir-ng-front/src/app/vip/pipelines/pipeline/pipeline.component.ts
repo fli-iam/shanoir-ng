@@ -13,6 +13,7 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
+
 import { Pipeline } from 'src/app/vip/models/pipeline';
 import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
 
@@ -26,8 +27,6 @@ export class PipelineComponent implements OnInit {
 
   @Input() pipeline:Pipeline;
   readonly ImagesUrlUtil = ImagesUrlUtil;
-
-  constructor() { }
 
   ngOnInit(): void {
     console.log(this.pipeline);

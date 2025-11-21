@@ -13,12 +13,13 @@
  */
 
 import { Location } from '@angular/common';
-import { Component } from '@angular/core';
-
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
+
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
@@ -31,9 +32,8 @@ import { UserService } from '../shared/user.service';
     standalone: false
 })
 
-export class AccountRequestComponent {
+export class AccountRequestComponent implements OnInit {
 
-    public user: User;
     public form: UntypedFormGroup;
 
     public requestSent: boolean = false;
@@ -59,18 +59,16 @@ export class AccountRequestComponent {
             }
 
     ngOnInit(): void {
-        this.user = new User();
-        this.user.accountRequestInfo = new AccountRequestInfo();
         this.buildForm();
     }
 
     buildForm(): void {
-        const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
+        const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         this.form = this.fb.group({
-            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': [this.user.accountRequestInfo, [this.validateARInfo]]
+            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
+            'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
     }
 
@@ -79,7 +77,7 @@ export class AccountRequestComponent {
         this.form.get('accountRequestInfo').updateValueAndValidity();
     }
 
-    private validateARInfo = (control: AbstractControl): ValidationErrors | null => {
+    private validateARInfo = (): ValidationErrors | null => {
         if (!this.infoValid) {
             return { invalid: true}
         }
@@ -87,12 +85,18 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
-        if (this.studyName) this.user.accountRequestInfo.studyName = this.studyName;
-        if (this.invitationIssuer) this.user.accountRequestInfo.contact = this.invitationIssuer;
-        if (this.function) this.user.accountRequestInfo.function = this.function;
+        const user: User = new User();
+        user.accountRequestInfo = new AccountRequestInfo();
+        user.firstName = this.form.value.firstName;
+        user.lastName = this.form.value.lastName;
+        user.email = this.form.value.email;
+        user.accountRequestInfo = this.form.value.accountRequestInfo;
+        if (this.studyName) user.accountRequestInfo.studyName = this.studyName;
+        if (this.invitationIssuer) user.accountRequestInfo.contact = this.invitationIssuer;
+        if (this.function) user.accountRequestInfo.function = this.function;
         this.loading = true;
-        this.userService.requestAccount(this.user)
-            .then((res) => {
+        this.userService.requestAccount(user)
+            .then(() => {
                  this.requestSent = true;
             }, (err) => {
                 if (err?.error?.details?.fieldErrors?.email != null) {
@@ -124,9 +128,9 @@ export class AccountRequestComponent {
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

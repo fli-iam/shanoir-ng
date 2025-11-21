@@ -17,7 +17,6 @@ import {
     ValidationErrors,
     ValidatorFn,
     Validators as NgValidators,
-    FormGroup,
 } from '@angular/forms';
 
 export class ShanoirValidators {
@@ -55,7 +54,7 @@ export class ShanoirValidators {
             const value = control.value;
             if (!value) return null;
 
-            const phoneRegex = /^[\+]?\d+$/;
+            const phoneRegex = /^[+]?\d+$/;
 
             return phoneRegex.test(value) ? null : { invalidPhoneNumber: true };
         };

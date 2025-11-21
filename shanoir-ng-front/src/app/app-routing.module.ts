@@ -15,91 +15,94 @@
 
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
+import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
+import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
-import { DatasetComponent } from './datasets/dataset/dataset.component';
-import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
+import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
+import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { DUAComponent } from './dua/dua.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
+import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { HomeComponent } from './home/home.component';
 import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { ImportComponent } from './import/import.component';
-import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { AnestheticFormComponent } from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
+import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
+import { AnestheticIngredientFormComponent } from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
+import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
+import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animal-subject-form.component';
+import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
+import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
+import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
+import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
+import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
+import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
+import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
+import { PathologiesListComponent } from './preclinical/pathologies/pathology/list/pathology-list.component';
+import { PathologyModelFormComponent } from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
+import { PathologyModelsListComponent } from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
+import { SubjectPathologyComponent } from './preclinical/pathologies/subjectPathology/edit/subject-pathology.component';
+import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
+import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
+import { SubjectTherapyComponent } from './preclinical/therapies/subjectTherapy/edit/subject-therapy.component';
+import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
+import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
-import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
+import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
+import { LoginGuard } from "./shared/roles/login-guard";
+import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
+import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
+import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
+import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
-import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
-import { BidsUploadComponent } from './import/bids/bids-upload.component';
-import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
-import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
-import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
-import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
-import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
-import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
-import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
-import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
-import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
-import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
-import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
-import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
-import { PathologiesListComponent } from './preclinical/pathologies/pathology/list/pathology-list.component';
-import { PathologyModelFormComponent } from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
-import { AnestheticIngredientFormComponent } from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
-import { PathologyModelsListComponent } from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
-import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
-import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
-import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
-import { AnestheticFormComponent } from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
-import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animalSubject-form.component';
-import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
-import { StudyCardComponent } from './study-cards/study-card/study-card.component';
-import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
-import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
-import { SolrSearchComponent } from './solr/solr.search.component';
-import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
-import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
-import { DUAComponent } from './dua/dua.component';
-import { AccessRequestComponent } from './users/access-request/access-request.component';
-import { PipelinesComponent } from './vip/pipelines/pipelines.component';
-import { ExecutionComponent } from './vip/execution/execution.component';
-import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
-import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
-import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
-import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
-import { WelcomeComponent } from "./welcome/welcome.component";
-import { LoginGuard } from "./shared/roles/login-guard";
-import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
-import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
-import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
-import { TaskStatusComponent } from './async-tasks/status/task-status.component';
-import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { TestComponent } from './utils/dev/test.component';
+import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
+import { ExecutionComponent } from './vip/execution/execution.component';
+import { PipelinesComponent } from './vip/pipelines/pipelines.component';
+import { WelcomeComponent } from "./welcome/welcome.component";
 
-let routes: Routes = [
+const routes: Routes = [
     {
         path: '',
         redirectTo: '/welcome',
@@ -688,6 +691,12 @@ let routes: Routes = [
 		canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
+		path: 'preclinical-subject-therapy/create',
+		component: SubjectTherapyComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
 		path: 'preclinical-pathology',
 		redirectTo: 'preclinical-pathology/list',
 	},
@@ -709,6 +718,12 @@ let routes: Routes = [
 	{
 		path: 'preclinical-pathology/create',
 		component: PathologyFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-subject-pathology/create',
+		component: SubjectPathologyComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},

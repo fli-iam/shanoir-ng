@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -45,12 +45,12 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Examination.
- *
+ * 
  * @author ifakhfakh
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId", "preclinical" })
+@JsonPropertyOrder({ "_links", "id", "examinationDate", "studyInstanceUID", "centerId", "subjectId", "studyId", "preclinical" })
 public class Examination extends HalEntity {
 
     /**
@@ -108,7 +108,7 @@ public class Examination extends HalEntity {
     private Long investigatorId;
 
     /** Notes about this examination. */
-    @JdbcTypeCode(Types.LONGVARCHAR)
+	@JdbcTypeCode(Types.LONGVARCHAR)
     private String note;
 
     /** Study. */
@@ -133,10 +133,17 @@ public class Examination extends HalEntity {
     /** The unit of weight, can be in kg or g */
     private Integer weightUnitOfMeasure;
 
-    /** Flag to set the examination as pre-clinical  */
-    @Column(nullable = false)
+    /** Flag to set the examination as pre-clinical  */ 
+    @Column(nullable=false)
     @ColumnDefault("false")
     private boolean preclinical;
+
+    /**
+     * The DICOM StudyInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light, and generated during examination creation.
+     */
+    @Column(name = "study_instance_uid")
+    private String studyInstanceUID;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_id")
@@ -146,7 +153,6 @@ public class Examination extends HalEntity {
     private List<Examination> copies;
 
     public Examination() {
-
     }
 
     public Examination(Examination other, Study study, Subject subject) {
@@ -174,6 +180,7 @@ public class Examination extends HalEntity {
         this.preclinical = other.preclinical;
         this.source = other.source;
         this.copies = other.copies;
+        this.studyInstanceUID = other.studyInstanceUID;
     }
 
     /**
@@ -360,7 +367,7 @@ public class Examination extends HalEntity {
     public Long getStudyId() {
         return getStudy() != null ? getStudy().getId() : null;
     }
-
+    
     public Study getStudy() {
         return study;
     }
@@ -369,7 +376,15 @@ public class Examination extends HalEntity {
         this.study = study;
     }
 
-    public Subject getSubject() {
+    public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
+	public Subject getSubject() {
         return subject;
     }
 
@@ -425,7 +440,7 @@ public class Examination extends HalEntity {
             this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
         }
     }
-
+    
     public boolean isPreclinical() {
         return preclinical;
     }
@@ -448,6 +463,13 @@ public class Examination extends HalEntity {
 
     public void setCopies(List<Examination> copies) {
         this.copies = copies;
+    }
+
+    @Override
+    public String toString() {
+        return "Examination [centerId=" + centerId + ", comment=" + comment + ", examinationDate=" + examinationDate
+                + ", extraDataFilePathList=" + extraDataFilePathList + ", note=" + note + ", subject=" + subject.getName()
+                + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
     }
 
 }
