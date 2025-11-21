@@ -116,11 +116,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
 	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
 		try {
-			String datasetAcEqName =
-					equipment.getManufacturerModel().getManufacturer().getName() + " - "
-							+ equipment.getManufacturerModel().getName() + " "
-							+ (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
-							+ equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
+			String datasetAcEqName = equipment.toString();
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
 			return true;

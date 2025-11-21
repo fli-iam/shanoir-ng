@@ -16,10 +16,13 @@ package org.shanoir.ng.shared.repository;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.springframework.data.repository.CrudRepository;
 
+
 /**
  * @author yyao
  *
  */
 public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
+
+    AcquisitionEquipment findByNameFirst(String name);
 
 }

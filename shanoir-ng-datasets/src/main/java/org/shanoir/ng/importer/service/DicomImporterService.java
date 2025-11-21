@@ -41,16 +41,20 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
+import org.shanoir.ng.shared.message.CreateEquipmentForCenterMessage;
+import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
@@ -103,6 +107,8 @@ public class DicomImporterService {
 
     private static final String CENTER_CREATION_ERROR = "An error occured during the center creation, please check your rights.";
 
+    private static final String EQUIPMENT_CREATION_ERROR = "An error occured during the equipment creation, please check your rights.";
+
     private static final String DOUBLE_EQUAL = "==";
 
     private static final String SEMI_COLON = ";";
@@ -147,6 +153,9 @@ public class DicomImporterService {
 
     @Autowired
     private DatasetExpressionRepository datasetExpressionRepository;
+
+    @Autowired
+    private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -195,11 +204,11 @@ public class DicomImporterService {
             return false;
         }
         Long subjectId = manageSubject(attributes, study);
-        Long centerId = manageCenterAndEquipment(attributes, study);
+        Long centerId = manageCenter(attributes, study);
         Examination examination = manageExamination(attributes, study, subjectId, centerId);
         String seriesDescription = attributes.getString(Tag.SeriesDescription);
         if(!DicomUtils.checkSerieIsIgnored(attributes)) {
-            DatasetAcquisition acquisition = manageAcquisition(attributes, examination);
+            DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
@@ -336,15 +345,15 @@ public class DicomImporterService {
         return seriesToDatasetsSeparator;
     }
 
-    private DatasetAcquisition manageAcquisition(Attributes attributes, Examination examination) throws Exception {
+    private DatasetAcquisition manageAcquisitionAndEquipment(Attributes attributes, Examination examination, Long centerId)
+            throws Exception {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
         Serie serieDICOM = new Serie(attributes);
-        Optional<DatasetAcquisition> existingAcquisition = 
-                acquisitionService.findByExaminationAndSeriesInstanceUIDWithDatasets(
-                    examination.getId(), 
-                    serieDICOM.getSeriesInstanceUID()
-                );
+        Optional<DatasetAcquisition> existingAcquisition = acquisitionService
+                .findByExaminationAndSeriesInstanceUIDWithDatasets(
+                        examination.getId(),
+                        serieDICOM.getSeriesInstanceUID());
         if (existingAcquisition.isPresent()) {
             return existingAcquisition.get();
         }
@@ -356,8 +365,29 @@ public class DicomImporterService {
                 userName, serieDICOM, rank, attributes);
         acquisition.setExamination(examination);
         acquisition.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
-        // @todo: take care of acquisition equipment
-        acquisition.setAcquisitionEquipmentId(0L);
+
+        EquipmentDicom equipmentDicom = serieDICOM.getEquipment();
+        String centerName = attributes.getString(Tag.InstitutionName);
+        String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
+        AcquisitionEquipment equipment = acquisitionEquipmentRepository.findByNameFirst(equipmentName);
+        if (equipment == null) {
+            CreateEquipmentForCenterMessage message = new CreateEquipmentForCenterMessage(centerId,
+                    equipmentDicom);
+            Long equipmentId = (Long) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE,
+                    objectMapper.writeValueAsString(message));
+            if (equipmentId == null) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EQUIPMENT_CREATION_ERROR, null));
+            }
+            LOG.info("Equipment created in MS Studies with ID: {}, Name: {}", equipmentId, equipmentName);
+            equipment = new AcquisitionEquipment();
+            equipment.setId(equipmentId);
+            equipment.setName(equipmentName);
+            equipment = acquisitionEquipmentRepository.save(equipment);
+            LOG.info("Equipment created in MS Datasets with ID: {}, Name: {}", equipment.getId(), equipment.getName());
+        }
+        acquisition.setAcquisitionEquipmentId(equipment.getId());
         return acquisitionService.create(acquisition, false);
     }
 
@@ -376,12 +406,9 @@ public class DicomImporterService {
      * @throws AmqpException 
      * @throws JsonProcessingException 
      */
-    private Long manageCenterAndEquipment(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
+    private Long manageCenter(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
         InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
         Long centerId = findOrCreateOrAddCenter(institutionDicom, study.getId());
-        String manufacturer = attributes.getString(Tag.Manufacturer);
-        String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
-        String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
         return centerId;
     }
 

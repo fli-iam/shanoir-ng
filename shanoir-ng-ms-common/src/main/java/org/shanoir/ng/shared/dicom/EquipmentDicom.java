@@ -105,4 +105,11 @@ public class EquipmentDicom {
 				+ ", magneticFieldStrength=" + magneticFieldStrength + "]";
 	}
 
+	public String toStringAcquisitionEquipment(String centerName) {
+		return manufacturer + " - "
+			+ manufacturerModelName + " "
+			+ (magneticFieldStrength != null ? (magneticFieldStrength + "T ") : "")
+			+ deviceSerialNumber + " - " + centerName;
+	}
+
 }
