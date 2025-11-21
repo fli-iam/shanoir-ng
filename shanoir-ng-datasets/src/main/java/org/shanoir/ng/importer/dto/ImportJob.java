@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,19 +28,19 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class ImportJob implements Serializable {
 
-	public static final String RANK_PROPERTY = "rank";
-	
-	public static final String INDEX_PROPERTY = "index";
-	
-	private static final long serialVersionUID = 8804929608059674037L;
+    public static final String RANK_PROPERTY = "rank";
+
+    public static final String INDEX_PROPERTY = "index";
+
+    private static final long serialVersionUID = 8804929608059674037L;
 
     private long timestamp;
 
     private boolean fromDicomZip;
 
-	private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<>();
 
-	private boolean fromShanoirUploader;
+    private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 
@@ -69,7 +69,7 @@ public class ImportJob implements Serializable {
     private String studyName;
 
     private ShanoirEvent shanoirEvent;
-    
+
     private Long userId;
 
     private String username;
@@ -77,7 +77,7 @@ public class ImportJob implements Serializable {
     private QualityTag qualityTag;
 
     private String studyInstanceUID;
-    
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -85,7 +85,7 @@ public class ImportJob implements Serializable {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-    
+
     public Long getUserId() {
         return userId;
     }
@@ -271,7 +271,7 @@ public class ImportJob implements Serializable {
         if ( getPatients() == null
                 || getPatients().get(0) == null
                 || getPatients().get(0).getStudies() == null) {
-            return null;        
+            return null;
         } else {
             return getPatients().get(0).getStudies().get(0);
         }

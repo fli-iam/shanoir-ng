@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,48 +32,48 @@ import org.springframework.stereotype.Service;
  * In the strategy pattern this class represents the context.
  * The context holds the variable to the actual strategy in use, that has
  * been chosen on using the required modality.
- * 
+ *
  * @author mkain
  *
  */
 @Service
 public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
-	
-	@Autowired
-	private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
-	
-	@Autowired
-	private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
-	
-	@Autowired
-	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
 
-	@Autowired
-	private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
-	
-	@Autowired
-	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
-	
-	// add other strategies for other modalities here
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
-		String modality = serie.getModality();
-		if ("MR".equals(modality)) {
-			datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
-		} else if ("CT".equals(modality)) {
-			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
-		} else if ("PT".equals(modality)) {
-			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
-		} else if ("XA".equals(modality)) {
-			datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
-		}else {
-			// By default we just create a generic dataset acquisition
-			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-		}
-		// Set SeriesInstanceUID into acquisition; this applies for all modalities DICOM, that are stored in PACS
-		seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
-		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, seriesInstanceUID, rank, importJob, dicomAttributes);
-	}
-	
+    @Autowired
+    private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
+
+    @Autowired
+    private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
+
+    @Autowired
+    private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
+
+    @Autowired
+    private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
+
+    @Autowired
+    private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
+
+    // add other strategies for other modalities here
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy;
+        String modality = serie.getModality();
+        if ("MR".equals(modality)) {
+            datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
+        } else if ("CT".equals(modality)) {
+            datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+        } else if ("PT".equals(modality)) {
+            datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+        } else if ("XA".equals(modality)) {
+            datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
+        }else {
+            // By default we just create a generic dataset acquisition
+            datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
+        }
+        // Set SeriesInstanceUID into acquisition; this applies for all modalities DICOM, that are stored in PACS
+        seriesInstanceUID = dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesInstanceUID);
+        return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, seriesInstanceUID, rank, importJob, dicomAttributes);
+    }
+
 }

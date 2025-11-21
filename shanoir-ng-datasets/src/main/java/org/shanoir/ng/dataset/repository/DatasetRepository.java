@@ -30,125 +30,125 @@ import org.springframework.data.repository.query.Param;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
-	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
-			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
-			"INNER JOIN examination as ex ON acq.examination_id=ex.id " +
-			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
-	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+    @Query(value="SELECT COUNT(*) FROM dataset as ds " +
+            "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
+            "INNER JOIN examination as ex ON acq.examination_id=ex.id " +
+            "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
+    Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
-	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
+    Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
+    Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
-	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
+    Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-	int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
+    int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-	@Query(value = "SELECT ds.id FROM dataset ds " +
-			"INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
-			"INNER JOIN examination ex ON acq.examination_id = ex.id " +
-			"WHERE ex.study_id = ?1", nativeQuery = true)
-	List<Long> findIdsByStudyId(Long studyId);
+    @Query(value = "SELECT ds.id FROM dataset ds " +
+            "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+            "INNER JOIN examination ex ON acq.examination_id = ex.id " +
+            "WHERE ex.study_id = ?1", nativeQuery = true)
+    List<Long> findIdsByStudyId(Long studyId);
 
-	@Query(value = "SELECT ds.id FROM dataset ds " +
-			"WHERE ds.subject_id IN (?1)", nativeQuery = true)
-	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+    @Query(value = "SELECT ds.id FROM dataset ds " +
+            "WHERE ds.subject_id IN (?1)", nativeQuery = true)
+    List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
-	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+    Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 
-	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
+    Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
 
-	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
+    Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
+    Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
-	@Query(value="SELECT ds.id FROM dataset ds " +
-			"LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
-			"LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id " +
-			"LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id " +
-			"LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id " +
-			"LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id " +
-			"WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
-	List<Long> findDatasetAndOutputByExaminationId(Long examId);
+    @Query(value="SELECT ds.id FROM dataset ds " +
+            "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+            "LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id " +
+            "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id " +
+            "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id " +
+            "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id " +
+            "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
+    List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
 
-	@Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
-			"GROUP BY expr.datasetExpressionFormat")
-	List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
+    @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
+            "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
+            "GROUP BY expr.datasetExpressionFormat")
+    List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
 
-	@Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-			"WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
-			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
-	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
+    @Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
+            "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
+            "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
+    List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
-	boolean existsByTagsContains(StudyTag tag);
+    boolean existsByTagsContains(StudyTag tag);
 
-	@Query(value="SELECT ds.id FROM dataset as ds " +
-			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
-			"WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
-	List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
+    @Query(value="SELECT ds.id FROM dataset as ds " +
+            "INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
+            "WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
+    List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
 
-	@Query("""
-		SELECT DISTINCT
-			ds.id                      AS id,
-			ex.study.id                AS studyId,
-			ex.centerId                AS centerId,
-			relSt.id                   AS relatedStudiesIds
-		FROM DatasetProcessing dp
-			JOIN dp.inputDatasets ds
-			LEFT JOIN ds.datasetAcquisition da
-			LEFT JOIN da.examination ex
-			LEFT JOIN ds.relatedStudies relSt
-		WHERE dp.id IN :processingIds
-			""")
-	List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
+    @Query("""
+        SELECT DISTINCT
+            ds.id                      AS id,
+            ex.study.id                AS studyId,
+            ex.centerId                AS centerId,
+            relSt.id                   AS relatedStudiesIds
+        FROM DatasetProcessing dp
+            JOIN dp.inputDatasets ds
+            LEFT JOIN ds.datasetAcquisition da
+            LEFT JOIN da.examination ex
+            LEFT JOIN ds.relatedStudies relSt
+        WHERE dp.id IN :processingIds
+            """)
+    List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
-	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
-			+ "ds.id, dm.name, TYPE(ds), "
-			+ "s.id, s.name, "
-			+ "sub.id, sub.name, "
-			+ "ds.creationDate, "
-			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
-			+ "FROM Dataset ds "
-			+ "LEFT JOIN ds.originMetadata dm "
-			+ "LEFT JOIN ds.datasetAcquisition da "
-			+ "LEFT JOIN da.examination e "
-			+ "LEFT JOIN e.study s "
-			+ "LEFT JOIN e.subject sub "
-			+ "WHERE ds.id IN :ids")
-	List<DatasetLight> findAllLightById(List<Long> ids);
+    @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
+            + "ds.id, dm.name, TYPE(ds), "
+            + "s.id, s.name, "
+            + "sub.id, sub.name, "
+            + "ds.creationDate, "
+            + "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
+            + "FROM Dataset ds "
+            + "LEFT JOIN ds.originMetadata dm "
+            + "LEFT JOIN ds.datasetAcquisition da "
+            + "LEFT JOIN da.examination e "
+            + "LEFT JOIN e.study s "
+            + "LEFT JOIN e.subject sub "
+            + "WHERE ds.id IN :ids")
+    List<DatasetLight> findAllLightById(List<Long> ids);
 
-	// select rd.study_id from related_datasets rd where dataset_id = ?1
-	@Query("""
-		SELECT DISTINCT
-		ds.id                      AS id,
-		ex.study.id                AS studyId,
-		ex.centerId                AS centerId,
-		relSt.id                   AS relatedStudiesIds
-		FROM Dataset ds
-		LEFT JOIN ds.datasetAcquisition da
-			LEFT JOIN da.examination ex
-		LEFT JOIN ds.relatedStudies relSt
-		WHERE ds.id IN :ids
-			""")
+    // select rd.study_id from related_datasets rd where dataset_id = ?1
+    @Query("""
+        SELECT DISTINCT
+        ds.id                      AS id,
+        ex.study.id                AS studyId,
+        ex.centerId                AS centerId,
+        relSt.id                   AS relatedStudiesIds
+        FROM Dataset ds
+        LEFT JOIN ds.datasetAcquisition da
+            LEFT JOIN da.examination ex
+        LEFT JOIN ds.relatedStudies relSt
+        WHERE ds.id IN :ids
+            """)
   List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
 
-	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
-			+ "ds.id, dm.name, TYPE(ds), "
-			+ "s.id, s.name, "
-			+ "sub.id, sub.name, "
-			+ "ds.creationDate, "
-			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
-			+ "FROM Dataset ds "
-			+ "LEFT JOIN ds.originMetadata dm "
-			+ "LEFT JOIN ds.datasetAcquisition da "
-			+ "LEFT JOIN da.examination e "
-			+ "LEFT JOIN e.study s "
-			+ "LEFT JOIN e.subject sub "
-			+ "WHERE s.id = :studyId")
-	List<DatasetLight> findAllLightByStudyId(Long studyId);
+    @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
+            + "ds.id, dm.name, TYPE(ds), "
+            + "s.id, s.name, "
+            + "sub.id, sub.name, "
+            + "ds.creationDate, "
+            + "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) "
+            + "FROM Dataset ds "
+            + "LEFT JOIN ds.originMetadata dm "
+            + "LEFT JOIN ds.datasetAcquisition da "
+            + "LEFT JOIN da.examination e "
+            + "LEFT JOIN e.study s "
+            + "LEFT JOIN e.subject sub "
+            + "WHERE s.id = :studyId")
+    List<DatasetLight> findAllLightByStudyId(Long studyId);
 
 }

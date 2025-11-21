@@ -23,33 +23,33 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
-	
-	@Autowired
-	private DatasetStrategy<GenericDataset> datasetStrategy;
-	
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
-		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
-		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(datasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		datasetAcquisition.setDatasets(genericizedList);		
-		return datasetAcquisition;
-	}
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
+
+    @Autowired
+    private DatasetStrategy<GenericDataset> datasetStrategy;
+
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
+        LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+        datasetAcquisition.setImportDate(LocalDate.now());
+        datasetAcquisition.setUsername(importJob.getUsername());
+        datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
+        datasetAcquisition.setRank(rank);
+        importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+        datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
+        datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)),
+                                                    DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+        DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(datasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        datasetAcquisition.setDatasets(genericizedList);
+        return datasetAcquisition;
+    }
 
 }

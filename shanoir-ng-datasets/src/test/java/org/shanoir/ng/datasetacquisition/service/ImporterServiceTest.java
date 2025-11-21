@@ -68,163 +68,163 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ImporterServiceTest {
 
-	@InjectMocks
-	@Spy
-	ImporterService service = new ImporterService();
-	
-	@Mock
-	private ExaminationService examinationService;
+    @InjectMocks
+    @Spy
+    ImporterService service = new ImporterService();
 
-	@Mock
-	private ExaminationRepository examinationRepository;
+    @Mock
+    private ExaminationService examinationService;
 
-	@Mock
-	private DatasetAcquisitionContext datasetAcquisitionContext;
-	
-	@Mock
-	private DatasetAcquisitionService datasetAcquisitionService;
+    @Mock
+    private ExaminationRepository examinationRepository;
 
-	@Mock
-	private DicomPersisterService dicomPersisterService;
+    @Mock
+    private DatasetAcquisitionContext datasetAcquisitionContext;
 
-	@Mock
-	private DicomProcessing dicomProcessing;
+    @Mock
+    private DatasetAcquisitionService datasetAcquisitionService;
 
-	@Mock
-	private ShanoirEventService taskService;
-	
-	@Mock
-	StudyUserRightsRepository studyUserRightRepo;
+    @Mock
+    private DicomPersisterService dicomPersisterService;
 
-	@Mock
-	QualityCardService qualityCardService;
+    @Mock
+    private DicomProcessing dicomProcessing;
 
-	@Mock
-	QualityService qualityService;
+    @Mock
+    private ShanoirEventService taskService;
 
-	@Mock
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+    @Mock
+    StudyUserRightsRepository studyUserRightRepo;
 
-	@Mock
-	private ImporterMailService importerServiceMail;
+    @Mock
+    QualityCardService qualityCardService;
 
-	@Mock
-	private SubjectService subjectService;
+    @Mock
+    QualityService qualityService;
 
-	private Examination exam;
+    @Mock
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
-	@BeforeEach
-	public void setUp() throws IOException {
-		exam = new Examination();
-		exam.setExaminationDate(LocalDate.now());
-		exam.setId(1l);
+    @Mock
+    private ImporterMailService importerServiceMail;
+
+    @Mock
+    private SubjectService subjectService;
+
+    private Examination exam;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        exam = new Examination();
+        exam.setExaminationDate(LocalDate.now());
+        exam.setId(1l);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
-	}
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void createAllDatasetAcquisition() throws Exception {
-		// GIVEN an importJob with series and patients
-		List<Patient> patients = new ArrayList<Patient>();
-		Patient patient = new Patient();
-		List<Study> studies = new ArrayList<Study>();
-		Study study = new Study();
-		List<Serie> series = new ArrayList<Serie>();
-		Serie serie = new Serie();
-		serie.setSelected(Boolean.TRUE);
-		serie.setModality("smthing");
-		List<Dataset> datasets = new ArrayList<Dataset>();
-		Dataset dataset = new Dataset();
-		List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
-		ExpressionFormat expressionFormat = new ExpressionFormat();
-		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
-		DatasetFile datasetFile = new DatasetFile();
-		datasetFile.setPath("/fakePath");
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void createAllDatasetAcquisition() throws Exception {
+        // GIVEN an importJob with series and patients
+        List<Patient> patients = new ArrayList<Patient>();
+        Patient patient = new Patient();
+        List<Study> studies = new ArrayList<Study>();
+        Study study = new Study();
+        List<Serie> series = new ArrayList<Serie>();
+        Serie serie = new Serie();
+        serie.setSelected(Boolean.TRUE);
+        serie.setModality("smthing");
+        List<Dataset> datasets = new ArrayList<Dataset>();
+        Dataset dataset = new Dataset();
+        List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
+        ExpressionFormat expressionFormat = new ExpressionFormat();
+        List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
+        DatasetFile datasetFile = new DatasetFile();
+        datasetFile.setPath("/fakePath");
 
-		datasetFiles.add(datasetFile);
-		expressionFormat.setDatasetFiles(datasetFiles);
-		expressionFormats.add(expressionFormat);
-		dataset.setExpressionFormats(expressionFormats);
-		datasets.add(dataset);
-		serie.setDatasets(datasets);
-		serie.setIsEnhanced(Boolean.FALSE);
-		series.add(serie);
-		study.setSeries(series);
-		studies.add(study);
-		patient.setStudies(studies);
-		patients.add(patient);
-		
-		ImportJob importJob = new ImportJob();
-		importJob.setPatients(patients );
-		importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
-		importJob.setExaminationId(Long.valueOf(2));
-		importJob.setSubjectName("subjectName");
-		importJob.setStudyName("studyName");
-		importJob.setStudyId(1L);
-		importJob.setStudyCardName("SCname");
-		importJob.setShanoirEvent(new ShanoirEvent());
-		importJob.setFromShanoirUploader(false);
+        datasetFiles.add(datasetFile);
+        expressionFormat.setDatasetFiles(datasetFiles);
+        expressionFormats.add(expressionFormat);
+        dataset.setExpressionFormats(expressionFormats);
+        datasets.add(dataset);
+        serie.setDatasets(datasets);
+        serie.setIsEnhanced(Boolean.FALSE);
+        series.add(serie);
+        study.setSeries(series);
+        studies.add(study);
+        patient.setStudies(studies);
+        patients.add(patient);
 
-		org.shanoir.ng.shared.model.Subject subject = new org.shanoir.ng.shared.model.Subject();
+        ImportJob importJob = new ImportJob();
+        importJob.setPatients(patients );
+        importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
+        importJob.setExaminationId(Long.valueOf(2));
+        importJob.setSubjectName("subjectName");
+        importJob.setStudyName("studyName");
+        importJob.setStudyId(1L);
+        importJob.setStudyCardName("SCname");
+        importJob.setShanoirEvent(new ShanoirEvent());
+        importJob.setFromShanoirUploader(false);
 
-		Examination examination = new Examination();
-		examination.setId(2L);
-		examination.setExaminationDate(LocalDate.now());
-		examination.setDatasetAcquisitions(new ArrayList<>());
-		examination.setSubject(subject);
-		examination.setStudy(new org.shanoir.ng.shared.model.Study());
-		examination.getStudy().setId(1L);
-		examination.getStudy().setSubjectStudyList(new ArrayList<>());
-		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
+        org.shanoir.ng.shared.model.Subject subject = new org.shanoir.ng.shared.model.Subject();
 
-		ExaminationData examData = new ExaminationData(examination);
+        Examination examination = new Examination();
+        examination.setId(2L);
+        examination.setExaminationDate(LocalDate.now());
+        examination.setDatasetAcquisitions(new ArrayList<>());
+        examination.setSubject(subject);
+        examination.setStudy(new org.shanoir.ng.shared.model.Study());
+        examination.getStudy().setId(1L);
+        examination.getStudy().setSubjectStudyList(new ArrayList<>());
+        DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 
-		QualityCardResult qualityResult = new QualityCardResult();
-		QualityCardResultEntry entry = new QualityCardResultEntry();
-		entry.setTagSet(QualityTag.VALID);
-		qualityResult.add(entry);
+        ExaminationData examData = new ExaminationData(examination);
 
-		AcquisitionAttributes<String> acquisitionAttributes = new AcquisitionAttributes<String>();
-		Attributes attributes = new Attributes();
-		attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
-		acquisitionAttributes.addDatasetAttributes("1", attributes);
+        QualityCardResult qualityResult = new QualityCardResult();
+        QualityCardResultEntry entry = new QualityCardResultEntry();
+        entry.setTagSet(QualityTag.VALID);
+        qualityResult.add(entry);
 
-		try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
-			dicomProcessingMock
-				.when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()))
-				.thenReturn(acquisitionAttributes);
-			when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(""), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
-			when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-			when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
-			when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
-			when(qualityService.checkQuality(Mockito.eq(examData), Mockito.eq(importJob), any())).thenReturn(qualityResult);
-			when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
+        AcquisitionAttributes<String> acquisitionAttributes = new AcquisitionAttributes<String>();
+        Attributes attributes = new Attributes();
+        attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
+        acquisitionAttributes.addDatasetAttributes("1", attributes);
 
-			// WHEN we treat this importjob
-			assertNotNull(qualityResult);
-			service.createAllDatasetAcquisition(importJob, 1L);
-		
-			ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
-			Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
-		
-			List<ShanoirEvent> values = argument.getAllValues();
-			ShanoirEvent task = values.get(0);
-			assertTrue(task.getStatus() == 1);
-			// NOTE: This test is important as we use the message to send an mail to study admin further.
-			// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-			assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
-		
-			// THEN datasets are created
-			// Check what we save at the end
-			verify(datasetAcquisitionService).createAll(any());
-			//verify(datasetAcquisitionService).create(datasetAcq);
-			verify(dicomPersisterService).persistAllForSerie(any());
+        try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
+            dicomProcessingMock
+                .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()))
+                .thenReturn(acquisitionAttributes);
+            when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(""), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
+            when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
+            when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
+            when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
+            when(qualityService.checkQuality(Mockito.eq(examData), Mockito.eq(importJob), any())).thenReturn(qualityResult);
+            when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
-			assertNotNull(datasetAcq);
-		
-			// AN archive is not referenced in the examination (file not existing)
-			List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
-			assertNull(extradata);
-		}
-	}
+            // WHEN we treat this importjob
+            assertNotNull(qualityResult);
+            service.createAllDatasetAcquisition(importJob, 1L);
+
+            ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
+            Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
+
+            List<ShanoirEvent> values = argument.getAllValues();
+            ShanoirEvent task = values.get(0);
+            assertTrue(task.getStatus() == 1);
+            // NOTE: This test is important as we use the message to send an mail to study admin further.
+            // PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
+            assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
+
+            // THEN datasets are created
+            // Check what we save at the end
+            verify(datasetAcquisitionService).createAll(any());
+            //verify(datasetAcquisitionService).create(datasetAcq);
+            verify(dicomPersisterService).persistAllForSerie(any());
+
+            assertNotNull(datasetAcq);
+
+            // AN archive is not referenced in the examination (file not existing)
+            List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
+            assertNull(extradata);
+        }
+    }
 }
