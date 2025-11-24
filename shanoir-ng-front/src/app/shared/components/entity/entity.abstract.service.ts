@@ -67,15 +67,15 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             .toPromise();
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity, studyListStr?: string): Promise<boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string): Promise<boolean> {
         const dialogTitle : string = 'Delete ' + name;
-        const dialogMsg : string = 'Are you sure you want to finally delete the ' + name
+        const defaultMsg : string = 'Are you sure you want to finally delete the ' + name
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
         return this.confirmDialogService
             .confirm(
                 dialogTitle,
-                dialogMsg + studyListStr
+                customMsg || defaultMsg,
             ).then(res => {
                 if (res) {
                     return this.delete(entity.id).then(() => {
