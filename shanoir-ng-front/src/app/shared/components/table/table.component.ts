@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { fromEvent, Subscription } from 'rxjs';
 import { Router } from "@angular/router";
+import { fromEvent, Subscription } from 'rxjs';
 import shajs from 'sha.js';
 
+import { TaskService } from "../../../async-tasks/task.service";
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
@@ -23,7 +24,6 @@ import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
-import {TaskService} from "../../../async-tasks/task.service";
 
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
@@ -652,7 +652,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
                 const pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
+                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
                 completion = completion.then(() => { // load pages sequentially
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
