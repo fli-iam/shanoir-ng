@@ -25,4 +25,6 @@ public interface AcquisitionEquipmentRepository extends CrudRepository<Acquisiti
 
     AcquisitionEquipment findFirstByName(String name);
 
+    AcquisitionEquipment findFirstByNameContainingAndNameContaining(String centerName, String serialNumber);
+
 }

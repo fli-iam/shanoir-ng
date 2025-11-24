@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -280,7 +281,7 @@ public class RabbitMQStudiesService {
 				LOG.error("Error while creating a new equipment.");
 				return null;
 			}
-		} catch (Exception e) {
+		} catch (JsonProcessingException e) {
 			LOG.error("Error while creating a new equipment: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
@@ -288,7 +289,12 @@ public class RabbitMQStudiesService {
 
 	@Transactional
 	private AcquisitionEquipment createEquipmentByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom) {
-		return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
+		try {
+			return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
+		} catch (Exception e) {
+			LOG.error("Error while creating a new equipment: ", e);
+		}
+		return null;
 	}
 
 }

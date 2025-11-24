@@ -203,23 +203,23 @@ public class DicomImporterService {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
         }
-        Long subjectId = manageSubject(attributes, study);
-        Long centerId = manageCenter(attributes, study);
-        Examination examination = manageExamination(attributes, study, subjectId, centerId);
-        String seriesDescription = attributes.getString(Tag.SeriesDescription);
-        if(!DicomUtils.checkSerieIsIgnored(attributes)) {
-            DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId);
-            Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition);
+        Serie serie = new Serie(attributes);
+        if(!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
+            Long subjectId = manageSubject(attributes, study);
+            Long centerId = manageCenter(attributes, study.getId());
+            Examination examination = manageExamination(attributes, study, subjectId, centerId);
+            DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
+            Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
             solrService.indexDataset(dataset.getId());
             sendToPacs(metaInformationAttributes, attributes);
-            countNumberOfFilesPerSerie(acquisition, seriesDescription);
-            return true;
+            countNumberOfFilesPerSerie(acquisition, serie.getSeriesDescription());
         } else {
-            LOG.error("DICOM file of serie {} ignored.", seriesDescription);
+            LOG.error("DICOM file of serie {} ignored.", serie.getSeriesDescription());
             return false;
         }
+        return true;
     }
 
     private void countNumberOfFilesPerSerie(DatasetAcquisition acquisition, String seriesDescription) {
@@ -233,14 +233,13 @@ public class DicomImporterService {
         LOG.info(seriesInstanceUIDNumberOfFilesCache.toString());
     }
 
-    private Dataset manageDataset(Attributes attributes, Long studyId, Long subjectId, DatasetAcquisition acquisition)
+    private Dataset manageDataset(Attributes attributes, Long studyId, Long subjectId, DatasetAcquisition acquisition, Serie serie)
             throws Exception {
         int datasetIndex = -1; // Used for single-dataset acquisitions
         Dataset currentDataset = null;
-        Serie serieDICOM = new Serie(attributes);
         List<Dataset> datasets = acquisition.getDatasets();
         if (datasets != null && !datasets.isEmpty()) {
-            boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serieDICOM, seriesProperties);
+            boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
             // Manage split series in the if-clause
             if (!serieIdentifiedForNotSeparating) {
                 // Check if serie == acquisition: separate datasets
@@ -264,7 +263,7 @@ public class DicomImporterService {
             echoTimes.add(echoTime);
             dataset.setEchoTimes(echoTimes);
             currentDataset = acquisitionContext.generateFlatDataset(
-                    serieDICOM, dataset, datasetIndex, subjectId,
+                    serie, dataset, datasetIndex, subjectId,
                     attributes);
             acquisition.getDatasets().add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
@@ -345,32 +344,35 @@ public class DicomImporterService {
         return seriesToDatasetsSeparator;
     }
 
-    private DatasetAcquisition manageAcquisitionAndEquipment(Attributes attributes, Examination examination, Long centerId)
+    private DatasetAcquisition manageAcquisitionAndEquipment(Attributes attributes, Examination examination, Long centerId, Serie serie)
             throws Exception {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
-        Serie serieDICOM = new Serie(attributes);
         Optional<DatasetAcquisition> existingAcquisition = acquisitionService
                 .findByExaminationAndSeriesInstanceUIDWithDatasets(
                         examination.getId(),
-                        serieDICOM.getSeriesInstanceUID());
+                        serie.getSeriesInstanceUID());
         if (existingAcquisition.isPresent()) {
             return existingAcquisition.get();
         }
         int rank = 0;
-        if (serieDICOM.getSeriesNumber() > 0) {
-            rank = serieDICOM.getSeriesNumber() - 1;
+        if (serie.getSeriesNumber() > 0) {
+            rank = serie.getSeriesNumber() - 1;
         }
         acquisition = acquisitionContext.generateFlatDatasetAcquisitionForSerie(
-                userName, serieDICOM, rank, attributes);
+                userName, serie, rank, attributes);
         acquisition.setExamination(examination);
         acquisition.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
 
-        EquipmentDicom equipmentDicom = serieDICOM.getEquipment();
+        EquipmentDicom equipmentDicom = serie.getEquipment();
         String centerName = attributes.getString(Tag.InstitutionName);
         if (equipmentDicom.isComplete() && centerName != null && !centerName.isEmpty()) {
             String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
+            LOG.info("Searching with equipment name: " + equipmentName);
             AcquisitionEquipment equipment = acquisitionEquipmentRepository.findFirstByName(equipmentName);
+            if (equipment == null) {
+                equipment = acquisitionEquipmentRepository.findFirstByNameContainingAndNameContaining(centerName, equipmentDicom.getDeviceSerialNumber());
+            }
             if (equipment == null) {
                 CreateEquipmentForCenterMessage message = new CreateEquipmentForCenterMessage(centerId,
                         equipmentDicom);
@@ -397,6 +399,12 @@ public class DicomImporterService {
     }
 
     /**
+     * This method calls MS Studies (domain owner of centers and study_center)
+     * to either create a new center and propagate it to MS Datasets, or to add
+     * an existing center to study_center. To avoid thousands of RabbitMQ messages
+     * a local lookup is made into the replication tables, and if the center exists
+     * and is already in the study, we send no message to MS Studies to avoid overhead.
+     * 
      * For the moment, we assume here that only pseudonymized
      * DICOM enter this import workflow. This means institution
      * name and address have been removed, so no way to create a
@@ -405,25 +413,6 @@ public class DicomImporterService {
      * center, we only keep it in MS Datasets to increase performance
      * and not too lose any significant value.
      * 
-     * @param attributes
-     * @return
-     * @throws RestServiceException 
-     * @throws AmqpException 
-     * @throws JsonProcessingException 
-     */
-    private Long manageCenter(Attributes attributes, Study study) throws JsonProcessingException, AmqpException, RestServiceException {
-        InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
-        Long centerId = findOrCreateOrAddCenter(institutionDicom, study.getId());
-        return centerId;
-    }
-
-    /**
-     * This method calls MS Studies (domain owner of centers and study_center)
-     * to either create a new center and propagate it to MS Datasets, or to add
-     * an existing center to study_center. To avoid thousands of RabbitMQ messages
-     * a local lookup is made into the replication tables, and if the center exists
-     * and is already in the study, we send no message to MS Studies to avoid overhead.
-     * 
      * @param institutionDicom
      * @param studyId
      * @return
@@ -431,7 +420,8 @@ public class DicomImporterService {
      * @throws AmqpException
      * @throws RestServiceException
      */
-    private Long findOrCreateOrAddCenter(InstitutionDicom institutionDicom, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+    private Long manageCenter(Attributes attributes, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+        InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
         Optional<StudyCenter> studyCenterOpt = null;
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
