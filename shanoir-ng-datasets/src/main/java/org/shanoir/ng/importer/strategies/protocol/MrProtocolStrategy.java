@@ -60,10 +60,6 @@ public class MrProtocolStrategy {
 		MrProtocolMetadata mrProtocolMetadata = createOriginMrProtocolMetadata(attributes, serie);
 		mrProtocol.setOriginMetadata(mrProtocolMetadata);
 
-        MrProtocol mrProtocol = new MrProtocol();
-        MrProtocolMetadata mrProtocolMetadata = createOriginMrProtocolMetadata(attributes, serie);
-        mrProtocol.setOriginMetadata(mrProtocolMetadata);
-
         // Imaged nucleus
         final ImagedNucleus imagedNucleus = getImagedNucleus(attributes, serie.getIsEnhanced());
         if (imagedNucleus != null) {
