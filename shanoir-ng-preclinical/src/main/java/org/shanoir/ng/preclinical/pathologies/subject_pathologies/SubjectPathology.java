@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,189 +46,189 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({ "_links", "pathology", "pathologyModel", "location", "startDate", "endDate", "animalSubject" })
 public class SubjectPathology extends HalEntity {
 
-	@ManyToOne
-	@NotNull
-	@JsonIgnore
-	@JsonProperty("animalSubject")
-	@JsonManagedReference
-	private AnimalSubject animalSubject = null;
+    @ManyToOne
+    @NotNull
+    @JsonIgnore
+    @JsonProperty("animalSubject")
+    @JsonManagedReference
+    private AnimalSubject animalSubject = null;
 
-	@JsonProperty("pathology")
-	@ManyToOne
-	@NotNull
-	private Pathology pathology = null;
+    @JsonProperty("pathology")
+    @ManyToOne
+    @NotNull
+    private Pathology pathology = null;
 
-	@JsonProperty("pathologyModel")
-	@ManyToOne
-	// @NotNull
-	private PathologyModel pathologyModel = null;
+    @JsonProperty("pathologyModel")
+    @ManyToOne
+    // @NotNull
+    private PathologyModel pathologyModel = null;
 
-	@JsonProperty("location")
-	@RefValueExists
-	@ManyToOne
-	@NotNull
-	private Reference location = null;
+    @JsonProperty("location")
+    @RefValueExists
+    @ManyToOne
+    @NotNull
+    private Reference location = null;
 
-	@JsonProperty("startDate")
-	private Date startDate = null;
+    @JsonProperty("startDate")
+    private Date startDate = null;
 
-	@JsonProperty("endDate")
-	private Date endDate = null;
+    @JsonProperty("endDate")
+    private Date endDate = null;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/pathology/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/pathology/" + getId());
+    }
 
-	public SubjectPathology subject(AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-		return this;
-	}
+    public SubjectPathology subject(AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+        return this;
+    }
 
-	@JsonIgnore
-	@Schema(name = "none")
-	public AnimalSubject getAnimalSubject() {
-		return animalSubject;
-	}
+    @JsonIgnore
+    @Schema(name = "none")
+    public AnimalSubject getAnimalSubject() {
+        return animalSubject;
+    }
 
-	public void setAnimalSubject(AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-	}
+    public void setAnimalSubject(AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+    }
 
-	public SubjectPathology pathology(Pathology pathology) {
-		this.pathology = pathology;
-		return this;
-	}
+    public SubjectPathology pathology(Pathology pathology) {
+        this.pathology = pathology;
+        return this;
+    }
 
-	/**
-	 * none
-	 * 
-	 * @return subjectId
-	 **/
-	@Schema(name = "none")
-	public Pathology getPathology() {
-		return pathology;
-	}
+    /**
+     * none
+     *
+     * @return subjectId
+     **/
+    @Schema(name = "none")
+    public Pathology getPathology() {
+        return pathology;
+    }
 
-	public void setPathology(Pathology pathology) {
-		this.pathology = pathology;
-	}
+    public void setPathology(Pathology pathology) {
+        this.pathology = pathology;
+    }
 
-	public SubjectPathology pathologyModel(PathologyModel pathologyModel) {
-		this.pathologyModel = pathologyModel;
-		return this;
-	}
+    public SubjectPathology pathologyModel(PathologyModel pathologyModel) {
+        this.pathologyModel = pathologyModel;
+        return this;
+    }
 
-	/**
-	 * none
-	 * 
-	 * @return subjectId
-	 **/
-	@Schema(name = "none")
-	public PathologyModel getPathologyModel() {
-		return pathologyModel;
-	}
+    /**
+     * none
+     *
+     * @return subjectId
+     **/
+    @Schema(name = "none")
+    public PathologyModel getPathologyModel() {
+        return pathologyModel;
+    }
 
-	public void setPathologyModel(PathologyModel pathologyModel) {
-		this.pathologyModel = pathologyModel;
-	}
+    public void setPathologyModel(PathologyModel pathologyModel) {
+        this.pathologyModel = pathologyModel;
+    }
 
-	public SubjectPathology location(Reference location) {
-		this.location = location;
-		return this;
-	}
+    public SubjectPathology location(Reference location) {
+        this.location = location;
+        return this;
+    }
 
-	/**
-	 * none
-	 * 
-	 * @return location
-	 **/
-	@Schema(name = "none")
-	public Reference getLocation() {
-		return location;
-	}
+    /**
+     * none
+     *
+     * @return location
+     **/
+    @Schema(name = "none")
+    public Reference getLocation() {
+        return location;
+    }
 
-	public void setLocation(Reference location) {
-		this.location = location;
-	}
+    public void setLocation(Reference location) {
+        this.location = location;
+    }
 
-	public SubjectPathology startDate(Date startDate) {
-		this.startDate = startDate;
-		return this;
-	}
+    public SubjectPathology startDate(Date startDate) {
+        this.startDate = startDate;
+        return this;
+    }
 
-	/**
-	 * none
-	 * 
-	 * @return startDate
-	 **/
-	@Schema(name = "none")
-	public Date getStartDate() {
-		return startDate;
-	}
+    /**
+     * none
+     *
+     * @return startDate
+     **/
+    @Schema(name = "none")
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public SubjectPathology endDate(Date endDate) {
-		this.endDate = endDate;
-		return this;
-	}
+    public SubjectPathology endDate(Date endDate) {
+        this.endDate = endDate;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Date getEndDate() {
-		return endDate;
-	}
+    @Schema(name = "none")
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
-	@Override
-	public boolean equals(java.lang.Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		SubjectPathology subjectPathos = (SubjectPathology) o;
-		return Objects.equals(this.pathology, subjectPathos.pathology)
-				&& Objects.equals(this.pathologyModel, subjectPathos.pathologyModel)
-				&& Objects.equals(this.location, subjectPathos.location);
-	}
+    @Override
+    public boolean equals(java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubjectPathology subjectPathos = (SubjectPathology) o;
+        return Objects.equals(this.pathology, subjectPathos.pathology)
+                && Objects.equals(this.pathologyModel, subjectPathos.pathologyModel)
+                && Objects.equals(this.location, subjectPathos.location);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(pathology, pathologyModel, location);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(pathology, pathologyModel, location);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class SubjectPathologies {\n");
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class SubjectPathologies {\n");
 
-		sb.append("    pathology: ").append(toIndentedString(pathology)).append("\n");
-		sb.append("    pathologyModel: ").append(toIndentedString(pathologyModel)).append("\n");
-		sb.append("    location: ").append(toIndentedString(location)).append("\n");
-		sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
-		sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
-		sb.append("}");
-		return sb.toString();
-	}
+        sb.append("    pathology: ").append(toIndentedString(pathology)).append("\n");
+        sb.append("    pathologyModel: ").append(toIndentedString(pathologyModel)).append("\n");
+        sb.append("    location: ").append(toIndentedString(location)).append("\n");
+        sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
+        sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
 
-	/**
-	 * Convert the given object to string with each line indented by 4 spaces
-	 * (except the first line).
-	 */
-	private String toIndentedString(java.lang.Object o) {
-		if (o == null) {
-			return "null";
-		}
-		return o.toString().replace("\n", "\n    ");
-	}
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(java.lang.Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
 }

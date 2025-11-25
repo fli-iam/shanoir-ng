@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -44,9 +44,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest
@@ -168,10 +168,10 @@ public class SubjectServiceSecurityTest {
 	}
 	
 	private void testRead() throws ShanoirException {
-		final String NAME = "data";
+		final String name = "data";
 		
 		Subject subjectMockNoRights = buildSubjectMock(1L);
-		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockNoRights);
+		given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockNoRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
@@ -181,7 +181,7 @@ public class SubjectServiceSecurityTest {
 		
 		Subject subjectMockWrongRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockWrongRights);
+		given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockWrongRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
@@ -191,7 +191,7 @@ public class SubjectServiceSecurityTest {
 		
 		Subject subjectMockRightRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
-		given(repository.findByStudyIdAndName(1L, NAME)).willReturn(subjectMockRightRights);
+		given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockRightRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);

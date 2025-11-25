@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,26 +31,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DatasetAcquisitionService {
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnExamination(returnObject.getExamination().getId(), 'CAN_SEE_ALL')")
-	DatasetAcquisition findById(Long id);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findById(List<Long> ids);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	public List<DatasetAcquisition> findByStudyCard(Long studyCardId);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findByExamination(Long examinationId);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnExamination(returnObject.getExamination().getId(), 'CAN_SEE_ALL')")
+    DatasetAcquisition findById(Long id);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
@@ -66,18 +50,35 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
-	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
-	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
-	void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+    List<DatasetAcquisition> findById(List<Long> ids);
 
-	void deleteByIdCascade(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+    public List<DatasetAcquisition> findByStudyCard(Long studyCardId);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+    List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+    List<DatasetAcquisition> findByExamination(Long examinationId);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+    DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
+    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
+    void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+
+    void deleteByIdCascade(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     boolean existsByStudyCardId(Long studyCardId);
 
-	Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
+    Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
+
 }

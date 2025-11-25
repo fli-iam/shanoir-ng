@@ -2,178 +2,180 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.dataset.model;
 
-import jakarta.persistence.Entity;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import jakarta.persistence.Entity;
+
 /**
  * Dataset metadata that could be updated by study card.
- * 
+ *
  * @author msimon
  *
  */
 @Entity
 public class DatasetMetadata extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -8189893217666417587L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -8189893217666417587L;
 
-	/**
-	 * Flag to indicate whether this dataset is related to a single subject or
-	 * to multiple subjects.
-	 */
-	private Integer cardinalityOfRelatedSubjects;
+    /**
+     * Flag to indicate whether this dataset is related to a single subject or
+     * to multiple subjects.
+     */
+    private Integer cardinalityOfRelatedSubjects;
 
-	/**
-	 * A comment on the dataset. In case of importing from dicom files, it could
-	 * be the series description for instance.
-	 */
-	private String comment;
+    /**
+     * A comment on the dataset. In case of importing from dicom files, it could
+     * be the series description for instance.
+     */
+    private String comment;
 
-	/** Dataset Modality Type. */
-	private Integer datasetModalityType;
+    /** Dataset Modality Type. */
+    private Integer datasetModalityType;
 
-	/** Explored entity. */
-	private Integer exploredEntity;
+    /** Explored entity. */
+    private Integer exploredEntity;
 
-	/**
-	 * The name of this dataset. For instance, it could be 'BrainWeb',
-	 * 'ICBM152', 'T1-weighted High resolution image without injection' etc.
-	 */
-	private String name;
+    /**
+     * The name of this dataset. For instance, it could be 'BrainWeb',
+     * 'ICBM152', 'T1-weighted High resolution image without injection' etc.
+     */
+    private String name;
 
-	/** Processed dataset type. */
-	private Integer processedDatasetType;
+    /** Processed dataset type. */
+    private Integer processedDatasetType;
 
 	private String imageOrientationPatient;
 
-	public DatasetMetadata() {}
+    public DatasetMetadata() {
+    }
 
-	public DatasetMetadata(DatasetMetadata other) {
-		if (other.getCardinalityOfRelatedSubjects() != null) {
-			this.cardinalityOfRelatedSubjects = other.getCardinalityOfRelatedSubjects().getId();
-		} else {
-			this.cardinalityOfRelatedSubjects = null;
-		}
+    public DatasetMetadata(DatasetMetadata other) {
+        if (other.getCardinalityOfRelatedSubjects() != null) {
+            this.cardinalityOfRelatedSubjects = other.getCardinalityOfRelatedSubjects().getId();
+        } else {
+            this.cardinalityOfRelatedSubjects = null;
+        }
 
-		this.comment = other.getComment();
-		if (other.getDatasetModalityType() != null) {
-			this.datasetModalityType = other.getDatasetModalityType().getId();
-		} else {
-			this.datasetModalityType = null;
-		}
-		if (other.getExploredEntity() != null) {
-			this.exploredEntity = other.getExploredEntity().getId();
-		} else {
-			this.exploredEntity = null;
-		}
+        this.comment = other.getComment();
+        if (other.getDatasetModalityType() != null) {
+            this.datasetModalityType = other.getDatasetModalityType().getId();
+        } else {
+            this.datasetModalityType = null;
+        }
+        if (other.getExploredEntity() != null) {
+            this.exploredEntity = other.getExploredEntity().getId();
+        } else {
+            this.exploredEntity = null;
+        }
 
-		this.name = other.getName();
-		if (other.getProcessedDatasetType() != null) {
-			this.processedDatasetType = other.getProcessedDatasetType().getId();
-		} else {
-			this.processedDatasetType = null;
-		}
-	}
+        this.name = other.getName();
+        if (other.getProcessedDatasetType() != null) {
+            this.processedDatasetType = other.getProcessedDatasetType().getId();
+        } else {
+            this.processedDatasetType = null;
+        }
+    }
 
-	/**
-	 * @return the cardinalityOfRelatedSubjects
-	 */
-	public CardinalityOfRelatedSubjects getCardinalityOfRelatedSubjects() {
-		return CardinalityOfRelatedSubjects.getCardinality(cardinalityOfRelatedSubjects);
-	}
+    /**
+     * @return the cardinalityOfRelatedSubjects
+     */
+    public CardinalityOfRelatedSubjects getCardinalityOfRelatedSubjects() {
+        return CardinalityOfRelatedSubjects.getCardinality(cardinalityOfRelatedSubjects);
+    }
 
-	/**
-	 * @param cardinalityOfRelatedSubjects
-	 *            the cardinalityOfRelatedSubjects to set
-	 */
-	public void setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects) {
-		if (cardinalityOfRelatedSubjects != null) {
-			this.cardinalityOfRelatedSubjects = cardinalityOfRelatedSubjects.getId();
-		}
-	}
+    /**
+     * @param cardinalityOfRelatedSubjects
+     *            the cardinalityOfRelatedSubjects to set
+     */
+    public void setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects) {
+        if (cardinalityOfRelatedSubjects != null) {
+            this.cardinalityOfRelatedSubjects = cardinalityOfRelatedSubjects.getId();
+        }
+    }
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the datasetModalityType
-	 */
-	public DatasetModalityType getDatasetModalityType() {
-		return DatasetModalityType.getType(datasetModalityType);
-	}
+    /**
+     * @return the datasetModalityType
+     */
+    public DatasetModalityType getDatasetModalityType() {
+        return DatasetModalityType.getType(datasetModalityType);
+    }
 
-	/**
-	 * @param datasetModalityType
-	 *            the datasetModalityType to set
-	 */
-	public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
-		if (datasetModalityType == null) {
-			this.datasetModalityType = null;
-		} else {
-			this.datasetModalityType = datasetModalityType.getId();
-		}
-	}
+    /**
+     * @param datasetModalityType
+     *            the datasetModalityType to set
+     */
+    public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
+        if (datasetModalityType == null) {
+            this.datasetModalityType = null;
+        } else {
+            this.datasetModalityType = datasetModalityType.getId();
+        }
+    }
 
-	/**
-	 * @return the exploredEntity
-	 */
-	public ExploredEntity getExploredEntity() {
-		return ExploredEntity.getEntity(exploredEntity);
-	}
+    /**
+     * @return the exploredEntity
+     */
+    public ExploredEntity getExploredEntity() {
+        return ExploredEntity.getEntity(exploredEntity);
+    }
 
-	/**
-	 * @param exploredEntity
-	 *            the exploredEntity to set
-	 */
-	public void setExploredEntity(ExploredEntity exploredEntity) {
-		if (exploredEntity == null) {
-			this.exploredEntity = null;
-		} else {
-			this.exploredEntity = exploredEntity.getId();
-		}
-	}
+    /**
+     * @param exploredEntity
+     *            the exploredEntity to set
+     */
+    public void setExploredEntity(ExploredEntity exploredEntity) {
+        if (exploredEntity == null) {
+            this.exploredEntity = null;
+        } else {
+            this.exploredEntity = exploredEntity.getId();
+        }
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
 	public String getImageOrientationPatient() {
 		return imageOrientationPatient;
@@ -183,42 +185,42 @@ public class DatasetMetadata extends AbstractEntity {
 		this.imageOrientationPatient = imageOrientationPatient;
 	}
 
-	/**
-	 * @return the processedDatasetType
-	 */
-	public ProcessedDatasetType getProcessedDatasetType() {
-		return ProcessedDatasetType.getType(processedDatasetType);
-	}
+    /**
+     * @return the processedDatasetType
+     */
+    public ProcessedDatasetType getProcessedDatasetType() {
+        return ProcessedDatasetType.getType(processedDatasetType);
+    }
 
-	/**
-	 * @param processedDatasetType
-	 *            the processedDatasetType to set
-	 */
-	public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
-		if (processedDatasetType == null) {
-			this.processedDatasetType = null;
-		} else {
-			this.processedDatasetType = processedDatasetType.getId();
-		}
-	}
+    /**
+     * @param processedDatasetType
+     *            the processedDatasetType to set
+     */
+    public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
+        if (processedDatasetType == null) {
+            this.processedDatasetType = null;
+        } else {
+            this.processedDatasetType = processedDatasetType.getId();
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof AbstractEntity)) {
-			return false;
-		}
-		AbstractEntity entity = (AbstractEntity) obj;
-		if (this.getId() == null && entity.getId() != null) {
-			return false;
-		} else {
-			return this.getId().equals(entity.getId());
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractEntity)) {
+            return false;
+        }
+        AbstractEntity entity = (AbstractEntity) obj;
+        if (this.getId() == null && entity.getId() != null) {
+            return false;
+        } else {
+            return this.getId().equals(entity.getId());
+        }
+    }
 
 }

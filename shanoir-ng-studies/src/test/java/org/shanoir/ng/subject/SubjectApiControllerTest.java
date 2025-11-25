@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -66,29 +66,29 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureMockMvc(addFilters = false)
 public class SubjectApiControllerTest {
 
-	private static final String REQUEST_PATH = "/subjects";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/subjects";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private SubjectService subjectServiceMock;
-	
-	@MockBean
-	private StudyService studyService;
+    @MockBean
+    private SubjectService subjectServiceMock;
 
-	@MockBean
-	private SubjectMapper subjectMapperMock;
+    @MockBean
+    private StudyService studyService;
 
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
+    @MockBean
+    private SubjectMapper subjectMapperMock;
 
-	@MockBean
-	private SubjectUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-	@MockBean
-	private ShanoirEventService eventService;
+    @MockBean
+    private SubjectUniqueConstraintManager uniqueConstraintManager;
+
+    @MockBean
+    private ShanoirEventService eventService;
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException, ShanoirException {
@@ -103,90 +103,90 @@ public class SubjectApiControllerTest {
 		given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
 	}
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteSubjectTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteSubjectTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	public void findSubjectByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewSubjectTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createSubject())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewSubjectTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createSubject())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateSubjectTest() throws Exception {
-		Subject subject = ModelsUtil.createSubject();
-		subject.setId(1L);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateSubjectTest() throws Exception {
+        Subject subject = ModelsUtil.createSubject();
+        subject.setId(1L);
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testFindSubjectsByStudyId() throws Exception {
-		SimpleSubjectDTO subject = new SimpleSubjectDTO();
-		subject.setName("AA");
-		subject.setId(2L);
-		subject.setSubjectStudy(new SubjectStudyDTO());
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testFindSubjectsByStudyId() throws Exception {
+        SimpleSubjectDTO subject = new SimpleSubjectDTO();
+        subject.setName("AA");
+        subject.setId(2L);
+        subject.setSubjectStudy(new SubjectStudyDTO());
 
-		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
-		subject2.setName("BB");
-		subject2.setId(1L);
-		subject2.setSubjectStudy(new SubjectStudyDTO());
-		
-		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
-		list.add(subject2);
-		list.add(subject);
-		
-		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
+        SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
+        subject2.setName("BB");
+        subject2.setId(1L);
+        subject2.setSubjectStudy(new SubjectStudyDTO());
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
-				.andExpect(status().isOk());
-	}
+        List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
+        list.add(subject2);
+        list.add(subject);
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testFindSubjectsByStudyIdPreclinical() throws Exception {
-		SimpleSubjectDTO subject = new SimpleSubjectDTO();
-		subject.setName("AA");
-		subject.setId(2L);
-		subject.setSubjectStudy(new SubjectStudyDTO());
+        given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
-		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
-		subject2.setName("BB");
-		subject2.setId(1L);
-		subject2.setSubjectStudy(new SubjectStudyDTO());
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .andExpect(status().isOk());
+    }
 
-		
-		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
-		list.add(subject2);
-		list.add(subject);
-		
-		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
-		
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testFindSubjectsByStudyIdPreclinical() throws Exception {
+        SimpleSubjectDTO subject = new SimpleSubjectDTO();
+        subject.setName("AA");
+        subject.setId(2L);
+        subject.setSubjectStudy(new SubjectStudyDTO());
+
+        SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
+        subject2.setName("BB");
+        subject2.setId(1L);
+        subject2.setSubjectStudy(new SubjectStudyDTO());
+
+
+        List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
+        list.add(subject2);
+        list.add(subject);
+
+        given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
+
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .andExpect(status().isOk());
+    }
 
 }

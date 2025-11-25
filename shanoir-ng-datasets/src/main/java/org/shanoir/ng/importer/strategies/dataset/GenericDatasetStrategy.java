@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
@@ -7,7 +21,6 @@ import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
@@ -49,9 +62,8 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 			datasetIndex++;
 		}
 
-		return datasetWrapper;
-
-	}
+        return datasetWrapper;
+    }
 
 	@Override
 	public GenericDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset,
@@ -59,14 +71,14 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		GenericDataset genericDataset = new GenericDataset();
 		genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		genericDataset.setCreationDate(serie.getSeriesDate());
-		final String serieDescription = serie.getSeriesDescription();
+		final String seriesDescription = serie.getSeriesDescription();
 
 		DatasetMetadata datasetMetadata = new DatasetMetadata();
 		genericDataset.setOriginMetadata(datasetMetadata);
 		// set the series description as the dataset comment & name
-		if (serieDescription != null && !"".equals(serieDescription)) {
-			genericDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-			genericDataset.getOriginMetadata().setComment(serieDescription);
+		if (seriesDescription != null && !"".equals(seriesDescription)) {
+			genericDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+			genericDataset.getOriginMetadata().setComment(seriesDescription);
 		}
 
 		// Pre-select the type Reconstructed dataset
@@ -75,8 +87,8 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		// Set the study and the subject
 		genericDataset.setSubjectId(subjectId);
 
-		// Set the modality from dicom fields
-		genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+        // Pre-select the type Reconstructed dataset
+        genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (genericDataset.getSubjectId() != null) {
@@ -111,13 +123,13 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		return genericDataset;
 	}
 
-	@Override
-	public String computeDatasetName(String name, int index) {
-		if (index == -1) {
-			return name;
-		} else {
-			return name + " " + index;
-		}
-	}
+    @Override
+    public String computeDatasetName(String name, int index) {
+        if (index == -1) {
+            return name;
+        } else {
+            return name + " " + index;
+        }
+    }
 
 }

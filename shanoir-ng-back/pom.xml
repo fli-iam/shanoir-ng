@@ -51,6 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<keycloak.version>26.2.1</keycloak.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
+		<checkstyle.header.file>java-header</checkstyle.header.file>
 	</properties>
 
 	<dependencyManagement>
@@ -238,6 +239,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<version>3.6.0</version>
 				<configuration>
 					<configLocation>checkstyle.xml</configLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<suppressionsLocation>suppressions.xml</suppressionsLocation>
 					<excludes>**/target/**/*</excludes>
 				</configuration>
 				<executions>

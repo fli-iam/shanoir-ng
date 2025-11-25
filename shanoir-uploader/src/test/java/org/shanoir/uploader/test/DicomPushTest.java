@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.test;
 
 import java.io.File;
@@ -37,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DicomPushTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(DicomPushTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomPushTest.class);
 
     private static Properties dicomServerProperties = new Properties();
 
@@ -68,7 +82,7 @@ public class DicomPushTest {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error in testDicomPush", e);
+            LOG.error("Error in testDicomPush", e);
         }
     }
 
@@ -76,7 +90,7 @@ public class DicomPushTest {
             throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-       	Device device = new Device(this.getClass().getName());
+        Device device = new Device(this.getClass().getName());
         device.setExecutor(executor);
         device.setScheduledExecutor(scheduledExecutor);
         ApplicationEntity ae = new ApplicationEntity(CALLING_AET);
@@ -95,8 +109,8 @@ public class DicomPushTest {
                 super.onDimseRSP(as, cmd, data);
                 int status = cmd.getInt(Tag.Status, -1);
                 if (status != Status.Success) {
-                    logger.error("C-STORE failed for: with status: "
-                        + TagUtils.shortToHexString(status));
+                    LOG.error("C-STORE failed for: with status: "
+                            + TagUtils.shortToHexString(status));
                 }
             }
         };

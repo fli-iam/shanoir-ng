@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.configuration.amqp;
 
 import java.util.Arrays;
@@ -50,18 +64,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
 
 	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
 	private static final String DELIMITER = ":";
 
-	@Autowired
-	private StudyRepository studyRepo;
+    @Autowired
+    private StudyRepository studyRepo;
 
-	@Autowired
-	private StudyService studyService;
+    @Autowired
+    private StudyService studyService;
 
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -113,55 +127,55 @@ public class RabbitMQStudiesService {
 				throw new ShanoirException("Could not read subject ID and center ID from event message");
 			}
 
-			this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
+            this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
 
-		} catch (Exception e) {
-			LOG.error("Could not index examination on given study ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
-		}
-	}
+        } catch (Exception e) {
+            LOG.error("Could not index examination on given study ", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+        }
+    }
 
-	/**
-	 * Receives a shanoirEvent as a json object, concerning an examination creation
-	 * @param eventStr the event as a json string.
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public void deleteExaminationStudy(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
-			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = Long.valueOf(event.getStudyId());
-			this.studyService.deleteExamination(examinationId, studyId);
-		} catch (Exception e) {
-			LOG.error("Could not index examination on given study ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
-		}
-	}
+    /**
+     * Receives a shanoirEvent as a json object, concerning an examination creation
+     * @param eventStr the event as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public void deleteExaminationStudy(final String eventStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+            Long examinationId = Long.valueOf(event.getObjectId());
+            Long studyId = Long.valueOf(event.getStudyId());
+            this.studyService.deleteExamination(examinationId, studyId);
+        } catch (Exception e) {
+            LOG.error("Could not index examination on given study ", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public String getStudyName(final long studyId) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		Study study = this.studyRepo.findById(studyId).get();
-		if (study != null) {
-			return study.getName();
-		}
-		return null;
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyName(final long studyId) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        Study study = this.studyRepo.findById(studyId).get();
+        if (study != null) {
+            return study.getName();
+        }
+        return null;
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public String getStudyAnonymisationProfile(final long studyId) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		Study study = this.studyRepo.findById(studyId).get();
-		if (study != null) {
-			return study.getProfile().getProfileName();
-		}
-		return null;
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyAnonymisationProfile(final long studyId) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        Study study = this.studyRepo.findById(studyId).get();
+        if (study != null) {
+            return study.getProfile().getProfileName();
+        }
+        return null;
+    }
 
 	/**
 	 * Receives a json object, concerning a study subscription

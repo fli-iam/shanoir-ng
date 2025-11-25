@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -65,8 +65,8 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		}
 
 		return datasetWrapper;
-
 	}
+
 
 	@Override
 	public CtDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
@@ -74,14 +74,14 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		CtDataset ctDataset = new CtDataset();
 		ctDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		ctDataset.setCreationDate(serie.getSeriesDate());
-		final String serieDescription = serie.getSeriesDescription();
+		final String seriesDescription = serie.getSeriesDescription();
 
 		DatasetMetadata datasetMetadata = new DatasetMetadata();
 		ctDataset.setOriginMetadata(datasetMetadata);
 		// set the series description as the dataset comment & name
-		if (serieDescription != null && !"".equals(serieDescription)) {
-			ctDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-			ctDataset.getOriginMetadata().setComment(serieDescription);
+		if (seriesDescription != null && !"".equals(seriesDescription)) {
+			ctDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+			ctDataset.getOriginMetadata().setComment(seriesDescription);
 		}
 
 		// Pre-select the type Reconstructed dataset
@@ -126,16 +126,16 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.shanoir.ng.dataset.modality.DatasetStrategy#computeDatasetName(java.lang.String, int)
-	 */
-	@Override
-	public String computeDatasetName(String name, int index) {
-		if (index == -1) {
-			return name;
-		} else {
-			return name + " " + index;
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.shanoir.ng.dataset.modality.DatasetStrategy#computeDatasetName(java.lang.String, int)
+     */
+    @Override
+    public String computeDatasetName(String name, int index) {
+        if (index == -1) {
+            return name;
+        } else {
+            return name + " " + index;
+        }
+    }
 
 }

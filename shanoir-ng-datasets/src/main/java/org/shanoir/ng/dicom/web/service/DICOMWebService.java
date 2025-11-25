@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web.service;
 
 import java.io.ByteArrayInputStream;
@@ -46,106 +60,106 @@ import jakarta.annotation.PostConstruct;
  * as the user will see an empty result list. For all storage calls, that are
  * important to arrive an exception is thrown back to the user to avoid silent
  * none storage.
- * 
+ *
  * @author mkain
  *
  */
 @Component
 public class DICOMWebService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
-	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
+    private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
-	private static final String RELATED = "related";
+    private static final String RELATED = "related";
 
-	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+    private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
-	private static final String CONTENT_TYPE_JSON = "application/json";
+    private static final String CONTENT_TYPE_JSON = "application/json";
 
-	private static final String BOUNDARY = "--import_dicom_shanoir--";
+    private static final String BOUNDARY = "--import_dicom_shanoir--";
 
-	private static final String CONTENT_TYPE = "&contentType";
+    private static final String CONTENT_TYPE = "&contentType";
 
-	private static final String REJECT_SUFFIX = "/reject/113001%5EDCM";
+    private static final String REJECT_SUFFIX = "/reject/113001%5EDCM";
 
-	private CloseableHttpClient httpClient;
+    private CloseableHttpClient httpClient;
 
-	private String serverURL;
+    private String serverURL;
 
-	@Value("${dcm4chee-arc.protocol}")
-	private String dcm4cheeProtocol;
+    @Value("${dcm4chee-arc.protocol}")
+    private String dcm4cheeProtocol;
 
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
+    @Value("${dcm4chee-arc.host}")
+    private String dcm4cheeHost;
 
-	@Value("${dcm4chee-arc.port.web}")
-	private String dcm4cheePort;
+    @Value("${dcm4chee-arc.port.web}")
+    private String dcm4cheePort;
 
-	@Value("${dcm4chee-arc.dicom.web.rs}")
-	private String dicomWebRS;
+    @Value("${dcm4chee-arc.dicom.web.rs}")
+    private String dicomWebRS;
 
-	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
-	private String dicomWebRSUpload;
+    @Value("${dcm4chee-arc.dicom.web.rs.upload}")
+    private String dicomWebRSUpload;
 
-	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
-	private int dicomWebHttpClientMaxTotal;
+    @Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
+    private int dicomWebHttpClientMaxTotal;
 
-	@Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
-	private int dicomWebHttpClientMaxPerRoute;
+    @Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
+    private int dicomWebHttpClientMaxPerRoute;
 
-	@Autowired
-	private WADOURLHandler wadoURLHandler;
+    @Autowired
+    private WADOURLHandler wadoURLHandler;
 
-	@PostConstruct
-	public void init() {
-		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
-		try {
-			final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-			cm.setMaxTotal(dicomWebHttpClientMaxTotal);
-			cm.setDefaultMaxPerRoute(dicomWebHttpClientMaxPerRoute);
-			httpClient = HttpClients.custom().setConnectionManager(cm).build();
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    @PostConstruct
+    public void init() {
+        this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
+        try {
+            final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+            cm.setMaxTotal(dicomWebHttpClientMaxTotal);
+            cm.setDefaultMaxPerRoute(dicomWebHttpClientMaxPerRoute);
+            httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	public String findStudy(String studyInstanceUID, String includeField) {
-		try {
-			String url = this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField;
-			HttpGet httpGet = new HttpGet(url);
-			httpGet.setHeader("Accept-Charset", "UTF-8");
-			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				HttpEntity entity = response.getEntity();
-				if (entity != null) {
-					return EntityUtils.toString(entity, "UTF-8");
-				} else {
-					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
-				}
-			}
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return null;
-	}
+    public String findStudy(String studyInstanceUID, String includeField) {
+        try {
+            String url = this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField;
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept-Charset", "UTF-8");
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity, "UTF-8");
+                } else {
+                    LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
 
     public String findStudyByDicomPatientId(String patientId) {
         try {
             String url = this.serverURL + "?PatientID=" + patientId;
             HttpGet httpGet = new HttpGet(url);
-			httpGet.setHeader("Accept-Charset", "UTF-8");
+            httpGet.setHeader("Accept-Charset", "UTF-8");
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				HttpEntity entity = response.getEntity();
-				if (entity != null) {
-					return EntityUtils.toString(entity, "UTF-8");
-				} else {
-					LOG.error("DICOMWeb: findStudy: empty response entity for Patient ID: " + patientId);
-				}
-			}
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity, "UTF-8");
+                } else {
+                    LOG.error("DICOMWeb: findStudy: empty response entity for Patient ID: " + patientId);
+                }
+            }
         } catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return null;
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
     }
 
 	public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
@@ -299,21 +313,6 @@ public class DICOMWebService {
 		sendMultipartRequest(entity);
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
 				+ directoryWithDicomFiles.getAbsolutePath());
-	}
-
-	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
-		if (dicomFile == null || !dicomFile.exists()) {
-			LOG.error("sendDicomFileToPacs called with null, or file: not existing.");
-			throw new ShanoirException("sendDicomFileToPacs called with null, or file: not existing.");
-		}
-		LOG.info("Start: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
-		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-		multipartEntityBuilder.setBoundary(BOUNDARY);
-		multipartEntityBuilder.setMimeSubtype(RELATED);
-		addFileToMultipart(dicomFile, multipartEntityBuilder);
-		HttpEntity entity = multipartEntityBuilder.build();
-		sendMultipartRequest(entity);
-		LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
 	}
 
 	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder)
@@ -523,69 +522,65 @@ public class DICOMWebService {
 		rejectURLFromPacs(rejectURL);
 	}
 
-	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
-		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
-		rejectURLFromPacs(rejectURL);
-	}
+    public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
+        String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
+        rejectURLFromPacs(rejectURL);
+    }
 
-	public void rejectDatasetFromPacs(String url) throws ShanoirException {
-		String rejectURL;
-		if (wadoURLHandler.isWADO_URI(url)) {
-			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
-		} else {
-			rejectURL = url + REJECT_SUFFIX;
-		}
-		rejectURLFromPacs(rejectURL);
-	}
+    public void rejectDatasetFromPacs(String url) throws ShanoirException {
+        String rejectURL;
+        if (wadoURLHandler.isWadoUri(url)) {
+            rejectURL = wadoURLHandler.convertWadoUriToWadoRs(url) + REJECT_SUFFIX;
+        } else {
+            rejectURL = url + REJECT_SUFFIX;
+        }
+        rejectURLFromPacs(rejectURL);
+    }
 
-	private void rejectURLFromPacs(String url) throws ShanoirException {
-		// STEP 1: Reject from the PACS
-		HttpPost post = new HttpPost(url);
-		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
-		try (CloseableHttpResponse response = httpClient.execute(post)) {
-			if (HttpStatus.OK.value() == response.getCode()) {
-				LOG.debug("Rejected from PACS: " + post);
-			} else {
-				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-						+ " for rejectURL: " + url);
-				// in case one URL is Not Found (no DICOM instance present), we continue with
-				// deletion
-				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-					return;
-				} else {
-					throw new ShanoirException(
-							response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-									+ " for rejectURL: " + url);
-				}
-			}
-		} catch (IOException e) {
-			LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);
-			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
-		}
-	}
+    private void rejectURLFromPacs(String url) throws ShanoirException {
+        // STEP 1: Reject from the PACS
+        HttpPost post = new HttpPost(url);
+        post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
+        try (CloseableHttpResponse response = httpClient.execute(post)) {
+            if (HttpStatus.OK.value() == response.getCode()) {
+                LOG.debug("Rejected from PACS: " + post);
+            } else {
+                LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+                        + " for rejectURL: " + url);
+                // in case one URL is Not Found (no DICOM instance present), we continue with deletion
+                if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
+                    return;
+                } else {
+                    throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+                            + " for rejectURL: " + url);
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);
+            throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
+        }
+    }
 
-	@Scheduled(cron = "0 */30 * * * *", zone = "Europe/Paris")
-	public void deleteDicomFilesFromPacs() throws ShanoirException {
-		// Doc :
-		// https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
-		LOG.info("Scheduled call to delete all rejected instances from pacs.");
-		String url = this.serverURL.substring(0, this.serverURL.indexOf("/aets/")) + REJECT_SUFFIX;
-		HttpDelete httpDelete = new HttpDelete(url);
-		httpDelete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
-		try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
-			if (response.getCode() == HttpStatus.OK.value()) {
-				LOG.info("Deleted from PACS: " + url);
-			} else {
-				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
-						+ "for deleteURL: " + url);
-				throw new ShanoirException(
-						response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
-								+ "for deleteURL: " + url);
-			}
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new ShanoirException(e.getMessage());
-		}
-	}
+    @Scheduled(cron = "0 */30 * * * *", zone = "Europe/Paris")
+    public void deleteDicomFilesFromPacs() throws ShanoirException {
+        // Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
+        LOG.info("Scheduled call to delete all rejected instances from pacs.");
+        String url = this.serverURL.substring(0, this.serverURL.indexOf("/aets/")) + REJECT_SUFFIX;
+        HttpDelete httpDelete = new HttpDelete(url);
+        httpDelete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
+        try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
+            if (response.getCode() == HttpStatus.OK.value()) {
+                LOG.info("Deleted from PACS: " + url);
+            } else {
+                LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
+                        + "for deleteURL: " + url);
+                throw new ShanoirException(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
+                        + "for deleteURL: " + url);
+            }
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ShanoirException(e.getMessage());
+        }
+    }
 
 }

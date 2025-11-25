@@ -24,7 +24,6 @@ import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { IdName } from "../../shared/models/id-name.model";
-import { SubjectDTO } from "../shared/subject.dto";
 
 @Component({
     selector: 'subject-list',
@@ -93,10 +92,11 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.studyId);
     }
 
-    getOnDeleteConfirmMessage(entity: Subject): string {
-        const subjectDTO = (entity as SubjectDTO);
-        let studyListStr : string = "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subjectDTO.studyId).name;
-        studyListStr += "\n\nAttention: this action deletes all datasets from that study.";
-        return studyListStr;
+    getOnDeleteConfirmMessage(subject: Subject): string {
+        let msg : string = 'Are you sure you want to finally delete the subject '
+            + (subject.name + ' with id n° ' + subject.id) + ' ?';
+        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.studyId).name;
+        msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
+        return msg;
     }
 }

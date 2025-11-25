@@ -29,44 +29,44 @@ import org.springframework.stereotype.Component;
 @Component
 public class DuaDraftServiceImpl implements DuaDraftService {
 
-	@Autowired
-	private DuaDraftRepository duaDraftRepository;
+    @Autowired
+    private DuaDraftRepository duaDraftRepository;
 
-	@Autowired
-	private StudyRepository studyRepository;
+    @Autowired
+    private StudyRepository studyRepository;
 
-	
-	@Override
-	public Optional<DuaDraft> findById(final String id) {
-		return duaDraftRepository.findById(id);
-	}
 
-	@Override
-	public DuaDraft create(final DuaDraft dua) throws EntityFoundException {
-		if (dua.getId() != null && duaDraftRepository.existsById(dua.getId())) {
-			throw new EntityFoundException("dua draft with this id already exists");
-		} else {
-			Optional<String> studyName = studyRepository.findNameById(dua.getStudyId());
-			if (studyName.isPresent()) {
-				dua.setStudyName(studyName.get());
-				String generatedId = UUID.randomUUID().toString();
-				dua.setId(generatedId);
-				return duaDraftRepository.save(dua);
-			} else {
-				throw new IllegalArgumentException("No study found for id " + dua.getStudyId());
-			}
-		}
-	}
+    @Override
+    public Optional<DuaDraft> findById(final String id) {
+        return duaDraftRepository.findById(id);
+    }
 
-	@Override
-	public DuaDraft update(final DuaDraft dua) throws EntityNotFoundException {
-		Optional<DuaDraft> existing = duaDraftRepository.findById(dua.getId());
-		if (existing.isPresent()) {
-			dua.setStudyId(existing.get().getStudyId());
-			dua.setStudyName(existing.get().getStudyName());
-			return duaDraftRepository.save(dua);
-		} else {
-			throw new EntityNotFoundException("dua draft with this id doesn't exist");
-		}
-	}
+    @Override
+    public DuaDraft create(final DuaDraft dua) throws EntityFoundException {
+        if (dua.getId() != null && duaDraftRepository.existsById(dua.getId())) {
+            throw new EntityFoundException("dua draft with this id already exists");
+        } else {
+            Optional<String> studyName = studyRepository.findNameById(dua.getStudyId());
+            if (studyName.isPresent()) {
+                dua.setStudyName(studyName.get());
+                String generatedId = UUID.randomUUID().toString();
+                dua.setId(generatedId);
+                return duaDraftRepository.save(dua);
+            } else {
+                throw new IllegalArgumentException("No study found for id " + dua.getStudyId());
+            }
+        }
+    }
+
+    @Override
+    public DuaDraft update(final DuaDraft dua) throws EntityNotFoundException {
+        Optional<DuaDraft> existing = duaDraftRepository.findById(dua.getId());
+        if (existing.isPresent()) {
+            dua.setStudyId(existing.get().getStudyId());
+            dua.setStudyName(existing.get().getStudyName());
+            return duaDraftRepository.save(dua);
+        } else {
+            throw new EntityNotFoundException("dua draft with this id doesn't exist");
+        }
+    }
 }

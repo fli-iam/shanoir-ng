@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import java.io.IOException;
@@ -46,25 +60,25 @@ import org.springframework.transaction.annotation.Transactional;
  * send as DICOM SR Structured Report. It modifies the by the OHIF
  * viewer created DICOM SR to correspond to shanoir needs, creates
  * the dataset in the database and sends the dicom file to the pacs.
- * 
+ *
  * The import only happens in the servers memory, as the structured
  * reports are very small memory footprint objects and as this avoids
  * us any implication of MS Import in this special case.
- * 
+ *
  * @author mkain
  *
  */
 @Service
 public class DicomSEGAndSRImporterService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
-	@Autowired
-	private ExaminationRepository examinationRepository;
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
-	@Autowired
+    @Autowired
     private SolrService solrService;
 	
 	@Autowired
@@ -289,75 +303,75 @@ public class DicomSEGAndSRImporterService {
 		solrService.indexDataset(createdDataset.getId());
 	}
 
-	/**
-	 * This method extracts important data, that could later be stored even
-	 * inside shanoir-database, to optimize mass data export of all measurements
-	 * e.g. for one study. This code works and has been tested to access the most
-	 * important measurement attributes and was hard to construct. Even if currently
-	 * not used, we keep it for a very high later usage.
-	 * 
-	 * @param datasetAttributes
-	 * @param dataset
-	 */
-	private void createMetadata(Attributes datasetAttributes, DatasetModalityType modalityType, Dataset dataset) {
-		DatasetMetadata originMetadata = new DatasetMetadata();
-		String reportName = datasetAttributes.getString(Tag.SeriesDescription);
-		if (reportName == null || reportName.isEmpty()) {
-			originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
-		} else {
-			originMetadata.setName(reportName);
-		}
-		originMetadata.setDatasetModalityType(modalityType);
-		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
-		dataset.setOriginMetadata(originMetadata);
-		dataset.setUpdatedMetadata(originMetadata);
-		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
-		if (contentSequence != null && contentSequence.size() >= 5) {
-			Attributes contentSequenceAttributes = contentSequence.get(4);
-			if (contentSequenceAttributes != null) {
-				// level of imaging measurements
-				Sequence imagingMeasurementsSequence = contentSequenceAttributes.getSequence(Tag.ContentSequence);
-				if (imagingMeasurementsSequence != null) {
-					Attributes imagingMeasurementsAttributes = imagingMeasurementsSequence.get(0);
-					if (imagingMeasurementsAttributes != null) {
-						// level of measurement group
-						Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
-						if (measurementGroupSequence != null) {
-							// get tracking identifier
-							Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
-							if (measurementGroupAttributes != null) {
-								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
-								if (trackingIdentifier != null && !trackingIdentifier.isEmpty()) {
-									String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
-									originMetadata.setComment(trackingIdentifierType);
-								}
-							}
-							// as it was complicated to acquire the below code and as in the future
-							// we might access dedicated values from DICOM SR, I keep it as comment
-							// level measured values
-							// Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
-							// if (measurementGroupAttributes2 != null) {
-							// 	Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
-							// 	if (measuredValueSequence != null) {
-							// 		Attributes measuredValueAttributes = measuredValueSequence.get(0);
-							// 		if (measuredValueAttributes != null) {
-							// 			// get numeric value and graphic data
-							// 			String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-							// 		}
-							// 	}
-							// 	Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
-							// 	if (graphicDataSequence != null) {
-							// 		Attributes graphicDataAttributes = graphicDataSequence.get(0);
-							// 		if (graphicDataAttributes != null) {
-							// 			String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
-							// 		}
-							// 	}
-							// }
-						}
-					}
-				}
-			}
-		}
-	}
+    /**
+     * This method extracts important data, that could later be stored even
+     * inside shanoir-database, to optimize mass data export of all measurements
+     * e.g. for one study. This code works and has been tested to access the most
+     * important measurement attributes and was hard to construct. Even if currently
+     * not used, we keep it for a very high later usage.
+     *
+     * @param datasetAttributes
+     * @param dataset
+     */
+    private void createMetadata(Attributes datasetAttributes, DatasetModalityType modalityType, Dataset dataset) {
+        DatasetMetadata originMetadata = new DatasetMetadata();
+        String reportName = datasetAttributes.getString(Tag.SeriesDescription);
+        if (reportName == null || reportName.isEmpty()) {
+            originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
+        } else {
+            originMetadata.setName(reportName);
+        }
+        originMetadata.setDatasetModalityType(modalityType);
+        originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+        dataset.setOriginMetadata(originMetadata);
+        dataset.setUpdatedMetadata(originMetadata);
+        Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
+        if (contentSequence != null && contentSequence.size() >= 5) {
+            Attributes contentSequenceAttributes = contentSequence.get(4);
+            if (contentSequenceAttributes != null) {
+                // level of imaging measurements
+                Sequence imagingMeasurementsSequence = contentSequenceAttributes.getSequence(Tag.ContentSequence);
+                if (imagingMeasurementsSequence != null) {
+                    Attributes imagingMeasurementsAttributes = imagingMeasurementsSequence.get(0);
+                    if (imagingMeasurementsAttributes != null) {
+                        // level of measurement group
+                        Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
+                        if (measurementGroupSequence != null) {
+                            // get tracking identifier
+                            Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
+                            if (measurementGroupAttributes != null) {
+                                String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
+                                if (trackingIdentifier != null && !trackingIdentifier.isEmpty()) {
+                                    String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
+                                    originMetadata.setComment(trackingIdentifierType);
+                                }
+                            }
+                            // as it was complicated to acquire the below code and as in the future
+                            // we might access dedicated values from DICOM SR, I keep it as comment
+                            // level measured values
+                            // Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
+                            // if (measurementGroupAttributes2 != null) {
+                            //     Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
+                            //     if (measuredValueSequence != null) {
+                            //         Attributes measuredValueAttributes = measuredValueSequence.get(0);
+                            //         if (measuredValueAttributes != null) {
+                            //             // get numeric value and graphic data
+                            //             String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+                            //         }
+                            //     }
+                            //     Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
+                            //     if (graphicDataSequence != null) {
+                            //         Attributes graphicDataAttributes = graphicDataSequence.get(0);
+                            //         if (graphicDataAttributes != null) {
+                            //             String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
+                            //         }
+                            //     }
+                            // }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }

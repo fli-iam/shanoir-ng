@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,57 +37,57 @@ import org.springframework.stereotype.Service;
  * content of the DICOMDIR in the DICOM specific tree order: patient - study
  * - serie - instance(image and non-images). Series with modalities outside
  * of medical imaging are ignored.
- * 
+ *
  * @author mkain
  *
  */
 @Service
 public class DicomDirToModelService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
 
-	/**
-	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
-	 * 
-	 * @param file DICOMDIR file
-	 * @return List<Patient>
-	 * @throws IOException
-	 */
-	public List<Patient> readDicomDirToPatients(final File file) throws IOException {
-		try (DicomDirReader dicomDirReader = new DicomDirReader(file)) {
-			// patient level
-			List<Patient> patients = new ArrayList<Patient>();
-			Attributes patientRecord = dicomDirReader.findPatientRecord();
-			while(patientRecord != null) {
-				Patient patient = new Patient(patientRecord);
-				patients.add(patient);
-				// study level
-				List<Study> studies = new ArrayList<Study>();
-				Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
-				while(studyRecord != null) {
-					Study study = new Study(studyRecord);
-					studies.add(study);
-					// serie level
-					List<Serie> series = new ArrayList<Serie>();
-					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
-					while(serieRecord != null) {
-						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
-						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
-					}
-					series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
-					study.setSeries(series);
-					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
-				}
-				studies.sort(new StudyDateSorter());
-				patient.setStudies(studies);
-				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
-			}
-			return patients;
-		} catch (IOException e) {
-			LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
-		}
-		return Collections.emptyList();
-	}
+    /**
+     * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
+     *
+     * @param file DICOMDIR file
+     * @return List<Patient>
+     * @throws IOException
+     */
+    public List<Patient> readDicomDirToPatients(final File file) throws IOException {
+        try (DicomDirReader dicomDirReader = new DicomDirReader(file)) {
+            // patient level
+            List<Patient> patients = new ArrayList<Patient>();
+            Attributes patientRecord = dicomDirReader.findPatientRecord();
+            while (patientRecord != null) {
+                Patient patient = new Patient(patientRecord);
+                patients.add(patient);
+                // study level
+                List<Study> studies = new ArrayList<Study>();
+                Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
+                while (studyRecord != null) {
+                    Study study = new Study(studyRecord);
+                    studies.add(study);
+                    // serie level
+                    List<Serie> series = new ArrayList<Serie>();
+                    Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
+                    while (serieRecord != null) {
+                        handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
+                        serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
+                    }
+                    series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                    study.setSeries(series);
+                    studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
+                }
+                studies.sort(new StudyDateSorter());
+                patient.setStudies(studies);
+                patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
+            }
+            return patients;
+        } catch (IOException e) {
+            LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
+        }
+        return Collections.emptyList();
+    }
 
 	/**
 	 * Handles Serie and Instance records.

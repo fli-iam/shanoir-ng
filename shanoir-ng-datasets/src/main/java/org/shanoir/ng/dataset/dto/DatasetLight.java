@@ -25,63 +25,63 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class DatasetLight {
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String type;
+    private String type;
 
-	private boolean hasProcessings;
+    private boolean hasProcessings;
 
-	private IdName study;
+    private IdName study;
 
-	private IdName subject;
+    private IdName subject;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
-	private LocalDate creationDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private LocalDate creationDate;
 
 
     public DatasetLight(
-			Long id,
-			String name,
-			Class<? extends Dataset> type,
-			Long studyId, String studyName,
-			Long subjectId, String subjectName,
-			LocalDate creationDate,
-			boolean hasProcessings
-	) throws NoSuchMethodException,InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+            Long id,
+            String name,
+            Class<? extends Dataset> type,
+            Long studyId, String studyName,
+            Long subjectId, String subjectName,
+            LocalDate creationDate,
+            boolean hasProcessings
+    ) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         this.hasProcessings = hasProcessings;
         this.id = id;
         this.name = name;
         this.type = type.getDeclaredConstructor().newInstance().getType().name();
-		this.study = new IdName(studyId, studyName);
-		this.subject = new IdName(subjectId, subjectName);
-		this.creationDate = creationDate;
+        this.study = new IdName(studyId, studyName);
+        this.subject = new IdName(subjectId, subjectName);
+        this.creationDate = creationDate;
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public boolean isHasProcessings() {
         return hasProcessings;
@@ -91,27 +91,27 @@ public class DatasetLight {
         this.hasProcessings = hasProcessings;
     }
 
-	public IdName getStudy() {
-		return study;
-	}
+    public IdName getStudy() {
+        return study;
+    }
 
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
 
-	public IdName getSubject() {
-		return subject;
-	}
+    public IdName getSubject() {
+        return subject;
+    }
 
-	public void setSubject(IdName subject) {
-		this.subject = subject;
-	}
+    public void setSubject(IdName subject) {
+        this.subject = subject;
+    }
 
-	public LocalDate getCreationDate() {
-		return creationDate;
-	}
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
 
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
 }

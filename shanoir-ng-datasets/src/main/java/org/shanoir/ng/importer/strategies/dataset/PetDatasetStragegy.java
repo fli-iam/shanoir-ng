@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -35,9 +35,9 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
-	
-	@Autowired
+public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
+
+    @Autowired
 	DatasetExpressionContext datasetExpressionContext;
 
 	@Override
@@ -62,8 +62,8 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 			datasetIndex++;
 		}
 
-		return datasetWrapper;
-	}
+        return datasetWrapper;
+    }
 
 	@Override
 	public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
@@ -71,14 +71,14 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 		PetDataset petDataset = new PetDataset();
 		petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		petDataset.setCreationDate(serie.getSeriesDate());
-		final String serieDescription = serie.getSeriesDescription();
+		final String seriesDescription = serie.getSeriesDescription();
 
-		DatasetMetadata datasetMetadata = new DatasetMetadata();
+        DatasetMetadata datasetMetadata = new DatasetMetadata();
 		petDataset.setOriginMetadata(datasetMetadata);
 		// set the series description as the dataset comment & name
-		if (serieDescription != null && !"".equals(serieDescription)) {
-			petDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-			petDataset.getOriginMetadata().setComment(serieDescription);
+		if (seriesDescription != null && !"".equals(seriesDescription)) {
+			petDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+			petDataset.getOriginMetadata().setComment(seriesDescription);
 		}
 
 		// Pre-select the type Reconstructed dataset
@@ -123,13 +123,13 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 		return petDataset;
 	}
 
-	@Override
-	public String computeDatasetName(String name, int index) {
-		if (index == -1) {
-			return name;
-		} else {
-			return name + " " + index;
-		}
-	}
+    @Override
+    public String computeDatasetName(String name, int index) {
+        if (index == -1) {
+            return name;
+        } else {
+            return name + " " + index;
+        }
+    }
 
 }

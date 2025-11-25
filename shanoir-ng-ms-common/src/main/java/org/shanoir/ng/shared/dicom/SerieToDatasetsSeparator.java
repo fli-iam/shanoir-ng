@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,33 +31,33 @@ import org.slf4j.LoggerFactory;
  */
 public class SerieToDatasetsSeparator {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SerieToDatasetsSeparator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SerieToDatasetsSeparator.class);
 
-	/** corresponding dicom tag. */
-	protected int acquisitionNumber = 0;
+    /** corresponding dicom tag. */
+    private int acquisitionNumber = 0;
 
-	/** corresponding dicom tag. */
-	protected Set<EchoTime> echoTime = null;
+    /** corresponding dicom tag. */
+    private Set<EchoTime> echoTime = null;
 
-	/** corresponding dicom tag. */
-	protected double[] imageOrientationPatient = null;
+    /** corresponding dicom tag. */
+    private double[] imageOrientationPatient = null;
 
-	/**
-	 * Constructor with fields.
-	 *
-	 * @param echoNumbers
-	 *            the echo numbers
-	 * @param acquisitionNumber
-	 *            the acquisition number
-	 * @param imageOrientationPatient
-	 *            the image orientation patient
-	 */
-	public SerieToDatasetsSeparator(final int acquisitionNumber, final Set<EchoTime> echoTime,
-			final double[] imageOrientationPatient) {
-		this.acquisitionNumber = acquisitionNumber;
-		this.echoTime = echoTime;
-		this.imageOrientationPatient = imageOrientationPatient;
-	}
+    /**
+     * Constructor with fields.
+     *
+     * @param echoNumbers
+     *            the echo numbers
+     * @param acquisitionNumber
+     *            the acquisition number
+     * @param imageOrientationPatient
+     *            the image orientation patient
+     */
+    public SerieToDatasetsSeparator(final int acquisitionNumber, final Set<EchoTime> echoTime,
+            final double[] imageOrientationPatient) {
+        this.acquisitionNumber = acquisitionNumber;
+        this.echoTime = echoTime;
+        this.imageOrientationPatient = imageOrientationPatient;
+    }
 
 	/*
 	 * (non-Javadoc)
@@ -99,34 +99,34 @@ public class SerieToDatasetsSeparator {
 		return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
 	}
 
-	/**
-	 * Return true if the patient orientations are roughly the same.
-	 *
-	 * @param imageOrientationPatient
-	 * @param otherImageOrientationPatient
-	 * @return true if the patient orientations are roughly the same
-	 */
-	private boolean imageOrientationEquals(final double[] imageOrientationPatient,
-			final double[] otherImageOrientationPatient) {
-		if (imageOrientationPatient == null) {
-			return otherImageOrientationPatient == null;
-		}
-		if (otherImageOrientationPatient == null) {
-			return imageOrientationPatient == null;
-		}
-		for (int i = 0; i < imageOrientationPatient.length; i++) {
-			double diff = imageOrientationPatient[i] - otherImageOrientationPatient[i];
-			if (diff != 0) {
-				if (Math.abs(diff) < 0.0001) {
-					LOG.debug(
-							"Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
-				} else {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+    /**
+     * Return true if the patient orientations are roughly the same.
+     *
+     * @param imageOrientationPatient
+     * @param otherImageOrientationPatient
+     * @return true if the patient orientations are roughly the same
+     */
+    private boolean imageOrientationEquals(final double[] imageOrientationPatient,
+            final double[] otherImageOrientationPatient) {
+        if (imageOrientationPatient == null) {
+            return otherImageOrientationPatient == null;
+        }
+        if (otherImageOrientationPatient == null) {
+            return imageOrientationPatient == null;
+        }
+        for (int i = 0; i < imageOrientationPatient.length; i++) {
+            double diff = imageOrientationPatient[i] - otherImageOrientationPatient[i];
+            if (diff != 0) {
+                if (Math.abs(diff) < 0.0001) {
+                    LOG.debug(
+                            "Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
 	@Override
 	public String toString() {

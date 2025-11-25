@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.check;
 
 import java.io.File;
@@ -34,36 +48,36 @@ import org.springframework.stereotype.Service;
 /*
  * This scheduled service iterates over all import job folders within
  * the workFolder and searches for import jobs, state FINISHED.
- * 
+ *
  * For performance reasons, especially on the limit network bandwith
  * in the hospital, this job only runs, when no UploadServiceJob is
  * running, see LOCK.
- * 
+ *
  * When the timestamp is older than 2 hours the DICOMWeb API of
  * the server is used to verify, that all local images have well
  * arrived on the server and that the examination is complete.
  * If all is perfect, that state moves to CHECK_OK or CHECK_KO.
- * 
+ *
  * DICOM tags and the binary pixel data are compared instance/image
  * by instance/image.
- * 
+ *
  * When the check runs on instance-by-instance after each
- * 
+ *
  */
 @Service
 public class ExaminationConsistencyServiceJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExaminationConsistencyServiceJob.class);
 
     private static final long THIRTY_MIN_IN_MILLIS = 30 * 60 * 1000;
-    
+
     private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 
-   	@Autowired
-	private CurrentNominativeDataController currentNominativeDataController;
+    @Autowired
+    private CurrentNominativeDataController currentNominativeDataController;
 
     @Autowired
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     @Scheduled(fixedRate = THIRTY_MIN_IN_MILLIS)
     public void execute() throws Exception {
@@ -71,24 +85,24 @@ public class ExaminationConsistencyServiceJob {
         boolean checkOnServer = Boolean.parseBoolean(value);
         if (checkOnServer) {
             if (!UploadServiceJob.LOCK.isLocked()) {
-                logger.info("ExaminationConsistencyServiceJob started...");
+                LOG.info("ExaminationConsistencyServiceJob started...");
                 UploadServiceJob.LOCK.lock();
                 File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-                processWorkFolder(workFolder, currentNominativeDataController);    
+                processWorkFolder(workFolder, currentNominativeDataController);
                 UploadServiceJob.LOCK.unlock();
-                logger.info("ExaminationConsistencyServiceJob ended...");
+                LOG.info("ExaminationConsistencyServiceJob ended...");
             }
         }
-	}
+    }
 
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws Exception {
         final List<File> folders = Util.listFolders(workFolder);
-		logger.debug("Found " + folders.size() + " folders in work folder.");
-		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			final File importJobFolder = (File) foldersIt.next();
-			final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-			// file could be missing in case of downloadOrCopy ongoing
-			if (importJobFile.exists()) {
+        LOG.debug("Found " + folders.size() + " folders in work folder.");
+        for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
+            final File importJobFolder = (File) foldersIt.next();
+            final File importJobFile = new File(importJobFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
+            // file could be missing in case of downloadOrCopy ongoing
+            if (importJobFile.exists()) {
                 // if the check.on.server flag has been activated after, do not check on previous
                 // already imported folders, as they do not contain any DICOM anymore
                 if (importJobFolder.listFiles().length > 1) {
@@ -116,14 +130,14 @@ public class ExaminationConsistencyServiceJob {
                                 importJob.setUploadState(UploadState.CHECK_KO);
                                 importJobManager.writeImportJob(importJob);
                                 currentNominativeDataController.updateNominativeDataPercentage(importJobFolder, UploadState.CHECK_KO.toString());
-                                logger.error(e.getMessage(), e);
+                                LOG.error(e.getMessage(), e);
                             }
                         }
                     }
                 } // do nothing, keep already imported untouched
-			} else {
-				logger.error("Folder found in workFolder without import-job.json.");
-			}
+            } else {
+                LOG.error("Folder found in workFolder without import-job.json.");
+            }
         }
     }
 
@@ -146,11 +160,11 @@ public class ExaminationConsistencyServiceJob {
                         }
                     }
                 }
-                logger.info(studies.size() + " DICOM study (examination) of"
-                    + " subject: " + importJob.getSubjectName()
-                    + ", studyDate: " + importJob.getStudy().getStudyDate()
-                    + " checked for consistency of "
-                    + numberOfInstances + " DICOM instances (images)");
+                LOG.info(studies.size() + " DICOM study (examination) of"
+                        + " subject: " + importJob.getSubjectName()
+                        + ", studyDate: " + importJob.getStudy().getStudyDate()
+                        + " checked for consistency of "
+                        + numberOfInstances + " DICOM instances (images)");
             }
         }
         return true;
@@ -172,21 +186,21 @@ public class ExaminationConsistencyServiceJob {
                     byte[] pixelDataRemote = remoteInstance.getBytes(Tag.PixelData);
                     Boolean pixelsEqual = java.util.Arrays.equals(pixelDataLocal, pixelDataRemote);
                     if (!attributesEqual || !pixelsEqual) {
-                        logger.error("Serie: " + serie.getSeriesDescription() + ", error in DICOM instance: " + instanceFilePath);
+                        LOG.error("Serie: " + serie.getSeriesDescription() + ", error in DICOM instance: " + instanceFilePath);
                         throw new Exception("DICOM instance comparison issue: tags("
                             + attributesEqual + "), pixel(" + pixelsEqual + ")");
                     } else {
                         deleteInstanceFileAndSerieFolder(importJobFolder, instanceFile);
                         numberOfInstances++;
-                    }   
+                    }
                 } else {
                     throw new Exception("Serie: " + serie.getSeriesDescription()
                         + ", DICOM instance not found on server: " + instance.getSopInstanceUID());
                 }
             }
         } else {
-            logger.error("Serie: " + serie.getSeriesDescription()
-                + ", DICOM instance not found locally: " + instanceFilePath);
+            LOG.error("Serie: " + serie.getSeriesDescription()
+                    + ", DICOM instance not found locally: " + instanceFilePath);
             throw new FileNotFoundException();
         }
         return numberOfInstances;
@@ -194,13 +208,13 @@ public class ExaminationConsistencyServiceJob {
 
     private boolean compareAttributes(Attributes localAttributes, Attributes remoteAttributes) {
         if (localAttributes.size() != remoteAttributes.size()) {
-            logger.error("Number of tags differ.");
+            LOG.error("Number of tags differ.");
             return false;
         }
         int[] localTags = localAttributes.tags();
         for (int tag : localTags) {
             if (!remoteAttributes.contains(tag)) {
-                logger.error("Missing tag in second file: " + TagUtils.toString(tag));
+                LOG.error("Missing tag in second file: " + TagUtils.toString(tag));
                 return false;
             }
             String localValue = localAttributes.getString(tag, null);
@@ -209,8 +223,8 @@ public class ExaminationConsistencyServiceJob {
                 continue;
             }
             if (localValue == null || remoteValue == null || !localValue.equals(remoteValue)) {
-                logger.error("Tag differs: " + TagUtils.toString(tag) +
-                                " | " + localValue + " != " + remoteValue);
+                LOG.error("Tag differs: " + TagUtils.toString(tag)
+                        + " | " + localValue + " != " + remoteValue);
                 return false;
             }
         }
