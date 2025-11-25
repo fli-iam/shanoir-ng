@@ -157,7 +157,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (dataset.getEchoTimes() != null) {
 			List<EchoTime> listEchoTime = new ArrayList<>(dataset.getEchoTimes());
-			mrDataset.getEchoTime().addAll(echoTimeMapper.EchoTimeDTOListToEchoTimeList(listEchoTime));
+			mrDataset.getEchoTime().addAll(echoTimeMapper.echoTimeDTOListToEchoTimeList(listEchoTime));
 			for (org.shanoir.ng.shared.model.EchoTime et: mrDataset.getEchoTime()) {
 				et.setMrDataset(mrDataset);
 			}
@@ -165,7 +165,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (dataset.getRepetitionTimes() != null) {
 			List<Double> listRepetitionTime = new ArrayList<>(dataset.getRepetitionTimes());
-			mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.RepetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
+			mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.repetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
 			for ( org.shanoir.ng.shared.model.RepetitionTime rt: mrDataset.getRepetitionTime()) {
 				rt.setMrDataset(mrDataset);
 			}
@@ -173,7 +173,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (dataset.getInversionTimes() != null) {
 			List<Double> listInversionTime = new ArrayList<>(dataset.getInversionTimes());
-			mrDataset.getInversionTime().addAll(inversionTimeMapper.InversionTimeDTOListToInversionTimeList(listInversionTime));
+			mrDataset.getInversionTime().addAll(inversionTimeMapper.inversionTimeDTOListToInversionTimeList(listInversionTime));
 			for ( org.shanoir.ng.shared.model.InversionTime rt: mrDataset.getInversionTime()) {
 				rt.setMrDataset(mrDataset);
 			}
@@ -181,7 +181,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		
 		if (dataset.getFlipAngles() != null) {
 			List<String> listFlipAngle = new ArrayList<>(dataset.getFlipAngles());
-			mrDataset.getFlipAngle().addAll(flipAngleMapper.FlipAngleDTOListToFlipAngleList(listFlipAngle));
+			mrDataset.getFlipAngle().addAll(flipAngleMapper.flipAngleDTOListToFlipAngleList(listFlipAngle));
 			for ( org.shanoir.ng.shared.model.FlipAngle rt: mrDataset.getFlipAngle()) {
 				rt.setMrDataset(mrDataset);
 			}
