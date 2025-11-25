@@ -125,8 +125,8 @@ public class StudyServiceImpl implements StudyService {
     @Autowired
     private SubjectStudyRepository subjectStudyRepository;
 
-	@Autowired
-	private StudyExaminationRepository studyExaminationRepository;
+    @Autowired
+    private StudyExaminationRepository studyExaminationRepository;
 
     @Autowired
     private ShanoirEventService eventService;

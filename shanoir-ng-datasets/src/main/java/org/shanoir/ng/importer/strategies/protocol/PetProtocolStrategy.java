@@ -30,13 +30,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PetProtocolStrategy {
-	
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
-	
-	public PetProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {		
-		PetProtocol petProtocol = new PetProtocol();
-		
+
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
+
+    public PetProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {
+        PetProtocol petProtocol = new PetProtocol();
+
         /** (0028, 0010) Rows */
         final Integer dimensionX = attributes.getInt(Tag.Rows, 0);
         LOG.debug("extractMetadata : dimensionX=" + dimensionX);

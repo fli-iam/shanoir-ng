@@ -132,27 +132,27 @@ public class SubjectApiController implements SubjectApi {
         return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
     }
 
-	// Attention: this method is used by ShanoirUploader!!!
-	@Override
-	public ResponseEntity<SubjectDTO> saveNewSubject(
-			@RequestBody Subject subject,
-			@RequestParam(required = false) Long centerId,
-			final BindingResult result) throws ShanoirException, RestServiceException {
-		validate(subject, result);
-		Subject createdSubject;
-		if (centerId == null) {
-			// #2475 Trim subject common name, only when not coming from SHUP
-			if (subject.getName() != null) {
-				subject.setName(subject.getName().trim());
-			}
-			createdSubject = subjectService.create(subject, true);
-		} else {
-			createdSubject = subjectService.createAutoIncrement(subject, centerId, true);
-		}
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
-		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
-	}
+    // Attention: this method is used by ShanoirUploader!!!
+    @Override
+    public ResponseEntity<SubjectDTO> saveNewSubject(
+            @RequestBody Subject subject,
+            @RequestParam(required = false) Long centerId,
+            final BindingResult result) throws ShanoirException, RestServiceException {
+        validate(subject, result);
+        Subject createdSubject;
+        if (centerId == null) {
+            // #2475 Trim subject common name, only when not coming from SHUP
+            if (subject.getName() != null) {
+                subject.setName(subject.getName().trim());
+            }
+            createdSubject = subjectService.create(subject, true);
+        } else {
+            createdSubject = subjectService.createAutoIncrement(subject, centerId, true);
+        }
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
+        return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
+    }
 
     // Attention: this method is used by ShanoirUploader!!!
     @Override

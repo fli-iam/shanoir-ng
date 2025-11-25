@@ -60,7 +60,7 @@ public class DatasetMetadata extends AbstractEntity {
     /** Processed dataset type. */
     private Integer processedDatasetType;
 
-	private String imageOrientationPatient;
+    private String imageOrientationPatient;
 
     public DatasetMetadata() {
     }
@@ -177,13 +177,13 @@ public class DatasetMetadata extends AbstractEntity {
         this.name = name;
     }
 
-	public String getImageOrientationPatient() {
-		return imageOrientationPatient;
-	}
+    public String getImageOrientationPatient() {
+        return imageOrientationPatient;
+    }
 
-	public void setImageOrientationPatient(String imageOrientationPatient) {
-		this.imageOrientationPatient = imageOrientationPatient;
-	}
+    public void setImageOrientationPatient(String imageOrientationPatient) {
+        this.imageOrientationPatient = imageOrientationPatient;
+    }
 
     /**
      * @return the processedDatasetType

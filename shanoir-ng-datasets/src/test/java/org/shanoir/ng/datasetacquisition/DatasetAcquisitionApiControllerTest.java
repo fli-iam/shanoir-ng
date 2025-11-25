@@ -56,12 +56,12 @@ public class DatasetAcquisitionApiControllerTest {
     @MockBean
     private EegImporterService eegImporterService;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
-	
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionService;
 

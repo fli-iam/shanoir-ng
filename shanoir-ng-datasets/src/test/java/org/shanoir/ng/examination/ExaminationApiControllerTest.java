@@ -89,11 +89,11 @@ public class ExaminationApiControllerTest {
 
     private String tempFolderPath;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
+    @MockBean
+    private DicomImporterService dicomImporterService;
 
     @BeforeEach
     public void beforeClass() {

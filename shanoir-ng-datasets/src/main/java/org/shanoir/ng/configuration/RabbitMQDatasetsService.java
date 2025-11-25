@@ -30,7 +30,6 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -43,10 +42,8 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
@@ -74,8 +71,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.persistence.EntityManager;
-
 /**
  * RabbitMQ configuration.
  */
@@ -99,8 +94,8 @@ public class RabbitMQDatasetsService {
     @Autowired
     private SubjectRepository subjectRepository;
 
-	@Autowired
-	private DatasetRepository datasetRepository;
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     @Autowired
     private CenterRepository centerRepository;
@@ -175,34 +170,34 @@ public class RabbitMQDatasetsService {
         return "";
     }
 
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveAcEqUpdate(final String acEqStr) {
-		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveAcEqUpdate(final String acEqStr) {
+        receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.CENTER_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveCenterUpdate(final String centerStr) throws JsonMappingException, JsonProcessingException {
-		Center center = objectMapper.readValue(centerStr, Center.class);
-		saveCenter(center);
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveCenterUpdate(final String centerStr) throws JsonMappingException, JsonProcessingException {
+        Center center = objectMapper.readValue(centerStr, Center.class);
+        saveCenter(center);
+    }
 
-	@Transactional
-	private void saveCenter(Center center) {
-		centerRepository.save(center);
-	}
-	
-	@RabbitListener(queues = RabbitMQConfiguration.CENTER_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveCenterDelete(final Long centerId) throws JsonMappingException, JsonProcessingException {
-		deleteCenter(centerId);
-	}
+    @Transactional
+    private void saveCenter(Center center) {
+        centerRepository.save(center);
+    }
 
-	@Transactional
-	private void deleteCenter(Long centerId) {
-		centerRepository.deleteById(centerId);
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveCenterDelete(final Long centerId) throws JsonMappingException, JsonProcessingException {
+        deleteCenter(centerId);
+    }
+
+    @Transactional
+    private void deleteCenter(Long centerId) {
+        centerRepository.deleteById(centerId);
+    }
 
     private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
         IdName received = new IdName();

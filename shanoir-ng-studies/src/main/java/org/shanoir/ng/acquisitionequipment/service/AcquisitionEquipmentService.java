@@ -48,16 +48,16 @@ public interface AcquisitionEquipmentService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<AcquisitionEquipment> findAll();
 
-	/**
-	 * Save an entity.
-	 *
-	 * @param entity the entity to create.
-	 * @return created entity.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
-	AcquisitionEquipment create(AcquisitionEquipment entity);
-	
-	public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP);
+    /**
+     * Save an entity.
+     *
+     * @param entity the entity to create.
+     * @return created entity.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+    AcquisitionEquipment create(AcquisitionEquipment entity);
+
+    public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP);
 
     /**
      * Update an entity.

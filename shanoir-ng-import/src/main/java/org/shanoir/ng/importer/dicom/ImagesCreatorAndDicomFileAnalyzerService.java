@@ -338,38 +338,38 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
         image.setEchoTimes(echoTimes);
     }
 
-	/**
-	 * Adds the equipment information. We suppose here that the info coming
-	 * from the first file is more reliable than the infos coming from the
-	 * dicomdir or the pacs querying.
-	 * 
-	 * @param serie
-	 * @param attributes
-	 */
-	private void addSeriesEquipment(Serie serie, Attributes attributes) {
-		if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-			String manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
-			String manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
-			String deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
-			String stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
-			String magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
-		}
-	}
+    /**
+     * Adds the equipment information. We suppose here that the info coming
+     * from the first file is more reliable than the infos coming from the
+     * dicomdir or the pacs querying.
+     *
+     * @param serie
+     * @param attributes
+     */
+    private void addSeriesEquipment(Serie serie, Attributes attributes) {
+        if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
+            String manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
+            String manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
+            String deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
+            String stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
+            String magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, UNKNOWN);
+            serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
+        }
+    }
 
-	/**
-	 * Adds the equipment information.
-	 * Used by ShanoirUploader in case of a DICOM Pushed study
-	 * 
-	 * @param serie
-	 * @param datasetAttributes
-	 */
-	public void addSeriesCenter(Serie serie, Attributes attributes) {
-		if (serie.getInstitution() == null) {
-			InstitutionDicom institution = new InstitutionDicom(attributes);
-			serie.setInstitution(institution);
-		}
-	}
+    /**
+     * Adds the equipment information.
+     * Used by ShanoirUploader in case of a DICOM Pushed study
+     *
+     * @param serie
+     * @param datasetAttributes
+     */
+    public void addSeriesCenter(Serie serie, Attributes attributes) {
+        if (serie.getInstitution() == null) {
+            InstitutionDicom institution = new InstitutionDicom(attributes);
+            serie.setInstitution(institution);
+        }
+    }
 
     /**
      * Get DICOM study information from .dcm file.

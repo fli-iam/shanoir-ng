@@ -38,90 +38,90 @@ import org.springframework.stereotype.Component;
 public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
 
     @Autowired
-	DatasetExpressionContext datasetExpressionContext;
+    private DatasetExpressionContext datasetExpressionContext;
 
-	@Override
-	public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, Long subjectId) throws Exception {
-		
-		DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
-		/**
-		 * retrieve number of dataset in current serie if Number of dataset > 1 then
-		 * each dataset will be named with an int at the end of the name. else the is
-		 * only one dataset => no need for extension.
-		 */
-		int datasetIndex;
-		if (serie.getDatasets().size() > 1) {
-			datasetIndex = 1;
-		} else {
-			datasetIndex = -1;
-		}
+    @Override
+    public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, Long subjectId) throws Exception {
 
-		for (Dataset dataset : serie.getDatasets()) {
-			PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, subjectId);
-			datasetWrapper.getDatasets().add(petDataset);
-			datasetIndex++;
-		}
+        DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
+        /**
+         * retrieve number of dataset in current serie if Number of dataset > 1 then
+         * each dataset will be named with an int at the end of the name. else the is
+         * only one dataset => no need for extension.
+         */
+        int datasetIndex;
+        if (serie.getDatasets().size() > 1) {
+            datasetIndex = 1;
+        } else {
+            datasetIndex = -1;
+        }
+
+        for (Dataset dataset : serie.getDatasets()) {
+            PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, subjectId);
+            datasetWrapper.getDatasets().add(petDataset);
+            datasetIndex++;
+        }
 
         return datasetWrapper;
     }
 
-	@Override
-	public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
-			Long subjectId) throws Exception {
-		PetDataset petDataset = new PetDataset();
-		petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
-		petDataset.setCreationDate(serie.getSeriesDate());
-		final String seriesDescription = serie.getSeriesDescription();
+    @Override
+    public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
+        PetDataset petDataset = new PetDataset();
+        petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
+        petDataset.setCreationDate(serie.getSeriesDate());
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
-		petDataset.setOriginMetadata(datasetMetadata);
-		// set the series description as the dataset comment & name
-		if (seriesDescription != null && !"".equals(seriesDescription)) {
-			petDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
-			petDataset.getOriginMetadata().setComment(seriesDescription);
-		}
+        petDataset.setOriginMetadata(datasetMetadata);
+        // set the series description as the dataset comment & name
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            petDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            petDataset.getOriginMetadata().setComment(seriesDescription);
+        }
 
-		// Pre-select the type Reconstructed dataset
-		petDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+        // Pre-select the type Reconstructed dataset
+        petDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
-		// Set the study and the subject
-		petDataset.setSubjectId(subjectId);
+        // Set the study and the subject
+        petDataset.setSubjectId(subjectId);
 
-		// Set the modality from dicom fields
-		petDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.PET_DATASET);
-		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		if (orientationArray != null) {
-			String orientationString = String.join("\\", orientationArray);
-			petDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
-		}
+        // Set the modality from dicom fields
+        petDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.PET_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            petDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
-		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
-		if (petDataset.getSubjectId() != null) {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
-		} else {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
-		}
-		petDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-		
-		/**
-		 *  The part below will generate automatically the datasetExpression according to :
-		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
-		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current petDataset
-		 * 
-		 **/
-		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-			datasetExpression.setDataset(petDataset);
-			petDataset.getDatasetExpressions().add(datasetExpression);
-		}
-		
-		DatasetMetadata originalDM = petDataset.getOriginMetadata();
-		petDataset.setUpdatedMetadata(originalDM);
-		
-		return petDataset;
-	}
+        CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
+        if (petDataset.getSubjectId() != null) {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
+        } else {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
+        }
+        petDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+
+        /**
+         *  The part below will generate automatically the datasetExpression according to :
+         *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
+         *
+         *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current petDataset
+         *
+         **/
+        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+            datasetExpression.setDataset(petDataset);
+            petDataset.getDatasetExpressions().add(datasetExpression);
+        }
+
+        DatasetMetadata originalDM = petDataset.getOriginMetadata();
+        petDataset.setUpdatedMetadata(originalDM);
+
+        return petDataset;
+    }
 
     @Override
     public String computeDatasetName(String name, int index) {

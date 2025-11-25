@@ -49,55 +49,55 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-	
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(CtDatasetAcquisitionStrategy.class);
-	
-	@Autowired
-	private CtProtocolStrategy protocolStrategy;
-	
-	@Autowired
-	private DatasetStrategy<CtDataset> datasetStrategy;
-	
-	@Override
-	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		CtDatasetAcquisition datasetAcquisition = (CtDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
-				userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
-		DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(datasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		datasetAcquisition.setDatasets(genericizedList);
-		return datasetAcquisition;
-	}
 
-	@Override
-	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
-			Attributes attributes) throws Exception {
-		LOG.info("Generating CtDatasetAcquisition for: {} - {} - {} - Rank: {}",
-				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
-		CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
-		datasetAcquisition.setUsername(userName);
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
-		datasetAcquisition.setRank(rank);
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(CtDatasetAcquisitionStrategy.class);
 
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
-				attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
-		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		CtProtocol protocol = protocolStrategy.generateProtocolForSerie(attributes, serie);
-		datasetAcquisition.setCtProtocol(protocol);
-		return datasetAcquisition;
-	}
+    @Autowired
+    private CtProtocolStrategy protocolStrategy;
 
-	@Override
-	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
-	}
+    @Autowired
+    private DatasetStrategy<CtDataset> datasetStrategy;
+
+    @Override
+    public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        CtDatasetAcquisition datasetAcquisition = (CtDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
+                userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
+        DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(datasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        datasetAcquisition.setDatasets(genericizedList);
+        return datasetAcquisition;
+    }
+
+    @Override
+    public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+            Attributes attributes) throws Exception {
+        LOG.info("Generating CtDatasetAcquisition for: {} - {} - {} - Rank: {}",
+                serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
+        CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
+        datasetAcquisition.setUsername(userName);
+        datasetAcquisition.setImportDate(LocalDate.now());
+        datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+        datasetAcquisition.setRank(rank);
+        datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        CtProtocol protocol = protocolStrategy.generateProtocolForSerie(attributes, serie);
+        datasetAcquisition.setCtProtocol(protocol);
+        return datasetAcquisition;
+    }
+
+    @Override
+    public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
+    }
 
 }

@@ -53,14 +53,14 @@ public class EchoTime extends AbstractEntity {
     @Min(value = 0)
     private Integer echoNumber;
 
-	/**
-	 * Comes from the dicom tag (0018,0081) VR=DS, VM=1 Echo Time. The unit of
-	 * measure must be in millisec.
-	 */
-	@NotNull
-	private Double echoTimeValue;
+    /**
+     * Comes from the dicom tag (0018,0081) VR=DS, VM=1 Echo Time. The unit of
+     * measure must be in millisec.
+     */
+    @NotNull
+    private Double echoTimeValue;
 
-	public EchoTime() {}
+    public EchoTime() { }
 
     public EchoTime(EchoTime et, MrDataset mr) {
         this.mrDataset = mr;
@@ -129,17 +129,17 @@ public class EchoTime extends AbstractEntity {
         return hash;
     }
 
-	/**
-	 * This method makes a transient type translation
-	 * between database EchoTime and the EchoTime used
-	 * during the imports before.
-	 * @return
-	 */
-	public org.shanoir.ng.shared.dicom.EchoTime getEchoTimeShared() {
-		org.shanoir.ng.shared.dicom.EchoTime echoTime = new org.shanoir.ng.shared.dicom.EchoTime();
-		echoTime.setEchoNumber(this.echoNumber);
-		echoTime.setEchoTime(this.echoTimeValue);
-		return echoTime;
-	}
+    /**
+     * This method makes a transient type translation
+     * between database EchoTime and the EchoTime used
+     * during the imports before.
+     * @return
+     */
+    public org.shanoir.ng.shared.dicom.EchoTime getEchoTimeShared() {
+        org.shanoir.ng.shared.dicom.EchoTime echoTime = new org.shanoir.ng.shared.dicom.EchoTime();
+        echoTime.setEchoNumber(this.echoNumber);
+        echoTime.setEchoTime(this.echoTimeValue);
+        return echoTime;
+    }
 
 }

@@ -121,11 +121,11 @@ public class SubjectServiceTest {
         Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
 
-	@Test
-	public void saveTest() throws MicroServiceCommunicationException, ShanoirException {
-		subjectService.create(createSubjectToSave(), true);
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
-	}
+    @Test
+    public void saveTest() throws MicroServiceCommunicationException, ShanoirException {
+        subjectService.create(createSubjectToSave(), true);
+        Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+    }
 
     @Test
     public void updateTest() throws RestServiceException, ShanoirException {

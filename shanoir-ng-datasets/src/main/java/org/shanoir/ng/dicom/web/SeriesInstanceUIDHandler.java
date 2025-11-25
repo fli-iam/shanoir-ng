@@ -86,8 +86,8 @@ public class SeriesInstanceUIDHandler {
 
     public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
         String seriesInstanceUIDDb = acquisition.getSeriesInstanceUID();
-		if (seriesInstanceUIDDb != null && !seriesInstanceUIDDb.isEmpty())
-			return seriesInstanceUIDDb;
+        if (seriesInstanceUIDDb != null && !seriesInstanceUIDDb.isEmpty())
+            return seriesInstanceUIDDb;
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition) {

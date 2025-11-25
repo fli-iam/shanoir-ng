@@ -49,51 +49,51 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
     @Autowired
     private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
 
-	@Autowired
-	private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
-	
-	@Autowired
-	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
-	
-	@Override
-	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, dicomAttributes.getFirstDatasetAttributes());
-		return datasetAcquisitionStrategy.generateDeepDatasetAcquisitionForSerie(userName, subjectId, serie, rank, dicomAttributes);
-	}
+    @Autowired
+    private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
 
-	@Override
-	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
-			Attributes attributes) throws Exception {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
-		return datasetAcquisitionStrategy.generateFlatDatasetAcquisitionForSerie(userName, serie, rank, attributes);
-	}
+    @Autowired
+    private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
 
-	@Override
-	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
-		return datasetAcquisitionStrategy.generateFlatDataset(serie, dataset, datasetIndex, subjectId, attributes);
-	}
+    @Override
+    public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, dicomAttributes.getFirstDatasetAttributes());
+        return datasetAcquisitionStrategy.generateDeepDatasetAcquisitionForSerie(userName, subjectId, serie, rank, dicomAttributes);
+    }
 
-	// add other strategies for other modalities here
-	private DatasetAcquisitionStrategy selectModalityStrategy(Serie serie, Attributes attributes) {
-		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
-		String modality = serie.getModality();
-		if ("MR".equals(modality)) {
-			datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
-		} else if ("CT".equals(modality)) {
-			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
-		} else if ("PT".equals(modality)) {
-			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
-		} else if ("XA".equals(modality)) {
-			datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
-		}else {
-			// By default we just create a generic dataset acquisition
-			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-		}
-		// Use always SeriesInstanceUID from DICOM files
-		String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
-		serie.setSeriesInstanceUID(seriesInstanceUID);
-		return datasetAcquisitionStrategy;
-	}
-	
+    @Override
+    public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
+            Attributes attributes) throws Exception {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
+        return datasetAcquisitionStrategy.generateFlatDatasetAcquisitionForSerie(userName, serie, rank, attributes);
+    }
+
+    @Override
+    public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy = selectModalityStrategy(serie, attributes);
+        return datasetAcquisitionStrategy.generateFlatDataset(serie, dataset, datasetIndex, subjectId, attributes);
+    }
+
+    // add other strategies for other modalities here
+    private DatasetAcquisitionStrategy selectModalityStrategy(Serie serie, Attributes attributes) {
+        DatasetAcquisitionStrategy datasetAcquisitionStrategy;
+        String modality = serie.getModality();
+        if ("MR".equals(modality)) {
+            datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
+        } else if ("CT".equals(modality)) {
+            datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+        } else if ("PT".equals(modality)) {
+            datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+        } else if ("XA".equals(modality)) {
+            datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
+        } else {
+            // By default we just create a generic dataset acquisition
+            datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
+        }
+        // Use always SeriesInstanceUID from DICOM files
+        String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+        serie.setSeriesInstanceUID(seriesInstanceUID);
+        return datasetAcquisitionStrategy;
+    }
+
 }

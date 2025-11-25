@@ -32,16 +32,16 @@ public class Subject {
     @JsonProperty("name")
     private String name;
 
-	@JsonProperty("study")
-	private IdName study;
+    @JsonProperty("study")
+    private IdName study;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -51,12 +51,12 @@ public class Subject {
         this.name = name;
     }
 
-	public IdName getStudy() {
-		return study;
-	}
+    public IdName getStudy() {
+        return study;
+    }
 
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
 
 }

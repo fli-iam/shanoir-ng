@@ -36,19 +36,19 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnExamination(returnObject.getExamination().getId(), 'CAN_SEE_ALL')")
     DatasetAcquisition findById(Long id);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
-			String seriesInstanceUID);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
+            String seriesInstanceUID);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public DatasetAcquisition findByIdWithDatasets(Long id);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
-	public Page<DatasetAcquisition> findPage(final Pageable pageable);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
+    public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
-	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
-	DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
+    @PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
+    DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")

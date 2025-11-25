@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
  *
  * MR Dataset Acquisition Strategy used to create new Mr Dataset Acquisition.
  * Called by the ImportService.
- * 
+ *
  * Refer to Interface for more information
  *
  * @author atouboul
@@ -56,10 +56,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
-	
-    private static final Map<String, BidsDataType> dataTypeMapping;
+
+    private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
+
+    private static final Map<String, BidsDataType> DATA_TYPE_MAPPING;
 
     static {
         Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
@@ -72,74 +72,74 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         aMap.put("T1", BidsDataType.ANAT);
         aMap.put("T2", BidsDataType.ANAT);
         aMap.put("T2_STAR", BidsDataType.ANAT);
-        dataTypeMapping = Collections.unmodifiableMap(aMap);
+        DATA_TYPE_MAPPING = Collections.unmodifiableMap(aMap);
     }
 
-	@Autowired
-	private MrProtocolStrategy mrProtocolStrategy;
-	
-	@Autowired
-	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+    @Autowired
+    private MrProtocolStrategy mrProtocolStrategy;
 
-	@Override
-	public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		MrDatasetAcquisition mrDatasetAcquisition = (MrDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
-				userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
+    @Autowired
+    private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
-		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(mrDatasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		mrDatasetAcquisition.setDatasets(genericizedList);
-		
-		// total acquisition time
-		if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
-			Double totalAcquisitionTime = null;
-			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
-				Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
-				totalAcquisitionTime = Double.valueOf(duration.toMillis());
-				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
-			} else {
-				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
-			}
-		}
-		return mrDatasetAcquisition;
-	}
+    @Override
+    public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        MrDatasetAcquisition mrDatasetAcquisition = (MrDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
+                userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
 
-	@Override
-	public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(
-			String userName, Serie serie, int rank,	Attributes attributes) throws IOException {
-		LOG.info("Generating MrDatasetAcquisition for: {} - {} - {} - Rank: {}",
-				serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
-		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		mrDatasetAcquisition.setUsername(userName);
-		mrDatasetAcquisition.setImportDate(LocalDate.now());
-		mrDatasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
-		mrDatasetAcquisition.setRank(rank);
-		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+        DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(mrDatasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        mrDatasetAcquisition.setDatasets(genericizedList);
 
-		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
-				attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
-		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
-		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
-		mrDatasetAcquisition.setMrProtocol(mrProtocol);
-		// Can be overridden by study cards
-		String imageType = attributes.getString(Tag.ImageType, 2);		
-		if (imageType != null && dataTypeMapping.get(imageType) != null) {
-			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
-				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-			}
-			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataTypeMapping.get(imageType));
-		}
-		return mrDatasetAcquisition;
-	}
+        // total acquisition time
+        if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
+            Double totalAcquisitionTime = null;
+            if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
+                Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
+                totalAcquisitionTime = Double.valueOf(duration.toMillis());
+                mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
+            } else {
+                mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
+            }
+        }
+        return mrDatasetAcquisition;
+    }
 
-	@Override
-	public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-		return mrDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
-	}
+    @Override
+    public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(
+            String userName, Serie serie, int rank,    Attributes attributes) throws IOException {
+        LOG.info("Generating MrDatasetAcquisition for: {} - {} - {} - Rank: {}",
+                serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
+        MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
+        mrDatasetAcquisition.setUsername(userName);
+        mrDatasetAcquisition.setImportDate(LocalDate.now());
+        mrDatasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
+        mrDatasetAcquisition.setRank(rank);
+        mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        mrDatasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
+
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
+        mrDatasetAcquisition.setMrProtocol(mrProtocol);
+        // Can be overridden by study cards
+        String imageType = attributes.getString(Tag.ImageType, 2);
+        if (imageType != null && DATA_TYPE_MAPPING.get(imageType) != null) {
+            if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
+                mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+            }
+            mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(DATA_TYPE_MAPPING.get(imageType));
+        }
+        return mrDatasetAcquisition;
+    }
+
+    @Override
+    public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
+        return mrDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
+    }
 
 }

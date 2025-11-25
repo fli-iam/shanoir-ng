@@ -67,9 +67,9 @@ public class RabbitMQStudiesService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
 
-	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
+    private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
-	private static final String DELIMITER = ":";
+    private static final String DELIMITER = ":";
 
     @Autowired
     private StudyRepository studyRepo;
@@ -77,55 +77,55 @@ public class RabbitMQStudiesService {
     @Autowired
     private StudyService studyService;
 
-	@Autowired
-	private SubjectRepository subjectRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
-	@Autowired
-	private CenterService centerService;
-	
-	@Autowired
-	private DataUserAgreementService dataUserAgreementService;
-	
-	@Autowired
-	private ObjectMapper mapper;
+    @Autowired
+    private CenterService centerService;
 
-	@Autowired
-	ShanoirEventService eventService;
+    @Autowired
+    private DataUserAgreementService dataUserAgreementService;
 
-	@Autowired
-	private AcquisitionEquipmentService acquisitionEquipmentService;
+    @Autowired
+    private ObjectMapper mapper;
 
-	/**
-	 * Receives a shanoirEvent as a json object, concerning an examination creation
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
-			)
-	@RabbitHandler
-	@Transactional
-	public void linkExamination(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
-			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = event.getStudyId();
-			String message = event.getMessage();
-			Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
-			Matcher mat = pat.matcher(message);
-			
-			Long centerId = null;
-			Long subjectId = null;
-			if (mat.matches()) {
-				centerId = Long.valueOf(mat.group(1));
-				subjectId = Long.valueOf(mat.group(2));
-			} else {
-				LOG.error("Something wrong happend while updating study examination list.");
-				throw new ShanoirException("Could not read subject ID and center ID from event message");
-			}
+    @Autowired
+    private ShanoirEventService eventService;
+
+    @Autowired
+    private AcquisitionEquipmentService acquisitionEquipmentService;
+
+    /**
+     * Receives a shanoirEvent as a json object, concerning an examination creation
+     * @param commandArrStr the task as a json string.
+     */
+    @RabbitListener(bindings = @QueueBinding(
+            key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
+            value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
+            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+            autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
+            )
+    @RabbitHandler
+    @Transactional
+    public void linkExamination(final String eventStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
+            Long examinationId = Long.valueOf(event.getObjectId());
+            Long studyId = event.getStudyId();
+            String message = event.getMessage();
+            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Matcher mat = pat.matcher(message);
+
+            Long centerId = null;
+            Long subjectId = null;
+            if (mat.matches()) {
+                centerId = Long.valueOf(mat.group(1));
+                subjectId = Long.valueOf(mat.group(2));
+            } else {
+                LOG.error("Something wrong happend while updating study examination list.");
+                throw new ShanoirException("Could not read subject ID and center ID from event message");
+            }
 
             this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
 
@@ -177,138 +177,138 @@ public class RabbitMQStudiesService {
         return null;
     }
 
-	/**
-	 * Receives a json object, concerning a study subscription
-	 * @param commandArrStr the studyUser as a json string.
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
-	@Transactional
-	public boolean studySubscription(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-		try {
-			ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
-			Long userId = event.getUserId();
-			Long studyId = Long.valueOf(event.getObjectId());
-			// Get the study
-			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
-			
-			for (StudyUser su : studyToUpdate.getStudyUserList()) {
-				if (su.getUserId().equals(userId)) {
-					// user already exists on study
-					return true;
-				}
-			}
-			
-			// Create a new StudyUser
-			StudyUser subscription = new StudyUser();
-			subscription.setStudy(studyToUpdate);
-			subscription.setUserId(userId);
-			subscription.setReceiveNewImportReport(false);
-			subscription.setReceiveStudyUserReport(false);
-			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
-			subscription.setUserName(event.getMessage());
+    /**
+     * Receives a json object, concerning a study subscription
+     * @param commandArrStr the studyUser as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public boolean studySubscription(final String studyStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
+            Long userId = event.getUserId();
+            Long studyId = Long.valueOf(event.getObjectId());
+            // Get the study
+            Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
 
-			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
-				subscription.setConfirmed(false);
-				dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
-			} else {
-				subscription.setConfirmed(true);
-			}
-			studyService.addStudyUserToStudy(subscription, studyToUpdate);
-			eventService.publishEvent(event);
-			return true;
-		} catch (Exception e) {
-			LOG.error("Could not directly subscribe a user to the study: ", e);
-			return false;
-		}
-	}
-	
-	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
-		try {
-		    LOG.info(messageStr);
-			List<SubjectQualityTagDTO> subjectStudyCardTagList =
-					mapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>(){});
-			// build a id -> dto map
-			Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
-			for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
-			    dtoMap.put(dto.getSubjectId(), dto);
-			}
-			// get subjects from db
-			Iterable<Subject> dbList = subjectRepository.findAllById(dtoMap.keySet());
-			// update subjects
-			for (Subject subject : dbList) {
-			    subject.setQualityTag(dtoMap.get(subject.getId()).getTag());
-			}
-			// save
-			subjectRepository.saveAll(dbList);			
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
-		}
-	}
+            for (StudyUser su : studyToUpdate.getStudyUserList()) {
+                if (su.getUserId().equals(userId)) {
+                    // user already exists on study
+                    return true;
+                }
+            }
 
-	@RabbitListener(queues = RabbitMQConfiguration.CENTER_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public String createCenter(final String messageStr) {
-		try {
-			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-			CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
-			Center center = findOrCreateOrAddCenterByInstitutionDicom(message.getStudyId(), message.getInstitutionDicom());
-			if (center != null) {
-				Long studyCenterId = center.getStudyCenterList().stream()
-						.filter(sc -> sc.getStudy().getId().equals(message.getStudyId()))
-						.findFirst().orElseThrow().getId();
-				String returnMessage = center.getId() + DELIMITER + studyCenterId;
-				return returnMessage;
-			} else {
-				LOG.error("Error while creating a new center.");
-				return null;
-			}
-		} catch (Exception e) {
-			LOG.error("Error while creating a new center: ", e);
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+            // Create a new StudyUser
+            StudyUser subscription = new StudyUser();
+            subscription.setStudy(studyToUpdate);
+            subscription.setUserId(userId);
+            subscription.setReceiveNewImportReport(false);
+            subscription.setReceiveStudyUserReport(false);
+            subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
+            subscription.setUserName(event.getMessage());
 
-	@Transactional
-	private Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) {
-		try {
-			return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, false);
-		} catch (EntityNotFoundException e) {
-			LOG.error("Error while creating a new center: ", e);
-		}
-		return null;
-	}
+            if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
+                subscription.setConfirmed(false);
+                dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
+            } else {
+                subscription.setConfirmed(true);
+            }
+            studyService.addStudyUserToStudy(subscription, studyToUpdate);
+            eventService.publishEvent(event);
+            return true;
+        } catch (Exception e) {
+            LOG.error("Could not directly subscribe a user to the study: ", e);
+            return false;
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
-	@RabbitHandler
-	public Long createEquipment(final String messageStr) {
-		try {
-			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-			CreateEquipmentForCenterMessage message = mapper.readValue(messageStr, CreateEquipmentForCenterMessage.class);
-			AcquisitionEquipment equipment = createEquipmentByEquipmentDicom(message.getCenterId(), message.getEquipmentDicom());
-			if (equipment != null) {
-				return equipment.getId();
-			} else {
-				LOG.error("Error while creating a new equipment.");
-				return null;
-			}
-		} catch (JsonProcessingException e) {
-			LOG.error("Error while creating a new equipment: ", e);
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+    @Transactional
+    @RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
+        try {
+            LOG.info(messageStr);
+            List<SubjectQualityTagDTO> subjectStudyCardTagList =
+                    mapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
+            // build a id -> dto map
+            Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
+            for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
+                dtoMap.put(dto.getSubjectId(), dto);
+            }
+            // get subjects from db
+            Iterable<Subject> dbList = subjectRepository.findAllById(dtoMap.keySet());
+            // update subjects
+            for (Subject subject : dbList) {
+                subject.setQualityTag(dtoMap.get(subject.getId()).getTag());
+            }
+            // save
+            subjectRepository.saveAll(dbList);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+        }
+    }
 
-	@Transactional
-	private AcquisitionEquipment createEquipmentByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom) {
-		try {
-			return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
-		} catch (Exception e) {
-			LOG.error("Error while creating a new equipment: ", e);
-		}
-		return null;
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public String createCenter(final String messageStr) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
+            Center center = findOrCreateOrAddCenterByInstitutionDicom(message.getStudyId(), message.getInstitutionDicom());
+            if (center != null) {
+                Long studyCenterId = center.getStudyCenterList().stream()
+                        .filter(sc -> sc.getStudy().getId().equals(message.getStudyId()))
+                        .findFirst().orElseThrow().getId();
+                String returnMessage = center.getId() + DELIMITER + studyCenterId;
+                return returnMessage;
+            } else {
+                LOG.error("Error while creating a new center.");
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error("Error while creating a new center: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
+    @Transactional
+    private Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) {
+        try {
+            return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, false);
+        } catch (EntityNotFoundException e) {
+            LOG.error("Error while creating a new center: ", e);
+        }
+        return null;
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public Long createEquipment(final String messageStr) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            CreateEquipmentForCenterMessage message = mapper.readValue(messageStr, CreateEquipmentForCenterMessage.class);
+            AcquisitionEquipment equipment = createEquipmentByEquipmentDicom(message.getCenterId(), message.getEquipmentDicom());
+            if (equipment != null) {
+                return equipment.getId();
+            } else {
+                LOG.error("Error while creating a new equipment.");
+                return null;
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while creating a new equipment: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
+    @Transactional
+    private AcquisitionEquipment createEquipmentByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom) {
+        try {
+            return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
+        } catch (Exception e) {
+            LOG.error("Error while creating a new equipment: ", e);
+        }
+        return null;
+    }
 
 }

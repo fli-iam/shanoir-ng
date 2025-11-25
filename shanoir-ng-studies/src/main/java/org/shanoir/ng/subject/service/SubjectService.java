@@ -117,45 +117,45 @@ public interface SubjectService {
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
     Subject findByIdWithSubjectStudies(Long subjectStudyId);
 
-	/**
-	 * Find a subject from a center code
-	 * @param centerCode
-	 * @return a subject or null
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findSubjectFromCenterCode(String centerCode);
-	
-	/**
-	 * Save a subject.
-	 *
-	 * @param subject subject to create.
-	 * @return created subject.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-	Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
-	
-	/**
-	 * Save a subject and auto-increment the common name on using the centerId.
-	 *
-	 * @param subject subject to create.
-	 * @return created subject.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-	Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
-	
-	/**
-	 * Update a subject.
-	 *
-	 * @param subject subject to update.
-	 * @return updated subject.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException
-	 * @throws ShanoirException
-	 * @throws RestServiceException
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-	Subject update(@Param("subject") Subject subject) throws ShanoirException;
+    /**
+     * Find a subject from a center code
+     * @param centerCode
+     * @return a subject or null
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
+    Subject findSubjectFromCenterCode(String centerCode);
+
+    /**
+     * Save a subject.
+     *
+     * @param subject subject to create.
+     * @return created subject.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
+
+    /**
+     * Save a subject and auto-increment the common name on using the centerId.
+     *
+     * @param subject subject to create.
+     * @return created subject.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
+
+    /**
+     * Update a subject.
+     *
+     * @param subject subject to update.
+     * @return updated subject.
+     * @throws EntityNotFoundException
+     * @throws MicroServiceCommunicationException
+     * @throws ShanoirException
+     * @throws RestServiceException
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
 
     /**

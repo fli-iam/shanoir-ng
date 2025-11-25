@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import java.io.ByteArrayInputStream;
@@ -80,22 +94,22 @@ import jakarta.annotation.PostConstruct;
 
 /**
  * The DicomImporterService is used by the STOWRSMultipartRequestFilter.
- * 
+ *
  * Single DICOM files are sent to the filter via POST requests and the
  * 4 standard modalities MR,CT,PT,NM are managed by this service.
- * 
+ *
  * Attention: All DICOM files are pseudonymized outside Shanoir, e.g. in
  * Karnak or elsewhere. We do not apply any additional pseudonymization
  * on the files here, even the contrary we fully rely on the DICOM info.
  * A DeidentificationMethod needs to be present to continue with the import.
- * 
+ *
  * To map the Shanoir study, the DICOM attribute ClinicalTrialProtocolID
  * (0012,0020) is used. No new Shanoir study (research project) is created,
  * it must be created manually before by its PI.
- * 
+ *
  * We assume, that the patientName is already matching the subject name and
  * rely on this, e.g. and create new subjects in case not yet existing.
- * 
+ *
  * @author mkain
  */
 @Service
@@ -172,27 +186,27 @@ public class DicomImporterService {
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
 
-   	private ConcurrentHashMap<String, Integer> studyInstanceUIDNumberOfFilesCache;
+    private ConcurrentHashMap<String, Integer> studyInstanceUIDNumberOfFilesCache;
 
     private ConcurrentHashMap<String, Integer> seriesInstanceUIDNumberOfFilesCache;
-	
-	@PostConstruct
-	public void init() {
-		studyInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
-		LOG.info("DICOMWeb STOW-RS cache created: studyInstanceUIDNumberOfFilesCache");
-		seriesInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
-		LOG.info("DICOMWeb STOW-RS cache created: seriesInstanceUIDNumberOfFilesCache");
-	}
 
-	@Scheduled(cron = "0 0 0 15 * *", zone="Europe/Paris")
-	public void logAndClearCaches() {
+    @PostConstruct
+    public void init() {
+        studyInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
+        LOG.info("DICOMWeb STOW-RS cache created: studyInstanceUIDNumberOfFilesCache");
+        seriesInstanceUIDNumberOfFilesCache = new ConcurrentHashMap<String, Integer>(1000);
+        LOG.info("DICOMWeb STOW-RS cache created: seriesInstanceUIDNumberOfFilesCache");
+    }
+
+    @Scheduled(cron = "0 0 0 15 * *", zone = "Europe/Paris")
+    public void logAndClearCaches() {
         LOG.info(studyInstanceUIDNumberOfFilesCache.toString());
         studyInstanceUIDNumberOfFilesCache.clear();
-		LOG.info("DICOMWeb cache cleared: studyInstanceUIDNumberOfFilesCache");
+        LOG.info("DICOMWeb cache cleared: studyInstanceUIDNumberOfFilesCache");
         LOG.info(seriesInstanceUIDNumberOfFilesCache.toString());
-		seriesInstanceUIDNumberOfFilesCache.clear();
-		LOG.info("DICOMWeb cache cleared: seriesInstanceUIDNumberOfFilesCache");
-	}
+        seriesInstanceUIDNumberOfFilesCache.clear();
+        LOG.info("DICOMWeb cache cleared: seriesInstanceUIDNumberOfFilesCache");
+    }
 
     @Transactional
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
@@ -200,7 +214,7 @@ public class DicomImporterService {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-                && (deIdentificationActionSequence == null    
+                && (deIdentificationActionSequence == null
                 || deIdentificationActionSequence.isEmpty())) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
@@ -212,7 +226,7 @@ public class DicomImporterService {
             return false;
         }
         Serie serie = new Serie(attributes);
-        if(!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
+        if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
             Long centerId = manageCenter(attributes, study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
@@ -236,14 +250,14 @@ public class DicomImporterService {
         if (numberOfFilesPerStudy == null) {
             studyInstanceUIDNumberOfFilesCache.put(keyStudy, Integer.valueOf(1));
         } else {
-            studyInstanceUIDNumberOfFilesCache.put(keyStudy, Integer.valueOf(numberOfFilesPerStudy+1));
+            studyInstanceUIDNumberOfFilesCache.put(keyStudy, Integer.valueOf(numberOfFilesPerStudy + 1));
         }
         String keySerie = acquisition.getId() + DELIMITER + seriesDescription;
         Integer numberOfFilesPerSerie = seriesInstanceUIDNumberOfFilesCache.get(keySerie);
         if (numberOfFilesPerSerie == null) {
             seriesInstanceUIDNumberOfFilesCache.put(keySerie, Integer.valueOf(1));
         } else {
-            seriesInstanceUIDNumberOfFilesCache.put(keySerie, Integer.valueOf(numberOfFilesPerSerie+1));
+            seriesInstanceUIDNumberOfFilesCache.put(keySerie, Integer.valueOf(numberOfFilesPerSerie + 1));
         }
     }
 
@@ -302,7 +316,7 @@ public class DicomImporterService {
                     for (int i = 0; i < parts.length; i++) {
                         imageOrientationPatient[i] = Double.parseDouble(parts[i]);
                     }
-                }           
+                }
             }
             Set<EchoTime> echoTimes = new HashSet<EchoTime>();
             if (acquisition instanceof MrDatasetAcquisition) {
@@ -312,7 +326,7 @@ public class DicomImporterService {
                             eT -> echoTimes.add(eT.getEchoTimeShared()));
                 }
             }
-            int acquisitionNumber = 0; 
+            int acquisitionNumber = 0;
             if (acquisition.getAcquisitionNumber() != null) {
                 acquisitionNumber = acquisition.getAcquisitionNumber().intValue();
             }
@@ -418,7 +432,7 @@ public class DicomImporterService {
      * an existing center to study_center. To avoid thousands of RabbitMQ messages
      * a local lookup is made into the replication tables, and if the center exists
      * and is already in the study, we send no message to MS Studies to avoid overhead.
-     * 
+     *
      * For the moment, we assume here that only pseudonymized
      * DICOM enter this import workflow. This means institution
      * name and address have been removed, so no way to create a
@@ -426,7 +440,7 @@ public class DicomImporterService {
      * that we do not communicate with MS Studies to create an unkown
      * center, we only keep it in MS Datasets to increase performance
      * and not too lose any significant value.
-     * 
+     *
      * @param institutionDicom
      * @param studyId
      * @return
@@ -470,16 +484,16 @@ public class DicomImporterService {
         }
     }
 
-	private void addCenterToStudy(Long studyId, Center center, Long studyCenterId) {
-		List<StudyCenter> studyCenterList = new ArrayList<>();
-		center.setStudyCenterList(studyCenterList);
-		StudyCenter studyCenter = new StudyCenter();
-		Study study = studyService.findById(studyId);
+    private void addCenterToStudy(Long studyId, Center center, Long studyCenterId) {
+        List<StudyCenter> studyCenterList = new ArrayList<>();
+        center.setStudyCenterList(studyCenterList);
+        StudyCenter studyCenter = new StudyCenter();
+        Study study = studyService.findById(studyId);
         studyCenter.setId(studyCenterId);
-		studyCenter.setStudy(study);
-		studyCenter.setCenter(center);
-		center.getStudyCenterList().add(studyCenter);
-	}
+        studyCenter.setStudy(study);
+        studyCenter.setCenter(center);
+        center.getStudyCenterList().add(studyCenter);
+    }
 
     private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
         Examination examination = null;
@@ -541,7 +555,7 @@ public class DicomImporterService {
     /**
      * This method receives a serie object and a String from the properties
      * and checks if the tag exists with a specific value.
-     * 
+     *
      * @throws NoSuchFieldException
      */
     private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString)
@@ -571,7 +585,7 @@ public class DicomImporterService {
      * This method writes both attributes to an output stream and converts
      * this one to an input stream, that can be used to send the manipulated
      * file to the backend pacs.
-     * 
+     *
      * @param metaInformationAttributes
      * @param datasetAttributes
      * @throws IOException
@@ -599,17 +613,17 @@ public class DicomImporterService {
 
     /**
      * Create the necessary dataset expression.
-     * 
+     *
      * @param attributes
      * @param measurementDataset
      * @throws MalformedURLException
-     * @throws ShanoirException 
+     * @throws ShanoirException
      */
     public DatasetExpression manageDatasetExpression(Attributes attributes, Dataset dataset)
             throws MalformedURLException, ShanoirException {
         DatasetExpression currentExpression = null;
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-			if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+            if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
                 currentExpression = expression;
                 break;
             }
@@ -634,12 +648,12 @@ public class DicomImporterService {
     /**
      * Add a dataset_file, as WADO-RS links in that case,
      * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-     * 
+     *
      * @param attributes
      * @param expression
      * @return
      * @throws MalformedURLException
-     * @throws ShanoirException 
+     * @throws ShanoirException
      */
     private void addDatasetFile(Attributes attributes, DatasetExpression expression)
             throws MalformedURLException, ShanoirException {
@@ -661,7 +675,7 @@ public class DicomImporterService {
                 .anyMatch(existingFile -> newPath.equals(existingFile.getPath()));
         if (pathExists) {
             LOG.error("DatasetFile with path {} already exists in expression, skipping duplicate", newPath);
-			throw new ShanoirException("DatasetFile with path " + newPath + " already exists in expression, skipping duplicate");
+            throw new ShanoirException("DatasetFile with path " + newPath + " already exists in expression, skipping duplicate");
         }
         DatasetFile datasetFile = new DatasetFile();
         datasetFile.setPath(newPath);

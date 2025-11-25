@@ -149,16 +149,16 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
-    
-	@MockBean
-	private ProcessedDatasetImporterService processedDatasetImporterService;
-	
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
-	
+    @MockBean
+    private ProcessedDatasetImporterService processedDatasetImporterService;
+
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
     @MockBean
     private ImporterService importerService;
 

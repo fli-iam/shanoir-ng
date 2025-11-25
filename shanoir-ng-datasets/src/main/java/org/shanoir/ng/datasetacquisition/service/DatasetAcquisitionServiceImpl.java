@@ -159,9 +159,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
-    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+        Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
         result.forEach(a -> indexDatasets(a));
-    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+        return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
@@ -185,7 +185,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
         }
     }
- 
+
     @Override
     @Transactional(readOnly = true)
     public DatasetAcquisition findByIdWithDatasets(Long id) {

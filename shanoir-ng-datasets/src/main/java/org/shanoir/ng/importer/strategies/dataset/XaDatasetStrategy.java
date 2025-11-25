@@ -35,94 +35,94 @@ import org.springframework.stereotype.Component;
 @Component
 public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 
-	@Autowired
-	DicomProcessing dicomProcessing;
-	
-	@Autowired
-	DatasetExpressionContext datasetExpressionContext;
-	
-	@Override
-	public DatasetsWrapper<XaDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-			Long subjectId) throws Exception {
-		
-		DatasetsWrapper<XaDataset> datasetWrapper = new DatasetsWrapper<>();
-		/**
-		 * retrieve number of dataset in current serie if Number of dataset > 1 then
-		 * each dataset will be named with an int at the end of the name. else the is
-		 * only one dataset => no need for extension.
-		 */
-		int datasetIndex;
-		if (serie.getDatasets().size() > 1) {
-			datasetIndex = 1;
-		} else {
-			datasetIndex = -1;
-		}
+    @Autowired
+    private DicomProcessing dicomProcessing;
 
-		for (Dataset anyDataset : serie.getDatasets()) {
-			XaDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
-			datasetWrapper.getDatasets().add(dataset);
-			datasetIndex++;
-		}
+    @Autowired
+    private DatasetExpressionContext datasetExpressionContext;
+
+    @Override
+    public DatasetsWrapper<XaDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
+            Long subjectId) throws Exception {
+
+        DatasetsWrapper<XaDataset> datasetWrapper = new DatasetsWrapper<>();
+        /**
+         * retrieve number of dataset in current serie if Number of dataset > 1 then
+         * each dataset will be named with an int at the end of the name. else the is
+         * only one dataset => no need for extension.
+         */
+        int datasetIndex;
+        if (serie.getDatasets().size() > 1) {
+            datasetIndex = 1;
+        } else {
+            datasetIndex = -1;
+        }
+
+        for (Dataset anyDataset : serie.getDatasets()) {
+            XaDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
+            datasetWrapper.getDatasets().add(dataset);
+            datasetIndex++;
+        }
 
         return datasetWrapper;
     }
 
-	@Override
-	public XaDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
-			Long subjectId) throws Exception {
-		XaDataset xaDataset = new XaDataset();
-		xaDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
-		xaDataset.setCreationDate(serie.getSeriesDate());
-		final String seriesDescription = serie.getSeriesDescription();
-        
+    @Override
+    public XaDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
+        XaDataset xaDataset = new XaDataset();
+        xaDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
+        xaDataset.setCreationDate(serie.getSeriesDate());
+        final String seriesDescription = serie.getSeriesDescription();
+
         DatasetMetadata datasetMetadata = new DatasetMetadata();
-		xaDataset.setOriginMetadata(datasetMetadata);
-		// set the series description as the dataset comment & name
-		if (seriesDescription != null && !"".equals(seriesDescription)) {
-			xaDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
-			xaDataset.getOriginMetadata().setComment(seriesDescription);
-		}
+        xaDataset.setOriginMetadata(datasetMetadata);
+        // set the series description as the dataset comment & name
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            xaDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            xaDataset.getOriginMetadata().setComment(seriesDescription);
+        }
 
-		// Pre-select the type Reconstructed dataset
-		xaDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+        // Pre-select the type Reconstructed dataset
+        xaDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
-		// Set the study and the subject
-		xaDataset.setSubjectId(subjectId);
+        // Set the study and the subject
+        xaDataset.setSubjectId(subjectId);
 
-		xaDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.XA_DATASET);
-		String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
-		if (orientationArray != null) {
-			String orientationString = String.join("\\", orientationArray);
-			xaDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
-		}
-		
-		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
-		if (xaDataset.getSubjectId() != null) {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
-		} else {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
-		}
-		xaDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+        xaDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.XA_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            xaDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
-		/**
-		 *  The part below will generate automatically the datasetExpression according to :
-		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
-		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
-		 * 
-		 **/
-		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-			datasetExpression.setDataset(xaDataset);
-			xaDataset.getDatasetExpressions().add(datasetExpression);
-		}
-		
-		DatasetMetadata originalDM = xaDataset.getOriginMetadata();
-		xaDataset.setUpdatedMetadata(originalDM);
-		
-		return xaDataset;
-	}
+        CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
+        if (xaDataset.getSubjectId() != null) {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
+        } else {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
+        }
+        xaDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+
+        /**
+         *  The part below will generate automatically the datasetExpression according to :
+         *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
+         *
+         *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
+         *
+         **/
+        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+            datasetExpression.setDataset(xaDataset);
+            xaDataset.getDatasetExpressions().add(datasetExpression);
+        }
+
+        DatasetMetadata originalDM = xaDataset.getOriginMetadata();
+        xaDataset.setUpdatedMetadata(originalDM);
+
+        return xaDataset;
+    }
 
 
     /* (non-Javadoc)

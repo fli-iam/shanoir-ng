@@ -34,11 +34,11 @@ import org.shanoir.ng.importer.dto.Serie;
  *
  */
 public interface DatasetAcquisitionStrategy {
-	
-	DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception;
 
-	DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank, Attributes attributes) throws Exception;
+    DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception;
 
-	Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception;
+    DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank, Attributes attributes) throws Exception;
+
+    Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception;
 
 }

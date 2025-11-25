@@ -59,11 +59,11 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
 
-	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException {
-		DatasetExpression pacsDatasetExpression = new DatasetExpression();
-		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
-		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+    @Override
+    public DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException {
+        DatasetExpression pacsDatasetExpression = new DatasetExpression();
+        pacsDatasetExpression.setCreationDate(LocalDateTime.now());
+        pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
         if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {
             pacsDatasetExpression.setMultiFrame(true);
