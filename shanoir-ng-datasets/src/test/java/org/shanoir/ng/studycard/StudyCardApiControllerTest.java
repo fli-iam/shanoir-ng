@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
@@ -77,6 +78,9 @@ public class StudyCardApiControllerTest {
 
     @MockBean
     private QualityCardService qualityCardServiceMock;
+
+    @MockBean
+    private CardsProcessingService studyCardProcessingServiceMock;
 
 	@MockBean
 	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
