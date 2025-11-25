@@ -657,8 +657,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
                 const pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
                 completion = completion.then(() => { // load pages sequentially
+                    const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
                     if (!task 
                             && (performance.now() - startTs > 5000) 
                             && (i / this.page.totalPages < 0.8)) {
