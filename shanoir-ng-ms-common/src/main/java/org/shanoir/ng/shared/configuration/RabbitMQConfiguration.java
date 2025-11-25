@@ -238,6 +238,16 @@ public class RabbitMQConfiguration {
     public static final String SUBJECT_STUDY_EXCHANGE = "subject-study-exchange";
 
     @Bean
+    public static Queue animaConversionQueue() {
+        return new Queue(ANIMA_CONVERSION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue brukerConversionQueue() {
+        return new Queue(BRUKER_CONVERSION_QUEUE, true);
+    }
+
+    @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
         return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
     }
@@ -273,6 +283,66 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue studyNameUpdateQueue() {
+        return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDatasetsDetailedStorageVolumeQueue() {
+        return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
+    }
+
+    @Bean
+    public static Queue studyDatasetsTotalStorageVolumeQueue() {
+        return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
+    }
+
+    @Bean
+    public static Queue studyDatasetTypeQueue() {
+        return new Queue(STUDY_DATASET_TYPE, true);
+    }
+
+    @Bean
+    public static Queue studyUserMailQueue() {
+        return new Queue(STUDY_USER_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studySubscriptionQueue() {
+        return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyICanAdminQueue() {
+        return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyInvitationQueue() {
+        return new Queue(STUDY_INVITATION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyAdminQueue() {
+        return new Queue(STUDY_ADMINS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyNameQueue() {
+        return new Queue(STUDY_NAME_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyAnonymisationProfileQueue() {
+        return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studiesSubjectStudyStudyCardTagQueue() {
+        return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
+    }
+
+    @Bean
     public static Queue subjectsQueue() {
         return new Queue(SUBJECTS_QUEUE, true);
     }
@@ -292,33 +362,13 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyDatasetsDetailedStorageVolumeQueue() {
-        return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
-    }
-
-    @Bean
-    public static Queue studyDatasetsTotalStorageVolumeQueue() {
-        return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
-    }
-
-    @Bean
-    public static Queue sexecutionMonitoringEventQueue() {
+    public static Queue executionMonitoringEventQueue() {
         return new Queue(EXECUTION_MONITORING_TASK, true);
-    }
-
-    @Bean
-    public static Queue studyDatasetTypeQueue() {
-        return new Queue(STUDY_DATASET_TYPE, true);
     }
 
     @Bean
     public static Queue datasetSubjectStudyQueue() {
         return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studiesSubjectStudyStudyCardTagQueue() {
-        return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
     }
 
     @Bean
@@ -340,6 +390,7 @@ public class RabbitMQConfiguration {
     public FanoutExchange fanout() {
         return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
     }
+
     @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(EVENTS_EXCHANGE);
@@ -436,11 +487,6 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyUserMailQueue() {
-        return new Queue(STUDY_USER_MAIL_QUEUE, true);
-    }
-
-    @Bean
     public static Queue importBidsDatasetQueue() {
         return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
     }
@@ -461,53 +507,13 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studySubscriptionQueue() {
-        return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyICanAdminQueue() {
-        return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyInvitationQueue() {
-        return new Queue(STUDY_INVITATION_QUEUE, true);
-    }
-
-    @Bean
     public static Queue importStudyCardQueue() {
         return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
     }
 
     @Bean
-    public static Queue studyAdminQueue() {
-        return new Queue(STUDY_ADMINS_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyNameQueue() {
-        return new Queue(STUDY_NAME_QUEUE, true);
-    }
-
-    @Bean
     public static Queue importEEGQueue() {
         return new Queue(IMPORT_EEG_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyAnonymisationProfileQueue() {
-        return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue brukerConversionQueue() {
-        return new Queue(BRUKER_CONVERSION_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue animaConversionQueue() {
-        return new Queue(ANIMA_CONVERSION_QUEUE, true);
     }
 
 }
