@@ -487,64 +487,64 @@ public class QueryPACSService {
         }
     }
 
-	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
-		Serie serie = new Serie(serieAttr);
-		if (!DicomUtils.checkSerieIsIgnored(serieAttr)) {
-			// In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
-			DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
-			DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-		} else {
-			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-			serie.setIgnored(true);
-			serie.setSelected(false);
-		}
-		synchronized (series) {
-			LOG.info("Serie found in DICOM server: " + serie.toString());
-			series.add(serie);			
-		}
-	}
-	
-	/**
-	 * This method queries for instances/images, creates them and adds them to series.
-	 * 
-	 * @param calling
-	 * @param called
-	 * @param serie
-	 */
-	private void queryInstances(Association association, String studyInstanceUID, Serie serie) {
-		DicomParam modality = initDicomParam(Tag.Modality, serie.getModality());
-		DicomParam studyInstanceUIDParam = initDicomParam(Tag.StudyInstanceUID, studyInstanceUID);
-		DicomParam seriesInstanceUIDParam = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
-		DicomParam[] params = {
-			modality,
-			studyInstanceUIDParam,
-			seriesInstanceUIDParam,
-			new DicomParam(Tag.SOPInstanceUID),
-			new DicomParam(Tag.InstanceNumber)
-		};
-		List<Attributes> instancesAttr = queryCFind(association, params, QueryRetrieveLevel.IMAGE);
-		if (instancesAttr != null) {
-			List<Instance> instances = new ArrayList<>();
-			instancesAttr.parallelStream().forEach(i -> {
-				Instance instance = new Instance(i);
-				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
-					synchronized (instances) {
-						LOG.debug("Adding instance: " + instance.toString());
-						instances.add(instance);						
-					}
-				}
-			});
-			if (!instances.isEmpty()) {
-				instances.sort(new InstanceNumberSorter());
-				serie.setInstances(instances);
-				LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
-			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-				serie.setIgnored(true);
-				serie.setSelected(false);
-			}
-		}
-	}
+    private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
+        Serie serie = new Serie(serieAttr);
+        if (!DicomUtils.checkSerieIsIgnored(serieAttr)) {
+            // In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
+            DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
+            DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
+        } else {
+            LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+            serie.setIgnored(true);
+            serie.setSelected(false);
+        }
+        synchronized (series) {
+            LOG.info("Serie found in DICOM server: " + serie.toString());
+            series.add(serie);
+        }
+    }
+
+    /**
+     * This method queries for instances/images, creates them and adds them to series.
+     *
+     * @param calling
+     * @param called
+     * @param serie
+     */
+    private void queryInstances(Association association, String studyInstanceUID, Serie serie) {
+        DicomParam modality = initDicomParam(Tag.Modality, serie.getModality());
+        DicomParam studyInstanceUIDParam = initDicomParam(Tag.StudyInstanceUID, studyInstanceUID);
+        DicomParam seriesInstanceUIDParam = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
+        DicomParam[] params = {
+            modality,
+            studyInstanceUIDParam,
+            seriesInstanceUIDParam,
+            new DicomParam(Tag.SOPInstanceUID),
+            new DicomParam(Tag.InstanceNumber)
+        };
+        List<Attributes> instancesAttr = queryCFind(association, params, QueryRetrieveLevel.IMAGE);
+        if (instancesAttr != null) {
+            List<Instance> instances = new ArrayList<>();
+            instancesAttr.parallelStream().forEach(i -> {
+                Instance instance = new Instance(i);
+                if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
+                    synchronized (instances) {
+                        LOG.debug("Adding instance: " + instance.toString());
+                        instances.add(instance);
+                    }
+                }
+            });
+            if (!instances.isEmpty()) {
+                instances.sort(new InstanceNumberSorter());
+                serie.setInstances(instances);
+                LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+            } else {
+                LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+                serie.setIgnored(true);
+                serie.setSelected(false);
+            }
+        }
+    }
 
     /**
      * This method queries for series, creates them and adds them to studies.
