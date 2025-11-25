@@ -174,52 +174,52 @@ public class SubjectServiceImpl implements SubjectService {
         return subject;
     }
 
-	@Override
-	public Subject findByIdWithSubjectStudies(final Long id) {
-		return subjectRepository.findSubjectWithSubjectStudyById(id);
-	}
-	
-	@Override
-	@Transactional
-	public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
-		subject = mapSubjectStudyListToSubject(subject);
-		Subject subjectDb = subjectRepository.save(subject);
-		if (withAMQP) {
-			try {
-				updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
-			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Unable to propagate subject creation to microservices: ", e);
-			}
-		}
-		return subjectDb;
-	}
+    @Override
+    public Subject findByIdWithSubjectStudies(final Long id) {
+        return subjectRepository.findSubjectWithSubjectStudyById(id);
+    }
 
-	@Override
-	@Transactional
-	public Subject createAutoIncrement(Subject subject, final Long centerId, boolean withAMQP) throws ShanoirException {
-		subject = mapSubjectStudyListToSubject(subject);
-		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
-		String subjectNameCenterPrefix = formatterCenter.format(centerId);
-		int maxSubjectNameNumber = 0;
-		Subject subjectMaxFoundByCenter = findSubjectFromCenterCode(subjectNameCenterPrefix);
-		if (subjectMaxFoundByCenter != null) { // subjects for centerId exist already
-			String maxNameToIncrement = subjectMaxFoundByCenter.getName().substring(subjectNameCenterPrefix.length());
-			maxSubjectNameNumber = Integer.parseInt(maxNameToIncrement);
-		}
-		maxSubjectNameNumber += 1;
-		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
-		String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
-		subject.setName(subjectName);
-		Subject subjectDb = subjectRepository.save(subject);
-		if (withAMQP) {
-			try {
-				updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
-			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
-			}
-		}
-		return subjectDb;
-	}
+    @Override
+    @Transactional
+    public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
+        subject = mapSubjectStudyListToSubject(subject);
+        Subject subjectDb = subjectRepository.save(subject);
+        if (withAMQP) {
+            try {
+                updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Unable to propagate subject creation to microservices: ", e);
+            }
+        }
+        return subjectDb;
+    }
+
+    @Override
+    @Transactional
+    public Subject createAutoIncrement(Subject subject, final Long centerId, boolean withAMQP) throws ShanoirException {
+        subject = mapSubjectStudyListToSubject(subject);
+        DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
+        String subjectNameCenterPrefix = formatterCenter.format(centerId);
+        int maxSubjectNameNumber = 0;
+        Subject subjectMaxFoundByCenter = findSubjectFromCenterCode(subjectNameCenterPrefix);
+        if (subjectMaxFoundByCenter != null) { // subjects for centerId exist already
+            String maxNameToIncrement = subjectMaxFoundByCenter.getName().substring(subjectNameCenterPrefix.length());
+            maxSubjectNameNumber = Integer.parseInt(maxNameToIncrement);
+        }
+        maxSubjectNameNumber += 1;
+        DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
+        String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
+        subject.setName(subjectName);
+        Subject subjectDb = subjectRepository.save(subject);
+        if (withAMQP) {
+            try {
+                updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+            }
+        }
+        return subjectDb;
+    }
 
     /**
      * This method maps subject_study objects (old versions of e.g. ShUp)
@@ -353,6 +353,7 @@ public class SubjectServiceImpl implements SubjectService {
         return subjectOld;
     }
 
+    @Override
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
         List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
         if (subjectStudyTagsOld == null) {
@@ -380,16 +381,17 @@ public class SubjectServiceImpl implements SubjectService {
         sSOld.setSubjectStudyTags(subjectStudyTagsOld);
     }
 
-	public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException{
-		try {
-			rabbitTemplate.
-					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(subjectDTO));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to update subject.");
-		}
-	}
+    @Override
+    public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
+        try {
+            rabbitTemplate.
+                    convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
+                    objectMapper.writeValueAsString(subjectDTO));
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to update subject.");
+        }
+    }
 
     /**
      * If preclinical is null, doesn't use it. Else it filters the subjects depending of the given value true/false.

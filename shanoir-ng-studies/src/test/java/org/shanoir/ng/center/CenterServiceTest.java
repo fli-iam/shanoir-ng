@@ -14,16 +14,15 @@
 
 package org.shanoir.ng.center;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -134,18 +133,18 @@ public class CenterServiceTest {
         Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
     }
 
-	@Test
-	public void saveTest() {
-		centerService.create(createCenter(), true);
+    @Test
+    public void saveTest() {
+        centerService.create(createCenter(), true);
 
         Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
     }
 
-	@Test
-	public void updateTest() throws EntityNotFoundException {
-		final Center updatedCenter = centerService.update(createCenter(), true);
-		Assertions.assertNotNull(updatedCenter);
-		Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
+    @Test
+    public void updateTest() throws EntityNotFoundException {
+        final Center updatedCenter = centerService.update(createCenter(), true);
+        Assertions.assertNotNull(updatedCenter);
+        Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
 
         Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
     }

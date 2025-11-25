@@ -52,28 +52,28 @@ public class RabbitMQSubjectService {
     @Autowired
     private StudyRepository studyRepository;
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-	
-	@Autowired
-	private ObjectMapper mapper;
-	
-	/**
-	 * This methods returns a list of subjects for a given study ID
-	 * @param studyId the study ID
-	 * @return a list of subjects
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public String getSubjectsForStudy(String studyId) {
-		try {
-			return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
-		} catch (Exception e) {
-			LOG.error("Error while serializing subjects for participants.tsv file.", e);
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    /**
+     * This methods returns a list of subjects for a given study ID
+     * @param studyId the study ID
+     * @return a list of subjects
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public String getSubjectsForStudy(String studyId) {
+        try {
+            return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
+        } catch (Exception e) {
+            LOG.error("Error while serializing subjects for participants.tsv file.", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 
     /**
      * This methods allows to update a subject with a subjectStudy if not existing.
@@ -138,22 +138,22 @@ public class RabbitMQSubjectService {
         }
     }
 
-	@Transactional
-	private Subject manageSubject(Subject subject) throws ShanoirException {
-		Long studyId = null;
-		if (subject.getStudy() != null) {
-			studyId = subject.getStudy().getId();
-		}
-		// @todo: to be removed later
-		if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-			studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
-		}
-		Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
-		if (subjectOld == null) {
-			return subjectService.create(subject, false);
-		} else {
-			return subjectOld;
-		}
-	}
+    @Transactional
+    private Subject manageSubject(Subject subject) throws ShanoirException {
+        Long studyId = null;
+        if (subject.getStudy() != null) {
+            studyId = subject.getStudy().getId();
+        }
+        // @todo: to be removed later
+        if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
+            studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
+        }
+        Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
+        if (subjectOld == null) {
+            return subjectService.create(subject, false);
+        } else {
+            return subjectOld;
+        }
+    }
 
 }

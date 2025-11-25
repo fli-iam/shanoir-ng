@@ -58,8 +58,8 @@ public class CenterApiController implements CenterApi {
     @Autowired
     private CenterService centerService;
 
-	@Autowired
-	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+    @Autowired
+    private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
 
     @Autowired
     private CenterUniqueConstraintManager uniqueConstraintManager;
@@ -97,29 +97,29 @@ public class CenterApiController implements CenterApi {
         return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
     }
 
-	/**
-	 * This method is used by ShanoirUploader, during mass imports (Excel) and imports for studies
-	 * without study cards. We could add a check here to only allow this method on studies, that have
-	 * no study cards, but this would block existing mass imports into today's studies, that is why
-	 * we do not add this restriction today.
-	 */
-	@Override
-	@Transactional
-	public ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(description = "institution dicom to find or create a center", required = true)
-			@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
-		if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-		try {
-			final Center center = centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, true);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(center), HttpStatus.OK);			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+    /**
+     * This method is used by ShanoirUploader, during mass imports (Excel) and imports for studies
+     * without study cards. We could add a check here to only allow this method on studies, that have
+     * no study cards, but this would block existing mass imports into today's studies, that is why
+     * we do not add this restriction today.
+     */
+    @Override
+    @Transactional
+    public ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "institution dicom to find or create a center", required = true)
+            @RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+        if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        try {
+            final Center center = centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, true);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(center), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @Override
     @Transactional
@@ -165,18 +165,18 @@ public class CenterApiController implements CenterApi {
         return new ResponseEntity<>(centers, HttpStatus.OK);
     }
 
-	@Override
-	@Transactional
-	public ResponseEntity<CenterDTO> saveNewCenter(
-			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
-			final BindingResult result) throws RestServiceException {
-		forceCentersOfStudyCenterList(center);
-		validate(center, result);
-		/* Save center in db. */
-		final Center createdCenter = centerService.create(center, true);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
-	}
+    @Override
+    @Transactional
+    public ResponseEntity<CenterDTO> saveNewCenter(
+            @Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
+            final BindingResult result) throws RestServiceException {
+        forceCentersOfStudyCenterList(center);
+        validate(center, result);
+        /* Save center in db. */
+        final Center createdCenter = centerService.create(center, true);
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
+    }
 
     @Override
     public ResponseEntity<Void> updateCenter(
@@ -190,14 +190,14 @@ public class CenterApiController implements CenterApi {
             forceCentersOfStudyCenterList(center);
             validate(center, result);
 
-			/* Update center in db. */
-			centerService.update(center, true);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} 
-	}
+            /* Update center in db. */
+            centerService.update(center, true);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     private void validate(Center center, BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap()
