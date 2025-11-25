@@ -45,4 +45,6 @@ public interface BIDSService {
      */
     void deleteBidsFolder(Long studyId, String studyName);
 
+    File generateParticipants(final Long studyId) throws IOException;
+
 }

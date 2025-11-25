@@ -199,6 +199,21 @@ public class BIDSServiceImpl implements BIDSService {
         return new File(tmpFilePath);
     }
 
+    public File generateParticipants(final Long studyId) throws IOException {
+        List<Subject> subjs = getSubjectsForStudy(studyId);
+
+        File workFolder = getBidsFolderpath(studyId, "neurobagel");
+        if (workFolder.exists()) {
+            // If the file already exists, just return it
+            return workFolder;
+        }
+        File baseDir = createBaseBidsFolder(workFolder, "neurobagel");
+        participantsSerializer(baseDir, subjs);
+
+        File res = new File(baseDir, "participants.tsv");
+        return res;
+    }
+
     /**
      * Returns data from the study formatted as BIDS in a .zip file.
      * @param studyId the study ID we want to export as BIDS

@@ -37,6 +37,17 @@ import java.io.IOException;
 @RequestMapping("/bids")
 public interface BidsApi {
 
+    @Operation(summary = "generateBids", description = "Create a participants.tsv file for a given study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/neurobagel/studyId/{studyId}")
+    ResponseEntity<Void> generateParticipantsByStudyId(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+
     @Operation(summary = "generateBids", description = "Create a BIDS structure for a given study ID and study name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),

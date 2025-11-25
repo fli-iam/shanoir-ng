@@ -76,6 +76,12 @@ public class BidsApiController implements BidsApi {
     }
 
     @Override
+    public ResponseEntity<Void> generateParticipantsByStudyId(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException {
+        bidsService.generateParticipants(studyId);
+        return ResponseEntity.ok().build();
+    }
+    @Override
     public ResponseEntity<Void> generateBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
