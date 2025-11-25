@@ -315,6 +315,21 @@ public class DICOMWebService {
 				+ directoryWithDicomFiles.getAbsolutePath());
 	}
 
+	public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
+        if (dicomFile == null || !dicomFile.exists()) {
+            LOG.error("sendDicomFileToPacs called with null, or file: not existing.");
+            throw new ShanoirException("sendDicomFileToPacs called with null, or file: not existing.");
+        }
+        LOG.info("Start: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+        multipartEntityBuilder.setBoundary(BOUNDARY);
+        multipartEntityBuilder.setMimeSubtype(RELATED);
+        addFileToMultipart(dicomFile, multipartEntityBuilder);
+        HttpEntity entity = multipartEntityBuilder.build();
+        sendMultipartRequest(entity);
+        LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
+    }
+
 	private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder)
 			throws ShanoirException {
 		try {
