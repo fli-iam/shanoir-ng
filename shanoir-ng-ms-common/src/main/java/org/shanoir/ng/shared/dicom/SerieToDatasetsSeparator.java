@@ -59,45 +59,45 @@ public class SerieToDatasetsSeparator {
         this.imageOrientationPatient = imageOrientationPatient;
     }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + acquisitionNumber;
-		result = prime * result + echoTime.hashCode();
-		result = prime * result + Arrays.hashCode(imageOrientationPatient);
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + acquisitionNumber;
+        result = prime * result + echoTime.hashCode();
+        result = prime * result + Arrays.hashCode(imageOrientationPatient);
+        return result;
+    }
 
-	/**
-	 * We consider that the image orientation is the same if the difference is very
-	 * small.
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		SerieToDatasetsSeparator other = (SerieToDatasetsSeparator) obj;
-		if (acquisitionNumber != other.acquisitionNumber) {
-			return false;
-		}
-		if (echoTime.hashCode() != other.echoTime.hashCode()) {
-			return false;
-		}
-		return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
-	}
+    /**
+     * We consider that the image orientation is the same if the difference is very
+     * small.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SerieToDatasetsSeparator other = (SerieToDatasetsSeparator) obj;
+        if (acquisitionNumber != other.acquisitionNumber) {
+            return false;
+        }
+        if (echoTime.hashCode() != other.echoTime.hashCode()) {
+            return false;
+        }
+        return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
+    }
 
     /**
      * Return true if the patient orientations are roughly the same.
@@ -128,10 +128,10 @@ public class SerieToDatasetsSeparator {
         return true;
     }
 
-	@Override
-	public String toString() {
-		return "SerieToDatasetsSeparator [acquisitionNumber=" + acquisitionNumber + ", echoTime=" + echoTime
-				+ ", imageOrientationPatient=" + Arrays.toString(imageOrientationPatient) + "]";
-	}
+    @Override
+    public String toString() {
+        return "SerieToDatasetsSeparator [acquisitionNumber=" + acquisitionNumber + ", echoTime=" + echoTime
+                + ", imageOrientationPatient=" + Arrays.toString(imageOrientationPatient) + "]";
+    }
 
 }

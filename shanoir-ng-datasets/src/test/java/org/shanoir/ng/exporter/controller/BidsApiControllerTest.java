@@ -62,11 +62,11 @@ public class BidsApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
+    @MockBean
+    private DicomImporterService dicomImporterService;
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })

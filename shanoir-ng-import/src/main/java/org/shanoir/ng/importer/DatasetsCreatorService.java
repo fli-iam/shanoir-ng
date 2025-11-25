@@ -89,32 +89,32 @@ public class DatasetsCreatorService {
         }
     }
 
-	/**
-	 * This method receives a serie object and a String from the properties
-	 * and checks if the tag exists with a specific value.
-	 * @throws NoSuchFieldException
-	 */
-	private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString) throws NoSuchFieldException {
-		final String[] itemArray = propertiesString.split(SEMI_COLON);
-		for (final String item : itemArray) {
-			final String tag = item.split(DOUBLE_EQUAL)[0];
-			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkDicomFromProperties : tag={}, value={}", tag, value);
-			try {
-				Class<? extends Serie> aClass = serie.getClass();
-				Field field = aClass.getDeclaredField(tag);
-				field.setAccessible(true);
-				String dicomValue = (String) field.get(serie);
-				String wildcard = Utils.wildcardToRegex(value);
-				if (dicomValue != null && dicomValue.matches(wildcard)) {
-					return true;
-				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LOG.error(e.getMessage());
-			}
-		}
-		return false;
-	}
+    /**
+     * This method receives a serie object and a String from the properties
+     * and checks if the tag exists with a specific value.
+     * @throws NoSuchFieldException
+     */
+    private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString) throws NoSuchFieldException {
+        final String[] itemArray = propertiesString.split(SEMI_COLON);
+        for (final String item : itemArray) {
+            final String tag = item.split(DOUBLE_EQUAL)[0];
+            final String value = item.split(DOUBLE_EQUAL)[1];
+            LOG.debug("checkDicomFromProperties : tag={}, value={}", tag, value);
+            try {
+                Class<? extends Serie> aClass = serie.getClass();
+                Field field = aClass.getDeclaredField(tag);
+                field.setAccessible(true);
+                String dicomValue = (String) field.get(serie);
+                String wildcard = Utils.wildcardToRegex(value);
+                if (dicomValue != null && dicomValue.matches(wildcard)) {
+                    return true;
+                }
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                LOG.error(e.getMessage());
+            }
+        }
+        return false;
+    }
 
     /**
      * This method extract the dicom files in proper dataset(s) (in a serie).

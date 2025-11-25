@@ -88,72 +88,72 @@ public class RabbitMQConfiguration {
     /** Study name updated => notify dataset MS to change database. */
     public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
-	public static final String STUDY_CENTER_QUEUE = "study-center-queue";
-	
-	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+    public static final String STUDY_CENTER_QUEUE = "study-center-queue";
+
+    public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
     public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
 
     /** Get the type of dataset from a given study. */
-	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
+    public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 
     /** BIDS purpose => Get a list of subjects to create bids participants file. */
     public static final String SUBJECTS_QUEUE = "subjects-queue";
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
-    
-	/** Subject name updated => notify dataset MS to change database. */
-	public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
-	
-	/** Center name updated => notify MS Datasets to change database. */
-	public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
 
-	/** Center created => notify MS Datasets to change database. */
-	public static final String CENTER_CREATE_QUEUE = "center-create-queue";
+    /** Subject name updated => notify dataset MS to change database. */
+    public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 
-	/** Center deleted => notify MS Datasets to change database. */
-	public static final String CENTER_DELETE_QUEUE = "center-delete-queue";
+    /** Center name updated => notify MS Datasets to change database. */
+    public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
 
-	/** Get the list of subjects for a given study. */
-	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+    /** Center created => notify MS Datasets to change database. */
+    public static final String CENTER_CREATE_QUEUE = "center-create-queue";
 
-	public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
-	
+    /** Center deleted => notify MS Datasets to change database. */
+    public static final String CENTER_DELETE_QUEUE = "center-delete-queue";
+
+    /** Get the list of subjects for a given study. */
+    public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+    public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
+
     public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
-	/** Create a subject study for a given subject and study. */
-	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
-	
-	/** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
-	public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+    /** Create a subject study for a given subject and study. */
+    public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
 
-	/** Delete user queue. */
-	public static final String DELETE_USER_QUEUE = "delete-user-queue";
-	
-	/** Study deleted => Delete associated datasets. */
-	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
-	
-	/** Queue to retrieve informations about studyc cards. */
-	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
+    /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
+    public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
-	public static final String ACQUISITION_EQUIPMENT_CREATE_QUEUE = "acquisition-equipment-create-queue";
+    /** Delete user queue. */
+    public static final String DELETE_USER_QUEUE = "delete-user-queue";
 
-	/** Queue to retrieve the center ID from an acquisition equipment ID. */
-	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
+    /** Study deleted => Delete associated datasets. */
+    public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 
-	/** Queue to retrieve the center ID from an acquisition equipment ID. */
-	public static final String ACQUISITION_EQUIPMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
+    /** Queue to retrieve informations about studyc cards. */
+    public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
+
+    public static final String ACQUISITION_EQUIPMENT_CREATE_QUEUE = "acquisition-equipment-create-queue";
+
+    /** Queue to retrieve the center ID from an acquisition equipment ID. */
+    public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
+
+    /** Queue to retrieve the center ID from an acquisition equipment ID. */
+    public static final String ACQUISITION_EQUIPMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 
     /** Delete subject => Delete associated examination / datasets. */
-	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
+    public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
 
     /** Create DS acquisition => Index datasets in solr. */
     public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
-	
+
     /** Queue to send dua draft by mail */
     public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
 
@@ -345,40 +345,40 @@ public class RabbitMQConfiguration {
         return new TopicExchange(EVENTS_EXCHANGE);
     }
 
-	@Bean
-	public static Queue subjectUpdateQueue() {
-		return new Queue(SUBJECT_UPDATE_QUEUE, true);
-	}
+    @Bean
+    public static Queue subjectUpdateQueue() {
+        return new Queue(SUBJECT_UPDATE_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue centerUpdateQueue() {
-		return new Queue(CENTER_UPDATE_QUEUE, true);
-	}
+    @Bean
+    public static Queue centerUpdateQueue() {
+        return new Queue(CENTER_UPDATE_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue centerCreateQueue() {
-		return new Queue(CENTER_CREATE_QUEUE, true);
-	}
+    @Bean
+    public static Queue centerCreateQueue() {
+        return new Queue(CENTER_CREATE_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue centerDeleteQueue() {
-		return new Queue(CENTER_DELETE_QUEUE, true);
-	}
+    @Bean
+    public static Queue centerDeleteQueue() {
+        return new Queue(CENTER_DELETE_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue acquisitionEquipmentCreateQueue() {
-		return new Queue(ACQUISITION_EQUIPMENT_CREATE_QUEUE, true);
-	}
+    @Bean
+    public static Queue acquisitionEquipmentCreateQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_CREATE_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue acquisitionEquipmentCenterQueue() {
-		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
-	}
+    @Bean
+    public static Queue acquisitionEquipmentCenterQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
+    }
 
-	@Bean
-	public static Queue acquisitionEquipmentUpdateQueue() {
-		return new Queue(ACQUISITION_EQUIPMENT_UPDATE_QUEUE, true);
-	}
+    @Bean
+    public static Queue acquisitionEquipmentUpdateQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_UPDATE_QUEUE, true);
+    }
 
     @Bean
     public static Queue findStudyCardQueue() {

@@ -43,7 +43,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     boolean existsByStudyCard_Id(Long studyCardId);
 
     List<DatasetAcquisition> findBySourceId(Long sourceId);
-    
+
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
     @Query("""
@@ -57,20 +57,18 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             """)
     List<DatasetAcquisitionForRightsProjection> findAllForRightsById(@Param("acquisitionIds") List<Long> acquisitionIds);
 
-	@Query("SELECT da FROM DatasetAcquisition da " +
-			"LEFT JOIN FETCH da.datasets d " +
-			"LEFT JOIN FETCH d.originMetadata " +
-			"WHERE da.examination.id = :examinationId " +
-			"AND da.seriesInstanceUID = :seriesInstanceUID")
-	Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(
-			@Param("examinationId") Long examinationId,
-			@Param("seriesInstanceUID") String seriesInstanceUID);
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets d "
+            + "LEFT JOIN FETCH d.originMetadata "
+            + "WHERE da.examination.id = :examinationId "
+            + "AND da.seriesInstanceUID = :seriesInstanceUID")
+    Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(
+            @Param("examinationId") Long examinationId,
+            @Param("seriesInstanceUID") String seriesInstanceUID);
 
-	@Query("SELECT da FROM DatasetAcquisition da " +
-			"LEFT JOIN FETCH da.datasets " +
-			"WHERE da.id = :id")
-	Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.id = :id")
+    Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
 
 }
-
-

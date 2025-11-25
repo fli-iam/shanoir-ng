@@ -114,29 +114,29 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         return newDbAcEq;
     }
 
-	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
-		try {
-			String datasetAcEqName = equipment.toString();
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
-		}
-	}
+    private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException {
+        try {
+            String datasetAcEqName = equipment.toString();
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
+                    objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
+        }
+    }
 
-	public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
-		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
-		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
-				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
-		AcquisitionEquipment updated = updateValues(entity, entityDb);
-		try {
-			updateName(updated);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center name update to the other microservices !", e);
-		}
-		return repository.save(entityDb);
-	}
+    public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
+        final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
+        final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+        AcquisitionEquipment updated = updateValues(entity, entityDb);
+        try {
+            updateName(updated);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not send the center name update to the other microservices !", e);
+        }
+        return repository.save(entityDb);
+    }
 
     public void deleteById(final Long id) throws EntityNotFoundException  {
         final Optional<AcquisitionEquipment> entity = repository.findById(id);
@@ -144,81 +144,81 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         repository.deleteById(id);
     }
 
-	@Override
-	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(
-			Long centerId, EquipmentDicom equipmentDicom) {
-		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
-		LOG.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom called with: " + equipmentDicom.toString());
-		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all values
-			AcquisitionEquipment acquisitionEquipment;
-			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
-			List<AcquisitionEquipment> equipments = findAllBySerialNumberContaining(dicomSerialNumber);
-			if (equipments == null || equipments.isEmpty()) {
-				// second try: remove spaces and leading zeros
-				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
-				equipments = findAllBySerialNumberContaining(dicomSerialNumber);
-				// nothing found with device serial number from DICOM
-				if (equipments == null || equipments.isEmpty()) {
-					equipments = new ArrayList<AcquisitionEquipment>();
-					acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
-					equipments.add(acquisitionEquipment);
-				} else {
-					matchOrRemoveEquipments(equipmentDicom, equipments);
-					if (equipments.isEmpty()) {
-						acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
-						equipments.add(acquisitionEquipment);
-					}
-				}
-			} else {
-				matchOrRemoveEquipments(equipmentDicom, equipments);
-				if (equipments.isEmpty()) {
-					acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
-					equipments.add(acquisitionEquipment);
-				}
-			}
-			return equipments;
-		}
-		return null;
-	}
+    @Override
+    public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(
+            Long centerId, EquipmentDicom equipmentDicom) {
+        // trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
+        LOG.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom called with: " + equipmentDicom.toString());
+        if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all values
+            AcquisitionEquipment acquisitionEquipment;
+            String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
+            List<AcquisitionEquipment> equipments = findAllBySerialNumberContaining(dicomSerialNumber);
+            if (equipments == null || equipments.isEmpty()) {
+                // second try: remove spaces and leading zeros
+                dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
+                equipments = findAllBySerialNumberContaining(dicomSerialNumber);
+                // nothing found with device serial number from DICOM
+                if (equipments == null || equipments.isEmpty()) {
+                    equipments = new ArrayList<AcquisitionEquipment>();
+                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
+                    equipments.add(acquisitionEquipment);
+                } else {
+                    matchOrRemoveEquipments(equipmentDicom, equipments);
+                    if (equipments.isEmpty()) {
+                        acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
+                        equipments.add(acquisitionEquipment);
+                    }
+                }
+            } else {
+                matchOrRemoveEquipments(equipmentDicom, equipments);
+                if (equipments.isEmpty()) {
+                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
+                    equipments.add(acquisitionEquipment);
+                }
+            }
+            return equipments;
+        }
+        return null;
+    }
 
-	@Override
-	public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP) {
-		Optional<ManufacturerModel> manufacturerModelOpt =
-	        	manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
-		ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
-			Manufacturer manufacturer = manufacturerRepository
-					.findByNameIgnoreCase(equipmentDicom.getManufacturer())
-					.orElseGet(() -> {
-						Manufacturer newManufacturer = new Manufacturer();
-						newManufacturer.setName(equipmentDicom.getManufacturer());
-						return manufacturerRepository.save(newManufacturer);
-					});
-			ManufacturerModel newManufacturerModel = new ManufacturerModel();
-			newManufacturerModel.setName(equipmentDicom.getManufacturerModelName());
-			newManufacturerModel.setManufacturer(manufacturer);
-			Integer modalityTypeId = DatasetModalityType.getIdFromModalityName(equipmentDicom.getModality());
-			newManufacturerModel.setDatasetModalityType(DatasetModalityType.getType(modalityTypeId));
-			String magneticFieldStrength = equipmentDicom.getMagneticFieldStrength();
-			if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
-				magneticFieldStrength = "0.0";
-			}
-			newManufacturerModel.setMagneticField(Double.valueOf(magneticFieldStrength));
-			return manufacturerModelRepository.save(newManufacturerModel);
-		});
-		AcquisitionEquipment equipment = new AcquisitionEquipment();
-		equipment.setManufacturerModel(manufacturerModel);
-		equipment.setCenter(centerRepository.findById(centerId).orElseThrow());
-		equipment.setSerialNumber(equipmentDicom.getDeviceSerialNumber());
-		equipment = repository.save(equipment);
-		if (withAMQP) {
-			try {
-				updateName(equipment);
-			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not send the center creation to the other microservices !", e);
-			}
-		}
-		return equipment;
-	}
+    @Override
+    public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP) {
+        Optional<ManufacturerModel> manufacturerModelOpt =
+                manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
+        ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
+            Manufacturer manufacturer = manufacturerRepository
+                    .findByNameIgnoreCase(equipmentDicom.getManufacturer())
+                    .orElseGet(() -> {
+                        Manufacturer newManufacturer = new Manufacturer();
+                        newManufacturer.setName(equipmentDicom.getManufacturer());
+                        return manufacturerRepository.save(newManufacturer);
+                    });
+            ManufacturerModel newManufacturerModel = new ManufacturerModel();
+            newManufacturerModel.setName(equipmentDicom.getManufacturerModelName());
+            newManufacturerModel.setManufacturer(manufacturer);
+            Integer modalityTypeId = DatasetModalityType.getIdFromModalityName(equipmentDicom.getModality());
+            newManufacturerModel.setDatasetModalityType(DatasetModalityType.getType(modalityTypeId));
+            String magneticFieldStrength = equipmentDicom.getMagneticFieldStrength();
+            if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
+                magneticFieldStrength = "0.0";
+            }
+            newManufacturerModel.setMagneticField(Double.valueOf(magneticFieldStrength));
+            return manufacturerModelRepository.save(newManufacturerModel);
+        });
+        AcquisitionEquipment equipment = new AcquisitionEquipment();
+        equipment.setManufacturerModel(manufacturerModel);
+        equipment.setCenter(centerRepository.findById(centerId).orElseThrow());
+        equipment.setSerialNumber(equipmentDicom.getDeviceSerialNumber());
+        equipment = repository.save(equipment);
+        if (withAMQP) {
+            try {
+                updateName(equipment);
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Could not send the center creation to the other microservices !", e);
+            }
+        }
+        return equipment;
+    }
 
     private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
         String manufacturerModelNameLower = equipmentDicom.getManufacturerModelName().toLowerCase();

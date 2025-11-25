@@ -13,16 +13,16 @@
  */
 package org.shanoir.ng.shared.model;
 
+import java.util.List;
+
+import org.shanoir.ng.shared.core.model.IdName;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
-import java.util.List;
-
-import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * @author yyao
@@ -32,13 +32,13 @@ import org.shanoir.ng.shared.core.model.IdName;
 @Table(name = "center")
 public class Center extends IdName {
 
-	@Id
-	private Long id;
-	 
-	private String name;
+    @Id
+    private Long id;
 
-	@OneToMany(mappedBy = "center", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<StudyCenter> studyCenterList;
+    private String name;
+
+    @OneToMany(mappedBy = "center", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<StudyCenter> studyCenterList;
 
     /**
      * @return the id
@@ -68,12 +68,12 @@ public class Center extends IdName {
         this.name = name;
     }
 
-	public List<StudyCenter> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public List<StudyCenter> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
 }

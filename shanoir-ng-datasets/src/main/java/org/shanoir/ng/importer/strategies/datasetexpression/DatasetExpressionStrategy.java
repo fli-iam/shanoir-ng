@@ -21,7 +21,7 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 
 public interface DatasetExpressionStrategy {
-	
-	DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException;
+
+    DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException;
 
 }

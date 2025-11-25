@@ -102,13 +102,13 @@ public class SubjectService {
         return subjectRepository.findByNameAndStudy_Id(name, studyId);
     }
 
-	private void send(Object obj, String queue) throws MicroServiceCommunicationException {
-	    try {
-	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
-	    } catch (AmqpException | JsonProcessingException e) {
-	        throw new MicroServiceCommunicationException("Error while communicating with MS Studies to send study card tags.", e);
-	    }
-	}
+    private void send(Object obj, String queue) throws MicroServiceCommunicationException {
+        try {
+            rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with MS Studies to send study card tags.", e);
+        }
+    }
 
     public Optional<Subject> findById(Long subjectId) {
         return subjectRepository.findById(subjectId);

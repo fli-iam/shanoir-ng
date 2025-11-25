@@ -82,12 +82,12 @@ public class StudyCardApiControllerTest {
     @MockBean
     private CardsProcessingService studyCardProcessingServiceMock;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
-	
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 

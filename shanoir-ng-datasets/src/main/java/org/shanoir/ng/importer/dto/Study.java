@@ -40,16 +40,16 @@ public class Study {
     @JsonProperty("series")
     private List<Serie> series;
 
-    public Study() {}
+    public Study() { }
 
     public Study(final Attributes attributes) {
-		studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		// try to remove confusing spaces, in case DICOM server sends them wrongly
-		if (studyInstanceUID != null)
-			studyInstanceUID = studyInstanceUID.trim();
-		studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
-		studyDescription = attributes.getString(Tag.StudyDescription);
-	}
+        studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+        // try to remove confusing spaces, in case DICOM server sends them wrongly
+        if (studyInstanceUID != null)
+            studyInstanceUID = studyInstanceUID.trim();
+        studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
+        studyDescription = attributes.getString(Tag.StudyDescription);
+    }
 
     public String getStudyInstanceUID() {
         return studyInstanceUID;

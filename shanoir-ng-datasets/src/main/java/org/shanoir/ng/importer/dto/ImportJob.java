@@ -26,13 +26,13 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class ImportJob implements Serializable {
 
-	private static final long serialVersionUID = 8804929608059674037L;
+    private static final long serialVersionUID = 8804929608059674037L;
 
     private long timestamp;
 
     private boolean fromDicomZip;
 
-	private boolean fromShanoirUploader;
+    private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 

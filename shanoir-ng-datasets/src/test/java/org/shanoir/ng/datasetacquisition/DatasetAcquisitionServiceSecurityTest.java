@@ -110,20 +110,20 @@ public class DatasetAcquisitionServiceSecurityTest {
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
     }
 
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySet();
-		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findByStudyCard, 1L);
-		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
-		
-		assertAccessDenied(service::create, mockDsAcq(), true);
-		assertAccessDenied(service::update, mockDsAcq(1L));
-		assertAccessDenied(service::deleteById, 1L, null);
-	}
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+        Set<Long> ids = Mockito.anySet();
+        given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
+        assertAccessDenied(service::findById, ENTITY_ID);
+        assertAccessDenied(service::findByStudyCard, 1L);
+        assertAccessDenied(service::findPage, PageRequest.of(0, 10));
+
+        assertAccessDenied(service::create, mockDsAcq(), true);
+        assertAccessDenied(service::update, mockDsAcq(1L));
+        assertAccessDenied(service::deleteById, 1L, null);
+    }
 
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
@@ -139,99 +139,99 @@ public class DatasetAcquisitionServiceSecurityTest {
         testAll("ROLE_EXPERT");
     }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAdmin() throws ShanoirException {
-		setCenterRightsContext();
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findByStudyCard, 1L);
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));		
-		Page<DatasetAcquisition> page = service.findPage(PageRequest.of(0, 10));
-		assertNotNull(page);
-		assertEquals(4, page.getTotalElements());
-		assertAccessAuthorized(service::create, mockDsAcq(), true);
-		assertAccessAuthorized(service::update, mockDsAcq(1L));
-		assertAccessAuthorized(service::deleteById, 1L, null);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAdmin() throws ShanoirException {
+        setCenterRightsContext();
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findByStudyCard, 1L);
+        assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
+        Page<DatasetAcquisition> page = service.findPage(PageRequest.of(0, 10));
+        assertNotNull(page);
+        assertEquals(4, page.getTotalElements());
+        assertAccessAuthorized(service::create, mockDsAcq(), true);
+        assertAccessAuthorized(service::update, mockDsAcq(1L));
+        assertAccessAuthorized(service::deleteById, 1L, null);
+    }
 
-	
-	private void testAll(String role) throws ShanoirException, RestServiceException {
-		// create(DatasetAcquisition)
-		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
-		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
-		assertAccessAuthorized(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
-		
-		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
-		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
-		assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
-		
-		given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied(service::create, mockDsAcq(null, 2L, 2L, 2L), true);
-		
-		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied(service::create, mockDsAcq(null, 4L, 4L, 4L), true);
-		
-		// findByStudyCard(Long)
-		assertAccessAuthorized(service::findByStudyCard, 1L);
-		assertAccessAuthorized(service::findByStudyCard, 2L);
-		assertThat(service.findByStudyCard(2L)).isNullOrEmpty();
-		assertAccessAuthorized(service::findByStudyCard, 3L);
-		assertThat(service.findByStudyCard(3L)).isNullOrEmpty();
-		assertAccessAuthorized(service::findByStudyCard, 4L);
-		assertThat(service.findByStudyCard(4L)).isNullOrEmpty();
-		
-		// findById(Long)
-		assertAccessAuthorized(service::findById, 1L);
-		assertAccessDenied(service::findById, 2L);
-		assertAccessDenied(service::findById, 3L);
-		assertAccessDenied(service::findById, 4L);
-		
-		// findByExamination(Long)
-		assertAccessAuthorized(service::findByExamination, 1L);
-		assertThat(service.findByExamination(2L).isEmpty());
-		assertThat(service.findByExamination(3L).isEmpty());
-		assertThat(service.findByExamination(4L).isEmpty());
-		
-		// findPage(Pageable)
-		assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
-		
-		// update(DatasetAcquisition)
-		if ("ROLE_USER".equals(role)) {
-			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));			
-		} else if ("ROLE_EXPERT".equals(role)) {
-			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-			assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));
-			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::update, mockDsAcq(1L, 1L, 1L, 1L));
-		}
-		assertAccessDenied(service::update, mockDsAcq(2L, 2L, 2L, 2L));
-		assertAccessDenied(service::update, mockDsAcq(3L, 3L, 3L, 1L));
-		assertAccessDenied(service::update, mockDsAcq(4L, 4L, 4L, 4L));
-		
-		// deleteById(Long)
-		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-		if ("ROLE_USER".equals(role)) {
-			assertAccessDenied(service::deleteById, 1L, null);
-		} else if ("ROLE_EXPERT".equals(role)) {
-			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-			assertAccessDenied(service::deleteById, 1L, null);
-			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::deleteById, 1L, null);
-		}
-		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 2L, null);
-		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 3L, null);
-		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 4L, null);
-		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
-		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
-		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(false);
-	}
+
+    private void testAll(String role) throws ShanoirException, RestServiceException {
+        // create(DatasetAcquisition)
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+        assertAccessDenied(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+        assertAccessAuthorized(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
+
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
+
+        given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
+        assertAccessDenied(service::create, mockDsAcq(null, 2L, 2L, 2L), true);
+
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+        assertAccessDenied(service::create, mockDsAcq(null, 4L, 4L, 4L), true);
+
+        // findByStudyCard(Long)
+        assertAccessAuthorized(service::findByStudyCard, 1L);
+        assertAccessAuthorized(service::findByStudyCard, 2L);
+        assertThat(service.findByStudyCard(2L)).isNullOrEmpty();
+        assertAccessAuthorized(service::findByStudyCard, 3L);
+        assertThat(service.findByStudyCard(3L)).isNullOrEmpty();
+        assertAccessAuthorized(service::findByStudyCard, 4L);
+        assertThat(service.findByStudyCard(4L)).isNullOrEmpty();
+
+        // findById(Long)
+        assertAccessAuthorized(service::findById, 1L);
+        assertAccessDenied(service::findById, 2L);
+        assertAccessDenied(service::findById, 3L);
+        assertAccessDenied(service::findById, 4L);
+
+        // findByExamination(Long)
+        assertAccessAuthorized(service::findByExamination, 1L);
+        assertThat(service.findByExamination(2L).isEmpty());
+        assertThat(service.findByExamination(3L).isEmpty());
+        assertThat(service.findByExamination(4L).isEmpty());
+
+        // findPage(Pageable)
+        assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
+
+        // update(DatasetAcquisition)
+        if ("ROLE_USER".equals(role)) {
+            given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+            assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));
+        } else if ("ROLE_EXPERT".equals(role)) {
+            given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+            assertAccessDenied(service::update, mockDsAcq(1L, 1L, 1L, 1L));
+            given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+            assertAccessAuthorized(service::update, mockDsAcq(1L, 1L, 1L, 1L));
+        }
+        assertAccessDenied(service::update, mockDsAcq(2L, 2L, 2L, 2L));
+        assertAccessDenied(service::update, mockDsAcq(3L, 3L, 3L, 1L));
+        assertAccessDenied(service::update, mockDsAcq(4L, 4L, 4L, 4L));
+
+        // deleteById(Long)
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+        if ("ROLE_USER".equals(role)) {
+            assertAccessDenied(service::deleteById, 1L, null);
+        } else if ("ROLE_EXPERT".equals(role)) {
+            given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+            assertAccessDenied(service::deleteById, 1L, null);
+            given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+            assertAccessAuthorized(service::deleteById, 1L, null);
+        }
+        given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(true);
+        assertAccessDenied(service::deleteById, 2L, null);
+        given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
+        assertAccessDenied(service::deleteById, 3L, null);
+        given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(true);
+        assertAccessDenied(service::deleteById, 4L, null);
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(false);
+    }
 
     private DatasetAcquisition mockDsAcq(Long id) {
         DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();

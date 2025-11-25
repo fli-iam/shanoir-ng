@@ -91,23 +91,23 @@ public class CenterApiControllerTest {
     @MockBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
-	@BeforeEach
-	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
-				.willReturn(Arrays.asList(new CenterDTO()));
-		Center center = new Center();
-		center.setId(Long.valueOf(123));
-		IdName idNameCenter = new IdName(1L, "naIme");
-		given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
-		doNothing().when(centerServiceMock).deleteById(1L);
-		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
-		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
-		given(centerServiceMock.create(Mockito.any(Center.class), Mockito.anyBoolean())).willReturn(center);
-		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
-		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
-		given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
-	}
+    @BeforeEach
+    public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
+        given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
+                .willReturn(Arrays.asList(new CenterDTO()));
+        Center center = new Center();
+        center.setId(Long.valueOf(123));
+        IdName idNameCenter = new IdName(1L, "naIme");
+        given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
+        doNothing().when(centerServiceMock).deleteById(1L);
+        given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
+        given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
+        given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
+        given(centerServiceMock.create(Mockito.any(Center.class), Mockito.anyBoolean())).willReturn(center);
+        given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+        given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+        given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
+    }
 
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })

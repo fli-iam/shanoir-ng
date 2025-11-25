@@ -121,19 +121,19 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
         return to;
     }
 
-	private boolean updateManufacturerModelName(ManufacturerModel manufacturerModel) throws MicroServiceCommunicationException {
-		try {
-			String manuModelName = manufacturerModel.getName();
-			List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
-			if (listAcEq == null) {
-				return true;
-			}
-			for (AcquisitionEquipment acEqItem : listAcEq) {
-				IdName acEq = new IdName();
-				acEq.setId(acEqItem.getId());
-				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-				rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
-			}
+    private boolean updateManufacturerModelName(ManufacturerModel manufacturerModel) throws MicroServiceCommunicationException {
+        try {
+            String manuModelName = manufacturerModel.getName();
+            List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
+            if (listAcEq == null) {
+                return true;
+            }
+            for (AcquisitionEquipment acEqItem : listAcEq) {
+                IdName acEq = new IdName();
+                acEq.setId(acEqItem.getId());
+                acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
+                rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
+            }
 
             return true;
         } catch (AmqpException | JsonProcessingException e) {

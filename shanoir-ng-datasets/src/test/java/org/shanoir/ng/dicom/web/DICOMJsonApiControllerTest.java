@@ -68,14 +68,14 @@ public class DICOMJsonApiControllerTest {
     @MockBean
     private ExaminationToStudyDTOMapper examinationToStudyDTOMapperMock;
 
-	@MockBean
-	private ExaminationService examinationServiceMock;
-	
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+    @MockBean
+    private ExaminationService examinationServiceMock;
 
-	@MockBean
-	private DicomImporterService dicomImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @MockBean
+    private DicomImporterService dicomImporterService;
 
     @BeforeEach
     public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {

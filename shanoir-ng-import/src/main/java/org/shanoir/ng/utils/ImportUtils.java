@@ -249,24 +249,24 @@ public final class ImportUtils {
         return s == -1 ? null : name.substring(0, s);
     }
 
-	/**
-	 * Extracts a zip entry (file entry)
-	 * 
-	 * @param zipIn
-	 * @param filePath
-	 * @throws IOException
-	 */
-	private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
-		
-		try (InputStream in = zipFile.getInputStream(zipIn);
-				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-			byte[] bytesIn = new byte[BUFFER_SIZE];
-			int read = 0;
-			while ((read = in.read(bytesIn)) != -1) {
-				bos.write(bytesIn, 0, read);
-			}
-		}
-	}
+    /**
+     * Extracts a zip entry (file entry)
+     *
+     * @param zipIn
+     * @param filePath
+     * @throws IOException
+     */
+    private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
+
+        try (InputStream in = zipFile.getInputStream(zipIn);
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+            byte[] bytesIn = new byte[BUFFER_SIZE];
+            int read = 0;
+            while ((read = in.read(bytesIn)) != -1) {
+                bos.write(bytesIn, 0, read);
+            }
+        }
+    }
 
     /**
      * This method stores an uploaded zip file in a temporary file, creates a new
@@ -354,16 +354,16 @@ public final class ImportUtils {
         return size;
     }
 
-	/**
-	 * Create an exam from fiew attributes
-	 * @return the created exam
-	 */
-	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
-		// Create one examination
-		ExaminationDTO examination = new ExaminationDTO();
-		IdName study = new IdName();
-		study.setId(studyId);
-		examination.setStudy(study);
+    /**
+     * Create an exam from fiew attributes
+     * @return the created exam
+     */
+    public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
+        // Create one examination
+        ExaminationDTO examination = new ExaminationDTO();
+        IdName study = new IdName();
+        study.setId(studyId);
+        examination.setStudy(study);
 
         IdName subj = new IdName();
         subj.setId(subjectId);

@@ -146,82 +146,82 @@ public class StudyInstanceUIDHandler {
         }
     }
 
-	/**
-	 * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
-	 * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
-	 * request response time or from the database, in table dataset_file.
-	 * 
-	 * @param examinationUID
-	 * @return
-	 */
-	public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
-		String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
-		if (studyInstanceUID == null) {
-			Long examinationId = extractExaminationId(examinationUID);
-			Examination examination = examinationService.findById(examinationId);
-			if (examination != null) {
-				studyInstanceUID = findStudyInstanceUID(examination);
-				if (studyInstanceUID != null) {
-					String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
-					if (existing == null) {
-						LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
-						LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
-					}
-				}
-			}
-		}
-		return studyInstanceUID;
-	}
-	
-	/**
-	 * This method walks down the information model in Shanoir to read the StudyInstanceUID
-	 * from the table dataset_file.path, that contains the WADO link.
-	 * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
-	 * 
-	 * @param examination
-	 * @return
-	 */
-	public String findStudyInstanceUID(Examination examination) {
-		String studyInstanceUIDDb = examination.getStudyInstanceUID();
-		if (studyInstanceUIDDb != null && !studyInstanceUIDDb.isEmpty())
-			return studyInstanceUIDDb;
-		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-		for (DatasetAcquisition acquisition : acquisitions) {
-			if (acquisition instanceof MrDatasetAcquisition
-					|| acquisition instanceof CtDatasetAcquisition
-					|| acquisition instanceof PetDatasetAcquisition
-					|| acquisition instanceof XaDatasetAcquisition
-					|| acquisition instanceof GenericDatasetAcquisition) {
-				List<Dataset> datasets = acquisition.getDatasets();
-				if (!datasets.isEmpty()) {
-					Dataset dataset = datasets.get(0);
-					List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-					if (!expressions.isEmpty()) {
-						for (DatasetExpression expression : expressions) {
-							// only DICOM is of interest here
-							if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-								List<DatasetFile> files = expression.getDatasetFiles();
-								if (!files.isEmpty()) {
-									DatasetFile file = files.get(0);
-									if (file.isPacs()) {
-										String path = file.getPath();
-										return findStudyInstanceUID(path);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+    /**
+     * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
+     * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
+     * request response time or from the database, in table dataset_file.
+     *
+     * @param examinationUID
+     * @return
+     */
+    public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
+        String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
+        if (studyInstanceUID == null) {
+            Long examinationId = extractExaminationId(examinationUID);
+            Examination examination = examinationService.findById(examinationId);
+            if (examination != null) {
+                studyInstanceUID = findStudyInstanceUID(examination);
+                if (studyInstanceUID != null) {
+                    String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
+                    }
+                }
+            }
+        }
+        return studyInstanceUID;
+    }
 
-	public Long extractExaminationId(String examinationUID) {
-		String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
-		Long id = Long.parseLong(examinationUIDWithoutPrefix);
-		return id;
-	}
+    /**
+     * This method walks down the information model in Shanoir to read the StudyInstanceUID
+     * from the table dataset_file.path, that contains the WADO link.
+     * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
+     *
+     * @param examination
+     * @return
+     */
+    public String findStudyInstanceUID(Examination examination) {
+        String studyInstanceUIDDb = examination.getStudyInstanceUID();
+        if (studyInstanceUIDDb != null && !studyInstanceUIDDb.isEmpty())
+            return studyInstanceUIDDb;
+        List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+        for (DatasetAcquisition acquisition : acquisitions) {
+            if (acquisition instanceof MrDatasetAcquisition
+                    || acquisition instanceof CtDatasetAcquisition
+                    || acquisition instanceof PetDatasetAcquisition
+                    || acquisition instanceof XaDatasetAcquisition
+                    || acquisition instanceof GenericDatasetAcquisition) {
+                List<Dataset> datasets = acquisition.getDatasets();
+                if (!datasets.isEmpty()) {
+                    Dataset dataset = datasets.get(0);
+                    List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+                    if (!expressions.isEmpty()) {
+                        for (DatasetExpression expression : expressions) {
+                            // only DICOM is of interest here
+                            if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+                                List<DatasetFile> files = expression.getDatasetFiles();
+                                if (!files.isEmpty()) {
+                                    DatasetFile file = files.get(0);
+                                    if (file.isPacs()) {
+                                        String path = file.getPath();
+                                        return findStudyInstanceUID(path);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public Long extractExaminationId(String examinationUID) {
+        String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
+        Long id = Long.parseLong(examinationUIDWithoutPrefix);
+        return id;
+    }
 
     /**
      * This method extracts the StudyInstanceUID from a WADO string.

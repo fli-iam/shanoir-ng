@@ -89,40 +89,40 @@ public class DicomDirToModelService {
         return Collections.emptyList();
     }
 
-	/**
-	 * Handles Serie and Instance records.
-	 * 
-	 * @param series
-	 * @param serieRecord
-	 * @param dicomDirReader
-	 * @throws IOException
-	 */
-	private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
-		Serie serie = new Serie(serieRecord);
-		if (!DicomUtils.checkSerieIsIgnored(serieRecord)) {
-			List<Instance> instances = new ArrayList<Instance>();
-			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
-			while(instanceRecord != null) {
-				Instance instance = new Instance(instanceRecord);
-				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
-					instances.add(instance);
-				}
-				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
-			}
-			if (!instances.isEmpty()) {
-				instances.sort(new InstanceNumberSorter());
-				serie.setInstances(instances);
-			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-				serie.setIgnored(true);
-				serie.setSelected(false);
-			}
-		} else {
-			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-			serie.setIgnored(true);
-			serie.setSelected(false);
-		}
-		series.add(serie);
-	}
-	
+    /**
+     * Handles Serie and Instance records.
+     *
+     * @param series
+     * @param serieRecord
+     * @param dicomDirReader
+     * @throws IOException
+     */
+    private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
+        Serie serie = new Serie(serieRecord);
+        if (!DicomUtils.checkSerieIsIgnored(serieRecord)) {
+            List<Instance> instances = new ArrayList<Instance>();
+            Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
+            while (instanceRecord != null) {
+                Instance instance = new Instance(instanceRecord);
+                if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
+                    instances.add(instance);
+                }
+                instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
+            }
+            if (!instances.isEmpty()) {
+                instances.sort(new InstanceNumberSorter());
+                serie.setInstances(instances);
+            } else {
+                LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+                serie.setIgnored(true);
+                serie.setSelected(false);
+            }
+        } else {
+            LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+            serie.setIgnored(true);
+            serie.setSelected(false);
+        }
+        series.add(serie);
+    }
+
 }

@@ -95,13 +95,13 @@ public class DicomProcessing {
     }
 
     public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-		if (study != null) {
-			for (Serie serie : study.getSeries()) {
-				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-			}
-		}
-		return attributes;
+        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
+        if (study != null) {
+            for (Serie serie : study.getSeries()) {
+                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
+            }
+        }
+        return attributes;
     }
 
     public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
@@ -114,27 +114,27 @@ public class DicomProcessing {
         return attributes;
     }
 
-	public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
-		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
-		String sopUID = null;
-		if (!CollectionUtils.isEmpty(serie.getImages())) {
-			sopUID = serie.getImages().get(0).getSOPInstanceUID();
-		} else {
-			LOG.warn("Attention: a new SOPInstanceUID has been generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
-			sopUID = uidGenerator.getNewUID();
-		}
-		// In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
-		if (!CollectionUtils.isEmpty(serie.getDatasets())) {
-			for (Dataset dataset : serie.getDatasets()) {
-				dataset.setFirstImageSOPInstanceUID(sopUID);
-				try {
-					attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
-				} catch (IOException e) {
-					throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
-				}
-			}
-		}
-		return attributes;
-	}
+    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
+        AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
+        String sopUID = null;
+        if (!CollectionUtils.isEmpty(serie.getImages())) {
+            sopUID = serie.getImages().get(0).getSOPInstanceUID();
+        } else {
+            LOG.warn("Attention: a new SOPInstanceUID has been generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
+            sopUID = uidGenerator.getNewUID();
+        }
+        // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
+        if (!CollectionUtils.isEmpty(serie.getDatasets())) {
+            for (Dataset dataset : serie.getDatasets()) {
+                dataset.setFirstImageSOPInstanceUID(sopUID);
+                try {
+                    attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
+                } catch (IOException e) {
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                }
+            }
+        }
+        return attributes;
+    }
 
 }

@@ -72,37 +72,37 @@ public class ManufacturerServiceImpl implements ManufacturerService {
         return manuDb;
     }
 
-	public boolean updateManufacturer(Manufacturer manufacturer) throws MicroServiceCommunicationException {
-		try {
-			String manuName = manufacturer.getName();
-			if (manufacturer.getId() == null) {
-				return true;
-			}
-			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
-			if (listManuModel == null || listManuModel.isEmpty()) {
-				return true;
-			}
-			for (ManufacturerModel manuModel : listManuModel) {
-				List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
-				if (listAcEq != null) {
-					for (AcquisitionEquipment acEqItem : listAcEq) {
-						IdName acEq = new IdName();
-						acEq.setId(acEqItem.getId());
-						acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
-						rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
-								objectMapper.writeValueAsString(acEq));
-					}
-				}
-			}
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException(
-					"Error while communicating with datasets MS to update manufacturer name.", e);
-		}
-	}
-	public Optional<Manufacturer> findById(final Long id) {
-		return repository.findById(id);
-	}
+    public boolean updateManufacturer(Manufacturer manufacturer) throws MicroServiceCommunicationException {
+        try {
+            String manuName = manufacturer.getName();
+            if (manufacturer.getId() == null) {
+                return true;
+            }
+            List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
+            if (listManuModel == null || listManuModel.isEmpty()) {
+                return true;
+            }
+            for (ManufacturerModel manuModel : listManuModel) {
+                List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
+                if (listAcEq != null) {
+                    for (AcquisitionEquipment acEqItem : listAcEq) {
+                        IdName acEq = new IdName();
+                        acEq.setId(acEqItem.getId());
+                        acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
+                        rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
+                                objectMapper.writeValueAsString(acEq));
+                    }
+                }
+            }
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException(
+                    "Error while communicating with datasets MS to update manufacturer name.", e);
+        }
+    }
+    public Optional<Manufacturer> findById(final Long id) {
+        return repository.findById(id);
+    }
 
     public List<Manufacturer> findAll() {
         return Utils.toList(repository.findAll());

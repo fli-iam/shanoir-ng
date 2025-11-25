@@ -75,21 +75,21 @@ public class StudyServiceImpl implements StudyService {
             tag.setStudy(current);
         }
 
-		// STUDY CENTER
-		if (current.getStudyCenterList() != null) {
-			current.getStudyCenterList().clear();
-		} else {
-			current.setStudyCenterList(new ArrayList<>());
-		}
-		if (updated.getStudyCenterList() != null) {
-			current.getStudyCenterList().addAll(updated.getStudyCenterList());
-		}
-		for (StudyCenter studyCenter : current.getStudyCenterList()) {
-			studyCenter.setStudy(current);
-		}
+        // STUDY CENTER
+        if (current.getStudyCenterList() != null) {
+            current.getStudyCenterList().clear();
+        } else {
+            current.setStudyCenterList(new ArrayList<>());
+        }
+        if (updated.getStudyCenterList() != null) {
+            current.getStudyCenterList().addAll(updated.getStudyCenterList());
+        }
+        for (StudyCenter studyCenter : current.getStudyCenterList()) {
+            studyCenter.setStudy(current);
+        }
 
-		this.repository.save(current);
-	}
+        this.repository.save(current);
+    }
 
     @Override
     public List<String> validate(Study updated, Study current) {
