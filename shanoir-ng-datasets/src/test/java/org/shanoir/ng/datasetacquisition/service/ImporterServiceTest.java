@@ -198,20 +198,20 @@ public class ImporterServiceTest {
         qualityResult.add(entry);
 
         AcquisitionAttributes<String> acquisitionAttributes = new AcquisitionAttributes<String>();
-		Attributes attributes = new Attributes();
-		attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
-		acquisitionAttributes.addDatasetAttributes("1", attributes);
+        Attributes attributes = new Attributes();
+        attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
+        acquisitionAttributes.addDatasetAttributes("1", attributes);
 
-		try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
-			dicomProcessingMock
-				.when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie))
-				.thenReturn(acquisitionAttributes);
-			when(datasetAcquisitionContext.generateDeepDatasetAcquisitionForSerie(Mockito.eq(importJob.getUsername()), Mockito.eq(examination.getSubject().getId()), Mockito.eq(serie), Mockito.eq(0), Mockito.any())).thenReturn(datasetAcq);
-			when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-			when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
-			when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
-			when(qualityService.checkQuality(Mockito.eq(examData), Mockito.eq(importJob), any())).thenReturn(qualityResult);
-			when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
+        try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
+            dicomProcessingMock
+                    .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie))
+                    .thenReturn(acquisitionAttributes);
+            when(datasetAcquisitionContext.generateDeepDatasetAcquisitionForSerie(Mockito.eq(importJob.getUsername()), Mockito.eq(examination.getSubject().getId()), Mockito.eq(serie), Mockito.eq(0), Mockito.any())).thenReturn(datasetAcq);
+            when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
+            when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
+            when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
+            when(qualityService.checkQuality(Mockito.eq(examData), Mockito.eq(importJob), any())).thenReturn(qualityResult);
+            when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
             // WHEN we treat this importjob
             assertNotNull(qualityResult);

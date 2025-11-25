@@ -50,13 +50,13 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
         // else... add other format strategies here
     }
 
-   	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie,
-			ExpressionFormat expressionFormat) throws IOException {
-		if (datasetExpressionStrategy != null) {
-			return datasetExpressionStrategy.generateDatasetExpression(serie, expressionFormat);
-		}
-		return null;
-	}
+    @Override
+    public DatasetExpression generateDatasetExpression(Serie serie,
+            ExpressionFormat expressionFormat) throws IOException {
+        if (datasetExpressionStrategy != null) {
+            return datasetExpressionStrategy.generateDatasetExpression(serie, expressionFormat);
+        }
+        return null;
+    }
 
 }

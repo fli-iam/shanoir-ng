@@ -249,69 +249,69 @@ public class BidsImporterService {
                 datasetToCreate.setOriginMetadata(originMetadata);
                 datasetToCreate.setUpdatedMetadata(originMetadata);
                 datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
-                
+
                 // DatasetExpression with list of files
-				expression = new DatasetExpression();
-				expression.setCreationDate(LocalDateTime.now());
-				expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
-				expression.setDataset(datasetToCreate);
-				expression.setDatasetFiles(new ArrayList<>());
-				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-			}
-            
+                expression = new DatasetExpression();
+                expression.setCreationDate(LocalDateTime.now());
+                expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
+                expression.setDataset(datasetToCreate);
+                expression.setDatasetFiles(new ArrayList<>());
+                datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+            }
+
             List<DatasetFile> files = expression.getDatasetFiles();
 
-			// Copy the data to "BIDS" folder
-			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-			final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
+            // Copy the data to "BIDS" folder
+            final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+            final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
-			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
-			outDir.mkdirs();
+            final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
+            outDir.mkdirs();
 
-			// remove old subject and session names from files names
-			String filename = importedFile.getName()
-					.replaceFirst("sub-[^_]+_", "")
-					.replaceFirst("ses-[^_]+_", "");
+            // remove old subject and session names from files names
+            String filename = importedFile.getName()
+                    .replaceFirst("sub-[^_]+_", "")
+                    .replaceFirst("ses-[^_]+_", "");
 
-			String outPath = outDir.getAbsolutePath() + File.separator + filename;
-			Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
+            String outPath = outDir.getAbsolutePath() + File.separator + filename;
+            Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
 
-			DatasetFile dsFile = new DatasetFile();
-			dsFile.setDatasetExpression(expression);
-			dsFile.setPacs(false);
-			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
-			files.add(dsFile);
-			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
-				// Check equipment in json file
-				//JSONParser json = new JSONParser(new FileReader(importedFile));
-				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				ObjectMapper jsonMapper = new ObjectMapper();
-				// Parse JSON file into a LinkedHashMap
-				LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
-				if (jsonObject.get("DeviceSerialNumber") != null) {
-					String code = (String) jsonObject.get("DeviceSerialNumber");
-					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
-				}
-			}
-			
-			expression.setDatasetFiles(files);
-			expression.setSize(Files.size(importedFileFinalLocation));
-			datasets.add(datasetToCreate);
-			datasetsByName.put(name, datasetToCreate);
-		}
-		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
-		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
-		datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
-		datasetAcquisition.setUsername(importJob.getUsername());
-		
-		datasetAcquisitionService.create(datasetAcquisition, true);
+            DatasetFile dsFile = new DatasetFile();
+            dsFile.setDatasetExpression(expression);
+            dsFile.setPacs(false);
+            dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+            files.add(dsFile);
+            if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+                // Check equipment in json file
+                //JSONParser json = new JSONParser(new FileReader(importedFile));
+                // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+                ObjectMapper jsonMapper = new ObjectMapper();
+                // Parse JSON file into a LinkedHashMap
+                LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
+                if (jsonObject.get("DeviceSerialNumber") != null) {
+                    String code = (String) jsonObject.get("DeviceSerialNumber");
+                    equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
+                }
+            }
 
-		event.setStatus(ShanoirEvent.SUCCESS);
-		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-				+" Successfully created datasets for subject [" + importJob.getSubjectName()
-				+ "] in examination [" + examination.getId() + "]");
-		event.setProgress(1f);
-		eventService.publishEvent(event);
-	}
+            expression.setDatasetFiles(files);
+            expression.setSize(Files.size(importedFileFinalLocation));
+            datasets.add(datasetToCreate);
+            datasetsByName.put(name, datasetToCreate);
+        }
+        datasetAcquisition.setDatasets(new ArrayList<>(datasets));
+        datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
+        datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
+        datasetAcquisition.setUsername(importJob.getUsername());
+
+        datasetAcquisitionService.create(datasetAcquisition, true);
+
+        event.setStatus(ShanoirEvent.SUCCESS);
+        event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                + " Successfully created datasets for subject [" + importJob.getSubjectName()
+                + "] in examination [" + examination.getId() + "]");
+        event.setProgress(1f);
+        eventService.publishEvent(event);
+    }
 
 }

@@ -52,18 +52,18 @@ public class RabbitMqExaminationService {
     @Autowired
     private SubjectRepository subjectRepository;
 
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional()
-	public Long createExamination(Message message) {
-		try {
-			Examination exam = mapper.readValue(message.getBody(), Examination.class);
-			Subject subj = exam.getSubject();
-			subj.setStudy(exam.getStudy());
-			Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
-			if (!dbSubject.isPresent()) {
-				subjectRepository.save(subj);
-			}
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional()
+    public Long createExamination(Message message) {
+        try {
+            Examination exam = mapper.readValue(message.getBody(), Examination.class);
+            Subject subj = exam.getSubject();
+            subj.setStudy(exam.getStudy());
+            Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
+            if (!dbSubject.isPresent()) {
+                subjectRepository.save(subj);
+            }
             exam = examRepo.save(exam);
             return exam.getId();
         } catch (Exception e) {

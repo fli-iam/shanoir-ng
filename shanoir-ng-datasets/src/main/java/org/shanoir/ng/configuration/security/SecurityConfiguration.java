@@ -58,8 +58,8 @@ public class SecurityConfiguration {
     @Autowired
     private MDCFilter mdcFilter;
 
-	@Autowired
-	private STOWRSMultipartRequestFilter multipartRelatedRequestFilter;
+    @Autowired
+    private STOWRSMultipartRequestFilter multipartRelatedRequestFilter;
 
     /**
      * Defines the session authentication strategy.

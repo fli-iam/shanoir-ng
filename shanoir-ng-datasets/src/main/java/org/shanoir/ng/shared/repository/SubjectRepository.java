@@ -13,10 +13,11 @@
  */
 package org.shanoir.ng.shared.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.springframework.data.repository.CrudRepository;
-import java.util.List;
 
 
 /**
@@ -24,12 +25,12 @@ import java.util.List;
  *
  */
 public interface SubjectRepository extends CrudRepository<Subject, Long> {
-    
+
     Subject findByName(String name);
 
-	Subject findByNameAndStudy_Id(String name, Long studyId);
+    Subject findByNameAndStudy_Id(String name, Long studyId);
 
-	List<Subject> findByStudy(Study study);
+    List<Subject> findByStudy(Study study);
 
     List<Subject> findByStudy_Id(Long studyId);
 
