@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -184,6 +185,14 @@ public class ShanoirUploaderServiceClient {
     private Map<Integer, String> apiResponseMessages;
 
     public void configure() {
+        
+        apiResponseMessages = new HashMap<Integer, String>();
+        apiResponseMessages.put(200, "ok");
+        apiResponseMessages.put(204, "no item found");
+        apiResponseMessages.put(401, "unauthorized");
+        apiResponseMessages.put(403, "forbidden");
+        apiResponseMessages.put(500, "unexpected error");
+        
         this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 
         this.serviceURLStudiesCreate = this.serverURL
