@@ -204,13 +204,6 @@ public class RabbitMQDatasetsService {
 		centerRepository.deleteById(centerId);
 	}
 
-    @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
-    @RabbitHandler
-    public void receiveCenterNameUpdate(final String centerStr) {
-        receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
-    }
-
     private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
         IdName received = new IdName();
         try {

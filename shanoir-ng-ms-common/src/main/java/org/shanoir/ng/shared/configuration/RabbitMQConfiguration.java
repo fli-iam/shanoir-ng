@@ -85,12 +85,24 @@ public class RabbitMQConfiguration {
     /** Update / create a study user to users MS. */
     public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
+
+	public static final String STUDY_CENTER_QUEUE = "study-center-queue";
+	
+	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+
+    public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
+    /** Get the type of dataset from a given study. */
+	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
+
     /** BIDS purpose => Get a list of subjects to create bids participants file. */
     public static final String SUBJECTS_QUEUE = "subjects-queue";
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
-
+    
 	/** Subject name updated => notify dataset MS to change database. */
 	public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 	
@@ -103,22 +115,13 @@ public class RabbitMQConfiguration {
 	/** Center deleted => notify MS Datasets to change database. */
 	public static final String CENTER_DELETE_QUEUE = "center-delete-queue";
 
-	public static final String STUDY_CENTER_QUEUE = "study-center-queue";
-	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
 	public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
 	
-	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
-
-    public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
-
     public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
-    /** Get the type of dataset from a given study. */
-	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
-	
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
 	
