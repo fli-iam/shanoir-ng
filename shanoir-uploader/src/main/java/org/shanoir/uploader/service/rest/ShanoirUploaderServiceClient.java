@@ -185,14 +185,12 @@ public class ShanoirUploaderServiceClient {
     private Map<Integer, String> apiResponseMessages;
 
     public void configure() {
-        
         apiResponseMessages = new HashMap<Integer, String>();
         apiResponseMessages.put(200, "ok");
         apiResponseMessages.put(204, "no item found");
         apiResponseMessages.put(401, "unauthorized");
         apiResponseMessages.put(403, "forbidden");
         apiResponseMessages.put(500, "unexpected error");
-        
         this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 
         this.serviceURLStudiesCreate = this.serverURL
@@ -281,7 +279,7 @@ public class ShanoirUploaderServiceClient {
             final StringBuilder postBody = new StringBuilder();
             postBody.append("client_id=shanoir-uploader");
             postBody.append("&grant_type=password");
-            postBody.append("&username = ").append(URLEncoder.encode(username, "UTF-8"));
+            postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
             postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
             postBody.append("&scope=offline_access");
             try (CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);) {
