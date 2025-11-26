@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -50,7 +50,8 @@ import jakarta.mail.MessagingException;
 
 public final class DatasetFileUtils {
 
-    private DatasetFileUtils() { }
+    private DatasetFileUtils() {
+    }
 
     private static final String UNDERSCORE = "_";
 
@@ -74,7 +75,7 @@ public final class DatasetFileUtils {
      */
     public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
         List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
+        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext(); ) {
             DatasetExpression datasetExpression = itExpressions.next();
             if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
                 List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
@@ -93,35 +94,35 @@ public final class DatasetFileUtils {
         }
     }
 
-	/**
-	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-	 * Return the list of copied files
-	 *
-	 * @param urls
-	 * @param subjectName         the subjectName
-	 * @param datasetFilePath
-	 * @param datasetDownloadName
-	 * @return
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName)
+    /**
+     * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+     * Return the list of copied files
+     *
+     * @param urls
+     * @param subjectName         the subjectName
+     * @param datasetFilePath
+     * @param datasetDownloadName
+     * @return
+     * @throws IOException
+     * @throws MessagingException
+     */
+    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName)
             throws IOException {
 
-		List<String> filesInZip = new ArrayList<>();
+        List<String> filesInZip = new ArrayList<>();
         int index = 0;
 
-		for (URL url : urls) {
+        for (URL url : urls) {
             File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
             String srcPath = srcFile.getAbsolutePath();
 
             // Generate the target file name
-			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
+            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
             fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
 
-			// Add folder path if specified
-			if (datasetFilePath != null)
-				fileName = datasetFilePath + File.separator + fileName;
+            // Add folder path if specified
+            if (datasetFilePath != null)
+                fileName = datasetFilePath + File.separator + fileName;
 
             // If it's an uncompressed NIfTI file, compress it.
             boolean compress = srcPath.endsWith(".nii");
@@ -132,7 +133,7 @@ public final class DatasetFileUtils {
             if (compress)
                 compressGzipFile(srcPath, zipPath);
 
-			// Add to ZIP
+            // Add to ZIP
             FileSystemResource resource = new FileSystemResource(srcPath);
             ZipEntry zipEntry = new ZipEntry(zipFileName);
             zipEntry.setSize(resource.contentLength());
@@ -141,16 +142,15 @@ public final class DatasetFileUtils {
             StreamUtils.copy(resource.getInputStream(), zipOutputStream);
             zipOutputStream.closeEntry();
 
-			if (compressed) {
-				// If we gzipped the file, delete the newly created file directly after
-				FileUtils.deleteQuietly(new File(srcPath));
-			}
+            // Cleanup temporary compressed file
+            if (compress)
+                FileUtils.deleteQuietly(new File(zipPath));
 
             filesInZip.add(zipFileName);
-			index++;
-		}
-		return filesInZip;
-	}
+            index++;
+        }
+        return filesInZip;
+    }
 
     public static void writeManifestForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> filesByAcquisitionId) throws IOException {
         InputDTO input = new InputDTO();
@@ -197,8 +197,8 @@ public final class DatasetFileUtils {
             }
         }
         name.append(dataset.getDatasetAcquisition().getRank()).append(UNDERSCORE)
-        .append(index)
-        .append(".");
+                .append(index)
+                .append(".");
         if (srcFile.getName().endsWith(".nii.gz")) {
             name.append("nii.gz");
         } else {
@@ -209,8 +209,8 @@ public final class DatasetFileUtils {
 
     public static void compressGzipFile(String source, String gzipDestination) throws IOException {
         try (FileInputStream fis = new FileInputStream(source);
-                FileOutputStream fos = new FileOutputStream(gzipDestination);
-                GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+             FileOutputStream fos = new FileOutputStream(gzipDestination);
+             GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = fis.read(buffer)) > 0) {

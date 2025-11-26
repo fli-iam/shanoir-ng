@@ -97,11 +97,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             Map<Long, String> outputsDownloadName = getDatasetDownloadName(outputs);
 
             for (Dataset dataset : inputs)
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
             for (Dataset dataset : outputs)
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
         }
-        if(!filesByAcquisitionId.isEmpty())
+        if (!filesByAcquisitionId.isEmpty())
             DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
 
         // Write errors to the file
@@ -163,7 +163,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private String getExecFilepath(Long processingId, Pair<Long, String> examDatas) {
 
-        String execFilePath = "processing_" + processingId +  "_exam_" + examDatas.first();
+        String execFilePath = "processing_" + processingId + "_exam_" + examDatas.first();
         if (!Objects.equals(examDatas.second(), "")) {
             execFilePath += "_" + examDatas.second();
         }
