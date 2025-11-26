@@ -16,6 +16,11 @@ CREATE TABLE study_center (
   CONSTRAINT `FKi5ioon77o40h52tyxdqubfpdp` FOREIGN KEY (center_id) REFERENCES `center` (id)
 );
 
+INSERT IGNORE INTO `center` (id)
+SELECT DISTINCT center_id 
+FROM studies.study_center 
+WHERE center_id NOT IN (SELECT id FROM `center`);
+
 # Replicate study_center into MS Datasets
 INSERT INTO study_center (id, study_id, center_id)
 SELECT
