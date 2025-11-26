@@ -140,36 +140,36 @@ public class DICOMWebService {
         return null;
     }
 
-	public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
-		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series";
-			boolean isFirstQueryParam = true;
-			if (includefield != null && !includefield.isEmpty()) {
-				url += "?includefield=" + includefield;
-				isFirstQueryParam = false;
-			}
-			if (seriesInstanceUID != null && !seriesInstanceUID.isEmpty()) {
-				if (isFirstQueryParam) {
-					url += "?SeriesInstanceUID=" + seriesInstanceUID;
-				} else {
-					url += "&SeriesInstanceUID=" + seriesInstanceUID;
-				}
-			}
-			HttpGet httpGet = new HttpGet(url);
-			httpGet.setHeader("Accept-Charset", "UTF-8");
-			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				HttpEntity entity = response.getEntity();
-				if (entity != null) {
-					return  EntityUtils.toString(entity, "UTF-8");
-				} else {
-					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
-				}
-			}
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return null;
-	}
+    public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
+        try {
+            String url = this.serverURL + "/" + studyInstanceUID + "/series";
+            boolean isFirstQueryParam = true;
+            if (includefield != null && !includefield.isEmpty()) {
+                url += "?includefield=" + includefield;
+                isFirstQueryParam = false;
+            }
+            if (seriesInstanceUID != null && !seriesInstanceUID.isEmpty()) {
+                if (isFirstQueryParam) {
+                    url += "?SeriesInstanceUID=" + seriesInstanceUID;
+                } else {
+                    url += "&SeriesInstanceUID=" + seriesInstanceUID;
+                }
+            }
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept-Charset", "UTF-8");
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity, "UTF-8");
+                } else {
+                    LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
 
     /**
      * With DICOMWeb for viewer OHIF, no need to transfer private tags,
@@ -210,7 +210,7 @@ public class DICOMWebService {
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-            String sopInstanceUID, String frame) {
+                                                            String sopInstanceUID, String frame) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
@@ -351,7 +351,7 @@ public class DICOMWebService {
             int code = response.getCode();
             if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
                 LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
-                LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
+                LOG.error("Associated message: " + EntityUtils.toString(response.getEntity()));
                 throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
             }
         } catch (Exception e) {

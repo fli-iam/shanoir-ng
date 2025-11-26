@@ -87,49 +87,49 @@ public class DICOMWebApiController implements DICOMWebApi {
         return null;
     }
 
-	@Override
-	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
-		Page<Examination> examinations = null;
-		int offset = Integer.valueOf(allParams.get(OFFSET));
-		int limit = Integer.valueOf(allParams.get(LIMIT));
-		Pageable pageable = PageRequest.of(offset, limit);
-		String includeField = allParams.get(INCLUDEFIELD);
-		// 1. Search for studies==examinations with patient name
-		// (DICOM patientID does not make sense in case of Shanoir)
-		String patientIDTagParam = allParams.get(PATIENT_ID);
-		String patientNameParam = allParams.get(PATIENT_NAME);
-		if (patientIDTagParam != null || patientNameParam != null) {
-			String subjectName;
-			if (patientIDTagParam != null) {
-				subjectName = patientIDTagParam;
-			} else {
-				subjectName = patientNameParam;
-			}
-			// Remove leading and trailing asterix here to search with subject name
-			subjectName = subjectName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
-			examinations = examinationService.findPage(pageable, subjectName);
-		} else {
-			// 2. Manage still existing case with single study instance UID
-			List<Examination> examinationList = new ArrayList<>();
-			String studyInstanceUID = allParams.get(STUDY_INSTANCE_UID);
-			if (studyInstanceUID != null) {
-				String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
-				Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
-				examinationList.add(examination);
-			}
-			// 3. Manage case, that nothing specific was found and return depending on pageable
-			if (examinationList.isEmpty()) {
-				examinations = examinationService.findPage(pageable, null);
-			} else {
-				examinations = new PageImpl<>(examinationList);
-			}
-		}
-		if (examinations == null || examinations.getContent().isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
-		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
+        Page<Examination> examinations = null;
+        int offset = Integer.valueOf(allParams.get(OFFSET));
+        int limit = Integer.valueOf(allParams.get(LIMIT));
+        Pageable pageable = PageRequest.of(offset, limit);
+        String includeField = allParams.get(INCLUDEFIELD);
+        // 1. Search for studies==examinations with patient name
+        // (DICOM patientID does not make sense in case of Shanoir)
+        String patientIDTagParam = allParams.get(PATIENT_ID);
+        String patientNameParam = allParams.get(PATIENT_NAME);
+        if (patientIDTagParam != null || patientNameParam != null) {
+            String subjectName;
+            if (patientIDTagParam != null) {
+                subjectName = patientIDTagParam;
+            } else {
+                subjectName = patientNameParam;
+            }
+            // Remove leading and trailing asterix here to search with subject name
+            subjectName = subjectName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
+            examinations = examinationService.findPage(pageable, subjectName);
+        } else {
+            // 2. Manage still existing case with single study instance UID
+            List<Examination> examinationList = new ArrayList<>();
+            String studyInstanceUID = allParams.get(STUDY_INSTANCE_UID);
+            if (studyInstanceUID != null) {
+                String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
+                Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
+                examinationList.add(examination);
+            }
+            // 3. Manage case, that nothing specific was found and return depending on pageable
+            if (examinationList.isEmpty()) {
+                examinations = examinationService.findPage(pageable, null);
+            } else {
+                examinations = new PageImpl<>(examinationList);
+            }
+        }
+        if (examinations == null || examinations.getContent().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
+        return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
+    }
 
     private String queryDicomServerForDicomWeb(Page<Examination> examinations, String includeField)
             throws JsonProcessingException, JsonMappingException {
@@ -229,10 +229,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
-            String sopInstanceUID, String frame) throws RestServiceException {
+                                                            String sopInstanceUID, String frame) throws RestServiceException {
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
         if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
-                && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame))  {
+                && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame)) {
             return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -250,7 +250,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             throws RestServiceException {
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
         if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
-                && !StringUtils.isEmpty(sopInstanceUID))  {
+                && !StringUtils.isEmpty(sopInstanceUID)) {
             return dicomWebService.findInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
