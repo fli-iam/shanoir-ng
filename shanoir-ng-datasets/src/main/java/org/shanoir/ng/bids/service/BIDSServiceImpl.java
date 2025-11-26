@@ -206,18 +206,13 @@ public class BIDSServiceImpl implements BIDSService {
     public ResponseEntity<ByteArrayResource> generateParticipants(final Long studyId) throws IOException {
         List<Subject> subjs = getSubjectsForStudy(studyId);
 
-        File workFolder = getBidsFolderpath(studyId, "neurobagel");
-        File baseDir = createBaseBidsFolder(workFolder, "neurobagel");
-        participantsSerializer(baseDir, subjs);
-
-        File res = new File(baseDir, "participants.tsv");
-        byte[] data = Files.readAllBytes(res.toPath());
-        ByteArrayResource resource = new ByteArrayResource(data);
+        StringBuilder data = buildParticipants(subjs);
+        ByteArrayResource resource = new ByteArrayResource(data.toString().getBytes());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + res.getName())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + "participants.tsv")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .contentLength(data.length)
+                .contentLength(data.length())
                 .body(resource);
     }
 
@@ -813,12 +808,21 @@ public class BIDSServiceImpl implements BIDSService {
      */
     private void participantsSerializer(File parentFolder, List<Subject> subjs) {
         File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
-        int index = 1;
 
         if (csvFile.exists()) {
             // Recreate it everytime
             FileUtils.deleteQuietly(csvFile);
         }
+
+        try {
+            Files.write(Paths.get(csvFile.getAbsolutePath()), buildParticipants(subjs).toString().getBytes());
+        } catch (IOException e) {
+            LOG.error("Error while creating particpants.tsv file: {}", e);
+        }
+    }
+
+    private StringBuilder buildParticipants(List<Subject> subjs) {
+        int index = 1;
         StringBuilder buffer =  new StringBuilder();
         // Headers
         for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
@@ -831,16 +835,13 @@ public class BIDSServiceImpl implements BIDSService {
             subjectName = this.formatLabel(subjectName);
             // Write in the file the values
             buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
-            .append(subject.getId()).append(CSV_SEPARATOR)
-            .append(CSV_SPLITTER);
+                    .append(subject.getId()).append(CSV_SEPARATOR)
+                    .append(CSV_SPLITTER);
         }
 
-        try {
-            Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
-        } catch (IOException e) {
-            LOG.error("Error while creating particpants.tsv file: {}", e);
-        }
+        return buffer;
     }
+
 
     private String formatLabel(String label) {
         return label.replaceAll("[^a-zA-Z0-9]+", "");
