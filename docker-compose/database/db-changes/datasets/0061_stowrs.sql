@@ -17,12 +17,12 @@ CREATE TABLE study_center (
 );
 
 INSERT IGNORE INTO `center` (id)
-SELECT DISTINCT center_id 
-FROM studies.study_center 
-WHERE center_id NOT IN (SELECT id FROM `center`);
+SELECT DISTINCT id 
+FROM studies.center 
+WHERE id NOT IN (SELECT id FROM `center`);
 
 # Replicate study_center into MS Datasets
-INSERT INTO study_center (id, study_id, center_id)
+INSERT IGNORE INTO study_center (id, study_id, center_id)
 SELECT
   id, study_id, center_id
 FROM 
