@@ -14,14 +14,20 @@
 
 package org.shanoir.ng.studycard;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -44,12 +50,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for study card controller.
@@ -81,6 +83,12 @@ public class StudyCardApiControllerTest {
     private CardsProcessingService studyCardProcessingServiceMock;
 
     @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
+    @MockBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 
     @MockBean
@@ -91,9 +99,6 @@ public class StudyCardApiControllerTest {
 
     @MockBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
-
-    @MockBean
-    private DicomSEGAndSRImporterService dicomSRImporterService;
 
     @MockBean
     private SolrService solrService;

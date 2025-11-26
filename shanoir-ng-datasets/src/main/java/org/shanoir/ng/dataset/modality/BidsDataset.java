@@ -28,7 +28,6 @@ public class BidsDataset extends Dataset {
     private String bidsDataType;
 
     public BidsDataset() {
-
     }
 
     public BidsDataset(Dataset other) {
@@ -48,6 +47,5 @@ public class BidsDataset extends Dataset {
     public void setBidsDataType(String bidsDataType) {
         this.bidsDataType = bidsDataType;
     }
-
 
 }

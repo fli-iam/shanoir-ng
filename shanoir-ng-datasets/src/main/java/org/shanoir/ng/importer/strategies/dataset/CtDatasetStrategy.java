@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -26,7 +27,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
     @Override
     public DatasetsWrapper<CtDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-            ImportJob importJob) throws Exception {
+            Long subjectId) throws Exception {
 
         DatasetsWrapper<CtDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
@@ -59,39 +59,43 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
         }
 
         for (Dataset anyDataset : serie.getDatasets()) {
-            importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-            CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
+            CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
             datasetWrapper.getDatasets().add(dataset);
             datasetIndex++;
         }
 
         return datasetWrapper;
-
     }
 
+
     @Override
-    public CtDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-            ImportJob importJob) throws Exception {
+    public CtDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
         CtDataset ctDataset = new CtDataset();
         ctDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
         ctDataset.setCreationDate(serie.getSeriesDate());
-        final String serieDescription = serie.getSeriesDescription();
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
         ctDataset.setOriginMetadata(datasetMetadata);
         // set the series description as the dataset comment & name
-        if (serieDescription != null && !"".equals(serieDescription)) {
-            ctDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-            ctDataset.getOriginMetadata().setComment(serieDescription);
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            ctDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            ctDataset.getOriginMetadata().setComment(seriesDescription);
         }
 
         // Pre-select the type Reconstructed dataset
         ctDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         // Set the study and the subject
-        ctDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        ctDataset.setSubjectId(subjectId);
 
         ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.CT_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            ctDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
         CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
         if (ctDataset.getSubjectId() != null) {
@@ -110,7 +114,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
          **/
         for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
             datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
             datasetExpression.setDataset(ctDataset);
             ctDataset.getDatasetExpressions().add(datasetExpression);
         }

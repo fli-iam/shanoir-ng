@@ -244,7 +244,7 @@ public class ImporterService {
                     // get dicomAttributes
                     AcquisitionAttributes<String> dicomAttributes = null;
                     try {
-                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
                     } catch (PacsException e) {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
@@ -357,7 +357,7 @@ public class ImporterService {
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, "", rank, importJob, dicomAttributes);
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDeepDatasetAcquisitionForSerie(importJob.getUsername(), examination.getSubject().getId(), serie, rank, dicomAttributes);
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());

@@ -47,7 +47,6 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
-import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
@@ -128,9 +127,6 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
-
-    @Autowired
-    private StudyCenterRepository studyCenterRepository;
 
     @Autowired
     private ShanoirEventService eventService;

@@ -26,7 +26,6 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.TagUtils;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
-import org.shanoir.ng.importer.dicom.DicomUtils;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -174,7 +173,7 @@ public class ExaminationConsistencyServiceJob {
     private int checkInstance(File importJobFolder, String examinationUID, int numberOfInstances, Serie serie,
             Iterator<Instance> instancesIt) throws FileNotFoundException, IOException, Exception {
         Instance instance = (Instance) instancesIt.next();
-        String instanceFilePath = DicomUtils.referencedFileIDToPath(importJobFolder.getAbsolutePath(), instance.getReferencedFileID());
+        String instanceFilePath = org.shanoir.ng.shared.dicom.DicomUtils.referencedFileIDToPath(importJobFolder.getAbsolutePath(), instance.getReferencedFileID());
         File instanceFile = new File(instanceFilePath);
         if (instanceFile.exists()) {
             try (DicomInputStream dIn = new DicomInputStream(instanceFile)) {

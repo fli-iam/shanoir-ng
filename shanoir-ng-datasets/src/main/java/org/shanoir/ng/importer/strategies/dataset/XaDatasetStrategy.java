@@ -15,8 +15,9 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.modality.XaDataset;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
@@ -26,7 +27,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 
     @Override
     public DatasetsWrapper<XaDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-            ImportJob importJob) throws Exception {
+            Long subjectId) throws Exception {
 
         DatasetsWrapper<XaDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
@@ -59,39 +59,42 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
         }
 
         for (Dataset anyDataset : serie.getDatasets()) {
-            importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-            XaDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
+            XaDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
             datasetWrapper.getDatasets().add(dataset);
             datasetIndex++;
         }
 
         return datasetWrapper;
-
     }
 
     @Override
-    public XaDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-            ImportJob importJob) throws Exception {
+    public XaDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
         XaDataset xaDataset = new XaDataset();
         xaDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
         xaDataset.setCreationDate(serie.getSeriesDate());
-        final String serieDescription = serie.getSeriesDescription();
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
         xaDataset.setOriginMetadata(datasetMetadata);
         // set the series description as the dataset comment & name
-        if (serieDescription != null && !"".equals(serieDescription)) {
-            xaDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-            xaDataset.getOriginMetadata().setComment(serieDescription);
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            xaDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            xaDataset.getOriginMetadata().setComment(seriesDescription);
         }
 
         // Pre-select the type Reconstructed dataset
         xaDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         // Set the study and the subject
-        xaDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        xaDataset.setSubjectId(subjectId);
 
         xaDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.XA_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            xaDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
         CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
         if (xaDataset.getSubjectId() != null) {
@@ -110,7 +113,7 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
          **/
         for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
             datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
             datasetExpression.setDataset(xaDataset);
             xaDataset.getDatasetExpressions().add(datasetExpression);
         }

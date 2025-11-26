@@ -32,7 +32,6 @@ public interface EquipmentCenterMapper {
 
     List<CenterDTO> centersToCenterDTO(List<Center> centers);
 
-
     CenterDTO centerToCenterDTO(Center center);
 
 }
