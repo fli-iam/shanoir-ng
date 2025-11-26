@@ -57,13 +57,13 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     private CtProtocolStrategy protocolStrategy;
 
     @Autowired
-    private DatasetStrategy<CtDataset> datasetStrategy;
+    private DatasetStrategy<CtDataset> ctDatasetStrategy;
 
     @Override
     public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         CtDatasetAcquisition datasetAcquisition = (CtDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
                 userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
-        DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        DatasetsWrapper<CtDataset> datasetsWrapper = ctDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
         List<Dataset> genericizedList = new ArrayList<>();
         for (Dataset dataset : datasetsWrapper.getDatasets()) {
             dataset.setDatasetAcquisition(datasetAcquisition);
@@ -96,8 +96,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 
     @Override
     public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
+        return ctDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
     }
 
 }

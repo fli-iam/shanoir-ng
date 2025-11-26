@@ -50,14 +50,14 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     private XaProtocolStrategy protocolStrategy;
 
     @Autowired
-    private DatasetStrategy<XaDataset> datasetStrategy;
+    private DatasetStrategy<XaDataset> xaDatasetStrategy;
 
     @Override
     public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes)
             throws Exception {
         XaDatasetAcquisition datasetAcquisition = (XaDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
                 userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
-        DatasetsWrapper<XaDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        DatasetsWrapper<XaDataset> datasetsWrapper = xaDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
         List<Dataset> genericizedList = new ArrayList<>();
         for (Dataset dataset : datasetsWrapper.getDatasets()) {
             dataset.setDatasetAcquisition(datasetAcquisition);
@@ -89,8 +89,7 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 
     @Override
     public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
+        return xaDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
     }
 
 }

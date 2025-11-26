@@ -36,17 +36,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
 
     @Autowired
-    private DatasetStrategy<GenericDataset> datasetStrategy;
+    private DatasetStrategy<GenericDataset> genericDatasetStrategy;
 
     @Override
     public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         GenericDatasetAcquisition datasetAcquisition = (GenericDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
                 userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
-        DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        DatasetsWrapper<GenericDataset> datasetsWrapper = genericDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
         List<Dataset> genericizedList = new ArrayList<>();
         for (Dataset dataset : datasetsWrapper.getDatasets()) {
             dataset.setDatasetAcquisition(datasetAcquisition);
@@ -76,8 +77,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 
     @Override
     public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFlatDataset'");
+        return genericDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
     }
 
 }
