@@ -92,7 +92,7 @@ public class SubjectServiceSecurityTest {
         assertAccessDenied(service::findByIdWithSubjectStudies, ENTITY_ID);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 
-        assertAccessDenied(service::create, mockNew);
+        assertAccessDenied(service::create, mockNew, true);
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
     }
@@ -162,7 +162,7 @@ public class SubjectServiceSecurityTest {
         assertAccessAuthorized(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
         assertAccessAuthorized(service::findByIdWithSubjectStudies, ENTITY_ID);
         assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
-        assertAccessAuthorized(service::create, mockNew);
+        assertAccessAuthorized(service::create, mockNew, true);
         assertAccessAuthorized(service::update, mockExisting);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
     }
@@ -206,7 +206,7 @@ public class SubjectServiceSecurityTest {
 
         // Create subject without subject <-> study
         Subject newSubjectMock = buildSubjectMock(null);
-        assertAccessDenied(service::create, newSubjectMock);
+        assertAccessDenied(service::create, newSubjectMock, true);
 
         // Create subject
         studiesMock = new ArrayList<>();
@@ -214,7 +214,7 @@ public class SubjectServiceSecurityTest {
         given(studyRepository.findAllById(Arrays.asList(new Long[] {9L}))).willReturn(studiesMock);
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 9L);
-        assertAccessDenied(service::create, newSubjectMock);
+        assertAccessDenied(service::create, newSubjectMock, true);
 
         // Create subject linked to a study where I can admin, download, see all but not import.
         studiesMock = new ArrayList<>();
@@ -222,7 +222,7 @@ public class SubjectServiceSecurityTest {
         given(studyRepository.findAllById(Arrays.asList(new Long[] {10L}))).willReturn(studiesMock);
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
-        assertAccessDenied(service::create, newSubjectMock);
+        assertAccessDenied(service::create, newSubjectMock, true);
 
         // Create subject linked to a study where I can import and also to a study where I can't.
         studiesMock = new ArrayList<>();
@@ -233,7 +233,7 @@ public class SubjectServiceSecurityTest {
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 11L);
         addStudyToMock(newSubjectMock, 12L);
-        assertAccessDenied(service::create, newSubjectMock);
+        assertAccessDenied(service::create, newSubjectMock, true);
 
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
@@ -244,7 +244,7 @@ public class SubjectServiceSecurityTest {
         given(studyUserRepository.findByStudy_Id(13L)).willReturn(studiesMock.get(0).getStudyUserList());
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 13L, StudyUserRight.CAN_IMPORT);
-        assertAccessAuthorized(service::create, newSubjectMock);
+        assertAccessAuthorized(service::create, newSubjectMock, true);
     }
 
     private Study buildStudyMock(Long id, StudyUserRight... rights) {

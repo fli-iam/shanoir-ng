@@ -13,6 +13,8 @@
  */
 package org.shanoir.ng.shared.repository;
 
+import java.util.Optional;
+
 import org.shanoir.ng.shared.model.Center;
 import org.springframework.data.repository.CrudRepository;
 
@@ -21,5 +23,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  */
 public interface CenterRepository extends CrudRepository<Center, Long> {
+
+    Optional<Center> findFirstByNameContainingOrderByIdAsc(String name);
 
 }

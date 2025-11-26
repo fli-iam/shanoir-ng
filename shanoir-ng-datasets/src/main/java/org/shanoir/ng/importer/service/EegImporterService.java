@@ -209,7 +209,7 @@ public class EegImporterService {
             }
 
             datasetAcquisition.setDatasets(datasets);
-            datasetAcquisitionService.create(datasetAcquisition);
+            datasetAcquisitionService.create(datasetAcquisition, true);
 
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);

@@ -35,8 +35,8 @@ public class MrDatasetMetadata extends AbstractEntity {
     private Integer mrDatasetNature;
 
     public MrDatasetMetadata() {
-
     }
+
     public MrDatasetMetadata(MrDatasetMetadata mrdsm) {
         if (mrdsm != null && mrdsm.getMrDatasetNature() != null)
             this.mrDatasetNature = mrdsm.getMrDatasetNature().getId();

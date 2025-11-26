@@ -18,7 +18,6 @@ import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
 /**
@@ -38,9 +37,9 @@ import org.shanoir.ng.importer.dto.Serie;
 
 public interface DatasetStrategy<T extends org.shanoir.ng.dataset.model.Dataset> {
 
-    DatasetsWrapper<T> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, ImportJob importJob) throws Exception;
+    DatasetsWrapper<T> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, Long subjectId) throws Exception;
 
-    T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,    ImportJob importJob) throws Exception;
+    T generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex, Long subjectId) throws Exception;
 
     String computeDatasetName(String name, int index);
 

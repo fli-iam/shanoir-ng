@@ -14,16 +14,9 @@
 
 package org.shanoir.ng.importer.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +25,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
-import org.dcm4che3.io.DicomInputStream;
-import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -49,10 +40,11 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
@@ -60,7 +52,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,10 +75,6 @@ public class DicomSEGAndSRImporterService {
 
     private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
-    private static final String SEG = "SEG";
-
-    private static final String SR = "SR";
-
     @Autowired
     private ExaminationRepository examinationRepository;
 
@@ -101,59 +88,34 @@ public class DicomSEGAndSRImporterService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private DICOMWebService dicomWebService;
-
-    @Autowired
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
-    @Value("${dcm4chee-arc.protocol}")
-    private String dcm4cheeProtocol;
-
-    @Value("${dcm4chee-arc.host}")
-    private String dcm4cheeHost;
-
-    @Value("${dcm4chee-arc.port.web}")
-    private String dcm4cheePortWeb;
-
-    @Value("${dcm4chee-arc.dicom.web.rs}")
-    private String dicomWebRS;
+    @Autowired
+    private DicomImporterService dicomImporterService;
 
     @Transactional
-    public boolean importDicomSEGAndSR(InputStream inputStream, boolean nonOhifRequest) {
-        // DicomInputStream consumes the input stream to read the data
-        try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
-            Attributes metaInformationAttributes = dIS.readFileMetaInformation();
-            Attributes datasetAttributes = dIS.readDataset();
+    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
+        // Retrieve examination; adjust datasetAttributes if received from OHIF
+        String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+        Examination examination = nonOhifRequest
+                ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
+                : modifyDicom(datasetAttributes);
+        if (examination == null) {
+            LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
+            return false;
+        }
 
-            // Validate modality
-            String modality = datasetAttributes.getString(Tag.Modality);
-            if (!SEG.equals(modality) && !SR.equals(modality)) {
-                LOG.error("Error: importDicomSEGAndSR: unsupported modality '{}'. Expected SEG or SR.", modality);
-                return false;
-            }
-
-            // Retrieve examination; adjust datasetAttributes if received from OHIF
-            String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-            Examination examination = nonOhifRequest
-                    ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
-                    : modifyDicom(datasetAttributes);
-            if (examination == null) {
-                LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
-                return false;
-            }
-
-            // Find related dataset
-            Dataset dataset = findDataset(examination, datasetAttributes);
-            if (dataset == null) {
-                LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-                return false;
-            }
-
-            // Create dataset and send it to PACS
+        // Find related dataset
+        Dataset dataset = findDataset(examination, datasetAttributes);
+        if (dataset == null) {
+            LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+            return false;
+        }
+        try {
             createDataset(modality, examination, dataset, datasetAttributes);
-            sendToPacs(metaInformationAttributes, datasetAttributes);
+            dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Error during import of DICOM SEG/SR.", e);
             return false;
         }
         return true;
@@ -175,20 +137,29 @@ public class DicomSEGAndSRImporterService {
      * @param datasetAttributes
      */
     private Examination modifyDicom(Attributes datasetAttributes) {
-        String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-        Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
-        Examination examination = examinationRepository.findById(examinationID).get();
-        // replace artificial examinationUID with real StudyInstanceUID in DICOM server
-        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-        datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
-        // replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
-        Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
-        String subjectName = "error_subject_name_not_found_in_db";
-        if (subjectOpt.isPresent()) {
-            subjectName = subjectOpt.get().getName();
+        String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+        Examination examination = null;
+        if (studyInstanceUID.contains(StudyInstanceUIDHandler.PREFIX)) {
+            try {
+                Long examinationID = Long.valueOf(studyInstanceUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+                examination = examinationRepository.findById(examinationID).orElseThrow();
+                // replace artificial examinationUID with real StudyInstanceUID in DICOM server
+                String studyInstanceUIDPACS = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(studyInstanceUID);
+                datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUIDPACS);
+                // replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
+                Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
+                String subjectName = "error_subject_name_not_found_in_db";
+                if (subjectOpt.isPresent()) {
+                    subjectName = subjectOpt.get().getName();
+                }
+                datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
+                datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
+            } catch (NumberFormatException e) {
+                examination = examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElseThrow();
+            }
+        } else {
+            examination = examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElseThrow();
         }
-        datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
-        datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
         // set user name, as person, who created the measurement/segmentation
         final String userName = KeycloakUtil.getTokenUserName();
         datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
@@ -310,10 +281,11 @@ public class DicomSEGAndSRImporterService {
      * @param dataset
      * @param datasetAttributes
      * @throws MalformedURLException
+     * @throws ShanoirException
      */
-    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
+    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
         Dataset newMsOrSegDataset = null;
-        if (SEG.equals(modality)) {
+        if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
             newMsOrSegDataset = new SegmentationDataset();
         } else {
             newMsOrSegDataset = new MeasurementDataset();
@@ -326,7 +298,7 @@ public class DicomSEGAndSRImporterService {
         // for rights check: keep link to original acquisition
         newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
         createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
-        createDatasetExpression(datasetAttributes, newMsOrSegDataset);
+        dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
         Dataset createdDataset = datasetService.create(newMsOrSegDataset);
         solrService.indexDataset(createdDataset.getId());
     }
@@ -398,78 +370,6 @@ public class DicomSEGAndSRImporterService {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Create the necessary dataset expression.
-     *
-     * @param datasetAttributes
-     * @param measurementDataset
-     * @throws MalformedURLException
-     */
-    private void createDatasetExpression(Attributes datasetAttributes, Dataset dataset)
-            throws MalformedURLException {
-        DatasetExpression expression = new DatasetExpression();
-        expression.setCreationDate(LocalDateTime.now());
-        expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-        expression.setDataset(dataset);
-        dataset.setDatasetExpressions(Collections.singletonList(expression));
-        List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
-        expression.setDatasetFiles(files);
-    }
-
-    /**
-     * Create the dataset files, as WADO-RS links in that case,
-     * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-     *
-     * @param datasetAttributes
-     * @param expression
-     * @return
-     * @throws MalformedURLException
-     */
-    private List<DatasetFile> createDatasetFiles(Attributes datasetAttributes, DatasetExpression expression)
-            throws MalformedURLException {
-        DatasetFile datasetFile = new DatasetFile();
-        final String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-        final String seriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
-        final String sOPInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-        final StringBuffer wadoStrBuf = new StringBuffer();
-        wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-        wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
-                    + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
-        URL wadoURL = new URL(wadoStrBuf.toString());
-        datasetFile.setPath(wadoURL.toString());
-        datasetFile.setPacs(true);
-        datasetFile.setDatasetExpression(expression);
-        List<DatasetFile> files = new ArrayList<DatasetFile>();
-        files.add(datasetFile);
-        return files;
-    }
-
-    /**
-     * This method writes both attributes to an output stream and converts
-     * this one to an input stream, that can be used to send the manipulated
-     * file to the backend pacs.
-     *
-     * @param metaInformationAttributes
-     * @param datasetAttributes
-     * @throws IOException
-     * @throws Exception
-     */
-    private void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
-            throws IOException, Exception {
-        /**
-         * Create a new output stream to write the changes into and use its bytes
-         * to produce a new input stream to send later by http client to the DICOM server.
-         */
-        ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
-        // close calls to the outer stream, close the inner stream
-        try (DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
-            dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-            try (InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-                dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }
     }
