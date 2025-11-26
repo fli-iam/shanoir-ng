@@ -75,6 +75,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -199,19 +203,22 @@ public class BIDSServiceImpl implements BIDSService {
         return new File(tmpFilePath);
     }
 
-    public File generateParticipants(final Long studyId) throws IOException {
+    public ResponseEntity<ByteArrayResource> generateParticipants(final Long studyId) throws IOException {
         List<Subject> subjs = getSubjectsForStudy(studyId);
 
         File workFolder = getBidsFolderpath(studyId, "neurobagel");
-        if (workFolder.exists()) {
-            // If the file already exists, just return it
-            return workFolder;
-        }
         File baseDir = createBaseBidsFolder(workFolder, "neurobagel");
         participantsSerializer(baseDir, subjs);
 
         File res = new File(baseDir, "participants.tsv");
-        return res;
+        byte[] data = Files.readAllBytes(res.toPath());
+        ByteArrayResource resource = new ByteArrayResource(data);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + res.getName())
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .contentLength(data.length)
+                .body(resource);
     }
 
     /**

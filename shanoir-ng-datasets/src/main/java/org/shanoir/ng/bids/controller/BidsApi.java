@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,7 +46,7 @@ public interface BidsApi {
             @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/neurobagel/studyId/{studyId}")
-    ResponseEntity<Void> generateParticipantsByStudyId(
+    ResponseEntity<ByteArrayResource> generateParticipantsByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
     @Operation(summary = "generateBids", description = "Create a BIDS structure for a given study ID and study name")
