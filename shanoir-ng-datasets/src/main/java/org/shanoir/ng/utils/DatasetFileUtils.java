@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * <p>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p>
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -75,7 +75,7 @@ public final class DatasetFileUtils {
      */
     public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
         List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext(); ) {
+        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
             DatasetExpression datasetExpression = itExpressions.next();
             if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
                 List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
@@ -209,8 +209,8 @@ public final class DatasetFileUtils {
 
     public static void compressGzipFile(String source, String gzipDestination) throws IOException {
         try (FileInputStream fis = new FileInputStream(source);
-             FileOutputStream fos = new FileOutputStream(gzipDestination);
-             GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+                 FileOutputStream fos = new FileOutputStream(gzipDestination);
+                 GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = fis.read(buffer)) > 0) {
