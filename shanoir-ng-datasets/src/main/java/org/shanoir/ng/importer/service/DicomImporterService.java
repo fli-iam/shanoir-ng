@@ -198,7 +198,7 @@ public class DicomImporterService {
         LOG.info("DICOMWeb STOW-RS cache created: seriesInstanceUIDNumberOfFilesCache");
     }
 
-    @Scheduled(cron = "0 0 0 15 * *", zone = "Europe/Paris")
+    @Scheduled(cron = "0 */15 * * * *", zone = "Europe/Paris")
     public void logAndClearCaches() {
         LOG.info(studyInstanceUIDNumberOfFilesCache.toString());
         studyInstanceUIDNumberOfFilesCache.clear();
@@ -396,7 +396,7 @@ public class DicomImporterService {
         String centerName = attributes.getString(Tag.InstitutionName);
         if (equipmentDicom.isComplete() && centerName != null && !centerName.isEmpty()) {
             String equipmentName = equipmentDicom.toStringAcquisitionEquipment(centerName);
-            LOG.info("Searching with equipment name: " + equipmentName);
+            LOG.debug("Searching with equipment name: " + equipmentName);
             AcquisitionEquipment equipment = acquisitionEquipmentRepository.findFirstByName(equipmentName);
             if (equipment == null) {
                 equipment = acquisitionEquipmentRepository.findFirstByNameContainingAndNameContaining(centerName, equipmentDicom.getDeviceSerialNumber());
