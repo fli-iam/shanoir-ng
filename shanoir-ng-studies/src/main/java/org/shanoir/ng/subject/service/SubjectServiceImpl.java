@@ -385,7 +385,7 @@ public class SubjectServiceImpl implements SubjectService {
     public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.
-                    convertAndSend(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
+                    convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(subjectDTO));
             return true;
         } catch (AmqpException | JsonProcessingException e) {
