@@ -166,10 +166,9 @@ public class RabbitMQDatasetsService {
 
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public boolean receiveSubjectUpdate(final String subjectStr) {
+    public void receiveSubjectUpdate(final String subjectStr) {
         try {
             manageSubjectUpdate(subjectStr);
-            return true;
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
         }
