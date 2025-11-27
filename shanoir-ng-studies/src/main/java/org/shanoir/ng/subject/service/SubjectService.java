@@ -133,7 +133,7 @@ public interface SubjectService {
      * @return created subject.
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-    Subject create(Subject subject) throws ShanoirException;
+    Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
 
     /**
      * Save a subject and auto-increment the common name on using the centerId.
@@ -142,7 +142,7 @@ public interface SubjectService {
      * @return created subject.
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-    Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
+    Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
 
     /**
      * Update a subject.
