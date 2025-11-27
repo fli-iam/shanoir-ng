@@ -209,6 +209,9 @@ public class RabbitMQConfiguration {
     /** Queue used to get anonymisation profile of a study. */
     public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
 
+    /** Queue used to get participants.tsv of a study. */
+    public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
+
     /** Queue used to make bruker to dicom conversion. */
     public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
 
@@ -486,6 +489,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyAnonymisationProfileQueue() {
         return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyParticipantsTsvQueue() {
+        return new Queue(STUDY_PARTICIPANTS_TSV, true);
     }
 
     @Bean

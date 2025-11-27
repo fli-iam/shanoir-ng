@@ -16,6 +16,7 @@ package org.shanoir.ng.configuration.amqp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +61,9 @@ public class RabbitMQStudiesService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private BIDSService bidsService;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -226,4 +231,11 @@ public class RabbitMQStudiesService {
         }
     }
 
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public void getStudyParticipantsTsv(final long studyId) throws IOException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+
+        this.bidsService.generateParticipantsTsvFile(studyId);
+    }
 }
