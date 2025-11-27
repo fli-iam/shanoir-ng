@@ -94,6 +94,9 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     @JoinColumn(name = "studycard_id")
     private StudyCard studyCard;
 
+    /** (0020,0012) Tag.AcquisitionNumber, Optional(3) */
+    private Integer acquisitionNumber;
+
     /** Used to know if the study card that was applied matches the study card's last version or anterior */
     private Long studyCardTimestamp;
 
@@ -125,8 +128,11 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     /**
      * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
      * dcm4chee arc light, and generated during pseudonymization.
+     * Not unique, as we can have STOW-RS imports of the same DICOM study,
+     * that are imported into 2 Shanoir studies (== research project) and
+     * keep the same SeriesInstanceUID, but are 2 different acquisitions.
      */
-    @Column(name = "series_instance_uid", unique = true)
+    @Column(name = "series_instance_uid")
     private String seriesInstanceUID;
 
     public DatasetAcquisition() {
@@ -227,6 +233,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
      */
     public Integer getSortingIndex() {
         return sortingIndex;
+    }
+
+    public Integer getAcquisitionNumber() {
+        return acquisitionNumber;
+    }
+
+    public void setAcquisitionNumber(Integer acquisitionNumber) {
+        this.acquisitionNumber = acquisitionNumber;
     }
 
     /**

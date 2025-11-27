@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,6 +227,54 @@ public final class Utils {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
+    }
+
+    /**
+     * Convert a String with a wildcard to a regular expression.
+     *
+     * @param wildcard the wildcard
+     *
+     * @return the string
+     */
+    public static String wildcardToRegex(String wildcard) {
+        StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        for (int i = 0, is = wildcard.length(); i < is; i++) {
+            char c = wildcard.charAt(i);
+            switch (c) {
+                case '*':
+                    s.append(".*");
+                    break;
+                case '?':
+                    s.append(".");
+                    break;
+                    // escape special regexp-characters
+                case '(':
+                case ')':
+                case '[':
+                case ']':
+                case '$':
+                case '^':
+                case '.':
+                case '{':
+                case '}':
+                case '|':
+                case '\\':
+                    s.append("\\");
+                    s.append(c);
+                    break;
+                default:
+                    s.append(c);
+                    break;
+            }
+        }
+        s.append('$');
+        return s.toString();
+    }
+
+    public static String getOrSetToDefault(Attributes attributes, int tag, String defaultValue) {
+        String value = attributes.getString(tag);
+        return (value == null || value.isEmpty()) ? defaultValue : value;
     }
 
 }

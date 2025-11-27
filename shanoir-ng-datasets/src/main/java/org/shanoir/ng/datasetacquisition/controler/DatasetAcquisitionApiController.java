@@ -114,9 +114,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     @Transactional
     public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
-
         eegImporterService.createEegDataset(importJob);
         importerService.cleanTempFiles(importJob.getWorkFolder());
         return HttpStatus.OK.value();

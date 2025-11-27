@@ -17,6 +17,10 @@ package org.shanoir.ng.dicom.web;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +40,22 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * The StowRSMultipartRelatedRequestFilter handles a POST request of
- * content type "multipart/related", as send by the OHIF-viewer according
- * to the DICOM standard, containing a DICOM SR modality, == Structured
- * Report. Within the OHIF viewer, the button "save measurements" is used
- * to send the measurements to shanoir backend for storage.
+ * The STOWRSMultipartRequestFilter handles a HTTP-POST request of
+ * content type "multipart/related", according to the DICOMWeb standard.
+ *
+ * 1) This request filter is used by the OHIF viewer sending DICOM SR or
+ * DICOM SEG modalities (SR == Structured Report, SEG = Segmentation).
+ * Within the OHIF viewer, the button "save measurements" is used
+ * to send the measurements (SR) to the Shanoir backend for storage.
+ * Within the OHIF viewer, open for segmentation/export segmentation
+ * is used to send segmentations (SEG) to the Shanoir backend for storage.
+ *
+ * 2) This request filter is used by Karnak or any other DICOM gateway to
+ * import DICOM files into Shanoir (file-by-file, eiter in one multipart
+ * request or multiple requests).
  *
  * It might look weird to use a request filter for this purpose and not
- * manage this inside the standard rest controller. After two days of search
+ * manage this inside the standard REST controller. After two days of search
  * I seem to have figured out, that the DefaultMultipartResolver of Spring
  * Boot only supports "multipart/form-data", but NOT "multipart/related".
  * I made several tries with CommonsMultipartResolver and the libs commons-
@@ -66,16 +78,31 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  */
 @Component
-public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
+public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StowRSMultipartRelatedRequestFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(STOWRSMultipartRequestFilter.class);
 
     private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
     private static final String DICOMWEB_STUDIES = "/dicomweb/studies";
 
+    public static final String DICOM_MODALITY_SEG = "SEG";
+
+    private static final String DICOM_MODALITY_SR = "SR";
+
+    private static final String DICOM_MODALITY_MR = "MR";
+
+    private static final String DICOM_MODALITY_CT = "CT";
+
+    private static final String DICOM_MODALITY_PT = "PT";
+
+    private static final String DICOM_MODALITY_NM = "NM";
+
     @Autowired
-    private DicomSEGAndSRImporterService dicomSRImporterService;
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @Autowired
+    private DicomImporterService dicomImporterService;
 
     @Override
     public void doFilter(
@@ -94,19 +121,46 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
                 for (int i = 0; i < count; i++) {
                     BodyPart bodyPart = multipart.getBodyPart(i);
                     if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-                        if (!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream(), nonOhifRequest)) {
-                            throw new ServletException("Error in importDicomSEGAndSR.");
-                        }
+                        manageDICOM(bodyPart, nonOhifRequest);
                     } else {
-                        throw new IOException("StowRSMultipartRelatedRequestFilter: exception sending dicom file to pacs (stow-sr).");
+                        throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
                     }
                 }
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
+                throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
             }
             return;
         }
         chain.doFilter(request, response);
+    }
+
+    private void manageDICOM(BodyPart bodyPart, boolean nonOhifRequest) throws Exception {
+        // DicomInputStream consumes the input stream to read the data
+        try (DicomInputStream dIS = new DicomInputStream(bodyPart.getInputStream())) {
+            Attributes metaInformationAttributes = dIS.readFileMetaInformation();
+            Attributes datasetAttributes = dIS.readDataset();
+            String modality = datasetAttributes.getString(Tag.Modality);
+            if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
+                if (!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
+                    LOG.error("Error during import of DICOM SEG/SR.");
+                    throw new ServletException("Error during import of DICOM SEG/SR.");
+                }
+            } else if (DICOM_MODALITY_MR.equals(modality)
+                    || DICOM_MODALITY_CT.equals(modality)
+                    || DICOM_MODALITY_PT.equals(modality)
+                    || DICOM_MODALITY_NM.equals(modality)) {
+                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes, modality)) {
+                    LOG.error("Error during import of DICOM MR/CT/PT/NM.");
+                    throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
+                }
+            } else {
+                LOG.error("Not supported DICOM modality sent: {}", modality);
+                throw new ServletException("Not supported DICOM modality sent: " + modality);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
 }

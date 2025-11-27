@@ -116,13 +116,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
     private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException {
         try {
-            String datasetAcEqName =
-                    equipment.getManufacturerModel().getManufacturer().getName() + " - "
-                            + equipment.getManufacturerModel().getName() + " "
-                            + (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
-                            + equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
-
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
+            String datasetAcEqName = equipment.toString();
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
             return true;
         } catch (AmqpException | JsonProcessingException e) {
@@ -138,7 +133,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         try {
             updateName(updated);
         } catch (MicroServiceCommunicationException e) {
-            LOG.error("Could not send the center name creation to the other microservices !", e);
+            LOG.error("Could not send the center name update to the other microservices !", e);
         }
         return repository.save(entityDb);
     }
@@ -165,19 +160,19 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
                 // nothing found with device serial number from DICOM
                 if (equipments == null || equipments.isEmpty()) {
                     equipments = new ArrayList<AcquisitionEquipment>();
-                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
                     equipments.add(acquisitionEquipment);
                 } else {
                     matchOrRemoveEquipments(equipmentDicom, equipments);
                     if (equipments.isEmpty()) {
-                        acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+                        acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
                         equipments.add(acquisitionEquipment);
                     }
                 }
             } else {
                 matchOrRemoveEquipments(equipmentDicom, equipments);
                 if (equipments.isEmpty()) {
-                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom);
+                    acquisitionEquipment = saveNewAcquisitionEquipment(centerId, equipmentDicom, true);
                     equipments.add(acquisitionEquipment);
                 }
             }
@@ -186,7 +181,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         return null;
     }
 
-    private AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom) {
+    @Override
+    public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP) {
         Optional<ManufacturerModel> manufacturerModelOpt =
                 manufacturerModelRepository.findFirstByNameContainingIgnoreCaseOrderByIdAsc(equipmentDicom.getManufacturerModelName());
         ManufacturerModel manufacturerModel = manufacturerModelOpt.orElseGet(() -> {
@@ -213,7 +209,15 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         equipment.setManufacturerModel(manufacturerModel);
         equipment.setCenter(centerRepository.findById(centerId).orElseThrow());
         equipment.setSerialNumber(equipmentDicom.getDeviceSerialNumber());
-        return repository.save(equipment);
+        equipment = repository.save(equipment);
+        if (withAMQP) {
+            try {
+                updateName(equipment);
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Could not send the center creation to the other microservices !", e);
+            }
+        }
+        return equipment;
     }
 
     private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {

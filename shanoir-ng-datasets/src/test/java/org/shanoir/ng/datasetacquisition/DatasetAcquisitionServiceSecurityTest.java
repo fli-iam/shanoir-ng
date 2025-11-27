@@ -120,7 +120,7 @@ public class DatasetAcquisitionServiceSecurityTest {
         assertAccessDenied(service::findByStudyCard, 1L);
         assertAccessDenied(service::findPage, PageRequest.of(0, 10));
 
-        assertAccessDenied(service::create, mockDsAcq());
+        assertAccessDenied(service::create, mockDsAcq(), true);
         assertAccessDenied(service::update, mockDsAcq(1L));
         assertAccessDenied(service::deleteById, 1L, null);
     }
@@ -149,7 +149,7 @@ public class DatasetAcquisitionServiceSecurityTest {
         Page<DatasetAcquisition> page = service.findPage(PageRequest.of(0, 10));
         assertNotNull(page);
         assertEquals(4, page.getTotalElements());
-        assertAccessAuthorized(service::create, mockDsAcq());
+        assertAccessAuthorized(service::create, mockDsAcq(), true);
         assertAccessAuthorized(service::update, mockDsAcq(1L));
         assertAccessAuthorized(service::deleteById, 1L, null);
     }
@@ -158,20 +158,20 @@ public class DatasetAcquisitionServiceSecurityTest {
     private void testAll(String role) throws ShanoirException, RestServiceException {
         // create(DatasetAcquisition)
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-        assertAccessDenied(service::create, mockDsAcq(null, 1L, 1L, 1L));
+        assertAccessDenied(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
-        assertAccessAuthorized(service::create, mockDsAcq(null, 1L, 1L, 1L));
+        assertAccessAuthorized(service::create, mockDsAcq(null, 1L, 1L, 1L), true);
 
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L));
+        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
-        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L));
+        assertAccessDenied(service::create, mockDsAcq(null, 3L, 3L, 1L), true);
 
         given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
-        assertAccessDenied(service::create, mockDsAcq(null, 2L, 2L, 2L));
+        assertAccessDenied(service::create, mockDsAcq(null, 2L, 2L, 2L), true);
 
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
-        assertAccessDenied(service::create, mockDsAcq(null, 4L, 4L, 4L));
+        assertAccessDenied(service::create, mockDsAcq(null, 4L, 4L, 4L), true);
 
         // findByStudyCard(Long)
         assertAccessAuthorized(service::findByStudyCard, 1L);
@@ -232,7 +232,6 @@ public class DatasetAcquisitionServiceSecurityTest {
         given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
         given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(false);
     }
-
 
     private DatasetAcquisition mockDsAcq(Long id) {
         DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();

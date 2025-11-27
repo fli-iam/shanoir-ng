@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
@@ -72,6 +73,19 @@ public class StudyServiceImpl implements StudyService {
         }
         for (StudyTag tag : current.getStudyTags()) {
             tag.setStudy(current);
+        }
+
+        // STUDY CENTER
+        if (current.getStudyCenterList() != null) {
+            current.getStudyCenterList().clear();
+        } else {
+            current.setStudyCenterList(new ArrayList<>());
+        }
+        if (updated.getStudyCenterList() != null) {
+            current.getStudyCenterList().addAll(updated.getStudyCenterList());
+        }
+        for (StudyCenter studyCenter : current.getStudyCenterList()) {
+            studyCenter.setStudy(current);
         }
 
         this.repository.save(current);

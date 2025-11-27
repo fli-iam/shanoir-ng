@@ -17,6 +17,7 @@ package org.shanoir.ng.shared.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -97,12 +98,24 @@ public class SubjectService {
         return subjectRepository.findByStudy_Id(studyId);
     }
 
+    public Subject findByNameAndStudyId(String name, Long studyId) {
+        return subjectRepository.findByNameAndStudy_Id(name, studyId);
+    }
+
     private void send(Object obj, String queue) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
         } catch (AmqpException | JsonProcessingException e) {
-            throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+            throw new MicroServiceCommunicationException("Error while communicating with MS Studies to send study card tags.", e);
         }
+    }
+
+    public Optional<Subject> findById(Long subjectId) {
+        return subjectRepository.findById(subjectId);
+    }
+
+    public Subject save(Subject subject) {
+        return subjectRepository.save(subject);
     }
 
 }

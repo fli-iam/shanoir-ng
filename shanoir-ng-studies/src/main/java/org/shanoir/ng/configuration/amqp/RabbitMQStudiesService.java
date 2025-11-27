@@ -14,13 +14,27 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
+import org.shanoir.ng.shared.message.CreateEquipmentForCenterMessage;
 import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -35,17 +49,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -53,6 +68,8 @@ public class RabbitMQStudiesService {
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
 
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
+
+    private static final String DELIMITER = ":";
 
     @Autowired
     private StudyRepository studyRepo;
@@ -64,13 +81,19 @@ public class RabbitMQStudiesService {
     private SubjectRepository subjectRepository;
 
     @Autowired
+    private CenterService centerService;
+
+    @Autowired
     private DataUserAgreementService dataUserAgreementService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper mapper;
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private AcquisitionEquipmentService acquisitionEquipmentService;
 
     /**
      * Receives a shanoirEvent as a json object, concerning an examination creation
@@ -87,7 +110,7 @@ public class RabbitMQStudiesService {
     public void linkExamination(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+            ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();
@@ -163,7 +186,7 @@ public class RabbitMQStudiesService {
     public boolean studySubscription(final String studyStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
+            ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
             Long userId = event.getUserId();
             Long studyId = Long.valueOf(event.getObjectId());
             // Get the study
@@ -207,7 +230,7 @@ public class RabbitMQStudiesService {
         try {
             LOG.info(messageStr);
             List<SubjectQualityTagDTO> subjectStudyCardTagList =
-                    objectMapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
+                    mapper.readValue(messageStr, new TypeReference<List<SubjectQualityTagDTO>>() { });
             // build a id -> dto map
             Map<Long, SubjectQualityTagDTO> dtoMap = new HashMap<>();
             for (SubjectQualityTagDTO dto : subjectStudyCardTagList) {
@@ -224,6 +247,68 @@ public class RabbitMQStudiesService {
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
         }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public String createCenter(final String messageStr) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            CreateCenterForStudyMessage message = mapper.readValue(messageStr, CreateCenterForStudyMessage.class);
+            Center center = findOrCreateOrAddCenterByInstitutionDicom(message.getStudyId(), message.getInstitutionDicom());
+            if (center != null) {
+                Long studyCenterId = center.getStudyCenterList().stream()
+                        .filter(sc -> sc.getStudy().getId().equals(message.getStudyId()))
+                        .findFirst().orElseThrow().getId();
+                String returnMessage = center.getId() + DELIMITER + studyCenterId;
+                return returnMessage;
+            } else {
+                LOG.error("Error while creating a new center.");
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error("Error while creating a new center: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
+    @Transactional
+    private Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom) {
+        try {
+            return centerService.findOrCreateOrAddCenterByInstitutionDicom(studyId, institutionDicom, false);
+        } catch (EntityNotFoundException e) {
+            LOG.error("Error while creating a new center: ", e);
+        }
+        return null;
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CREATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public Long createEquipment(final String messageStr) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            CreateEquipmentForCenterMessage message = mapper.readValue(messageStr, CreateEquipmentForCenterMessage.class);
+            AcquisitionEquipment equipment = createEquipmentByEquipmentDicom(message.getCenterId(), message.getEquipmentDicom());
+            if (equipment != null) {
+                return equipment.getId();
+            } else {
+                LOG.error("Error while creating a new equipment.");
+                return null;
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while creating a new equipment: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
+    @Transactional
+    private AcquisitionEquipment createEquipmentByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom) {
+        try {
+            return acquisitionEquipmentService.saveNewAcquisitionEquipment(centerId, equipmentDicom, false);
+        } catch (Exception e) {
+            LOG.error("Error while creating a new equipment: ", e);
+        }
+        return null;
     }
 
 }

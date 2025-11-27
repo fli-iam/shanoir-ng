@@ -26,6 +26,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -98,7 +99,7 @@ public class DicomDirToModelService {
      */
     private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
         Serie serie = new Serie(serieRecord);
-        if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
+        if (!DicomUtils.checkSerieIsIgnored(serieRecord)) {
             List<Instance> instances = new ArrayList<Instance>();
             Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
             while (instanceRecord != null) {

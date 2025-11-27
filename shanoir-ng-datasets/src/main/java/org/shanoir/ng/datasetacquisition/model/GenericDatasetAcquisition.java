@@ -28,7 +28,6 @@ public class GenericDatasetAcquisition extends DatasetAcquisition {
     private static final long serialVersionUID = -8826440216825057112L;
 
     public GenericDatasetAcquisition() {
-
     }
 
     public GenericDatasetAcquisition(DatasetAcquisition other) {

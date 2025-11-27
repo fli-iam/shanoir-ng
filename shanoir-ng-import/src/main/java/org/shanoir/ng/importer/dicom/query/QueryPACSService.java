@@ -54,6 +54,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -486,44 +487,9 @@ public class QueryPACSService {
         }
     }
 
-    /**
-     * This method queries for series, creates them and adds them to studies.
-     *
-     * @param calling
-     * @param called
-     * @param study
-     */
-    private void querySeries(Association association, Study study, DicomParam modality, String studyDateStr) {
-        DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
-        DicomParam studyDate = initDicomParam(Tag.StudyDate, studyDateStr);
-        DicomParam[] params = {
-            modality,
-            studyInstanceUID,
-            studyDate,
-            new DicomParam(Tag.SeriesInstanceUID),
-            new DicomParam(Tag.NumberOfSeriesRelatedInstances),
-            new DicomParam(Tag.SeriesDescription),
-            new DicomParam(Tag.SeriesDate),
-            new DicomParam(Tag.SeriesNumber),
-            new DicomParam(Tag.AcquisitionTime),
-            new DicomParam(Tag.ProtocolName),
-            new DicomParam(Tag.Manufacturer),
-            new DicomParam(Tag.ManufacturerModelName),
-            new DicomParam(Tag.DeviceSerialNumber)
-        };
-        List<Attributes> seriesAttr = queryCFind(association, params, QueryRetrieveLevel.SERIES);
-        if (seriesAttr != null) {
-            List<Serie> series = new ArrayList<Serie>();
-            seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
-            series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
-            LOG.info("{} series returned by DICOM server", series.size());
-            study.setSeries(series);
-        }
-    }
-
     private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
         Serie serie = new Serie(serieAttr);
-        if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
+        if (!DicomUtils.checkSerieIsIgnored(serieAttr)) {
             // In case we didn't receive the attribute numberOfSeriesRelatedInstances, we still display the series.
             DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
             DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
@@ -577,6 +543,41 @@ public class QueryPACSService {
                 serie.setIgnored(true);
                 serie.setSelected(false);
             }
+        }
+    }
+
+    /**
+     * This method queries for series, creates them and adds them to studies.
+     *
+     * @param calling
+     * @param called
+     * @param study
+     */
+    private void querySeries(Association association, Study study, DicomParam modality, String studyDateStr) {
+        DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
+        DicomParam studyDate = initDicomParam(Tag.StudyDate, studyDateStr);
+        DicomParam[] params = {
+            modality,
+            studyInstanceUID,
+            studyDate,
+            new DicomParam(Tag.SeriesInstanceUID),
+            new DicomParam(Tag.NumberOfSeriesRelatedInstances),
+            new DicomParam(Tag.SeriesDescription),
+            new DicomParam(Tag.SeriesDate),
+            new DicomParam(Tag.SeriesNumber),
+            new DicomParam(Tag.AcquisitionTime),
+            new DicomParam(Tag.ProtocolName),
+            new DicomParam(Tag.Manufacturer),
+            new DicomParam(Tag.ManufacturerModelName),
+            new DicomParam(Tag.DeviceSerialNumber)
+        };
+        List<Attributes> seriesAttr = queryCFind(association, params, QueryRetrieveLevel.SERIES);
+        if (seriesAttr != null) {
+            List<Serie> series = new ArrayList<Serie>();
+            seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
+            series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+            LOG.info("{} series returned by DICOM server", series.size());
+            study.setSeries(series);
         }
     }
 
