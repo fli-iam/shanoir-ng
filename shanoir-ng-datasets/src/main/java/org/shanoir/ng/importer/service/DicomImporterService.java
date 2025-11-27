@@ -450,10 +450,11 @@ public class DicomImporterService {
      */
     private Long manageCenter(Attributes attributes, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
         InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
+        Center center = null;
         Optional<StudyCenter> studyCenterOpt = null;
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
         if (!centerOpt.isEmpty()) {
-            Center center = centerOpt.get();
+            center = centerOpt.get();
             studyCenterOpt = studyCenterRepository.findByStudy_IdAndCenter_Id(studyId, center.getId());
         }
         if (studyCenterOpt == null || studyCenterOpt.isEmpty()) {
@@ -472,11 +473,16 @@ public class DicomImporterService {
             Long centerId = Long.parseLong(parts[0]);
             Long studyCenterId = Long.parseLong(parts[1]);
             LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
-            Center center = new Center();
-            center.setId(centerId);
-            center.setName(institutionDicom.getInstitutionName());
-            addCenterToStudy(studyId, center, studyCenterId);
-            centerRepository.save(center);
+            if (center == null) {
+                center = new Center();
+                center.setName(institutionDicom.getInstitutionName());
+                isCenterInStudy(studyId, center, studyCenterId);
+                centerRepository.save(center);
+            } else {
+                if (!isCenterInStudy(studyId, center, studyCenterId)) {
+                    centerRepository.save(center);
+                }
+            }
             LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             return centerId;
         } else {
@@ -484,16 +490,28 @@ public class DicomImporterService {
         }
     }
 
-    private void addCenterToStudy(Long studyId, Center center, Long studyCenterId) {
-        List<StudyCenter> studyCenterList = new ArrayList<>();
-        center.setStudyCenterList(studyCenterList);
+    private boolean isCenterInStudy(Long studyId, Center center, Long studyCenterId) {
+        List<StudyCenter> studyCenterList = center.getStudyCenterList();
+        if (studyCenterList != null && !studyCenterList.isEmpty()) {
+            for (StudyCenter studyCenter : studyCenterList) {
+                if (studyCenter.getStudy().getId().equals(studyId)) {
+                    return true;
+                }
+            }
+        }
+        if (studyCenterList == null) {
+            studyCenterList = new ArrayList<>();
+            center.setStudyCenterList(studyCenterList);
+        }
         StudyCenter studyCenter = new StudyCenter();
-        Study study = studyService.findById(studyId);
         studyCenter.setId(studyCenterId);
+        Study study = studyService.findById(studyId);
         studyCenter.setStudy(study);
         studyCenter.setCenter(center);
         center.getStudyCenterList().add(studyCenter);
+        return false;
     }
+
 
     private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
         Examination examination = null;
