@@ -228,7 +228,7 @@ public class CenterServiceImpl implements CenterService {
         } else {
             Center center = centerOpt.orElseThrow();
             if (!isCenterInStudy(studyId, center)) {
-                update(center, withAMQP);
+                return update(center, withAMQP);
             }
             return center;
         }
