@@ -137,7 +137,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
         FROM Examination ex
         WHERE ex.id IN :ids
             """)
-      List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
+    List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
 
     @EntityGraph(attributePaths = {"datasetAcquisitions"})

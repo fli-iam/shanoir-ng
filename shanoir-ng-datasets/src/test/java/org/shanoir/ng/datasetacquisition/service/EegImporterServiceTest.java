@@ -123,7 +123,7 @@ public class EegImporterServiceTest {
         assertTrue(task.getStatus() == 1);
 
         // Check what we save at the end
-        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
+        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture(), Mockito.anyBoolean());
         DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 
         EegDataset ds = (EegDataset) hack.getDatasets().get(0);

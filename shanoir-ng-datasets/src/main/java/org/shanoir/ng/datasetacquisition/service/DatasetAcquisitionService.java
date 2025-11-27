@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -36,6 +37,20 @@ public interface DatasetAcquisitionService {
     DatasetAcquisition findById(Long id);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
+            String seriesInstanceUID);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    public DatasetAcquisition findByIdWithDatasets(Long id);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
+    public Page<DatasetAcquisition> findPage(final Pageable pageable);
+
+    @PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
+    DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findById(List<Long> ids);
 
@@ -51,13 +66,6 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findByExamination(Long examinationId);
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
-    public Page<DatasetAcquisition> findPage(final Pageable pageable);
-
-    @PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
-    DatasetAcquisition create(DatasetAcquisition entity);
-
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 
@@ -72,4 +80,5 @@ public interface DatasetAcquisitionService {
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
+
 }

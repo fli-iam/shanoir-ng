@@ -20,7 +20,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -51,9 +50,6 @@ public class RabbitMqExaminationService {
     private ExaminationService examinationService;
 
     @Autowired
-    private ShanoirEventService eventService;
-
-    @Autowired
     private SubjectRepository subjectRepository;
 
     @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
@@ -62,13 +58,12 @@ public class RabbitMqExaminationService {
     public Long createExamination(Message message) {
         try {
             Examination exam = mapper.readValue(message.getBody(), Examination.class);
-
             Subject subj = exam.getSubject();
+            subj.setStudy(exam.getStudy());
             Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
             if (!dbSubject.isPresent()) {
                 subjectRepository.save(subj);
             }
-
             exam = examRepo.save(exam);
             return exam.getId();
         } catch (Exception e) {
@@ -82,11 +77,11 @@ public class RabbitMqExaminationService {
     public void addExaminationExtraData(String path) {
         try {
             IdName examExtradata = mapper.readValue(path, IdName.class);
-
             // add examination extra-data
             examinationService.addExtraDataFromFile(examExtradata.getId(), new File(examExtradata.getName()));
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException(e);
         }
     }
+
 }

@@ -30,7 +30,6 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -67,15 +66,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.persistence.EntityManager;
 
 /**
  * RabbitMQ configuration.
@@ -113,9 +108,6 @@ public class RabbitMQDatasetsService {
     private SolrService solrService;
 
     @Autowired
-    private DatasetAcquisitionService datasetAcquisitionService;
-
-    @Autowired
     private ExaminationService examinationService;
 
     @Autowired
@@ -136,9 +128,6 @@ public class RabbitMQDatasetsService {
     @Autowired
     private StudyService studyService;
 
-    @Autowired
-    private EntityManager entityManager;
-
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
     @RabbitListener(bindings = @QueueBinding(
@@ -156,30 +145,22 @@ public class RabbitMQDatasetsService {
         try {
 
             Study updated = objectMapper.readValue(studyAsString, Study.class);
-
             bidsService.deleteBidsFolder(updated.getId(), null);
-
             Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
-
             List<String> errors = studyService.validate(updated, current);
-
             if (!errors.isEmpty()) {
                 return errors.get(0);
             }
-
             studyService.updateStudy(updated, current);
-
             try {
                 solrService.updateStudyAsync(current.getId());
             } catch (Exception e) {
                 LOG.error("Solr update failed for study {}", current.getId(), e);
             }
-
         } catch (Exception ex) {
             LOG.error("An error occured while processing study update", ex);
             return ex.getMessage();
         }
-
         return "";
     }
 
@@ -225,18 +206,33 @@ public class RabbitMQDatasetsService {
         }
     }
 
-    @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
     public void receiveAcEqUpdate(final String acEqStr) {
         receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
     }
 
-    @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public void receiveCenterNameUpdate(final String centerStr) {
-        receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
+    public void receiveCenterUpdate(final String centerStr) throws JsonMappingException, JsonProcessingException {
+        Center center = objectMapper.readValue(centerStr, Center.class);
+        saveCenter(center);
+    }
+
+    @Transactional
+    private void saveCenter(Center center) {
+        centerRepository.save(center);
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.CENTER_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public void receiveCenterDelete(final Long centerId) throws JsonMappingException, JsonProcessingException {
+        deleteCenter(centerId);
+    }
+
+    @Transactional
+    private void deleteCenter(Long centerId) {
+        centerRepository.deleteById(centerId);
     }
 
     private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
@@ -264,35 +260,6 @@ public class RabbitMQDatasetsService {
         } catch (IOException e) {
             LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR);
-        }
-    }
-
-    /**
-     * Receives a shanoirEvent as a json object, concerning a dataset acquisition to create
-     * @param studyStr the task as a json string.
-     */
-    @RabbitListener(bindings = @QueueBinding(
-            key = ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT,
-            value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
-            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-            autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
-            )
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-    public void createDatasetAcquisition(final String studyStr) {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        try {
-            ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
-            DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
-            List<Long> datasetIds = new ArrayList<>();
-            if (acq != null) {
-                for (Dataset ds : acq.getDatasets()) {
-                    datasetIds.add(ds.getId());
-                }
-            }
-            solrService.indexDatasets(datasetIds);
-        } catch (Exception e) {
-            LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
-            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
         }
     }
 
@@ -370,12 +337,9 @@ public class RabbitMQDatasetsService {
     @RabbitHandler
     @Transactional
     public String getDetailedStudyStorageVolume(Long studyId) {
-
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
                 examinationService.getExtraDataSizeByStudyId(studyId));
-
         try {
             return objectMapper.writeValueAsString(dto);
         } catch (JsonProcessingException e) {
@@ -389,13 +353,10 @@ public class RabbitMQDatasetsService {
     @Transactional
     public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
-
         datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
             studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
         });
-
         try {
             return objectMapper.writeValueAsString(studyStorageVolumes);
         } catch (JsonProcessingException e) {

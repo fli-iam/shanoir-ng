@@ -40,6 +40,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.validation.constraints.NotNull;
 
@@ -71,6 +72,7 @@ public class Examination extends HalEntity {
     /** Dataset acquisitions. */
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
+    @OrderBy("id ASC")
     private List<DatasetAcquisition> datasetAcquisitions;
 
     /** Examination date. */

@@ -48,6 +48,8 @@ import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,7 +61,6 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
-
 
     @Autowired
     private DatasetAcquisitionRepository repository;
@@ -88,6 +89,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
+
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -113,6 +116,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
@@ -152,17 +160,36 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
         Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-        for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
-        }
+        result.forEach(a -> indexDatasets(a));
         return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        if (indexDatasetsToSolr) {
+            indexDatasets(savedEntity);
+        }
         return savedEntity;
+    }
+
+    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
+                    .map(Dataset::getId)
+                    .collect(Collectors.toList());
+            solrService.indexDatasets(datasetIds);
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+        } else {
+            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByIdWithDatasets(Long id) {
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override

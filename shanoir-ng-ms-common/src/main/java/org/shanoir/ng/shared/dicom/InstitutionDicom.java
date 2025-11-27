@@ -14,6 +14,11 @@
 
 package org.shanoir.ng.shared.dicom;
 
+
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.shanoir.ng.utils.Utils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,11 +27,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class InstitutionDicom {
 
+    private static final String UNKNOWN = "unknown";
+
     @JsonProperty("institutionName")
     private String institutionName;
 
     @JsonProperty("institutionAddress")
     private String institutionAddress;
+
+    public InstitutionDicom() { }
+
+    public InstitutionDicom(Attributes attributes) {
+        this.institutionName = Utils.getOrSetToDefault(attributes, Tag.InstitutionName, UNKNOWN);
+        this.institutionAddress = Utils.getOrSetToDefault(attributes, Tag.InstitutionAddress, UNKNOWN);
+    }
 
     public String getInstitutionName() {
         return institutionName;

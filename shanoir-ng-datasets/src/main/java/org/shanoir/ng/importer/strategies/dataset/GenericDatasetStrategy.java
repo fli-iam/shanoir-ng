@@ -15,17 +15,17 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +35,14 @@ import org.springframework.stereotype.Component;
 public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 
     @Autowired
+    private DicomProcessing dicomProcessing;
+
+    @Autowired
     private DatasetExpressionContext datasetExpressionContext;
 
     @Override
     public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-            ImportJob importJob) throws Exception {
+            Long subjectId) throws Exception {
         DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
          * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -54,40 +57,38 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
         }
 
         for (Dataset anyDataset : serie.getDatasets()) {
-            importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-            GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
+            GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
             datasetWrapper.getDatasets().add(dataset);
             datasetIndex++;
         }
 
         return datasetWrapper;
-
     }
 
     @Override
-    public GenericDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset,
-            int datasetIndex, ImportJob importJob) throws Exception {
+    public GenericDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset,
+            int datasetIndex, Long subjectId) throws Exception {
         GenericDataset genericDataset = new GenericDataset();
         genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
         genericDataset.setCreationDate(serie.getSeriesDate());
-        final String serieDescription = serie.getSeriesDescription();
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
         genericDataset.setOriginMetadata(datasetMetadata);
         // set the series description as the dataset comment & name
-        if (serieDescription != null && !"".equals(serieDescription)) {
-            genericDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-            genericDataset.getOriginMetadata().setComment(serieDescription);
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            genericDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            genericDataset.getOriginMetadata().setComment(seriesDescription);
         }
 
         // Pre-select the type Reconstructed dataset
         genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         // Set the study and the subject
-        genericDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        genericDataset.setSubjectId(subjectId);
 
-        // Set the modality from dicom fields
-        genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+        // Pre-select the type Reconstructed dataset
+        genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
         if (genericDataset.getSubjectId() != null) {
@@ -96,6 +97,11 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
             refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
         }
         genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            genericDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
         /**
          *  The part below will generate automatically the datasetExpression according to :
@@ -106,7 +112,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
          **/
         for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
             datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
             datasetExpression.setDataset(genericDataset);
             genericDataset.getDatasetExpressions().add(datasetExpression);
         }
