@@ -475,6 +475,7 @@ public class DicomImporterService {
             LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
             if (center == null) {
                 center = new Center();
+                center.setId(centerId);
                 center.setName(institutionDicom.getInstitutionName());
                 isCenterInStudy(studyId, center, studyCenterId);
                 centerRepository.save(center);
