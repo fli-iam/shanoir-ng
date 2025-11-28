@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.rights;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +21,8 @@ import java.util.Set;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -29,9 +30,13 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class StudyRightsService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StudyRightsService.class);
+
     @Autowired
     private StudyUserRightsRepository repo;
 
+    @Autowired
+    private StudyRightsCacheService cache;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -45,12 +50,7 @@ public class StudyRightsService {
         if (userId == null) {
             throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
         }
-        StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-        return
-                founded != null
-                && founded.getStudyUserRights() != null
-                && founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
-                && founded.isConfirmed();
+        return cache.hasRightOnStudyCached(userId, studyId, rightStr);
     }
 
     public boolean hasRightOnCenter(Long studyId, Long centerId) {
@@ -76,7 +76,6 @@ public class StudyRightsService {
             throw new IllegalStateException("UserId should not be null. Cannot check rights");
         }
         List<StudyUser> founded = Utils.toList(repo.findByUserIdAndStudyIdIn(userId, studies));
-
         if (CollectionUtils.isEmpty(founded)) {
             return false;
         }
@@ -99,7 +98,7 @@ public class StudyRightsService {
     public boolean hasOneRightOnStudy(Long studyId, String... rightStrs) {
         Long userId = KeycloakUtil.getTokenUserId();
         if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
-        StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+        StudyUser founded = cache.findByUserIdAndStudyIdIn(userId, studyId);
         if (founded != null && founded.getStudyUserRights() != null) {
             for (String rightStr : rightStrs) {
                 if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.isConfirmed()) return true;
@@ -156,9 +155,8 @@ public class StudyRightsService {
 
     public UserRights getUserRights() {
         Long userId = KeycloakUtil.getTokenUserId();
-        List<StudyUser> studyUsers = repo
-                .findAllByUserId(userId)
-                .orElseGet(Collections::emptyList);
+        List<StudyUser> studyUsers = cache.getUserRights(userId);
         return new UserRights(studyUsers);
     }
+
 }
