@@ -30,7 +30,7 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "studyRights", "studyUser", "userRights");
+                "studyRights", "studyUser", "userRights", "studyUserCenterIds");
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES)
                 .maximumSize(5000));
