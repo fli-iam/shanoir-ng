@@ -44,7 +44,7 @@ public class StudyRightsCacheService {
     }
 
     @Cacheable(value = "studyUser", key = "#userId + '-' + #studyId")
-    public StudyUser findByUserIdAndStudyIdIn(Long userId, Long studyId) {
+    public StudyUser findByUserIdAndStudyIdCached(Long userId, Long studyId) {
         LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}",
                 userId, studyId);
         StudyUser studyUser = repo.findByUserIdAndStudyId(userId, studyId);
@@ -53,13 +53,19 @@ public class StudyRightsCacheService {
     }
 
     @Cacheable(value = "userRights", key = "#userId")
-    public List<StudyUser> getUserRights(Long userId) {
+    public List<StudyUser> getUserRightsCached(Long userId) {
         LOG.info("CACHE MISS - Database query executed for userId={}", userId);
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
         studyUsers.stream().forEach(su -> su.getCenterIds());
         return studyUsers;
+    }
+
+    @Cacheable(value = "studyUserCenterIds", key = "#studyUserId")
+    public List<Long> findCenterIdsByStudyUserIdCached(Long studyUserId) {
+        LOG.info("CACHE MISS - Database query executed for studyUserId={}", studyUserId);
+        return repo.findCenterIdsByStudyUserId(studyUserId);
     }
 
 }
