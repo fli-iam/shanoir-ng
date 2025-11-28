@@ -211,14 +211,14 @@ public class DatasetDownloaderServiceImpl {
         List<URL> pathURLs = new ArrayList<>();
         DatasetExpressionFormat format = dataset.getDatasetExpressions().get(0).getDatasetExpressionFormat();
 
-        if (format == DatasetExpressionFormat.DICOM && Objects.equals("dcm", outputFormat)) { // Download DICOM dataset
+        if (format == DatasetExpressionFormat.DICOM && Objects.equals(DCM, outputFormat)) { // Download DICOM dataset
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
             List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
             if (withManifest) {
                 filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
                 filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
             }
-        } else if (format == DatasetExpressionFormat.DICOM && Objects.equals("nii", outputFormat)) { // Convert dataset from DICOM to NIfTI and download it
+        } else if (format == DatasetExpressionFormat.DICOM && Objects.equals(NII, outputFormat)) { // Convert dataset from DICOM to NIfTI and download it
             File tempDir = null;
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
