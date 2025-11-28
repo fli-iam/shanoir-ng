@@ -13,17 +13,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <legend>
-    {{legend}}
-    <tool-tip>You can choose one or more {{legend | lowercase}}s from the list</tool-tip>
+    Subject
+    <tool-tip>You can choose one or more subjects from the list</tool-tip>
 </legend>
 <ol>
-    <li *ngIf="mode != 'view'">
-        <label>Add a {{legend | lowercase}}</label>
-        <span class="right-col">
-            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (addClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()" [options]="optionList">
-            </select-box>
-        </span>
-    </li>
     <li *ngIf="model && model.length > 0 && columnDefs">
         <shanoir-table #table
                 [getPage]="getPage.bind(this)"

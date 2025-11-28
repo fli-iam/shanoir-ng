@@ -27,7 +27,6 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
@@ -180,13 +179,10 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getPrefilledSubject(): Subject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
         const newSubject = new Subject();
-        newSubject.subjectStudyList = [];
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         return newSubject;
     }
 

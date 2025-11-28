@@ -38,111 +38,111 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class ManufacturerModelApiController implements ManufacturerModelApi {
 
-	@Autowired
-	private ManufacturerModelService manufacturerModelService;
+    @Autowired
+    private ManufacturerModelService manufacturerModelService;
 
-	@Override
-	public ResponseEntity<ManufacturerModel> findManufacturerModelById(
-			@PathVariable("manufacturerModelId") final Long manufacturerModelId) {
-		final Optional<ManufacturerModel> manufacturerModelOpt = manufacturerModelService.findById(manufacturerModelId);
-		if (manufacturerModelOpt.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerModelOpt.orElseThrow(), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<ManufacturerModel> findManufacturerModelById(
+            @PathVariable("manufacturerModelId") final Long manufacturerModelId) {
+        final Optional<ManufacturerModel> manufacturerModelOpt = manufacturerModelService.findById(manufacturerModelId);
+        if (manufacturerModelOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturerModelOpt.orElseThrow(), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<ManufacturerModel>> findManufacturerModels() {
-		List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
-		// Remove "unknown" manufacturer models
-		manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
-		if (manufacturerModels.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<ManufacturerModel>> findManufacturerModels() {
+        List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
+        // Remove "unknown" manufacturer models
+        manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
+        if (manufacturerModels.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<IdName>> findManufacturerModelsNames() {
-		List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNames();
-		// Remove "unknown" manufacturer models
-		manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
-		if (manufacturerModels.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<IdName>> findManufacturerModelsNames() {
+        List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNames();
+        // Remove "unknown" manufacturer models
+        manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
+        if (manufacturerModels.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@PathVariable("centerId") final Long centerId) {
-		final List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNamesForCenter(centerId);
-		if (manufacturerModels.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@PathVariable("centerId") final Long centerId) {
+        final List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNamesForCenter(centerId);
+        if (manufacturerModels.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<ManufacturerModel> saveNewManufacturerModel(
-			@RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
-					throws RestServiceException {
+    @Override
+    public ResponseEntity<ManufacturerModel> saveNewManufacturerModel(
+            @RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
+                    throws RestServiceException {
 
-		/* Validation */
-		validate(result);
+        /* Validation */
+        validate(result);
 
-		/* Save center in db. */
-		return new ResponseEntity<ManufacturerModel>(manufacturerModelService.create(manufacturerModel), HttpStatus.OK);
-	}
+        /* Save center in db. */
+        return new ResponseEntity<ManufacturerModel>(manufacturerModelService.create(manufacturerModel), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updateManufacturerModel(
-			@PathVariable("manufacturerModelId") final Long manufacturerModelId,
-			@RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
-					throws RestServiceException {
-		try {
-			if (manufacturerModelId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
-			}
-			manufacturerModel.setId(manufacturerModelId);
+    @Override
+    public ResponseEntity<Void> updateManufacturerModel(
+            @PathVariable("manufacturerModelId") final Long manufacturerModelId,
+            @RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
+                    throws RestServiceException {
+        try {
+            if (manufacturerModelId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown manufacturer model");
+            }
+            manufacturerModel.setId(manufacturerModelId);
 
-			/* Validation */
-			validate(result);
+            /* Validation */
+            validate(result);
 
-			/* Update user in db. */
-			manufacturerModelService.update(manufacturerModel);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            /* Update user in db. */
+            manufacturerModelService.update(manufacturerModel);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-	@Override
-	public ResponseEntity<Void> deleteManufacturerModel(Long manufacturerModelId) throws RestServiceException {
-		try {
-			if (manufacturerModelId.equals(0L)) {
-				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
-			}
-			manufacturerModelService.deleteById(manufacturerModelId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @Override
+    public ResponseEntity<Void> deleteManufacturerModel(Long manufacturerModelId) throws RestServiceException {
+        try {
+            if (manufacturerModelId.equals(0L)) {
+                throw new EntityNotFoundException("Cannot update unknown manufacturer model");
+            }
+            manufacturerModelService.deleteById(manufacturerModelId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (EntityLinkedException e) {
-			throw new RestServiceException(
-					new ErrorModel(
-							HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"This manufacturer is still linked to manufacturer models."
-					)
-			);
-		}
-	}
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (EntityLinkedException e) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This manufacturer is still linked to manufacturer models."
+                    )
+            );
+        }
+    }
 
-	private void validate(BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
+    private void validate(BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
 }
