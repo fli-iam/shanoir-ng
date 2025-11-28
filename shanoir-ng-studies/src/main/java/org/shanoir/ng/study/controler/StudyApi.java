@@ -100,10 +100,10 @@ public interface StudyApi {
 
     @Operation(summary = "", description = "Returns the total number of studies")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
-	    @ApiResponse(responseCode = "401", description = "unauthorized"),
-	    @ApiResponse(responseCode = "403", description = "forbidden"),
-	    @ApiResponse(responseCode = "404", description = "no study found"),
-	    @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
     ResponseEntity<Long> countAllStudies();
 

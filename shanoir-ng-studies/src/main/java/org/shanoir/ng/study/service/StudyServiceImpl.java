@@ -940,8 +940,8 @@ public class StudyServiceImpl implements StudyService {
         return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
     }
 
-	@Override
-	public Long countStudies() {
-		return studyRepository.count();
-	}
+    @Override
+    public Long countStudies() {
+        return studyRepository.count();
+    }
 }

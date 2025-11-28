@@ -391,13 +391,13 @@ public class ExaminationServiceImpl implements ExaminationService {
         return dataDir + "/examination-" + examinationId + "/" + fileName;
     }
 
-	/**
-	 * Counts all the examinations
-	 * @return the number of examinations
-	 */
-	@Override
-	public Long countAllExaminations() {
-		return examinationRepository.count();
-	}
+    /**
+     * Counts all the examinations
+     * @return the number of examinations
+     */
+    @Override
+    public Long countAllExaminations() {
+        return examinationRepository.count();
+    }
 
 }

@@ -200,11 +200,11 @@ public interface SubjectService {
 
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 
-	/**
-	 * Count all subjects.
-	 * 
-	 * @return the number of subjects
-	 */
-	Long countSubjects();
+    /**
+     * Count all subjects.
+     *
+     * @return the number of subjects
+     */
+    Long countSubjects();
 
 }
