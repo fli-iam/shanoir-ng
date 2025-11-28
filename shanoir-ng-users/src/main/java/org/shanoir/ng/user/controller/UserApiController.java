@@ -110,12 +110,11 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-  
-    @Override
-	  public ResponseEntity<Long> countUsers() {
-		    return new ResponseEntity<>(getUserService().count(), HttpStatus.OK);
-	  }
 
+    @Override
+    public ResponseEntity<Long> countUsers() {
+        return new ResponseEntity<>(getUserService().count(), HttpStatus.OK);
+    }
 
     @Override
     public ResponseEntity<List<User>> findAccountRequests() {

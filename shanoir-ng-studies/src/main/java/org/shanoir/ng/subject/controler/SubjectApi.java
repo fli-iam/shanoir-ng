@@ -108,7 +108,7 @@ public interface SubjectApi {
     ResponseEntity<List<IdName>> findSubjectsNames(@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
     @Operation(summary = "", description = "If exists, returns the subject corresponding to the given id")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found bubject"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
             @ApiResponse(responseCode = "204", description = "no subject found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -174,13 +174,13 @@ public interface SubjectApi {
     ResponseEntity<SubjectDTO> findSubjectByIdentifier(
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
-	  @Operation(summary = "", description = "Returns the total number of subjects")
-	  @ApiResponses(value = {
-			      @ApiResponse(responseCode = "200", description = "found subjects"),
-			      @ApiResponse(responseCode = "401", description = "unauthorized"),
-			      @ApiResponse(responseCode = "403", description = "forbidden"),
-			      @ApiResponse(responseCode = "500", description = "unexpected error") })
-	  @GetMapping(value = "/count", produces = { "application/json" })
-	  ResponseEntity<Long> countAllSubjects();
+    @Operation(summary = "", description = "Returns the total number of subjects")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found subjects"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/count", produces = { "application/json" })
+    ResponseEntity<Long> countAllSubjects();
 
 }

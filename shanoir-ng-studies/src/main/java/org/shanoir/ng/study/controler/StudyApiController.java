@@ -196,7 +196,8 @@ public class StudyApiController implements StudyApi {
 
     @Override
     @Transactional
-    public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
+    public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId,
+            boolean withStorageVolume) {
         Study study = studyService.findById(studyId);
         if (study == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -235,7 +236,8 @@ public class StudyApiController implements StudyApi {
             studyUser.setStudy(study);
             studyUser.setUserId(KeycloakUtil.getTokenUserId());
             studyUser.setUserName(KeycloakUtil.getTokenUserName());
-            studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
+            studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
+                    StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
             studyUserList.add(studyUser);
             study.setStudyUserList(studyUserList);
         }
@@ -243,34 +245,31 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<String> copyDatasetsToStudy(
-            @Parameter(description = "Dataset ids to copy", required = true)
-            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-            @Parameter(description = "Study id to copy in", required = true)
-            @RequestParam(value = "studyId", required = true) String studyIdAsStr,
-            @Parameter(description = "center id of datasets", required = true)
-            @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
-            @Parameter(description = "subject id of datasets", required = true)
-            @RequestParam(value = "subjectIdStudyId", required = true) List<String> subjectIdStudyId) {
+            @Parameter(description = "Dataset ids to copy", required = true) @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+            @Parameter(description = "Study id to copy in", required = true) @RequestParam(value = "studyId", required = true) String studyIdAsStr,
+            @Parameter(description = "center id of datasets", required = true) @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
+            @Parameter(description = "subject id of datasets", required = true) @RequestParam(value = "subjectIdStudyId", required = true) List<String> subjectIdStudyId) {
         String res = null;
         try {
             Long studyId = Long.valueOf(studyIdAsStr);
             res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
             relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
         } catch (Exception e) {
-            LOG.error("Error during copy for datasetsIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
+            LOG.error("Error during copy for datasetsIds : " + datasetIds + ", studyId : " + studyIdAsStr
+                    + ", centersId : " + centerIds + ". Error : ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+    public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId)
+            throws RestServiceException {
         StudyStorageVolumeDTO dto = studyService.getDetailedStorageVolume(studyId);
         if (dto == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            "Error while fetching study datasets storage volume details.", null)
-            );
+                            "Error while fetching study datasets storage volume details.", null));
         }
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -283,7 +282,7 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
-                                            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException {
 
         validate(study, result);
 
@@ -407,7 +406,8 @@ public class StudyApiController implements StudyApi {
     @Override
     public ResponseEntity<List<DataUserAgreement>> getDataUserAgreements() throws RestServiceException, IOException {
         Long userId = KeycloakUtil.getTokenUserId();
-        List<DataUserAgreement> dataUserAgreements = this.dataUserAgreementService.getDataUserAgreementsByUserId(userId);
+        List<DataUserAgreement> dataUserAgreements = this.dataUserAgreementService
+                .getDataUserAgreementsByUserId(userId);
         if (!dataUserAgreements.isEmpty()) {
             return new ResponseEntity<>(dataUserAgreements, HttpStatus.OK);
         } else {
@@ -417,9 +417,11 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<Boolean> hasDUAByStudyId(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+            throws ShanoirException {
 
-        DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
+        DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(),
+                studyId);
 
         return new ResponseEntity<>(dua != null, HttpStatus.OK);
     }
@@ -440,9 +442,10 @@ public class StudyApiController implements StudyApi {
     @Override
     public ResponseEntity<Void> uploadDataUserAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+            @Parameter(description = "dua to upload", required = true) @Valid @RequestBody MultipartFile file)
+            throws RestServiceException {
         try {
-            if (!file.getOriginalFilename().endsWith(PDF_EXTENSION)  || file.getSize() > 50000000) {
+            if (!file.getOriginalFilename().endsWith(PDF_EXTENSION) || file.getSize() > 50000000) {
                 LOG.error("Could not upload the file: {}", file.getOriginalFilename());
                 // Clean up: delete from study in case upload not allowed
                 Study study = studyService.findById(studyId);
@@ -467,7 +470,8 @@ public class StudyApiController implements StudyApi {
     @Override
     public void downloadDataUserAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
         String filePath = studyService.getStudyFilePath(studyId, fileName);
         LOG.info("Retrieving file : {}", filePath);
         File fileToDownLoad = new File(filePath);
@@ -486,7 +490,8 @@ public class StudyApiController implements StudyApi {
     @Override
     public ResponseEntity<Void> deleteStudyUser(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
+            @Parameter(description = "id of the userId", required = true) @PathVariable("userId") Long userId)
+            throws IOException {
         studyService.removeStudyUserFromStudy(studyId, userId);
         List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
 
@@ -538,14 +543,16 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-	  public ResponseEntity<Long> countAllStudies() {
-		    Long count = studyService.countStudies();
-		    return new ResponseEntity<>(count, HttpStatus.OK);
-	  }
+    public ResponseEntity<Long> countAllStudies() {
+        Long count = studyService.countStudies();
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
 
     /**
-     * This method allows to filter studies by on the one the given user is not part in
-     * @param studies the list of studies to filter
+     * This method allows to filter studies by on the one the given user is not part
+     * in
+     *
+     * @param studies     the list of studies to filter
      * @param tokenUserId the user to filter with
      * @return the list of filtered studies
      */
@@ -566,14 +573,15 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+    public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, IOException {
         try {
             List<StudyStatisticsDTO> statistics = studyService.queryStudyStatistics(studyId);
 
             return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(statistics);
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(statistics);
 
         } catch (jakarta.persistence.NoResultException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
@@ -586,7 +594,8 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
-            @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException {
+            @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right)
+            throws RestServiceException {
         try {
             List<Long> studies = studyService.queryStudiesByRight(right);
 

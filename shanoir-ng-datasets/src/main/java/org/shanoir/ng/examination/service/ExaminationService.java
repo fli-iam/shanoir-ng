@@ -165,10 +165,10 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
     String getExtraDataFilePath(Long examinationId, String fileName);
 
-	  /**
-	   * Count all examinations
-	   * 
-	   * @return number of examinations
-	   */
-	  Long countAllExaminations();
+    /**
+     * Count all examinations
+     *
+     * @return number of examinations
+     */
+    Long countAllExaminations();
 }

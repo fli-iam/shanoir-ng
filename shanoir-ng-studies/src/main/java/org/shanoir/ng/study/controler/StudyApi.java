@@ -99,13 +99,13 @@ public interface StudyApi {
     ResponseEntity<List<StudyLightDTO>> findPublicStudiesData();
 
     @Operation(summary = "", description = "Returns the total number of studies")
-	  @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
-			      @ApiResponse(responseCode = "401", description = "unauthorized"),
-			      @ApiResponse(responseCode = "403", description = "forbidden"),
-			      @ApiResponse(responseCode = "404", description = "no study found"),
-			      @ApiResponse(responseCode = "500", description = "unexpected error") })
-	  @RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
-	  ResponseEntity<Long> countAllStudies();
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
+    ResponseEntity<Long> countAllStudies();
 
     @Operation(summary = "", description = "Returns id and name for all the studies")
     @ApiResponses(value = {
@@ -411,6 +411,5 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
             @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException;
-
 
 }
