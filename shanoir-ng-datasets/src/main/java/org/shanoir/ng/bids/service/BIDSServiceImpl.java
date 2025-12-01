@@ -25,14 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -49,7 +42,6 @@ import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -75,10 +67,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -119,19 +107,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String README_FILE = "README";
 
-    private static final String SUBJECT_IDENTIFIER = "subject_identifier";
-
-    private static final String PARTICIPANT_ID = "participant_id";
-
-    private static final String CSV_SEPARATOR = "\t";
-
-    private static final String CSV_SPLITTER = "\n";
-
-    private static final String[] CSV_PARTICIPANTS_HEADER = {
-            PARTICIPANT_ID,
-            SUBJECT_IDENTIFIER
-    };
-
     private static final Map<String, String> NATURE_MAP;
     static {
         Map<String, String> aMap = new HashMap<>();
@@ -158,9 +133,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private WADODownloaderService downloader;
@@ -203,19 +175,6 @@ public class BIDSServiceImpl implements BIDSService {
         return new File(tmpFilePath);
     }
 
-    public ResponseEntity<ByteArrayResource> generateParticipants(final Long studyId) throws IOException {
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-
-        StringBuilder data = buildParticipants(subjs);
-        ByteArrayResource resource = new ByteArrayResource(data.toString().getBytes());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + "participants.tsv")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .contentLength(data.length())
-                .body(resource);
-    }
-
     /**
      * Returns data from the study formatted as BIDS in a .zip file.
      * @param studyId the study ID we want to export as BIDS
@@ -245,7 +204,7 @@ public class BIDSServiceImpl implements BIDSService {
         subjs.sort(Comparator.comparing(Subject::getId));
 
         // Create participants.tsv
-        participantsSerializer(baseDir, subjs);
+        rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
 
         int index = 1;
         for (Subject subj : subjs) {
@@ -802,46 +761,6 @@ public class BIDSServiceImpl implements BIDSService {
 
         Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
     }
-
-    /**
-     * Creates the participants.tsv and participants.json file from the study
-     */
-    private void participantsSerializer(File parentFolder, List<Subject> subjs) {
-        File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
-
-        if (csvFile.exists()) {
-            // Recreate it everytime
-            FileUtils.deleteQuietly(csvFile);
-        }
-
-        try {
-            Files.write(Paths.get(csvFile.getAbsolutePath()), buildParticipants(subjs).toString().getBytes());
-        } catch (IOException e) {
-            LOG.error("Error while creating particpants.tsv file: {}", e);
-        }
-    }
-
-    private StringBuilder buildParticipants(List<Subject> subjs) {
-        int index = 1;
-        StringBuilder buffer =  new StringBuilder();
-        // Headers
-        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
-            buffer.append(columnHeader).append(CSV_SEPARATOR);
-        }
-        buffer.append(CSV_SPLITTER);
-
-        for (Subject subject : subjs) {
-            String subjectName = subject.getName();
-            subjectName = this.formatLabel(subjectName);
-            // Write in the file the values
-            buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
-                    .append(subject.getId()).append(CSV_SEPARATOR)
-                    .append(CSV_SPLITTER);
-        }
-
-        return buffer;
-    }
-
 
     private String formatLabel(String label) {
         return label.replaceAll("[^a-zA-Z0-9]+", "");

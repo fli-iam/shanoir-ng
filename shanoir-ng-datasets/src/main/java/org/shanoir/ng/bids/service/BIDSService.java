@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.bids.service;
 
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -47,7 +44,5 @@ public interface BIDSService {
      * @param studyName the given study name
      */
     void deleteBidsFolder(Long studyId, String studyName);
-
-    ResponseEntity<ByteArrayResource> generateParticipants(final Long studyId) throws IOException;
 
 }

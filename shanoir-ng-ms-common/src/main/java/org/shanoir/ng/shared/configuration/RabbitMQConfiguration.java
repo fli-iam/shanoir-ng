@@ -203,9 +203,6 @@ public class RabbitMQConfiguration {
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
-    /** Queue used to make bruker to dicom conversion. */
-    public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
-
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
@@ -503,13 +500,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyUserQueue() {
         return new Queue(STUDY_USER_QUEUE, true);
-    public static Queue studyParticipantsTsvQueue() {
-        return new Queue(STUDY_PARTICIPANTS_TSV, true);
     }
 
     @Bean
-    public static Queue brukerConversionQueue() {
-        return new Queue(BRUKER_CONVERSION_QUEUE, true);
+    public static Queue studyParticipantsTsvQueue() {
+        return new Queue(STUDY_PARTICIPANTS_TSV, true);
     }
 
     @Bean

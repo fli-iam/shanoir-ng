@@ -63,12 +63,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class RabbitMQStudiesService {
@@ -324,9 +318,8 @@ public class RabbitMQStudiesService {
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
     @Transactional
-    public void getStudyParticipantsTsv(final long studyId) throws IOException {
+    public void getStudyParticipantsTsv(Long studyId) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         this.bidsService.generateParticipantsTsvFile(studyId);
     }
 }

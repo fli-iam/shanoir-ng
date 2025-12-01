@@ -39,7 +39,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -76,11 +75,6 @@ public class BidsApiController implements BidsApi {
         this.request = request;
     }
 
-    @Override
-    public ResponseEntity<ByteArrayResource> generateParticipantsByStudyId(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
-        return bidsService.generateParticipants(studyId);
-    }
     @Override
     public ResponseEntity<Void> generateBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
