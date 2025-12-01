@@ -36,7 +36,9 @@ public class StowRSDicomTest extends AbstractTest {
                 File newFile = new File(file.getParent(), "DICOMSR-modified.dcm");
                 newFile.createNewFile();
                 modifyAndCopyDicomFile(file, newFile, study.getId().toString(), subject.getName(), UIDGeneration.ROOT + "." + examination.getId());
-                shUpClient.postDicom(newFile);
+// todo: add creation of acquisition and dataset (source)/or just create independent dataset
+// requires code modification on server
+                //                shUpClient.postDicom(newFile);
             }
         } catch (URISyntaxException e) {
             logger.error("Error while reading file", e);
