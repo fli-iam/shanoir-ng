@@ -12,6 +12,7 @@ import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.junit.jupiter.api.Test;
+import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.test.AbstractTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,13 @@ public class StowRSDicomTest extends AbstractTest {
 
     @Test
     public void postDICOMMRToDicomWeb() throws Exception {
-        String studyId = "10";
+        Study study = createStudyAndCenterAndStudyCard();
         try {
-            URL resource = getClass().getClassLoader().getResource("sample1/");
+            URL resource = getClass().getClassLoader().getResource("acr_phantom_t1/");
             if (resource != null) {
                 File sourceDir = new File(resource.toURI());
                 if (sourceDir.isDirectory()) {
-                    File tempDir = generateStowRSDicom(studyId, sourceDir);
+                    File tempDir = generateStowRSDicom(study.getId().toString(), sourceDir);
                     if (tempDir != null) {
                         logger.info("Starting postDICOMMRToDicomWeb");
                         long startTime = System.currentTimeMillis();
