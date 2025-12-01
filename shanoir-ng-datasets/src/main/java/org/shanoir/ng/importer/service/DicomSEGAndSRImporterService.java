@@ -104,7 +104,6 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
         }
-
         // Find related dataset
         Dataset dataset = findDataset(examination, datasetAttributes);
         if (dataset == null) {
