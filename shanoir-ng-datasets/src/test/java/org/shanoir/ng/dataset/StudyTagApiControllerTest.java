@@ -49,6 +49,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
@@ -150,13 +151,16 @@ public class StudyTagApiControllerTest {
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    private ImporterService importerService;
-
-    @MockBean
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @MockBean
-    private DicomSEGAndSRImporterService dicomSRImporterService;
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
+    @MockBean
+    private ImporterService importerService;
 
     @MockBean
     @Qualifier("datasetDownloaderServiceImpl")

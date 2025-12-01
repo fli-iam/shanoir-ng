@@ -24,10 +24,10 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-import</name>
-	<description>Shanoir-NG Import Microservice</description>
+	<description>Import microservice</description>
 
 	<dependencies>
-		<!-- Shanoir-NG dependencies -->
+		<!-- Shanoir dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
@@ -67,39 +67,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- DCM4CHE dependencies -->
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-core</artifactId>
-			<version>${dcm4che.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-dcmr</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-emf</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che.tool</groupId>
-			<artifactId>dcm4che-tool-storescu</artifactId>
-			<version>${dcm4che.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

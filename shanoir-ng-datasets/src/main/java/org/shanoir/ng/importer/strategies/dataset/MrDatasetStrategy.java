@@ -33,7 +33,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.shared.dicom.EchoTime;
@@ -71,7 +70,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
     @Override
     public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes<String> serieAttributes, Serie serie,
-            ImportJob importJob) throws Exception {
+            Long subjectId) throws Exception {
 
         DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
@@ -87,10 +86,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
         }
 
         for (Dataset dataset : serie.getDatasets()) {
-            importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-
             MrDataset mrDataset = new MrDataset();
-            mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
+            mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, subjectId);
             if (mrDataset.getFirstImageAcquisitionTime() != null) {
                 if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
                     datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
@@ -114,37 +111,41 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
         }
 
         return datasetWrapper;
-
     }
 
     /* (non-Javadoc)
      * @see org.shanoir.ng.dataset.modality.DatasetStrategy#generateSingleMrDataset(org.dcm4che3.data.Attributes, org.shanoir.ng.importer.dto.Serie, org.shanoir.ng.importer.dto.Dataset, int, org.shanoir.ng.importer.dto.ImportJob)
      */
     @Override
-    public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-            ImportJob importJob) throws Exception {
+    public MrDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
         MrDataset mrDataset = new MrDataset();
         mrDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
         mrDataset.setCreationDate(serie.getSeriesDate());
         mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
-        final String serieDescription = serie.getSeriesDescription();
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
         mrDataset.setOriginMetadata(datasetMetadata);
         // set the series description as the dataset comment & name
-        if (serieDescription != null && !"".equals(serieDescription)) {
-            mrDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-            mrDataset.getOriginMetadata().setComment(serieDescription);
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            mrDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            mrDataset.getOriginMetadata().setComment(seriesDescription);
         }
 
         // Pre-select the type Reconstructed dataset
         mrDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         // Set the study and the subject
-        mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        mrDataset.setSubjectId(subjectId);
 
         // Set the modality from dicom fields
         mrDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            mrDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
         CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
         if (mrDataset.getSubjectId() != null) {
@@ -188,8 +189,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
         if (serie.getIsSpectroscopy()) {
             MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
-            int rows = dicomAttributes.getInt(Tag.Rows, 0);
-            int columns = dicomAttributes.getInt(Tag.Columns, 0);
+            int rows = attributes.getInt(Tag.Rows, 0);
+            int columns = attributes.getInt(Tag.Columns, 0);
             if (rows == 1 && columns == 1) {
                 mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET);
             } else {
@@ -201,7 +202,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
         if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
             MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
             // Tag (0008,0008) ImageType is of Type Required (1) in Enhanced MR Image IOD
-            String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
+            String[] imageTypeArray = attributes.getStrings(Tag.ImageType);
             if (imageTypeArray != null) {
                 // Check if image flavor is present, Value Multiplicity 2-n
                 // Example was: ["DERIVED", "PRIMARY"]: no image flavor present
@@ -240,29 +241,31 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
          *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current mrDataset
          *
          **/
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
-            if (datasetExpression.getFirstImageAcquisitionTime() != null) {
-                if (mrDataset.getFirstImageAcquisitionTime() == null) {
-                    mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
-                } else {
-                    if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                if (datasetExpression.getFirstImageAcquisitionTime() != null) {
+                    if (mrDataset.getFirstImageAcquisitionTime() == null) {
                         mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
+                    } else {
+                        if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
+                            mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
+                        }
                     }
                 }
-            }
-            if (datasetExpression.getLastImageAcquisitionTime() != null) {
-                if (mrDataset.getLastImageAcquisitionTime() == null) {
-                    mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
-                } else {
-                    if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
+                if (datasetExpression.getLastImageAcquisitionTime() != null) {
+                    if (mrDataset.getLastImageAcquisitionTime() == null) {
                         mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
+                    } else {
+                        if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
+                            mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
+                        }
                     }
                 }
+                datasetExpression.setDataset(mrDataset);
+                mrDataset.getDatasetExpressions().add(datasetExpression);
             }
-            datasetExpression.setDataset(mrDataset);
-            mrDataset.getDatasetExpressions().add(datasetExpression);
         }
 
         DatasetMetadata originalDM = mrDataset.getOriginMetadata();
@@ -272,7 +275,6 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
         return mrDataset;
     }
-
 
     /* (non-Javadoc)
      * @see org.shanoir.ng.dataset.modality.DatasetStrategy#computeDatasetName(java.lang.String, int)

@@ -17,7 +17,11 @@ package org.shanoir.ng.importer.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -85,6 +89,40 @@ public class Serie {
 
     @JsonProperty("datasets")
     private List<Dataset> datasets = null;
+
+    public Serie() { }
+
+    public Serie(Attributes attributes) {
+        seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+        // try to remove confusing spaces, in case DICOM server sends them wrongly
+        if (seriesInstanceUID != null)
+            seriesInstanceUID = seriesInstanceUID.trim();
+        sopClassUID = attributes.getString(Tag.SOPClassUID);
+        seriesDescription = attributes.getString(Tag.SeriesDescription);
+        seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
+        seriesNumber = attributes.getInt(Tag.SeriesNumber, 0);
+        numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
+        modality = attributes.getString(Tag.Modality);
+        protocolName = attributes.getString(Tag.ProtocolName);
+        isEnhanced = DicomUtils.checkDicomIsEnhanced(attributes);
+        multiFrameCount = DicomUtils.getDicomMultiFrameCount(attributes, isEnhanced);
+        if (multiFrameCount > 1) {
+            isMultiFrame = true;
+        } else {
+            isMultiFrame = false;
+        }
+        sequenceName = DicomUtils.getDicomSequenceName(attributes, isEnhanced);
+        isSpectroscopy = Boolean.FALSE;
+        isCompressed = Boolean.FALSE;
+        final EquipmentDicom equipmentDicom = new EquipmentDicom(
+                attributes.getString(Tag.Manufacturer),
+                attributes.getString(Tag.ManufacturerModelName),
+                modality,
+                attributes.getString(Tag.DeviceSerialNumber),
+                attributes.getString(Tag.StationName),
+                attributes.getString(Tag.MagneticFieldStrength));
+        setEquipment(equipmentDicom);
+    }
 
     public Boolean getSelected() {
         return selected;
@@ -249,4 +287,5 @@ public class Serie {
     public void setIsSpectroscopy(Boolean isSpectroscopy) {
         this.isSpectroscopy = isSpectroscopy;
     }
+
 }

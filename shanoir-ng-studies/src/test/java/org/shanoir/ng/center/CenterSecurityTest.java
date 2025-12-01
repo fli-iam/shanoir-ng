@@ -79,8 +79,8 @@ public class CenterSecurityTest {
         assertAccessDenied(service::findById, ENTITY_ID);
         assertAccessDenied(service::findAll);
         assertAccessDenied(service::findIdsAndNames);
-        assertAccessDenied(service::create, mockNew);
-        assertAccessDenied(service::update, mockExisting);
+        assertAccessDenied(service::create, mockNew, true);
+        assertAccessDenied(service::update, mockExisting, true);
         assertAccessDenied(service::deleteById, ENTITY_ID);
         assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
     }
@@ -92,8 +92,8 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::findById, ENTITY_ID);
         assertAccessAuthorized(service::findAll);
         assertAccessAuthorized(service::findIdsAndNames);
-        assertAccessAuthorized(service::create, mockNew);
-        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::create, mockNew, true);
+        assertAccessAuthorized(service::update, mockExisting, true);
         assertAccessDenied(service::deleteById, ENTITY_ID);
         assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
     }
@@ -105,9 +105,9 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::findById, ENTITY_ID);
         assertAccessAuthorized(service::findAll);
         assertAccessAuthorized(service::findIdsAndNames);
-        assertAccessAuthorized(service::create, mockNew);
-        assertAccessDenied(service::create, mockExisting);
-        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::create, mockNew, true);
+        assertAccessDenied(service::create, mockExisting, true);
+        assertAccessAuthorized(service::update, mockExisting, true);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
         assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
     }
@@ -119,9 +119,9 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::findById, ENTITY_ID);
         assertAccessAuthorized(service::findAll);
         assertAccessAuthorized(service::findIdsAndNames);
-        assertAccessAuthorized(service::create, mockNew);
-        assertAccessDenied(service::create, mockExisting);
-        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::create, mockNew, true);
+        assertAccessDenied(service::create, mockExisting, true);
+        assertAccessAuthorized(service::update, mockExisting, true);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
         assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
     }

@@ -29,6 +29,10 @@ shanoir-uploader/src/main/resources/key
 shanoir-uploader/src/main/resources/profile.OFSEP/key
 shanoir-uploader/src/main/resources/profile.OFSEP-Qualif/key
 shanoir-uploader/src/main/resources/pseudonymus
+shanoir-uploader/src/test/resources/sample1
+shanoir-uploader/src/test/resources/sample1_stowrs
+shanoir-uploader/src/test/resources/sample_healthy_archive
+shanoir-uploader/src/test/resources/sample_healthy_archive_stowrs
 shanoir-ng-tests/tests/geckodriver.log
 shanoir-ng-users/shanoir-events-log.log
 shanoir-ng-preclinical/nullbruker/

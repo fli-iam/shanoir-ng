@@ -19,17 +19,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -61,6 +65,9 @@ public class CenterServiceImpl implements CenterService {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
+    private CenterMapper centerMapper;
+
+    @Autowired
     private StudyExaminationRepository studyExaminationRepository;
 
     @Autowired
@@ -68,6 +75,9 @@ public class CenterServiceImpl implements CenterService {
 
     @Autowired
     private StudyUserRepository studyUserRepo;
+
+    @Autowired
+    private StudyService studyService;
 
     private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 
@@ -99,6 +109,7 @@ public class CenterServiceImpl implements CenterService {
             throw new UndeletableDependenciesException(errorMap);
         }
         centerRepository.deleteById(id);
+        deleteCenterInMSDatasets(id);
     }
 
     @Override
@@ -154,33 +165,43 @@ public class CenterServiceImpl implements CenterService {
     }
 
     @Override
-    public Center update(Center center) throws EntityNotFoundException {
+    public Center update(Center center, boolean withAMQP) throws EntityNotFoundException {
         final Center centerDb = centerRepository.findById(center.getId()).orElse(null);
         if (centerDb == null) {
             throw new EntityNotFoundException(center.getClass(), center.getId());
         }
-        String previousName = centerDb.getName();
         updateValues(center, centerDb);
         Center updatedCenter = centerRepository.save(centerDb);
-        // send name update via rabbitmq
-        if (!previousName.equals(updatedCenter.getName())) {
-            try {
-                updateName(new IdName(center.getId(), center.getName()));
-            } catch (MicroServiceCommunicationException e) {
-                LOG.error("Could not send the center name change to the other microservices !", e);
-            }
+        if (withAMQP) {
+            updateCenterInMSDatasets(updatedCenter);
         }
         return updatedCenter;
     }
 
-    public Center create(Center center) {
-        Center newDbCenter = centerRepository.save(center);
+    private void updateCenterInMSDatasets(Center center) {
         try {
-            updateName(new IdName(newDbCenter.getId(), newDbCenter.getName()));
-        } catch (MicroServiceCommunicationException e) {
-            LOG.error("Could not send the center name creation to the other microservices !", e);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
+                    objectMapper.writeValueAsString(centerMapper.centerToCenterDTOFlat(center)));
+        } catch (AmqpException | JsonProcessingException e) {
+            LOG.error("Could not send center change to MS Datasets !", e);
         }
-        return newDbCenter;
+    }
+
+    private void deleteCenterInMSDatasets(Long centerId) {
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_DELETE_QUEUE,
+                    objectMapper.writeValueAsString(centerId));
+        } catch (AmqpException | JsonProcessingException e) {
+            LOG.error("Could not send center change to MS Datasets !", e);
+        }
+    }
+
+    public Center create(Center center, boolean withAMQP) {
+        Center createdCenter = centerRepository.save(center);
+        if (withAMQP) {
+            updateCenterInMSDatasets(createdCenter);
+        }
+        return createdCenter;
     }
 
     @Override
@@ -188,20 +209,50 @@ public class CenterServiceImpl implements CenterService {
         return centerRepository.findFirstByNameContainingOrderByIdAsc(name);
     }
 
-    private boolean updateName(IdName idName) throws MicroServiceCommunicationException {
-        try {
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
-                    objectMapper.writeValueAsString(idName));
-            return true;
-        } catch (AmqpException | JsonProcessingException e) {
-            throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
-        }
-    }
-
+    // Method only used by unit tests
     public void deleteById(final Long id) throws EntityNotFoundException  {
         final Optional<Center> entity = centerRepository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
         centerRepository.deleteById(id);
+    }
+
+    @Override
+    public Center findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom, boolean withAMQP) throws EntityNotFoundException {
+        Optional<Center> centerOpt = findByName(institutionDicom.getInstitutionName());
+        if (centerOpt.isEmpty()) {
+            Center center = new Center();
+            center.setName(institutionDicom.getInstitutionName());
+            center.setStreet(institutionDicom.getInstitutionAddress());
+            isCenterInStudy(studyId, center);
+            return create(center, withAMQP);
+        } else {
+            Center center = centerOpt.orElseThrow();
+            if (!isCenterInStudy(studyId, center)) {
+                return update(center, withAMQP);
+            }
+            return center;
+        }
+    }
+
+    private boolean isCenterInStudy(Long studyId, Center center) {
+        List<StudyCenter> studyCenterList = center.getStudyCenterList();
+        if (studyCenterList != null && !studyCenterList.isEmpty()) {
+            for (StudyCenter studyCenter : studyCenterList) {
+                if (studyCenter.getStudy().getId().equals(studyId)) {
+                    return true;
+                }
+            }
+        }
+        if (studyCenterList == null) {
+            studyCenterList = new ArrayList<>();
+            center.setStudyCenterList(studyCenterList);
+        }
+        StudyCenter studyCenter = new StudyCenter();
+        Study study = studyService.findById(studyId);
+        studyCenter.setStudy(study);
+        studyCenter.setCenter(center);
+        center.getStudyCenterList().add(studyCenter);
+        return false;
     }
 
 }

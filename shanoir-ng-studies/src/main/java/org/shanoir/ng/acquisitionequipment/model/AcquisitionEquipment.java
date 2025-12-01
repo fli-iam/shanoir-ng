@@ -107,4 +107,11 @@ public class AcquisitionEquipment extends HalEntity {
         this.serialNumber = serialNumber;
     }
 
+    public String toString() {
+        return getManufacturerModel().getManufacturer().getName() + " - "
+            + getManufacturerModel().getName() + " "
+            + (getManufacturerModel().getMagneticField() != null ? (getManufacturerModel().getMagneticField() + "T ") : "")
+            + getSerialNumber() + " - " + getCenter().getName();
+    }
+
 }

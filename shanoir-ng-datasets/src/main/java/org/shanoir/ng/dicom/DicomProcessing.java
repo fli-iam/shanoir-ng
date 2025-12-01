@@ -52,16 +52,6 @@ public class DicomProcessing {
     @Autowired
     private static WADOURLHandler wadoURLHandler;
 
-    // public static int countUniqueInstances(AcquisitionAttributes acquisitionAttributes) {
-    //     Set<String> instanceUIDs = new HashSet<>();
-    //     List<Attributes> allAttributes = acquisitionAttributes.getAllDatasetAttributes();
-    //     for (Attributes datasetAttributes : allAttributes) {
-    //         String instanceUID = datasetAttributes.getString(Tag.InstanceNumber);
-    //         instanceUIDs.add(instanceUID);
-    //     }
-    //     return instanceUIDs.size();
-    // }
-
     public static int countUniqueInstances(Serie serie, Boolean isEnhancedMR) throws IOException {
         Set<String> instanceUIDs = new HashSet<>();
         for (Dataset dataset : ListUtils.emptyIfNull(serie.getDatasets())) {
@@ -108,7 +98,7 @@ public class DicomProcessing {
         ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
         if (study != null) {
             for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
+                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
             }
         }
         return attributes;
@@ -124,12 +114,13 @@ public class DicomProcessing {
         return attributes;
     }
 
-    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
+    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
         AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
         String sopUID = null;
         if (!CollectionUtils.isEmpty(serie.getImages())) {
             sopUID = serie.getImages().get(0).getSOPInstanceUID();
         } else {
+            LOG.warn("Attention: a new SOPInstanceUID has been generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
             sopUID = uidGenerator.getNewUID();
         }
         // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
@@ -137,17 +128,13 @@ public class DicomProcessing {
             for (Dataset dataset : serie.getDatasets()) {
                 dataset.setFirstImageSOPInstanceUID(sopUID);
                 try {
-                    attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
+                    attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
                 } catch (IOException e) {
                     throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
                 }
             }
         }
         return attributes;
-    }
-
-    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
-        return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
     }
 
 }

@@ -14,6 +14,7 @@
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -24,7 +25,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +41,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
     private DatasetExpressionContext datasetExpressionContext;
 
     @Override
-    public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-            ImportJob importJob) throws Exception {
+    public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie, Long subjectId) throws Exception {
 
         DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
@@ -58,8 +57,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
         }
 
         for (Dataset dataset : serie.getDatasets()) {
-            importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-            PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
+            PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, subjectId);
             datasetWrapper.getDatasets().add(petDataset);
             datasetIndex++;
         }
@@ -68,29 +66,34 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
     }
 
     @Override
-    public PetDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-            ImportJob importJob) throws Exception {
+    public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
+            Long subjectId) throws Exception {
         PetDataset petDataset = new PetDataset();
         petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
         petDataset.setCreationDate(serie.getSeriesDate());
-        final String serieDescription = serie.getSeriesDescription();
+        final String seriesDescription = serie.getSeriesDescription();
 
         DatasetMetadata datasetMetadata = new DatasetMetadata();
         petDataset.setOriginMetadata(datasetMetadata);
         // set the series description as the dataset comment & name
-        if (serieDescription != null && !"".equals(serieDescription)) {
-            petDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-            petDataset.getOriginMetadata().setComment(serieDescription);
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            petDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            petDataset.getOriginMetadata().setComment(seriesDescription);
         }
 
         // Pre-select the type Reconstructed dataset
         petDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
         // Set the study and the subject
-        petDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        petDataset.setSubjectId(subjectId);
 
         // Set the modality from dicom fields
         petDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.PET_DATASET);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            petDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
 
         CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
         if (petDataset.getSubjectId() != null) {
@@ -109,7 +112,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
          **/
         for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
             datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
             datasetExpression.setDataset(petDataset);
             petDataset.getDatasetExpressions().add(datasetExpression);
         }
