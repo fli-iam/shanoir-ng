@@ -12,7 +12,10 @@ import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
+import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.test.AbstractTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +25,18 @@ public class StowRSDicomTest extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(StowRSDicomTest.class);
 
     @Test
-    public void postDICOMSRToDicomWeb() throws Exception {
+    public void postDicomSRToDicomWeb() throws Exception {
+        Study study = createStudyAndCenterAndStudyCard();
+        Subject subject = createSubject(study);
+        Examination examination = createExamination(study.getId(), subject.getId(), study.getStudyCenterList().get(0).getCenter().getId());
         try {
             URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
             if (resource != null) {
                 File file = new File(resource.toURI());
-                shUpClient.postDicom(file);
+                File newFile = new File(file.getParent(), "DICOMSR-modified.dcm");
+                newFile.createNewFile();
+                modifyAndCopyDicomFile(file, newFile, study.getId().toString(), subject.getName(), UIDGeneration.ROOT + "." + examination.getId());
+                shUpClient.postDicom(newFile);
             }
         } catch (URISyntaxException e) {
             logger.error("Error while reading file", e);
@@ -88,12 +97,12 @@ public class StowRSDicomTest extends AbstractTest {
             for (File f : sourceDir.listFiles()) {
                 File newFile = new File(destinationDir, f.getName());
                 newFile.createNewFile();
-                modifyAndCopyDicomFile(f, newFile, studyId, patientName);
+                modifyAndCopyDicomFile(f, newFile, studyId, patientName, null);
             }
         }
     }
 
-    private void modifyAndCopyDicomFile(File f, File newFile, String studyId, String patientName) throws IOException {
+    private void modifyAndCopyDicomFile(File f, File newFile, String studyId, String patientName, String studyInstanceUID) throws IOException {
         try (DicomInputStream dIn = new DicomInputStream(f);
                 DicomOutputStream dOu = new DicomOutputStream(newFile);) {
             Attributes metaInformationAttributes = dIn.readFileMetaInformation();
@@ -105,6 +114,9 @@ public class StowRSDicomTest extends AbstractTest {
             datasetAttributes.setString(Tag.ClinicalTrialProtocolName, VR.LO, "Phantom QA Study");
             datasetAttributes.setString(Tag.PatientName, VR.PN, patientName);
             datasetAttributes.setString(Tag.PatientID, VR.LO, patientName);
+            if (studyInstanceUID != null && !studyInstanceUID.isEmpty()) {
+                datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
+            }
             dOu.writeDataset(metaInformationAttributes, datasetAttributes);
         }
     }

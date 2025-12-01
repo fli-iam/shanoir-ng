@@ -82,7 +82,6 @@ public class ZipFileImportTest extends AbstractTest {
         }
     }
 
-
     /**
      * Attention: as we simulate for testing reason, the ZIP upload import
      * via Web GUI, we add a pseudonymization profile, as the GUI does it.
