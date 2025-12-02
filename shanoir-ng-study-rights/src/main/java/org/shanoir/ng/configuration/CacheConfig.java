@@ -15,6 +15,8 @@
 package org.shanoir.ng.configuration;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;

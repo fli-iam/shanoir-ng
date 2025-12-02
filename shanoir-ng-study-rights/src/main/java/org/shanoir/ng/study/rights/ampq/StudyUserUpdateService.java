@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import org.shanoir.ng.configuration.CacheNames;
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;

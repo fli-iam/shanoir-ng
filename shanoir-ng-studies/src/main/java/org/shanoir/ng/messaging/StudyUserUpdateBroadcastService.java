@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.messaging;
 
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;

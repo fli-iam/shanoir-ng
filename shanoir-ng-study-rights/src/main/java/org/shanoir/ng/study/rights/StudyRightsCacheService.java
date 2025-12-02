@@ -17,7 +17,7 @@ package org.shanoir.ng.study.rights;
 import java.util.Collections;
 import java.util.List;
 
-import org.shanoir.ng.configuration.CacheNames;
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
