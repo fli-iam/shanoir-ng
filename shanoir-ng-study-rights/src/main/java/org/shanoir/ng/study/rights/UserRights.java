@@ -23,86 +23,86 @@ import org.springframework.util.CollectionUtils;
 
 public class UserRights {
 
-	Map<Long, StudyUser> studyRights = new HashMap<>();
+    private Map<Long, StudyUser> studyRights = new HashMap<>();
 
     public UserRights(List<StudyUser> studyUsers) {
-		if (studyUsers != null) {
-			for (StudyUser su : studyUsers) {
-				if (su.isConfirmed()) {
-					studyRights.put(su.getStudyId(), su);
-				}
-			}
-		}
+        if (studyUsers != null) {
+            for (StudyUser su : studyUsers) {
+                if (su.isConfirmed()) {
+                    studyRights.put(su.getStudyId(), su);
+                }
+            }
+        }
     }
 
-	/**
-	 * Has the user the specified right for the study
-	 */
+    /**
+     * Has the user the specified right for the study
+     */
     public boolean hasStudyRights(Long studyId, String rightStr) {
         if (studyRights.containsKey(studyId)) {
-			StudyUser su = studyRights.get(studyId);
-			return su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
-		} else {
-			return false;
-		}
+            StudyUser su = studyRights.get(studyId);
+            return su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
+        } else {
+            return false;
+        }
     }
 
-	public boolean hasStudyRights(Long studyId, StudyUserRight right) {
-		return hasStudyRights(studyId, right.name());
-	}
+    public boolean hasStudyRights(Long studyId, StudyUserRight right) {
+        return hasStudyRights(studyId, right.name());
+    }
 
-	/**
-	 * Has the user specific center restrictions for this study
-	 */
-	public boolean hasCenterRestrictionsFor(Long studyId) {
-		if (studyRights.containsKey(studyId)) {
-			StudyUser su = studyRights.get(studyId);
-			return !CollectionUtils.isEmpty(su.getCenterIds());
-		} else {
-			return false;
-		}
-	}
+    /**
+     * Has the user specific center restrictions for this study
+     */
+    public boolean hasCenterRestrictionsFor(Long studyId) {
+        if (studyRights.containsKey(studyId)) {
+            StudyUser su = studyRights.get(studyId);
+            return !CollectionUtils.isEmpty(su.getCenterIds());
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Has the user right to access this study-center (including no center restriction)
-	 */
+    /**
+     * Has the user right to access this study-center (including no center restriction)
+     */
     public boolean hasStudyCenterRights(Long studyId, Long centerId) {
         if (studyRights.containsKey(studyId)) {
-			StudyUser su = studyRights.get(studyId);
-			if (!CollectionUtils.isEmpty(su.getCenterIds())) {
-				return su.getCenterIds().contains(centerId);
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
+            StudyUser su = studyRights.get(studyId);
+            if (!CollectionUtils.isEmpty(su.getCenterIds())) {
+                return su.getCenterIds().contains(centerId);
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
-	/**
-	 * Has the user the specified right string for the study and also rights for this center (or no center restriction)
-	 */
-	public boolean hasStudyCenterRights(Long studyId, Long centerId, String rightStr) {
+    /**
+     * Has the user the specified right string for the study and also rights for this center (or no center restriction)
+     */
+    public boolean hasStudyCenterRights(Long studyId, Long centerId, String rightStr) {
         if (hasStudyRights(studyId, rightStr)) {
-			if (hasCenterRestrictionsFor(studyId)) {
-				return hasStudyCenterRights(studyId, centerId);
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
+            if (hasCenterRestrictionsFor(studyId)) {
+                return hasStudyCenterRights(studyId, centerId);
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
-	/**
-	 * Has the user the specified right string for each study and also rights for each study-center (or no center restriction)
-	 */
-	public boolean hasStudiesCenterRights(Iterable<Long> studyIds, Long centerId, String rightStr) {
-		for (Long studyId : studyIds) {
-			if (!hasStudyCenterRights(studyId, centerId, rightStr)) {
-				return false;
-			}
-		}
-		return true;
+    /**
+     * Has the user the specified right string for each study and also rights for each study-center (or no center restriction)
+     */
+    public boolean hasStudiesCenterRights(Iterable<Long> studyIds, Long centerId, String rightStr) {
+        for (Long studyId : studyIds) {
+            if (!hasStudyCenterRights(studyId, centerId, rightStr)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

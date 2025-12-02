@@ -20,40 +20,40 @@ package org.shanoir.ng.dataset.dto;
  */
 public class DatasetStudyCenter {
 
-	private Long datasetId;
+    private Long datasetId;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long centerId;
+    private Long centerId;
 
-	DatasetStudyCenter(Long datasetId, Long studyId, Long centerId) {
-		this.datasetId = datasetId;
-		this.studyId = studyId;
-		this.centerId = centerId;
-	}
+    DatasetStudyCenter(Long datasetId, Long studyId, Long centerId) {
+        this.datasetId = datasetId;
+        this.studyId = studyId;
+        this.centerId = centerId;
+    }
 
-	public Long getDatasetId() {
-		return datasetId;
-	}
+    public Long getDatasetId() {
+        return datasetId;
+    }
 
-	public void setDatasetId(Long datasetId) {
-		this.datasetId = datasetId;
-	}
+    public void setDatasetId(Long datasetId) {
+        this.datasetId = datasetId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
 }

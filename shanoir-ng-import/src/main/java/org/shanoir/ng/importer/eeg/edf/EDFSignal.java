@@ -1,4 +1,4 @@
-/*
+/**
  * (The MIT license)
  *
  * Copyright (c) 2012 MIPT (mr.santak@gmail.com)
@@ -25,9 +25,11 @@ package org.shanoir.ng.importer.eeg.edf;
  */
 public class EDFSignal {
 
-    Double[] unitsInDigit;
-    short[][] digitalValues;
-    double[][] valuesInUnits;
+    private Double[] unitsInDigit;
+
+    private short[][] digitalValues;
+
+    private double[][] valuesInUnits;
 
     public Double[] getUnitsInDigit() {
         return unitsInDigit;
@@ -40,4 +42,17 @@ public class EDFSignal {
     public double[][] getValuesInUnits() {
         return valuesInUnits;
     }
+
+    public void setUnitsInDigit(Double[] unitsInDigit) {
+        this.unitsInDigit = unitsInDigit;
+    }
+
+    public void setDigitalValues(short[][] digitalValues) {
+        this.digitalValues = digitalValues;
+    }
+
+    public void setValuesInUnits(double[][] valuesInUnits) {
+        this.valuesInUnits = valuesInUnits;
+    }
+
 }

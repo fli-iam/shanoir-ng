@@ -14,10 +14,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
-import { Tag } from 'src/app/tags/tag.model';
-
+import { TreeNodeAbstractComponent } from '../../shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '../../studies/study/tree.service';
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 
@@ -51,13 +49,7 @@ export class ReverseSubjectNodeComponent extends TreeNodeAbstractComponent<Rever
                     this.input.parentNode,
                     this.input.subject.id,
                     this.input.subject.name,
-                    this.input.subject.subjectStudyList?.map(subjectStudy => {
-                        let tags: Tag[] = [];
-                        if (!(this.input instanceof ReverseSubjectNode)) {
-                            tags = this.input.subject.subjectStudyList[this.input.subject.subjectStudyList.findIndex(element => element.study.id == subjectStudy.study.id)].tags;
-                        }
-                        return ReverseStudyNode.fromStudy(subjectStudy.study, tags, this.node);
-                    })
+                    ReverseStudyNode.fromStudy(this.input.subject.study, this.input.subject.tags, this.node)
                 );
                 if(this.input.subject.preclinical){
                     this.awesome = "fas fa-hippo"
@@ -71,7 +63,7 @@ export class ReverseSubjectNodeComponent extends TreeNodeAbstractComponent<Rever
     hasChildren(): boolean | 'unknown' {
         if (!this.node.studies) return false;
         else if (this.node.studies == 'UNLOADED') return 'unknown';
-        else return this.node.studies.length > 0;
+        else return this.node.studies != null;
     }
 
 }

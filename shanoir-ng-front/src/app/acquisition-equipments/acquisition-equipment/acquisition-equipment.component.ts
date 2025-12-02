@@ -203,4 +203,3 @@ export class ManufacturerAndSerial {
         public serial: string
     ) {}
 }
-

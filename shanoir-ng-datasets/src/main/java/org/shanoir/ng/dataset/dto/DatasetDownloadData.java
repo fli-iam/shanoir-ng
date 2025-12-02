@@ -20,27 +20,27 @@ package org.shanoir.ng.dataset.dto;
  */
 public class DatasetDownloadData {
 
-	private Long id;
+    private Long id;
 
-	private boolean canDownload;
+    private boolean canDownload;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public boolean isCanDownload() {
-		return canDownload;
-	}
+    public boolean isCanDownload() {
+        return canDownload;
+    }
 
-	public boolean getCanDownload() {
-		return canDownload;
-	}
+    public boolean getCanDownload() {
+        return canDownload;
+    }
 
-	public void setCanDownload(boolean canDownload) {
-		this.canDownload = canDownload;
-	}
+    public void setCanDownload(boolean canDownload) {
+        this.canDownload = canDownload;
+    }
 }

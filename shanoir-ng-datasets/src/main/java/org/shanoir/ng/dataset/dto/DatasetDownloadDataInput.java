@@ -22,23 +22,23 @@ import java.util.List;
  */
 public class DatasetDownloadDataInput {
 
-	private List<Long> acquisitionIds;
+    private List<Long> acquisitionIds;
 
-	private List<Long> examinationIds;
+    private List<Long> examinationIds;
 
-	public List<Long> getAcquisitionIds() {
-		return acquisitionIds;
-	}
+    public List<Long> getAcquisitionIds() {
+        return acquisitionIds;
+    }
 
-	public void setAcquisitionIds(List<Long> acquisitionIds) {
-		this.acquisitionIds = acquisitionIds;
-	}
+    public void setAcquisitionIds(List<Long> acquisitionIds) {
+        this.acquisitionIds = acquisitionIds;
+    }
 
-	public List<Long> getExaminationIds() {
-		return examinationIds;
-	}
+    public List<Long> getExaminationIds() {
+        return examinationIds;
+    }
 
-	public void setExaminationIds(List<Long> examinationIds) {
-		this.examinationIds = examinationIds;
-	}
+    public void setExaminationIds(List<Long> examinationIds) {
+        this.examinationIds = examinationIds;
+    }
 }

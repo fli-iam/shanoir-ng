@@ -47,98 +47,98 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 
-	@Autowired
-	private ManufacturerModelRepository manufacturerModelRepository;
+    @Autowired
+    private ManufacturerModelRepository manufacturerModelRepository;
 
-	@Autowired
-	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
+    @Autowired
+    private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	private static final Logger LOG = LoggerFactory.getLogger(ManufacturerModelServiceImpl.class);
-	public Optional<ManufacturerModel> findById(final Long id) {
-		return manufacturerModelRepository.findById(id);
-	}
+    private static final Logger LOG = LoggerFactory.getLogger(ManufacturerModelServiceImpl.class);
+    public Optional<ManufacturerModel> findById(final Long id) {
+        return manufacturerModelRepository.findById(id);
+    }
 
-	@Override
-	public List<ManufacturerModel> findAll() {
-		return Utils.toList(manufacturerModelRepository.findAll());
-	}
+    @Override
+    public List<ManufacturerModel> findAll() {
+        return Utils.toList(manufacturerModelRepository.findAll());
+    }
 
-	@Override
-	public ManufacturerModel create(final ManufacturerModel entity) {
-		ManufacturerModel savedEntity = manufacturerModelRepository.save(entity);
-		return savedEntity;
-	}
+    @Override
+    public ManufacturerModel create(final ManufacturerModel entity) {
+        ManufacturerModel savedEntity = manufacturerModelRepository.save(entity);
+        return savedEntity;
+    }
 
-	@Override
-	public ManufacturerModel update(final ManufacturerModel entity) throws EntityNotFoundException {
-		final Optional<ManufacturerModel> entityDbOpt = manufacturerModelRepository.findById(entity.getId());
-		final ManufacturerModel entityDb = entityDbOpt.orElseThrow(
-				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+    @Override
+    public ManufacturerModel update(final ManufacturerModel entity) throws EntityNotFoundException {
+        final Optional<ManufacturerModel> entityDbOpt = manufacturerModelRepository.findById(entity.getId());
+        final ManufacturerModel entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
 
-		updateValues(entity, entityDb);
-		return manufacturerModelRepository.save(entityDb);
-	}
+        updateValues(entity, entityDb);
+        return manufacturerModelRepository.save(entityDb);
+    }
 
-	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, EntityLinkedException {
-		final Optional<ManufacturerModel> entity = manufacturerModelRepository.findById(id);
-		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-		try {
-			manufacturerModelRepository.deleteById(id);
-		} catch (DataIntegrityViolationException e) {
-			throw new EntityLinkedException("Cannot delete entity with id = " + id + " because it is linked to other entities.", e);
-		}
-	}
+    @Override
+    public void deleteById(final Long id) throws EntityNotFoundException, EntityLinkedException {
+        final Optional<ManufacturerModel> entity = manufacturerModelRepository.findById(id);
+        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+        try {
+            manufacturerModelRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new EntityLinkedException("Cannot delete entity with id = " + id + " because it is linked to other entities.", e);
+        }
+    }
 
-	@Override
-	public List<IdName> findIdsAndNames() {
-		return manufacturerModelRepository.findIdsAndNames();
-	}
+    @Override
+    public List<IdName> findIdsAndNames() {
+        return manufacturerModelRepository.findIdsAndNames();
+    }
 
-	@Override
-	public List<IdName> findIdsAndNamesForCenter(Long centerId) {
-		return manufacturerModelRepository.findIdsAndNames();
-	}
+    @Override
+    public List<IdName> findIdsAndNamesForCenter(Long centerId) {
+        return manufacturerModelRepository.findIdsAndNames();
+    }
 
-	protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
-		to.setDatasetModalityType(from.getDatasetModalityType());
-		to.setMagneticField(from.getMagneticField());
-		to.setManufacturer(from.getManufacturer());
-		to.setName(from.getName());
+    protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
+        to.setDatasetModalityType(from.getDatasetModalityType());
+        to.setMagneticField(from.getMagneticField());
+        to.setManufacturer(from.getManufacturer());
+        to.setName(from.getName());
 
-		try {
-			updateManufacturerModelName(from);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the manufacturer model values change to the other microservices !", e);
-		}
+        try {
+            updateManufacturerModelName(from);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not send the manufacturer model values change to the other microservices !", e);
+        }
 
-		return to;
-	}
+        return to;
+    }
 
-	private boolean updateManufacturerModelName(ManufacturerModel manufacturerModel) throws MicroServiceCommunicationException {
-		try {
-			String manuModelName = manufacturerModel.getName();
-			List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
-			if (listAcEq == null) {
-				return true;
-			}
-			for (AcquisitionEquipment acEqItem : listAcEq) {
-				IdName acEq = new IdName();
-				acEq.setId(acEqItem.getId());
-				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-				rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
-			}
+    private boolean updateManufacturerModelName(ManufacturerModel manufacturerModel) throws MicroServiceCommunicationException {
+        try {
+            String manuModelName = manufacturerModel.getName();
+            List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
+            if (listAcEq == null) {
+                return true;
+            }
+            for (AcquisitionEquipment acEqItem : listAcEq) {
+                IdName acEq = new IdName();
+                acEq.setId(acEqItem.getId());
+                acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
+                rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
+            }
 
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException(
-					"Error while communicating with datasets MS to update manufacturer model name.", e);
-		}
-	}
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException(
+                    "Error while communicating with datasets MS to update manufacturer model name.", e);
+        }
+    }
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,119 +36,119 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class PathologyApiController implements PathologyApi {
 
-	private static final String BAD_ARGUMENTS = "Bad arguments";
+    private static final String BAD_ARGUMENTS = "Bad arguments";
 
-	private static final Logger LOG = LoggerFactory.getLogger(PathologyApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PathologyApiController.class);
 
-	@Autowired
-	private PathologyService pathologiesService;
+    @Autowired
+    private PathologyService pathologiesService;
 
-	@Autowired
-	private PathologyUniqueValidator uniqueValidator;
-	
-	@Autowired
-	private PathologyEditableByManager editableOnlyValidator;
+    @Autowired
+    private PathologyUniqueValidator uniqueValidator;
 
-	@Override
-	public ResponseEntity<Pathology> createPathology(
-			@Parameter(name = "pathology to create", required = true) @RequestBody Pathology pathology,
-			BindingResult result) throws RestServiceException {
+    @Autowired
+    private PathologyEditableByManager editableOnlyValidator;
 
-		final FieldErrorMap accessErrors = this.getCreationRightsErrors(pathology);
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(pathology);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
-		}
+    @Override
+    public ResponseEntity<Pathology> createPathology(
+            @Parameter(name = "pathology to create", required = true) @RequestBody Pathology pathology,
+            BindingResult result) throws RestServiceException {
 
-		// Guarantees it is a creation, not an update
-		pathology.setId(null);
+        final FieldErrorMap accessErrors = this.getCreationRightsErrors(pathology);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(pathology);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
 
-		/* Save pathology in db. */
-		try {
-			final Pathology createdPathology = pathologiesService.save(pathology);
-			return new ResponseEntity<>(createdPathology, HttpStatus.OK);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
-		}
+        // Guarantees it is a creation, not an update
+        pathology.setId(null);
 
-	}
+        /* Save pathology in db. */
+        try {
+            final Pathology createdPathology = pathologiesService.save(pathology);
+            return new ResponseEntity<>(createdPathology, HttpStatus.OK);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
 
-	@Override
-	public ResponseEntity<Void> deletePathology(
-			@Parameter(name = "Pathology id to delete", required = true) @PathVariable("id") Long id) {
-		if (pathologiesService.findById(id) == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		try {
-			pathologiesService.deleteById(id);
-		} catch (ShanoirException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+    }
 
-	@Override
-	public ResponseEntity<Pathology> getPathologyById(
-			@Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
-		final Pathology pathology = pathologiesService.findById(id);
-		if (pathology == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(pathology, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Void> deletePathology(
+            @Parameter(name = "Pathology id to delete", required = true) @PathVariable("id") Long id) {
+        if (pathologiesService.findById(id) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        try {
+            pathologiesService.deleteById(id);
+        } catch (ShanoirException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<Pathology>> getPathologies() {
-		final List<Pathology> pathologies = pathologiesService.findAll();
-		if (pathologies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(pathologies, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Pathology> getPathologyById(
+            @Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+        final Pathology pathology = pathologiesService.findById(id);
+        if (pathology == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(pathology, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updatePathology(
-			@Parameter(name = "ID of subject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@Parameter(name = "Pathology object that needs to be updated", required = true) @RequestBody Pathology pathology,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<List<Pathology>> getPathologies() {
+        final List<Pathology> pathologies = pathologiesService.findAll();
+        if (pathologies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(pathologies, HttpStatus.OK);
+    }
 
-		pathology.setId(id);
+    @Override
+    public ResponseEntity<Void> updatePathology(
+            @Parameter(name = "ID of subject that needs to be updated", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "Pathology object that needs to be updated", required = true) @RequestBody Pathology pathology,
+            final BindingResult result) throws RestServiceException {
 
-		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(pathology);
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(pathology);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
-		}
-		try {
-			pathologiesService.update(pathology);
-		} catch (ShanoirException e) {
-			LOG.error("Error while trying to update pathology " + id + " : ", e);
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
+        pathology.setId(id);
 
-	}
+        final FieldErrorMap accessErrors = this.getUpdateRightsErrors(pathology);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(pathology);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+        try {
+            pathologiesService.update(pathology);
+        } catch (ShanoirException e) {
+            LOG.error("Error while trying to update pathology " + id + " : ", e);
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
 
-	private FieldErrorMap getUpdateRightsErrors(final Pathology pathology) {
-	    return editableOnlyValidator.validate(pathology);
-	}
+    }
 
-	private FieldErrorMap getCreationRightsErrors(final Pathology pathology) {
-	    return editableOnlyValidator.validate(pathology);
-	}
+    private FieldErrorMap getUpdateRightsErrors(final Pathology pathology) {
+        return editableOnlyValidator.validate(pathology);
+    }
 
-	private FieldErrorMap getUniqueConstraintErrors(final Pathology pathology) {
-		return uniqueValidator.validate(pathology);
-	}
+    private FieldErrorMap getCreationRightsErrors(final Pathology pathology) {
+        return editableOnlyValidator.validate(pathology);
+    }
+
+    private FieldErrorMap getUniqueConstraintErrors(final Pathology pathology) {
+        return uniqueValidator.validate(pathology);
+    }
 
 }
