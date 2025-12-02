@@ -317,9 +317,24 @@ public class RabbitMQStudiesService {
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public String studyParticipantsTsv(Long studyId) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            return this.getStudyParticipantsTsv(studyId);
+        } catch (Exception e) {
+            LOG.error("Error while creating participants.tsv: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
     @Transactional
-    public String getStudyParticipantsTsv(Long studyId) throws IOException {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        return this.bidsService.generateParticipantsTsvFile(studyId);
+    private String getStudyParticipantsTsv(Long studyId) {
+        try {
+            return this.bidsService.generateParticipantsTsvFile(studyId);
+        } catch (IOException e) {
+            LOG.error("Error while creating participants.tsv: ", e);
+        }
+        return null;
     }
 }
