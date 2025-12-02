@@ -134,7 +134,7 @@ public class BIDSServiceImpl implements BIDSService {
         for (Subject subject : subjs) {
             String subjectName = subject.getName();
             String subjectAge = ageCalculation(subject);
-            String subjectSex = subject.getSex().name();
+            String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
             subjectName = this.formatLabel(subjectName);
             // Write in the file the values
             buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
