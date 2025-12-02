@@ -126,6 +126,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 
+    private static final String SERVICE_EXAMINATIONS = "service.examinations.find";
+
     private static final String SERVICE_SUBJECTS_BY_STUDY_ID = "service.subjects.by.study.id";
 
     private HttpService httpService;
@@ -179,6 +181,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLImporterUploadDicom;
 
     private String serviceURLExaminationsBySubjectId;
+
+    private String serviceURLExaminations;
 
     private String serviceURLSubjectsByStudyId;
 
@@ -240,6 +244,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
         this.serviceURLExaminationsBySubjectId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
+        this.serviceURLExaminations = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS);
         this.serviceURLSubjectsByStudyId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 
@@ -451,6 +457,24 @@ public class ShanoirUploaderServiceClient {
                 } else {
                     LOG.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
+            }
+        }
+        return null;
+    }
+
+    public List<Examination> findExaminations() throws Exception {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminations)) {
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            LOG.info("findExaminations: " + elapsedTime + "ms");
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                List<Examination> examinations = Util.getMappedPageContent(response, Examination.class);
+                LOG.info("findExaminations: " + examinations.size() + " examinations.");
+                return examinations;
+            } else {
+                LOG.info("Exam(s) not found (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
             }
         }
         return null;
