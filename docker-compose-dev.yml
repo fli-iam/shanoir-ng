@@ -140,6 +140,8 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "studies-data:/var/studies-data"
+      # This is related to participants.tsv file
+      - "datasets-data:/var/datasets-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network

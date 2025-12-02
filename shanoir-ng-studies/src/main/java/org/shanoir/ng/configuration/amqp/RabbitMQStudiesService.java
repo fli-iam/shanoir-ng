@@ -318,8 +318,8 @@ public class RabbitMQStudiesService {
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
     @Transactional
-    public void getStudyParticipantsTsv(Long studyId) throws IOException {
+    public String getStudyParticipantsTsv(Long studyId) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        this.bidsService.generateParticipantsTsvFile(studyId);
+        return this.bidsService.generateParticipantsTsvFile(studyId);
     }
 }

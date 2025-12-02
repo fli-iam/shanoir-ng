@@ -204,7 +204,7 @@ public class BIDSServiceImpl implements BIDSService {
         subjs.sort(Comparator.comparing(Subject::getId));
 
         // Create participants.tsv
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+        rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
 
         int index = 1;
         for (Subject subj : subjs) {

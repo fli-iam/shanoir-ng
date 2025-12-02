@@ -105,7 +105,7 @@ ms.url:
 # data paths
 studies-data: /var/studies-data
 # Data folder configuration
-bids-data-folder: /var/studies-data/bids-data
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   pattern:
@@ -161,7 +161,7 @@ ms.url:
 # data paths
 studies-data: /tmp
 # Data folder configuration
-bids-data-folder: /var/studies-data/bids-data
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file:

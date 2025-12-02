@@ -67,6 +67,8 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String SUBJECT_AGE = "subject_age";
 
+    private static final String SUBJECT_SEX = "subject_sex";
+
     private static final String CSV_SEPARATOR = "\t";
 
     private static final String CSV_SPLITTER = "\n";
@@ -74,7 +76,8 @@ public class BIDSServiceImpl implements BIDSService {
     private static final String[] CSV_PARTICIPANTS_HEADER = {
             PARTICIPANT_ID,
             SUBJECT_IDENTIFIER,
-            SUBJECT_AGE
+            SUBJECT_AGE,
+            SUBJECT_SEX
     };
 
     private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
@@ -97,7 +100,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 
     @Override
-    public void generateParticipantsTsvFile(Long studyId) throws IOException {
+    public String generateParticipantsTsvFile(Long studyId) throws IOException {
         Study study = studyRepository.findById(studyId).orElse(null);
         File workFolder = getBidsFolderpath(studyId, study.getName());
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
@@ -116,6 +119,7 @@ public class BIDSServiceImpl implements BIDSService {
         } catch (IOException e) {
             LOG.error("Error while creating particpants.tsv file: {}", e);
         }
+        return buffer.toString();
     }
 
     public StringBuilder participantsSerializer(List<Subject> subjs) {
@@ -130,11 +134,13 @@ public class BIDSServiceImpl implements BIDSService {
         for (Subject subject : subjs) {
             String subjectName = subject.getName();
             String subjectAge = ageCalculation(subject);
+            String subjectSex = subject.getSex().name();
             subjectName = this.formatLabel(subjectName);
             // Write in the file the values
             buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
                     .append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subjectAge).append(CSV_SEPARATOR)
+                    .append(subjectSex).append(CSV_SEPARATOR)
                     .append(CSV_SPLITTER);
         }
 
@@ -178,7 +184,6 @@ public class BIDSServiceImpl implements BIDSService {
         LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
         LocalDate now = new LocalDate();
         Years age = Years.yearsBetween(birthDate, now);
-        System.out.println("age = " + age.get(DurationFieldType.years()));
         return String.valueOf(age.get(DurationFieldType.years()));
     }
 
