@@ -25,6 +25,7 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterService;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -61,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 
 @Service
 public class RabbitMQStudiesService {
@@ -76,6 +78,9 @@ public class RabbitMQStudiesService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private BIDSService bidsService;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -311,4 +316,10 @@ public class RabbitMQStudiesService {
         return null;
     }
 
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyParticipantsTsv(Long studyId) throws IOException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        return this.bidsService.generateParticipantsTsvFile(studyId);
+    }
 }
