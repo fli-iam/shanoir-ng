@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +39,7 @@ public class StudyUserUpdateBroadcastService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @CacheEvict(value = {CacheNames.STUDY_USER, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.STUDY_RIGHTS, CacheNames.USER_RIGHTS}, allEntries = true)
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);

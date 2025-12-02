@@ -17,6 +17,7 @@ package org.shanoir.ng.study.rights;
 import java.util.Collections;
 import java.util.List;
 
+import org.shanoir.ng.configuration.CacheNames;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class StudyRightsCacheService {
     @Autowired
     private StudyUserRightsRepository repo;
 
-    @Cacheable(value = "studyRights", key = "#userId + '-' + #studyId + '-' + #rightStr")
+    @Cacheable(value = CacheNames.STUDY_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
     public boolean hasRightOnStudyCached(Long userId, Long studyId, String rightStr) {
         LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}, right={}",
                  userId, studyId, rightStr);
@@ -43,7 +44,7 @@ public class StudyRightsCacheService {
                 && founded.isConfirmed();
     }
 
-    @Cacheable(value = "studyUser", key = "#userId + '-' + #studyId")
+    @Cacheable(value = CacheNames.STUDY_USER, key = "#userId + '-' + #studyId")
     public StudyUser findByUserIdAndStudyIdCached(Long userId, Long studyId) {
         LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}",
                 userId, studyId);
@@ -52,7 +53,7 @@ public class StudyRightsCacheService {
         return studyUser;
     }
 
-    @Cacheable(value = "userRights", key = "#userId")
+    @Cacheable(value = CacheNames.USER_RIGHTS, key = "#userId")
     public List<StudyUser> getUserRightsCached(Long userId) {
         LOG.info("CACHE MISS - Database query executed for userId={}", userId);
         List<StudyUser> studyUsers = repo
@@ -62,7 +63,7 @@ public class StudyRightsCacheService {
         return studyUsers;
     }
 
-    @Cacheable(value = "studyUserCenterIds", key = "#studyUserId")
+    @Cacheable(value = CacheNames.STUDY_USER_CENTER_IDS, key = "#studyUserId")
     public List<Long> findCenterIdsByStudyUserIdCached(Long studyUserId) {
         LOG.info("CACHE MISS - Database query executed for studyUserId={}", studyUserId);
         return repo.findCenterIdsByStudyUserId(studyUserId);

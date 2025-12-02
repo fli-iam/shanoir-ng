@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
+import org.shanoir.ng.configuration.CacheNames;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -22,6 +23,7 @@ import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.keyvalue.core.IterableConverter;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +37,8 @@ public class StudyUserUpdateService {
     @Autowired
     private StudyUserRightsRepository studyUserRepository;
 
+    @CacheEvict(value = {CacheNames.STUDY_USER, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.STUDY_RIGHTS, CacheNames.USER_RIGHTS}, allEntries = true)
     public void processCommands(Iterable<StudyUserCommand> commands) {
-
         List<StudyUser> toBeCreated = new ArrayList<>();
         Map<Long, StudyUser> toBeUpdated = new HashMap<>();
         Set<Long> toBeDeleted = new HashSet<>();
