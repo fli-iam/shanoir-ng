@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.vip.execution.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -278,15 +280,25 @@ public class ExecutionServiceImpl implements ExecutionService {
      */
     private Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
 
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            LOG.info("VIPExecution : " + mapper.writeValueAsString(execution));
+        } catch (JsonProcessingException ignored) {
+        }
+
         return webClient.post()
                 .uri(vipExecutionUri)
-                .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
+                .headers(h -> h.addAll(utils.getUserHttpHeaders()))
                 .bodyValue(execution)
                 .retrieve()
-                .bodyToMono(VipExecutionDTO.class).onErrorResume(e -> {
-                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't create execution [" + execution.getName() + "] through VIP API", e.getMessage());
-                    return Mono.error(new RestServiceException(e, model));
-                });
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class).flatMap(body -> {
+                            LOG.error("HTTP {} from VIP API: {}", resp.statusCode(), body);
+                            return Mono.error(new RuntimeException("VIP error: " + body));
+                        })
+                )
+                .bodyToMono(VipExecutionDTO.class);
+
     }
 
     /**
