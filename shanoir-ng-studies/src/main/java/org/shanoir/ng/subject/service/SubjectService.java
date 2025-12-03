@@ -97,7 +97,6 @@ public interface SubjectService {
     Subject findById(Long id);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
     Subject findByStudyIdAndName(Long id, String name);
 
     /**
