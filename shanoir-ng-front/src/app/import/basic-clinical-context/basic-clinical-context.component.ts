@@ -24,7 +24,6 @@ import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 
-
 @Component({
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
@@ -102,9 +101,9 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         this.breadcrumbsService.addNextStepPrefilled('entity', newSubject);
         this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
@@ -112,7 +111,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
         this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
         this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
-        this.breadcrumbsService.addNextStepPrefilled('subjectStudyList', newSubject.subjectStudyList);
         this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 

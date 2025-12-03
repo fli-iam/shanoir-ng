@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -40,6 +39,7 @@ public class ExecutionApiController implements ExecutionApi {
     @Autowired
     private ExecutionServiceImpl executionService;
 
+    @Override
     public ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
@@ -50,12 +50,12 @@ public class ExecutionApiController implements ExecutionApi {
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
     }
 
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).block());
     }
 
 
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 

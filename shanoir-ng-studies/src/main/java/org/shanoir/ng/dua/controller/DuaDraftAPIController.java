@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,7 +26,6 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.exception.EntityFoundException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,83 +45,80 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class DuaDraftAPIController implements DuaDraftAPI {
 
-	@Autowired
-	DuaDraftService duaDraftService;
+    @Autowired
+    private DuaDraftService duaDraftService;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-	
-	@Autowired
-	private DuaDraftMapper mapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private StudyService studyService;
+    @Autowired
+    private DuaDraftMapper mapper;
 
-	@Value("${front.server.url}")
-	private String frontServerUrl;
+    @Value("${front.server.url}")
+    private String frontServerUrl;
 
-	private static String DUA_VIEW_URL = "/shanoir-ng/dua/view/";
+    private static final String DUA_VIEW_URL = "/shanoir-ng/dua/view/";
 
 
-	@Override
-	public ResponseEntity<String> saveNew(
-			@Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
-			throws RestServiceException {
+    @Override
+    public ResponseEntity<String> saveNew(
+            @Parameter(description = "dua draft to create", required = true) @RequestBody DuaDraftCreationWrapperDTO dua, BindingResult result)
+            throws RestServiceException {
 
-	    DuaDraft duaEntity = mapper.DuaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
-		try {
-			DuaDraft created = duaDraftService.create(duaEntity);
-			if (dua.getEmail() != null) {
-				sendDuaDraftCreationMail(created, dua.getEmail());
-			}
-			return new ResponseEntity<>(created.getId(), HttpStatus.OK);
-		} catch (EntityFoundException ex) {
-			return new ResponseEntity<>("This id is already taken", HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (JsonProcessingException ex) {
+        DuaDraft duaEntity = mapper.duaDraftCreationDTOToDuaDraft(dua.getDuaDraft());
+        try {
+            DuaDraft created = duaDraftService.create(duaEntity);
+            if (dua.getEmail() != null) {
+                sendDuaDraftCreationMail(created, dua.getEmail());
+            }
+            return new ResponseEntity<>(created.getId(), HttpStatus.OK);
+        } catch (EntityFoundException ex) {
+            return new ResponseEntity<>("This id is already taken", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (JsonProcessingException ex) {
             return new ResponseEntity<>("The mail could not be sent, json serializing error", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+        }
+    }
 
-	@Override
-	public ResponseEntity<Void> update(
-			@Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
-			@Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
-			throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> update(
+            @Parameter(description = "id of the draft", required = true) @PathVariable("duaId") String duaId,
+            @Parameter(description = "study to update", required = true) @RequestBody DuaDraftDTO dua, BindingResult result)
+            throws RestServiceException {
 
-		DuaDraft duaEntity = mapper.DuaDraftDTOToDuaDraft(dua);
-		duaEntity.setId(duaId);
-		try {
-			duaDraftService.update(duaEntity);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+        DuaDraft duaEntity = mapper.duaDraftDTOToDuaDraft(dua);
+        duaEntity.setId(duaId);
+        try {
+            duaDraftService.update(duaEntity);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-	}
+    }
 
-	@Override
-	public ResponseEntity<DuaDraftDTO> findById(
-			@Parameter(description = "id of the dua draft", required = true) @PathVariable("duaId") String duaId) {
+    @Override
+    public ResponseEntity<DuaDraftDTO> findById(
+            @Parameter(description = "id of the dua draft", required = true) @PathVariable("duaId") String duaId) {
 
-		Optional<DuaDraft> dua = duaDraftService.findById(duaId);
-		if (dua.isPresent()) {
-			DuaDraftDTO dto = mapper.duaDraftToDuaDraftDTO(dua.get());
-			return new ResponseEntity<>(dto, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        Optional<DuaDraft> dua = duaDraftService.findById(duaId);
+        if (dua.isPresent()) {
+            DuaDraftDTO dto = mapper.duaDraftToDuaDraftDTO(dua.get());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) throws JsonProcessingException {
-		DuaDraftWrapper data = new DuaDraftWrapper();
-		String link = frontServerUrl + DUA_VIEW_URL + duaEntity.getId();
-		data.setDuaLink(link);
-		data.setRecipienEmailAddress(email);
-		data.setSenderUserId(KeycloakUtil.getTokenUserId());
-		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, objectMapper.writeValueAsString(data));
+        DuaDraftWrapper data = new DuaDraftWrapper();
+        String link = frontServerUrl + DUA_VIEW_URL + duaEntity.getId();
+        data.setDuaLink(link);
+        data.setRecipienEmailAddress(email);
+        data.setSenderUserId(KeycloakUtil.getTokenUserId());
+        rabbitTemplate.convertAndSend(RabbitMQConfiguration.DUA_DRAFT_MAIL_QUEUE, objectMapper.writeValueAsString(data));
     }
 
 }

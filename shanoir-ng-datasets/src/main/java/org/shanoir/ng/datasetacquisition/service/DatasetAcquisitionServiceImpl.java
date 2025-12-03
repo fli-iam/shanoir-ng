@@ -14,6 +14,19 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -22,6 +35,8 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -44,17 +59,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
-
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
-
 
     @Autowired
     private DatasetAcquisitionRepository repository;
@@ -84,13 +90,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
+
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return repository.findByStudyCardId(studyCardId);
         } else {
             List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            Set<Long> unrestrictedStudies = new HashSet<>();
             securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
             return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
         }
@@ -109,6 +116,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
@@ -144,21 +156,40 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
     }
-    
+
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
-    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-    	for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
-    	}
-    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+        Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+        result.forEach(a -> indexDatasets(a));
+        return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        if (indexDatasetsToSolr) {
+            indexDatasets(savedEntity);
+        }
         return savedEntity;
+    }
+
+    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
+                    .map(Dataset::getId)
+                    .collect(Collectors.toList());
+            solrService.indexDatasets(datasetIds);
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+        } else {
+            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByIdWithDatasets(Long id) {
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override
@@ -288,7 +319,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
-    
+
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);

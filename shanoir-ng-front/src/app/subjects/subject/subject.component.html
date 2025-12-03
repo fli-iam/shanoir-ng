@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<form-footer
 				[state]="footerState"
-				(save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
+				(save)="save()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
 				(dismiss)="goToView()"
@@ -211,7 +211,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
-						<label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+						<label i18n="Subject detail |Study label@@SubjectDetailStudy">Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'create'">
 								<select-box
@@ -227,7 +227,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ol>
-				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
 			<fieldset *ngIf="forceStudy">
                 <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
@@ -239,11 +238,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
             <fieldset>
-                <ol *ngIf="subject.identifier != null">
+                <ol *ngIf="subject.studyIdentifier != null">
                     <li>
                         <label>Subject identifier for this study</label>
                         <span class="right-col">
-                            {{subject.identifier}}
+                            {{subject.studyIdentifier}}
                         </span>
                     </li>
                 </ol>
