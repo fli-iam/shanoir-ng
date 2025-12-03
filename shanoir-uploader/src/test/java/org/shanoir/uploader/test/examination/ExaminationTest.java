@@ -27,7 +27,7 @@ public class ExaminationTest extends AbstractTest {
     public void examinationsTest() throws Exception {
         logger.info("Starting examinationsTest");
         long totalTime = 0;
-        int numberOfCalls = 10;
+        int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
             shUpClient.findExaminations();
