@@ -16,7 +16,10 @@ package org.shanoir.ng.study.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -32,7 +35,8 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +72,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     private SubjectService subjectService;
 
     @Autowired
-    private SubjectStudyRepository subjectStudyRepository;
+    private TagRepository tagRepository;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -96,6 +100,15 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             }
             if (toAdd) {
                 Subject clonedSubject = new Subject(subject, studyTarget);
+                if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+                    Set<Tag> clonedTags = new HashSet<>();
+                    List<Long> tagIds = subject.getTags().stream()
+                            .map(Tag::getId)
+                            .collect(Collectors.toList());
+                    Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+                    managedTagsIt.forEach(clonedTags::add);
+                    clonedSubject.setTags((clonedTags));
+                }
                 // true: synchronize subjects with MS Datasets
                 clonedSubject = subjectService.create(clonedSubject, true);
             }

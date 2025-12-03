@@ -141,7 +141,6 @@ public class Subject extends HalEntity {
         this.manualHemisphericDominance = other.manualHemisphericDominance;
         this.imagedObjectCategory = other.imagedObjectCategory;
         this.qualityTag = other.qualityTag;
-        this.tags = other.tags;
         this.preclinical = other.preclinical;
         this.pseudonymusHashValues = other.pseudonymusHashValues;
     }
