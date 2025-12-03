@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.service;
 
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,6 @@ public interface RelatedDatasetService {
     String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void addSubjectStudyToNewStudy(List<String> subjectIdStudyId, Long studyId);
+    void createSubjectsInTargetStudy(List<String> subjectIdStudyId, Long studyId) throws ShanoirException;
 
 }

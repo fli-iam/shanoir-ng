@@ -14,13 +14,16 @@
 
 package org.shanoir.ng.study.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -28,8 +31,7 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -40,7 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Implementation of RelatedDataset service.
@@ -62,7 +65,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     private StudyRepository studyRepository;
 
     @Autowired
-    private SubjectRepository subjectRepository;
+    private SubjectService subjectService;
 
     @Autowired
     private SubjectStudyRepository subjectStudyRepository;
@@ -76,43 +79,25 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Transactional
     @Override
-    public void addSubjectStudyToNewStudy(List<String> subjectIdStudyId, Long studyId) {
+    public void createSubjectsInTargetStudy(List<String> subjectIdStudyId, Long studyId) throws ShanoirException {
         List<Long> subjectIds = new ArrayList<>();
         List<Long> studySourceId = new ArrayList<>();
         for (String s : subjectIdStudyId) {
             subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
             studySourceId.add(Long.valueOf(s.substring(s.indexOf("/") + 1, s.length())));
         }
-
         Study studyTarget = studyService.findById(Long.valueOf(studyId));
         Boolean toAdd = true;
-        Iterable<Subject> subjects = subjectRepository.findAllById(subjectIds);
+        Iterable<Subject> subjects = subjectService.findAllById(subjectIds);
         for (Subject subject : subjects) {
-            List<SubjectStudy> subjectStudyList = studyTarget.getSubjectStudyList();
-            for (SubjectStudy subjectStudy : subjectStudyList) {
-                if (subjectStudy.getSubject().equals(subject)) {
-                    toAdd = false;
-                    break;
-                } else {
-                    toAdd = true;
-                }
+            Subject subjectTarget = subjectService.findByStudyIdAndName(studyTarget.getId(), subject.getName());
+            if (subjectTarget != null) {
+                toAdd = false;
             }
-
             if (toAdd) {
-                SubjectStudy ssToAdd = new SubjectStudy();
-                for (int i = 0; i < subjectIds.size(); i++) {
-                    if (subjectIds.get(i).equals(subject.getId())) {
-                        SubjectStudy type = subjectStudyRepository.findByStudyIdAndSubjectId(studySourceId.get(i), subjectIds.get(i));
-                        ssToAdd.setSubjectType(type.getSubjectType());
-                    }
-                }
-                ssToAdd.setStudy(studyTarget);
-                ssToAdd.setSubject(subject);
-
-                subjectStudyList.add(ssToAdd);
-                studyTarget.setSubjectStudyList(subjectStudyList);
-
-                studyRepository.save(studyTarget);
+                Subject clonedSubject = new Subject(subjectTarget, studyTarget);
+                // true: synchronize subjects with MS Datasets
+                clonedSubject = subjectService.create(clonedSubject, true);
             }
         }
     }
@@ -128,12 +113,10 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             return "You must be part of both studies to copy datasets.";
         } else {
             List<StudyUserRight> rights = studyUser.getStudyUserRights();
-
             if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                addCenterToStudy(study, centerIds);
-
+                addCentersToStudy(study, centerIds);
                 try {
-                    copyDatasetToStudy(datasetIds, studyId, userId);
+                    copyDatasetsToStudy(datasetIds, studyId, userId);
                 } catch (MicroServiceCommunicationException e) {
                     throw new RuntimeException(e);
                 }
@@ -145,31 +128,30 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         }
     }
 
-    private void addCenterToStudy(Study study, List<Long> centerIds) {
+    private void addCentersToStudy(Study study, List<Long> centerIds) {
         Iterable<Center> centers = centerRepository.findAllById(centerIds);
+        List<StudyCenter> studyCenterList = study.getStudyCenterList();
         for (Center center : centers) {
             boolean add = true;
-            List<StudyCenter> studyCenterList = study.getStudyCenterList();
             for (StudyCenter sc : studyCenterList) {
                 if (center != null && sc.getCenter().getId().equals(center.getId())) {
                     add = false;
                     break;
                 }
             }
-
             if (add) {
                 StudyCenter centerToAdd = new StudyCenter();
                 centerToAdd.setStudy(study);
                 centerToAdd.setCenter(center);
                 centerToAdd.setSubjectNamePrefix(null);
                 studyCenterList.add(centerToAdd);
-                study.setStudyCenterList(studyCenterList);
-                studyRepository.save(study);
             }
         }
+        study.setStudyCenterList(studyCenterList);
+        studyRepository.save(study);
     }
 
-    private void copyDatasetToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);
