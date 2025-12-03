@@ -26,13 +26,17 @@ public class ExaminationTest extends AbstractTest {
     @Test
     public void examinationsTest() throws Exception {
         logger.info("Starting examinationsTest");
-        for (int i = 0; i < 10; i++) {
+        long totalTime = 0;
+        int numberOfCalls = 10;
+        for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
             shUpClient.findExaminations();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
-            logger.info("examinationsTest: " + elapsedTime + "ms");
+            totalTime += elapsedTime;
         }
+        long averageTime = totalTime / numberOfCalls;
+        logger.info("Average request time: " + averageTime + "ms (over " + numberOfCalls + " calls)");
     }
 
 }
