@@ -188,7 +188,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              */
             Attributes datasetAttributes = din.readDataset();
 
-            // Make sure tha PatientName and PatientID exist in the dataset attributes.
+            // Make sure the PatientName and PatientID exist in the dataset attributes.
             if (!datasetAttributes.contains(Tag.PatientID))
                 datasetAttributes.setNull(Tag.PatientID, VR.LO);
             if (!datasetAttributes.contains(Tag.PatientName))
