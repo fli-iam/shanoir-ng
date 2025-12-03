@@ -95,7 +95,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 toAdd = false;
             }
             if (toAdd) {
-                Subject clonedSubject = new Subject(subjectTarget, studyTarget);
+                Subject clonedSubject = new Subject(subject, studyTarget);
                 // true: synchronize subjects with MS Datasets
                 clonedSubject = subjectService.create(clonedSubject, true);
             }
