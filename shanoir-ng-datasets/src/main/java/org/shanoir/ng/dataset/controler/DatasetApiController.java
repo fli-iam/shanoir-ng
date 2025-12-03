@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetDownloadData;
+import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -90,7 +92,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-
 
 @Controller
 public class DatasetApiController implements DatasetApi {
@@ -476,6 +477,14 @@ public class DatasetApiController implements DatasetApi {
         datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
+    @Override
+    public ResponseEntity<List<DatasetDownloadData>> getDownloadData(
+            @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
+
+        List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
+        return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
+    }
+
 
     /**
      * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
@@ -572,9 +581,7 @@ public class DatasetApiController implements DatasetApi {
                 null);
 
         eventService.publishEvent(event);
-
         createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

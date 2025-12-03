@@ -31,7 +31,6 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
-
 @Component({
     selector: 'acquisition-equipment-detail',
     templateUrl: 'acquisition-equipment.component.html',
@@ -204,4 +203,3 @@ export class ManufacturerAndSerial {
         public serial: string
     ) {}
 }
-

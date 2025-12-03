@@ -838,7 +838,6 @@ public class DatasetSecurityService {
         return true;
     }
 
-
     /**
     * Filter dataset acquisitions checking the connected user has the right on those.
     *
@@ -868,7 +867,6 @@ public class DatasetSecurityService {
         list.removeIf(e -> examsToRemove.contains(e.getId()));
         return true;
     }
-
 
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
