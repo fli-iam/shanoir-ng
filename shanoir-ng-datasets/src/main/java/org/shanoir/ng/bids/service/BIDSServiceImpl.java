@@ -25,14 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -49,7 +42,6 @@ import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -115,19 +107,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String README_FILE = "README";
 
-    private static final String SUBJECT_IDENTIFIER = "subject_identifier";
-
-    private static final String PARTICIPANT_ID = "participant_id";
-
-    private static final String CSV_SEPARATOR = "\t";
-
-    private static final String CSV_SPLITTER = "\n";
-
-    private static final String[] CSV_PARTICIPANTS_HEADER = {
-            PARTICIPANT_ID,
-            SUBJECT_IDENTIFIER
-    };
-
     private static final Map<String, String> NATURE_MAP;
     static {
         Map<String, String> aMap = new HashMap<>();
@@ -154,9 +133,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private WADODownloaderService downloader;
@@ -228,7 +204,7 @@ public class BIDSServiceImpl implements BIDSService {
         subjs.sort(Comparator.comparing(Subject::getId));
 
         // Create participants.tsv
-        participantsSerializer(baseDir, subjs);
+        rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
 
         int index = 1;
         for (Subject subj : subjs) {
@@ -784,40 +760,6 @@ public class BIDSServiceImpl implements BIDSService {
         .append(NEW_LINE);
 
         Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
-    }
-
-    /**
-     * Creates the participants.tsv and participants.json file from the study
-     */
-    private void participantsSerializer(File parentFolder, List<Subject> subjs) {
-        File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
-        int index = 1;
-
-        if (csvFile.exists()) {
-            // Recreate it everytime
-            FileUtils.deleteQuietly(csvFile);
-        }
-        StringBuilder buffer =  new StringBuilder();
-        // Headers
-        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
-            buffer.append(columnHeader).append(CSV_SEPARATOR);
-        }
-        buffer.append(CSV_SPLITTER);
-
-        for (Subject subject : subjs) {
-            String subjectName = subject.getName();
-            subjectName = this.formatLabel(subjectName);
-            // Write in the file the values
-            buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
-            .append(subject.getId()).append(CSV_SEPARATOR)
-            .append(CSV_SPLITTER);
-        }
-
-        try {
-            Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
-        } catch (IOException e) {
-            LOG.error("Error while creating particpants.tsv file: {}", e);
-        }
     }
 
     private String formatLabel(String label) {
