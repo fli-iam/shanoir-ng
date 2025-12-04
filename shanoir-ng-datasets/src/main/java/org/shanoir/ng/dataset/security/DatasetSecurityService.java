@@ -846,20 +846,20 @@ public class DatasetSecurityService {
     * @return true
     */
     public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-
         if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
             return true;
         }
         if (list == null || list.isEmpty()) {
             return true;
         }
-        List<Long> examinationIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+        List<Long> examinationIds = list.stream().map(dto -> dto.getExaminationId()).collect(Collectors.toList());
         Set<Long> examsToRemove = new HashSet<>();
         UserRights userRights = commService.getUserRights();
         List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
+
             if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 examsToRemove.add(exam.getId());
             }
