@@ -21,6 +21,7 @@ import java.util.List;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
+import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -349,6 +350,14 @@ public interface DatasetApi {
             @Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
             throws RestServiceException, IOException;
 
+            @Operation(summary = "", description = "Returns the overall statistics of datasets database computed daily")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found statistics"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no statistics found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/overallStatistics", produces = { "application/json" })
+    ResponseEntity<OverallStatisticsDTO> getOverallStatistics() throws RestServiceException, EntityNotFoundException, IOException;
 
     @Operation(summary = "", description = "If exists, returns the datasets corresponding to the given ids")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),

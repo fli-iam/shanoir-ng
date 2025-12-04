@@ -39,6 +39,7 @@ export class WelcomeComponent implements OnInit {
   public studiesCount: number = 0;
   public datasetAcquisitionsCount: number = 0;
   public subjectsCount: number = 0;
+  public storageVolume: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
@@ -53,12 +54,10 @@ export class WelcomeComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-        this.fetchStudies();
+        this.fetchOverallStats();
         this.fetchPublicStudies();
         this.fetchUsersCount();
         this.fetchEventsCount();
-        this.fetchExaminationsCount();
-        this.fetchSubjectsCount();
         this.addSchemaToDOM();
     }
 
@@ -197,7 +196,7 @@ export class WelcomeComponent implements OnInit {
                   "dqv:value": { "@value": "` + this.eventsCount + `", "@type": "xsd:integer" }
                 },
                 {
-                  "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/count` + `",
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
                   "@type": "dqv:QualityMeasurement",
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Datasets" },
@@ -213,7 +212,7 @@ export class WelcomeComponent implements OnInit {
                   "dqv:value": { "@value": "` + this.publicStudies.length + `", "@type": "xsd:integer" }
                 },
                 {
-                  "@id": "` + shanoirUrl + `/shanoir-ng/studies/subjects/count` + `",
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
                   "@type": "dqv:QualityMeasurement",
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Subjects" },
@@ -221,12 +220,12 @@ export class WelcomeComponent implements OnInit {
                   "dqv:value": { "@value": "` + this.subjectsCount + `", "@type": "xsd:integer" }
                 },
                 {
-                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/examinations/count` + `",
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
                   "@type": "dqv:QualityMeasurement",
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Images" },
                   "dqv:inMetric": { "@id": "Images Count" },
-                  "dqv:value": { "@value": "` + this.examinationsCount + `", "@type": "xsd:integer" }
+                  "dqv:value": { "@value": "` + this.datasetAcquisitionsCount + `", "@type": "xsd:integer" }
                 },
                 {
                   "@id": "Users",
@@ -262,14 +261,14 @@ export class WelcomeComponent implements OnInit {
                   "@id": "Images",
                   "@type": "dqv:Dimension",
                   "skos:prefLabel": "Number of images",
-                  "skos:definition": "Total number of images belonging to subjects on the platform."
+                  "skos:definition": "Total number of DICOM series belonging to subjects on the platform."
                 },
                 {
                   "@id": "Users Count",
                   "@type": "dqv:Metric",
                   "dqv:inDimension": { "@id": "Users" },
                   "skos:prefLabel": "Count of all users",
-                  "skos:definition": "Count all users accounts present in Shanoir database."
+                  "skos:definition": "Count all active users accounts present in Shanoir database."
                 },
                 {
                   "@id": "Events Count",
@@ -304,7 +303,7 @@ export class WelcomeComponent implements OnInit {
                   "@type": "dqv:Metric",
                   "dqv:inDimension": { "@id": "Images" },
                   "skos:prefLabel": "Count of all images",
-                  "skos:definition": "Count all images belonging to subjects and hosted on the platform under the Shanoir term Examinations."
+                  "skos:definition": "Count all DICOM series belonging to subjects and hosted on the platform under the Shanoir term Dataset Acquisition."
                 },
             ]
         }`;
@@ -326,10 +325,13 @@ export class WelcomeComponent implements OnInit {
         });
     }
 
-    private fetchStudies() {
-        // count all studies
-        this.studyService.countAllStudies().then(count => {
-            this.studiesCount = count;
+    private fetchOverallStats() {
+        // get the latest overall statistics
+        this.datasetService.getOverallStatistics().then(stats => {
+            this.studiesCount = stats.studiesCount;
+            this.subjectsCount = stats.subjectsCount;
+            this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
+            this.storageVolume = stats.storageVolume;
         });
     }
 
@@ -344,20 +346,6 @@ export class WelcomeComponent implements OnInit {
 			})
 		});
 	}
-
-    private fetchExaminationsCount() {
-        // count all examinations
-        this.datasetService.countAllExaminations().then(count => {
-            this.examinationsCount = count;
-        });
-    }
-
-    private fetchSubjectsCount() {
-        // count all subjects
-        this.studyService.countAllSubjects().then(count => {
-            this.subjectsCount = count;
-        });
-    }
 
 	increaseShow() {
 		this.show += 10;

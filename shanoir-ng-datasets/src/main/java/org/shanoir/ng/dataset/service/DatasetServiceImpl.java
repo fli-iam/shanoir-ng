@@ -25,6 +25,7 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -496,5 +497,11 @@ public class DatasetServiceImpl implements DatasetService {
             }
         }
         return null;
+    }
+
+    @Override
+    public OverallStatisticsDTO getOverallStatistics() {
+        OverallStatisticsDTO stats = repository.getOverallStatistics();
+        return stats;
     }
 }

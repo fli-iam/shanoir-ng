@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -165,4 +166,6 @@ public interface DatasetService {
     DatasetAcquisition getAcquisition(Dataset dataset);
 
     void deleteNiftis(Long studyId);
+
+    OverallStatisticsDTO getOverallStatistics();
 }

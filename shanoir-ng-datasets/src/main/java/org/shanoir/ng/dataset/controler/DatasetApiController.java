@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
+import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -639,5 +640,14 @@ public class DatasetApiController implements DatasetApi {
         } catch (Exception e) {
             LOG.error("Error while computing overall statistics.", e);
         }
+    }
+
+    @Override
+    public ResponseEntity<OverallStatisticsDTO> getOverallStatistics() throws IOException {
+        OverallStatisticsDTO statistics = datasetService.getOverallStatistics();
+        if (statistics == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(statistics, HttpStatus.OK);
     }
 }

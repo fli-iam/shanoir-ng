@@ -20,7 +20,7 @@ BEGIN
 INSERT into overall_statistics (stats_date, studies_count, subjects_count, dataset_acquisitions_count)
 VALUES (CURDATE(),
     (SELECT COUNT(*) FROM study),
-    (SELECT COUNT(DISTINCT subject.name) FROM subject where study_id IS NOT NULL),
+    (SELECT COUNT(*) FROM subject where study_id IS NOT NULL),
     (SELECT COUNT(DISTINCT dataset_acquisition_id) FROM dataset)
 );
 END //
