@@ -808,8 +808,6 @@ public class DatasetSecurityService {
         for (DatasetAcquisition da : list) {
             Long studyId = da.getExamination().getStudyId();
             Long centerId = da.getExamination().getCenterId();
-            System.out.println("###################################### Checking dataset acquisition " + da.getId() + " for study " + studyId + " center " + centerId);
-            System.out.println("###################################### ---> " + userRights.hasStudyCenterRights(studyId, centerId, rightStr));
             if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 toRemove.add(da);
             }
@@ -849,20 +847,20 @@ public class DatasetSecurityService {
     * @return true
     */
     public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-
         if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
             return true;
         }
         if (list == null || list.isEmpty()) {
             return true;
         }
-        List<Long> examinationIds = list.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+        List<Long> examinationIds = list.stream().map(dto -> dto.getExaminationId()).collect(Collectors.toList());
         Set<Long> examsToRemove = new HashSet<>();
         UserRights userRights = commService.getUserRights();
         List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
+
             if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 examsToRemove.add(exam.getId());
             }
