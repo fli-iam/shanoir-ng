@@ -66,28 +66,28 @@ public class SecurityConfiguration {
         return new NullAuthenticatedSessionStrategy();
     }
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.csrf(AbstractHttpConfigurer::disable)
-				.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
-				.authorizeHttpRequests(
-					matcher -> matcher.requestMatchers("/studies/public/data", "/studies/count", "/subjects/count", "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/dua/**")
-						.permitAll()
-					.anyRequest()
-						.authenticated()
-				)
-				.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-					Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
-					Collection<String> roles = realmAccess.get("roles");
-					var grantedAuthorities = roles.stream()
-							.map(role -> new SimpleGrantedAuthority(role))
-							.collect(Collectors.toList());
-					return new JwtAuthenticationToken(jwt, grantedAuthorities);
-				})));
-		return http.build();
-	}
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
+                .authorizeHttpRequests(
+                    matcher -> matcher.requestMatchers("/studies/public/data", "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/dua/**")
+                        .permitAll()
+                    .anyRequest()
+                        .authenticated()
+                )
+                .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+                    Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
+                    Collection<String> roles = realmAccess.get("roles");
+                    var grantedAuthorities = roles.stream()
+                            .map(role -> new SimpleGrantedAuthority(role))
+                            .collect(Collectors.toList());
+                    return new JwtAuthenticationToken(jwt, grantedAuthorities);
+                })));
+        return http.build();
+    }
 
     @Bean
     FilterRegistrationBean shanoirCorsFilter() {

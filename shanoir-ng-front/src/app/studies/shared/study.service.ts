@@ -97,13 +97,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         });
     }
 
-    countAllStudies(): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_STUDY_COUNT_ALL_URL)
-            .toPromise().then((count: number) => {
-                return count;
-            });
-    }
-
     getChallenges(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
             .toPromise().then((typeResult: IdName[]) => {
