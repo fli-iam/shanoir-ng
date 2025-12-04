@@ -104,7 +104,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @RequestMapping(value = "/datasetacquisition/examination/{examinationId}", produces = {"application/json"}, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    //@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 
