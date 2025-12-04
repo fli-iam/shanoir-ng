@@ -194,8 +194,6 @@ export class DatasetService extends EntityService<Dataset> {
         } else {
             dto = new DatasetDTO(entity);
         }
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }
