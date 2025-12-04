@@ -808,6 +808,8 @@ public class DatasetSecurityService {
         for (DatasetAcquisition da : list) {
             Long studyId = da.getExamination().getStudyId();
             Long centerId = da.getExamination().getCenterId();
+            System.out.println("###################################### Checking dataset acquisition " + da.getId() + " for study " + studyId + " center " + centerId);
+            System.out.println("###################################### ---> " + userRights.hasStudyCenterRights(studyId, centerId, rightStr));
             if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
                 toRemove.add(da);
             }

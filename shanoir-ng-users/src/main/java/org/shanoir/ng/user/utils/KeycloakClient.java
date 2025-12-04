@@ -210,7 +210,9 @@ public class KeycloakClient {
     private UserRepresentation getUserRepresentation(final User user) {
         final Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("userId", Arrays.asList(user.getId().toString()));
-        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+        if (user.isCanAccessToDicomAssociation()) {
+            attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+        }
         if (user.getExpirationDate() != null) {
             attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
         }
