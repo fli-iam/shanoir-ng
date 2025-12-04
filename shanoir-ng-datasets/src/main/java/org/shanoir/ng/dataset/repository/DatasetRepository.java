@@ -158,9 +158,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
     void computeOverallStatistics();
 
-    @Query("SELECT DISTINCT study.id FROM study")
-    List<Long> getAllStudyIds();
-
     @Query(value = "UPDATE overall_statistics d SET d.storage_size = :totalStorageVolume WHERE stats_date = CURDATE()", nativeQuery = true)
     void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
