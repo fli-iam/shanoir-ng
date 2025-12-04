@@ -536,4 +536,9 @@ public class DatasetServiceImpl implements DatasetService {
         }
         return downloadDataList;
     }
+    @Override
+    public OverallStatisticsDTO getOverallStatistics() {
+        OverallStatisticsDTO stats = repository.getOverallStatistics();
+        return stats;
+    }
 }
