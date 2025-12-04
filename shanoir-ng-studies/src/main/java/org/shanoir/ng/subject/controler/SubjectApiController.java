@@ -240,10 +240,4 @@ public class SubjectApiController implements SubjectApi {
         return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<Long> countAllSubjects() {
-        Long count = subjectService.countSubjects();
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    }
-
 }

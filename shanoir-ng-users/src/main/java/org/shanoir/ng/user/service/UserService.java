@@ -224,10 +224,10 @@ public interface UserService {
     User findById(Long id);
 
     /**
-     * Count all the users
+     * Count all the users that have an active account
      *
-     * @return the number of users
+     * @return the number of active users
      */
-    Long count();
+    Long countActiveUsers();
 
 }

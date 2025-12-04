@@ -71,7 +71,6 @@ export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_UR
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
-export const BACKEND_API_STUDY_COUNT_ALL_URL: string = BACKEND_API_STUDY_URL + '/count';
 
 
 // Profile API
@@ -87,7 +86,6 @@ export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/su
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
 export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER: string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
-export const BACKEND_API_SUBJECT_COUNT_URL: string = BACKEND_API_SUBJECT_URL + '/count';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
@@ -98,9 +96,7 @@ export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils
 // Datasets http api
 export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
-export const BACKEND_API_EXAMINATIONS_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
-export const BACKEND_API_DATASET_COUNT_EXAMS_URL: string = BACKEND_API_EXAMINATIONS_URL + '/count';
 
 // Dataset processing api
 export const BACKEND_API_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/datasetProcessing';

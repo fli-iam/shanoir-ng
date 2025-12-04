@@ -542,12 +542,6 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<Long> countAllStudies() {
-        Long count = studyService.countStudies();
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    }
-
     /**
      * This method allows to filter studies by on the one the given user is not part
      * in

@@ -37,7 +37,7 @@ export class WelcomeComponent implements OnInit {
   public usersCount: number = 0;
   public eventsCount: number = 0;
   public studiesCount: number = 0;
-  public examinationsCount: number = 0;
+  public datasetAcquisitionsCount: number = 0;
   public subjectsCount: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;

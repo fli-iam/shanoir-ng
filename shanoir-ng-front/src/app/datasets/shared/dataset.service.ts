@@ -194,9 +194,4 @@ export class DatasetService extends EntityService<Dataset> {
             return this.customReplacer(key, value, dto);
         });
     }
-
-    public countAllExaminations(): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_DATASET_COUNT_EXAMS_URL)
-            .toPromise();
-    }
 }
