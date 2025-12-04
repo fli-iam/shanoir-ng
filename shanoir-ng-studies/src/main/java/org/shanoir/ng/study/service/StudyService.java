@@ -167,11 +167,6 @@ public interface StudyService {
 
     public List<Tag> getTagsFromStudy(Long studyId);
 
-	List<Long> queryStudiesByRight(StudyUserRight right);
+    List<Long> queryStudiesByRight(StudyUserRight right);
 
-	/**
-	 * Count all studies;
-	 */
-	public Long countStudies();
-    
 }
