@@ -72,6 +72,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
+            Subject subjectSource = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
+            Subject subjectTarget = subjectRepository.findByNameAndStudy_Id(subjectSource.getName(), studyId);
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
@@ -86,7 +88,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 ds.getCopies().add(newDs);
                 newDs.setSource(ds);
                 newDs.setCopies(new ArrayList<>());
-                newDs.setSubjectId(ds.getSubjectId());
+                newDs.setSubjectId(subjectTarget.getId());
 
                 // Handling of DatasetAcquisition and Examination
                 DatasetAcquisition newDsAcq = null;
@@ -109,12 +111,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     dexpList.add(new DatasetExpression(dexp, newDs));
                 }
                 newDs.setDatasetExpressions(dexpList);
-
-
                 datasetRepository.save(newDs);
                 acqMap.put(oldAcqId, newDsAcq);
                 countSuccess++;
-
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
                 countProcessed++;
@@ -162,14 +161,12 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     public Examination moveExamination(DatasetAcquisition acq, Long studyId, Long userId) {
         Examination oldExam = acq.getExamination();
         Study newStudy = studyService.findById(studyId);
-        Subject subject = subjectRepository.findById(oldExam.getSubject().getId()).orElse(null);
-
-        Examination newExamination = new Examination(oldExam, newStudy, subject);
-
+        Subject subjectSource = subjectRepository.findById(oldExam.getSubject().getId()).orElse(null);
+        Subject subjectTarget = subjectRepository.findByNameAndStudy_Id(subjectSource.getName(), studyId);
+        Examination newExamination = new Examination(oldExam, newStudy, subjectTarget);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());
-
         examinationRepository.save(newExamination);
         eventService.publishEvent(
                 new ShanoirEvent(
@@ -179,8 +176,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         "centerId:" + newExamination.getCenterId() + ";subjectId:" + (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),
                         ShanoirEvent.SUCCESS,
                         newExamination.getStudyId()));
-
         LOG.info("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }
+
 }
