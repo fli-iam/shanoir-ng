@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -35,42 +35,42 @@ import org.springframework.validation.BindingResult;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 @SpringBootTest
 @ActiveProfiles("test")
 public class AccountRequestApiSecurityTest {
 
-	private BindingResult mockBindingResult;
+    private BindingResult mockBindingResult;
 
-	@MockBean
-	private UserRepository userRepository;
+    @MockBean
+    private UserRepository userRepository;
 
-	@Autowired
-	private AccountRequestApi accountRequestApi;
-	
-	private User mockAccountReqUser;
+    @Autowired
+    private AccountRequestApi accountRequestApi;
 
-	@BeforeEach
-	public void setup() {
-		mockAccountReqUser = ModelsUtil.createUser(null);
-		mockAccountReqUser.setAccountRequestDemand(true);
-		mockAccountReqUser.setRole(null);
-		mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
-	}
-	
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		assertAccessAuthorized((t, u) -> {
-			try {
-				accountRequestApi.saveNewAccountRequest(t, u);
-			} catch (RestServiceException e) {
-				fail(e.toString());
-			}
-		}, mockAccountReqUser, mockBindingResult);
-	}
+    private User mockAccountReqUser;
+
+    @BeforeEach
+    public void setup() {
+        mockAccountReqUser = ModelsUtil.createUser(null);
+        mockAccountReqUser.setAccountRequestDemand(true);
+        mockAccountReqUser.setRole(null);
+        mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        assertAccessAuthorized((t, u) -> {
+            try {
+                accountRequestApi.saveNewAccountRequest(t, u);
+            } catch (RestServiceException e) {
+                fail(e.toString());
+            }
+        }, mockAccountReqUser, mockBindingResult);
+    }
 
 }

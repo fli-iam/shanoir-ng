@@ -14,7 +14,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { Router } from "@angular/router";
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
@@ -657,12 +657,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
                             for (const entry of page.content) {
-                                csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                                csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                             }
                         });
                     } else if (getPage instanceof Page) {
                         for (const entry of getPage.content) {
-                            csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                            csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                         }
                         return Promise.resolve();
                     }
@@ -675,6 +675,20 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
             });
         }
+    }
+
+    /** Deal with the dates */
+    private exportCsvCell(entry: any, col: ColumnDefinition): string {
+        const value = TableComponent.getCellValue(entry, col);
+        if (value == null) return '';
+        if (value instanceof Date) {
+            if (col.type == 'date') {
+                return value.toISOString().substring(0, 10);
+            } else if (col.type == 'dateTime') {
+                return value.toISOString();
+            }
+        }
+        return value.toString();
     }
 
     deploy(i: number) {

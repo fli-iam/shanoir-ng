@@ -14,7 +14,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
@@ -33,9 +33,9 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import {Tag} from "../../tags/tag.model";
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {isDarkColor} from "../../utils/app.utils";
+import { Tag} from "../../tags/tag.model";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { isDarkColor } from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',
@@ -118,7 +118,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             });
             this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( () => this.subject.subjectStudyList = []);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
 
             if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
@@ -152,6 +151,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     initEdit(): Promise<void> {
         this.loadAllStudies();
+        this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
+            this.subject.study.tags = tags ? tags : [];
+        })
         return Promise.resolve();
     }
 
@@ -173,7 +175,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'studyIdentifier': [this.subject.identifier],
+            'studyIdentifier': [this.subject.studyIdentifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
             'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
@@ -252,7 +254,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
-        this.subject.subjectStudyList = null;
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
@@ -316,20 +317,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
     }
 
-    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "";
-        if (entity.subjectStudyList.length > 0) {
-            studyListStr = "\n\nThis subject belongs to the studies: \n- ";
-            const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
-            studyListStr += studiesNames;
-        }
-        studyListStr += '\n\nWarning: this action deletes ALL datasets ';
-        if (entity.subjectStudyList.length > 0) {
-            studyListStr += 'from ALL studies listed above.';
-        } else {
-            studyListStr += 'from this subject.';
-        }
-        return Promise.resolve(studyListStr);
+    getOnDeleteConfirmMessage(subject: Subject): string {
+        let msg : string = 'Are you sure you want to finally delete the subject '
+            + (subject.name + ' with id n° ' + subject.id) + ' ?';
+        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.study.id).name;
+        msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
+        return msg;
     }
 
     ngOnDestroy() {
