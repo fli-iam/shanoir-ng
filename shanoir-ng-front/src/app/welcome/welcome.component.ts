@@ -129,7 +129,10 @@ export class WelcomeComponent implements OnInit {
                   "Neuroimaging",
                   "Neuroinformatics",
                   "MRI",
-                  "Research"
+                  "Research",
+                  "DICOM",
+                  "BIDS",
+                  "Data Sharing"
                 ],
                 "schema:license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
                 "dct:language": { "@id": "http://id.loc.gov/vocabulary/iso639-1/en" },
