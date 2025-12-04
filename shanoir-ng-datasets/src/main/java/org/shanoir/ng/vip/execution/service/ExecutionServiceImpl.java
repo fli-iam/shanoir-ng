@@ -79,7 +79,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
-        SHANOIR_URI_SCHEME = (SHANOIR_URI_SCHEME_LOCAL.contains(".") ? SHANOIR_URI_SCHEME_LOCAL.substring(0, SHANOIR_URI_SCHEME_LOCAL.indexOf('.')).replaceAll("-","") : "local") + ":/";
+        SHANOIR_URI_SCHEME = ((SHANOIR_URI_SCHEME_LOCAL.endsWith("-datasets") ? SHANOIR_URI_SCHEME_LOCAL.replace("-datasets","") : SHANOIR_URI_SCHEME_LOCAL) + ":/").replaceAll("-","");
     }
 
     public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
