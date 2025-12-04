@@ -82,6 +82,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
     List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
+    @Query("SELECT SUM(expr.size) FROM DatasetExpression expr WHERE expr.size IS NOT NULL")
+    Long findDatasetsExpressionSizesSum();
+
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
     boolean existsByTagsContains(StudyTag tag);
@@ -150,5 +153,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN e.subject sub "
             + "WHERE s.id = :studyId")
     List<DatasetLight> findAllLightByStudyId(Long studyId);
+
+    @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
+    void computeOverallStatistics();
+
+    @Query("SELECT DISTINCT study.id FROM study")
+    List<Long> getAllStudyIds();
+
+    @Query(value = "UPDATE overall_statistics d SET d.storage_size = :totalStorageVolume WHERE stats_date = CURDATE()", nativeQuery = true)
+    void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
 }

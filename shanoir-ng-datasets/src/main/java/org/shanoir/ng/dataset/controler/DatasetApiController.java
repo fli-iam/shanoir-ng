@@ -628,4 +628,16 @@ public class DatasetApiController implements DatasetApi {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Scheduled method to compute overall statistics daily at 6 AM to display up to date stats on welcome page.
+     */
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
+    public void computeOverallStatistics() {
+        try {
+            createStatisticsService.computeOverallStatistics();
+        } catch (Exception e) {
+            LOG.error("Error while computing overall statistics.", e);
+        }
+    }
 }

@@ -149,22 +149,13 @@ public interface StudyService {
     String getStudyFilePath(Long studyId, String fileName);
 
     /**
-     * Returns all public available studies;
+     * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 
     Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds);
-
-    /**
-     * Calculate global storage volume for a list of studies
-     *
-     * @param studyIds
-     *                 list of study IDs
-     * @return global storage volume
-     */
-    // Long getGlobalStorageVolume(List<Long> studyIds);
 
     /**
      * Get statistics for data analysts and study promoters
@@ -177,9 +168,4 @@ public interface StudyService {
     public List<Tag> getTagsFromStudy(Long studyId);
 
     List<Long> queryStudiesByRight(StudyUserRight right);
-
-    /**
-     * Count all studies;
-     */
-    public Long countStudies();
 }
