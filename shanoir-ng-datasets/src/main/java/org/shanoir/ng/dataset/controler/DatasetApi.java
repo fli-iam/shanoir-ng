@@ -350,7 +350,7 @@ public interface DatasetApi {
             @Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
             throws RestServiceException, IOException;
 
-            @Operation(summary = "", description = "Returns the overall statistics of datasets database computed daily")
+    @Operation(summary = "", description = "Returns the overall statistics of datasets database computed daily")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found statistics"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),

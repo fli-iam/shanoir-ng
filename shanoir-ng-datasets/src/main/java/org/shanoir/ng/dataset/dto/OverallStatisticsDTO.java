@@ -1,6 +1,6 @@
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2025 Inria - https://www.inria.fr/
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,5 +43,4 @@ public class OverallStatisticsDTO {
     public Long getStorageSize() {
         return storageSize;
     }
-    
 }
