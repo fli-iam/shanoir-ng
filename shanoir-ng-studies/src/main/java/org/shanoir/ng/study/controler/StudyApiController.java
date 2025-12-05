@@ -252,8 +252,8 @@ public class StudyApiController implements StudyApi {
         String res = null;
         try {
             Long studyId = Long.valueOf(studyIdAsStr);
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyId, studyId);
             res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
-            relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
         } catch (Exception e) {
             LOG.error("Error during copy for datasetsIds : " + datasetIds + ", studyId : " + studyIdAsStr
                     + ", centersId : " + centerIds + ". Error : ", e);

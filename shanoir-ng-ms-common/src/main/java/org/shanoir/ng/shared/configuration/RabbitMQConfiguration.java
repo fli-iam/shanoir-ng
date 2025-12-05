@@ -204,6 +204,8 @@ public class RabbitMQConfiguration {
 
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+    /** Queue used to get participants.tsv of a study. */
+    public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
@@ -502,6 +504,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyUserQueue() {
         return new Queue(STUDY_USER_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyParticipantsTsvQueue() {
+        return new Queue(STUDY_PARTICIPANTS_TSV, true);
     }
 
     @Bean

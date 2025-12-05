@@ -15,9 +15,11 @@
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
@@ -97,17 +99,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
 
     @Query("""
-        SELECT DISTINCT
-            ds.id                      AS id,
-            ex.study.id                AS studyId,
-            ex.centerId                AS centerId,
-            relSt.id                   AS relatedStudiesIds
-        FROM DatasetProcessing dp
-            JOIN dp.inputDatasets ds
-            LEFT JOIN ds.datasetAcquisition da
-            LEFT JOIN da.examination ex
-            LEFT JOIN ds.relatedStudies relSt
-        WHERE dp.id IN :processingIds
+            SELECT DISTINCT
+                ds.id                      AS id,
+                ex.study.id                AS studyId,
+                ex.centerId                AS centerId,
+                relSt.id                   AS relatedStudiesIds
+            FROM DatasetProcessing dp
+                JOIN dp.inputDatasets ds
+                LEFT JOIN ds.datasetAcquisition da
+                LEFT JOIN da.examination ex
+                LEFT JOIN ds.relatedStudies relSt
+            WHERE dp.id IN :processingIds
             """)
     List<DatasetForRightsProjection> findAllInputsByProcessingId(@Param("processingIds") List<Long> processingIds);
 
@@ -128,18 +130,22 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     // select rd.study_id from related_datasets rd where dataset_id = ?1
     @Query("""
-        SELECT DISTINCT
-        ds.id                      AS id,
-        ex.study.id                AS studyId,
-        ex.centerId                AS centerId,
-        relSt.id                   AS relatedStudiesIds
-        FROM Dataset ds
-        LEFT JOIN ds.datasetAcquisition da
-            LEFT JOIN da.examination ex
-        LEFT JOIN ds.relatedStudies relSt
-        WHERE ds.id IN :ids
+            SELECT DISTINCT
+                      ds.id                      AS id,
+                      COALESCE(ex.study.id, dp.studyId) AS studyId,
+                      COALESCE(ex.centerId, ex2.centerId) AS centerId,
+                      relSt.id                   AS relatedStudiesIds
+            FROM Dataset ds
+            LEFT JOIN ds.datasetAcquisition da
+                  LEFT JOIN da.examination ex
+                  LEFT JOIN ds.datasetProcessing dp
+                  LEFT JOIN dp.inputDatasets inputDs
+                  LEFT JOIN inputDs.datasetAcquisition da2
+                  LEFT JOIN da2.examination ex2
+            LEFT JOIN ds.relatedStudies relSt
+            WHERE ds.id IN :ids
             """)
-  List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
+    List<DatasetForRightsProjection> findDatasetsForRights(@Param("ids") List<Long> datasetIds);
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
             + "ds.id, dm.name, TYPE(ds), "
@@ -156,6 +162,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "WHERE s.id = :studyId")
     List<DatasetLight> findAllLightByStudyId(Long studyId);
 
+
     @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
     void computeOverallStatistics();
 
@@ -167,5 +174,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query(value = "SELECT studies_count, subjects_count, dataset_acquisitions_count, storage_size "
             + "from overall_statistics WHERE stats_date = CURDATE()", nativeQuery = true)
     Object[] getOverallStatistics();
+
+    @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("
+            + "ds.id, ex.study.id, ex.centerId) "
+            + "FROM Dataset ds "
+            + "LEFT JOIN ds.datasetAcquisition da "
+            + "LEFT JOIN da.examination ex "
+            + "WHERE da.id in :acquisitionIds "
+            + "OR ex.id in :examinationIds")
+    Set<DatasetStudyCenter> getDatasetsByAcquisitionAndExaminationIds(
+            @Param("acquisitionIds") List<Long> acquisitionIds,
+            @Param("examinationIds") List<Long> examinationIds);
 
 }

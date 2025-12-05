@@ -78,4 +78,5 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 
     boolean existsByStudyIdAndName(Long studyId, String name);
 
+    List<Subject> findByStudy_Id(Long studyId);
 }

@@ -129,6 +129,16 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    public Iterable<Subject> findAllById(List<Long> subjectIds) {
+        return subjectRepository.findAllById(subjectIds);
+    }
+
+    @Override
+    public Subject findByStudyIdAndName(Long id, String name) {
+        return subjectRepository.findByStudyIdAndName(id, name);
+    }
+
+    @Override
     public List<IdName> findAllNames() {
         Iterable<Subject> subjects;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
