@@ -207,7 +207,7 @@ export class WelcomeComponent implements OnInit {
                   "dqv:value": { "@value": "` + this.studiesCount + `", "@type": "xsd:integer" }
                 },
                 {
-                  "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/count` + `",
+                  "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/data` + `",
                   "@type": "dqv:QualityMeasurement",
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Public Datasets" },
@@ -230,6 +230,19 @@ export class WelcomeComponent implements OnInit {
                   "dqv:inMetric": { "@id": "Images Count" },
                   "dqv:value": { "@value": "` + this.datasetAcquisitionsCount + `", "@type": "xsd:integer" }
                 },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
+                  "@type": "schema:QuantitativeValue",
+                  "skos:prefLabel": "Total data storage volume",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Storage Volume" },
+                  "schema:value": {
+                  "@value": "` + this.storageVolume + `",
+                  "@type": "xsd:decimal"
+                  },
+                  "schema:unitCode": "E34", 
+                  "schema:unitText": "Gigabyte"
+                  },
                 {
                   "@id": "Users",
                   "@type": "dqv:Dimension",
@@ -265,6 +278,12 @@ export class WelcomeComponent implements OnInit {
                   "@type": "dqv:Dimension",
                   "skos:prefLabel": "Number of images",
                   "skos:definition": "Total number of DICOM series belonging to subjects on the platform."
+                },
+                {
+                  "@id": "Storage Volume",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Data storage volume",
+                  "skos:definition": "Total data storage volume used to store all datasets on the platform."
                 },
                 {
                   "@id": "Users Count",
@@ -308,6 +327,13 @@ export class WelcomeComponent implements OnInit {
                   "skos:prefLabel": "Count of all images",
                   "skos:definition": "Count all DICOM series belonging to subjects and hosted on the platform under the Shanoir term Dataset Acquisition."
                 },
+                {
+                  "@id": "Storage Volume",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Storage Volume" },
+                  "skos:prefLabel": "Total data storage volume",
+                  "skos:definition": "Total data storage volume used to store all datasets on the platform."
+                }
             ]
         }`;
 
