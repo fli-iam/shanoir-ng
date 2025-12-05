@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Center } from '../../centers/shared/center.model';
@@ -20,11 +20,9 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
-
 
 @Component({
     selector: 'clinical-context',
@@ -33,7 +31,7 @@ import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from 
     animations: [slideDown, preventInitialChildAnimations],
     standalone: false
 })
-export class BasicClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
+export class BasicClinicalContextComponent extends AbstractClinicalContextComponent {
 
     patient: PatientDicom;
 
@@ -72,6 +70,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.workFolder = this.importDataService.patientList.workFolder;
         importJob.fromDicomZip = true;
         importJob.examinationId = context.examination.id;
+        importJob.studyInstanceUID = context.examination.studyInstanceUID;
         importJob.studyId = context.study.id;
         importJob.studyCardId = context.studyCard ? context.studyCard.id : null;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
@@ -94,23 +93,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return eq1 && eq2 && eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
-    protected fillCreateSubjectStep() {
-        const s: Subject = this.getPrefilledSubject();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", s);
-        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
-        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
-        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
-        this.breadcrumbsService.currentStep.addPrefilled("birthDate", s.birthDate);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectStudyList", s.subjectStudyList);
-        this.breadcrumbsService.currentStep.addPrefilled("isAlreadyAnonymized", s.isAlreadyAnonymized);
-    }
-
-    private getPrefilledSubject(): Subject {
-        const subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
+    protected prefillSubject() {
         const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient?.patientSex) {
@@ -118,19 +101,20 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = null;
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
-        return newSubject;
+        newSubject.physicallyInvolved = false;
+        this.breadcrumbsService.addNextStepPrefilled('entity', newSubject);
+        this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
+        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
+        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
+        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
-    protected fillCreateExaminationStep() {
-        const exam: Examination = this.getPrefilledExam();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", exam);
-        this.breadcrumbsService.currentStep.addPrefilled("subject", exam.subject);
-    }
-
-    private getPrefilledExam(): Examination {
+    protected getPrefilledExamination(): Examination {
         const newExam = new Examination();
         newExam.preclinical = false;
         newExam.hasStudyCenterData = true;
@@ -147,12 +131,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return newExam;
     }
 
-    protected fillCreateAcqEqStep() {
-        const acqEqp : AcquisitionEquipment = this.getPrefilledAcqEqt();
-        this.breadcrumbsService.currentStep.addPrefilled("entity", acqEqp);
-    }
-
-    private getPrefilledAcqEqt(): AcquisitionEquipment {
+    protected getPrefilledAcquisitionEquipment(): AcquisitionEquipment {
         const acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         acqEpt.serialNumber = this.getFirstSelectedSerie()?.equipment?.deviceSerialNumber;

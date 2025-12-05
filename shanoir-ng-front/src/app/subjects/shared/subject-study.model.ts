@@ -20,7 +20,6 @@ import { Subject } from './subject.model';
 
 export class SubjectStudy {
     id: number;
-    // examinations: SubjectExamination[];
     subject: Subject;
     subjectId: number;
     study: SimpleStudy;

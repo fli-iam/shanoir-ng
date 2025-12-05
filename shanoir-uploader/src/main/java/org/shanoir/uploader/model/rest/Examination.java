@@ -8,139 +8,149 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class Examination {
 
-	private Long id;
+    private Long id;
 
-	private Long centerId;
+    private Long centerId;
 
-	private String comment;
+    private String comment;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
-	private Date examinationDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date examinationDate;
 
-	private String note;
+    private String note;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long subjectId;
+    private Long subjectId;
 
-	private Double subjectWeight;
+    private Double subjectWeight;
 
-	private boolean preclinical;
-	
-	public Examination() {
-		super();
-	}
+    private boolean preclinical;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private String studyInstanceUID;
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Examination() {
+        super();
+    }
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public Date getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(Date examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public Date getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @param note
-	 *            the note to set
-	 */
-	public void setNote(String note) {
-		this.note = note;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(Date examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
+    /**
+     * @param note
+     *            the note to set
+     */
+    public void setNote(String note) {
+        this.note = note;
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
-	
-	public String toString() {
-		final String examinationDate = ShUpConfig.formatter.format(this.getExaminationDate());
-		return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";
-	}
+    /**
+     * @param subjectWeight
+     *            the subjectWeight to set
+     */
+    public void setSubjectWeight(Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    public String toString() {
+        final String examinationDate = ShUpConfig.FORMATTER.format(this.getExaminationDate());
+        return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    public Long getSubjectId() {
+        return subjectId;
+    }
+
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
+
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
 }

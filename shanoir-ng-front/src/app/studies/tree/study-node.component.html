@@ -76,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 } @else {
                     <div class="fake-node" #fakeSubject [id]="subject.id" >
                         <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(subject)"></i>
-                        <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickFakeNode(subject)" [title]="subject.title + ' n°' + subject.id">
+                        <a [routerLink]="[subject.route]" class="inner" (click)="clickFakeNode(subject)" [title]="subject.title + ' n°' + subject.id">
                             <i [class]="subject.awesome" class="picto"></i>
                             {{subject.label}}
                         </a>
@@ -114,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <node
             *ngIf="node.open"
             class="studycards"
-            label="Study Cards"
+            label="Study cards"
             awesome="fa-solid fa-shuffle"
             (firstOpen)="loadStudyCards()"
             [(opened)]="node.studyCardsNode.opened"
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <node
             *ngIf="node.open"
             class="studycards"
-            label="Quality Cards"
+            label="Quality cards"
             awesome="fa-solid fa-shuffle"
             (firstOpen)="loadQualityCards()"
             [(opened)]="node.qualityCardsNode.opened"
@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <card-node
                     *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
                     [input]="qualitycard"
-                    (onCardDelete)="onQualityCardDelete(i)"
+                    (cardDelete)="onQualityCardDelete(i)"
                     [withMenu]="withMenu"
                     detailsPath="quality-card/details"
             >
