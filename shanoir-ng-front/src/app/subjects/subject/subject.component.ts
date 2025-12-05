@@ -105,7 +105,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         return Selection.fromSubject(this.subject);
     }
 
-    init() {
+    async init() {
         super.init();
         if (this.mode == 'create') {
             this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => {
@@ -116,18 +116,19 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 this.lastName = res;
                 this.form.get('lastName').setValue(this.lastName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => {
+                this.forceStudy = res;
+                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
+                this.breadcrumbsService.currentStep.getPrefilledValue("subjectNamePrefix").then(res => {
+                    this.subjectNamePrefix += res + '-';
+                    if (this.subjectNamePrefix) {
+                        this.subject.name = this.subjectNamePrefix;
+                    }
+                });
+            });
             this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
             this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
-
-            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
-                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
-                this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
-            }
-            if (this.subjectNamePrefix) {
-                this.subject.name = this.subjectNamePrefix;
-            }
+            this.dicomPatientName = await this.breadcrumbsService.currentStep.getPrefilledValue('patientName');
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();

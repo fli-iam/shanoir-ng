@@ -65,8 +65,6 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
 
     public stringify(entity: PreclinicalSubject) {
         const dto = new PreclinicalSubjectDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

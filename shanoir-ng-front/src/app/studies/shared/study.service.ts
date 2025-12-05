@@ -235,15 +235,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         });
     }
 
-    protected getIgnoreList(): string[] {
+    protected static getIgnoreList(): string[] {
         return super.getIgnoreList().concat(['completeMembers']);
     }
 
     public stringify(entity: Study) {
         const dto = new StudyDTO(entity);
-        const test = JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const test = JSON.stringify(dto, this.customReplacer);
         return test;
     }
 
