@@ -109,13 +109,13 @@ public class DatasetDownloaderServiceImpl {
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
-        Map<Long, String> datasetDownloadName = getDatasetDownloadName(datasets);
-
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
+
             for (Dataset dataset : datasets) {
                 // Prepare folder structure
                 String subjectName = getSubjectName(dataset).replace(File.separator, "_");
@@ -139,7 +139,7 @@ public class DatasetDownloaderServiceImpl {
                         withManifest,
                         filesByAcquisitionId,
                         converterId,
-                        datasetDownloadName.get(dataset.getId())
+                        datasetDownloadNameListPerPath
                 );
             }
 
@@ -181,26 +181,104 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
-    protected Map<Long, String> getDatasetDownloadName(List<Dataset> datasets) {
-        HashMap<Long, String> datasetDownloadName = new HashMap<>();
-        int count = 0;
-        for (Dataset dataset : datasets) {
-            String datasetName = dataset.getName();
-            if (datasetDownloadName.containsValue(datasetName)) {
-                if (datasetName.contains(".")) {
-                    datasetDownloadName.put(dataset.getId(), datasetName.replaceFirst("\\.", "_" + count + "."));
-                } else {
-                    datasetDownloadName.put(dataset.getId(), datasetName + "_" + count);
-                }
-                count++;
-            } else {
-                datasetDownloadName.put(dataset.getId(), dataset.getName());
+    public void massiveProcessingOutputsDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, String sorting) throws RestServiceException {
+        Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
+        Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
+        Map<Long, String> datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
+
+        // Prepare the HTTP response for a zip download
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
+
+            for (Dataset dataset : datasets) {
+                // Prepare folder structure
+                String subjectName = getSubjectName(dataset).replace(File.separator, "_");
+
+                // Download the dataset into the zip
+                manageDatasetDownload(
+                        dataset,
+                        downloadResults,
+                        zipOutputStream,
+                        subjectName,
+                        datasetDownloadPath.get(dataset.getId()),
+                        outputFormat,
+                        withManifest,
+                        filesByAcquisitionId,
+                        converterId,
+                        datasetDownloadNameListPerPath
+                );
             }
+
+            // Write manifest if any files exist
+            if (!filesByAcquisitionId.isEmpty())
+                DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
+
+            // Write download errors into a JSON file in the zip
+            if (!downloadResults.isEmpty()) {
+                ZipEntry zipEntry = new ZipEntry(JSON_RESULT_FILENAME);
+                zipEntry.setTime(System.currentTimeMillis());
+                zipOutputStream.putNextEntry(zipEntry);
+
+                String errorsJson = objectMapper.writeValueAsString(downloadResults);
+                zipOutputStream.write(errorsJson.getBytes());
+                zipOutputStream.closeEntry();
+            }
+
+            // Publish download event
+            String ids = String.join(",", datasets.stream()
+                    .map(dataset -> dataset.getId().toString())
+                    .collect(Collectors.toList()));
+
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DOWNLOAD_DATASET_EVENT,
+                    ids,
+                    KeycloakUtil.getTokenUserId(),
+                    ids + "." + outputFormat,
+                    ShanoirEvent.IN_PROGRESS
+            );
+            event.setStatus(ShanoirEvent.SUCCESS);
+            eventService.publishEvent(event);
+        } catch (Exception e) {
+            response.setContentType(null);
+            LOG.error("Unexpected error while downloading dataset files.", e);
+            throw new RestServiceException(new ErrorModel(
+                    HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unexpected error while downloading dataset files"
+            ));
         }
-        return datasetDownloadName;
     }
 
-    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, String datasetDownloadName) throws IOException, RestServiceException {
+    protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
+        HashMap<Long, String> datasetDownloadPath = new HashMap<>();
+
+        for (Dataset dataset : datasets) {
+            String path = "";
+            Dataset relevantDataset = dataset;
+
+            if (Objects.nonNull(dataset.getDatasetProcessing())) {
+                relevantDataset = dataset.getFirstRealInput();
+            }
+
+            if (sorting.contains("study")) {
+                path += "/Study_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getId();
+            }
+
+            if (sorting.contains("subject")) {
+                path += "/Subject_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getId();
+            }
+
+            if (sorting.contains("exam")) {
+                path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
+            }
+
+            datasetDownloadPath.put(dataset.getId(), path);
+        }
+        return datasetDownloadPath;
+    }
+
+    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws IOException, RestServiceException {
         if (!dataset.isDownloadable()) {
             downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
             return;
@@ -223,14 +301,14 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
                 LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
                 FileUtils.deleteQuietly(tempDir);
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
-            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
         }
         if (downloadResult.getStatus() == null)
             downloadResults.remove(dataset.getId());

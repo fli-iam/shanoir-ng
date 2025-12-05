@@ -405,7 +405,37 @@ public class DatasetApiController implements DatasetApi {
         // STEP 1: Retrieve all datasets all in one with only the one we can see
         List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
+
+
         datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+    }
+
+    public void massiveProcessingOutputsDownloadByDatasetIds(
+            @Parameter(description = "ids of the datasets", required = true) @Valid
+            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
+            @RequestParam(value = "format", required = false, defaultValue = DCM) String format,
+            @Parameter(description = "If nifti, decide converter to use") @Valid
+            @RequestParam(value = "converterId", required = false) Long converterId,
+            @Parameter(description = "Sorting for directories tree") @Valid
+            @RequestParam(value = "sorting", required = false) String sorting,
+            HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+        // STEP 0: Check data integrity
+        if (datasetIds == null || datasetIds.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
+        }
+        int size = datasetIds.size();
+
+        if (size > DATASET_LIMIT) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
+        }
+
+        // STEP 1: Retrieve all datasets all in one with only the one we can see
+        List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+
+        datasetDownloaderService.massiveProcessingOutputsDownload(format, datasets, response, false, converterId, sorting);
     }
 
     @Override

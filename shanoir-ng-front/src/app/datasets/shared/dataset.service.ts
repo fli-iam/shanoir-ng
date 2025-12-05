@@ -133,6 +133,18 @@ export class DatasetService extends EntityService<Dataset> {
         return AppUtils.downloadWithStatusPOST(url, formData, state);
     }
 
+    public downloadProcessingOuputDatasets(sorting: string, ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', ids.join(","));
+        formData.set("format", format);
+        formData.set('sorting', sorting)
+        if (converter) {
+            formData.set("converterId", "" + converter);
+        }
+        const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveProcessingOutputsDownload';
+        return AppUtils.downloadWithStatusPOST(url, formData, state);
+    }
+
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         const params = new HttpParams()
             .set("studyNameInRegExp", studyNameInRegExp)
