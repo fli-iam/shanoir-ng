@@ -15,5 +15,5 @@ create table overall_statistics (
     studies_count INT NOT NULL,
     subjects_count INT NOT NULL,
     dataset_acquisitions_count INT NOT NULL,
-    storage_size DECIMAL(10,2) NOT NULL
+    storage_size DECIMAL(10,2) DEFAULT NULL
 );
