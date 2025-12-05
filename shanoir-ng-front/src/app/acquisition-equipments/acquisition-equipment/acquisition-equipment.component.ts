@@ -74,10 +74,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.updateAcquEq();
     }
 
-    init() {
-        super.init();
-    }
-
     initEdit(): Promise<void> {
         this.currentManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         this.getManufModels();
