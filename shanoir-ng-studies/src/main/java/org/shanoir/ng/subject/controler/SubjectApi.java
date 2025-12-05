@@ -117,7 +117,7 @@ public interface SubjectApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForEveryStudies(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<SubjectDTO> findSubjectById(
-	    @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
     // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "Saves a new subject")

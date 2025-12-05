@@ -100,11 +100,11 @@ public interface StudyApi {
 
     @Operation(summary = "", description = "Returns id and name for all the studies")
     @ApiResponses(value = {
-	    @ApiResponse(responseCode = "200", description = "found studies"),
-	    @ApiResponse(responseCode = "204", description = "no study found"),
-	    @ApiResponse(responseCode = "401", description = "unauthorized"),
-	    @ApiResponse(responseCode = "403", description = "forbidden"),
-	    @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "200", description = "found studies"),
+            @ApiResponse(responseCode = "204", description = "no study found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
@@ -317,7 +317,6 @@ public interface StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, ShanoirException;
 
-
     @Operation(summary = "", description = "Add DUA to a study")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "dua uploaded"),
@@ -390,7 +389,6 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
     ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
-
 
     @Operation(summary = "", description = "If exists, returns a list of Study corresponding to the given right for current user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study"),

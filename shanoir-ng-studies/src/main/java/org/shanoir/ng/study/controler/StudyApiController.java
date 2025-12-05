@@ -519,12 +519,6 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }
 
-	@Override
-	public ResponseEntity<Long> countAllStudies() {
-		Long count = studyService.countStudies();
-		return new ResponseEntity<>(count, HttpStatus.OK);
-	}
-
     @Override
     public ResponseEntity<List<StudyUser>> getStudyUserByStudyId(Long studyId) {
         List<StudyUser> studyUserList = this.studyUserService.findStudyUsersByStudyId(studyId);

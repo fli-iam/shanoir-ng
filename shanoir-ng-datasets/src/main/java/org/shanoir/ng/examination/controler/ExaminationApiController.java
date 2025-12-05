@@ -329,10 +329,4 @@ public class ExaminationApiController implements ExaminationApi {
         String newUID = generator.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
-
-	@Override
-	public ResponseEntity<Long> countAllExaminations() {
-		Long count = examinationService.countAllExaminations();
-		return new ResponseEntity<>(count, HttpStatus.OK);
-	}
 }

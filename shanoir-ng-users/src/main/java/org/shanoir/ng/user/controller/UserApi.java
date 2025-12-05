@@ -118,14 +118,6 @@ public interface UserApi {
     @PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
     ResponseEntity<List<User>> findAccountRequests();
 
-    @Operation(summary = "", description = "Count all the users")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found users"),
-	    @ApiResponse(responseCode = "401", description = "unauthorized"),
-	    @ApiResponse(responseCode = "403", description = "forbidden"),
-	    @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
-    ResponseEntity<Long> countUsers();
-
     @Operation(summary = "", description = "Saves a new user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created user"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
