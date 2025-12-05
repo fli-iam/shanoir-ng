@@ -27,8 +27,8 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
-import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
+import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -516,6 +516,7 @@ public class DatasetServiceImpl implements DatasetService {
             ((Number) stats[2]).longValue(),
             ((Number) stats[3]).longValue()
         );
+    }
 
     public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,
             List<Long> examinationIds) {
