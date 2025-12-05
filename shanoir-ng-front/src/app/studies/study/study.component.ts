@@ -51,6 +51,9 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 
 import { Selection } from './tree.service';
+import {AcquisitionEquipmentService} from "../../acquisition-equipments/shared/acquisition-equipment.service";
+import {ExecutionDataService} from "../../vip/execution.data-service";
+import {StudyCard} from "../../study-cards/shared/study-card.model";
 
 @Component({
     selector: 'study-detail',
@@ -106,7 +109,10 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            protected downloadService: MassDownloadService) {
+            private processingService: ExecutionDataService,
+            protected downloadService: MassDownloadService,
+            private acqEqService: AcquisitionEquipmentService
+            ) {
         super(route, 'study');
         this.activeTab = 'general';
     }
@@ -399,11 +405,37 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     removeCenterFromStudy(centerId: number): void {
-        if (!this.study.studyCenterList) return;
-        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
-        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        // Before removing center, warn the user if a study card uses it
+        // center -> get studies.acquisition_equipment -> get dataset.study_card(acquisition_equipment.id)
+        console.log("center id = ", centerId);
+        const studyCardNames: string[]=[];
+        const studyCardToRemove: StudyCard[]=[];
+        this.studyCardService.getAllForStudy(this.study.id).then( studyCards => {
+            studyCards.forEach(sc => {
+                if (sc.acquisitionEquipment.center.id == centerId) {
+                    studyCardNames.push(sc.name);
+                    studyCardToRemove.push(sc);
+                }
+            })
+        }).then( () => {
+            console.log("studyCardNames = " , studyCardNames);
+            this.confirmDialogService
+                .confirm(
+                    'Delete center',
+                    'Are you sure you want to delete this center, it is link to study card(s) : '
+                    + studyCardNames.join(', ')
+                    + '\nRemoving the center will delete the associated study card(s).'
+                ).then(res => {
+                if (res) {
+                    studyCardToRemove.forEach(sc => this.studyCardService.delete(sc.id));
+                    if (!this.study.studyCenterList) return;
+                    this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
+                    this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
+                    this.form.get('studyCenterList').markAsDirty();
+                    this.form.get('studyCenterList').updateValueAndValidity();
+                }
+            })
+        })
     }
 
     isMe(user: User): boolean {
