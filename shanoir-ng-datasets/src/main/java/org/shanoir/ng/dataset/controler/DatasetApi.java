@@ -381,15 +381,6 @@ public interface DatasetApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DatasetDownloadData>> getDownloadData(@Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input);
 
-    @Operation(summary = "", description = "Returns the overall statistics of datasets database computed daily")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found statistics"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "404", description = "no statistics found"),
-        @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/overallStatistics", produces = { "application/json" })
-    ResponseEntity<OverallStatisticsDTO> getOverallStatistics() throws RestServiceException, EntityNotFoundException, IOException;
-
     @Operation(summary = "", description = "If exists, returns the datasets corresponding to the given ids")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found dataset"),
