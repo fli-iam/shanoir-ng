@@ -501,7 +501,12 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public OverallStatisticsDTO getOverallStatistics() {
-        OverallStatisticsDTO stats = repository.getOverallStatistics();
-        return stats;
+        Object[] stats = repository.getOverallStatistics();
+        return new OverallStatisticsDTO(
+            ((Number) stats[0]).longValue(),
+            ((Number) stats[1]).longValue(),
+            ((Number) stats[2]).longValue(),
+            ((Number) stats[3]).longValue()
+        );
     }
 }
