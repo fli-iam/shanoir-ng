@@ -171,14 +171,18 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return this.importService.startEegImportJob(importJob);
     }
 
+    protected fillCreateSubjectStep() {
+        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
+        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
+        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
+
+    }
+
     protected getPrefilledSubject(): Subject {
         const newSubject = new Subject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
         newSubject.physicallyInvolved = false;
-        this.breadcrumbsService.addNextStepPrefilled("entity", newSubject);
-        this.breadcrumbsService.addNextStepPrefilled("forceStudy", this.study);
-        this.breadcrumbsService.addNextStepPrefilled("subjectNamePrefix", this.subjectNamePrefix);
         return newSubject;
     }
 

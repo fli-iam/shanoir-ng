@@ -56,7 +56,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     subjectNamePrefix: string = "";
     pattern: RegExp = /[^:|<>&/]+/;
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
-    forceStudy: Study = null;
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
@@ -105,29 +104,24 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         return Selection.fromSubject(this.subject);
     }
 
-    init() {
+    async init() {
         super.init();
         if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => {
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then(res => {
                 this.firstName = res;
                 this.form.get('firstName').setValue(this.firstName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => {
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then(res => {
                 this.lastName = res;
                 this.form.get('lastName').setValue(this.lastName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
-
-            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
-                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
-                this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
-            }
-            if (this.subjectNamePrefix) {
-                this.subject.name = this.subjectNamePrefix;
-            }
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then(res => this.subject.isAlreadyAnonymized = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("patientName").then(res => {
+                this.dicomPatientName = res;
+            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectNamePrefix").then(res => {
+                this.subjectNamePrefix = res;
+            });
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
@@ -307,7 +301,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     public toggleAnonymised() {
         if (this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
-        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
+        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
         }
     }
@@ -329,7 +323,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         super.ngOnDestroy();
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
     }
 
     getFontColor(colorInp: string): boolean {

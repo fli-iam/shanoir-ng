@@ -724,5 +724,3 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 }
-
-
