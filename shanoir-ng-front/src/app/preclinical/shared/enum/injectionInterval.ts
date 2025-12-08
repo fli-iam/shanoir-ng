@@ -15,8 +15,8 @@
 import { allOfEnum } from "src/app/utils/app.utils";
 
 export enum InjectionInterval {
-    BEFORE = "Before",
-    DURING = "During"
+    BEFORE = "BEFORE",
+    DURING = "DURING"
 }
 
 export namespace InjectionInterval {

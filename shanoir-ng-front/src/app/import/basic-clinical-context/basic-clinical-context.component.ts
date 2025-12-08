@@ -101,7 +101,11 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.name = this.subjectNamePrefix + (this.patient.patientName ? '-' + this.patient.patientName : '');
+        if (newSubject.isAlreadyAnonymized) {
+            newSubject.name = this.subjectNamePrefix + this.patient.patientName;
+        } else {
+            newSubject.name =this.subjectNamePrefix
+        }
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
         newSubject.physicallyInvolved = false;
