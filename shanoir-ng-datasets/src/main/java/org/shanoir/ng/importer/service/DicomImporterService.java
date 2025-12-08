@@ -234,7 +234,6 @@ public class DicomImporterService {
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
-            solrService.indexDataset(dataset);
             sendToPacs(metaInformationAttributes, attributes);
             countNumberOfFiles(examination, acquisition, serie.getSeriesDescription());
         } else {
@@ -297,6 +296,7 @@ public class DicomImporterService {
             currentDataset.setDatasetAcquisition(acquisition);
             currentDataset.setStudyId(studyId);
             currentDataset = datasetService.create(currentDataset);
+            solrService.indexDataset(currentDataset);
         }
         return currentDataset;
     }
