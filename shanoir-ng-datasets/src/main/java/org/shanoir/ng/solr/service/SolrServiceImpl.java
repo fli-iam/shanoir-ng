@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -158,13 +159,13 @@ public class SolrServiceImpl implements SolrService {
     }
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-    public void indexDataset(Long datasetId) {
+    public void indexDataset(Dataset dataset) {
         try {
-            ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
-            if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
+            ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(dataset);
+            if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  dataset.getId() + " query failed to return any result");
             ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-            Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(datasetId));
-            doc.setTags(tags.get(datasetId));
+            Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(dataset.getId()));
+            doc.setTags(tags.get(dataset.getId()));
             solrJWrapper.addToIndex(doc);
         } catch (Exception e) {
             LOG.error("Solr indexation failed", e);

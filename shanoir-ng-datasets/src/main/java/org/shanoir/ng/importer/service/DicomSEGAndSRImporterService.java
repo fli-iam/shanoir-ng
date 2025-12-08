@@ -300,7 +300,7 @@ public class DicomSEGAndSRImporterService {
         createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
         dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
         Dataset createdDataset = datasetService.create(newMsOrSegDataset);
-        solrService.indexDataset(createdDataset.getId());
+        solrService.indexDataset(createdDataset);
     }
 
     /**

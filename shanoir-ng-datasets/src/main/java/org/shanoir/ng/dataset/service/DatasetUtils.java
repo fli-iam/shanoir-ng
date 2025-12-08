@@ -27,6 +27,7 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.solr.repository.ShanoirMetadataRepositoryImpl;
 
 public final class DatasetUtils {
 
@@ -55,10 +56,8 @@ public final class DatasetUtils {
 
 
     public static Dataset buildDatasetFromType(String type) {
-
         DatasetMetadata originMetadata = new DatasetMetadata();
         Dataset dataset = null;
-
         switch (type) {
             case DatasetType.Names.GENERIC:
                 dataset = new CalibrationDataset();
@@ -131,7 +130,6 @@ public final class DatasetUtils {
 
     public static Dataset copyDatasetFromDataset(Dataset d) {
         DatasetType type = d.getType();
-
         return switch (type) {
             case CALIBRATION -> new CalibrationDataset(d);
             case CT -> new CtDataset(d);
@@ -150,4 +148,28 @@ public final class DatasetUtils {
             default -> new GenericDataset(d);
         };
     }
+
+    public static String getMetadataQueryNameFromDataset(Dataset d) {
+        DatasetType type = d.getType();
+        return switch (type) {
+            case CALIBRATION -> null;
+            case CT -> ShanoirMetadataRepositoryImpl.CT_QUERY;
+            case EEG -> ShanoirMetadataRepositoryImpl.EEG_QUERY;
+            case MEASUREMENT -> ShanoirMetadataRepositoryImpl.MEASUREMENT_QUERY;
+            case MEG -> null;
+            case MESH -> null;
+            case MR -> ShanoirMetadataRepositoryImpl.MR_QUERY;
+            case PARAMETER_QUANTIFICATION -> null;
+            case PET -> ShanoirMetadataRepositoryImpl.PET_QUERY;
+            case REGISTRATION -> null;
+            case SEGMENTATION -> ShanoirMetadataRepositoryImpl.SEGMENTATION_QUERY;
+            case SPECT -> null;
+            case STATISTICAL -> null;
+            case TEMPLATE -> null;
+            case BIDS -> ShanoirMetadataRepositoryImpl.BIDS_QUERY;
+            case XA -> ShanoirMetadataRepositoryImpl.XA_QUERY;
+            default -> ShanoirMetadataRepositoryImpl.GENERIC_QUERY;
+        };
+    }
+
 }

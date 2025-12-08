@@ -123,7 +123,7 @@ public class ProcessedDatasetImporterService {
             expression.setDatasetFiles(Collections.singletonList(datasetFile));
 
             dataset = datasetService.create(dataset);
-            solrService.indexDataset(dataset.getId());
+            solrService.indexDataset(dataset);
 
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
