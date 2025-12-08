@@ -39,7 +39,6 @@ import * as AppUtils from '../../../utils/app.utils';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
