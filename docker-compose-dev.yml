@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,7 +57,7 @@ services:
       - "keycloak-database"
   #
   # RabbitMQ: inter-microservices communication
-  #  
+  #
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
@@ -67,7 +67,7 @@ services:
      - "5672:5672"
      - "15672:15672"
     networks:
-      - shanoir_ng_network 
+      - shanoir_ng_network
   #
   # Database for all other microservices
   #
@@ -140,6 +140,8 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "studies-data:/var/studies-data"
+      # This is related to participants.tsv file
+      - "datasets-data:/var/datasets-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network

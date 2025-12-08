@@ -14,7 +14,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
@@ -33,9 +33,9 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import {Tag} from "../../tags/tag.model";
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
-import {isDarkColor} from "../../utils/app.utils";
+import { Tag} from "../../tags/tag.model";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { isDarkColor } from "../../utils/app.utils";
 
 @Component({
     selector: 'subject-detail',
@@ -56,7 +56,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     subjectNamePrefix: string = "";
     pattern: RegExp = /[^:|<>&/]+/;
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
-    forceStudy: Study = null;
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
@@ -105,30 +104,27 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         return Selection.fromSubject(this.subject);
     }
 
-    init() {
+    async init() {
         super.init();
         if (this.mode == 'create') {
-            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then( res => {
+            this.breadcrumbsService.currentStep.getPrefilledValue("firstName").then(res => {
                 this.firstName = res;
                 this.form.get('firstName').setValue(this.firstName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then( res => {
+            this.breadcrumbsService.currentStep.getPrefilledValue("lastName").then(res => {
                 this.lastName = res;
                 this.form.get('lastName').setValue(this.lastName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("forceStudy").then( res => this.forceStudy = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("birthDate").then( res => this.subject.birthDate = res);
-            this.breadcrumbsService.currentStep.getPrefilledValue("subjectStudyList").then( () => this.subject.subjectStudyList = []);
-            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then( res => this.subject.isAlreadyAnonymized = res);
-
-            if (this.breadcrumbsService.currentStep?.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
-            if (this.breadcrumbsService.currentStep?.data.subjectNamePrefix) {
-                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
-                this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
-            }
-            if (this.subjectNamePrefix) {
-                this.subject.name = this.subjectNamePrefix;
-            }
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then(res => {
+                this.subject.isAlreadyAnonymized = res;
+                this.toggleAnonymised(res);
+            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("patientName").then(res => {
+                this.dicomPatientName = res;
+            });
+            this.breadcrumbsService.currentStep.getPrefilledValue("subjectNamePrefix").then(res => {
+                this.subjectNamePrefix = res;
+            });
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
@@ -152,6 +148,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     initEdit(): Promise<void> {
         this.loadAllStudies();
+        this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
+            this.subject.study.tags = tags ? tags : [];
+        })
         return Promise.resolve();
     }
 
@@ -173,7 +172,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'studyIdentifier': [this.subject.identifier],
+            'studyIdentifier': [this.subject.studyIdentifier],
             'physicallyInvolved': [this.subject.physicallyInvolved],
             'tags': [this.subject.tags],
             'study': [this.subject.study, (this.mode == 'view' || this.mode == 'edit') ? [] : [Validators.required]],
@@ -188,8 +187,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             })
         );
         this.subscriptions.push(
-            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(() => {
-                this.toggleAnonymised();
+            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(value => {
+                this.toggleAnonymised(value);
                 this.updateFormControl(subjectForm);
             })
         );
@@ -252,7 +251,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
-        this.subject.subjectStudyList = null;
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
@@ -303,12 +301,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    public toggleAnonymised() {
-        if (this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
-            this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
-        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
-            this.subject.name = this.subjectNamePrefix;
-        }
+    public toggleAnonymised(isAlreadyAnonymized: boolean) {
+        this.subject.name = (this.subjectNamePrefix ? this.subjectNamePrefix : '')
+            + (isAlreadyAnonymized ? this.dicomPatientName : '');
     }
 
     download() {
@@ -316,27 +311,18 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
     }
 
-    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "";
-        if (entity.subjectStudyList.length > 0) {
-            studyListStr = "\n\nThis subject belongs to the studies: \n- ";
-            const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
-            studyListStr += studiesNames;
-        }
-        studyListStr += '\n\nWarning: this action deletes ALL datasets ';
-        if (entity.subjectStudyList.length > 0) {
-            studyListStr += 'from ALL studies listed above.';
-        } else {
-            studyListStr += 'from this subject.';
-        }
-        return Promise.resolve(studyListStr);
+    getOnDeleteConfirmMessage(subject: Subject): string {
+        let msg : string = 'Are you sure you want to finally delete the subject '
+            + (subject.name + ' with id n° ' + subject.id) + ' ?';
+        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.study.id).name;
+        msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
+        return msg;
     }
 
     ngOnDestroy() {
         super.ngOnDestroy();
         this.breadcrumbsService.currentStep.addPrefilled("firstName", this.firstName);
         this.breadcrumbsService.currentStep.addPrefilled("lastName", this.lastName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.forceStudy);
     }
 
     getFontColor(colorInp: string): boolean {

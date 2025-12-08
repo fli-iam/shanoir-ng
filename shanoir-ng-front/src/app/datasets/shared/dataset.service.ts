@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 
@@ -23,6 +23,7 @@ import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { IdName } from '../../shared/models/id-name.model';
 
 import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
 import { Dataset } from './dataset.model';
@@ -30,7 +31,7 @@ import { DatasetUtils } from './dataset.utils';
 import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
-export type DatasetLight = {id: number, name: string, type: DatasetType, hasProcessings: boolean, studyId: number};
+export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -166,8 +167,12 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+    getDownloadData(acquisitionIds: number[], examinationIds: number[]): Promise<{id: number, canDownload: boolean}[]> {
+        const formData = {examinationIds: examinationIds, acquisitionIds: acquisitionIds};
+        return firstValueFrom(this.http.post<{id: number, canDownload: boolean}[]>(
+            AppUtils.BACKEND_API_DATASET_URL + '/getDownloadData',
+            formData
+        ));
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
@@ -189,8 +194,6 @@ export class DatasetService extends EntityService<Dataset> {
         } else {
             dto = new DatasetDTO(entity);
         }
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

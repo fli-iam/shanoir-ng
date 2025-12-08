@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -62,83 +62,83 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class AnestheticIngredientApiControllerTest {
 
-	private static final String REQUEST_PATH_ANESTHETIC = "/anesthetic";
-	private static final String ANESTHETIC_ID = "/1";
-	private static final String REQUEST_PATH_INGREDIENT = "/ingredient";
-	private static final String REQUEST_PATH = REQUEST_PATH_ANESTHETIC + ANESTHETIC_ID + REQUEST_PATH_INGREDIENT;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_ANESTHETIC = "/anesthetic";
+    private static final String ANESTHETIC_ID = "/1";
+    private static final String REQUEST_PATH_INGREDIENT = "/ingredient";
+    private static final String REQUEST_PATH = REQUEST_PATH_ANESTHETIC + ANESTHETIC_ID + REQUEST_PATH_INGREDIENT;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private AnestheticIngredientService ingredientsServiceMock;
-	@MockBean
-	private AnestheticService anestheticsServiceMock;
-	
-	@MockBean
-	private AnestheticIngredientUniqueValidator uniqueValidator;
-	
-	@MockBean
-	private AnestheticIngredientEditableByManager editableOnlyValidator;
+    @MockBean
+    private AnestheticIngredientService ingredientsServiceMock;
+    @MockBean
+    private AnestheticService anestheticsServiceMock;
+
+    @MockBean
+    private AnestheticIngredientUniqueValidator uniqueValidator;
+
+    @MockBean
+    private AnestheticIngredientEditableByManager editableOnlyValidator;
 
 
 
-	@MockBean
-	private RefsService referencesServiceMock;
+    @MockBean
+    private RefsService referencesServiceMock;
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(ingredientsServiceMock).deleteById(1L);
-		given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
-		given(ingredientsServiceMock.findAll()).willReturn(Arrays.asList(new AnestheticIngredient()));
-		given(ingredientsServiceMock.findByAnesthetic(new Anesthetic()))
-				.willReturn(Arrays.asList(new AnestheticIngredient()));
-		given(ingredientsServiceMock.findById(1L)).willReturn(new AnestheticIngredient());
-		given(ingredientsServiceMock.save(Mockito.mock(AnestheticIngredient.class)))
-				.willReturn(new AnestheticIngredient());
-		given(uniqueValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
-	}
+        doNothing().when(ingredientsServiceMock).deleteById(1L);
+        given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
+        given(ingredientsServiceMock.findAll()).willReturn(Arrays.asList(new AnestheticIngredient()));
+        given(ingredientsServiceMock.findByAnesthetic(new Anesthetic()))
+                .willReturn(Arrays.asList(new AnestheticIngredient()));
+        given(ingredientsServiceMock.findById(1L)).willReturn(new AnestheticIngredient());
+        given(ingredientsServiceMock.save(Mockito.mock(AnestheticIngredient.class)))
+                .willReturn(new AnestheticIngredient());
+        given(uniqueValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteAnestheticIngredientTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteAnestheticIngredientTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findAnestheticIngredientByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findAnestheticIngredientByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findAnestheticIngredientsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findAnestheticIngredientsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewAnestheticIngredientTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnestheticModelUtil.createAnestheticIngredient()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewAnestheticIngredientTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(AnestheticModelUtil.createAnestheticIngredient()))).andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updateAnestheticIngredientTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnestheticModelUtil.createAnestheticIngredient()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updateAnestheticIngredientTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(AnestheticModelUtil.createAnestheticIngredient()))).andExpect(status().isOk());
+    }
 
 }

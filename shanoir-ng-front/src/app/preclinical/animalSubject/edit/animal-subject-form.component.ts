@@ -14,7 +14,7 @@
 import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import shajs from 'sha.js';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -207,10 +207,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'isAlreadyAnonymized': [this.preclinicalSubject.subject?.isAlreadyAnonymized],
             'name': [this.preclinicalSubject.subject?.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'subject.name')])],
             'sex': [this.preclinicalSubject.subject?.sex, animal ? [Validators.required] : []],
-            'studyIdentifier': [this.preclinicalSubject.subject.identifier],
+            'studyIdentifier': [this.preclinicalSubject.subject.studyIdentifier],
             'physicallyInvolved': [this.preclinicalSubject.subject.physicallyInvolved],
             'tags': [this.preclinicalSubject.subject.tags],
-            'subjectType': [this.preclinicalSubject.subject.subjectType], 
+            'subjectType': [this.preclinicalSubject.subject.subjectType],
         });
         // Sub-group for animal subject properties
         const animalSubjectGroup = this.formBuilder.group({
@@ -260,21 +260,16 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 }
             }
         });
-        this.breadcrumbsService.currentStep.getPrefilledValue('forceStudy').then((forceStudy: Study) => {
-            if (forceStudy) {
-                this.preclinicalSubject.subject.study = forceStudy;
-            }
-        });
     }
-    
+
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
         const subjectGroup = formGroup.get('subject') as UntypedFormGroup;
         const animalSubjectGroup = formGroup.get('animalSubject') as UntypedFormGroup;
-        
+
         const newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
         const animalSubjectRequiredProperties: string[] = ['specie', 'strain', 'biotype', 'provider', 'stabulation'];
         const subjectRequiredProperties: string[] = ['sex'];
-        
+
         // Update validators based on category selection
         if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             // Animal categories require all animal fields

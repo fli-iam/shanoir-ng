@@ -73,8 +73,6 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     
     public stringify(entity: DatasetProcessing) {
         const dto = new DatasetProcessingOutDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

@@ -20,10 +20,10 @@ import { InstrumentBasedAssessment } from '../instrument-assessment/instrument.m
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Field } from '../../shared/reflect/field.decorator';
 
-
 export class Examination extends Entity {
     @Field() id: number;
     @Field() examinationDate: Date;
+    @Field() studyInstanceUID: string;
     @Field() subject: IdName | Subject;
     @Field() study: IdName | Study;
     @Field() center: IdName | Center;
