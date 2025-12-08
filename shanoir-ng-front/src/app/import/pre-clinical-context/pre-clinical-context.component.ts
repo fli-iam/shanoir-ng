@@ -119,7 +119,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         const newPreclinicalSubject = new PreclinicalSubject();
         const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
-        newSubject.name = this.patient.patientName;
+        newSubject.name = this.subjectNamePrefix ? this.subjectNamePrefix + '-' + this.patient.patientName : this.patient.patientName;
         newSubject.preclinical = true;
         newSubject.study = this.study;
         newSubject.physicallyInvolved = false;
@@ -129,9 +129,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
-        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('entity.study', this.study, true);
         this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
-        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
         this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 

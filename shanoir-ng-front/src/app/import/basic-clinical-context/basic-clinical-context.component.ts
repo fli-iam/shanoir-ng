@@ -101,6 +101,11 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
+        if (newSubject.isAlreadyAnonymized) {
+            newSubject.name = this.subjectNamePrefix + this.patient.patientName;
+        } else {
+            newSubject.name =this.subjectNamePrefix
+        }
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
         newSubject.physicallyInvolved = false;
@@ -108,10 +113,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
-        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('entity.study', this.study, true);
         this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
-        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
-        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
     protected getPrefilledExamination(): Examination {
