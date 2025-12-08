@@ -12,26 +12,33 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.study.service;
-
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+package org.shanoir.ng.dataset.dto;
 
 import java.util.List;
 
-
 /**
- * Study service.
+ * DTO for input for dataset download data.
  *
  */
-@Service
-public interface RelatedDatasetService {
+public class DatasetDownloadDataInput {
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds);
+    private List<Long> acquisitionIds;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void createSubjectsInTargetStudy(List<String> subjectIdStudyId, Long studyId) throws ShanoirException;
+    private List<Long> examinationIds;
 
+    public List<Long> getAcquisitionIds() {
+        return acquisitionIds;
+    }
+
+    public void setAcquisitionIds(List<Long> acquisitionIds) {
+        this.acquisitionIds = acquisitionIds;
+    }
+
+    public List<Long> getExaminationIds() {
+        return examinationIds;
+    }
+
+    public void setExaminationIds(List<Long> examinationIds) {
+        this.examinationIds = examinationIds;
+    }
 }

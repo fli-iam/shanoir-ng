@@ -61,8 +61,6 @@ export class CenterService extends EntityService<Center> {
 
     public stringify(entity: Center) {
         const dto = new CenterDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

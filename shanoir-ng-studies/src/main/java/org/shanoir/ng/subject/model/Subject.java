@@ -127,6 +127,25 @@ public class Subject extends HalEntity {
 
     private Integer qualityTag;
 
+    public Subject() { }
+
+    public Subject(Subject other, Study study) {
+        this.study = study;
+        this.name = other.name;
+        this.birthDate = other.birthDate;
+        this.sex = other.sex;
+        this.studyIdentifier = other.studyIdentifier;
+        this.subjectType = other.subjectType;
+        this.physicallyInvolved = other.physicallyInvolved;
+        this.languageHemisphericDominance = other.languageHemisphericDominance;
+        this.manualHemisphericDominance = other.manualHemisphericDominance;
+        this.imagedObjectCategory = other.imagedObjectCategory;
+        this.qualityTag = other.qualityTag;
+        this.preclinical = other.preclinical;
+        this.pseudonymusHashValues = other.pseudonymusHashValues;
+    }
+
+
     /**
      * Init HATEOAS links
      */
