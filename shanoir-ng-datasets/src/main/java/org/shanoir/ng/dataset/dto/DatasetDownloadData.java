@@ -12,26 +12,35 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.eeg.edf;
-
-import java.io.IOException;
+package org.shanoir.ng.dataset.dto;
 
 /**
- * This exception is thrown if the file format is not according to EDF.
+ * DTO for dataset download data.
+ *
  */
-public class EDFParserException extends IOException {
+public class DatasetDownloadData {
 
-    private static final long serialVersionUID = 3807109927368496625L;
+    private Long id;
 
-    public EDFParserException() {
-        this("File format not according to EDF/EDF+ specification.", null);
+    private boolean canDownload;
+
+    public Long getId() {
+        return id;
     }
 
-    public EDFParserException(Throwable th) {
-        this("File format not according to EDF/EDF+ specification.", th);
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public EDFParserException(String message, Throwable th) {
-        super(message, th);
+    public boolean isCanDownload() {
+        return canDownload;
+    }
+
+    public boolean getCanDownload() {
+        return canDownload;
+    }
+
+    public void setCanDownload(boolean canDownload) {
+        this.canDownload = canDownload;
     }
 }

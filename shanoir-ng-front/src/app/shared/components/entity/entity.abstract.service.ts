@@ -156,22 +156,21 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     public stringify(obj: any) {
-        return JSON.stringify(obj, (key, value) => {
-            return this.customReplacer(key, value, obj);
-        });
+        return JSON.stringify(obj, this.customReplacer);
     }
 
-    protected getIgnoreList() {
+    protected static getIgnoreList() {
         return ['_links'];
     }
 
-    protected customReplacer = (key, value, entity) => {
-        if (this.getIgnoreList().indexOf(key) > -1) return undefined;
-        else if (entity[key] instanceof Date) return this.datePattern(entity[key]);
+    /** Custom replacer, 'this' is the parent object of the current key/value */
+    protected customReplacer(key, value) {
+        if (EntityService.getIgnoreList().indexOf(key) > -1) return undefined;
+        else if (this[key] instanceof Date) return EntityService.datePattern(this[key]);
         else return value;
     }
 
-    private datePattern(date: Date): string {
+    private static datePattern(date: Date): string {
         return date.getFullYear()
             + '-'
             + ('0' + (date.getMonth() + 1)).slice(-2)
