@@ -173,7 +173,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Query(value = "SELECT studies_count, subjects_count, dataset_acquisitions_count, storage_size "
             + "from overall_statistics WHERE stats_date = CURDATE()", nativeQuery = true)
-    Object[] getOverallStatistics();
+    List<Object[]> getOverallStatistics();
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("
             + "ds.id, ex.study.id, ex.centerId) "

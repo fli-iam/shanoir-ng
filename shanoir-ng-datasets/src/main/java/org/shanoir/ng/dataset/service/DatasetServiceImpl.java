@@ -509,7 +509,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public OverallStatisticsDTO getOverallStatistics() {
-        Object[] stats = repository.getOverallStatistics();
+        List<Object[]> result = repository.getOverallStatistics();
+        // We get only one row with 4 columns so we select the first row
+        Object[] stats = result.get(0);
         return new OverallStatisticsDTO(
             ((Number) stats[0]).longValue(),
             ((Number) stats[1]).longValue(),
