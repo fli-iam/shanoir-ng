@@ -80,7 +80,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     constructor(
         private route: ActivatedRoute,
-        private examinationService: ExaminationService,
         private animalExaminationService: AnimalExaminationService,
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
@@ -90,7 +89,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private studyService: StudyService,
         public breadcrumbsService: BreadcrumbsService)
     {
-
         super(route, 'preclinical-examination');
         this.inImport = breadcrumbsService.isImporting();
         this.manageSaveEntity();
@@ -100,7 +98,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
-        return this.examinationService;
+        return this.animalExaminationService;
     }
 
     protected getTreeSelection: () => Selection = () => {
@@ -197,7 +195,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             .then(subjects => this.subjects = subjects);
     }
 
-
     manageSaveEntity(): void {
         this.subscriptions.push(
             this.onSave.subscribe(response => {
@@ -209,12 +206,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     }
 
-
     public save(): Promise<Examination> {
         return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (const file of this.files) {
-                this.examinationService.postFile(file, this.entity.id);
+                this.animalExaminationService.postFile(file, this.entity.id);
             }
             return result;
         });
