@@ -511,6 +511,10 @@ public class DatasetServiceImpl implements DatasetService {
     public OverallStatisticsDTO getOverallStatistics() {
         List<Object[]> result = repository.getOverallStatistics();
         // We get only one row with 4 columns so we select the first row
+        if (result.isEmpty()) {
+            LOG.error("No overall statistics found in database.");
+            return new OverallStatisticsDTO(0L, 0L, 0L, 0L);
+        }
         Object[] stats = result.get(0);
         return new OverallStatisticsDTO(
             ((Number) stats[0]).longValue(),
