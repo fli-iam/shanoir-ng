@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<select id="injectionInterval" formControlName="injectionInterval">
-								<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
+								<option *ngFor="let interval of intervals" [value]="interval">{{interval | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
@@ -76,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<select id="injectionSite" formControlName="injectionSite">
-								<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
+								<option *ngFor="let site of sites" [value]="site">{{site | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
@@ -89,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<select id="injectionType" formControlName="injectionType">
-								<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
+								<option *ngFor="let injtype of injtypes" [value]="injtype">{{injtype | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
