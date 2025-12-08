@@ -8,12 +8,10 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -22,13 +20,10 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -41,8 +36,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class ZipFileImportTest extends AbstractTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
-
-    private static final String IN_PROGRESS = "IN_PROGRESS";
 
     private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
@@ -87,42 +80,6 @@ public class ZipFileImportTest extends AbstractTest {
             //     step4StartImport(importJob, subject, examination, study);
             // }
         }
-    }
-
-    private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
-        org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
-        final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
-        study.setName(randomStudyName);
-        study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
-        // add center to study
-        List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
-        final StudyCenter studyCenter = new StudyCenter();
-        Center createdCenter = createCenter();
-        Assertions.assertNotNull(createdCenter);
-        studyCenter.setCenter(createdCenter);
-        studyCenterList.add(studyCenter);
-        study.setStudyCenterList(studyCenterList);
-        // create study
-        study = shUpClient.createStudy(study);
-        Assertions.assertNotNull(study);
-        // create equipment
-        AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
-        Assertions.assertNotNull(createdEquipment);
-        // create study card and add to study
-        StudyCard studyCard = new StudyCard();
-        final String randomStudyCardName = "Study-Card-Name-" + UUID.randomUUID().toString();
-        studyCard.setName(randomStudyCardName);
-        studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
-        studyCard.setAcquisitionEquipment(createdEquipment);
-        studyCard.setCenterId(createdCenter.getId());
-        studyCard.setStudyId(study.getId());
-        shUpClient.createStudyCard(studyCard);
-        Assertions.assertNotNull(studyCard);
-        List<StudyCard> studyCards = new ArrayList<>();
-        studyCards.add(studyCard);
-        study.setStudyCards(studyCards);
-        return study;
     }
 
     /**
