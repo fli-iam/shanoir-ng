@@ -260,11 +260,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 }
             }
         });
-        this.breadcrumbsService.currentStep.getPrefilledValue('forceStudy').then((forceStudy: Study) => {
-            if (forceStudy) {
-                this.preclinicalSubject.subject.study = forceStudy;
-            }
-        });
     }
 
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
