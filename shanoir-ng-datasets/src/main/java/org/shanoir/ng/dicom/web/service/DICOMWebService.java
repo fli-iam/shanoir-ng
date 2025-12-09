@@ -49,6 +49,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -140,25 +143,6 @@ public class DICOMWebService {
         return null;
     }
 
-    public String findStudyByDicomPatientId(String patientId) {
-        try {
-            String url = this.serverURL + "?PatientID=" + patientId;
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader("Accept-Charset", "UTF-8");
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    return EntityUtils.toString(entity, "UTF-8");
-                } else {
-                    LOG.error("DICOMWeb: findStudy: empty response entity for Patient ID: " + patientId);
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series";
@@ -179,9 +163,10 @@ public class DICOMWebService {
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    return  EntityUtils.toString(entity, "UTF-8");
+                    return EntityUtils.toString(entity, "UTF-8");
                 } else {
-                    LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
+                    LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: "
+                            + studyInstanceUID);
                 }
             }
         } catch (Exception e) {
@@ -200,7 +185,8 @@ public class DICOMWebService {
      */
     public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
         try {
-            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata?excludeprivate=false";
+            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID
+                    + "/metadata?excludeprivate=false";
             HttpGet httpGet = new HttpGet(url);
             httpGet.setHeader("Accept-Charset", "UTF-8");
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -229,7 +215,7 @@ public class DICOMWebService {
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-            String sopInstanceUID, String frame) {
+                                                            String sopInstanceUID, String frame) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
@@ -265,7 +251,8 @@ public class DICOMWebService {
      */
     public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
         try {
-            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
+            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
+                    + sopInstanceUID;
             HttpGet httpGet = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
@@ -287,12 +274,15 @@ public class DICOMWebService {
     }
 
     public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws ShanoirException {
-        if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists() || !directoryWithDicomFiles.isDirectory()) {
+        if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists()
+                || !directoryWithDicomFiles.isDirectory()) {
             LOG.error("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
-            throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
+            throw new ShanoirException(
+                    "sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
         }
         File[] dicomFiles = directoryWithDicomFiles.listFiles();
-        LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+        LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+                + directoryWithDicomFiles.getAbsolutePath());
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         multipartEntityBuilder.setBoundary(BOUNDARY);
         multipartEntityBuilder.setMimeSubtype(RELATED);
@@ -302,7 +292,8 @@ public class DICOMWebService {
         }
         HttpEntity entity = multipartEntityBuilder.build();
         sendMultipartRequest(entity);
-        LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+        LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+                + directoryWithDicomFiles.getAbsolutePath());
     }
 
     public void sendDicomFileToPacs(File dicomFile) throws ShanoirException {
@@ -320,12 +311,12 @@ public class DICOMWebService {
         LOG.info("Finished: STOW-RS sending one dicom file to PACS: " + dicomFile.getAbsolutePath());
     }
 
-    private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder) throws ShanoirException {
+    private void addFileToMultipart(File dicomFile, MultipartEntityBuilder multipartEntityBuilder)
+            throws ShanoirException {
         try {
             FileBody fileBody = new FileBody(
                     dicomFile,
-                    ContentType.create(CONTENT_TYPE_DICOM)
-            );
+                    ContentType.create(CONTENT_TYPE_DICOM));
             MultipartPartBuilder partBuilder = MultipartPartBuilder.create()
                     .addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM)
                     .setBody(fileBody);
@@ -338,7 +329,7 @@ public class DICOMWebService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public void sendDicomInputStreamToPacs(InputStream inputStream) throws ShanoirException {
-        LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
+        LOG.debug("Start: STOW-RS sending dicom file input stream to PACS.");
         try {
             // create content body
             ContentBody contentBody = new InputStreamBody(
@@ -359,23 +350,166 @@ public class DICOMWebService {
             LOG.error(e.getMessage(), e);
             throw new ShanoirException(e.getMessage());
         }
-        LOG.info("Finished: STOW-RS sending dicom file input stream to PACS.");
+        LOG.debug("Finished: STOW-RS sending dicom file input stream to PACS.");
     }
 
-    private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
+    private DICOMWebSTOWRSResult sendMultipartRequest(HttpEntity entity) throws ShanoirException {
         HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE,
+                CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
+        httpPost.setHeader(HttpHeaders.ACCEPT, "application/dicom+json");
         httpPost.setEntity(entity);
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             int code = response.getCode();
             if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
                 LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
-                LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
+                LOG.error("Associated message: " + EntityUtils.toString(response.getEntity()));
                 throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
             }
+            String responseBody = EntityUtils.toString(response.getEntity());
+            DICOMWebSTOWRSResult result = parseJsonResponse(responseBody);
+            long duplicateCount = result.getInstances().stream()
+                    .filter(DICOMWebSTOWRSResultInstance::isDuplicate)
+                    .count();
+            if (duplicateCount > 0) {
+                LOG.warn("DICOMWeb: {} duplicate instance(s) detected and ignored", duplicateCount);
+                result.getInstances().stream()
+                        .filter(DICOMWebSTOWRSResultInstance::isDuplicate)
+                        .forEach(inst -> LOG.debug("Duplicate instance: {} (reason: 0x{} - {})",
+                                inst.getSopInstanceUID(),
+                                Integer.toHexString(inst.getFailureReason()).toUpperCase(),
+                                inst.getFailureReasonText()));
+                throw new ShanoirException("DICOMWeb: " + duplicateCount + " duplicate instance(s) detected and ignored");
+            }
+            if (result.getFailureCount() > 0) {
+                LOG.warn("DICOMWeb: {} instance(s) failed to store", result.getFailureCount());
+                throw new ShanoirException("DICOMWeb: " + result.getFailureCount() + " instance(s) failed to store");
+            }
+            LOG.debug("DICOMWeb STOW-RS result: {} success, {} warnings, {} failures",
+                    result.getSuccessCount(), result.getWarningCount(), result.getFailureCount());
+            return result;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new ShanoirException(e.getMessage());
+        }
+    }
+
+    private DICOMWebSTOWRSResult parseJsonResponse(String responseBody) {
+        DICOMWebSTOWRSResult result = new DICOMWebSTOWRSResult();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(responseBody);
+            // Parse Referenced SOP Sequence (00081199) - successful instances
+            JsonNode referencedSopSeq = findDicomAttribute(root, "00081199");
+            if (referencedSopSeq != null && referencedSopSeq.has("Value")) {
+                JsonNode items = referencedSopSeq.get("Value");
+                for (JsonNode item : items) {
+                    DICOMWebSTOWRSResultInstance instResult = parseInstanceFromJson(item, true);
+                    if (instResult != null) {
+                        result.addInstance(instResult);
+                        result.incrementSuccess();
+                    }
+                }
+            }
+            // Parse Failed SOP Sequence (00081198) - failed/warned instances
+            JsonNode failedSopSeq = findDicomAttribute(root, "00081198");
+            if (failedSopSeq != null && failedSopSeq.has("Value")) {
+                JsonNode items = failedSopSeq.get("Value");
+                for (JsonNode item : items) {
+                    DICOMWebSTOWRSResultInstance instResult = parseInstanceFromJson(item, false);
+                    if (instResult != null) {
+                        result.addInstance(instResult);
+                        if (instResult.isDuplicate()) {
+                            result.incrementWarning();
+                        } else {
+                            result.incrementFailure();
+                        }
+                    }
+                }
+            }
+            // If no sequences found, assume success
+            if (result.getInstances().isEmpty()) {
+                result.incrementSuccess();
+            }
+        } catch (Exception e) {
+            LOG.error("Error parsing JSON STOW-RS response: {}", e.getMessage(), e);
+            // Treat as success if we can't parse (fail-safe)
+            result.incrementSuccess();
+        }
+        return result;
+    }
+
+    private JsonNode findDicomAttribute(JsonNode root, String tag) {
+        // DICOM JSON format can be array or object
+        if (root.isArray()) {
+            for (JsonNode item : root) {
+                if (item.has(tag)) {
+                    return item.get(tag);
+                }
+            }
+        } else if (root.isObject() && root.has(tag)) {
+            return root.get(tag);
+        }
+        return null;
+    }
+
+    private DICOMWebSTOWRSResultInstance parseInstanceFromJson(JsonNode item, boolean isSuccess) {
+        DICOMWebSTOWRSResultInstance instResult = new DICOMWebSTOWRSResultInstance();
+        try {
+            // Referenced SOP Instance UID (00081155)
+            JsonNode sopInstanceUID = item.get("00081155");
+            if (sopInstanceUID != null && sopInstanceUID.has("Value")) {
+                instResult.setSopInstanceUID(sopInstanceUID.get("Value").get(0).asText());
+            }
+            // Referenced SOP Class UID (00081150)
+            JsonNode sopClassUID = item.get("00081150");
+            if (sopClassUID != null && sopClassUID.has("Value")) {
+                instResult.setSopClassUID(sopClassUID.get("Value").get(0).asText());
+            }
+            // Failure Reason (00081197)
+            JsonNode failureReason = item.get("00081197");
+            if (failureReason != null && failureReason.has("Value")) {
+                int reasonCode = failureReason.get("Value").get(0).asInt();
+                instResult.setFailureReason(reasonCode);
+                instResult.setFailureReasonText(getFailureReasonText(reasonCode));
+            }
+            // Set status
+            if (isSuccess && instResult.getFailureReason() == null) {
+                instResult.setStatus("SUCCESS");
+            } else if (instResult.getFailureReason() != null) {
+                if (instResult.isDuplicate()) {
+                    instResult.setStatus("WARNING");
+                } else {
+                    instResult.setStatus("FAILURE");
+                }
+            }
+            return instResult;
+        } catch (Exception e) {
+            LOG.error("Error parsing instance from JSON: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String getFailureReasonText(Integer code) {
+        if (code == null)
+            return "Unknown";
+        switch (code) {
+            case 0xB306: // 45830
+                return "Instance already stored (duplicate)";
+            case 0xB305: // 45829
+                return "Instance received but not stored (duplicate)";
+            case 0x0110: // 272
+                return "Processing failure";
+            case 0x0122: // 290
+                return "Referenced SOP Class not supported";
+            case 0xA700: // 42752
+                return "Out of resources";
+            case 0xA900: // 43264
+                return "Data set does not match SOP Class";
+            case 0xC000: // 49152
+                return "Cannot understand";
+            default:
+                return String.format("Failure code: 0x%04X", code);
         }
     }
 

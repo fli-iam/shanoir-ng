@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -51,7 +52,6 @@ public interface DatasetService {
     void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-
 
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
     void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException;
@@ -125,7 +125,6 @@ public interface DatasetService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
     Page<Dataset> findPage(final Pageable pageable);
 
-
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
     List<Dataset> findByStudyId(Long studyId);
@@ -166,4 +165,7 @@ public interface DatasetService {
     DatasetAcquisition getAcquisition(Dataset dataset);
 
     void deleteNiftis(Long studyId);
+
+    public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(
+            List<Long> acquisitionIds, List<Long> examinationIds);
 }

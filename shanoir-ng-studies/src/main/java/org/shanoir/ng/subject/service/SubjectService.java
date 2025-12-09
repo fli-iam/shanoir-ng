@@ -50,6 +50,10 @@ public interface SubjectService {
     @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findAll();
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
+    Iterable<Subject> findAllById(List<Long> subjectIds);
+
     /**
      * Get all the subjects.
      *
@@ -92,6 +96,9 @@ public interface SubjectService {
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
     Subject findById(Long id);
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Subject findByStudyIdAndName(Long id, String name);
+
     /**
      * Find subject by its identifier and a list of studies (based on the rights).
      *
@@ -133,7 +140,7 @@ public interface SubjectService {
      * @return created subject.
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-    Subject create(Subject subject) throws ShanoirException;
+    Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
 
     /**
      * Save a subject and auto-increment the common name on using the centerId.
@@ -142,7 +149,7 @@ public interface SubjectService {
      * @return created subject.
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
-    Subject createAutoIncrement(Subject subject, Long centerId) throws ShanoirException;
+    Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
 
     /**
      * Update a subject.

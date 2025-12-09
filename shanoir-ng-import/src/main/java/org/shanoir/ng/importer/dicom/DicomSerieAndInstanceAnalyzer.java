@@ -19,9 +19,9 @@ import java.util.Set;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
-import org.dcm4che3.dcmr.AcquisitionModality;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.shared.dicom.DicomUtils;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +39,6 @@ public final class DicomSerieAndInstanceAnalyzer {
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
     private static final String DICOMDIR_BASIC_DIRECTORY_IOD = "1.2.840.10008.1.3.10";
-
-    private static final String RTPLAN = "RTPLAN";
-
-    private static final String RTDOSE = "RTDOSE";
-
-    private static final String RTSTRUCT = "RTSTRUCT";
 
     private static final String DICOM_VR_CODE_STRING_YES = "YES";
 
@@ -96,17 +90,6 @@ public final class DicomSerieAndInstanceAnalyzer {
         return false;
     }
 
-    /**
-     * Ignore all series, that are not medical imaging.
-     *
-     * @param serie
-     * @return
-     */
-    public static boolean checkSerieIsIgnored(Attributes attributes) {
-        String modality = attributes.getString(Tag.Modality);
-        return AcquisitionModality.codeOf(modality) == null && !RTSTRUCT.equals(modality) && !RTDOSE.equals(modality) && !RTPLAN.equals(modality);
-    }
-
     public static void checkSerieIsSpectroscopy(Serie serie) {
         final String sopClassUID = serie.getSopClassUID();
         final String seriesDescription = serie.getSeriesDescription();
@@ -140,7 +123,7 @@ public final class DicomSerieAndInstanceAnalyzer {
                 final String tag = item.split(DOUBLE_EQUAL)[0];
                 final String value = item.split(DOUBLE_EQUAL)[1];
                 LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
-                String wildcard = ImportUtils.wildcardToRegex(value);
+                String wildcard = Utils.wildcardToRegex(value);
                 if (seriesDescription != null && seriesDescription.matches(wildcard)) {
                     LOG.info("Serie found with Spectroscopy (CSANonImageStorage): {}", seriesDescription);
                     return true;
@@ -159,23 +142,7 @@ public final class DicomSerieAndInstanceAnalyzer {
      * @param attributes
      */
     public static void checkSerieIsEnhanced(Serie serie, Attributes attributes) {
-        final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (sopClassUID != null) {
-            if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                    || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-                    || UID.MRSpectroscopyStorage.equals(sopClassUID) // enhanced by default
-                    || UID.LegacyConvertedEnhancedMRImageStorage.equals(sopClassUID)
-                    || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                    || UID.EnhancedPETImageStorage.equals(sopClassUID)
-                    || UID.EnhancedXAImageStorage.equals(sopClassUID)
-                    || UID.EnhancedXRFImageStorage.equals(sopClassUID)) {
-                serie.setIsEnhanced(true);
-            } else {
-                serie.setIsEnhanced(false);
-            }
-        } else {
-            LOG.debug("SOPClassUID not found to detect Enhanced DICOM.");
-        }
+        serie.setIsEnhanced(DicomUtils.checkDicomIsEnhanced(attributes));
     }
 
     /**
@@ -186,22 +153,15 @@ public final class DicomSerieAndInstanceAnalyzer {
      * @param attributes
      */
     public static void checkSerieIsMultiFrame(Serie serie, Attributes attributes) {
-        int frameCount = 0;
-        if (serie.getIsEnhanced()) {
-            Attributes pFFGS = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);
-            if (pFFGS != null) {
-                frameCount = pFFGS.size();
-            }
-            serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
-        } else {
-            serie.setSequenceName(attributes.getString(Tag.SequenceName));
-        }
+        int frameCount = DicomUtils.getDicomMultiFrameCount(attributes, serie.getIsEnhanced());
         serie.setMultiFrameCount(frameCount);
         if (frameCount > 1) {
             serie.setIsMultiFrame(true);
         } else {
             serie.setIsMultiFrame(false); // an Enhanced Dicom can have only one frame
         }
+        String sequenceName = DicomUtils.getDicomSequenceName(attributes, serie.getIsEnhanced());
+        serie.setSequenceName(sequenceName);
     }
 
 }

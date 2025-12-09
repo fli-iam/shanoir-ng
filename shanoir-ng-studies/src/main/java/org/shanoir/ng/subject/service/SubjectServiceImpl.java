@@ -129,6 +129,16 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    public Iterable<Subject> findAllById(List<Long> subjectIds) {
+        return subjectRepository.findAllById(subjectIds);
+    }
+
+    @Override
+    public Subject findByStudyIdAndName(Long id, String name) {
+        return subjectRepository.findByStudyIdAndName(id, name);
+    }
+
+    @Override
     public List<IdName> findAllNames() {
         Iterable<Subject> subjects;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -181,20 +191,22 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
-    public Subject create(Subject subject) throws ShanoirException {
+    public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
         Subject subjectDb = subjectRepository.save(subject);
-        try {
-            updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
-        } catch (MicroServiceCommunicationException e) {
-            LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+        if (withAMQP) {
+            try {
+                updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Unable to propagate subject creation to microservices: ", e);
+            }
         }
         return subjectDb;
     }
 
     @Override
     @Transactional
-    public Subject createAutoIncrement(Subject subject, final Long centerId) throws ShanoirException {
+    public Subject createAutoIncrement(Subject subject, final Long centerId, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
         DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
         String subjectNameCenterPrefix = formatterCenter.format(centerId);
@@ -209,10 +221,12 @@ public class SubjectServiceImpl implements SubjectService {
         String subjectName = subjectNameCenterPrefix + formatterSubject.format(maxSubjectNameNumber);
         subject.setName(subjectName);
         Subject subjectDb = subjectRepository.save(subject);
-        try {
-            updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
-        } catch (MicroServiceCommunicationException e) {
-            LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+        if (withAMQP) {
+            try {
+                updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
+            } catch (MicroServiceCommunicationException e) {
+                LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+            }
         }
         return subjectDb;
     }
@@ -349,6 +363,7 @@ public class SubjectServiceImpl implements SubjectService {
         return subjectOld;
     }
 
+    @Override
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
         List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
         if (subjectStudyTagsOld == null) {
@@ -376,6 +391,7 @@ public class SubjectServiceImpl implements SubjectService {
         sSOld.setSubjectStudyTags(subjectStudyTagsOld);
     }
 
+    @Override
     public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.
@@ -383,7 +399,7 @@ public class SubjectServiceImpl implements SubjectService {
                     objectMapper.writeValueAsString(subjectDTO));
             return true;
         } catch (AmqpException | JsonProcessingException e) {
-            throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
+            throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to update subject.");
         }
     }
 

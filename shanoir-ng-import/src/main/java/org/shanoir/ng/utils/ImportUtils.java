@@ -269,49 +269,6 @@ public final class ImportUtils {
     }
 
     /**
-     * Convert a String with a wildcard to a regular expression.
-     *
-     * @param wildcard the wildcard
-     *
-     * @return the string
-     */
-    public static String wildcardToRegex(String wildcard) {
-        StringBuilder s = new StringBuilder(wildcard.length());
-        s.append('^');
-        for (int i = 0, is = wildcard.length(); i < is; i++) {
-            char c = wildcard.charAt(i);
-            switch (c) {
-                case '*':
-                    s.append(".*");
-                    break;
-                case '?':
-                    s.append(".");
-                    break;
-                    // escape special regexp-characters
-                case '(':
-                case ')':
-                case '[':
-                case ']':
-                case '$':
-                case '^':
-                case '.':
-                case '{':
-                case '}':
-                case '|':
-                case '\\':
-                    s.append("\\");
-                    s.append(c);
-                    break;
-                default:
-                    s.append(c);
-                    break;
-            }
-        }
-        s.append('$');
-        return s.toString();
-    }
-
-    /**
      * This method stores an uploaded zip file in a temporary file, creates a new
      * folder with the same name and unzips the content into this folder, and gives
      * back the folder with the content.

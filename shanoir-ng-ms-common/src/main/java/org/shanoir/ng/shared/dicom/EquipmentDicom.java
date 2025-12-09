@@ -91,6 +91,13 @@ public class EquipmentDicom {
         return magneticFieldStrength;
     }
 
+    public String toStringAcquisitionEquipment(String centerName) {
+        return manufacturer + " - "
+            + manufacturerModelName + " "
+            + (magneticFieldStrength != null ? (magneticFieldStrength + "T ") : "")
+            + deviceSerialNumber + " - " + centerName;
+    }
+
     public void setMagneticFieldStrength(String magneticFieldStrength) {
         this.magneticFieldStrength = magneticFieldStrength;
     }

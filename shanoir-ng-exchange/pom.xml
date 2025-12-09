@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
 		<jackson.version>2.13.4.1</jackson.version>
-		<dcm4che.version>5.30.0</dcm4che.version>
+		<dcm4che.version>5.31.1</dcm4che.version>
 		<checkstyle.header.file>../shanoir-ng-back/java-header</checkstyle.header.file>
 	</properties>
 
