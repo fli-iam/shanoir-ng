@@ -510,7 +510,6 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public OverallStatisticsDTO getOverallStatistics() {
         List<Object[]> result = repository.getOverallStatistics();
-        
         if (result.isEmpty() || result.get(0) == null || result.get(0).length != 4) {
             LOG.error("No complete overall statistics found in database.");
             return new OverallStatisticsDTO(0L, 0L, 0L, 0L);
