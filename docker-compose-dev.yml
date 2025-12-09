@@ -385,6 +385,7 @@ services:
       - /home/mkain/Documents/vipvolume/outputs:/vip/storage/outputs
       - /home/mkain/Documents/vipvolume/inputs:/vip/storage/workflows/SharedData/groups/local/inputs
       - /home/mkain/Documents/vipvolume/boutiques:/vip/storage/workflows/SharedData/groups/local/boutiques
+      - certificate-share-data:/etc/ssl/certs/java:ro
     stdin_open: true
     tty: true
     networks:
