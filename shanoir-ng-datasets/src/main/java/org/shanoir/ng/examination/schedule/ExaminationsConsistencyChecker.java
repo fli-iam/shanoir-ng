@@ -34,6 +34,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,9 +99,10 @@ public class ExaminationsConsistencyChecker {
     private WADOURLHandler wadoURLHandler;
 
 //    @Scheduled(fixedDelay = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-    @Scheduled(fixedDelay = 5 * 60 * 1000) // Run every 5 minutes (in milliseconds)
+    @Scheduled(fixedDelay = 2 * 60 * 1000) // Run every 5 minutes (in milliseconds)
     @Transactional
     public void check() {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
             LOG.info("---------------");
             LOG.info("---------------");
