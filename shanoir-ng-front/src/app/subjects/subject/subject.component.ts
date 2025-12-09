@@ -115,7 +115,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 this.lastName = res;
                 this.form.get('lastName').setValue(this.lastName);
             });
-            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then(res => this.subject.isAlreadyAnonymized = res);
+            this.breadcrumbsService.currentStep.getPrefilledValue("isAlreadyAnonymized").then(res => {
+                this.subject.isAlreadyAnonymized = res;
+                this.toggleAnonymised(res);
+            });
             this.breadcrumbsService.currentStep.getPrefilledValue("patientName").then(res => {
                 this.dicomPatientName = res;
             });
@@ -184,8 +187,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             })
         );
         this.subscriptions.push(
-            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(() => {
-                this.toggleAnonymised();
+            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(value => {
+                this.toggleAnonymised(value);
                 this.updateFormControl(subjectForm);
             })
         );
@@ -298,12 +301,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    public toggleAnonymised() {
-        if (this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
-            this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
-        } else if (!this.subject.isAlreadyAnonymized && this.subjectNamePrefix) {
-            this.subject.name = this.subjectNamePrefix;
-        }
+    public toggleAnonymised(isAlreadyAnonymized: boolean) {
+        this.subject.name = (this.subjectNamePrefix ? this.subjectNamePrefix : '')
+            + (isAlreadyAnonymized ? this.dicomPatientName : '');
     }
 
     download() {
