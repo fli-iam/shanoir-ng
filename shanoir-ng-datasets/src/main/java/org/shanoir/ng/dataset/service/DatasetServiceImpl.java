@@ -49,6 +49,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -119,6 +120,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
+
+    @Autowired
+    private SolrService solrService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -249,6 +253,7 @@ public class DatasetServiceImpl implements DatasetService {
             // We have a processed dataset -> acquisition is null but study id is set.
             studyId = ds.getStudyId();
         }
+        solrService.indexDataset(ds);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
         rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
         return ds;
@@ -269,6 +274,7 @@ public class DatasetServiceImpl implements DatasetService {
             } else {
                 studyId = ds.getStudyId();
             }
+            solrService.indexDataset(ds);
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
         } catch (JsonProcessingException e) {

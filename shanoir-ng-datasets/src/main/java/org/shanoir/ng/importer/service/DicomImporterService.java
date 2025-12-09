@@ -73,7 +73,6 @@ import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -158,9 +157,6 @@ public class DicomImporterService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private SolrService solrService;
 
     @Autowired
     private DatasetService datasetService;
@@ -264,7 +260,7 @@ public class DicomImporterService {
             throws Exception {
         int datasetIndex = -1; // Used for single-dataset acquisitions
         Dataset currentDataset = null;
-        List<Dataset> datasets = acquisition.getDatasets();
+        List<Dataset> datasets = acquisitionService.getDatasets(acquisition);
         if (datasets != null && !datasets.isEmpty()) {
             boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
             // Manage split series in the if-clause
@@ -292,11 +288,10 @@ public class DicomImporterService {
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
-            acquisition.getDatasets().add(currentDataset);
+            datasets.add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
             currentDataset.setStudyId(studyId);
             currentDataset = datasetService.create(currentDataset);
-            solrService.indexDataset(currentDataset);
         }
         return currentDataset;
     }
