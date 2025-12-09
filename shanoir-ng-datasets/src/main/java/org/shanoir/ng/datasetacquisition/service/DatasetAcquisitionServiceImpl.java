@@ -121,11 +121,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
     }
 
-    @Override
-    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
-        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
-    }
-
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
         to.setAcquisitionEquipmentId(from.getAcquisitionEquipmentId());
         to.setExamination(from.getExamination());
@@ -187,6 +182,16 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         } else {
             LOG.warn("No datasets found for acquisition {}", acquisition.getId());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId,
+            String seriesInstanceUID) {
+        DatasetAcquisition acquisition = repository.findByExaminationIdAndSeriesInstanceUID(examinationId,
+                seriesInstanceUID);
+        datasetLoaderService.loadDatasets(acquisition);
+        return acquisition;
     }
 
     @Override

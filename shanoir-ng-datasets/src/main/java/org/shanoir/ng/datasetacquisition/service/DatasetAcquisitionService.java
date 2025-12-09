@@ -38,10 +38,6 @@ public interface DatasetAcquisitionService {
     DatasetAcquisition findById(Long id);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId,
-            String seriesInstanceUID);
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public DatasetAcquisition findByIdWithDatasets(Long id);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -69,6 +65,9 @@ public interface DatasetAcquisitionService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findByExamination(Long examinationId);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    DatasetAcquisition findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;

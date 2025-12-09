@@ -371,12 +371,10 @@ public class DicomImporterService {
             throws Exception {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
-        Optional<DatasetAcquisition> existingAcquisition = acquisitionService
-                .findByExaminationAndSeriesInstanceUIDWithDatasets(
-                        examination.getId(),
-                        serie.getSeriesInstanceUID());
-        if (existingAcquisition.isPresent()) {
-            return existingAcquisition.get();
+        DatasetAcquisition existingAcquisition = acquisitionService.
+                findByExaminationIdAndSeriesInstanceUIDWithDatasets(examination.getId(), serie.getSeriesInstanceUID());
+        if (existingAcquisition != null) {
+            return existingAcquisition;
         }
         int rank = 0;
         if (serie.getSeriesNumber() > 0) {
