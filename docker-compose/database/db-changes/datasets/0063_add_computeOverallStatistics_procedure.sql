@@ -17,6 +17,7 @@ DROP PROCEDURE IF EXISTS computeOverallStatistics;
 delimiter //
 CREATE PROCEDURE computeOverallStatistics()
 BEGIN
+DELETE FROM overall_statistics WHERE stats_date = CURDATE();
 INSERT into overall_statistics (stats_date, studies_count, subjects_count, dataset_acquisitions_count)
 VALUES (CURDATE(),
     (SELECT COUNT(*) FROM study),

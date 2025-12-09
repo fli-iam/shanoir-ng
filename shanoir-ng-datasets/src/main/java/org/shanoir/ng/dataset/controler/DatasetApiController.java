@@ -640,7 +640,7 @@ public class DatasetApiController implements DatasetApi {
     /**
      * Scheduled method to compute overall statistics daily at 6 AM to display up to date stats on welcome page.
      */
-    @Scheduled(cron = "0 0 * * * *", zone = "Europe/Paris") // was "0 0 6 * * *"
+    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Paris") // was "0 0 6 * * *"
     public void computeOverallStatistics() {
         try {
             createStatisticsService.computeOverallStatistics();

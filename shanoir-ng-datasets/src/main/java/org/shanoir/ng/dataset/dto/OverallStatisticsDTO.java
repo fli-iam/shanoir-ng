@@ -19,9 +19,9 @@ public class OverallStatisticsDTO {
     private Long studiesCount;
     private Long subjectsCount;
     private Long datasetAcquisitionsCount;
-    private Long storageSize;
+    private Double storageSize;
 
-    public OverallStatisticsDTO(Long studiesCount, Long subjectsCount, Long datasetAcquisitionsCount, Long storageSize) {
+    public OverallStatisticsDTO(Long studiesCount, Long subjectsCount, Long datasetAcquisitionsCount, Double storageSize) {
         this.studiesCount = studiesCount;
         this.subjectsCount = subjectsCount;
         this.datasetAcquisitionsCount = datasetAcquisitionsCount;
@@ -40,7 +40,7 @@ public class OverallStatisticsDTO {
         return datasetAcquisitionsCount;
     }
 
-    public Long getStorageSize() {
+    public Double getStorageSize() {
         return storageSize;
     }
 }

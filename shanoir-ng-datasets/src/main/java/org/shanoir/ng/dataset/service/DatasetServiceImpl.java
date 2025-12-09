@@ -509,18 +509,22 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public OverallStatisticsDTO getOverallStatistics() {
-        List<Object[]> result = repository.getOverallStatistics();
-        if (result.isEmpty() || result.get(0) == null || result.get(0).length != 4) {
-            LOG.error("No complete overall statistics found in database.");
-            return new OverallStatisticsDTO(0L, 0L, 0L, 0L);
+        Object[] stats = repository.getOverallStatistics();
+        if (stats == null) {
+            LOG.error("No overall statistics found in database.");
+            return new OverallStatisticsDTO(0L, 0L, 0L, 0D);
+        // handle the case where storage_size is null
+        } else if (stats[3] == null) {
+            stats[3] = 0D;
         }
+        // We convert the byte value of storage_size to gigabytes
+        double storageInGb = ((Number) stats[3]).doubleValue() / (1024 * 1024 * 1024);
         // We get only one row with 4 columns so we select the first row
-        Object[] stats = result.get(0);
         return new OverallStatisticsDTO(
             ((Number) stats[0]).longValue(),
             ((Number) stats[1]).longValue(),
             ((Number) stats[2]).longValue(),
-            ((Number) stats[3]).longValue()
+            storageInGb
         );
     }
 
