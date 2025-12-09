@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,43 +31,43 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Subject - study mapper test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT) 
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class SubjectStudyMapperTest {
 
-	private static final Long SUBJECT_ID = 1L;
+    private static final Long SUBJECT_ID = 1L;
 
-	@Autowired
-	private SubjectStudyMapper subjectStudyMapper;
+    @Autowired
+    private SubjectStudyMapper subjectStudyMapper;
 
-	@Test
-	public void subjectStudyListToSubjectStudyDTOListTest() {
-		final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
-				.subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
-		Assertions.assertNotNull(subjectStudyDTOs);
-		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
-		Assertions.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
-	}
+    @Test
+    public void subjectStudyListToSubjectStudyDTOListTest() {
+        final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
+                .subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
+        Assertions.assertNotNull(subjectStudyDTOs);
+        Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+        Assertions.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
+    }
 
-	@Test
-	public void subjectStudyToSubjectStudyDTOTest() {
-		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
-		Assertions.assertNotNull(subjectStudyDTO);
-		Assertions.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
-	}
+    @Test
+    public void subjectStudyToSubjectStudyDTOTest() {
+        final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
+        Assertions.assertNotNull(subjectStudyDTO);
+        Assertions.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
+    }
 
-	private SubjectStudy createSubjectStudy() {
-		final SubjectStudy subjectStudy = new SubjectStudy();
-		final Subject subject = new Subject();
-		subject.setId(SUBJECT_ID);
-		subjectStudy.setSubject(subject);
-		subjectStudy.setStudy(new Study());
-		return subjectStudy;
-	}
+    private SubjectStudy createSubjectStudy() {
+        final SubjectStudy subjectStudy = new SubjectStudy();
+        final Subject subject = new Subject();
+        subject.setId(SUBJECT_ID);
+        subjectStudy.setSubject(subject);
+        subjectStudy.setStudy(new Study());
+        return subjectStudy;
+    }
 
 }

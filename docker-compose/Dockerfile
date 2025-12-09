@@ -72,10 +72,10 @@ ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", 
 FROM alpine AS datasets-download
 
 # Installation of dcm4che into /opt/dcm4che to manage the store-scu into the
-# PACS dcm4che3, used last version 5.21.0 as available on the 2020-02-14
+# PACS dcm4che-arc light, use version 5.31.1 to comply with entire library usage
 # https://sourceforge.net/projects/dcm4che/files/dcm4che3/
 RUN wget -qO dcm4che-bin.zip \
-        https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.21.0/dcm4che-5.21.0-bin.zip \
+        https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.31.1/dcm4che-5.31.1-bin.zip \
     && mkdir -p /target/opt && cd /target/opt \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip

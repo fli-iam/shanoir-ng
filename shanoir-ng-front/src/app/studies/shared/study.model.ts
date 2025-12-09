@@ -15,10 +15,10 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
 import { Field } from '../../shared/reflect/field.decorator';
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
@@ -45,7 +45,7 @@ export class Study extends Entity {
     @Field() detailedSizes: Map<string, number> = null;
     totalSize: number;
     @Field() studyType: StudyType;
-    @Field() subjectStudyList: SubjectStudy[] = [];
+    @Field() subjects: Subject[] = [];
     @Field() studyUserList: StudyUser[] = [];
     @Field() timepoints: Timepoint[];
     @Field() visibleByDefault: boolean = false;
