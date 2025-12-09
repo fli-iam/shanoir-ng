@@ -14,8 +14,18 @@
 
 package org.shanoir.ng.dataset.repository;
 
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
 
-public interface DatasetExpressionRepository extends CrudRepository<DatasetExpression, Long> {
+import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+public interface GenericDatasetRepository extends CrudRepository<GenericDataset, Long> {
+
+    @Query("SELECT m FROM GenericDataset m "
+            + "LEFT JOIN FETCH m.originMetadata "
+            + "WHERE m.datasetAcquisition.id = :acquisitionId")
+    List<GenericDataset> findByAcquisitionId(@Param("acquisitionId") Long acquisitionId);
+
 }

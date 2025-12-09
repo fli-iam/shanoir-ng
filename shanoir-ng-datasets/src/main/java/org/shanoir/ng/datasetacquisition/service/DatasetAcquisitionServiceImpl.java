@@ -63,6 +63,9 @@ import org.springframework.util.CollectionUtils;
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
     @Autowired
+    private DatasetLoaderService datasetLoaderService;
+
+    @Autowired
     private DatasetAcquisitionRepository repository;
 
     @Autowired
@@ -126,7 +129,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
         to.setAcquisitionEquipmentId(from.getAcquisitionEquipmentId());
         to.setExamination(from.getExamination());
-        to.setDatasets(from.getDatasets());
+        to.setDatasets(getDatasets(from));
         to.setRank(from.getRank());
         to.setSoftwareRelease(from.getSoftwareRelease());
         to.setSortingIndex(from.getSortingIndex());
@@ -173,23 +176,31 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return savedEntity;
     }
 
-    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
-        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
-        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
-            List<Long> datasetIds = acq.getDatasets().stream()
+    private void indexDatasets(DatasetAcquisition acquisition) {
+        List<Dataset> datasets = getDatasets(acquisition);
+        if (datasets != null && !datasets.isEmpty()) {
+            List<Long> datasetIds = datasets.stream()
                     .map(Dataset::getId)
                     .collect(Collectors.toList());
             solrService.indexDatasets(datasetIds);
-            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), acquisition.getId());
         } else {
-            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+            LOG.warn("No datasets found for acquisition {}", acquisition.getId());
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public DatasetAcquisition findByIdWithDatasets(Long id) {
-        return repository.findByIdWithDatasets(id).orElseThrow();
+        DatasetAcquisition acquisition = repository.findById(id).orElseThrow();
+        datasetLoaderService.loadDatasets(acquisition);
+        return acquisition;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Dataset> getDatasets(DatasetAcquisition acquisition) {
+        return datasetLoaderService.loadDatasets(acquisition);
     }
 
     @Override
@@ -200,9 +211,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         updateValues(entity, entityDb);
         DatasetAcquisition acq = repository.save(entityDb);
-
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
-
         return acq;
     }
 
@@ -253,7 +262,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                             "This datasetAcquisition is linked to another datasetAcquisition that was copied."
                     ));
         } else {
-            List<Dataset> datasets = entity.getDatasets();
+            List<Dataset> datasets = getDatasets(entity);
             if (datasets != null) {
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {

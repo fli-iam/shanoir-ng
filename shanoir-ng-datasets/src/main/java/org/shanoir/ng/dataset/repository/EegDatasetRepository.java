@@ -14,8 +14,18 @@
 
 package org.shanoir.ng.dataset.repository;
 
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
 
-public interface DatasetExpressionRepository extends CrudRepository<DatasetExpression, Long> {
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+public interface EegDatasetRepository extends CrudRepository<EegDataset, Long> {
+
+    @Query("SELECT m FROM EegDataset m "
+            + "LEFT JOIN FETCH m.originMetadata "
+            + "WHERE m.datasetAcquisition.id = :acquisitionId")
+    List<EegDataset> findByAcquisitionId(@Param("acquisitionId") Long acquisitionId);
+
 }

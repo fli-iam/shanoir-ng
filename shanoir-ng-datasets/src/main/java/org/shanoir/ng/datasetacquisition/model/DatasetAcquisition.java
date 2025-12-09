@@ -169,8 +169,10 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     }
 
     /**
-     * @return the datasets
+     * Please use: DatasetAcquisitionService: getDatasets
+     * @return
      */
+    @Deprecated
     public List<Dataset> getDatasets() {
         return datasets;
     }
