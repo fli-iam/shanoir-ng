@@ -27,9 +27,11 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.utils.LogExecutionTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,9 @@ public class StudyInstanceUIDHandler {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 
@@ -181,6 +186,7 @@ public class StudyInstanceUIDHandler {
      * @param examination
      * @return
      */
+    @LogExecutionTime
     public String findStudyInstanceUID(Examination examination) {
         String studyInstanceUIDDb = examination.getStudyInstanceUID();
         if (studyInstanceUIDDb != null && !studyInstanceUIDDb.isEmpty())
@@ -192,7 +198,7 @@ public class StudyInstanceUIDHandler {
                     || acquisition instanceof PetDatasetAcquisition
                     || acquisition instanceof XaDatasetAcquisition
                     || acquisition instanceof GenericDatasetAcquisition) {
-                List<Dataset> datasets = acquisition.getDatasets();
+                List<Dataset> datasets = datasetAcquisitionService.getDatasets(acquisition);
                 if (!datasets.isEmpty()) {
                     Dataset dataset = datasets.get(0);
                     List<DatasetExpression> expressions = dataset.getDatasetExpressions();

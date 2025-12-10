@@ -100,6 +100,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Value("${datasets-data}")
     private String dataDir;
 
@@ -333,9 +334,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Override
     public Long getExtraDataSizeByStudyId(Long studyId) {
-
         List<Examination> exams = this.findByStudyId(studyId);
-
         long size = 0L;
         for (Examination exam : exams) {
             for (String path : exam.getExtraDataFilePathList()) {

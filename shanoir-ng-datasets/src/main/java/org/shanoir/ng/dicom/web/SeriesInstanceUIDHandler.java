@@ -24,11 +24,14 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.utils.LogExecutionTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,14 +87,17 @@ public class SeriesInstanceUIDHandler {
         return seriesInstanceUID;
     }
 
+    @LogExecutionTime
     public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
         String seriesInstanceUIDDb = acquisition.getSeriesInstanceUID();
         if (seriesInstanceUIDDb != null && !seriesInstanceUIDDb.isEmpty())
             return seriesInstanceUIDDb;
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
-                || acquisition instanceof PetDatasetAcquisition) {
-            List<Dataset> datasets = acquisition.getDatasets();
+                || acquisition instanceof PetDatasetAcquisition
+                || acquisition instanceof XaDatasetAcquisition
+                || acquisition instanceof GenericDatasetAcquisition) {
+            List<Dataset> datasets = acquisitionService.getDatasets(acquisition);
             if (!datasets.isEmpty()) {
                 Dataset dataset = datasets.get(0);
                 List<DatasetExpression> expressions = dataset.getDatasetExpressions();
