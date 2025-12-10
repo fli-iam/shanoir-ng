@@ -194,6 +194,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 
 		<examination-anesthetic-form
+		    class="embedded-form"
 			[id]="examination.id"
 			[mode]="mode"
 			(examAnestheticChange)="onExamAnestheticChange($event)"
@@ -212,6 +213,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 		<physiological-data-upload-form
+			class="embedded-form"
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
 			[canModify]="true"
@@ -220,6 +222,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</physiological-data-upload-form>
 
 		<bloodgas-data-upload-form
+			class="embedded-form"
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
 			[canModify]="true"
