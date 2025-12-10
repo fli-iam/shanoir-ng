@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<form-footer
 				[state]="footerState"
-				(save)="subject.subjectStudyList?.length >= 1 || mode == 'create' ? save() : delete()"
+				(save)="save()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
 				(dismiss)="goToView()"
@@ -46,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" [options]="catOptions">
+								<select-box formControlName="imagedObjectCategory" [options]="catOptions">
 								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
@@ -58,9 +58,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="mode == 'create' && humanSelected() && importMode != 'EEG'">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="subject.isAlreadyAnonymized == true"
+								<input type="radio" formControlName="isAlreadyAnonymized" [value]="true" [checked]="subject.isAlreadyAnonymized == true"
 								/>Yes
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="subject.isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'subject.isAlreadyAnonymized'?'subject.isAlreadyAnonymized == false' :'true' "
+								<input type="radio" formControlName="isAlreadyAnonymized" [value]="false" [checked]="subject.isAlreadyAnonymized == false"
 								/>No
 							</span>
 						</li>
@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First name</label>
 							<span class="right-col">
-								<input *ngIf="importMode != 'DICOM'" type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
+								<input *ngIf="importMode != 'DICOM'" type="text" id="firstName" formControlName="firstName" />
                                 <div *ngIf="importMode == 'DICOM'"> {{ firstName }} </div>
 								<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
 								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="!subject.isAlreadyAnonymized && mode == 'create' && importMode != 'EEG'">
 							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last name</label>
 							<span class="right-col">
-                                <input *ngIf="importMode != 'DICOM'" type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
+                                <input *ngIf="importMode != 'DICOM'" type="text" id="lastName" formControlName="lastName" />
                                 <div *ngIf="importMode == 'DICOM'"> {{ lastName }} </div>
 								<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
 								<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
@@ -99,7 +99,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 {{subject.name}}
                             </ng-template>
                             <ng-template ngSwitchDefault>
-                                <input type="text" id="name" formControlName="name" [(ngModel)]="subject.name"/>
+                                <input type="text" id="name" formControlName="name"/>
                                 <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
                                 <label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
                                 <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
@@ -109,7 +109,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ng-template>
                         </span>
 					</li>
-					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'" @slideDown>
+					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'">
 						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>.
 						However the prefix is optional and if you know what you are doing please just ignore this message.
 					</li>
@@ -121,7 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.birthDate | localDateFormatPipe}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="'create'">
-									<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
+									<datepicker formControlName="birthDate"></datepicker>
 									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 								</ng-template>
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.sex}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box [formControl]="form.controls['sex']" [(ngModel)]="subject.sex" [options]="genderOptions">
+									<select-box formControlName="sex" [options]="genderOptions">
 									</select-box>
 								</ng-template>
 							</span>
@@ -149,7 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.manualHemisphericDominance}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance" [optionArr]="['Left', 'Right']">
+									<select-box formControlName="manualHemisphericDominance" [optionArr]="['Left', 'Right']">
 									</select-box>
 								</ng-template>
 							</span>
@@ -161,7 +161,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subject.languageHemisphericDominance}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select-box formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance" [optionArr]="['Left','Right']">
+									<select-box formControlName="languageHemisphericDominance" [optionArr]="['Left','Right']">
 									</select-box>
 								</ng-template>
 							</span>
@@ -172,7 +172,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode == 'create'">
 						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<span class="right-col">
-							<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
+							<datepicker formControlName="birthDate"></datepicker>
 							<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 						</span>
 					</li>
@@ -187,7 +187,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </ng-template>
                                 <ng-template ngSwitchDefault>
                                     <select-box formControlName="subjectType"
-                                                [(ngModel)]="subject.subjectType"
                                                 [options]="subjectTypes">
                                     </select-box>
                                 </ng-template>
@@ -201,42 +200,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<span *ngIf="!subject.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<checkbox formControlName="physicallyInvolved" [(ngModel)]="subject.physicallyInvolved"></checkbox>
+									<checkbox formControlName="physicallyInvolved"></checkbox>
 								</ng-template>
 							</span>
                         </li>
 					</div>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="!forceStudy">
+			<fieldset>
                 <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
 				<ol>
 					<li>
-						<label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+						<label i18n="Subject detail |Study label@@SubjectDetailStudy">Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'create'">
 								<select-box
                                     formControlName="study"
-                                    [(ngModel)]="selectedStudy"
                                     [optionArr]="studies"
                                     (userChange)="onSelectStudy()">
                                 </select-box>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-                                {{studies[0]?.name}}
+                                {{ studyNameForSubject() }}
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Subject detail|Study required error@@subjectDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
-					</li>
-				</ol>
-				<label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
-			</fieldset>
-			<fieldset *ngIf="forceStudy">
-                <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
-				<ol>
-					<li>
-						<label>Study</label>
-						<span class="right-col">{{forceStudy.name}}</span>
 					</li>
 				</ol>
 			</fieldset>
@@ -259,7 +247,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     </span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<tag-list [(ngModel)]="subject.tags" [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
+								<tag-list [availableTags]="subject.study?.tags" formControlName="tags"></tag-list>
 							</ng-template>
 						</span>
                     </li>

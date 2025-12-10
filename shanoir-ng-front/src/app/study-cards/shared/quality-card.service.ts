@@ -58,9 +58,7 @@ export class QualityCardService extends EntityService<QualityCard> {
 
     public stringify(entity: QualityCard) {
         const dto = new QualityCardDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 
     applyOnStudy(qualityCardId: number): Promise<any> {

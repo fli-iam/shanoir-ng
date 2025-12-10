@@ -20,6 +20,8 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  config:
+    import: "classpath:/shanoir-shared.yml"
   datasource:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: datasets
@@ -151,7 +153,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
-  shanoir-vip-host: ${HOSTNAME:local}
+  shanoir-vip-host: ${SHANOIR_URL_HOST:local}
 
 # Service account
 service-account:

@@ -26,7 +26,6 @@ import { Reference }    from '../../../reference/shared/reference.model';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 
 
@@ -36,8 +35,7 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
-export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges{
+export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges {
 
     @Input() anesthetic: Anesthetic;
     @Input() toggleForm: boolean = true;
@@ -86,7 +84,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         return this.formBuilder.group({
             'name': [this.ingredient.name, Validators.required],
             'concentration': [this.ingredient.concentration, Validators.required],
-            'concentration_unit': [this.ingredient.concentration_unit, Validators.required]
+            'concentrationUnit': [this.ingredient.concentrationUnit, Validators.required]
         });
     }
 
@@ -121,14 +119,14 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         }
     }
 
-    loadIngredientAttributesForSelect(ingredientSelected:AnestheticIngredient){
+    loadIngredientAttributesForSelect(ingredientSelected:AnestheticIngredient) {
         this.ingredient = ingredientSelected;
 
         if(this.units){
             for (const unit of this.units) {
-                if(ingredientSelected.concentration_unit){
-                    if (ingredientSelected.concentration_unit.id == unit.id) {
-                        this.ingredient.concentration_unit = unit;
+                if(ingredientSelected.concentrationUnit){
+                    if (ingredientSelected.concentrationUnit.id == unit.id) {
+                        this.ingredient.concentrationUnit = unit;
                     }
                 }
                 }
@@ -196,11 +194,11 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                 if (reftype == 'ingredient'){
                     this.names.push(entity as Reference);
                     this.entity.name = entity as Reference;
-                }else if (reftype == 'concentration'){
+                } else if (reftype == 'concentration'){
                     this.units.push(entity as Reference);
-                    this.entity.concentration_unit = entity as Reference;
+                    this.entity.concentrationUnit = entity as Reference;
                 }
-        });
+            });
         });
     }
 

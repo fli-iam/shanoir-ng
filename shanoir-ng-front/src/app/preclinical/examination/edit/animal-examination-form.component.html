@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.study?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="study" formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects()" [compareWith]="compareEntities">
+									<select id="study" formControlName="study" [compareWith]="compareEntities">
 										<option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
 									</select>
 									<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.subject?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select-box formControlName="subject" [(ngModel)]="examination.subject" [optionArr]="subjects">
+									<select-box formControlName="subject" [optionArr]="subjects">
 									</select-box>
 									<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
 								</ng-template>
@@ -95,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.center?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="center" formControlName="center" [(ngModel)]="examination.center" [compareWith]="compareEntities">
+									<select id="center" formControlName="center" [compareWith]="compareEntities">
 										<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 									</select>
 									<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
@@ -110,11 +110,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<ng-template [ngSwitchCase]="'view'">
 							{{examination.examinationExecutive?.name}}
 						</ng-template>
-						<!--<ng-template ngSwitchDefault>
-							<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
-								<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
-							</select>
-						</ng-template>-->
 					</span>
 				</li>
 				<li>
@@ -124,7 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.examinationDate | localDateFormatPipe}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
+							<datepicker formControlName="examinationDate" required></datepicker>
 							<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
 							<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 						</ng-template>
@@ -137,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.comment}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment" />
+							<input type="text" id="comment" formControlName="comment"/>
 						</ng-template>
 					</span>
 				</li>
@@ -148,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.note}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="note" formControlName="note" [(ngModel)]="examination.note" />
+							<input type="text" id="note" formControlName="note"/>
 						</ng-template>
 					</span>
 				</li>
@@ -159,12 +154,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.subjectWeight}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />
+							<input type="text" id="subjectWeight" formControlName="subjectWeight"/>
 						</ng-template>
 
                         <span class="right-col" *ngIf="mode != 'view'">
-                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" [(ngModel)]="examination.weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
-                            <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" [(ngModel)]="examination.weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
+                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
+                            <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
                             </span>
 
 					</span>
@@ -175,13 +170,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<ng-template [ngSwitchCase]="'view'">
 							<!--{{examination.note}}-->
 						</ng-template>
-						<ng-template ngSwitchDefault>
+						<!-- <ng-template ngSwitchDefault>
 							<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
 							disabled>
 								<i class="fas fa-plus-square"></i>
 								new Instrument Based Assessment
 							</button>
-						</ng-template>
+						</ng-template> -->
 					</span>
 				</li>
                     <li *ngIf="mode == 'create' || mode=='edit'">
@@ -199,9 +194,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 
 		<examination-anesthetic-form
+		    class="embedded-form"
 			[id]="examination.id"
 			[mode]="mode"
-			(examAnestheticChange)="onExamAnestheticChange($event)">
+			(examAnestheticChange)="onExamAnestheticChange($event)"
+			[embedded]="true">
 		</examination-anesthetic-form>
 
 		<!--
@@ -216,17 +213,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 		<physiological-data-upload-form
+			class="embedded-form"
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
 			[canModify]="true"
-			[examination_id]="examination.id">
+			[examinationId]="examination.id"
+			[embedded]="true">
 		</physiological-data-upload-form>
 
 		<bloodgas-data-upload-form
+			class="embedded-form"
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
 			[canModify]="true"
-			[examination_id]="examination.id">
+			[examinationId]="examination.id"
+			[embedded]="true">
 		</bloodgas-data-upload-form>
 
 		<fieldset *ngIf="examination && mode=='view'">
