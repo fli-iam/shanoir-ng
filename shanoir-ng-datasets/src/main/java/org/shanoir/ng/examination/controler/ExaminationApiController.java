@@ -139,11 +139,12 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Override
     public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
-            @Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
+            @Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical,
+            Pageable pageable, String searchStr, String searchField) {
         Page<Examination> examinations;
 
         // Get examinations reachable by connected user
-        examinations = examinationService.findPage(pageable, isPreclinical, null, null);
+        examinations = examinationService.findPage(pageable, isPreclinical, searchStr, searchField);
         if (examinations.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

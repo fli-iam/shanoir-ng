@@ -19,7 +19,7 @@ import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthet
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
-import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
+import { Page, Pageable } from '../../../shared/components/table/pageable.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
@@ -50,7 +50,9 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable, true, "", "");
+        return this.examinationService.getPage(pageable, true, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
+            return page;
+        });
     }
 
     getColumnDefs(): ColumnDefinition[] {
