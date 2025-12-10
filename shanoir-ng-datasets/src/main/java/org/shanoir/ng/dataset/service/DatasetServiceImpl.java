@@ -25,7 +25,6 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -37,8 +36,6 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.datasetfile.DatasetFileRepository;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
