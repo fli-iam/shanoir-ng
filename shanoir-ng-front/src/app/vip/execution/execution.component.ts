@@ -1,36 +1,46 @@
-import {Component, Input, OnInit} from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { formatDate } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import {
-    AbstractControl,
     UntypedFormControl,
     UntypedFormGroup,
-    FormGroup,
-    FormControl,
     ValidatorFn,
     Validators
 } from '@angular/forms';
-import {Router} from '@angular/router';
-import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
-import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
-import {Execution} from 'src/app/vip/models/execution';
-import {ParameterType} from 'src/app/vip/models/parameterType';
-import {Pipeline} from 'src/app/vip/models/pipeline';
-import {ExecutionService} from 'src/app/vip/execution/execution.service';
-import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import {Dataset} from 'src/app/datasets/shared/dataset.model';
-import {DatasetService} from 'src/app/datasets/shared/dataset.service';
-import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
-import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
-import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
-import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
-import {ExecutionDataService} from '../execution.data-service';
-import {Option} from '../../shared/select/select.component';
-import { formatDate } from '@angular/common';
-import {DatasetParameterDTO} from "../models/dataset-parameter.dto";
-import {GroupByEnum} from "../models/groupby.enum";
-import {PipelineParameter} from "../models/pipelineParameter";
-import {ServiceLocator} from "../../utils/locator.service";
-import {ConsoleService} from "../../shared/console/console.service";
-import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
+import { Router } from '@angular/router';
+
+import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { DatasetLight, DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { DatasetProcessingType } from 'src/app/enum/dataset-processing-type.enum';
+import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
+import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
+import { ExecutionService } from 'src/app/vip/execution/execution.service';
+import { Execution } from 'src/app/vip/models/execution';
+import { ParameterType } from 'src/app/vip/models/parameterType';
+import { Pipeline } from 'src/app/vip/models/pipeline';
+
+import { ConsoleService } from "../../shared/console/console.service";
+import { Option } from '../../shared/select/select.component';
+import { ServiceLocator } from "../../utils/locator.service";
+import { ExecutionDataService } from '../execution.data-service';
+import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
+import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
+import { GroupByEnum } from "../models/groupby.enum";
+import { PipelineParameter } from "../models/pipelineParameter";
 
 @Component({
     selector: 'app-execution',
@@ -43,15 +53,15 @@ export class ExecutionComponent implements OnInit {
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
-    selectedDatasets: Set<Dataset>;
+    private selectedDatasets: Set<DatasetLight>;
 
-    datasetsOptions: Option<Dataset>[];
+    datasetsOptions: Option<DatasetLight>[];
     token: string;
     refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
-    columnDefs: { [key: string]: ColumnDefinition[] } = {};
-    datasetsByParam: { [key: string]: Dataset[] } = {};
+    columnDefs: Record<string, ColumnDefinition[]> = {};
+    datasetsByParam: Record<string, DatasetLight[]> = {};
     fileInputs = [];
     execDefaultName= "";
     exportFormat= "nii";
@@ -80,7 +90,7 @@ export class ExecutionComponent implements OnInit {
         private keycloakService: KeycloakService,
         private datasetService: DatasetService) {
             this.breadcrumbsService.nameStep('2. Executions');
-            this.selectedDatasets = new Set<Dataset>();
+            this.selectedDatasets = new Set<DatasetLight>();
             this.isSubmitted = false;
     }
 
@@ -134,11 +144,11 @@ export class ExecutionComponent implements OnInit {
                 if (this.isAFile(parameter)) {
                     this.fileInputs.push(parameter);
                 }
-                let validators: ValidatorFn[] = [];
+                const validators: ValidatorFn[] = [];
                 if (!parameter.isOptional && parameter.type != ParameterType.Boolean && parameter.type != ParameterType.File) {
                     validators.push(Validators.required);
                 }
-                let control = new UntypedFormControl(parameter.defaultValue, validators);
+                const control = new UntypedFormControl(parameter.defaultValue, validators);
                 if (parameter.name != "executable") {
                     this.executionForm.addControl(parameter.name, control);
                 }
@@ -164,16 +174,16 @@ export class ExecutionComponent implements OnInit {
 
         this.datasetsPromise.then(() => {
 
-            let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+            const availableDatasets: DatasetLight[] = Array.from(this.selectedDatasets);
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
-                this.datasetsOptions.push(new Option<Dataset>(dataset, dataset.name + '(' + dataset.id + ')'));
+                this.datasetsOptions.push(new Option<DatasetLight>(dataset, dataset.name + '(' + dataset.id + ')'));
             });
 
             // By default, we order by alphabtical order
             // TODO: Propose another possible order (by ID?)
-            availableDatasets.sort((a: Dataset, b: Dataset) => {
+            availableDatasets.sort((a: DatasetLight, b: DatasetLight) => {
                 return a.name.localeCompare(b.name);
             })
 
@@ -182,10 +192,10 @@ export class ExecutionComponent implements OnInit {
                     if (this.isAFile(parameter)) {
                         // If we have a file, we try to set up the adapted dataset
                         // We try to find all adapted datasets
-                        let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
-                        let nameFilter: RegExp = new RegExp(exp);
+                        // let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
+                        // let nameFilter: RegExp = new RegExp(exp);
 
-                        let paramDatasets: Dataset[] = [];
+                        const paramDatasets: DatasetLight[] = [];
 
                         availableDatasets.forEach(dataset => {
                             paramDatasets.push(dataset);
@@ -207,7 +217,7 @@ export class ExecutionComponent implements OnInit {
 
         this.isSubmitted = true;
 
-        let exec = this.initExecutionCandidate();
+        const exec = this.initExecutionCandidate();
         this.executionService.createExecution(exec).then(
             monitoring => {
                 this.router.navigate([`/dataset-processing/details/${monitoring.id}`]);
@@ -220,10 +230,10 @@ export class ExecutionComponent implements OnInit {
     }
 
     private initExecutionCandidate() {
-        let candidate = new ExecutionCandidateDto();
+        const candidate = new ExecutionCandidateDto();
         candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         candidate.pipelineIdentifier = this.pipeline.identifier
-        candidate.studyIdentifier = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+        candidate.studyIdentifier = [...this.selectedDatasets][0].study?.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
         candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
@@ -235,7 +245,7 @@ export class ExecutionComponent implements OnInit {
             parameter => {
                 if (this.isAFile(parameter)) {
                     // File type parameters (i.e. datasets)
-                    let dto = new DatasetParameterDTO();
+                    const dto = new DatasetParameterDTO();
                     dto.name = parameter.name;
                     dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
                     dto.exportFormat = this.exportFormat;

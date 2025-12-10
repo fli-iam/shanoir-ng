@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,187 +24,210 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class Subject {
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String identifier;
+    private String identifier;
 
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonSerialize(using = LocalDateSerializer.class)
-	private LocalDate birthDate;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate birthDate;
 
-	private HemisphericDominance languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-	private HemisphericDominance manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-	private ImagedObjectCategory imagedObjectCategory;
-	
-	private Sex sex;
+    private ImagedObjectCategory imagedObjectCategory;
 
-	private List<SubjectStudy> subjectStudyList;
+    private Sex sex;
 
-	private SubjectStudy subjectStudy;
-	
-	private PseudonymusHashValues pseudonymusHashValues;
+    private IdName study;
 
-	private boolean preclinical;
+    private String studyIdentifier;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private SubjectType subjectType;
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private boolean physicallyInvolved;
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    private List<Tag> tags;
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    private PseudonymusHashValues pseudonymusHashValues;
 
-	/**
-	 * @return the identifier
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
+    private boolean preclinical;
 
-	/**
-	 * @param identifier
-	 *            the identifier to set
-	 */
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the birthDate
-	 */
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param birthDate
-	 *            the birthDate to set
-	 */
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the languageHemisphericDominance
-	 */
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param languageHemisphericDominance
-	 *            the languageHemisphericDominance to set
-	 */
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
+    /**
+     * @return the identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * @return the manualHemisphericDominance
-	 */
-	public HemisphericDominance getManualHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
+    /**
+     * @param identifier
+     *            the identifier to set
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	/**
-	 * @param manualHemisphericDominance
-	 *            the manualHemisphericDominance to set
-	 */
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		this.manualHemisphericDominance = manualHemisphericDominance;
-	}
+    /**
+     * @return the birthDate
+     */
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	/**
-	 * @return the imagedObjectCategory
-	 */
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    /**
+     * @param birthDate
+     *            the birthDate to set
+     */
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	/**
-	 * @param imagedObjectCategory
-	 *            the imagedObjectCategory to set
-	 */
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    /**
+     * @return the languageHemisphericDominance
+     */
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return languageHemisphericDominance;
+    }
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    /**
+     * @param languageHemisphericDominance
+     *            the languageHemisphericDominance to set
+     */
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        this.languageHemisphericDominance = languageHemisphericDominance;
+    }
 
-	/**
-	 * @param subjectStudyList
-	 *            the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    /**
+     * @return the manualHemisphericDominance
+     */
+    public HemisphericDominance getManualHemisphericDominance() {
+        return manualHemisphericDominance;
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @param manualHemisphericDominance
+     *            the manualHemisphericDominance to set
+     */
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        this.manualHemisphericDominance = manualHemisphericDominance;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    /**
+     * @return the imagedObjectCategory
+     */
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	public Sex getSex() {
-		return sex;
-	}
+    /**
+     * @param imagedObjectCategory
+     *            the imagedObjectCategory to set
+     */
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
-	public void setSex(Sex sex) {
-		this.sex = sex;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public PseudonymusHashValues getPseudonymusHashValues() {
-		return pseudonymusHashValues;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
-		this.pseudonymusHashValues = pseudonymusHashValues;
-	}
+    public Sex getSex() {
+        return sex;
+    }
 
-	@Override
-	public String toString() {
-		return this.getName();
-	}
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
 
-	public SubjectStudy getSubjectStudy() {
-		return subjectStudy;
-	}
+    public PseudonymusHashValues getPseudonymusHashValues() {
+        return pseudonymusHashValues;
+    }
 
-	public void setSubjectStudy(SubjectStudy subjectStudy) {
-		this.subjectStudy = subjectStudy;
-	}
+    public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
+        this.pseudonymusHashValues = pseudonymusHashValues;
+    }
+
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+
+    public IdName getStudy() {
+        return study;
+    }
+
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
+
+    public String getStudyIdentifier() {
+        return studyIdentifier;
+    }
+
+    public void setStudyIdentifier(String studyIdentifier) {
+        this.studyIdentifier = studyIdentifier;
+    }
+
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
+
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
 }

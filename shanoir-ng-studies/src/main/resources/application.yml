@@ -26,6 +26,7 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    show-sql: false
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -103,6 +104,8 @@ ms.url:
   shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
 # data paths
 studies-data: /var/studies-data
+# Data folder configuration
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   pattern:
@@ -157,6 +160,8 @@ ms.url:
   shanoir-ng-bids: http://localhost:9904/bids
 # data paths
 studies-data: /tmp
+# Data folder configuration
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file:

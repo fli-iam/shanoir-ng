@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,55 +40,55 @@ import java.util.stream.Collectors;
 @Service
 public class RabbitMqStudyUserService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
 
-	@Autowired
-	private StudyUserUpdateService service;
+    @Autowired
+    private StudyUserUpdateService service;
 
-	@Autowired
-	private StudyUserRightsRepository studyUserRightsRepository;
+    @Autowired
+    private StudyUserRightsRepository studyUserRightsRepository;
 
-	@Autowired
-	private ObjectMapper mapper;
+    @Autowired
+    private ObjectMapper mapper;
 
-	public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
-		StudyUserCommand[] commands;
-		try {
-			LOG.debug("Received study-user commands : {}", commandArrStr);
+    public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+        StudyUserCommand[] commands;
+        try {
+            LOG.debug("Received study-user commands : {}", commandArrStr);
 
-			SimpleModule module = new SimpleModule();
-			module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-			mapper.registerModule(module);
+            SimpleModule module = new SimpleModule();
+            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
+            mapper.registerModule(module);
 
-			commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
-			service.processCommands(Arrays.asList(commands));
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
-		}
-	}
-
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public List<Long> getStudiesICanAdmin(Long userId) {
-		List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
-    	if (CollectionUtils.isEmpty(sus)) {
-    		return null;
-    	}
-    	return sus.stream().map(StudyUser::getStudyId
-    	).collect(Collectors.toList());
+            commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
+            service.processCommands(Arrays.asList(commands));
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
+        }
     }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public List<Long> getStudyAdmins(Long studyId) {
-    	List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
-    	if (CollectionUtils.isEmpty(admins)) {
-    		return null;
-    	}
-    	return admins.stream().map(studyUser ->
-    		studyUser.getUserId()
-    	).collect(Collectors.toList());
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public List<Long> getStudiesICanAdmin(Long userId) {
+        List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        if (CollectionUtils.isEmpty(sus)) {
+            return null;
+        }
+        return sus.stream().map(StudyUser::getStudyId
+        ).collect(Collectors.toList());
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public List<Long> getStudyAdmins(Long studyId) {
+        List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        if (CollectionUtils.isEmpty(admins)) {
+            return null;
+        }
+        return admins.stream().map(studyUser ->
+            studyUser.getUserId()
+        ).collect(Collectors.toList());
     }
 }

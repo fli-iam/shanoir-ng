@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,12 +17,11 @@ package org.shanoir.ng.subjectstudy.model;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.tag.model.Tag;
 
 import jakarta.persistence.CascadeType;
@@ -37,149 +36,144 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Relation between the subjects and the studies.
- * 
+ *
  * @author msimon
  *
  */
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "subject_id" }, name = "study_subject_idx") })
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class SubjectStudy extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 734032331139342460L;
+    private static final long serialVersionUID = 734032331139342460L;
 
-	/** true if the subject is physically involved in the study. */
-	private boolean physicallyInvolved;
+    /** true if the subject is physically involved in the study. */
+    private boolean physicallyInvolved;
 
-	/** Study. */
-	@ManyToOne
-	@JoinColumn(name = "study_id")
-	@NotNull
-	private Study study;
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
-	/** Subject. */
-	@ManyToOne
-	@JoinColumn(name = "subject_id", updatable = true, insertable = true)
-	@NotNull
-	private Subject subject;
+    /** Subject. */
+    @ManyToOne
+    @JoinColumn(name = "subject_id", updatable = true, insertable = true)
+    @NotNull
+    private Subject subject;
 
-	/** Identifier of the subject inside the study. */
-	private String subjectStudyIdentifier;
+    /** Identifier of the subject inside the study. */
+    private String subjectStudyIdentifier;
 
-	/** Subject type. */
-	private Integer subjectType;
+    /** Subject type. */
+    private Integer subjectType;
 
-	/** Tags associated to the subject. */
-	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<SubjectStudyTag> subjectStudyTags;
-	
-	/** StudyCard tags associated to the subject. */
-	private Integer qualityTag;
+    /** Tags associated to the subject. */
+    @OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubjectStudyTag> subjectStudyTags;
 
-	/**
-	 * @return the tags
-	 */
-	public List<Tag> getTags() {
+    /** QualityCard tags associated to the subject. */
+    private Integer qualityTag;
+
+    /**
+     * @return the tags
+     */
+    public List<Tag> getTags() {
         if (getSubjectStudyTags() == null) return null;
         return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
     }
-	
-	public List<SubjectStudyTag> getSubjectStudyTags() {
-		return subjectStudyTags;
-	}
-	
-	public QualityTag getQualityTag() {
-		return QualityTag.get(qualityTag);
-	}
-	
-	public void setQualityTag(QualityTag tag) {
+
+    public List<SubjectStudyTag> getSubjectStudyTags() {
+        return subjectStudyTags;
+    }
+
+    public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+
+    public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
-	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
-		this.subjectStudyTags = subjectStudyTags;
-	}
-	
-	/**
-	 * @return the physicallyInvolved
-	 */
-	public boolean isPhysicallyInvolved() {
-		return physicallyInvolved;
-	}
+    public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
+        this.subjectStudyTags = subjectStudyTags;
+    }
 
-	/**
-	 * @param physicallyInvolved
-	 *            the physicallyInvolved to set
-	 */
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
-		this.physicallyInvolved = physicallyInvolved;
-	}
+    /**
+     * @return the physicallyInvolved
+     */
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
 
-	/**
-	 * @return the study
-	 */
-	public Study getStudy() {
-		return study;
-	}
+    /**
+     * @param physicallyInvolved
+     *            the physicallyInvolved to set
+     */
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
 
-	/**
-	 * @param study
-	 *            the study to set
-	 */
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    /**
+     * @return the study
+     */
+    public Study getStudy() {
+        return study;
+    }
 
-	/**
-	 * @return the subject
-	 */
-	public Subject getSubject() {
-		return subject;
-	}
+    /**
+     * @param study
+     *            the study to set
+     */
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    /**
+     * @return the subject
+     */
+    public Subject getSubject() {
+        return subject;
+    }
 
-	/**
-	 * @return the subjectStudyIdentifier
-	 */
-	public String getSubjectStudyIdentifier() {
-		return subjectStudyIdentifier;
-	}
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	/**
-	 * @param subjectStudyIdentifier
-	 *            the subjectStudyIdentifier to set
-	 */
-	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
-		this.subjectStudyIdentifier = subjectStudyIdentifier;
-	}
+    /**
+     * @return the subjectStudyIdentifier
+     */
+    public String getSubjectStudyIdentifier() {
+        return subjectStudyIdentifier;
+    }
 
-	/**
-	 * @return the subjectType
-	 */
-	public SubjectType getSubjectType() {
-		return SubjectType.getType(subjectType);
-	}
+    /**
+     * @param subjectStudyIdentifier
+     *            the subjectStudyIdentifier to set
+     */
+    public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
+        this.subjectStudyIdentifier = subjectStudyIdentifier;
+    }
 
-	/**
-	 * @param subjectType
-	 *            the subjectType to set
-	 */
-	public void setSubjectType(SubjectType subjectType) {
-		if (subjectType == null) {
-			this.subjectType = null;
-		} else {
-			this.subjectType = subjectType.getId();
-		}
-	}
+    /**
+     * @return the subjectType
+     */
+    public SubjectType getSubjectType() {
+        return SubjectType.getType(subjectType);
+    }
+
+    /**
+     * @param subjectType
+     *            the subjectType to set
+     */
+    public void setSubjectType(SubjectType subjectType) {
+        if (subjectType == null) {
+            this.subjectType = null;
+        } else {
+            this.subjectType = subjectType.getId();
+        }
+    }
 
 }

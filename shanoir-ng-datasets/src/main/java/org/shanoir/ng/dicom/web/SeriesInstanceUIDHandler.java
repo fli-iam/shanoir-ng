@@ -1,8 +1,24 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -13,18 +29,13 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class SeriesInstanceUIDHandler {
@@ -48,7 +59,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
-    @Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
     public void clearAcquisitionIdToSeriesInstanceUIDCache() {
         acquisitionUIDToSeriesInstanceUIDCache.clear();
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
@@ -62,9 +73,11 @@ public class SeriesInstanceUIDHandler {
             if (acquisition != null) {
                 seriesInstanceUID = findSeriesInstanceUID(acquisition);
                 if (seriesInstanceUID != null) {
-                    acquisitionUIDToSeriesInstanceUIDCache.put(acquisitionUID, seriesInstanceUID);
-                    LOG.info("DICOMWeb cache adding: " + acquisitionUID + ", " + seriesInstanceUID);
-                    LOG.info("DICOMWeb cache, size: " + acquisitionUIDToSeriesInstanceUIDCache.size());
+                    String existing = acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
+                    }
                 }
             }
         }
@@ -72,6 +85,9 @@ public class SeriesInstanceUIDHandler {
     }
 
     public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
+        String seriesInstanceUIDDb = acquisition.getSeriesInstanceUID();
+        if (seriesInstanceUIDDb != null && !seriesInstanceUIDDb.isEmpty())
+            return seriesInstanceUIDDb;
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition) {

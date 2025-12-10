@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -22,12 +21,9 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.execution.service.ExecutionServiceImpl;
-import org.shanoir.ng.vip.pipeline.service.PipelineServiceImpl;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +39,7 @@ public class ExecutionApiController implements ExecutionApi {
     @Autowired
     private ExecutionServiceImpl executionService;
 
+    @Override
     public ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
@@ -53,12 +50,12 @@ public class ExecutionApiController implements ExecutionApi {
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
     }
 
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).block());
     }
 
 
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 

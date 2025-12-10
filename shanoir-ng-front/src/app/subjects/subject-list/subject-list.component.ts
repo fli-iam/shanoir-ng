@@ -13,16 +13,17 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
-import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
+
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
-import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
-
+import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
+import { IdName } from "../../shared/models/id-name.model";
 
 @Component({
     selector: 'subject-list',
@@ -38,13 +39,15 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    private studiesICanAdmin: number[];
+    private studies: IdName[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
             private subjectService: SubjectService,
             private studyService: StudyService) {
         super('subject');
-        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.findStudyIdNamesIcanAdmin().then(ids => this.studies = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Subject> {
@@ -86,19 +89,14 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     canDelete(subject: Subject): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            subject.subjectStudyList &&
-            subject.subjectStudyList.filter(ss => this.studiesICanAdmin?.includes(ss.study.id)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.studyId);
     }
 
-    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
-        return this.subjectService.get(entity.id).then(res => {
-            const studiesNames = res.subjectStudyList.map(study => study.study.name).join('\n- ');
-            studyListStr += studiesNames;
-            studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
-            return studyListStr;
-        });
+    getOnDeleteConfirmMessage(subject: Subject): string {
+        let msg : string = 'Are you sure you want to finally delete the subject '
+            + (subject.name + ' with id n° ' + subject.id) + ' ?';
+        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.studyId).name;
+        msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
+        return msg;
     }
 }

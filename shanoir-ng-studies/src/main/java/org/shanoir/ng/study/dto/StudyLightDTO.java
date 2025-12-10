@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,241 +25,241 @@ import org.shanoir.ng.tag.model.StudyTagDTO;
 
 /**
  * DTO for study.
- * 
+ *
  * @author msimon
  *
  */
 public class StudyLightDTO {
 
-	private boolean downloadableByDefault;
-	
-	private boolean challenge;
+    private boolean downloadableByDefault;
 
-	@LocalDateAnnotations
-	private LocalDate endDate;
+    private boolean challenge;
 
-	private Long id;
+    @LocalDateAnnotations
+    private LocalDate endDate;
 
-	private String name;
+    private Long id;
 
-	private int nbExaminations;
+    private String name;
 
-	private int nbSubjects;
+    private int nbExaminations;
 
-	@LocalDateAnnotations
-	private LocalDate startDate;
+    private int nbSubjects;
 
-	private StudyStatus studyStatus;
+    @LocalDateAnnotations
+    private LocalDate startDate;
 
-	private StudyType studyType;
+    private StudyStatus studyStatus;
 
-	private String description;
+    private StudyType studyType;
 
-	private String license;
+    private String description;
 
-	private List<StudyTagDTO> studyTags;
+    private String license;
 
-	private List<String> protocolFilePaths;
-	
-	private List<String> dataUserAgreementPaths;
+    private List<StudyTagDTO> studyTags;
 
-	private Profile profile;
+    private List<String> protocolFilePaths;
 
-	/**
-	 * Default constructor.
-	 */
-	public StudyLightDTO() {
-		// empty constructor
-	}
+    private List<String> dataUserAgreementPaths;
 
-	public boolean isChallenge() {
-		return challenge;
-	}
+    private Profile profile;
 
-	public void setChallenge(boolean challenge) {
-		this.challenge = challenge;
-	}
+    /**
+     * Default constructor.
+     */
+    public StudyLightDTO() {
+        // empty constructor
+    }
 
-	/**
-	 * @return the downloadableByDefault
-	 */
-	public boolean isDownloadableByDefault() {
-		return downloadableByDefault;
-	}
+    public boolean isChallenge() {
+        return challenge;
+    }
 
-	/**
-	 * @param downloadableByDefault
-	 *            the downloadableByDefault to set
-	 */
-	public void setDownloadableByDefault(boolean downloadableByDefault) {
-		this.downloadableByDefault = downloadableByDefault;
-	}
+    public void setChallenge(boolean challenge) {
+        this.challenge = challenge;
+    }
 
-	/**
-	 * @return the endDate
-	 */
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+    /**
+     * @return the downloadableByDefault
+     */
+    public boolean isDownloadableByDefault() {
+        return downloadableByDefault;
+    }
 
-	/**
-	 * @param endDate
-	 *            the endDate to set
-	 */
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+    /**
+     * @param downloadableByDefault
+     *            the downloadableByDefault to set
+     */
+    public void setDownloadableByDefault(boolean downloadableByDefault) {
+        this.downloadableByDefault = downloadableByDefault;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the endDate
+     */
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param endDate
+     *            the endDate to set
+     */
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the nbExaminations
-	 */
-	public int getNbExaminations() {
-		return nbExaminations;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param nbExaminations
-	 *            the nbExaminations to set
-	 */
-	public void setNbExaminations(int nbExaminations) {
-		this.nbExaminations = nbExaminations;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the nbSubjects
-	 */
-	public int getNbSubjects() {
-		return nbSubjects;
-	}
+    /**
+     * @return the nbExaminations
+     */
+    public int getNbExaminations() {
+        return nbExaminations;
+    }
 
-	/**
-	 * @param nbSubjects
-	 *            the nbSubjects to set
-	 */
-	public void setNbSubjects(int nbSubjects) {
-		this.nbSubjects = nbSubjects;
-	}
+    /**
+     * @param nbExaminations
+     *            the nbExaminations to set
+     */
+    public void setNbExaminations(int nbExaminations) {
+        this.nbExaminations = nbExaminations;
+    }
 
-	/**
-	 * @return the startDate
-	 */
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+    /**
+     * @return the nbSubjects
+     */
+    public int getNbSubjects() {
+        return nbSubjects;
+    }
 
-	/**
-	 * @param startDate
-	 *            the startDate to set
-	 */
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+    /**
+     * @param nbSubjects
+     *            the nbSubjects to set
+     */
+    public void setNbSubjects(int nbSubjects) {
+        this.nbSubjects = nbSubjects;
+    }
 
-	/**
-	 * @return the studyStatus
-	 */
-	public StudyStatus getStudyStatus() {
-		return studyStatus;
-	}
+    /**
+     * @return the startDate
+     */
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-	/**
-	 * @param studyStatus
-	 *            the studyStatus to set
-	 */
-	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
-	}
+    /**
+     * @param startDate
+     *            the startDate to set
+     */
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-	/**
-	 * @return the studyType
-	 */
-	public StudyType getStudyType() {
-		return studyType;
-	}
+    /**
+     * @return the studyStatus
+     */
+    public StudyStatus getStudyStatus() {
+        return studyStatus;
+    }
 
-	/**
-	 * @param studyType
-	 *            the studyType to set
-	 */
-	public void setStudyType(StudyType studyType) {
-		this.studyType = studyType;
-	}
+    /**
+     * @param studyStatus
+     *            the studyStatus to set
+     */
+    public void setStudyStatus(StudyStatus studyStatus) {
+        this.studyStatus = studyStatus;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    /**
+     * @return the studyType
+     */
+    public StudyType getStudyType() {
+        return studyType;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * @param studyType
+     *            the studyType to set
+     */
+    public void setStudyType(StudyType studyType) {
+        this.studyType = studyType;
+    }
 
-	public String getLicense() {
-		return license;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setLicense(String license) {
-		this.license = license;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public List<StudyTagDTO> getStudyTags() {
-		return studyTags;
-	}
+    public String getLicense() {
+        return license;
+    }
 
-	public void setStudyTags(List<StudyTagDTO> studyTags) {
-		this.studyTags = studyTags;
-	}
+    public void setLicense(String license) {
+        this.license = license;
+    }
 
-	public List<String> getProtocolFilePaths() {
-		return protocolFilePaths;
-	}
+    public List<StudyTagDTO> getStudyTags() {
+        return studyTags;
+    }
 
-	public void setProtocolFilePaths(List<String> protocolFilePaths) {
-		this.protocolFilePaths = protocolFilePaths;
-	}
+    public void setStudyTags(List<StudyTagDTO> studyTags) {
+        this.studyTags = studyTags;
+    }
 
-	public List<String> getDataUserAgreementPaths() {
-		return dataUserAgreementPaths;
-	}
+    public List<String> getProtocolFilePaths() {
+        return protocolFilePaths;
+    }
 
-	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
-		this.dataUserAgreementPaths = dataUserAgreementPaths;
-	}
+    public void setProtocolFilePaths(List<String> protocolFilePaths) {
+        this.protocolFilePaths = protocolFilePaths;
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public List<String> getDataUserAgreementPaths() {
+        return dataUserAgreementPaths;
+    }
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
+    public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+        this.dataUserAgreementPaths = dataUserAgreementPaths;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,7 +29,6 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -45,7 +44,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -66,100 +64,100 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
 
-	private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
+    private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
-	private static final String GET_DICOM = "/importer/get_dicom/";
-	
-	@Autowired
-	private MockMvc mvc;
+    private static final String GET_DICOM = "/importer/get_dicom/";
 
-	@MockBean
-	private RestTemplate restTemplate;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private DicomDirToModelService dicomDirToModel;
+    @MockBean
+    private RestTemplate restTemplate;
 
-	@MockBean
-	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
+    @MockBean
+    private DicomDirToModelService dicomDirToModel;
 
-	@MockBean
-	private ImporterManagerService importerManagerService;
+    @MockBean
+    private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 
-	@MockBean
-	private QueryPACSService queryPACSService;
+    @MockBean
+    private ImporterManagerService importerManagerService;
 
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
+    @MockBean
+    private QueryPACSService queryPACSService;
 
-	@MockBean
-	private DicomDirGeneratorService dicomDirGeneratorService;
-	
-	@MockBean
-	private ShanoirEventService shanoirEventService;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-	public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
-			boolean sourceData, boolean importJson) throws IOException {
-	    File importDir = new File("/tmp/test-import-as-bids");
-	    importDir.mkdirs();
-	    if (withParticipants) {
-	    	File participants = new File(importDir.getAbsolutePath() + "/" + "participants.tsv");
-	    	participants.createNewFile();
-	    }
-	    if (studyDescription) {
-	    	File studyDesc = new File(importDir.getAbsolutePath() + "/" + "dataset_description.json");
-	    	studyDesc.createNewFile();
-	    }
-	    if (sourceData) {
-	    	File sourceDataFile = new File(importDir.getAbsolutePath() + "/" + "sourcedata");
-	    	File subjectFile = new File(sourceDataFile.getAbsolutePath() + "/sub-name");
-	    	sourceDataFile.mkdir();
-	    	subjectFile.mkdir();
-	    	if (importJson) {
-		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
-		    	importJsonFile.createNewFile();
-		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"studyCardId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
-	    	}
-	    }
-	    File importZip = new File("/tmp/test-import-as-bids.zip");
+    @MockBean
+    private DicomDirGeneratorService dicomDirGeneratorService;
 
-	    FileOutputStream outStream = new FileOutputStream(importZip.getAbsolutePath());
-		ZipOutputStream zipout = new ZipOutputStream(outStream);
-		ImportUtils.zipFile(importDir, importDir.getName(), zipout , true);
-		zipout.close();
-		outStream.close();
-		return new MockMultipartFile("file", "test-import-as-bids.zip", "application/zip", new FileInputStream(importZip.getAbsolutePath()));
-	}
+    @MockBean
+    private ShanoirEventService shanoirEventService;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testStartImportEEGJob() throws Exception {
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
+            boolean sourceData, boolean importJson) throws IOException {
+        File importDir = new File("/tmp/test-import-as-bids");
+        importDir.mkdirs();
+        if (withParticipants) {
+            File participants = new File(importDir.getAbsolutePath() + "/" + "participants.tsv");
+            participants.createNewFile();
+        }
+        if (studyDescription) {
+            File studyDesc = new File(importDir.getAbsolutePath() + "/" + "dataset_description.json");
+            studyDesc.createNewFile();
+        }
+        if (sourceData) {
+            File sourceDataFile = new File(importDir.getAbsolutePath() + "/" + "sourcedata");
+            File subjectFile = new File(sourceDataFile.getAbsolutePath() + "/sub-name");
+            sourceDataFile.mkdir();
+            subjectFile.mkdir();
+            if (importJson) {
+                File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
+                importJsonFile.createNewFile();
+                FileUtils.write(importJsonFile, "{\"studyId\": 1,\"studyCardId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
+            }
+        }
+        File importZip = new File("/tmp/test-import-as-bids.zip");
 
-		EegImportJob importJob = new EegImportJob();
-		EegDataset dataset = new EegDataset();
-		importJob.setExaminationId(1L);
-		importJob.setDatasets(Collections.singletonList(dataset));
-		dataset.setName("Ceci est un nom bien particulier");
+        FileOutputStream outStream = new FileOutputStream(importZip.getAbsolutePath());
+        ZipOutputStream zipout = new ZipOutputStream(outStream);
+        ImportUtils.zipFile(importDir, importDir.getName(), zipout, true);
+        zipout.close();
+        outStream.close();
+        return new MockMultipartFile("file", "test-import-as-bids.zip", "application/zip", new FileInputStream(importZip.getAbsolutePath()));
+    }
 
-		mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(JacksonUtils.serialize(importJob)));
-		
-		// Just check that the name is well transmitted and that the call is made
-		verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testStartImportEEGJob() throws Exception {
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
-		//verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
-		assertTrue(((String)captor.getValue()).contains(dataset.getName()));
-	}
+        EegImportJob importJob = new EegImportJob();
+        EegDataset dataset = new EegDataset();
+        importJob.setExaminationId(1L);
+        importJob.setDatasets(Collections.singletonList(dataset));
+        dataset.setName("Ceci est un nom bien particulier");
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testGetDicomImageNoPath() throws Exception {
-		
-		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
-				.param("path", ""))
-		.andExpect(status().is(200));
-	}
+        mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JacksonUtils.serialize(importJob)));
+
+        // Just check that the name is well transmitted and that the call is made
+        verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
+
+        //verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
+        assertTrue(((String) captor.getValue()).contains(dataset.getName()));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageNoPath() throws Exception {
+
+        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
+                .param("path", ""))
+                .andExpect(status().is(200));
+    }
 
 }

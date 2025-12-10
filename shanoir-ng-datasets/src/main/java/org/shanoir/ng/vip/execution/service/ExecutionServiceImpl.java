@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.execution.service;
 
 import jakarta.annotation.PostConstruct;
@@ -43,7 +57,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionServiceImpl.class);
 
-    public static final String SHANOIR_URI_SCHEME = "shanoir:/";
+    @Value("${vip.shanoir-vip-host}")
+    private String shanoirURISchemeLocal;
+
+    private static String shanoirURIScheme;
 
     private final String vipExecutionUri = "/executions";
 
@@ -76,18 +93,19 @@ public class ExecutionServiceImpl implements ExecutionService {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
+        shanoirURIScheme = (shanoirURISchemeLocal.contains(".") ? shanoirURISchemeLocal.substring(0, shanoirURISchemeLocal.indexOf('.')).replaceAll("-", "") : "local") + ":/";
     }
 
     public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
         ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidate, inputDatasets);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.VALID);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
 
         VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.SENT);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
-    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
         List<Long> datasetsIds = new ArrayList<>();
         for (DatasetParameterDTO param : parameters) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -145,7 +163,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException {
 
-        if(attempts >= 3){
+        if (attempts >= 3) {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
@@ -231,7 +249,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      * Get location of exec results as URI
      */
     private String getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
-        return SHANOIR_URI_SCHEME + resultLocation
+        return shanoirURIScheme + resultLocation
                 + "?token=" + KeycloakUtil.getToken()
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
@@ -241,9 +259,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Get input values of exec as URI
      */
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
-        return SHANOIR_URI_SCHEME + entityName
+        return shanoirURIScheme + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken

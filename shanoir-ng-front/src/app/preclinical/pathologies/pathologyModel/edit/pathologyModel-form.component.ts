@@ -16,25 +16,23 @@ import { Component } from '@angular/core';
 import {  Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
 import { PathologyService } from '../../pathology/shared/pathology.service';
 import { slideDown } from '../../../../shared/animations/animations';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
-    providers: [PathologyModelService, PathologyService],
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{
 
     pathologies: Pathology[];
@@ -54,7 +52,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         }
 
     get model(): PathologyModel { return this.entity; }
-    set model(model: PathologyModel) { this.entity = model; }
+    set model(model: PathologyModel) { this.entity = model; }
 
     getService(): EntityService<PathologyModel> {
         return this.modelService;
@@ -67,7 +65,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     initEdit(): Promise<void> {
         this.loadData();
         if(this.pathologies){
-            for(let patho of this.pathologies){
+            for(const patho of this.pathologies){
                 if(patho.id == this.model.pathology.id)
                     this.model.pathology = patho;
             }
@@ -88,7 +86,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             'name': [this.model.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'pathology': [this.model.pathology, Validators.required],
             'comment': [this.model.comment],
-            'specifications': [this.model.filename]
+            'filename': [this.model.filename]
         });
     }
 
@@ -105,11 +103,11 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     }
 
     goToAddPathology(){
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-pathology/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-pathology/create']).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 this.pathologies.push(entity as Pathology);
-                (currentStep.entity as PathologyModel).pathology = entity as Pathology;
+                this.entity.pathology = entity as Pathology;
             });
         });
     }

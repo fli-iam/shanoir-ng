@@ -1,21 +1,30 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
@@ -30,8 +39,9 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
 
     @Autowired
     private DICOMWebService dicomWebService;
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAsyncService.class);
 

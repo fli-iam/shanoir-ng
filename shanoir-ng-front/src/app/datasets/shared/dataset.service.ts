@@ -13,20 +13,25 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { IdName } from '../../shared/models/id-name.model';
+
 import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { Observable } from 'rxjs';
+import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
+export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -93,7 +98,7 @@ export class DatasetService extends EntityService<Dataset> {
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
-                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+                .then(dtos => this.datasetDTOService.toEntityList(dtos, [], 'lazy'));
     }
 
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
@@ -105,12 +110,11 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getByIds(ids: Set<number>): Promise<Dataset[]> {
+    getByIds(ids: Set<number>): Promise<DatasetLight[]> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
-        return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
-            .toPromise()
-            .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
+        return this.http.post<DatasetLight[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
+            .toPromise();
     }
 
     countDatasetsByStudyId(studyId: number): Promise<number> {
@@ -130,7 +134,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
-        let params = new HttpParams()
+        const params = new HttpParams()
             .set("studyNameInRegExp", studyNameInRegExp)
             .set("studyNameOutRegExp", studyNameOutRegExp)
             .set("subjectNameInRegExp", subjectNameInRegExp)
@@ -163,8 +167,12 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+    getDownloadData(acquisitionIds: number[], examinationIds: number[]): Promise<{id: number, canDownload: boolean}[]> {
+        const formData = {examinationIds: examinationIds, acquisitionIds: acquisitionIds};
+        return firstValueFrom(this.http.post<{id: number, canDownload: boolean}[]>(
+            AppUtils.BACKEND_API_DATASET_URL + '/getDownloadData',
+            formData
+        ));
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
@@ -173,7 +181,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
-        let result: Dataset[] = [];
+        const result: Dataset[] = [];
         if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }
@@ -186,8 +194,6 @@ export class DatasetService extends EntityService<Dataset> {
         } else {
             dto = new DatasetDTO(entity);
         }
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

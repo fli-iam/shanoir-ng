@@ -20,6 +20,8 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  config:
+    import: "classpath:/shanoir-shared.yml"
   datasource:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: datasets
@@ -28,6 +30,7 @@ spring:
     hikari.maximum-pool-size: 70
     hikari.minimum-idle:  70
   jpa:
+    show-sql: false
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -37,6 +40,8 @@ spring:
         db_structure_naming_strategy: legacy
     properties:
       hibernate:
+        format_sql: false
+        use_sql_comments: true
         connection:
           charset: UTF-8
         hbm2ddl:
@@ -148,6 +153,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
+  shanoir-vip-host: ${SHANOIR_URL_HOST:local}
 
 # Service account
 service-account:

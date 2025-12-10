@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,192 +50,198 @@ import java.util.regex.Pattern;
  * a WADO-URI link or from a WADO-RS link in the path colum of dataset_file.
  * Furthermore the StudyInstanceUIDHandler replaces the StudyInstanceUIDs + retrieveURLs
  * send from the backup PACS in the DICOMWeb Json, to match the examinationId.
- * 
+ *
  * StudyInstanceUIDHandler contains a internal cache, that is cleaned at 6:00h every
  * morning, to accelerate the resolution between examinationUID and StudyInstanceUID;
  * what avoids database look ups for every request.
- * 
+ *
  * @author mkain
  *
  */
 @Component
 public class StudyInstanceUIDHandler {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDHandler.class);
 
-	private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
-	
-	private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
+    private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDHandler.class);
 
-	private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
+    private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
 
-	private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
+    private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
 
-	private static final String VALUE = "Value";
+    private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
 
-	private static final String RETRIEVE_URL_SERIE_LEVEL = "/studies/(.*)/series/";
+    private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
 
-	private static final String RETRIEVE_URL_STUDY_LEVEL = "/studies/(.*)";
+    private static final String VALUE = "Value";
 
-	private static final String STUDIES = "/studies/";
+    private static final String RETRIEVE_URL_SERIE_LEVEL = "/studies/(.*)/series/";
 
-	private static final String SERIES = "/series/";
-	
-	public static final String PREFIX = UIDGeneration.ROOT + ".";
+    private static final String RETRIEVE_URL_STUDY_LEVEL = "/studies/(.*)";
 
-	@Autowired
-	private ExaminationService examinationService;
+    private static final String STUDIES = "/studies/";
 
-	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
-	
-	@PostConstruct
-	public void init() {
-		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
-		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
-	}
+    private static final String SERIES = "/series/";
 
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
-	public void clearExaminationIdToStudyInstanceUIDCache() {
-		examinationUIDToStudyInstanceUIDCache.clear();
-		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
-	}
+    public static final String PREFIX = UIDGeneration.ROOT + ".";
 
-	/**
-	 * This method replaces StudyInstanceUIDs returned from the PACS with IDs
-	 * of examinations in Shanoir, in the Json returned.
-	 * 
-	 * @param root
-	 * @param examinationUID
-	 * @param studyLevel
-	 */
-	public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
-		if (root.isObject()) {
-			// find attribute: StudyInstanceUID
-			JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
-			if (studyInstanceUIDNode != null) {
-				ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
-				for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
-					studyInstanceUIDArray.remove(i);
-					studyInstanceUIDArray.insert(i,  examinationUID);
-				}				
-			}
-			// find attribute: RetrieveURL
-			JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
-			if (retrieveURLNode != null) {
-				ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
-				for (int i = 0; i < retrieveURLArray.size(); i++) {
-					JsonNode arrayElement = retrieveURLArray.get(i);
-					String retrieveURL = arrayElement.asText();
-					if (studyLevel) { // study level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationUID);
-						retrieveURLArray.remove(i);
-						retrieveURLArray.insert(i, retrieveURL);
-					} else { // serie level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationUID + SERIES);
-						retrieveURLArray.remove(i);
-						retrieveURLArray.insert(i, retrieveURL);
-					}
-				}				
-			}
-		} else if (root.isArray()) {
-			ArrayNode arrayNode = (ArrayNode) root;
-			for (int i = 0; i < arrayNode.size(); i++) {
-				JsonNode arrayElement = arrayNode.get(i);
-				replaceStudyInstanceUIDsWithExaminationUIDs(arrayElement, examinationUID, studyLevel);
-			}
-		}
-	}
+    @Autowired
+    private ExaminationService examinationService;
 
-	/**
-	 * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
-	 * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
-	 * request response time or from the database, in table dataset_file.
-	 * 
-	 * @param examinationUID
-	 * @return
-	 */
-	public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
-		String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
-		if (studyInstanceUID == null) {
-			Long examinationId = extractExaminationId(examinationUID);
-			Examination examination = examinationService.findById(examinationId);
-			if (examination != null) {
-				studyInstanceUID = findStudyInstanceUID(examination);
-				if (studyInstanceUID != null) {
-					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
-					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
-					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
-				}
-			}
-		}
-		return studyInstanceUID;
-	}
-	
-	/**
-	 * This method walks down the information model in Shanoir to read the StudyInstanceUID
-	 * from the table dataset_file.path, that contains the WADO link.
-	 * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
-	 * 
-	 * @param examination
-	 * @return
-	 */
-	public String findStudyInstanceUID(Examination examination) {
-		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-		for (DatasetAcquisition acquisition : acquisitions) {
-			if (acquisition instanceof MrDatasetAcquisition
-					|| acquisition instanceof CtDatasetAcquisition
-					|| acquisition instanceof PetDatasetAcquisition
-					|| acquisition instanceof XaDatasetAcquisition
-					|| acquisition instanceof GenericDatasetAcquisition) {
-				List<Dataset> datasets = acquisition.getDatasets();
-				if (!datasets.isEmpty()) {
-					Dataset dataset = datasets.get(0);
-					List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-					if (!expressions.isEmpty()) {
-						for (DatasetExpression expression : expressions) {
-							// only DICOM is of interest here
-							if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-								List<DatasetFile> files = expression.getDatasetFiles();
-								if (!files.isEmpty()) {
-									DatasetFile file = files.get(0);
-									if (file.isPacs()) {
-										String path = file.getPath();
-										return findStudyInstanceUID(path);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+    private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 
-	/**
-	 * This method extracts the StudyInstanceUID from a WADO string.
-	 * It tries first WADO-URI, and then WADO-RS, in case of nothing
-	 * could be found for WADO-URI.
-	 * 
-	 * @param path
-	 */
-	private String findStudyInstanceUID(String path) {
-		Pattern p = Pattern.compile(WADO_URI_STUDY_UID_SERIES_UID);
-		Matcher m = p.matcher(path);
-		while (m.find()) {
-			return m.group(1);
-		}
-		p = Pattern.compile(WADO_RS_STUDY_UID_SERIES_UID);
-		m = p.matcher(path);
-		while (m.find()) {
-			return m.group(1);
-		}
-		return null;
-	}
+    @PostConstruct
+    public void init() {
+        examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
+        LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
+    }
 
-	public Long extractExaminationId(String examinationUID) {
-		String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
-		Long id = Long.parseLong(examinationUIDWithoutPrefix);
-		return id;
-	}
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
+    public void clearExaminationIdToStudyInstanceUIDCache() {
+        examinationUIDToStudyInstanceUIDCache.clear();
+        LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
+    }
+
+    /**
+     * This method replaces StudyInstanceUIDs returned from the PACS with IDs
+     * of examinations in Shanoir, in the Json returned.
+     *
+     * @param root
+     * @param examinationUID
+     * @param studyLevel
+     */
+    public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
+        if (root.isObject()) {
+            // find attribute: StudyInstanceUID
+            JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
+            if (studyInstanceUIDNode != null) {
+                ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
+                for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
+                    studyInstanceUIDArray.remove(i);
+                    studyInstanceUIDArray.insert(i,  examinationUID);
+                }
+            }
+            // find attribute: RetrieveURL
+            JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
+            if (retrieveURLNode != null) {
+                ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
+                for (int i = 0; i < retrieveURLArray.size(); i++) {
+                    JsonNode arrayElement = retrieveURLArray.get(i);
+                    String retrieveURL = arrayElement.asText();
+                    if (studyLevel) { // study level
+                        retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationUID);
+                        retrieveURLArray.remove(i);
+                        retrieveURLArray.insert(i, retrieveURL);
+                    } else { // serie level
+                        retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationUID + SERIES);
+                        retrieveURLArray.remove(i);
+                        retrieveURLArray.insert(i, retrieveURL);
+                    }
+                }
+            }
+        } else if (root.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) root;
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode arrayElement = arrayNode.get(i);
+                replaceStudyInstanceUIDsWithExaminationUIDs(arrayElement, examinationUID, studyLevel);
+            }
+        }
+    }
+
+    /**
+     * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
+     * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
+     * request response time or from the database, in table dataset_file.
+     *
+     * @param examinationUID
+     * @return
+     */
+    public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
+        String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
+        if (studyInstanceUID == null) {
+            Long examinationId = extractExaminationId(examinationUID);
+            Examination examination = examinationService.findById(examinationId);
+            if (examination != null) {
+                studyInstanceUID = findStudyInstanceUID(examination);
+                if (studyInstanceUID != null) {
+                    String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
+                    }
+                }
+            }
+        }
+        return studyInstanceUID;
+    }
+
+    /**
+     * This method walks down the information model in Shanoir to read the StudyInstanceUID
+     * from the table dataset_file.path, that contains the WADO link.
+     * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
+     *
+     * @param examination
+     * @return
+     */
+    public String findStudyInstanceUID(Examination examination) {
+        String studyInstanceUIDDb = examination.getStudyInstanceUID();
+        if (studyInstanceUIDDb != null && !studyInstanceUIDDb.isEmpty())
+            return studyInstanceUIDDb;
+        List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+        for (DatasetAcquisition acquisition : acquisitions) {
+            if (acquisition instanceof MrDatasetAcquisition
+                    || acquisition instanceof CtDatasetAcquisition
+                    || acquisition instanceof PetDatasetAcquisition
+                    || acquisition instanceof XaDatasetAcquisition
+                    || acquisition instanceof GenericDatasetAcquisition) {
+                List<Dataset> datasets = acquisition.getDatasets();
+                if (!datasets.isEmpty()) {
+                    Dataset dataset = datasets.get(0);
+                    List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+                    if (!expressions.isEmpty()) {
+                        for (DatasetExpression expression : expressions) {
+                            // only DICOM is of interest here
+                            if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+                                List<DatasetFile> files = expression.getDatasetFiles();
+                                if (!files.isEmpty()) {
+                                    DatasetFile file = files.get(0);
+                                    if (file.isPacs()) {
+                                        String path = file.getPath();
+                                        return findStudyInstanceUID(path);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public Long extractExaminationId(String examinationUID) {
+        String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
+        Long id = Long.parseLong(examinationUIDWithoutPrefix);
+        return id;
+    }
+
+    /**
+     * This method extracts the StudyInstanceUID from a WADO string.
+     * It tries first WADO-URI, and then WADO-RS, in case of nothing
+     * could be found for WADO-URI.
+     *
+     * @param path
+     */
+    private String findStudyInstanceUID(String path) {
+        Pattern p = Pattern.compile(WADO_URI_STUDY_UID_SERIES_UID);
+        Matcher m = p.matcher(path);
+        while (m.find()) {
+            return m.group(1);
+        }
+        p = Pattern.compile(WADO_RS_STUDY_UID_SERIES_UID);
+        m = p.matcher(path);
+        while (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+
 }

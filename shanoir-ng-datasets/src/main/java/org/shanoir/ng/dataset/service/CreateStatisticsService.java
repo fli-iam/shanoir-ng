@@ -1,24 +1,25 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.ParameterMode;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.StoredProcedureQuery;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.utils.DatasetFileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.*;
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,10 +27,27 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.utils.DatasetFileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
+
 @Service
 public class CreateStatisticsService {
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
+
     @PersistenceContext
     private EntityManager entityManager;
     private static final String ZIP = ".zip";
@@ -38,7 +56,7 @@ public class CreateStatisticsService {
 
     private File recreateFile(final String fileName) throws IOException {
         File file = new File(fileName);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
         }
         file.createNewFile();
@@ -67,7 +85,7 @@ public class CreateStatisticsService {
 
             // Get the data
             try (FileOutputStream fos = new FileOutputStream(zipFile);
-                 ZipOutputStream zos = new ZipOutputStream(fos)) {
+                    ZipOutputStream zos = new ZipOutputStream(fos)) {
 
                 ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
                 zos.putNextEntry(zipEntry);
@@ -173,19 +191,14 @@ public class CreateStatisticsService {
      * @throws IOException
      */
     private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-
         byte[] buffer = new byte[1024];
-
-
         try (FileOutputStream fos = new FileOutputStream(zipFile);
-             ZipOutputStream zos = new ZipOutputStream(fos);
-             FileInputStream fis = new FileInputStream(sourceFile);
+                ZipOutputStream zos = new ZipOutputStream(fos);
+                FileInputStream fis = new FileInputStream(sourceFile);
         ) {
             // begin writing a new ZIP entry, positions the stream to the start of the entry data
             zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-
             int length;
-
             while ((length = fis.read(buffer)) > 0) {
                 zos.write(buffer, 0, length);
             }

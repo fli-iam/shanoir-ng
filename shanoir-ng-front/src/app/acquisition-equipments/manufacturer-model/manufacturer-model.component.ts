@@ -13,20 +13,19 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { Enum } from '../../shared/utils/enum';
+import { Option } from '../../shared/select/select.component';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Option } from '../../shared/select/select.component';
-import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -60,7 +59,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     initEdit(): Promise<void> {
-        this.manufModel.manufacturer = this.getManufById(this.manufModel.manufacturer.id);
+        this.getManufs();
         return Promise.resolve();
     }
 
@@ -95,13 +94,6 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR;
     }
 
-    private getManufacturerModel(): Promise<void> {
-        return this.manufModelService.get(this.id)
-            .then(manufModel => {
-                this.manufModel = manufModel;
-            });
-    }
-
     private getManufs(): Promise<void> {
         return this.manufService.getAll()
             .then(manufs => {
@@ -109,28 +101,12 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             });
     }
 
-    private getManufById(id: number): Manufacturer {
-        for (let manuf of this.manufs) {
-            if (id == manuf.id) {
-                return manuf;
-            }
-        }
-        return null;
-    }
-
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
     openNewManuf() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer/create']).then(success => {
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
-                })
-            );
-        });
+        this.navigateToAttributeCreateStep('/manufacturer/create', 'manufacturer');
     }
 
     getUnit(key: string) {

@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader;
 
 import java.io.File;
@@ -9,124 +23,154 @@ import org.shanoir.uploader.utils.Encryption;
 
 /**
  * This class contains all static data needed by ShanoirUploader upon startup.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ShUpConfig {
-	
-	/**
-	 * Constants
-	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
-	
-	public static final String RELEASE_DATE = "2025-03-19";
-	
-	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-	
-	public static final String PROFILES_PROPERTIES = "profiles.properties";
-	
-	public static final String PROFILES_PROPERTY = "profiles";
-	
-	public static final String PROFILE_DIR = "profile.";
-	
-	public static final String PROFILE_PROPERTIES = "profile.properties";
 
-	public static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
-	
-	public static final String MODE_PSEUDONYMUS_KEY_FILE = "key";
-	
-	public static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
-	
-	public static final String MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT = "auto-increment";
-	
-	public static final String MODE_SUBJECT_COMMON_NAME_MANUAL = "manual";
-	
-	public static final String MODE_SUBJECT_STUDY_IDENTIFIER = "mode.subject.study.identifier";
-	
-	public static final String BASIC_PROPERTIES = "basic.properties";
-	
-	public static final String LANGUAGE_PROPERTIES = "language.properties";
+    /**
+     * Constants
+     */
+    public static final String SHANOIR_UPLOADER_VERSION;
 
-	public static final String PROXY_PROPERTIES = "proxy.properties";
-	
-	public static final String ENDPOINT_PROPERTIES = "endpoint.properties";
+    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
 
-	public static final String DICOM_SERVER_PROPERTIES = "dicom_server.properties";
-	
-	public static final String KEYCLOAK_JSON = "keycloak.json";
-	
-	public static final String SU = ".su";
-	
-	public static final String USER_HOME = "user.home";
+    public static final String PROFILES_PROPERTIES = "profiles.properties";
 
-	public static final String FRENCH_LANGUAGE = "FRENCH";
-	
-	public static final String WORK_FOLDER = "workFolder";
-	
-	public static final String UPLOAD_SERVICE_JOB = "uploadServiceJob";
-	
-	public static final int UPLOAD_SERVICE_INTERVAL = 5;
+    public static final String PROFILES_PROPERTY = "profiles";
 
-	public static final String RANDOM_SEED = "random.seed";
-	
-	public static final String PROFILE = "profile";
-	
-	public static final String USERNAME = "username";
+    public static final String PROFILE_DIR = "profile.";
 
-	public static final String PASSWORD = "password";
+    public static final String PROFILE_PROPERTIES = "profile.properties";
 
-	/**
-	 * Static variables
-	 */
-	public static Properties basicProperties = new Properties();
-	
-	public static Properties languageProperties = new Properties();
+    public static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
 
-	public static Properties proxyProperties = new Properties();
+    public static final String MODE_PSEUDONYMUS_KEY = "PSEUDONYMUS";
 
-	public static Properties dicomServerProperties = new Properties();
+    public static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
 
-	public static Properties profilesProperties = new Properties();
-	
-	public static String[] profiles;
-	
-	public static String profileSelected;
-	
-	public static String username;
-	
-	public static String password;
-	
-	public static File profileDirectory;
-	
-	public static Properties profileProperties = new Properties();
-	
-	public static Properties endpointProperties = new Properties();
-	
-	public static File keycloakJson;
-	
-	public static ResourceBundle resourceBundle;
+    public static final String MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT = "auto-increment";
 
-	public static File shanoirUploaderFolder;
+    public static final String MODE_SUBJECT_COMMON_NAME_MANUAL = "manual";
 
-	public static Integer studyCardComplianceLevel;
-	
-	public static Encryption encryption;
-	
-	public static boolean isModePseudonymus() {
-		return Boolean.parseBoolean(profileProperties.getProperty(MODE_PSEUDONYMUS));
-	}
-	
-	public static boolean isModeSubjectCommonNameAutoIncrement() {
-		return MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
-	}
+    public static final String MODE_SUBJECT_STUDY_IDENTIFIER = "mode.subject.study.identifier";
 
-	public static boolean isModeSubjectCommonNameManual() {
-		return MODE_SUBJECT_COMMON_NAME_MANUAL.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
-	}
+    public static final String BASIC_PROPERTIES = "basic.properties";
 
-	public static boolean isModeSubjectStudyIdentifier() {
-		return Boolean.parseBoolean(profileProperties.getProperty(MODE_SUBJECT_STUDY_IDENTIFIER));
-	}
+    public static final String LANGUAGE_PROPERTIES = "language.properties";
+
+    public static final String PROXY_PROPERTIES = "proxy.properties";
+
+    public static final String ENDPOINT_PROPERTIES = "endpoint.properties";
+
+    public static final String DICOM_SERVER_PROPERTIES = "dicom_server.properties";
+
+    public static final String KEYCLOAK_JSON = "keycloak.json";
+
+    public static final String SU = ".su";
+
+    public static final String DEV = "dev";
+
+    public static final String USER_HOME = "user.home";
+
+    public static final String FRENCH_LANGUAGE = "FRENCH";
+
+    public static final String WORK_FOLDER = "workFolder";
+
+    public static final String UPLOAD_SERVICE_JOB = "uploadServiceJob";
+
+    public static final int UPLOAD_SERVICE_INTERVAL = 5;
+
+    public static final String RANDOM_SEED = "random.seed";
+
+    public static final String RELEASE_DATE = "release.date";
+
+    public static final String PROFILE = "profile";
+
+    public static final String USERNAME = "username";
+
+    public static final String PASSWORD = "password";
+
+    public static final String CHECK_ON_SERVER = "check.on.server";
+
+    public static final String DICOMDIR = "DICOMDIR";
+
+    public static final String IMPORT_JOB_JSON = "import-job.json";
+
+    public static final String UPLOAD_JOB_XML = "upload-job.xml";
+
+    public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
+
+    public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
+
+    /**
+     * Static variables
+     */
+    public static Properties basicProperties = new Properties();
+
+    public static Properties languageProperties = new Properties();
+
+    public static Properties proxyProperties = new Properties();
+
+    public static Properties dicomServerProperties = new Properties();
+
+    public static Properties profilesProperties = new Properties();
+
+    public static String[] profiles;
+
+    public static String profileSelected;
+
+    public static String username;
+
+    public static String password;
+
+    public static File profileDirectory;
+
+    public static Properties profileProperties = new Properties();
+
+    public static Properties endpointProperties = new Properties();
+
+    public static File keycloakJson;
+
+    public static ResourceBundle resourceBundle;
+
+    public static File shanoirUploaderFolder;
+
+    public static Integer studyCardComplianceLevel;
+
+    public static Encryption encryption;
+
+    public static boolean isModePseudonymus() {
+        return Boolean.parseBoolean(profileProperties.getProperty(MODE_PSEUDONYMUS));
+    }
+
+    public static boolean isModeSubjectNameAutoIncrement() {
+        return MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
+    }
+
+    public static boolean isModeSubjectNameManual() {
+        return MODE_SUBJECT_COMMON_NAME_MANUAL.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
+    }
+
+    public static boolean isModeSubjectStudyIdentifier() {
+        return Boolean.parseBoolean(profileProperties.getProperty(MODE_SUBJECT_STUDY_IDENTIFIER));
+    }
+
+    /**
+     * Static initialization block to set the ShanoirUploader version.
+     * Used to manage the version only in pom.xml.
+     */
+    static {
+        String version = DEV;
+        Package pkg = ShUpConfig.class.getPackage();
+        if (pkg != null) {
+            String currentVersion = pkg.getImplementationVersion();
+            if (currentVersion != null) {
+                version = "v" + currentVersion;
+            }
+        }
+        SHANOIR_UPLOADER_VERSION = version;
+    }
 
 }

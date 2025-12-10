@@ -12,19 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AnimalSubject } from './animalSubject.model';
-import { Subject }    from '../../../subjects/shared/subject.model';
-import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
-import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
+import { Field } from "../../../shared/reflect/field.decorator";
 import { Entity } from "../../../shared/components/entity/entity.abstract";
-import {SubjectDTO} from "../../../subjects/shared/subject.dto";
+import { SubjectDTO } from "../../../subjects/shared/subject.dto";
+import { Subject } from '../../../subjects/shared/subject.model';
+import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
+import { SubjectTherapy } from "../../therapies/subjectTherapy/shared/subjectTherapy.model";
+
+import { AnimalSubject } from './animalSubject.model';
+
 
 export class PreclinicalSubject extends Entity {
-  id: number;
-  animalSubject: AnimalSubject;
-  subject: Subject;
-  pathologies: SubjectPathology[];
-  therapies: SubjectTherapy[];
+    @Field() id: number;
+    @Field() animalSubject: AnimalSubject;
+    @Field() subject: Subject;
+    @Field() pathologies: SubjectPathology[];
+    @Field() therapies: SubjectTherapy[];
 }
 
 export class PreclinicalSubjectDTO {
@@ -36,7 +39,7 @@ export class PreclinicalSubjectDTO {
 	therapies: SubjectTherapy[];
 
     constructor(entity: PreclinicalSubject) {
-        this.id = entity.id;
+        this.id = entity.id ? entity.id : null;
 		this.animalSubject = entity.animalSubject;
         this.subject = new SubjectDTO(entity.subject);
 		this.pathologies = entity.pathologies;

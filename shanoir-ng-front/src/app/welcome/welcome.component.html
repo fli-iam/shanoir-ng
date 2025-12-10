@@ -1,16 +1,30 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="welcome-component">
 	<div class="header">
-		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()"/>
+		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub"/>
 		<div class="buttons">
 			<button class="left-icon alt" type="button" (click)="login()"><i class="fa-solid fa-right-to-bracket"></i>Sign in</button>
 			<button class="left-icon" type="button" (click)="toShanoir()"><i class="fa-solid fa-circle-info"></i>More info</button>
-			<a href="mailto:developers_shanoir-request@inria.fr">
+			<a href="mailto:developers_shanoir@inria.fr">
 				<button class="left-icon" type="button"><i class="fa-solid fa-paper-plane"></i>Contact</button>
 			</a>
 		</div>
 	</div>
 	<div class="shanoir">
-		<img class="shanoir-logo" [src]="shanoirLogoUrl"/>
+		<img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
 		<div class="shanoir-text">
 			SHAring iN vivO Imaging Resources
 		</div>

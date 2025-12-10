@@ -1,7 +1,25 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
@@ -20,7 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ImporterMailService {
@@ -74,7 +93,7 @@ public class ImporterMailService {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
         generatedMail.setStudyId(importJob.getStudyId().toString());
-        generatedMail.setStudyCardId(importJob.getStudyCardId().toString());
+        generatedMail.setStudyCardId(importJob.getStudyCardId() != null ? importJob.getStudyCardId().toString() : "");
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);

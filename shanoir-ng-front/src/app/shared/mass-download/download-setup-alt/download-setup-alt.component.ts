@@ -12,14 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { Subscription } from 'rxjs';
+
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds } from '../mass-download.service';
+
 
 @Component({
     selector: 'download-setup-alt',
@@ -28,18 +32,19 @@ import { DownloadInputIds } from '../mass-download.service';
     standalone: false
 })
 
-export class DownloadSetupAltComponent implements OnInit {
+export class DownloadSetupAltComponent implements OnInit, OnDestroy {
 
-    @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[]}> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
     loading: boolean;
     format: Format;
     converter: number;
-    datasets: Dataset[];
+    datasets: Dataset[] | DatasetLight[];
     hasDicom: boolean = false;
+    private subscriptions: Subscription[] = [];
 
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null),
@@ -59,15 +64,21 @@ export class DownloadSetupAltComponent implements OnInit {
     constructor(private formBuilder: UntypedFormBuilder,
                 globalService: GlobalService,
                 private datasetService: DatasetService) {
-        globalService.onNavigate.subscribe(() => {
-            this.cancel();
-        });
+        this.subscriptions.push(
+            globalService.onNavigate.subscribe(() => {
+                this.cancel();
+            })
+        );
         this.form = this.buildForm();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 
     ngOnInit(): void {
         if (this.inputIds) {
-            let fetchDatasets: Promise<Dataset[]>;
+            let fetchDatasets: Promise<Dataset[] | DatasetLight[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
                     fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
@@ -77,9 +88,9 @@ export class DownloadSetupAltComponent implements OnInit {
             } else if (this.inputIds.examinationId) {
                 fetchDatasets = this.datasetService.getByExaminationId(this.inputIds.examinationId);
             } else if (this.inputIds.acquisitionId) {
-                fetchDatasets =this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
+                fetchDatasets = this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
             } else if (this.inputIds.datasetIds) {
-                fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+                fetchDatasets = this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
             }
             if (fetchDatasets) {
                 this.loading = true;
@@ -96,7 +107,7 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'converter': [{value: this.converter}],
         });
@@ -112,7 +123,7 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])
@@ -123,9 +134,9 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     // This method checks if the list of given datasets has dicom or not.
-    private hasDicomInDatasets(datasets: Dataset[]) {
-        for (let dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.datasetProcessing == null) {
+    private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
+        for (const dataset of datasets) {
+            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
                 return true;
             }
         }

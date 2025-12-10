@@ -2,111 +2,109 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.processing.dto;
 
-import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 
 
 /**
  * DTO for dataset.
- * 
+ *
  * @author msimon
  *
  */
 public class DatasetProcessingDTO {
 
-	private Long id;
+    private Long id;
 
-	private String comment;
+    private String comment;
 
-	private DatasetProcessingType datasetProcessingType;
+    private DatasetProcessingType datasetProcessingType;
 
-	private List<DatasetWithProcessingsDTO> outputDatasets;
+    private List<Long> outputDatasets;
 
-	private List<DatasetDTO> inputDatasets;
+    private List<Long> inputDatasets;
 
-	private LocalDate processingDate;
-	
-	private Long studyId;
+    private LocalDate processingDate;
 
-	private Long parentId;
+    private Long studyId;
 
-	public Long getId() {
-		return id;
-	}
+    private Long parentId;
 
-	public void setId(final Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    public void setId(final Long id) {
+        this.id = id;
+    }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public DatasetProcessingType getDatasetProcessingType() {
-		return datasetProcessingType;
-	}
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
-		this.datasetProcessingType = datasetProcessingType;
-	}
-	
-	public List<DatasetDTO> getInputDatasets() {
-		return inputDatasets;
-	}
+    public DatasetProcessingType getDatasetProcessingType() {
+        return datasetProcessingType;
+    }
 
-	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
-		this.inputDatasets = inputDatasets;
-	}
+    public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
+        this.datasetProcessingType = datasetProcessingType;
+    }
 
-	public List<DatasetWithProcessingsDTO> getOutputDatasets() {
-		return outputDatasets;
-	}
+    public List<Long> getInputDatasets() {
+        return inputDatasets;
+    }
 
-	public void setOutputDatasets(List<DatasetWithProcessingsDTO> outputDatasets) {
-		this.outputDatasets = outputDatasets;
-	}
+    public void setInputDatasets(List<Long> inputDatasets) {
+        this.inputDatasets = inputDatasets;
+    }
 
-	public LocalDate getProcessingDate() {
-		return processingDate;
-	}
+    public List<Long> getOutputDatasets() {
+        return outputDatasets;
+    }
 
-	public void setProcessingDate(LocalDate processingDate) {
-		this.processingDate = processingDate;
-	}
+    public void setOutputDatasets(List<Long> outputDatasets) {
+        this.outputDatasets = outputDatasets;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public LocalDate getProcessingDate() {
+        return processingDate;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setProcessingDate(LocalDate processingDate) {
+        this.processingDate = processingDate;
+    }
 
-	public Long getParentId() {
-		return parentId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 }

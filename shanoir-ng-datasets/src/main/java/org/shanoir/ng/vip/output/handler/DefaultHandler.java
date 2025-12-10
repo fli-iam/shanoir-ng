@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
@@ -11,6 +25,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.model.Study;
@@ -24,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -37,7 +53,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@Order(1)
 public class DefaultHandler extends OutputHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
+
     @Value("${vip.result-file-name}")
     private String resultFileName;
 
@@ -59,8 +79,8 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
-
+    @Autowired
+    private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {
@@ -69,13 +89,10 @@ public class DefaultHandler extends OutputHandler {
 
     @Override
     public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring monitoring) throws ResultHandlerException {
-
         try {
-
             List<File> outputFiles = new ArrayList<>();
             File resultJson = null;
-
-            for(File file : resultFiles){
+            for (File file : resultFiles) {
                 if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
                 } else {
@@ -85,18 +102,15 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
+            List<Dataset> inputDatasets = new ArrayList<>(monitoring.getInputDatasets());
 
-            if(inputDatasets.isEmpty()) {
+            if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
-
-            if(outputFiles.isEmpty()){
+            if (outputFiles.isEmpty()) {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
-
             DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
-
             executionTrackingService.completeTracking(monitoring, newProcessing);
         } catch (Exception e) {
             importerService.createFailedJob(parent.getPath());
@@ -104,12 +118,9 @@ public class DefaultHandler extends OutputHandler {
         }
     }
 
-
     private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
         List<String> candidates = new ArrayList<>();
-
         candidates.add(tarName);
-
         if (resultJson == null) {
             LOG.info("No result JSON found in archive.");
         } else if (resultJson.length() == 0) {
@@ -144,7 +155,6 @@ public class DefaultHandler extends OutputHandler {
             }
         }
         List<Dataset> datasets = new ArrayList<>();
-
         for (String name : candidates) {
             datasets.addAll(getDatasetFromFilename(name));
         }
@@ -154,7 +164,7 @@ public class DefaultHandler extends OutputHandler {
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
      */
-    private List<Dataset> getDatasetFromFilename(String name){
+    private List<Dataset> getDatasetFromFilename(String name) {
         Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
         if (matcher.matches()) {
             return processingResourceRepository.findDatasetsByResourceId(matcher.group(1));
@@ -183,7 +193,7 @@ public class DefaultHandler extends OutputHandler {
             }
             processedDataset.setProcessedDatasetName(datasetName);
 
-            if(!inputDatasets.isEmpty()) {
+            if (!inputDatasets.isEmpty()) {
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
@@ -201,8 +211,9 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.Generic.name());
-            importerService.createProcessedDataset(processedDataset);
+            processedDataset.setDatasetType(DatasetType.GENERIC.name());
+            processedDatasetImporterService.createProcessedDataset(processedDataset);
+
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
         }
         datasetProcessingService.update(processing);
@@ -222,4 +233,5 @@ public class DefaultHandler extends OutputHandler {
         processing = datasetProcessingService.create(processing);
         return processing;
     }
+
 }

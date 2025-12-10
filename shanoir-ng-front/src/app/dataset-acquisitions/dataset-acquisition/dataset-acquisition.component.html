@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
 				(edit)="goToEdit()"
                 (delete) = "delete()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()"
 			>
 				<button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.type}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="type" [(ngModel)]="datasetAcquisition.type" [optionArr]="['Mr', 'Pet', 'Ct']">
+								<select-box formControlName="type" [optionArr]="['Mr', 'Pet', 'Ct']">
 								</select-box>
 							</ng-template>
 						</span>
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate | localDateFormatPipe}}
                                 </a>
                             </ng-template>
                         </span>
@@ -85,7 +85,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study-card" [(ngModel)]="datasetAcquisition.studyCard" [optionArr]="studyCards">
+								<select-box formControlName="studyCard" [optionArr]="studyCards">
 								</select-box>
 							</ng-template>
 						</span>
@@ -111,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
+								<select-box formControlName="acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
 								</select-box>
 							</ng-template>
 						</span>
@@ -123,7 +123,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.rank}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="rank" [(ngModel)]="datasetAcquisition.rank" />
+								<input type="text" formControlName="rank" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Acquisition start time</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.acquisitionStartTime | localDateFormatPipe : true}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" formControlName="acquisitionStartTime" />
 							</ng-template>
 						</span>
 					</li>
@@ -134,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.softwareRelease}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="software-release" [(ngModel)]="datasetAcquisition.softwareRelease" />
+								<input type="text" formControlName="softwareRelease" />
 							</ng-template>
 						</span>
 					</li>
@@ -145,7 +156,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.sortingIndex}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" formControlName="sorting-index" [(ngModel)]="datasetAcquisition.sortingIndex" />
+								<input type="text" formControlName="sortingIndex" />
 							</ng-template>
 						</span>
 					</li>
@@ -167,8 +178,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 
 			<ng-container *ngIf="datasetAcquisition.protocol">
-				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></mr-protocol>
-				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
+				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" formControlName="protocol"></mr-protocol>
+				<ct-protocol *ngIf="datasetAcquisition.type == 'Ct'" formControlName="protocol"></ct-protocol>
+				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" formControlName="protocol"></pet-protocol>
+				<xa-protocol *ngIf="datasetAcquisition.type == 'Xa'" formControlName="protocol"></xa-protocol>
 			</ng-container>
 
 			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>

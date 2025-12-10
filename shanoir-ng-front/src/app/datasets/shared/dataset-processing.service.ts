@@ -12,12 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+
 import { DatasetProcessing } from './dataset-processing.model';
-import { HttpClient } from '@angular/common/http';
-import { DatasetProcessingDTO, DatasetProcessingDTOService } from './dataset-processing.dto';
+import { DatasetProcessingDTOService, DatasetProcessingInDTO, DatasetProcessingOutDTO } from './dataset-processing.dto';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 
@@ -34,9 +35,14 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     }
 
 	findAllByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<DatasetProcessing[]> {
-		return this.http.get<DatasetProcessingDTO[]>(this.API_URL + '/study/' + studyId + '/subject/' + subjectId)
+		return this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/study/' + studyId + '/subject/' + subjectId)
             .toPromise().then(dtos => this.mapEntityList(dtos));
 	}
+
+    findByInputDatasetId(datasetId: number): Promise<DatasetProcessing[]> {
+        return this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/inputDataset/' + datasetId)
+            .toPromise().then(dtos => this.mapEntityList(dtos));
+    }
 
     getInputDatasets(datasetProcessingId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(this.API_URL + '/' + datasetProcessingId + '/inputDatasets/')
@@ -56,19 +62,17 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
 
     getEntityInstance() { return new DatasetProcessing(); }
 
-    protected mapEntity = (dto: DatasetProcessingDTO, quickResult?: DatasetProcessing): Promise<DatasetProcessing> => {
+    protected mapEntity = (dto: DatasetProcessingInDTO, quickResult?: DatasetProcessing): Promise<DatasetProcessing> => {
         return this.datasetProcessingDTOService.toEntity(dto, quickResult);
     }
 
-    protected mapEntityList = (dtos: DatasetProcessingDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]> => {
+    protected mapEntityList = (dtos: DatasetProcessingInDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]> => {
         if (result == undefined) result = [];
         return this.datasetProcessingDTOService.toEntityList(dtos, result);
     }
     
     public stringify(entity: DatasetProcessing) {
-        let dto = new DatasetProcessingDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new DatasetProcessingOutDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

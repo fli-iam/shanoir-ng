@@ -13,9 +13,7 @@
  */
 import { Component } from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
@@ -58,8 +56,8 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     }
 
     importData(timestamp: number): Promise<any> {
-        let context = this.importDataService.contextData;
-        let importJob = new ProcessedDatasetImportJob();
+        const context = this.importDataService.contextData;
+        const importJob = new ProcessedDatasetImportJob();
         importJob.subjectId = context.subject.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
@@ -82,12 +80,12 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     }
 
     public openCreateDatasetProcessing() {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        let createDatasetProcessingRoute: string = '/dataset-processing/create';
-        this.router.navigate([createDatasetProcessingRoute]).then(success => {
-	        this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
-            this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
-            this.subscribtions.push(
+        const importStep: Step = this.breadcrumbsService.currentStep;
+        const createDatasetProcessingRoute: string = '/dataset-processing/create';
+        this.breadcrumbsService.addNextStepPrefilled('study', this.study, true);
+        this.breadcrumbsService.addNextStepPrefilled('subject', this.subject, true);
+        this.router.navigate([createDatasetProcessingRoute]).then(() => {
+            this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
                     this.onContextChange();
@@ -100,12 +98,12 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     protected reloadSavedData(): Promise<void> {
         if (this.importDataService.contextBackup(this.stepTs)) {
             this.reloading = true;
-            let processedDatasetFilePath = this.importDataService.contextBackup(this.stepTs).processedDatasetFilePath;
-            let datasetType = this.importDataService.contextBackup(this.stepTs).datasetType;
-            let processedDatasetType = this.importDataService.contextBackup(this.stepTs).processedDatasetType;
-            let processedDatasetName = this.importDataService.contextBackup(this.stepTs).processedDatasetName;
-            let processedDatasetComment = this.importDataService.contextBackup(this.stepTs).processedDatasetComment;
-            let datasetProcessing = this.importDataService.contextBackup(this.stepTs).datasetProcessing;
+            const processedDatasetFilePath = this.importDataService.contextBackup(this.stepTs).processedDatasetFilePath;
+            const datasetType = this.importDataService.contextBackup(this.stepTs).datasetType;
+            const processedDatasetType = this.importDataService.contextBackup(this.stepTs).processedDatasetType;
+            const processedDatasetName = this.importDataService.contextBackup(this.stepTs).processedDatasetName;
+            const processedDatasetComment = this.importDataService.contextBackup(this.stepTs).processedDatasetComment;
+            const datasetProcessing = this.importDataService.contextBackup(this.stepTs).datasetProcessing;
             if (processedDatasetFilePath) {
                 this.processedDatasetFilePath = processedDatasetFilePath;
             }
@@ -121,8 +119,8 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             if (processedDatasetComment) {
                 this.processedDatasetComment = processedDatasetComment;
             }
-            let study = this.importDataService.contextBackup(this.stepTs).study;
-            let subject = this.importDataService.contextBackup(this.stepTs).subject;
+            const study = this.importDataService.contextBackup(this.stepTs).study;
+            const subject = this.importDataService.contextBackup(this.stepTs).subject;
 
             this.study = study;
             return this.onSelectStudy().then(() => {
@@ -148,7 +146,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     }
 
     get valid(): boolean {
-        let context = this.getContext();
+        const context = this.getContext();
         return (
             context.study != null
             && context.subject != null

@@ -1,18 +1,27 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.processing.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.solr.common.util.Pair;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -25,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -35,13 +43,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Service
-public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl{
-
+public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl {
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
 
-    @Autowired
-    private WADODownloaderService downloader;
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
     @Autowired
@@ -58,9 +63,19 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
 
-            String ids = String.join(",", Stream.concat(processingList.stream().map(DatasetProcessing::getInputDatasets), processingList.stream().map(DatasetProcessing::getOutputDatasets)).map(dataset -> ((Dataset) dataset).getId().toString()).collect(Collectors.toList()));
-            ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, ids,
-                    KeycloakUtil.getTokenUserId(), ids + "." + format, ShanoirEvent.IN_PROGRESS);
+            String ids = Stream.concat(
+                            processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
+                            processingList.stream().flatMap(p -> p.getOutputDatasets().stream())
+                    )
+                    .map(dataset -> dataset.getId().toString())
+                    .collect(Collectors.joining(","));
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DOWNLOAD_DATASET_EVENT,
+                    ids,
+                    KeycloakUtil.getTokenUserId(),
+                    ids + "." + format,
+                    ShanoirEvent.IN_PROGRESS
+            );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         } catch (Exception e) {
@@ -76,16 +91,18 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
-            for (Dataset dataset : processing.getInputDatasets()) {
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
-            }
-            for (Dataset dataset : processing.getOutputDatasets()) {
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId);
-            }
+            List<Dataset> inputs = processing.getInputDatasets();
+            List<Dataset> outputs = processing.getOutputDatasets();
+            Map<Long, String> inputsDownloadName = getDatasetDownloadName(inputs);
+            Map<Long, String> outputsDownloadName = getDatasetDownloadName(outputs);
+
+            for (Dataset dataset : inputs)
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, inputsDownloadName.get(dataset.getId()));
+            for (Dataset dataset : outputs)
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/output", format, withManifest, filesByAcquisitionId, converterId, outputsDownloadName.get(dataset.getId()));
         }
-        if(!filesByAcquisitionId.isEmpty()){
+        if (!filesByAcquisitionId.isEmpty())
             DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
-        }
 
         // Write errors to the file
         if (!downloadResults.isEmpty()) {
@@ -100,26 +117,29 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
         List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
-        if(!Objects.isNull(processingComment)){
+        if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
-        };
+        }
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if(resultOnly){
-            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
+        if (resultOnly) {
+            processingList.forEach(it -> {
+                it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList());
+                it.setInputDatasets(new ArrayList<>());
+            });
         }
     }
 
     private String getProcessingSubject(DatasetProcessing processing) {
         Examination exam = null;
-        for (Dataset dataset : processing.getInputDatasets()){
+        for (Dataset dataset : processing.getInputDatasets()) {
             exam = Optional.ofNullable(dataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);
-            if (!Objects.isNull(exam)){
+            if (!Objects.isNull(exam)) {
                 return exam.getSubject().getName();
             }
         }
@@ -128,12 +148,12 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private Pair<Long, String> getExaminationDatas(List<Dataset> inputs) {
         Examination exam = null;
-        for (Dataset dataset : inputs){
+        for (Dataset dataset : inputs) {
             exam = Optional.ofNullable(dataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);
-            if (!Objects.isNull(exam)){
+            if (!Objects.isNull(exam)) {
                 return new Pair<>(exam.getId(), exam.getComment());
             }
         }
@@ -143,14 +163,14 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private String getExecFilepath(Long processingId, Pair<Long, String> examDatas) {
 
-        String execFilePath = "processing_" + processingId +  "_exam_" + examDatas.first();
+        String execFilePath = "processing_" + processingId + "_exam_" + examDatas.first();
         if (!Objects.equals(examDatas.second(), "")) {
             execFilePath += "_" + examDatas.second();
         }
         return shapeForPath(execFilePath);
     }
 
-    private String shapeForPath(String path){
+    private String shapeForPath(String path) {
         path = path.replaceAll("[^a-zA-Z0-9_\\-]", "_");
         if (path.length() > 255) {
             path = path.substring(0, 254);

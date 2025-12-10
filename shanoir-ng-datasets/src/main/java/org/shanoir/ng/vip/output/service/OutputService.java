@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.output.service;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -56,11 +70,11 @@ public class OutputService {
      * @throws ResultHandlerException
      */
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
-        final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
+        File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
-        for (File archive : this.getArchivesToProcess(userImportDir)) {
+        for (File archive : getArchivesToProcess(userImportDir)) {
             File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
+            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
             for (OutputHandler outputHandler : outputHandlers) {
                 if (outputHandler.canProcess(monitoring)) {
@@ -68,13 +82,21 @@ public class OutputService {
                     outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
                 }
             }
-            this.deleteCache(cacheFolder);
+            deleteTemporaryDirectory(cacheFolder);
         }
 
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
         datasetProcessingService.update(monitoring);
         processingResourceRepository.deleteByProcessingId(monitoring.getId());
+    }
+
+    private void deleteTemporaryDirectory(File userImportDir) {
+        try {
+            FileUtils.deleteDirectory(userImportDir);
+        } catch (IOException e) {
+            LOG.error("I/O error while deleting cache dir [{}]", userImportDir.getAbsolutePath());
+        }
     }
 
     private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
@@ -116,17 +138,9 @@ public class OutputService {
             throw new ResultHandlerException("I/O error while extracting files from result archive [" + archive.getAbsolutePath() + "]", e);
         }
 
-        if(outputFiles.isEmpty()) {
+        if (outputFiles.isEmpty()) {
             throw new ResultHandlerException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
         }
         return outputFiles;
-    }
-
-    private void deleteCache(File cacheFolder) {
-        try {
-            FileUtils.deleteDirectory(cacheFolder);
-        } catch (IOException e) {
-            LOG.error("I/O error while deleting cache dir [{}]", cacheFolder.getAbsolutePath());
-        }
     }
 }

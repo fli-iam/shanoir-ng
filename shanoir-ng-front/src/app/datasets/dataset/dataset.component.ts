@@ -15,17 +15,20 @@
 import { Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+
 import { MrDataset } from './mr/dataset.mr.model';
-import { Selection } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -41,8 +44,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
-    public papayaLoaded: boolean = false;
     isMRS: boolean = false; // MR Spectroscopy
+    papayaLoadCallback: () => Promise<any[]>;
 
     constructor(
             private datasetService: DatasetService,
@@ -65,8 +68,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     initView(): Promise<void> {
-        this.papayaLoaded = false;
         this.dicomArchiveService.clearFileInMemory();
+        this.papayaLoadCallback = () => this.loadDicomInMemory();
         if (!this.dataset.updatedMetadata) this.dataset.updatedMetadata = new DatasetMetadata();
         this.isMRS = this.isSpectro(this.dataset);
         if (this.keycloakService.isUserAdmin()) {
@@ -113,30 +116,29 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.downloadService.downloadByIds([this.dataset?.id], this.downloadState);
     }
 
-    public loadDicomInMemory() {
-        this.papayaLoaded = true;
-        this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
+    public loadDicomInMemory(): Promise<any[]> {
+        return this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
-            this.dicomArchiveService.importFromZip(blobReponse.body)
-                .then(response => {
-                    this.dicomArchiveService.extractFileDirectoryStructure()
+            return this.dicomArchiveService.importFromZip(blobReponse.body)
+                .then(() => {
+                    return this.dicomArchiveService.extractFileDirectoryStructure()
                         .then(response => {
-                            this.initPapaya(response);
+                            return this.initPapaya(response);
                         });
                 });
         });
     }
 
-    private initPapaya(dataFiles: any): void {
-        let buffs = [];
+    private initPapaya(dataFiles: any): Promise<any[]> {
+        const buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
             buffs.push(dataFiles.files[key].async("arraybuffer"));
         });
-        let promiseOfList = Promise.all(buffs);
-        promiseOfList.then((values) => {
-            let params: object[] = [];
+        const promiseOfList = Promise.all(buffs);
+        return promiseOfList.then((values) => {
+            const params: object[] = [];
             params['binaryImages'] = [values];
-            this.papayaParams = params;
+            return params;
         });
     }
 

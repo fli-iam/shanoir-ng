@@ -1,11 +1,24 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.tasks;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventLight;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -29,52 +42,59 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class AsyncTaskApiController implements AsyncTaskApi {
 
-	@Autowired
-	ShanoirEventsService taskService;
+    @Autowired
+    private ShanoirEventsService taskService;
 
-    public static final List<UserSseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
+    public static final List<UserSseEmitter> EMITTERS = Collections.synchronizedList(new ArrayList<>());
 
-	@Override
-	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-			userId, 
-			ShanoirEventType.IMPORT_DATASET_EVENT, 
-			ShanoirEventType.COPY_DATASET_EVENT, 
-			ShanoirEventType.EXECUTION_MONITORING_EVENT, 
-			ShanoirEventType.CHECK_QUALITY_EVENT, 
-			ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
-			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
-			ShanoirEventType.DELETE_EXAMINATION_EVENT,
-			ShanoirEventType.DELETE_DATASET_EVENT);
- 		// Order by last update date
-		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
-			@Override
-			public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
-				return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
-			}
-		};
-		taskList.sort(comparator);
-		return new ResponseEntity<>(taskList, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<ShanoirEventLight>> findTasks() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
+                userId,
+                ShanoirEventType.IMPORT_DATASET_EVENT,
+                ShanoirEventType.COPY_DATASET_EVENT,
+                ShanoirEventType.EXECUTION_MONITORING_EVENT,
+                ShanoirEventType.CHECK_QUALITY_EVENT,
+                ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+                ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+                ShanoirEventType.DELETE_EXAMINATION_EVENT,
+                ShanoirEventType.DELETE_NIFTI_EVENT,
+                ShanoirEventType.DELETE_DATASET_EVENT);
 
-	@Override
-	public ResponseEntity<ShanoirEvent> getTaskDetails(
-			@Parameter(name = "id of the task", required = true) @PathVariable("taskId") Long taskId) {
-		ShanoirEvent event = taskService.findById(taskId);
-		if (event == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else {
-			return new ResponseEntity<>(event, HttpStatus.OK);
-		}
-	}
+        // Get only event with last updates < 7 days
+        Date now = new Date();
+        long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
+        taskList = taskList.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
 
-	@Override
+         // Order by last update date
+        Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
+            @Override
+            public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
+                return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
+            }
+        };
+        taskList.sort(comparator);
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ShanoirEvent> getTaskDetails(
+            @Parameter(name = "id of the task", required = true) @PathVariable("taskId") Long taskId) {
+        ShanoirEvent event = taskService.findById(taskId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(event, HttpStatus.OK);
+        }
+    }
+
+    @Override
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-	long userId = KeycloakUtil.getTokenUserId();
+        long userId = KeycloakUtil.getTokenUserId();
         UserSseEmitter emitter = new UserSseEmitter(userId);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        return new ResponseEntity<>(emitter,HttpStatus.OK);
+        EMITTERS.add(emitter);
+        emitter.onCompletion(() -> EMITTERS.remove(emitter));
+        return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 }

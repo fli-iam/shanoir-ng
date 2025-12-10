@@ -19,9 +19,10 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
-import { Examination } from './examination.model';
 import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+
+import { Examination } from './examination.model';
 
 @Injectable()
 export class ExaminationDTOService {
@@ -38,7 +39,7 @@ export class ExaminationDTOService {
     public toEntity(dto: ExaminationDTO, result?: Examination): Promise<Examination> {
         if (!result) result = new Examination();
         ExaminationDTOService.mapSyncFields(dto, result);
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
         if (dto.centerId) promises.push(this.centerService.get(dto.centerId).then(center => result.center = center));
         return Promise.all(promises).then(() => result);
@@ -51,8 +52,8 @@ export class ExaminationDTOService {
     public toEntityList(dtos: ExaminationDTO[], result?: Examination[]): Promise<Examination[]> {
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new Examination();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new Examination();
                 ExaminationDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -61,7 +62,7 @@ export class ExaminationDTOService {
             this.studyService.getStudiesNames(),
             this.centerService.getCentersNames(),
         ]).then(([studies, centers]: [IdName[], IdName[]]) => {
-            for (let entity of result) {
+            for (const entity of result) {
                 if (entity.study) entity.study = studies.find(study => study.id == entity.study.id);
                 if (entity.center) entity.center = centers.find(center => center.id == entity.center.id);
             }
@@ -72,6 +73,7 @@ export class ExaminationDTOService {
     static mapSyncFields(dto: ExaminationDTO, entity: Examination): Examination {
         entity.id = dto.id;
         entity.examinationDate = new Date(dto.examinationDate);
+        entity.studyInstanceUID = dto.studyInstanceUID;
         entity.comment = dto.comment;
         entity.source = dto.source;
         entity.copies = dto.copies;
@@ -103,9 +105,10 @@ export class ExaminationDTO {
     centerId: number;
 	comment: string;
     examinationDate: Date;
+    studyInstanceUID: string;
     note: string;
     studyId: number;
-    subject: IdName;
+    subject: IdName | Subject;
     subjectWeight: number;
     weightUnitOfMeasure: UnitOfMeasure;
     preclinical: boolean;
@@ -119,9 +122,10 @@ export class ExaminationDTO {
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;
             this.examinationDate = examination.examinationDate;
+            this.studyInstanceUID = examination.studyInstanceUID;
             this.note = examination.note;
             this.studyId = examination.study ? examination.study.id : null;
-            this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
+            this.subject = examination.subject ? examination.subject : null;
             this.subjectWeight = examination.subjectWeight;
             this.weightUnitOfMeasure = examination.weightUnitOfMeasure;
             this.preclinical = examination.preclinical;

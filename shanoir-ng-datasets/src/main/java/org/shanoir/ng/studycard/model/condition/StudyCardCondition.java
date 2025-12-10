@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,10 +38,10 @@ import jakarta.persistence.InheritanceType;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)") 
+@Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)")
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING, length = 47)
+@DiscriminatorColumn(name = "scope", discriminatorType = DiscriminatorType.STRING, length = 47)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = StudyCardDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),
@@ -51,21 +51,21 @@ import jakarta.validation.constraints.NotNull;
     @JsonSubTypes.Type(value = AcqMetadataCondOnDatasets.class, name = "AcqMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = AcqMetadataCondOnAcq.class, name = "AcqMetadataCondOnAcq")})
 public abstract class StudyCardCondition extends AbstractEntity {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 
-    public static String LIST_SEPERATOR = ",";
-	
-	@ElementCollection 
-	@Column(name = "value")
-	private List<String> values;
-	
-	@NotNull
-	private int operation;
+    private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
+
+    public static final String LIST_SEPERATOR = ",";
+
+    @ElementCollection
+    @Column(name = "value")
+    private List<String> values;
+
+    @NotNull
+    private int operation;
 
     @NotNull
     private int cardinality;
-    
+
     public int getCardinality() {
         return cardinality;
     }
@@ -86,13 +86,13 @@ public abstract class StudyCardCondition extends AbstractEntity {
         else return nbOk >= getCardinality(); // n
     }
 
-	public Operation getOperation() {
-		return Operation.getType(operation);
-	}
+    public Operation getOperation() {
+        return Operation.getType(operation);
+    }
 
-	public void setOperation(Operation operation) {
-		this.operation = operation.getId();
-	}
+    public void setOperation(Operation operation) {
+        this.operation = operation.getId();
+    }
 
     public List<String> getValues() {
         return values;
@@ -115,14 +115,14 @@ public abstract class StudyCardCondition extends AbstractEntity {
             throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
         }
     }
-    
+
     protected boolean textualCompare(Operation operation, String original, String studycardStr) {
         if (original != null) {
             if (Operation.EQUALS.equals(operation)) {
                 return original.equals(studycardStr);
             } else if (Operation.NOT_EQUALS.equals(operation)) {
                 return !original.equals(studycardStr);
-             } else if (Operation.CONTAINS.equals(operation)) {
+            } else if (Operation.CONTAINS.equals(operation)) {
                 return original.contains(studycardStr);
             } else if (Operation.DOES_NOT_CONTAIN.equals(operation)) {
                 return !original.contains(studycardStr);
