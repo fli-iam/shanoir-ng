@@ -118,7 +118,7 @@ public final class DatasetFileUtils {
 
             // Generate the target file name
             String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
-            fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
+            fileName = fileName.replace(File.separator, UNDERSCORE);
 
             // Add folder path if specified
             if (datasetFilePath != null)
@@ -134,7 +134,7 @@ public final class DatasetFileUtils {
                 compressGzipFile(srcPath, zipPath);
 
             // Add to ZIP
-            FileSystemResource resource = new FileSystemResource(srcPath);
+            FileSystemResource resource = new FileSystemResource(zipPath);
             ZipEntry zipEntry = new ZipEntry(zipFileName);
             zipEntry.setSize(resource.contentLength());
             zipEntry.setTime(System.currentTimeMillis());
