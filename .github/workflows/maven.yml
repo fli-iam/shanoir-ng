@@ -62,6 +62,7 @@ jobs:
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
         SHANOIR_SMTP_HOST: localhost
         SHANOIR_SMTP_PORT: 25
+        SHANOIR_SMTP_AUTH: false
         VIP_URL_SCHEME: https
         VIP_URL_HOST: vip
         VIP_CLIENT_SECRET: SECRET
