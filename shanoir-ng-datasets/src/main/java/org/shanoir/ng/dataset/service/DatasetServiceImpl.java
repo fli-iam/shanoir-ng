@@ -520,9 +520,7 @@ public class DatasetServiceImpl implements DatasetService {
         // We get only one row with 4 columns so we select the first row
         Object[] stats = result.get(0);
         // We convert the byte value of storage_size to gigabytes
-        double storageInGb = ((Number) stats[3]).doubleValue() / (1024 * 1024 * 1024);
-        LOG.debug("Getting the overall statistics: studies_count = {}, subjects_count = {}, dataset_acquisitions_count = {}, storage_size = {}",
-                stats[0], stats[1], stats[2], storageInGb);
+        double storageInGb = Math.round(((Number) stats[3]).doubleValue() / (1024 * 1024 * 1024));
         return new OverallStatisticsDTO(
             ((Number) stats[0]).longValue(),
             ((Number) stats[1]).longValue(),

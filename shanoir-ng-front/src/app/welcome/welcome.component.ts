@@ -39,7 +39,7 @@ export class WelcomeComponent implements OnInit {
   public studiesCount: number = 0;
   public datasetAcquisitionsCount: number = 0;
   public subjectsCount: number = 0;
-  public storageVolume: number = 0;
+  public storageSize: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
@@ -237,7 +237,7 @@ export class WelcomeComponent implements OnInit {
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Storage Volume" },
                   "schema:value": {
-                  "@value": "` + this.storageVolume + `",
+                  "@value": "` + this.storageSize + `",
                   "@type": "xsd:decimal"
                   },
                   "schema:unitCode": "E34", 
@@ -360,7 +360,7 @@ export class WelcomeComponent implements OnInit {
             this.studiesCount = stats.studiesCount;
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
-            this.storageVolume = stats.storageVolume;
+            this.storageSize = stats.storageSize;
         });
     }
 

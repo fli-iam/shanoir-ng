@@ -29,6 +29,7 @@ import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -77,7 +78,7 @@ public class SecurityConfiguration {
                 .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
                 .addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
                 .authorizeHttpRequests(
-                    matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/datasets/overallStatistics")
+                    matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
                         .permitAll()
                     .anyRequest()
                         .authenticated()
@@ -105,5 +106,16 @@ public class SecurityConfiguration {
         final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
+    }
+
+    /**
+     * Web security customizer to allow public access to overall statistics endpoint.
+     * @return
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(
+            "/datasets/overallStatistics"
+        );
     }
 }

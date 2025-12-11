@@ -36,7 +36,7 @@ export type OverallStatisticsDTO = {
     studiesCount: number;
     subjectsCount: number;
     datasetAcquisitionsCount: number;
-    storageVolume: number;
+    storageSize: number;
 };
 
 @Injectable()
