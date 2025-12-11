@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class StudyRightsCacheService {
 
@@ -34,6 +36,7 @@ public class StudyRightsCacheService {
     private StudyUserRightsRepository repo;
 
     @Cacheable(value = CacheNames.STUDY_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
+    @Transactional
     public boolean hasRightOnStudyCached(Long userId, Long studyId, String rightStr) {
         LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}, right={}",
                  userId, studyId, rightStr);
@@ -45,25 +48,28 @@ public class StudyRightsCacheService {
     }
 
     @Cacheable(value = CacheNames.STUDY_USER, key = "#userId + '-' + #studyId")
+    @Transactional
     public StudyUser findByUserIdAndStudyIdCached(Long userId, Long studyId) {
         LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}",
                 userId, studyId);
         StudyUser studyUser = repo.findByUserIdAndStudyId(userId, studyId);
-        studyUser.getCenterIds();
+        studyUser.setCenterIds(findCenterIdsByStudyUserIdCached(studyUser.getId()));
         return studyUser;
     }
 
     @Cacheable(value = CacheNames.USER_RIGHTS, key = "#userId")
+    @Transactional
     public List<StudyUser> getUserRightsCached(Long userId) {
         LOG.info("CACHE MISS - Database query executed for userId={}", userId);
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
-        studyUsers.stream().forEach(su -> su.getCenterIds());
+        studyUsers.stream().forEach(su -> findCenterIdsByStudyUserIdCached(su.getId()));
         return studyUsers;
     }
 
     @Cacheable(value = CacheNames.STUDY_USER_CENTER_IDS, key = "#studyUserId")
+    @Transactional
     public List<Long> findCenterIdsByStudyUserIdCached(Long studyUserId) {
         LOG.info("CACHE MISS - Database query executed for studyUserId={}", studyUserId);
         return repo.findCenterIdsByStudyUserId(studyUserId);
