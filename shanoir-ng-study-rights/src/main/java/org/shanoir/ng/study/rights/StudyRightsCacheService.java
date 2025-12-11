@@ -38,7 +38,7 @@ public class StudyRightsCacheService {
     @Cacheable(value = CacheNames.STUDY_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
     @Transactional
     public boolean hasRightOnStudyCached(Long userId, Long studyId, String rightStr) {
-        LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}, right={}",
+        LOG.info("Cache miss - query executed for userId={}, studyId={}, right={}",
                  userId, studyId, rightStr);
         StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
         return founded != null
@@ -50,7 +50,7 @@ public class StudyRightsCacheService {
     @Cacheable(value = CacheNames.STUDY_USER, key = "#userId + '-' + #studyId")
     @Transactional
     public StudyUser findByUserIdAndStudyIdCached(Long userId, Long studyId) {
-        LOG.info("CACHE MISS - Database query executed for userId={}, studyId={}",
+        LOG.info("Cache miss - query executed for userId={}, studyId={}",
                 userId, studyId);
         StudyUser studyUser = repo.findByUserIdAndStudyId(userId, studyId);
         studyUser.setCenterIds(findCenterIdsByStudyUserIdCached(studyUser.getId()));
@@ -60,7 +60,7 @@ public class StudyRightsCacheService {
     @Cacheable(value = CacheNames.USER_RIGHTS, key = "#userId")
     @Transactional
     public List<StudyUser> getUserRightsCached(Long userId) {
-        LOG.info("CACHE MISS - Database query executed for userId={}", userId);
+        LOG.info("Cache miss - query executed for userId={}", userId);
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
@@ -71,7 +71,7 @@ public class StudyRightsCacheService {
     @Cacheable(value = CacheNames.STUDY_USER_CENTER_IDS, key = "#studyUserId")
     @Transactional
     public List<Long> findCenterIdsByStudyUserIdCached(Long studyUserId) {
-        LOG.info("CACHE MISS - Database query executed for studyUserId={}", studyUserId);
+        LOG.info("Cache miss - query executed for studyUserId={}", studyUserId);
         return repo.findCenterIdsByStudyUserId(studyUserId);
     }
 
