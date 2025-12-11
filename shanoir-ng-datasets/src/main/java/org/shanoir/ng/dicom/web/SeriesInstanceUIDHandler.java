@@ -97,7 +97,7 @@ public class SeriesInstanceUIDHandler {
                 || acquisition instanceof PetDatasetAcquisition
                 || acquisition instanceof XaDatasetAcquisition
                 || acquisition instanceof GenericDatasetAcquisition) {
-            List<Dataset> datasets = acquisitionService.getDatasets(acquisition);
+            List<Dataset> datasets = acquisition.getDatasets();
             if (!datasets.isEmpty()) {
                 Dataset dataset = datasets.get(0);
                 List<DatasetExpression> expressions = dataset.getDatasetExpressions();

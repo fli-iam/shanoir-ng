@@ -260,7 +260,7 @@ public class DicomImporterService {
             throws Exception {
         int datasetIndex = -1; // Used for single-dataset acquisitions
         Dataset currentDataset = null;
-        List<Dataset> datasets = acquisitionService.getDatasets(acquisition);
+        List<Dataset> datasets = acquisition.getDatasets();
         if (datasets != null && !datasets.isEmpty()) {
             boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
             // Manage split series in the if-clause
@@ -371,10 +371,12 @@ public class DicomImporterService {
             throws Exception {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
-        DatasetAcquisition existingAcquisition = acquisitionService.
-                findByExaminationIdAndSeriesInstanceUIDWithDatasets(examination.getId(), serie.getSeriesInstanceUID());
-        if (existingAcquisition != null) {
-            return existingAcquisition;
+        Optional<DatasetAcquisition> existingAcquisition = acquisitionService
+                .findByExaminationIdAndSeriesInstanceUIDWithDatasets(
+                        examination.getId(),
+                        serie.getSeriesInstanceUID());
+        if (existingAcquisition.isPresent()) {
+            return existingAcquisition.get();
         }
         int rank = 0;
         if (serie.getSeriesNumber() > 0) {

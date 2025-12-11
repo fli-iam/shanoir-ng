@@ -63,9 +63,6 @@ import org.springframework.util.CollectionUtils;
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
     @Autowired
-    private DatasetLoaderService datasetLoaderService;
-
-    @Autowired
     private DatasetAcquisitionRepository repository;
 
     @Autowired
@@ -121,10 +118,15 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
     }
 
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
+    }
+
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
         to.setAcquisitionEquipmentId(from.getAcquisitionEquipmentId());
         to.setExamination(from.getExamination());
-        to.setDatasets(getDatasets(from));
+        to.setDatasets(from.getDatasets());
         to.setRank(from.getRank());
         to.setSoftwareRelease(from.getSoftwareRelease());
         to.setSortingIndex(from.getSortingIndex());
@@ -172,9 +174,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     private void indexDatasets(DatasetAcquisition acquisition) {
-        List<Dataset> datasets = getDatasets(acquisition);
-        if (datasets != null && !datasets.isEmpty()) {
-            List<Long> datasetIds = datasets.stream()
+        DatasetAcquisition acq = findByIdWithDatasets(acquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
                     .map(Dataset::getId)
                     .collect(Collectors.toList());
             solrService.indexDatasets(datasetIds);
@@ -186,26 +188,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     @Transactional(readOnly = true)
-    public DatasetAcquisition findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId,
-            String seriesInstanceUID) {
-        DatasetAcquisition acquisition = repository.findByExaminationIdAndSeriesInstanceUID(examinationId,
-                seriesInstanceUID);
-        datasetLoaderService.loadDatasets(acquisition);
-        return acquisition;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public DatasetAcquisition findByIdWithDatasets(Long id) {
-        DatasetAcquisition acquisition = repository.findById(id).orElseThrow();
-        datasetLoaderService.loadDatasets(acquisition);
-        return acquisition;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Dataset> getDatasets(DatasetAcquisition acquisition) {
-        return datasetLoaderService.loadDatasets(acquisition);
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override
@@ -267,7 +251,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                             "This datasetAcquisition is linked to another datasetAcquisition that was copied."
                     ));
         } else {
-            List<Dataset> datasets = getDatasets(entity);
+            List<Dataset> datasets = entity.getDatasets();
             if (datasets != null) {
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {

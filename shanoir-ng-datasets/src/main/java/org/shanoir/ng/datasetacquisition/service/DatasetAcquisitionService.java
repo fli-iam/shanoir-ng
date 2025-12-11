@@ -17,9 +17,9 @@ package org.shanoir.ng.datasetacquisition.service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -38,9 +38,6 @@ public interface DatasetAcquisitionService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public DatasetAcquisition findByIdWithDatasets(Long id);
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    public List<Dataset> getDatasets(DatasetAcquisition acquisition);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
@@ -66,7 +63,7 @@ public interface DatasetAcquisitionService {
     List<DatasetAcquisition> findByExamination(Long examinationId);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    DatasetAcquisition findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID);
+    Optional<DatasetAcquisition> findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;

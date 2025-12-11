@@ -29,7 +29,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
@@ -88,9 +87,6 @@ public class ExaminationsConsistencyChecker {
 
     @Autowired
     private ExaminationRepository examinationRepository;
-
-    @Autowired
-    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
     private ExaminationLastCheckedRepository examinationLastCheckedRepository;
@@ -300,7 +296,7 @@ public class ExaminationsConsistencyChecker {
     }
 
     private void checkAcquisition(DatasetAcquisition acquisition, List<String> filesInPACS) {
-        List<Dataset> datasets = datasetAcquisitionService.getDatasets(acquisition);
+        List<Dataset> datasets = acquisition.getDatasets();
         if (datasets != null && !datasets.isEmpty()) {
             datasets.stream().forEach(d -> {
                 checkDataset(d, filesInPACS);
