@@ -60,6 +60,8 @@ jobs:
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        SHANOIR_SMTP_HOST: localhost
+        SHANOIR_SMTP_PORT: 25
         VIP_URL_SCHEME: https
         VIP_URL_HOST: vip
         VIP_CLIENT_SECRET: SECRET
