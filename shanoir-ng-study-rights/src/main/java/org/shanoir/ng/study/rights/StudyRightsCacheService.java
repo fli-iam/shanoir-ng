@@ -53,7 +53,7 @@ public class StudyRightsCacheService {
         LOG.info("Cache miss - query executed for userId={}, studyId={}",
                 userId, studyId);
         StudyUser studyUser = repo.findByUserIdAndStudyId(userId, studyId);
-        studyUser.setCenterIds(findCenterIdsByStudyUserIdCached(studyUser.getId()));
+        studyUser.setCenterIds(repo.findCenterIdsByStudyUserId(studyUser.getId()));
         return studyUser;
     }
 
@@ -64,7 +64,8 @@ public class StudyRightsCacheService {
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
-        studyUsers.stream().forEach(su -> findCenterIdsByStudyUserIdCached(su.getId()));
+        studyUsers.stream().forEach(su
+                -> su.setCenterIds(repo.findCenterIdsByStudyUserId(su.getId())));
         return studyUsers;
     }
 
