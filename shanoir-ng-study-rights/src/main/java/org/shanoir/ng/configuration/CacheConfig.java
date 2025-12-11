@@ -35,7 +35,8 @@ public class CacheConfig {
                 CacheNames.STUDY_USER,
                 CacheNames.STUDY_USER_CENTER_IDS,
                 CacheNames.STUDY_RIGHTS,
-                CacheNames.USER_RIGHTS);
+                CacheNames.USER_RIGHTS,
+                CacheNames.EXAMINATIONS);
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(6, TimeUnit.HOURS)
                 .maximumSize(10000));

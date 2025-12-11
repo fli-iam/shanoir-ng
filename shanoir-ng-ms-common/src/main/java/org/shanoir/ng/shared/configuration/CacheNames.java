@@ -26,4 +26,6 @@ public final class CacheNames {
 
     public static final String USER_RIGHTS = "userRights";
 
+    public static final String EXAMINATIONS = "examinations";
+
 }
