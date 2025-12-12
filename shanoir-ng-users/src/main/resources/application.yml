@@ -68,8 +68,8 @@ spring:
   mail:
     host: ${SHANOIR_SMTP_HOST}
     port: ${SHANOIR_SMTP_PORT}
-    username: ${SHANOIR_SMTP_USERNAME}
-    password: ${SHANOIR_SMTP_PASSWORD}
+    username: ${SHANOIR_SMTP_USERNAME:}
+    password: ${SHANOIR_SMTP_PASSWORD:}
     properties:
       mail.smtp.from: ${SHANOIR_SMTP_FROM}
       mail.smtp.auth: ${SHANOIR_SMTP_AUTH}
