@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -38,11 +38,18 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_PORT
+      - SHANOIR_SMTP_AUTH
+      - SHANOIR_SMTP_USERNAME
+      - SHANOIR_SMTP_PASSWORD
+      - SHANOIR_SMTP_STARTTLS_ENABLE
+      - SHANOIR_SMTP_STARTTLS_REQUIRED
+      - SHANOIR_SMTP_FROM
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.5.1"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
@@ -54,7 +61,7 @@ services:
       - "keycloak-database"
   #
   # RabbitMQ: inter-microservices communication
-  #  
+  #
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
@@ -64,7 +71,7 @@ services:
      - "5672:5672"
      - "15672:15672"
     networks:
-      - shanoir_ng_network 
+      - shanoir_ng_network
   #
   # Database for all other microservices
   #
@@ -98,13 +105,14 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
       - VIP_SERVICE_EMAIL
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
