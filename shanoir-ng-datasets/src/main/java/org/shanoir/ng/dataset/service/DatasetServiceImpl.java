@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -118,6 +119,9 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetAsyncService datasetAsyncService;
 
     @Autowired
+    private DatasetFileRepository datasetFileRepository;
+
+    @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -130,7 +134,16 @@ public class DatasetServiceImpl implements DatasetService {
         processingService.removeDatasetFromAllProcessingInput(id);
         processingResourceRepository.deleteByDatasetId(id);
         propertyService.deleteByDatasetId(id);
-        repository.deleteById(id);
+
+        List<Long> expressionIds = entity.getDatasetExpressions().stream()
+                .map(DatasetExpression::getId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (!expressionIds.isEmpty()) {
+            datasetFileRepository.deleteByDatasetExpressionIds(expressionIds);
+        }
+        repository.delete(entity);
     }
 
     /**
