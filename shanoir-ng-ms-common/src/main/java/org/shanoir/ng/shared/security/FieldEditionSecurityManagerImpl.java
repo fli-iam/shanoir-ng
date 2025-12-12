@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  */
 @Service
-public abstract class FieldEditionSecurityManagerImpl<T extends AbstractEntity> implements FieldEditionSecurityManager<T> {
+public abstract class FieldEditionSecurityManagerImpl<T extends AbstractEntityInterface> implements FieldEditionSecurityManager<T> {
 
     @Autowired
     private CrudRepository<T, Long> repository;

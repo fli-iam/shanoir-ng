@@ -87,12 +87,12 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
     }
 
     save(): Promise<SubjectTherapy> {
-        // Instead of saving the entity, we will emit it to the previous step
-        if (this.breadcrumbsService.previousStep != null) {
-            this.breadcrumbsService.previousStep.addPrefilled('newSubjectTherapy', this.subjectTherapy);
-            this.goBack();
-            return Promise.resolve(this.subjectTherapy);
-        }
+        // Instead of saving the entity just emit it
+        this.mapFormToEntity();
+        this.onSave.next(this.subjectTherapy);
+        this.breadcrumbsService.currentStep.notifySave(this.subjectTherapy);
+        this.goBack();
+        return Promise.resolve(this.subjectTherapy);
     }
 
     public async hasEditRight(): Promise<boolean> {

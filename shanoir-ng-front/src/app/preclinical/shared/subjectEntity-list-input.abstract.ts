@@ -14,7 +14,7 @@
 
 import {Input, Output, ViewChild, Component, EventEmitter} from '@angular/core';
 
-import { PreclinicalSubject } from '../animalSubject/shared/preclinicalSubject.model';
+import { AnimalSubject } from '../animalSubject/shared/animalSubject.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -29,7 +29,7 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
     @Input() canModify: boolean = false;
-    @Input() preclinicalSubject: PreclinicalSubject;
+    @Input() animalSubject: AnimalSubject;
     @Input() mode: Mode;
     @Output() event = new EventEmitter();
     protected propagateChange: (any) => void = () => { return; };

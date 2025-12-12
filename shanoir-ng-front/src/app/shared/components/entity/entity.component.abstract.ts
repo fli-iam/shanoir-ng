@@ -500,6 +500,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         });
     };
 
+    protected mapFormToEntity() {
+        EntityComponent.mapFormToEntity(this._entity, this.form);
+    }
+
     /**
      * Maps the current entity properties to the form values.
      * Used to sync the form when the entity is updated outside of the form.
@@ -635,9 +639,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         currentObj = currentObj[part];
                         currentFormObj = currentFormObj.get(part) as FormGroup;
                     });
-                    currentObj[lastPart] = res.value;
-                    currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
-                    if (res.readonly) currentFormObj.get(lastPart)?.disable({emitEvent: false});
+                    if (currentObj) {
+                        currentObj[lastPart] = res.value;
+                        currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
+                        if (res.readonly) currentFormObj?.get(lastPart)?.disable({emitEvent: false});
+                    }
                 });
             }
         });
