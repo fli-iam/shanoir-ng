@@ -149,6 +149,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
+        this.getSubjects();
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -210,7 +211,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 this.studies = studies;
             });
     }
-
 
     public getSubjects(): void {
         if (!this.examination.study) return;

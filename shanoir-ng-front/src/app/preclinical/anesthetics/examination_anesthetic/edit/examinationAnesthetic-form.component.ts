@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -54,7 +54,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private route: ActivatedRoute,
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
-        private anestheticService: AnestheticService) 
+        private anestheticService: AnestheticService)
     {
         super(route, 'preclinical-examination-anesthetics');
     }
@@ -83,11 +83,12 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.loadData();
     }
 
-    
+
     initEdit(): Promise<void> {
         this.getEnums();
         return this.loadData().then(() => {
             //Should be only one
+            console.log(this);
             this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
             this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
 
@@ -146,7 +147,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.sites = InjectionSite.all();
         this.injtypes = InjectionType.all();
     }
-    
+
 
     getReferenceById(reference: any): Reference {
         if (reference) {
@@ -169,15 +170,15 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         }
         return null;
     }
-    
-    
+
+
     eaChange() {
         if(!this.isStandalone && this.examinationAnesthetic) {
             this.examAnestheticChange.emit(this.examinationAnesthetic);
-        }       
+        }
     }
 
-    
+
 
     goToAddAnesthetic() {
         this.router.navigate(['/preclinical-anesthetic/create']);
@@ -202,8 +203,8 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     addExaminationAnesthetic(): Promise<ExaminationAnesthetic> {
-        if (!this.examinationAnesthetic) { 
-            return Promise.resolve(null); 
+        if (!this.examinationAnesthetic) {
+            return Promise.resolve(null);
         } else {
             return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examinationId, this.examinationAnesthetic));
         }
