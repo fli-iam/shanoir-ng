@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.user.service;
 
 import org.keycloak.representations.AccessTokenResponse;
@@ -29,16 +43,17 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 @ConditionalOnProperty(name = "vip.enabled", havingValue = "true")
-public class VIPUserServiceImpl implements VIPUserService{
+public class VIPUserServiceImpl implements VIPUserService {
     private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
-	/**
+    /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(VIPUserServiceImpl.class);
 
     @Value("${vip.uri}")
-    private String vip_uri;
+    private String vipUri;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -75,15 +90,15 @@ public class VIPUserServiceImpl implements VIPUserService{
         HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
-            ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(this.vipUri, HttpMethod.POST, entity, Void.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-            	LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
+                LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
             }
             return user;
         } catch (Exception e) {
             // Do not fail when an error occures
-        	LOG.error("Could not communicate with VIP instance to create user", e);
-        	return user;
+            LOG.error("Could not communicate with VIP instance to create user", e);
+            return user;
         }
     }
 }

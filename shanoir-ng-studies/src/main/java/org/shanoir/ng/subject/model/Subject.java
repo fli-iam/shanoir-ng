@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -58,237 +58,256 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(indexes = @Index(name = "subject_name_study_id_idx", columnList = "name, study_id", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
-	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
-	"userPersonalCommentList" })
+    "preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
+    "userPersonalCommentList" })
 @SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
-		@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
+        @ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
 
-	private static final long serialVersionUID = 6844259659282875507L;
+    private static final long serialVersionUID = 6844259659282875507L;
 
-	@JsonSerialize(using = LocalDateSerializer.class)
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	private LocalDate birthDate;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
-	@NotNull
-	private String name;
+    @NotNull
+    private String name;
 
-	private Integer sex;
+    private Integer sex;
 
-	@ManyToOne
-	@JoinColumn(name = "study_id")
-	@NotNull
-	private Study study;
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
-	/** Relations beetween the subjects and the studies. */
-	@OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<SubjectStudy> subjectStudyList;
+    /** Relations beetween the subjects and the studies. */
+    @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubjectStudy> subjectStudyList;
 
-	private String identifier;
+    private String identifier;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	private PseudonymusHashValues pseudonymusHashValues;
+    @OneToOne(cascade = CascadeType.ALL)
+    private PseudonymusHashValues pseudonymusHashValues;
 
-	/** Language Hemispheric dominance. */
-	private Integer languageHemisphericDominance;
+    /** Language Hemispheric dominance. */
+    private Integer languageHemisphericDominance;
 
-	/** Manual Hemispheric dominance. */
-	private Integer manualHemisphericDominance;
+    /** Manual Hemispheric dominance. */
+    private Integer manualHemisphericDominance;
 
-	/** Flag to set the subject as pre-clinical subject */
-	@Column(nullable=false)
-	@ColumnDefault("false")
-	private boolean preclinical;
-	
-	/**
-	 * The category of the subject (phantom, human alive, human cadaver, etc.).
-	 */
-	private Integer imagedObjectCategory;
+    /** Flag to set the subject as pre-clinical subject */
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private boolean preclinical;
 
-	/** Personal Comments on this subject. */
-	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<>(0);
+    /**
+     * The category of the subject (phantom, human alive, human cadaver, etc.).
+     */
+    private Integer imagedObjectCategory;
 
-	private String studyIdentifier;
+    /** Personal Comments on this subject. */
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
+    private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<>(0);
 
-	@Column(name = "physically_involved", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-	private boolean physicallyInvolved;
+    private String studyIdentifier;
 
-	private Integer subjectType;
+    @Column(name = "physically_involved", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean physicallyInvolved;
 
-	@ManyToMany(cascade = { CascadeType.ALL })
+    private Integer subjectType;
+
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
-			name = "subject_tag", 
-			joinColumns = { @JoinColumn(name = "subject_id") }, 
-			inverseJoinColumns = { @JoinColumn(name = "tag_id") }
+            name = "subject_tag",
+            joinColumns = { @JoinColumn(name = "subject_id") },
+            inverseJoinColumns = { @JoinColumn(name = "tag_id") }
     )
-	private Set<Tag> tags = new HashSet<Tag>();
-	
-	private Integer qualityTag;
+    private Set<Tag> tags = new HashSet<Tag>();
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "subject/" + getId());
-	}
+    private Integer qualityTag;
 
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    public Subject() { }
 
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    public Subject(Subject other, Study study) {
+        this.study = study;
+        this.name = other.name;
+        this.birthDate = other.birthDate;
+        this.sex = other.sex;
+        this.studyIdentifier = other.studyIdentifier;
+        this.subjectType = other.subjectType;
+        this.physicallyInvolved = other.physicallyInvolved;
+        this.languageHemisphericDominance = other.languageHemisphericDominance;
+        this.manualHemisphericDominance = other.manualHemisphericDominance;
+        this.imagedObjectCategory = other.imagedObjectCategory;
+        this.qualityTag = other.qualityTag;
+        this.preclinical = other.preclinical;
+        this.pseudonymusHashValues = other.pseudonymusHashValues;
+    }
 
-	public String getName() {
-		return name;
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "subject/" + getId());
+    }
 
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	public String getIdentifier() {
-		return identifier;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public PseudonymusHashValues getPseudonymusHashValues() {
-		return pseudonymusHashValues;
-	}
+    public List<SubjectStudy> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
-		this.pseudonymusHashValues = pseudonymusHashValues;
-	}
+    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
-	public List<UserPersonalCommentSubject> getUserPersonalCommentList() {
-		return userPersonalCommentList;
-	}
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	public void setUserPersonalCommentList(List<UserPersonalCommentSubject> userPersonalCommentList) {
-		this.userPersonalCommentList = userPersonalCommentList;
-	}
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	public Sex getSex() {
-		return Sex.getSex(sex);
-	}
+    public PseudonymusHashValues getPseudonymusHashValues() {
+        return pseudonymusHashValues;
+    }
 
-	public void setSex(Sex sex) {
-		if (sex == null) {
-			this.sex = null;
-		} else {
-			this.sex = sex.getId();
-		}
-	}
+    public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
+        this.pseudonymusHashValues = pseudonymusHashValues;
+    }
 
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return HemisphericDominance.getDominance(languageHemisphericDominance);
-	}
+    public List<UserPersonalCommentSubject> getUserPersonalCommentList() {
+        return userPersonalCommentList;
+    }
 
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		if (languageHemisphericDominance == null) {
-			this.languageHemisphericDominance = null;
-		} else {
-			this.languageHemisphericDominance = languageHemisphericDominance.getId();
-		}
-	}
+    public void setUserPersonalCommentList(List<UserPersonalCommentSubject> userPersonalCommentList) {
+        this.userPersonalCommentList = userPersonalCommentList;
+    }
 
-	public HemisphericDominance getManualHemisphericDominance() {
-		return HemisphericDominance.getDominance(manualHemisphericDominance);
-	}
+    public Sex getSex() {
+        return Sex.getSex(sex);
+    }
 
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		if (manualHemisphericDominance == null) {
-			this.manualHemisphericDominance = null;
-		} else {
-			this.manualHemisphericDominance = manualHemisphericDominance.getId();
-		}
-	}
+    public void setSex(Sex sex) {
+        if (sex == null) {
+            this.sex = null;
+        } else {
+            this.sex = sex.getId();
+        }
+    }
 
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return ImagedObjectCategory.getCategory(imagedObjectCategory);
-	}
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return HemisphericDominance.getDominance(languageHemisphericDominance);
+    }
 
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		if (imagedObjectCategory == null) {
-			this.imagedObjectCategory = null;
-		} else {
-			this.imagedObjectCategory = imagedObjectCategory.getId();
-		}
-	}
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        if (languageHemisphericDominance == null) {
+            this.languageHemisphericDominance = null;
+        } else {
+            this.languageHemisphericDominance = languageHemisphericDominance.getId();
+        }
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    public HemisphericDominance getManualHemisphericDominance() {
+        return HemisphericDominance.getDominance(manualHemisphericDominance);
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        if (manualHemisphericDominance == null) {
+            this.manualHemisphericDominance = null;
+        } else {
+            this.manualHemisphericDominance = manualHemisphericDominance.getId();
+        }
+    }
 
-	public String getStudyIdentifier() {
-		return studyIdentifier;
-	}
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return ImagedObjectCategory.getCategory(imagedObjectCategory);
+    }
 
-	public void setStudyIdentifier(String studyIdentifier) {
-		this.studyIdentifier = studyIdentifier;
-	}
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        if (imagedObjectCategory == null) {
+            this.imagedObjectCategory = null;
+        } else {
+            this.imagedObjectCategory = imagedObjectCategory.getId();
+        }
+    }
 
-	public Set<Tag> getTags() {
+    public boolean isPreclinical() {
+        return preclinical;
+    }
+
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
+
+    public String getStudyIdentifier() {
+        return studyIdentifier;
+    }
+
+    public void setStudyIdentifier(String studyIdentifier) {
+        this.studyIdentifier = studyIdentifier;
+    }
+
+    public Set<Tag> getTags() {
         return tags;
     }
-	
-	public QualityTag getQualityTag() {
-		return QualityTag.get(qualityTag);
-	}
-	
-	public void setQualityTag(QualityTag tag) {
+
+    public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+
+    public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
-	}
-	
-	public boolean isPhysicallyInvolved() {
-		return physicallyInvolved;
-	}
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
 
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
-		this.physicallyInvolved = physicallyInvolved;
-	}
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
 
-	public Study getStudy() {
-		return study;
-	}
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	public SubjectType getSubjectType() {
-		return SubjectType.getType(subjectType);
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public void setSubjectType(SubjectType subjectType) {
-		if (subjectType == null) {
-			this.subjectType = null;
-		} else {
-			this.subjectType = subjectType.getId();
-		}
-	}
+    public SubjectType getSubjectType() {
+        return SubjectType.getType(subjectType);
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        if (subjectType == null) {
+            this.subjectType = null;
+        } else {
+            this.subjectType = subjectType.getId();
+        }
+    }
 
 }

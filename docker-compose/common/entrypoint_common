@@ -71,9 +71,16 @@ require()
             SHANOIR_INSTANCE_NAME)  match "$name" '^[^"\\]*$'				;;
             SHANOIR_INSTANCE_COLOR) match "$name" '^([A-Za-z]*|#[0-9a-fA-F]{3,6})$'	;;
             SHANOIR_KEYCLOAK_ADAPTER_MODE) match "$name" '^(login-required|check-sso)$'	;;
-            SHANOIR_ADMIN_EMAIL)    ;;
+            SHANOIR_ADMIN_EMAIL)  ;;
             SHANOIR_ADMIN_NAME)     ;;
-            SHANOIR_SMTP_HOST)      ;;
+			SHANOIR_SMTP_HOST) ;;
+			SHANOIR_SMTP_PORT) ;;
+			SHANOIR_SMTP_AUTH) match "$name" '^(true|false)$' ;;
+			SHANOIR_SMTP_USERNAME) ;;
+			SHANOIR_SMTP_PASSWORD) ;;
+			SHANOIR_SMTP_STARTTLS_ENABLE) match "$name" '^(true|false)$' ;;
+			SHANOIR_SMTP_STARTTLS_REQUIRED) match "$name" '^(true|false)$' ;;
+			SHANOIR_SMTP_FROM) ;;
             SHANOIR_CERTIFICATE_PEM_CRT) ;;
             SHANOIR_CERTIFICATE_PEM_KEY) ;;
             VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
