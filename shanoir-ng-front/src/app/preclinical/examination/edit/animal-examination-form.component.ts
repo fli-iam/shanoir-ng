@@ -39,6 +39,7 @@ import * as AppUtils from '../../../utils/app.utils';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
@@ -78,6 +79,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     constructor(
         private route: ActivatedRoute,
+        private examinationService: ExaminationService,
         private animalExaminationService: AnimalExaminationService,
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
@@ -95,7 +97,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
-        return this.animalExaminationService;
+        return this.examinationService;
     }
 
     protected getTreeSelection: () => Selection = () => {
@@ -207,7 +209,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (const file of this.files) {
-                this.animalExaminationService.postFile(file, this.entity.id);
+                this.examinationService.postFile(file, this.entity.id);
             }
             return result;
         });
