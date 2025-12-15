@@ -88,7 +88,6 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         return this.loadData().then(() => {
             //Should be only one
-            console.log(this);
             this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
             this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
 
