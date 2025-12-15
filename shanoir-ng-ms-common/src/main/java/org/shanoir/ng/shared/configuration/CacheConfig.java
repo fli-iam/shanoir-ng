@@ -12,11 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.configuration;
+package org.shanoir.ng.shared.configuration;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
-import org.shanoir.ng.shared.configuration.CacheNames;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -35,8 +34,7 @@ public class CacheConfig {
                 CacheNames.STUDY_USER,
                 CacheNames.STUDY_USER_CENTER_IDS,
                 CacheNames.STUDY_RIGHTS,
-                CacheNames.USER_RIGHTS,
-                CacheNames.EXAMINATIONS);
+                CacheNames.USER_RIGHTS);
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(6, TimeUnit.HOURS)
                 .maximumSize(10000));

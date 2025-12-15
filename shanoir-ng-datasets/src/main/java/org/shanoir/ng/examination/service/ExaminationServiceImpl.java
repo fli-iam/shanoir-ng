@@ -37,7 +37,6 @@ import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -54,8 +53,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -250,9 +247,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    @Cacheable(value = CacheNames.EXAMINATIONS, key = "#id")
     public Examination findById(final Long id) {
-        LOG.info("Cache miss - query executed for examinationId={}", id);
         return examinationRepository.findById(id).orElse(null);
     }
 
@@ -266,7 +261,6 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    @CacheEvict(value = {CacheNames.EXAMINATIONS}, allEntries = true)
     public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
