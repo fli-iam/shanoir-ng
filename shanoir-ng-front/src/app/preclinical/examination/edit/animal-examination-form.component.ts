@@ -187,9 +187,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
         this.subscriptions.push(
-            form.get('study').valueChanges.subscribe(() => {
-                this.getSubjects();
-            })
+            form.get('study').valueChanges.subscribe((study: IdName) => {
+            this.examination.study = study;
+            this.getSubjects();
+        })
         );
         return form;
     }
