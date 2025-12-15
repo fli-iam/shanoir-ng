@@ -19,6 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+                (delete) = "delete()"
 				(back)="goBack()"
 				(dismiss)="goToView()">
                 <button *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive() || noDatasets">Download<i class="fas fa-download"></i></button>
