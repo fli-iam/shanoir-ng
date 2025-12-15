@@ -25,6 +25,8 @@ import { ColumnDefinition } from '../../../shared/components/table/column.defini
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { StudyService } from '../../../studies/shared/study.service';
+import { StudyUserRight } from '../../../studies/shared/study-user-right.enum';
 
 
 @Component({
@@ -33,16 +35,21 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
     standalone: false
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
-    @ViewChild('examTable', { static: false }) table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
+
+    private studiesICanAdmin: number[];
+    private studyIdsForCurrentUser: number[];
 
     constructor(
         private examinationService:ExaminationService,
         private examAnestheticsService: ExaminationAnestheticService,
-    	private extradataService: ExtraDataService)
-
-    {
-            super('preclinical-examination');
-            this.manageDelete();
+    	private extradataService: ExtraDataService,
+    	private studyService: StudyService
+    ) {
+        super('preclinical-examination');
+        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then( studies => this.studyIdsForCurrentUser = studies);
+        this.subscriptions.push(this.onDelete.subscribe(response => this.deleteExaminationRelatedData(response.entity.id)));
     }
 
     getService(): EntityService<Examination> {
@@ -81,70 +88,42 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         return [];
     }
 
-    protected openDeleteConfirmDialog = (entity: Examination) => {
-        if (!this.keycloakService.isUserAdminOrExpert()) return;
-        this.getSelectedExamination(entity.id).then(selectedExamination => {
-        this.confirmDialogService
-            .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?'
-            ).then(res => {
-                if (res) {
-                    this.getService().delete(selectedExamination.id).then(() => {
-                        this.onDelete.next({entity: selectedExamination});
-                        this.table.refresh();
-                        this.consoleService.log('info', 'The preclinical-examination n°' + entity.id + ' was sucessfully deleted');
-                    }).catch(reason => {
-                        if (reason && reason.error) {
-                            this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});
-                            if (reason.error.code != 422) throw Error(reason);
-                        }
-                    });
-                }
-            })
-
-        });
-    }
-
     private getSelectedExamination(id : number): Promise<Examination>{
         return this.examinationService.get(id).then(examination => {
             return examination;
         });
     }
 
-    private manageDelete() {
-        this.subscriptions.push(
-            this.onDelete.subscribe(response => {
-                this.deleteExamination(response.entity.id)
-            })
-        );
-    }
-
     getOptions() {
         return {
-            new: false,
+            new: this.keycloakService.isUserAdminOrExpert(),
             view: true,
-            edit: false,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
 
-    deleteExamination(examinationId: number) {
-        // Delete examination and refresh page
-        this.examAnestheticsService.getExaminationAnesthetics(examinationId)
-               .then(examAnesthetics => {
-               if (examAnesthetics && examAnesthetics.length > 0) {
-                   //Should be only one
-                    const examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                    this.examAnestheticsService.deleteAnesthetic(examAnesthetic);
-               }
-        });
-        this.extradataService.getExtraDatas(examinationId).then(extradatas => {
-            if(extradatas && extradatas.length > 0){
-            	for (const data of extradatas) {
-            		this.extradataService.deleteExtradata(data).then(() => { return; });
-            	}
-            }
-        });
+    canEdit(ex: Examination): boolean {
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(ex.study.id);
+    }
 
+    canDelete(exam: Examination): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            exam.study
+            && this.studiesICanAdmin
+            && this.studiesICanAdmin.includes(exam.study.id)
+        );
+    }
+
+    async deleteExaminationRelatedData(examinationId: number): Promise<void> {
+         // Delete anesthetic (0 or 1)
+        const examAnesthetics = await this.examAnestheticsService.getExaminationAnesthetics(examinationId);
+        if (examAnesthetics?.length)
+            await this.examAnestheticsService.deleteAnesthetic(examAnesthetics[0]);
+
+        // Delete all extra data (0 or multiple)
+        const extraData = await this.extradataService.getExtraDatas(examinationId);
+        if (extraData?.length)
+            await Promise.all(extraData.map(data => this.extradataService.deleteExtradata(data)));
     }
 }
