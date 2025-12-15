@@ -18,12 +18,14 @@ public final class CacheNames {
 
     private CacheNames() { }
 
-    public static final String STUDY_USER = "studyUser";
+    public static final String USER_ID_STUDY_ID = "userIdStudyId";
 
     public static final String STUDY_USER_CENTER_IDS = "studyUserCenterIds";
 
-    public static final String STUDY_RIGHTS = "studyRights";
+    public static final String USER_ID_STUDY_ID_RIGHTS = "userIdStudyIdRights";
 
-    public static final String USER_RIGHTS = "userRights";
+    public static final String STUDY_ID_RIGHTS = "studyIdRights";
+
+    public static final String USER_ID_RIGHTS = "userRights";
 
 }

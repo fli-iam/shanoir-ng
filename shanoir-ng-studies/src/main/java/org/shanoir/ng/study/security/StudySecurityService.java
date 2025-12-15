@@ -21,6 +21,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -44,6 +45,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -175,7 +177,10 @@ public class StudySecurityService {
      *            the right
      * @return true or false
      */
+    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#study.id + '-' + #rightStr")
     public boolean hasRightOnTrustedStudy(Study study, String rightStr) {
+        LOG.info("Cache miss - query executed for studyId={}, right={}",
+                study.getId(), rightStr);
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(study, right);
     }
@@ -192,6 +197,7 @@ public class StudySecurityService {
      *            the right
      * @return true or false
      */
+    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#dto.id + '-' + #rightStr")
     public boolean hasRightOnTrustedStudyDTO(StudyDTO dto, String rightStr) {
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(dto.getStudyUserList(), right);

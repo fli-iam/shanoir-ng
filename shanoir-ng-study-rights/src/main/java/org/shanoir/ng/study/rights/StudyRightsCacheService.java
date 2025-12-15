@@ -35,7 +35,7 @@ public class StudyRightsCacheService {
     @Autowired
     private StudyUserRightsRepository repo;
 
-    @Cacheable(value = CacheNames.STUDY_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
+    @Cacheable(value = CacheNames.USER_ID_STUDY_ID_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
     @Transactional
     public boolean hasRightOnStudyCached(Long userId, Long studyId, String rightStr) {
         LOG.info("Cache miss - query executed for userId={}, studyId={}, right={}",
@@ -47,7 +47,7 @@ public class StudyRightsCacheService {
                 && founded.isConfirmed();
     }
 
-    @Cacheable(value = CacheNames.STUDY_USER, key = "#userId + '-' + #studyId")
+    @Cacheable(value = CacheNames.USER_ID_STUDY_ID, key = "#userId + '-' + #studyId")
     @Transactional
     public StudyUser findByUserIdAndStudyIdCached(Long userId, Long studyId) {
         LOG.info("Cache miss - query executed for userId={}, studyId={}",
@@ -57,7 +57,7 @@ public class StudyRightsCacheService {
         return studyUser;
     }
 
-    @Cacheable(value = CacheNames.USER_RIGHTS, key = "#userId")
+    @Cacheable(value = CacheNames.USER_ID_RIGHTS, key = "#userId")
     @Transactional
     public List<StudyUser> getUserRightsCached(Long userId) {
         LOG.info("Cache miss - query executed for userId={}", userId);

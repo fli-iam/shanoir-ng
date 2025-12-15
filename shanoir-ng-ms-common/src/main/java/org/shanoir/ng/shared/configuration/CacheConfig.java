@@ -31,10 +31,11 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                CacheNames.STUDY_USER,
+                CacheNames.USER_ID_STUDY_ID,
                 CacheNames.STUDY_USER_CENTER_IDS,
-                CacheNames.STUDY_RIGHTS,
-                CacheNames.USER_RIGHTS);
+                CacheNames.USER_ID_STUDY_ID_RIGHTS,
+                CacheNames.STUDY_ID_RIGHTS,
+                CacheNames.USER_ID_RIGHTS);
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(6, TimeUnit.HOURS)
                 .maximumSize(10000));
