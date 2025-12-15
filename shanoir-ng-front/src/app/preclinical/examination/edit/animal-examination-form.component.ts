@@ -17,9 +17,12 @@ import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
 
+import { environment } from '../../../../environments/environment';
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
@@ -32,6 +35,8 @@ import { PhysiologicalDataFile }    from '../../extraData/physiologicalData/shar
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 import { CenterService } from '../../../centers/shared/center.service';
 import { StudyService } from '../../../studies/shared/study.service';
+import { StudyRightsService } from '../../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../../studies/shared/study-user-right.enum';
 import { IdName } from '../../../shared/models/id-name.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
@@ -76,6 +81,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
     dateDisplay = dateDisplay;
+    hasDownloadRight: boolean = false;
+    downloadState: TaskState = new TaskState();
+    noDatasets: boolean = false;
+    hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
 
     constructor(
         private route: ActivatedRoute,
@@ -86,12 +96,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private animalSubjectService: AnimalSubjectService,
         private centerService: CenterService,
         private studyService: StudyService,
-        public breadcrumbsService: BreadcrumbsService)
-    {
-        super(route, 'preclinical-examination');
-        this.inImport = breadcrumbsService.isImporting();
-        this.manageSaveEntity();
-    }
+        private studyRightsService: StudyRightsService,
+        public breadcrumbsService: BreadcrumbsService,
+        private downloadService: MassDownloadService
+        ) {
+            super(route, 'preclinical-examination');
+            this.inImport = breadcrumbsService.isImporting();
+            this.manageSaveEntity();
+        }
 
     get examination(): Examination { return this.entity; }
     set examination(examination: Examination) { this.entity = examination; }
@@ -116,6 +128,19 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             this.animalSubjectService
                 .getAnimalSubject(this.examination.subject.id)
                 .then(animalSubject => this.animalSubjectId = animalSubject.id);
+        }
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+
+            this.hasDownloadRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
         }
         return Promise.resolve();
     }
@@ -340,14 +365,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.contrastAgent = event;
     }
 
-    public async hasEditRight(): Promise<boolean> {
-        return false;
-    }
-
-    public async hasDeleteRight(): Promise<boolean> {
-        return false;
-    }
-
     // Extra data file management
 
     public setFile() {
@@ -376,5 +393,21 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
+    }
+
+    downloadAll() {
+        this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
+    }
+
+    openViewer() {
+	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
+
+    openSegmentationViewer() {
+        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

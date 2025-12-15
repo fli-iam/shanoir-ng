@@ -70,14 +70,14 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     private studyFirstChange: boolean = true;
 
     constructor(
-            private route: ActivatedRoute,
-            private examinationService: ExaminationService,
-            private centerService: CenterService,
-            private studyService: StudyService,
-            private studyRightsService: StudyRightsService,
-            public breadcrumbsService: BreadcrumbsService,
-            private downloadService: MassDownloadService) {
-
+        private route: ActivatedRoute,
+        private examinationService: ExaminationService,
+        private centerService: CenterService,
+        private studyService: StudyService,
+        private studyRightsService: StudyRightsService,
+        public breadcrumbsService: BreadcrumbsService,
+        private downloadService: MassDownloadService
+    ) {
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
     }
