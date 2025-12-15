@@ -35,7 +35,7 @@ export class AnimalSubjectService extends EntityService<AnimalSubject>{
 
     getAnimalSubjects(ids: IterableIterator<any>): Promise<AnimalSubject[]>{
         const formData: FormData = new FormData();
-        formData.set('subjectIds', Array.from(ids).join(","));
+        formData.set('ids', Array.from(ids).join(","));
         return this.http.post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL, formData)
             .toPromise();
     }

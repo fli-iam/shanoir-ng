@@ -338,8 +338,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {
     public save(): Promise<AnimalSubject> {
         if (this.animalSubject.id){
             return this.updateSubject().then(createdAnimal => {
-                this.onSave.next(this.animalSubject);
-                this.chooseRouteAfterSave(this.animalSubject);
+                this.onSave.next(createdAnimal);
+                this.chooseRouteAfterSave(createdAnimal);
                 this.consoleService.log('info', 'Preclinical subject n°' + this.animalSubject.id + ' successfully updated');
                 return createdAnimal;
             }).catch(reason => {
@@ -353,8 +353,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {
                 if (subject == null) {
                     return;
                 }
-                this.onSave.next(this.animalSubject);
-                this.chooseRouteAfterSave(this.animalSubject);
+                this.onSave.next(subject);
+                this.chooseRouteAfterSave(subject);
                 this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.animalSubject.id);
                 return subject;
             }).catch(reason => {
