@@ -643,14 +643,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     initExecutionMode() {
         this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
-            const studyId = datasets[0]?.studyId;
+            const studyId = datasets[0]?.study?.id;
 
             if (!this.hasAdminRight(studyId)) {
                 this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on study [' + studyId + '] that you don\'t administrate.');
                 return;
             }
             for (const ds of datasets) {
-                if(ds.studyId != studyId){
+                if(ds.study?.id != studyId){
                     this.confirmDialogService.error('Invalid selection', 'All selected datasets must be of the same study.');
                     return;
                 }
