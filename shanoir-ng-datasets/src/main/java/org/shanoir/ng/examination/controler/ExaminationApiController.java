@@ -179,11 +179,15 @@ public class ExaminationApiController implements ExaminationApi {
         validate(result);
         Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
         generateStudyInstanceUID(examination);
-        final Examination createdExamination = examinationService.save(examination);
-        LOG.info("New examination created: " + createdExamination.toString());
-        // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
-        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-        return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+        try {
+            final Examination createdExamination = examinationService.save(examination);
+            LOG.info("New examination created: " + createdExamination.toString());
+            // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
+            return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+        }
     }
 
     @Override
@@ -251,13 +255,18 @@ public class ExaminationApiController implements ExaminationApi {
         pathList.add(file.getOriginalFilename());
         examination.setExtraDataFilePathList(pathList);
         generateStudyInstanceUID(examination);
-        Examination dbExamination = examinationService.save(examination);
-        String path = examinationService.addExtraData(dbExamination.getId(), file);
-        LOG.info("New examination created: " + examination.toString());
-        if (path != null) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            Examination dbExamination = examinationService.save(examination);
+            String path = examinationService.addExtraData(dbExamination.getId(), file);
+            LOG.info("New examination created: " + examination.toString());
+            if (path != null) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (EntityNotFoundException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't create examination for subject that doesn't exist" + subjectName);
+            throw new RestServiceException(error);
         }
     }
 

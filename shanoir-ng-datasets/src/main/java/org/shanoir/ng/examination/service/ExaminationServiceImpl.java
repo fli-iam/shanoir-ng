@@ -251,9 +251,12 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    public Examination save(final Examination examination) {
+    public Examination save(final Examination examination) throws EntityNotFoundException {
         Examination savedExamination = null;
-        Subject subToSet = this.subjectService.findById(examination.getSubject().getId()).get();
+        Subject subToSet = this.subjectService.findById(examination.getSubject().getId()).orElse(null);
+        if (subToSet == null) {
+            throw new EntityNotFoundException("Could not save examination, subject not found: " + examination.getSubject().getId());
+        }
         examination.setSubject(subToSet);
         savedExamination = examinationRepository.save(examination);
         return savedExamination;
