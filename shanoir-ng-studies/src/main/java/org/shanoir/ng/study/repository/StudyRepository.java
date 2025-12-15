@@ -40,7 +40,6 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrue();
 
-    //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
 
     @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s")
@@ -53,7 +52,6 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
         WHERE su.study.id = s.id
         AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights)
         AND su.confirmed = :confirmed""")
-
     List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
             @Param("userId") Long userId,
             @Param("studyUserRightId") Integer studyUserRightId,
@@ -76,19 +74,19 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 
     List<Study> findByChallengeTrue();
 
-
     List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
 
     @EntityGraph(attributePaths = "tags")
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithTagsById(@Param("studyId") Long studyId);
 
-    @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
-    List<String> findProtocolFilePathsByStudyId(Long studyId);
+    @Query(value = "SELECT study_id, path FROM protocol_file_path WHERE study_id IN :studyIds", nativeQuery = true)
+    List<Object[]> findProtocolFilePathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
-    @Query("SELECT s.dataUserAgreementPaths FROM Study s WHERE s.id = :studyId")
-    List<String> findDataUserAgreementPathsByStudyId(Long studyId);
+    @Query(value = "SELECT study_id, path FROM data_user_agreement_file WHERE study_id IN :studyIds", nativeQuery = true)
+    List<Object[]> findDataUserAgreementPathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
     @Query("SELECT su.study.id FROM StudyUser su WHERE su.userId = :userId AND :right MEMBER OF su.studyUserRights")
     List<Long> findByUserIdAndStudyUserRight(Long userId, Integer right);
+
 }

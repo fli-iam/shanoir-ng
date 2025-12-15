@@ -577,9 +577,28 @@ public class StudyServiceImpl implements StudyService {
     }
 
     private void setFilePaths(List<Study> studies) {
-        studies.stream().forEach(s -> {
-            s.setProtocolFilePaths(studyRepository.findProtocolFilePathsByStudyId(s.getId()));
-            s.setDataUserAgreementPaths(studyRepository.findDataUserAgreementPathsByStudyId(s.getId()));
+        if (studies.isEmpty())
+            return;
+        List<Long> studyIds = studies.stream()
+                .map(Study::getId)
+                .collect(Collectors.toList());
+        Map<Long, List<String>> protocolPaths = studyRepository
+                .findProtocolFilePathsByStudyIds(studyIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        arr -> ((Number) arr[0]).longValue(),
+                        Collectors.mapping(arr -> (String) arr[1], Collectors.toList())));
+        Map<Long, List<String>> duaPaths = studyRepository
+                .findDataUserAgreementPathsByStudyIds(studyIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        arr -> ((Number) arr[0]).longValue(),
+                        Collectors.mapping(arr -> (String) arr[1], Collectors.toList())));
+        studies.forEach(study -> {
+            study.setProtocolFilePaths(
+                    protocolPaths.getOrDefault(study.getId(), Collections.emptyList()));
+            study.setDataUserAgreementPaths(
+                    duaPaths.getOrDefault(study.getId(), Collections.emptyList()));
         });
     }
 
