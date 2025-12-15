@@ -86,8 +86,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
         try {
             SubjectDto createdSubjectDto = this.createSubject(dto.getSubject());
             AnimalSubject animalSubject = dtoService.getAnimalSubjectFromAnimalSubjectDto(dto);
-            animalSubject.setId(createdSubjectDto.getId());
             this.validateAnimalSubjectCreation(animalSubject, result);
+            animalSubject.setId(createdSubjectDto.getId());
             final AnimalSubject createdAnimal = subjectService.save(animalSubject);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdAnimal.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             AnimalSubjectDto animalSubjectDto = dtoService.getAnimalSubjectDtoFromAnimalSubject(createdAnimal);

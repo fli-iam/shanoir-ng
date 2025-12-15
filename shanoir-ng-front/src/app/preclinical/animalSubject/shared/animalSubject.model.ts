@@ -29,7 +29,7 @@ export class AnimalSubject extends Entity {
     @Field() name: string;
     @Field() imagedObjectCategory: ImagedObjectCategory;
     @Field() sex: Sex;
-    @Field() study: number;
+    @Field() studyId: number;
     @Field() specie: Reference;
     @Field() strain: Reference;
     @Field() biotype: Reference;
@@ -48,7 +48,7 @@ export class AnimalSubjectDTO {
         this.name = animalSubject.name;
         this.imagedObjectCategory = animalSubject.imagedObjectCategory;
         this.sex = animalSubject.sex;
-        this.study = animalSubject.study;
+        this.studyId = animalSubject.studyId;
         this.specie = animalSubject.specie;
         this.strain = animalSubject.strain;
         this.biotype = animalSubject.biotype;
@@ -63,7 +63,7 @@ export class AnimalSubjectDTO {
     name: string;
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
-    study: number;
+    studyId: number;
     specie: Reference;
     strain: Reference;
     biotype: Reference;

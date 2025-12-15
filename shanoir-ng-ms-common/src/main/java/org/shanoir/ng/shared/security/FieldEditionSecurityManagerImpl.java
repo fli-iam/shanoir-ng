@@ -57,7 +57,6 @@ public abstract class FieldEditionSecurityManagerImpl<T extends AbstractEntityIn
 
 
     private FieldErrorMap validateUpdate(final T editedEntity, final T originalEntity) {
-
         final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
         final FieldErrorMap errorMap = new FieldErrorMap();
         for (final Field field : originalEntity.getClass().getDeclaredFields()) {
