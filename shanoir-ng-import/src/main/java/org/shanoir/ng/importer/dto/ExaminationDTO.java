@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,182 +26,182 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Examination DTO with necessary information for front
- * 
+ *
  * @author ifakhfak
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExaminationDTO {
 
-	private Long id;
+    private Long id;
 
-	private IdName center;
+    private IdName center;
 
-	private String comment;
+    private String comment;
 
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	private String note;
+    private String note;
 
-	private IdName study;
+    private IdName study;
 
-	private IdName subject;
+    private IdName subject;
 
-	private Double subjectWeight;
-	
-	private boolean preclinical;
+    private Double subjectWeight;
 
-	private List<String> extraDataFilePathList;
-	
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private boolean preclinical;
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(final Long id) {
-		this.id = id;
-	}
+    private List<String> extraDataFilePathList;
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(final String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(final Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(final LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(final String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @param note
-	 *            the note to set
-	 */
-	public void setNote(final String note) {
-		this.note = note;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(final LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	public IdName getCenter() {
-		return center;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	public void setCenter(final IdName center) {
-		this.center = center;
-	}
+    /**
+     * @param note
+     *            the note to set
+     */
+    public void setNote(final String note) {
+        this.note = note;
+    }
 
-	public IdName getStudy() {
-		return study;
-	}
+    public IdName getCenter() {
+        return center;
+    }
 
-	public void setStudy(final IdName study) {
-		this.study = study;
-	}
+    public void setCenter(final IdName center) {
+        this.center = center;
+    }
 
-	/**
-	 * @return the subject
-	 */
-	public IdName getSubject() {
-		return subject;
-	}
+    public IdName getStudy() {
+        return study;
+    }
 
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(final IdName subject) {
-		this.subject = subject;
-	}
+    public void setStudy(final IdName study) {
+        this.study = study;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @return the subject
+     */
+    public IdName getSubject() {
+        return subject;
+    }
 
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(final Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
-	
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(final IdName subject) {
+        this.subject = subject;
+    }
 
-	public void setPreclinical(final boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
 
-	/**
-	 * @return the extraDataFilePathList
-	 */
-	public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
+    /**
+     * @param subjectWeight
+     *            the subjectWeight to set
+     */
+    public void setSubjectWeight(final Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
 
-	/**
-	 * @param extraDataFilePathList the extraDataFilePathList to set
-	 */
-	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	/**
-	 * Center ID getter.
-	 * @return the center id
-	 */
-	public Long getCenterId() {
-		if (this.center != null) {
-			return center.getId();
-		}
-		return null;
-	}
+    public void setPreclinical(final boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	/**
-	 * Study ID getter.
-	 * @return the study id
-	 */
-	public Long getStudyId() {
-		if (study != null) {
-			return study.getId();
-		}
-		return null;
-	}
+    /**
+     * @return the extraDataFilePathList
+     */
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    /**
+     * @param extraDataFilePathList the extraDataFilePathList to set
+     */
+    public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
+
+    /**
+     * Center ID getter.
+     * @return the center id
+     */
+    public Long getCenterId() {
+        if (this.center != null) {
+            return center.getId();
+        }
+        return null;
+    }
+
+    /**
+     * Study ID getter.
+     * @return the study id
+     */
+    public Long getStudyId() {
+        if (study != null) {
+            return study.getId();
+        }
+        return null;
+    }
 
 }
