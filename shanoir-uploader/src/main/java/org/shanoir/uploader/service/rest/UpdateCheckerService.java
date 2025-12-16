@@ -36,6 +36,7 @@ public class UpdateCheckerService {
     private static final String APP_VERSION = ShUpConfig.SHANOIR_UPLOADER_VERSION;
     private static final String RELEASES_URL = ShUpConfig.endpointProperties.getProperty("github.releases");
     private static final String TAG_PREFIX = "SHUP_v";
+    private static final String DEV = ShUpConfig.DEV;
 
     public static void checkForUpdates(JFrame parent, ResourceBundle resourceBundle) {
         try {
@@ -119,8 +120,8 @@ public class UpdateCheckerService {
     }
 
     private static boolean isNewerVersion(String latest, String current) {
-        // Check if it is a SHUP release
-        if (latest.contains(TAG_PREFIX)) {
+        // Check if it is a SHUP release and if the current version is not 'dev
+        if (latest.contains(TAG_PREFIX) && !current.equals(DEV)) {
             //format the tags to compare only the version numbers
             latest = latest.replace(TAG_PREFIX, "");
             current = current.replace("v", "");
