@@ -25,5 +25,7 @@ insert into animal_subject (biotype_id, id, provider_id, specie_id, stabulation_
 -- Update related tables to point to new animal_subject ids
 update subject_pathology set animal_subject_id = (select id - 10000 from animal_subject where subject_id = animal_subject_id);
 update subject_therapy set animal_subject_id = (select id - 10000 from animal_subject where subject_id = animal_subject_id);
+-- Remove duplicated animal_subject entries
+delete from animal_subject where id > 10000;
 -- Remove subject_id column (now the id is synced with subject.id)
 alter table animal_subject drop subject_id;
