@@ -330,12 +330,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     onExamAnestheticChange(event) {
-        console.log("onExamAnestheticChange")
         this.examAnesthetic = event;
     }
 
     onAgentChange(event) {
-        console.log("onAgentChange")
         this.contrastAgent = event;
     }
 
