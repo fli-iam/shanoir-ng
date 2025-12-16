@@ -12,8 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
-import {  ActivatedRoute} from '@angular/router';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -36,11 +36,10 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
     standalone: false
 })
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
-
     @Input() isStandalone: boolean = false;
     @Input() form: UntypedFormGroup;
     @Output() examAnestheticChange = new EventEmitter();
-    //examinationAnesthetic : ExaminationAnesthetic;
+
     anesthetics: Anesthetic[] = [];
     sites: InjectionSite[] = [];
     intervals: InjectionInterval[] = [];
@@ -54,8 +53,8 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private route: ActivatedRoute,
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
-        private anestheticService: AnestheticService)
-    {
+        private anestheticService: AnestheticService
+    ) {
         super(route, 'preclinical-examination-anesthetics');
     }
 
@@ -80,7 +79,15 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     initView(): Promise<void> {
         this.getEnums();
         this.examinationAnesthetic = new ExaminationAnesthetic();
-        return this.loadData();
+        return this.loadData().then(() => {
+            if (this.id) {
+                return this.fetchEntity().then(entity => {
+                    if (entity) {
+                        this.examinationAnesthetic = entity;
+                    }
+                });
+            }
+        });
     }
 
 

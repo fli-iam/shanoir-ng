@@ -12,8 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild, ElementRef} from '@angular/core';
-import { UntypedFormGroup,  Validators } from '@angular/forms';
+import { NgModule, Component, ViewChild, ElementRef } from '@angular/core';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
@@ -48,8 +48,8 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
 import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
-import {dateDisplay} from "../../../shared/./localLanguage/localDate.abstract";
-import {Subject} from "../../../subjects/shared/subject.model";
+import { dateDisplay } from "../../../shared/./localLanguage/localDate.abstract";
+import { Subject } from "../../../subjects/shared/subject.model";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -58,7 +58,6 @@ import {Subject} from "../../../subjects/shared/subject.model";
     standalone: false
 })
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
-
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
 
     urlupload: string;
@@ -117,21 +116,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     initView(): Promise<void> {
-        if(!this.examination.weightUnitOfMeasure){
+        if (!this.examination.weightUnitOfMeasure)
             this.examination.weightUnitOfMeasure = this.defaultUnit;
-        }
-        if (!this.examination.subject) {
+
+        if (!this.examination.subject)
             this.examination.subject = new Subject();
-        }
-        //this.loadExaminationAnesthetic();
-        if(this.examination && this.examination.subject && this.examination.subject.id ){
-            this.animalSubjectService
-                .getAnimalSubject(this.examination.subject.id)
-                .then(animalSubject => this.animalSubjectId = animalSubject.id);
-        }
+
         if (this.keycloakService.isUserAdmin()) {
             this.hasAdministrateRight = true;
-
             this.hasDownloadRight = true;
             this.hasImportRight = true;
             return Promise.resolve();
@@ -144,7 +136,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         }
         return Promise.resolve();
     }
-
 
     initEdit(): Promise<void> {
         this.getCenters();
@@ -188,9 +179,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         });
         this.subscriptions.push(
             form.get('study').valueChanges.subscribe((study: IdName) => {
-            this.examination.study = study;
-            this.getSubjects();
-        })
+                this.examination.study = study;
+                this.getSubjects();
+            })
         );
         return form;
     }
@@ -213,7 +204,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             });
     }
 
-    public getSubjects(): void {
+    private getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
             .findSubjectsByStudyIdPreclinical(this.examination.study.id, this.examination.preclinical)
@@ -253,12 +244,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     addExtraDataToExamination(examinationId: number, isUpdate: boolean) {
-        if (!examinationId) { return; }
-        //Set the upload URL model
+        if (!examinationId) return;
+        // Set the upload URL model
         if (this.physioData) {
             this.physioData.examinationId = examinationId;
             //Create physio data
-            if (isUpdate && this.examinationPhysioData && this.examinationPhysioData.id){
+            if (isUpdate && this.examinationPhysioData && this.examinationPhysioData.id) {
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.examinationPhysioData.id, this.physioData)
                 .then(physioData => {
                 	if (this.physioDataFile.physiologicalDataFile){
@@ -270,7 +261,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     //Add extra data to array
                     this.examinationExtradatas.push(physioData);
                 });
-            }else{
+            } else {
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioData)
                 .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
@@ -287,7 +278,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if (this.bloodGasData) {
             this.bloodGasData.examinationId = examinationId;
             //Create blood gas data
-             if (isUpdate && this.examinationBloodGasData && this.examinationBloodGasData.id){
+             if (isUpdate && this.examinationBloodGasData && this.examinationBloodGasData.id) {
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.examinationBloodGasData.id, this.bloodGasData)
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
@@ -298,7 +289,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     }
                     this.examinationExtradatas.push(bloodGasData);
                 });
-            }else{
+            } else {
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.bloodGasData)
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
@@ -329,7 +320,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.physioData.has_respiratory_rate = this.physioDataFile.has_respiratory_rate;
         this.physioData.has_sao2 = this.physioDataFile.has_sao2;
         this.physioData.has_temperature = this.physioDataFile.has_temperature;
-
     }
 
     onUploadBloodGasData(event) {
@@ -337,6 +327,16 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData = new BloodGasData();
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
+    }
+
+    onExamAnestheticChange(event) {
+        console.log("onExamAnestheticChange")
+        this.examAnesthetic = event;
+    }
+
+    onAgentChange(event) {
+        console.log("onAgentChange")
+        this.contrastAgent = event;
     }
 
     public exportBruker() {
@@ -358,16 +358,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 
-    onExamAnestheticChange(event) {
-        this.examAnesthetic = event;
-    }
-
-    onAgentChange(event) {
-        this.contrastAgent = event;
-    }
-
     // Extra data file management
-
     public setFile() {
         this.fileInput.nativeElement.click();
     }
