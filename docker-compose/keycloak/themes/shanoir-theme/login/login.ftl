@@ -4,8 +4,15 @@
         ${msg("loginAccountTitle")}
     <#elseif section = "form">
 		<div class="${properties.kcFormGroupClass!}" style="padding-bottom:20px;">
-			<span style="color: #E0C000;">
-				${msg("updatePasswordPolicies")}
+			<span class="kc-password-policy-inline">
+			  ${msg("updatePasswordPolicies")}
+
+			  <span class="kc-login-tooltip" tabindex="0">
+				<span class="kc-tooltip-icon" aria-hidden="true"></span>
+				<span class="kc-tooltip-text">
+				  ${msg("passwordPolicies")}
+				</span>
+			  </span>
 			</span>
 		</div>
         <#if messagesPerField.existsError('username','password')>
