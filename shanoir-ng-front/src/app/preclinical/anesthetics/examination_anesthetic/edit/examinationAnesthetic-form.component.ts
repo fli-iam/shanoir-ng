@@ -79,6 +79,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     initView(): Promise<void> {
         this.getEnums();
         this.examinationAnesthetic = new ExaminationAnesthetic();
+
         return this.loadData().then(() => {
             if (this.id) {
                 return this.fetchEntity().then(entity => {
@@ -94,10 +95,12 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     initEdit(): Promise<void> {
         this.getEnums();
         return this.loadData().then(() => {
-            //Should be only one
+            // Set references after both are loaded
+            this.references = this.units;
+
+            // Now that data is loaded, get the anesthetic by ID
             this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
             this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
-
         });
     }
 
@@ -134,17 +137,31 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     loadReferences(): Promise<void> {
-        return this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => {
+        // Load units and anesthetics in parallel, wait for BOTH
+        const unitsPromise = this.referenceService.getReferencesByCategoryAndType(
+            PreclinicalUtils.PRECLINICAL_CAT_UNIT,
+            PreclinicalUtils.PRECLINICAL_UNIT_VOLUME
+        ).then(units => {
             this.units = units;
-            this.loadAnesthetics();
         });
 
+        const anestheticsPromise = this.loadAnesthetics();
+
+        // Wait for BOTH promises to complete
+        return Promise.all([unitsPromise, anestheticsPromise]).then(() => {
+        });
     }
 
     loadAnesthetics() {
-        this.anestheticService.getAll().then(anesthetics => {
+        // Make this return a Promise!
+        return this.anestheticService.getAll().then(anesthetics => {
             this.anesthetics = anesthetics;
-            this.references = this.units;
+            // Don't rely on this.units here since they load in parallel
+            if (this.units) {
+                this.references = this.units;
+            }
+        }).catch(error => {
+            this.anesthetics = [];
         });
     }
 
